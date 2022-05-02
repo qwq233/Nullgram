@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="NullgramName">Nullgram</string>
-    <string name="NullgramPushService">Сервис уведомлений</string>
+    <string name="NullgramPushService">Nullgram Сервис уведомлений</string>
     <string name="NullSettings">Настройки Nullgram</string>
     <string name="OfficialChannel">Официальный канал</string>
     <string name="Chat">Чат</string>
@@ -9,10 +9,10 @@
     <string name="OfficialSite">Официальный сайт</string>
     <string name="ViewSourceCode">Показать исходный код</string>
     <string name="Categories">Категории</string>
-    <string name="About">О модификации</string>
+    <string name="About">О нас</string>
     <string name="OfficialChannelName">NullgramClient</string>
     <string name="noAvailableUpdate">Новые обновления отсутствуют.</string>
-    <string name="updateAvailable">Доступно новое обновление</string>
+    <string name="updateAvailable">Доступно обновление</string>
     <string name="variantsNotFound">Версия приложения не совпадает с последней \nПожалуйста скачайте вручную с GitHub.</string>
     <string name="skipUpdate">Пропустить</string>
     <string name="notNow">Не сейчас</string>
@@ -26,8 +26,8 @@
     <string name="BotToken">API ключ</string>
     <string name="InvalidAccessToken">Неверный токен доступа</string>
     <string name="QRLoginTitle">Вход через QR-код</string>
-    <string name="QRLoginMessage">Отсканируйте QRCode с помощью другого устройства для входа.</string>
-    <string name="NullgramVersion">Nullgram %1$s\nОснован на исходном коде Telegram %2$s</string>
+    <string name="QRLoginMessage">Отсканируйте QR-код с помощью другого устройства для входа.</string>
+    <string name="NullgramVersion">Nullgram %1$s\nНа основе Telegram %2$s</string>
     <string name="RestrictionReason">Причина ограничения</string>
     <string name="Hide">Скрыть</string>
     <string name="showBotAPIID">Показать API ID бота</string>
@@ -42,8 +42,8 @@
     <string name="SelectBetween">Выберите между</string>
     <string name="StickerSavedHint">Стикер сохранен в галерею</string>
     <string name="MessageDetails">Подробности</string>
-    <string name="formatterDay12HSec">час:мин:сёк</string>
-    <string name="formatterDay24HSec">Час:мин:сек</string>
+    <string name="formatterDay12HSec">h:mm:ss a</string>
+    <string name="formatterDay24HSec">HH:mm:ss</string>
     <string name="DeleteDownloadedFile">Удалить загруженный файл</string>
     <string name="Repeat">Повторить</string>
     <string name="saveMessages">Сохранить сообщения</string>
@@ -62,7 +62,7 @@
     <string name="CreateMono">Создать монопространство</string>
     <string name="CreateMonoLanguage">Язык монопространства</string>
     <string name="codeSyntaxHighlightDetails">Спасибо prismjs и Nekogram</string>
-    <string name="CreateMention">Упомянуть</string>
+    <string name="CreateMention">Создать упоминание</string>
     <string name="Name">Имя</string>
     <string name="channelAlias">Название канала</string>
     <string name="channelAliasDetails">Требуется чтобы название канала было включено.</string>
@@ -95,12 +95,12 @@
     <string name="disableGreetingSticker">Отключить приветственный стикер</string>
     <string name="disableTrendingSticker">Отключить популярный стикер</string>
     <string name="customDoubleTap">Пользовательский двойной тап</string>
-    <string name="OpenSource">Лицензии на программное обеспечение с открытым исходным кодом</string>
+    <string name="OpenSource">Лицензии на ПО с открытым исходным кодом</string>
     <string name="disableCustonAPI">Не использовать пользовательский API</string>
     <string name="useOfficialAPI">Telegram</string>
     <string name="customAPI">Пользовательский API</string>
     <string name="useCustomApiNotice">Войдите в систему, используя пользовательский api, если вы не можете зарегистрироваться или войти, это может помочь.\n
-\nПримечание: fcm не будет работать, если вы используете публичную версию.</string>
+\nПримечание: FCM не будет работать, если вы используете публичную версию.</string>
     <string name="useCustomAPI">Ручной ввод</string>
     <string name="TestBackendOn">Этот аккаунт будет подключен к тестовому серверу.</string>
     <string name="TestBackendOff">Этот аккаунт будет подключен к основному серверу.</string>
@@ -145,9 +145,10 @@
     <string name="useSystemEmoji">Использовать системные эмодзи</string>
     <string name="Command">Команда</string>
     <string name="setCustomQuickMessage">Настройка быстрых сообщений</string>
-    <string name="emptyInput">Вы не можете вводить здесь</string>
+    <string name="emptyInput">Здесь ничего не введено</string>
     <string name="numberInvalid"><![CDATA[Число должно быть >20 и 150<]]></string>
-    <string name="notANumber">Необходимо ввести число!</string>
+    <string name="notANumber">Ты должен ввести число!</string>
     <string name="notACommand">Вы должны ввести текст!</string>
     <string name="SendAsReply">Отправить как ответ на предыдущее письмо</string>
+    <string name="scrollableChatPreview">Scrollable Chat Preview</string>
 </resources>
