@@ -149,4 +149,5 @@
     <string name="notANumber">Devi inserire un numero!</string>
     <string name="notACommand">Devi inserire una stringa!</string>
     <string name="SendAsReply">Invia come risposta</string>
+    <string name="scrollableChatPreview">Scrollable Chat Preview</string>
 </resources>
