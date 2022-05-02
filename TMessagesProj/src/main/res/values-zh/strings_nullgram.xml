@@ -149,4 +149,5 @@
     <string name="notANumber">您必须输入一个数字</string>
     <string name="notACommand">您必须输入合法的字符</string>
     <string name="SendAsReply">作为回复发送</string>
+    <string name="scrollableChatPreview">Scrollable Chat Preview</string>
 </resources>
