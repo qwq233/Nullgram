@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="NullgramName">Nullgram</string>
-    <string name="NullgramPushService">Nullgram Push Service</string>
-    <string name="NullSettings">Nullgram Settings</string>
-    <string name="OfficialChannel">Official Channel</string>
+    <string name="NullgramPushService">Serviço de Push Nullgram</string>
+    <string name="NullSettings">Configurações do Nullgram</string>
+    <string name="OfficialChannel">Canal oficial</string>
     <string name="Chat">Chat</string>
-    <string name="Experiment">Experiment</string>
-    <string name="OfficialSite">Official Site</string>
-    <string name="ViewSourceCode">View Source Code</string>
+    <string name="Experiment">Experimental</string>
+    <string name="OfficialSite">Site oficial</string>
+    <string name="ViewSourceCode">Ver código-fonte</string>
     <string name="Categories">Categories</string>
     <string name="About">About</string>
     <string name="OfficialChannelName">NullgramClient</string>
@@ -25,11 +25,11 @@
     <string name="BotLogin">Bot Login</string>
     <string name="BotToken">API Key</string>
     <string name="InvalidAccessToken">Invalid access token</string>
-    <string name="QRLoginTitle">QR Login</string>
+    <string name="QRLoginTitle">Acessar com Código QR</string>
     <string name="QRLoginMessage">Scan QRCode with another device to login.</string>
     <string name="NullgramVersion">Nullgram %1$s\nBased on Telegram %2$s</string>
-    <string name="RestrictionReason">Restriction reason</string>
-    <string name="Hide">Hide</string>
+    <string name="RestrictionReason">Motivo da restrição</string>
+    <string name="Hide">Esconder</string>
     <string name="showBotAPIID">Show Bot API ID</string>
     <string name="hideGroupSticker">Hide Group Sticker Pack</string>
     <string name="ignoreBlockedUser">Ignore Blocked User Messages</string>
@@ -47,9 +47,9 @@
     <string name="DeleteDownloadedFile">Delete downloaded file</string>
     <string name="Repeat">Repeat</string>
     <string name="saveMessages">Save Messages</string>
-    <string name="ViewHistory">View history</string>
+    <string name="ViewHistory">Ver histórico</string>
     <string name="NoQuoteForward">NoQuote forward</string>
-    <string name="MessageMenu">Message menu</string>
+    <string name="MessageMenu">Menu de mensagens</string>
     <string name="allowScreenshotOnNoForwardChat">Bypass Screenshot Limit</string>
     <string name="allowScreenshotOnNoForwardChatWarning">It will also allow you to bypass screenshot limit in SecureChat!</string>
     <string name="labelChannelUser">Label Channel User</string>
