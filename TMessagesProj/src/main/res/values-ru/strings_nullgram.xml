@@ -151,5 +151,5 @@
     <string name="notACommand">Вы должны ввести текст!</string>
     <string name="SendAsReply">Отправить как ответ на предыдущее письмо</string>
     <string name="scrollableChatPreview">Прокручиваемый предпросмотр чатов</string>
-    <string name="disableVibration">Disable Vibration</string>
+    <string name="disableVibration">Отключить вибрацию</string>
 </resources>
