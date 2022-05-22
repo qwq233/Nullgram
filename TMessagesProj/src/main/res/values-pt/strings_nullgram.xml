@@ -96,7 +96,7 @@
     <string name="disableTrendingSticker">Disable Trending Sticker</string>
     <string name="customDoubleTap">Custom Double Tap</string>
     <string name="OpenSource">OpenSource Software Licenses</string>
-    <string name="disableCustonAPI">Don\'t use custom API</string>
+    <string name="disableCustomAPI">Don\'t use custom API</string>
     <string name="useOfficialAPI">Telegram</string>
     <string name="customAPI">Custom API</string>
     <string name="useCustomApiNotice">Log in using the custom api, if you are unable to register or log in, this may help.\n\nNote: fcm will not work if you are using the release version.</string>
@@ -151,4 +151,7 @@
     <string name="SendAsReply">Send As Reply</string>
     <string name="scrollableChatPreview">Scrollable Chat Preview</string>
     <string name="disableVibration">Disable Vibration</string>
+    <string name="DatacenterStatus">Datacenter status</string>
+    <string name="DatacenterStatusAbout">Check the status of Telegram\'s **datacenters**.</string>
+    <string name="DeleteAllFromSelfDone">All your messages have been deleted</string>
 </resources>
