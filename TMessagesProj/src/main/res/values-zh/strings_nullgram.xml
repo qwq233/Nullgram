@@ -96,7 +96,7 @@
     <string name="disableTrendingSticker">禁用热门贴纸</string>
     <string name="customDoubleTap">自定义双击模式</string>
     <string name="OpenSource">开源软件许可协议</string>
-    <string name="disableCustonAPI">不要使用自定义 API</string>
+    <string name="disableCustomAPI">Don\'t use custom API</string>
     <string name="useOfficialAPI">Telegram</string>
     <string name="customAPI">自定义 API</string>
     <string name="useCustomApiNotice">使用自定义api登录，如果您不能注册或登录，这可能会有所帮助。\n\n注意：fcm 将无法工作。</string>
@@ -151,4 +151,7 @@
     <string name="SendAsReply">作为回复发送</string>
     <string name="scrollableChatPreview">Scrollable Chat Preview</string>
     <string name="disableVibration">Disable Vibration</string>
+    <string name="DatacenterStatus">Datacenter status</string>
+    <string name="DatacenterStatusAbout">Check the status of Telegram\'s **datacenters**.</string>
+    <string name="DeleteAllFromSelfDone">All your messages have been deleted</string>
 </resources>
