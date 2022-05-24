@@ -96,7 +96,7 @@
     <string name="disableTrendingSticker">Отключить популярный стикер</string>
     <string name="customDoubleTap">Пользовательский двойной тап</string>
     <string name="OpenSource">Лицензии на ПО с открытым исходным кодом</string>
-    <string name="disableCustomAPI">Don\'t use custom API</string>
+    <string name="disableCustomAPI">Не использовать пользовательский API</string>
     <string name="useOfficialAPI">Telegram</string>
     <string name="customAPI">Пользовательский API</string>
     <string name="useCustomApiNotice">Войдите в систему, используя пользовательский api, если вы не можете зарегистрироваться или войти, это может помочь.\n
@@ -152,7 +152,7 @@
     <string name="SendAsReply">Отправить как ответ на предыдущее письмо</string>
     <string name="scrollableChatPreview">Прокручиваемый предпросмотр чатов</string>
     <string name="disableVibration">Отключить вибрацию</string>
-    <string name="DatacenterStatus">Datacenter status</string>
-    <string name="DatacenterStatusAbout">Check the status of Telegram\'s **datacenters**.</string>
-    <string name="DeleteAllFromSelfDone">All your messages have been deleted</string>
+    <string name="DatacenterStatus">Статус дата-центра</string>
+    <string name="DatacenterStatusAbout">Проверьте состояние **датацентров** Telegram.</string>
+    <string name="DeleteAllFromSelfDone">Все ваши сообщения были удалены</string>
 </resources>
