@@ -181,5 +181,5 @@
     <string name="PasscodePanicCodeRemove">Отключить экстренный код</string>
     <string name="PasscodePanicCodeRemoveConfirmMessage">Вы уверены, что хотите отключить экстренный код?</string>
     <string name="PasscodeRemoveConfirmMessage">Вы действительно хотите отключить пароль для этого аккаунта?</string>
-    <string name="PasscodePanicCodeAbout">Use the panic code to log out accounts if something goes wrong.</string>
+    <string name="PasscodePanicCodeAbout">Использовать экстренный код для выхода из аккаунтов, если что-то пойдет не так.</string>
 </resources>
