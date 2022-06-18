@@ -182,4 +182,6 @@
     <string name="PasscodePanicCodeRemoveConfirmMessage">Вы уверены, что хотите отключить экстренный код?</string>
     <string name="PasscodeRemoveConfirmMessage">Вы действительно хотите отключить пароль для этого аккаунта?</string>
     <string name="PasscodePanicCodeAbout">Использовать экстренный код для выхода из аккаунтов, если что-то пойдет не так.</string>
+    <string name="PhotoCopied">Photo Copied</string>
+    <string name="CopyPhoto">Copy Photo</string>
 </resources>
