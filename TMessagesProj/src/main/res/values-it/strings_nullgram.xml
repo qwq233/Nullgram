@@ -180,7 +180,7 @@
     <string name="PasscodePanicCodeRemove">Disattiva codice antipanico</string>
     <string name="PasscodePanicCodeRemoveConfirmMessage">Vuoi disattivare il codice antipanico?</string>
     <string name="PasscodeRemoveConfirmMessage">Vuoi rimuovere il codice da questo account?</string>
-    <string name="PasscodePanicCodeAbout">Use the panic code to log out accounts if something goes wrong.</string>
-    <string name="PhotoCopied">Photo Copied</string>
-    <string name="CopyPhoto">Copy Photo</string>
+    <string name="PasscodePanicCodeAbout">Usa il codice antipanico per scollegare gli account in caso di emergenza.</string>
+    <string name="PhotoCopied">Foto copiata</string>
+    <string name="CopyPhoto">Copia foto</string>
 </resources>
