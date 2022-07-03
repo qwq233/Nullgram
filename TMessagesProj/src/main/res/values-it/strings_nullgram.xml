@@ -177,6 +177,7 @@
     <string name="PasscodePanicCode">Codice antipanico</string>
     <string name="PasscodePanicCodeSet">Imposta codice antipanico</string>
     <string name="PasscodePanicCodeEdit">Cambia codice antipanico</string>
+    <string name="disableSendTyping">Disable Sending Type Status</string>
     <string name="PasscodePanicCodeRemove">Disattiva codice antipanico</string>
     <string name="PasscodePanicCodeRemoveConfirmMessage">Vuoi disattivare il codice antipanico?</string>
     <string name="PasscodeRemoveConfirmMessage">Vuoi rimuovere il codice da questo account?</string>
