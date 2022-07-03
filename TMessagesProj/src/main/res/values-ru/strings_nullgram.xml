@@ -178,6 +178,7 @@
     <string name="PasscodePanicCode">Экстренный код</string>
     <string name="PasscodePanicCodeSet">Установить экстренный код</string>
     <string name="PasscodePanicCodeEdit">Изменить экстренный код</string>
+    <string name="disableSendTyping">Disable Sending Type Status</string>
     <string name="PasscodePanicCodeRemove">Отключить экстренный код</string>
     <string name="PasscodePanicCodeRemoveConfirmMessage">Вы уверены, что хотите отключить экстренный код?</string>
     <string name="PasscodeRemoveConfirmMessage">Вы действительно хотите отключить пароль для этого аккаунта?</string>
