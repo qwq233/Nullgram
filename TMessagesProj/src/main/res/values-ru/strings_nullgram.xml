@@ -175,14 +175,17 @@
     <string name="PasscodeHideAccount">Скрыть аккаунт</string>
     <string name="PasscodeAllowPanic">Выйти с помощью экстренного кода</string>
     <string name="PasscodeAbout">Установите разные пароли для каждого аккаунта, и переключайтесь между ними путем ввода соответствующего пароля.</string>
-    <string name="PasscodePanicCode">Экстренный код</string>
-    <string name="PasscodePanicCodeSet">Установить экстренный код</string>
-    <string name="PasscodePanicCodeEdit">Изменить экстренный код</string>
+    <string name="PasscodePanicCode">Экстренный пароль</string>
+    <string name="PasscodePanicCodeSet">Установить экстренный пароль</string>
+    <string name="PasscodePanicCodeEdit">Изменить экстренный пароль</string>
     <string name="disableSendTyping">Отключить статус отправки сообщения</string>
-    <string name="PasscodePanicCodeRemove">Отключить экстренный код</string>
-    <string name="PasscodePanicCodeRemoveConfirmMessage">Вы уверены, что хотите отключить экстренный код?</string>
+    <string name="PasscodePanicCodeRemove">Отключить экстренный пароль</string>
+    <string name="PasscodePanicCodeRemoveConfirmMessage">Вы уверены, что хотите отключить экстренный пароль?</string>
     <string name="PasscodeRemoveConfirmMessage">Вы действительно хотите отключить пароль для этого аккаунта?</string>
-    <string name="PasscodePanicCodeAbout">Использовать экстренный код для выхода из аккаунтов, если что-то пойдет не так.</string>
+    <string name="PasscodePanicCodeAbout">Использовать экстренный пароль для выхода из аккаунтов, если что-то пойдет не так.</string>
     <string name="PhotoCopied">Фотография скопирована</string>
     <string name="CopyPhoto">Скопировать изображение</string>
+    <string name="hidePremiumStickerAnim">Hide Premium Sticker Animation</string>
+    <string name="premium">Premium</string>
+    <string name="fastSpeedUpload">Fasten upload speed</string>
 </resources>
