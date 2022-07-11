@@ -184,4 +184,7 @@
     <string name="PasscodePanicCodeAbout">Usa il codice antipanico per scollegare gli account in caso di emergenza.</string>
     <string name="PhotoCopied">Foto copiata</string>
     <string name="CopyPhoto">Copia foto</string>
+    <string name="hidePremiumStickerAnim">Hide Premium Sticker Animation</string>
+    <string name="premium">Premium</string>
+    <string name="fastSpeedUpload">Fasten upload speed</string>
 </resources>
