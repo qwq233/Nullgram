@@ -188,4 +188,5 @@
     <string name="hidePremiumStickerAnim">Отключить анимацию премиум стикеров</string>
     <string name="premium">Premium</string>
     <string name="fastSpeedUpload">Ускорение скорости загрузки</string>
+    <string name="showTabsOnForward">Show Tabs On Forward</string>
 </resources>
