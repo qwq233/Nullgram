@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="NullgramName">Nullgram</string>
-    <string name="NullgramPushService">Nullgram Push Service</string>
-    <string name="NullSettings">Nullgram Settings</string>
-    <string name="OfficialChannel">Official Channel</string>
-    <string name="Chat">Chat</string>
-    <string name="Experiment">Experiment</string>
-    <string name="OfficialSite">Official Site</string>
-    <string name="ViewSourceCode">View Source Code</string>
-    <string name="Categories">Categories</string>
+    <string name="NullgramName">نولجرام</string>
+    <string name="NullgramPushService">خدمة دفع Nullgram</string>
+    <string name="NullSettings">إعدادات نولجرام</string>
+    <string name="OfficialChannel">القناة الرسمية</string>
+    <string name="Chat">الدردشة</string>
+    <string name="Experiment">تجريبية</string>
+    <string name="OfficialSite">الموقع الرسمي</string>
+    <string name="ViewSourceCode">عرض كود المصدر</string>
+    <string name="Categories">الفئات</string>
     <string name="About">About</string>
     <string name="OfficialChannelName">NullgramClient</string>
     <string name="noAvailableUpdate">No Update.</string>
