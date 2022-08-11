@@ -195,4 +195,10 @@
     <string name="TabTitleTypeIcon">Значки</string>
     <string name="TabTitleTypeMix">Значки с названиями</string>
     <string name="modifyDownloadSpeed">Изменить скорость загрузки</string>
+    <string name="AppIconMain">Main Icon</string>
+    <string name="icon_1">Icon 1</string>
+    <string name="icon_2">Icon 2</string>
+    <string name="icon_3">Icon 3</string>
+    <string name="icon_4">Icon 4</string>
+    <string name="icon_5">Icon 5</string>
 </resources>
