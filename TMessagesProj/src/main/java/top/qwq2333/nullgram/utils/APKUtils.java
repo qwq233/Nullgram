@@ -19,41 +19,16 @@
 
 package top.qwq2333.nullgram.utils;
 
-import org.telegram.messenger.ApplicationLoader;
-
-import java.util.Enumeration;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipFile;
+import org.telegram.messenger.BuildConfig;
 
 public class APKUtils {
 
     /**
-     * @return 获取到的abi
-     * @throws IllegalStateException 如果没找到lib目录就会抛出这错误 一般不太可能发生
+     * @deprecated 已弃用
      */
-    public static String getAbi() throws Exception {
-        String filePath = ApplicationLoader.applicationContext.getApplicationInfo().sourceDir;
-        ZipFile file = new ZipFile(filePath);
-        Enumeration<? extends ZipEntry> entries = file.entries();
-        while (entries.hasMoreElements()) {
-            ZipEntry entry = entries.nextElement();
-            String name = entry.getName();
-            if (name.contains("lib")) {
-                Log.i("getAbi: " + entry.getName().split("/")[1]);
-                String target = entry.getName().split("/")[1];
-                if (target.contains("arm64")) {
-                    return "arm64";
-                } else if (target.contains("armeabi")) {
-                    return "arm32";
-                } else if (target.contains("x86") && !target.contains("x86_64")) {
-                    return "x86";
-                } else {
-                    return "x86_64";
-                }
-            }
-        }
-
-        throw new IllegalStateException("Directory Not Found");
+    @Deprecated
+    public static String getAbi() {
+        return BuildConfig.FLAVOR;
     }
 
     /**
