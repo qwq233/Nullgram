@@ -4897,8 +4897,11 @@ public class EmojiView extends FrameLayout implements
                 groupStickersHidden = hiddenStickerSetId == info.stickerset.id;
             }
             if (info.stickerset != null) {
-                TLRPC.TL_messages_stickerSet pack = mediaDataController.getGroupStickerSetById(
-                    info.stickerset);
+                TLRPC.TL_messages_stickerSet pack = mediaDataController.getGroupStickerSetById(info.stickerset);
+                if (ConfigManager.getBooleanOrFalse(Defines.hideGroupSticker)) {
+                    pack = null;
+                    groupStickersHidden = true;
+                }
                 if (pack != null && pack.documents != null && !pack.documents.isEmpty()
                     && pack.set != null) {
                     TLRPC.TL_messages_stickerSet set = new TLRPC.TL_messages_stickerSet();
