@@ -93,12 +93,12 @@ import top.qwq2333.nullgram.utils.Defines;
 @SuppressWarnings("unchecked")
 public class MediaDataController extends BaseController {
     public final static String ATTACH_MENU_BOT_ANIMATED_ICON_KEY = "android_animated",
-            ATTACH_MENU_BOT_STATIC_ICON_KEY = "default_static",
-            ATTACH_MENU_BOT_PLACEHOLDER_STATIC_KEY = "placeholder_static",
-            ATTACH_MENU_BOT_COLOR_LIGHT_ICON = "light_icon",
-            ATTACH_MENU_BOT_COLOR_LIGHT_TEXT = "light_text",
-            ATTACH_MENU_BOT_COLOR_DARK_ICON = "dark_icon",
-            ATTACH_MENU_BOT_COLOR_DARK_TEXT = "dark_text";
+        ATTACH_MENU_BOT_STATIC_ICON_KEY = "default_static",
+        ATTACH_MENU_BOT_PLACEHOLDER_STATIC_KEY = "placeholder_static",
+        ATTACH_MENU_BOT_COLOR_LIGHT_ICON = "light_icon",
+        ATTACH_MENU_BOT_COLOR_LIGHT_TEXT = "light_text",
+        ATTACH_MENU_BOT_COLOR_DARK_ICON = "dark_icon",
+        ATTACH_MENU_BOT_COLOR_DARK_TEXT = "dark_text";
 
     private static Pattern BOLD_PATTERN = Pattern.compile("\\*\\*(.+?)\\*\\*"),
         ITALIC_PATTERN = Pattern.compile("__(.+?)__"),
@@ -109,6 +109,7 @@ public class MediaDataController extends BaseController {
 
     private static volatile MediaDataController[] Instance = new MediaDataController[UserConfig.MAX_ACCOUNT_COUNT];
     private static final Object[] lockObjects = new Object[UserConfig.MAX_ACCOUNT_COUNT];
+
     static {
         for (int i = 0; i < UserConfig.MAX_ACCOUNT_COUNT; i++) {
             lockObjects[i] = new Object();
@@ -236,14 +237,14 @@ public class MediaDataController extends BaseController {
     private HashMap<String, ArrayList<TLRPC.Document>> allStickersFeatured = new HashMap<>();
 
     private ArrayList<TLRPC.Document>[] recentStickers = new ArrayList[]{
-            new ArrayList<>(),
-            new ArrayList<>(),
-            new ArrayList<>(),
-            new ArrayList<>(),
-            new ArrayList<>(),
-            new ArrayList<>(),
-            new ArrayList<>(),
-            new ArrayList<>()
+        new ArrayList<>(),
+        new ArrayList<>(),
+        new ArrayList<>(),
+        new ArrayList<>(),
+        new ArrayList<>(),
+        new ArrayList<>(),
+        new ArrayList<>(),
+        new ArrayList<>()
     };
     private boolean[] loadingRecentStickers = new boolean[8];
     private boolean[] recentStickersLoaded = new boolean[8];
@@ -257,10 +258,10 @@ public class MediaDataController extends BaseController {
     private long loadFeaturedHash[] = new long[2];
     private int loadFeaturedDate[] = new int[2];
     public boolean loadFeaturedPremium;
-    private ArrayList<TLRPC.StickerSetCovered>[] featuredStickerSets = new ArrayList[] { new ArrayList<>(), new ArrayList<>() };
-    private LongSparseArray<TLRPC.StickerSetCovered>[] featuredStickerSetsById = new LongSparseArray[] { new LongSparseArray<>(), new LongSparseArray<>() };
-    private ArrayList<Long> unreadStickerSets[] = new ArrayList[] { new ArrayList<Long>(), new ArrayList<Long>() };
-    private ArrayList<Long> readingStickerSets[] = new ArrayList[] { new ArrayList<Long>(), new ArrayList<Long>() };
+    private ArrayList<TLRPC.StickerSetCovered>[] featuredStickerSets = new ArrayList[]{new ArrayList<>(), new ArrayList<>()};
+    private LongSparseArray<TLRPC.StickerSetCovered>[] featuredStickerSetsById = new LongSparseArray[]{new LongSparseArray<>(), new LongSparseArray<>()};
+    private ArrayList<Long> unreadStickerSets[] = new ArrayList[]{new ArrayList<Long>(), new ArrayList<Long>()};
+    private ArrayList<Long> readingStickerSets[] = new ArrayList[]{new ArrayList<Long>(), new ArrayList<Long>()};
     private boolean loadingFeaturedStickers[] = new boolean[2];
     private boolean featuredStickersLoaded[] = new boolean[2];
 
@@ -647,8 +648,8 @@ public class MediaDataController extends BaseController {
             preloadImage(ImageLocation.getForDocument(reaction.appear_animation), "60_60_nolimit");
 
             size = ReactionsEffectOverlay.sizeForAroundReaction();
-            preloadImage(ImageLocation.getForDocument(reaction.around_animation),  size + "_" + size + "_pcache");
-            preloadImage(ImageLocation.getForDocument(reaction.center_icon),  null);
+            preloadImage(ImageLocation.getForDocument(reaction.around_animation), size + "_" + size + "_pcache");
+            preloadImage(ImageLocation.getForDocument(reaction.center_icon), null);
         }
     }
 
@@ -699,13 +700,13 @@ public class MediaDataController extends BaseController {
 
     public void checkFeaturedStickers() {
         if (!loadingFeaturedStickers[0] && (!featuredStickersLoaded[0] || Math.abs(System.currentTimeMillis() / 1000 - loadFeaturedDate[0]) >= 60 * 60)) {
-            loadFeaturedStickers(false,true, false);
+            loadFeaturedStickers(false, true, false);
         }
     }
 
     public void checkFeaturedEmoji() {
         if (!loadingFeaturedStickers[1] && (!featuredStickersLoaded[1] || Math.abs(System.currentTimeMillis() / 1000 - loadFeaturedDate[1]) >= 60 * 60)) {
-            loadFeaturedStickers(true,true, false);
+            loadFeaturedStickers(true, true, false);
         }
     }
 
@@ -740,7 +741,7 @@ public class MediaDataController extends BaseController {
 
     public void clearRecentStickers() {
         TLRPC.TL_messages_clearRecentStickers req = new TLRPC.TL_messages_clearRecentStickers();
-        getConnectionsManager().sendRequest(req, (response, error) -> AndroidUtilities.runOnUIThread(()-> {
+        getConnectionsManager().sendRequest(req, (response, error) -> AndroidUtilities.runOnUIThread(() -> {
             if (response instanceof TLRPC.TL_boolTrue) {
                 getMessagesStorage().getStorageQueue().postRunnable(() -> {
                     try {
@@ -1036,6 +1037,7 @@ public class MediaDataController extends BaseController {
     public TLRPC.TL_messages_stickerSet getStickerSet(TLRPC.InputStickerSet inputStickerSet, boolean cacheOnly) {
         return getStickerSet(inputStickerSet, cacheOnly, null);
     }
+
     public TLRPC.TL_messages_stickerSet getStickerSet(TLRPC.InputStickerSet inputStickerSet, boolean cacheOnly, Runnable onNotFound) {
         if (inputStickerSet == null) {
             return null;
@@ -1241,9 +1243,9 @@ public class MediaDataController extends BaseController {
     public static boolean canShowAttachMenuBotForTarget(TLRPC.TL_attachMenuBot bot, String target) {
         for (TLRPC.AttachMenuPeerType peerType : bot.peer_types) {
             if ((peerType instanceof TLRPC.TL_attachMenuPeerTypeSameBotPM || peerType instanceof TLRPC.TL_attachMenuPeerTypeBotPM) && target.equals("bots") ||
-                    peerType instanceof TLRPC.TL_attachMenuPeerTypeBroadcast && target.equals("channels") ||
-                    peerType instanceof TLRPC.TL_attachMenuPeerTypeChat && target.equals("groups") ||
-                    peerType instanceof TLRPC.TL_attachMenuPeerTypePM && target.equals("users")) {
+                peerType instanceof TLRPC.TL_attachMenuPeerTypeBroadcast && target.equals("channels") ||
+                peerType instanceof TLRPC.TL_attachMenuPeerTypeChat && target.equals("groups") ||
+                peerType instanceof TLRPC.TL_attachMenuPeerTypePM && target.equals("users")) {
                 return true;
             }
         }
@@ -1256,10 +1258,10 @@ public class MediaDataController extends BaseController {
 
         for (TLRPC.AttachMenuPeerType peerType : bot.peer_types) {
             if (peerType instanceof TLRPC.TL_attachMenuPeerTypeSameBotPM && user != null && user.bot && user.id == bot.bot_id ||
-                    peerType instanceof TLRPC.TL_attachMenuPeerTypeBotPM && user != null && user.bot && user.id != bot.bot_id ||
-                    peerType instanceof TLRPC.TL_attachMenuPeerTypePM && user != null && !user.bot ||
-                    peerType instanceof TLRPC.TL_attachMenuPeerTypeChat && chat != null && !ChatObject.isChannelAndNotMegaGroup(chat) ||
-                    peerType instanceof TLRPC.TL_attachMenuPeerTypeBroadcast && chat != null && ChatObject.isChannelAndNotMegaGroup(chat)) {
+                peerType instanceof TLRPC.TL_attachMenuPeerTypeBotPM && user != null && user.bot && user.id != bot.bot_id ||
+                peerType instanceof TLRPC.TL_attachMenuPeerTypePM && user != null && !user.bot ||
+                peerType instanceof TLRPC.TL_attachMenuPeerTypeChat && chat != null && !ChatObject.isChannelAndNotMegaGroup(chat) ||
+                peerType instanceof TLRPC.TL_attachMenuPeerTypeBroadcast && chat != null && ChatObject.isChannelAndNotMegaGroup(chat)) {
                 return true;
             }
         }
@@ -1577,9 +1579,9 @@ public class MediaDataController extends BaseController {
                         editor.putLong("lastStickersLoadTimeMask", System.currentTimeMillis()).commit();
                     } else if (type == TYPE_GREETINGS) {
                         editor.putLong("lastStickersLoadTimeGreet", System.currentTimeMillis()).commit();
-                    } else if (type == TYPE_EMOJIPACKS){
+                    } else if (type == TYPE_EMOJIPACKS) {
                         editor.putLong("lastStickersLoadTimeEmojiPacks", System.currentTimeMillis()).commit();
-                    } else if (type == TYPE_PREMIUM_STICKERS){
+                    } else if (type == TYPE_PREMIUM_STICKERS) {
                         editor.putLong("lastStickersLoadTimePremiumStickers", System.currentTimeMillis()).commit();
                     } else {
                         editor.putLong("lastStickersLoadTimeFavs", System.currentTimeMillis()).commit();
@@ -1733,7 +1735,7 @@ public class MediaDataController extends BaseController {
             getConnectionsManager().sendRequest(req, (response, error) -> AndroidUtilities.runOnUIThread(() -> {
                 if (response instanceof TLRPC.TL_messages_featuredStickers) {
                     TLRPC.TL_messages_featuredStickers res = (TLRPC.TL_messages_featuredStickers) response;
-                    processLoadedFeaturedStickers(emoji, res.sets, res.unread, res.premium,false, (int) (System.currentTimeMillis() / 1000), res.hash);
+                    processLoadedFeaturedStickers(emoji, res.sets, res.unread, res.premium, false, (int) (System.currentTimeMillis() / 1000), res.hash);
                 } else {
                     processLoadedFeaturedStickers(emoji, null, null, false, false, (int) (System.currentTimeMillis() / 1000), hash);
                 }
@@ -2091,7 +2093,7 @@ public class MediaDataController extends BaseController {
                 getUserConfig().lastUpdatedPremiumGiftsStickerPack = System.currentTimeMillis();
                 getUserConfig().saveConfig(false);
 
-                processLoadedDiceStickers(getUserConfig().premiumGiftsStickerPack, false, stickerSet, false, (int)(System.currentTimeMillis() / 1000));
+                processLoadedDiceStickers(getUserConfig().premiumGiftsStickerPack, false, stickerSet, false, (int) (System.currentTimeMillis() / 1000));
 
                 getNotificationCenter().postNotificationName(NotificationCenter.didUpdatePremiumGiftStickers);
             }
@@ -2637,6 +2639,7 @@ public class MediaDataController extends BaseController {
     public void toggleStickerSet(Context context, TLObject stickerSetObject, int toggle, BaseFragment baseFragment, boolean showSettings, boolean showTooltip) {
         toggleStickerSet(context, stickerSetObject, toggle, baseFragment, showSettings, showTooltip, null);
     }
+
     public void toggleStickerSet(Context context, TLObject stickerSetObject, int toggle, BaseFragment baseFragment, boolean showSettings, boolean showTooltip, Runnable onUndo) {
         TLRPC.StickerSet stickerSet;
         TLRPC.TL_messages_stickerSet messages_stickerSet;
@@ -6460,11 +6463,14 @@ public class MediaDataController extends BaseController {
     //---------------- EMOJI START ----------------
 
     public static class KeywordResult {
-        public KeywordResult() {}
+        public KeywordResult() {
+        }
+
         public KeywordResult(String emoji, String keyword) {
             this.emoji = emoji;
             this.keyword = keyword;
         }
+
         public String emoji;
         public String keyword;
     }
@@ -6751,6 +6757,7 @@ public class MediaDataController extends BaseController {
     }
 
     private boolean triedLoadingEmojipacks = false;
+
     public void fillWithAnimatedEmoji(ArrayList<KeywordResult> result, Integer maxAnimatedPerEmojiInput, Runnable onDone) {
         if (result == null || result.isEmpty()) {
             if (onDone != null) {
@@ -6779,8 +6786,8 @@ public class MediaDataController extends BaseController {
                                 long documentId = Long.parseLong(Emoji.recentEmoji.get(j).substring(9));
                                 TLRPC.Document document = AnimatedEmojiDrawable.findDocument(currentAccount, documentId);
                                 if (document != null &&
-                                        (isPremium || MessageObject.isFreeEmoji(document)) &&
-                                        emoji.equals(MessageObject.findAnimatedEmojiEmoticon(document, null))) {
+                                    (isPremium || MessageObject.isFreeEmoji(document)) &&
+                                    emoji.equals(MessageObject.findAnimatedEmojiEmoticon(document, null))) {
                                     animatedEmoji.add(document);
                                 }
                             } catch (Exception ignore) {
@@ -6902,12 +6909,12 @@ public class MediaDataController extends BaseController {
             final boolean[] done = new boolean[1];
             AndroidUtilities.runOnUIThread(() -> {
                 loadStickers(TYPE_EMOJIPACKS, true, false, false, packs -> {
-                            if (!done[0]) {
-                                emojiPacks[0] = packs;
-                                fillRunnable.run();
-                                done[0] = true;
-                            }
-                        });
+                    if (!done[0]) {
+                        emojiPacks[0] = packs;
+                        fillRunnable.run();
+                        done[0] = true;
+                    }
+                });
             });
             AndroidUtilities.runOnUIThread(() -> {
                 if (!done[0]) {

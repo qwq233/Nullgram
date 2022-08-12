@@ -89,7 +89,6 @@ import org.telegram.messenger.Emoji;
 import org.telegram.messenger.EmojiData;
 import org.telegram.messenger.FileLoader;
 import org.telegram.messenger.FileLog;
-import org.telegram.messenger.ImageLoader;
 import org.telegram.messenger.ImageLocation;
 import org.telegram.messenger.ImageReceiver;
 import org.telegram.messenger.LocaleController;
@@ -4880,7 +4879,7 @@ public class EmojiView extends FrameLayout implements
             stickerSets.add(pack);
         }
 
-        if (!premiumStickers.isEmpty()) {
+        if (!premiumStickers.isEmpty() && !ConfigManager.getBooleanOrFalse(Defines.disablePremiumSticker)) {
             premiumTabNum = stickersTabOffset;
             stickersTabOffset++;
             StickerTabView stickerTabView = stickersTab.addStickerIconTab(4, PremiumGradient.getInstance().premiumStarMenuDrawable2);
@@ -5401,7 +5400,7 @@ public class EmojiView extends FrameLayout implements
             int previousCount2 = favouriteStickers.size();
             recentStickers = MediaDataController.getInstance(currentAccount).getRecentStickers(MediaDataController.TYPE_IMAGE);
             favouriteStickers = MediaDataController.getInstance(currentAccount).getRecentStickers(MediaDataController.TYPE_FAVE);
-            premiumStickers = MediaDataController.getInstance(currentAccount).getRecentStickers(MediaDataController.TYPE_PREMIUM_STICKERS);
+            premiumStickers = ConfigManager.getBooleanOrFalse(Defines.disablePremiumSticker) ? new ArrayList<>() : MediaDataController.getInstance(currentAccount).getRecentStickers(MediaDataController.TYPE_PREMIUM_STICKERS);
             for (int a = 0; a < favouriteStickers.size(); a++) {
                 TLRPC.Document favSticker = favouriteStickers.get(a);
                 for (int b = 0; b < recentStickers.size(); b++) {
@@ -6061,7 +6060,7 @@ public class EmojiView extends FrameLayout implements
                             cell.setText(LocaleController.getString("RecentStickers", R.string.RecentStickers), R.drawable.msg_close, LocaleController.getString(R.string.ClearRecentStickersAlertTitle));
                         } else if (object == favouriteStickers) {
                             cell.setText(LocaleController.getString("FavoriteStickers", R.string.FavoriteStickers), 0);
-                        } else if (object == premiumStickers) {
+                        } else if (object == premiumStickers && ConfigManager.getBooleanOrFalse(Defines.disablePremiumSticker)) {
                             cell.setText(LocaleController.getString("PremiumStickers", R.string.PremiumStickers), 0);
                         }
                     }
@@ -6119,7 +6118,7 @@ public class EmojiView extends FrameLayout implements
                 } else if (a == -2) {
                     documents = recentStickers;
                     packStartPosition.put(key = "recent", totalItems);
-                } else if (a == -1) {
+                } else if (a == -1 && ConfigManager.getBooleanOrFalse(Defines.disablePremiumSticker)) {
                     documents = premiumStickers;
                     packStartPosition.put(key = "premium", totalItems);
                 } else {
