@@ -5396,6 +5396,7 @@ public class EmojiView extends FrameLayout implements
         } else {
             int previousCount = recentStickers.size();
             int previousCount2 = favouriteStickers.size();
+            recentStickers = MediaDataController.getInstance(currentAccount).getRecentStickers(MediaDataController.TYPE_IMAGE);
             favouriteStickers = MediaDataController.getInstance(currentAccount).getRecentStickers(MediaDataController.TYPE_FAVE);
             premiumStickers = MediaDataController.getInstance(currentAccount).getRecentStickers(MediaDataController.TYPE_PREMIUM_STICKERS);
             for (int a = 0; a < favouriteStickers.size(); a++) {
