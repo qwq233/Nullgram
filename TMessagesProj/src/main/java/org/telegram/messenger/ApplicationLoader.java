@@ -142,7 +142,7 @@ public class ApplicationLoader extends Application {
     }
 
     protected String onGetApplicationId() {
-        return null;
+        return BuildConfig.APPLICATION_ID;
     }
 
     public static boolean isHuaweiStoreBuild() {
