@@ -136,7 +136,8 @@ public class Defines {
         1578562490, // Developer Channel
         1645976613, // Update Channel
         1714986438, // CI Channel
-        1477185964  // Discussion Group
+        1477185964, // Discussion Group
+        1068402676  // Kitsune
     };
     /**
      * 数组中元素未找到的下标，值为-1
