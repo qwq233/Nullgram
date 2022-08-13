@@ -6118,9 +6118,13 @@ public class EmojiView extends FrameLayout implements
                 } else if (a == -2) {
                     documents = recentStickers;
                     packStartPosition.put(key = "recent", totalItems);
-                } else if (a == -1 && ConfigManager.getBooleanOrFalse(Defines.disablePremiumSticker)) {
-                    documents = premiumStickers;
-                    packStartPosition.put(key = "premium", totalItems);
+                } else if (a == -1) {
+                    if (!ConfigManager.getBooleanOrFalse(Defines.disablePremiumSticker)) {
+                        documents = premiumStickers;
+                        packStartPosition.put(key = "premium", totalItems);
+                    } else {
+                        continue;
+                    }
                 } else {
                     key = null;
                     pack = packs.get(a);
