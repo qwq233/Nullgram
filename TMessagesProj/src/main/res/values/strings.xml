@@ -5540,4 +5540,5 @@
     <string name="Unlock">Unlock</string>
     <string name="Restore">Restore</string>
     <string name="PremiumPreviewEmojiPack">This emoji pack is available only to subscribers of **Telegram Premium.**</string>
+    <string name="disableVolumeBtnEnableVideoSound">Disable volume keys to enable preview video sound</string>
 </resources>

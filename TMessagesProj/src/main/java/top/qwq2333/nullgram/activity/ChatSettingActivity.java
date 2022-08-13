@@ -71,6 +71,7 @@ public class ChatSettingActivity extends BaseActivity {
     private int disableJumpToNextChannelRow;
     private int disableGreetingStickerRow;
     private int disableTrendingStickerRow;
+    private int disableVolumeBtnEnableVideoSoundRow;
     private int customDoubleClickTapRow;
     private int confirmToSendMediaMessagesRow;
     private int maxRecentStickerRow;
@@ -280,6 +281,11 @@ public class ChatSettingActivity extends BaseActivity {
             if (view instanceof TextCheckCell) {
                 ((TextCheckCell) view).setChecked(ConfigManager.getBooleanOrFalse(Defines.showTabsOnForward));
             }
+        } else if (position == disableVolumeBtnEnableVideoSoundRow) {
+            ConfigManager.toggleBoolean(Defines.disableVolumeBtnEnableVideoSound);
+            if (view instanceof TextCheckCell) {
+                ((TextCheckCell) view).setChecked(ConfigManager.getBooleanOrFalse(Defines.disableVolumeBtnEnableVideoSound));
+            }
         }
 
     }
@@ -316,6 +322,7 @@ public class ChatSettingActivity extends BaseActivity {
         disableJumpToNextChannelRow = rowCount++;
         disableGreetingStickerRow = rowCount++;
         disableTrendingStickerRow = rowCount++;
+        disableVolumeBtnEnableVideoSoundRow = rowCount++;
         customDoubleClickTapRow = rowCount++;
         confirmToSendMediaMessagesRow = rowCount++;
         maxRecentStickerRow = rowCount++;
@@ -414,6 +421,8 @@ public class ChatSettingActivity extends BaseActivity {
                         textCell.setTextAndCheck(LocaleController.getString("scrollableChatPreview", R.string.scrollableChatPreview), ConfigManager.getBooleanOrFalse(Defines.scrollableChatPreview), true);
                     } else if (position == showTabsOnForwardRow) {
                         textCell.setTextAndCheck(LocaleController.getString("showTabsOnForward", R.string.showTabsOnForward), ConfigManager.getBooleanOrFalse(Defines.showTabsOnForward), true);
+                    } else if (position == disableVolumeBtnEnableVideoSoundRow) {
+                        textCell.setTextAndCheck(LocaleController.getString("disableVolumeBtnEnableVideoSound", R.string.disableVolumeBtnEnableVideoSound), ConfigManager.getBooleanOrFalse(Defines.disableVolumeBtnEnableVideoSound), true);
                     }
                     break;
                 }

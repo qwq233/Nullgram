@@ -194,4 +194,5 @@
     <string name="TabTitleTypeIcon">Icons</string>
     <string name="TabTitleTypeMix">Icons with titles</string>
     <string name="modifyDownloadSpeed">Modify Download Speed</string>
+    <string name="disableVolumeBtnEnableVideoSound">禁用音量键开启预览视频声音</string>
 </resources>
