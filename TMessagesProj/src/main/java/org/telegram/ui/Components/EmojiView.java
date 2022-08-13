@@ -6060,7 +6060,7 @@ public class EmojiView extends FrameLayout implements
                             cell.setText(LocaleController.getString("RecentStickers", R.string.RecentStickers), R.drawable.msg_close, LocaleController.getString(R.string.ClearRecentStickersAlertTitle));
                         } else if (object == favouriteStickers) {
                             cell.setText(LocaleController.getString("FavoriteStickers", R.string.FavoriteStickers), 0);
-                        } else if (object == premiumStickers && ConfigManager.getBooleanOrFalse(Defines.disablePremiumSticker)) {
+                        } else if (object == premiumStickers && !ConfigManager.getBooleanOrFalse(Defines.disablePremiumSticker)) {
                             cell.setText(LocaleController.getString("PremiumStickers", R.string.PremiumStickers), 0);
                         }
                     }
