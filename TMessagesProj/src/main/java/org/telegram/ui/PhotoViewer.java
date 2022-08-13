@@ -68,6 +68,9 @@ import android.transition.TransitionManager;
 import android.transition.TransitionSet;
 import android.transition.TransitionValues;
 import android.util.FloatProperty;
+
+import top.qwq2333.nullgram.config.ConfigManager;
+import top.qwq2333.nullgram.utils.Defines;
 import top.qwq2333.nullgram.utils.Log;
 import android.util.Property;
 import android.util.Range;
@@ -6468,7 +6471,7 @@ public class PhotoViewer implements NotificationCenter.NotificationCenterDelegat
             }
 
             private Layout lastLayout;
-            
+
             @Override
             protected void onDraw(Canvas canvas) {
                 canvas.save();
