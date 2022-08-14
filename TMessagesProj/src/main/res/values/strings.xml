@@ -5541,4 +5541,6 @@
     <string name="Restore">Restore</string>
     <string name="PremiumPreviewEmojiPack">This emoji pack is available only to subscribers of **Telegram Premium.**</string>
     <string name="disableVolumeBtnEnableVideoSound">Disable volume keys to enable preview video sound</string>
+    <string name="quickToggleAnonymous">Quick toggle anonymous</string>
+    <string name="quickToggleAnonymousNotice">If you\'re owner of the group</string>
 </resources>

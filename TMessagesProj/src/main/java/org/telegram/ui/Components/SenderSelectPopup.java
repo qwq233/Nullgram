@@ -31,6 +31,7 @@ import org.telegram.messenger.ChatObject;
 import org.telegram.messenger.LocaleController;
 import org.telegram.messenger.MessagesController;
 import org.telegram.messenger.R;
+import org.telegram.messenger.UserConfig;
 import org.telegram.messenger.UserObject;
 import org.telegram.tgnet.TLRPC;
 import org.telegram.ui.ActionBar.ActionBarPopupWindow;
@@ -40,6 +41,9 @@ import org.telegram.ui.ChatActivity;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+
+import top.qwq2333.nullgram.config.ConfigManager;
+import top.qwq2333.nullgram.utils.Defines;
 
 public class SenderSelectPopup extends ActionBarPopupWindow {
     public final static float SPRING_STIFFNESS = 750f;
@@ -120,6 +124,21 @@ public class SenderSelectPopup extends ActionBarPopupWindow {
         FrameLayout recyclerFrameLayout = new FrameLayout(context);
 
         List<TLRPC.Peer> peers = sendAsPeers.peers;
+
+        if (ConfigManager.getBooleanOrFalse(Defines.quickToggleAnonymous)) {
+            var chat = messagesController.getChat(chatFull.id);
+            if (chat != null && chat.creator && peers.stream().noneMatch(peer -> peer.channel_id == chat.id)) {
+                peers.add(0, new TLRPC.TL_peerChannel() {{
+                    channel_id = chat.id;
+                }});
+
+                if (peers.size() < 2) {
+                    peers.add(new TLRPC.TL_peerUser() {{
+                        user_id = UserConfig.getInstance(UserConfig.selectedAccount).getCurrentUser().id;
+                    }});
+                }
+            }
+        }
 
         recyclerView = new RecyclerListView(context);
         layoutManager = new LinearLayoutManager(context);
