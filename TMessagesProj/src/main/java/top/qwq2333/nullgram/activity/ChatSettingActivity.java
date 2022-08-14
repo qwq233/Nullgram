@@ -3,6 +3,7 @@ package top.qwq2333.nullgram.activity;
 import android.animation.ValueAnimator;
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.os.Bundle;
@@ -19,6 +20,8 @@ import android.widget.LinearLayout;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
+
+import com.jakewharton.processphoenix.ProcessPhoenix;
 
 import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.LocaleController;
@@ -40,6 +43,7 @@ import org.telegram.ui.Components.EditTextBoldCursor;
 import org.telegram.ui.Components.LayoutHelper;
 import org.telegram.ui.Components.RecyclerListView;
 import org.telegram.ui.Components.SeekBarView;
+import org.telegram.ui.LaunchActivity;
 
 import kotlin.Unit;
 import top.qwq2333.nullgram.config.ConfigManager;
@@ -292,6 +296,14 @@ public class ChatSettingActivity extends BaseActivity {
             if (view instanceof TextCheckCell) {
                 ((TextCheckCell) view).setChecked(ConfigManager.getBooleanOrFalse(Defines.quickToggleAnonymous));
             }
+
+            AlertDialog restart = new AlertDialog(getContext(), 0);
+            restart.setTitle(LocaleController.getString("AppName", R.string.AppName));
+            restart.setMessage(LocaleController.getString("RestartAppToTakeEffect", R.string.RestartAppToTakeEffect));
+            restart.setPositiveButton(LocaleController.getString("OK", R.string.OK), (__, ___) -> {
+                ProcessPhoenix.triggerRebirth(getContext(), new Intent(getContext(), LaunchActivity.class));
+            });
+            restart.show();
         }
 
     }
