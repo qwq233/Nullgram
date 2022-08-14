@@ -172,7 +172,10 @@ public class SenderSelectPopup extends ActionBarPopupWindow {
                     TLRPC.Chat chat = messagesController.getChat(-peerId);
                     if (chat != null) {
                         senderView.title.setText(chat.title);
-                        senderView.subtitle.setText(LocaleController.formatPluralString(ChatObject.isChannel(chat) && !chat.megagroup ? "Subscribers" : "Members", chat.participants_count));
+                        senderView.subtitle.setText(
+                            chat.participants_count == 0 ? LocaleController.getString("SendAnonymously", R.string.SendAnonymously)
+                                : LocaleController.formatPluralString(ChatObject.isChannel(chat) && !chat.megagroup ? "Subscribers" : "Members", chat.participants_count)
+                        );
                         senderView.avatar.setAvatar(chat);
                     }
                     senderView.avatar.setSelected(chatFull.default_send_as != null && chatFull.default_send_as.channel_id == peer.channel_id, false);
