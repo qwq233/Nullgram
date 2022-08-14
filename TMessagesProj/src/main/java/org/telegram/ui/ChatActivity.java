@@ -1329,6 +1329,7 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
     private final static int text_strike = 55;
     private final static int text_underline = 56;
     private final static int text_spoiler = 57;
+    private final static int text_mention = 58;
 
     private final static int search = 40;
 
@@ -2526,6 +2527,11 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
                         chatActivityEnterView.getEditField().setSelectionOverride(editTextStart, editTextEnd);
                         chatActivityEnterView.getEditField().makeSelectedSpoiler();
                     }
+                } else if (id == text_mention) {
+                    if (chatActivityEnterView != null) {
+                        chatActivityEnterView.getEditField().setSelectionOverride(editTextStart, editTextEnd);
+                        chatActivityEnterView.getEditField().makeSelectedMention();
+                    }
                 } else if (id == text_mono) {
                     if (chatActivityEnterView != null) {
                         chatActivityEnterView.getEditField().setSelectionOverride(editTextStart, editTextEnd);
@@ -2869,6 +2875,7 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
             editTextItem.addSubItem(text_underline, stringBuilder);
         }
         editTextItem.addSubItem(text_link, LocaleController.getString("CreateLink", R.string.CreateLink));
+        editTextItem.addSubItem(text_mention, LocaleController.getString("CreateMention", R.string.CreateMention));
         editTextItem.addSubItem(text_regular, LocaleController.getString("Regular", R.string.Regular));
 
         if (chatMode == 0 && threadMessageId == 0 && !UserObject.isReplyUser(currentUser) && reportType < 0) {
