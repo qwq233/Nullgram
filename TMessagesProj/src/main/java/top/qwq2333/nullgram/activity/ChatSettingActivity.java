@@ -72,7 +72,7 @@ public class ChatSettingActivity extends BaseActivity {
     private int disableGreetingStickerRow;
     private int disableTrendingStickerRow;
     private int disableVolumeBtnEnableVideoSoundRow;
-    private int quickToggleAnonymousNotice;
+    private int quickToggleAnonymous;
     private int customDoubleClickTapRow;
     private int confirmToSendMediaMessagesRow;
     private int maxRecentStickerRow;
@@ -287,7 +287,7 @@ public class ChatSettingActivity extends BaseActivity {
             if (view instanceof TextCheckCell) {
                 ((TextCheckCell) view).setChecked(ConfigManager.getBooleanOrFalse(Defines.disableVolumeBtnEnableVideoSound));
             }
-        } else if (position == quickToggleAnonymousNotice) {
+        } else if (position == quickToggleAnonymous) {
             ConfigManager.toggleBoolean(Defines.quickToggleAnonymous);
             if (view instanceof TextCheckCell) {
                 ((TextCheckCell) view).setChecked(ConfigManager.getBooleanOrFalse(Defines.quickToggleAnonymous));
@@ -337,7 +337,7 @@ public class ChatSettingActivity extends BaseActivity {
         showForwardDateRow = rowCount++;
         hideTimeForStickerRow = rowCount++;
         showMessageIDRow = rowCount++;
-        quickToggleAnonymousNotice = rowCount++;
+        quickToggleAnonymous = rowCount++;
         hideQuickSendMediaBottomRow = rowCount++;
         customQuickMessageRow = rowCount++;
         scrollableChatPreviewRow = rowCount++;
@@ -430,7 +430,7 @@ public class ChatSettingActivity extends BaseActivity {
                         textCell.setTextAndCheck(LocaleController.getString("showTabsOnForward", R.string.showTabsOnForward), ConfigManager.getBooleanOrFalse(Defines.showTabsOnForward), true);
                     } else if (position == disableVolumeBtnEnableVideoSoundRow) {
                         textCell.setTextAndCheck(LocaleController.getString("disableVolumeBtnEnableVideoSound", R.string.disableVolumeBtnEnableVideoSound), ConfigManager.getBooleanOrFalse(Defines.disableVolumeBtnEnableVideoSound), true);
-                    } else if (position == quickToggleAnonymousNotice) {
+                    } else if (position == quickToggleAnonymous) {
                         textCell.setTextAndValueAndCheck(LocaleController.getString("quickToggleAnonymous", R.string.quickToggleAnonymous), LocaleController.getString("quickToggleAnonymousNotice",R.string.quickToggleAnonymousNotice),ConfigManager.getBooleanOrFalse(Defines.quickToggleAnonymous), true, true);
                     }
                     break;
