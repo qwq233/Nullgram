@@ -62,8 +62,6 @@ import org.telegram.ui.RestrictedLanguagesSelectActivity;
 
 import java.util.ArrayList;
 
-import top.qwq2333.nullgram.helpers.EntitiesHelper;
-
 public abstract class TextSelectionHelper<Cell extends TextSelectionHelper.SelectableView> {
 
     protected int textX;
@@ -1459,7 +1457,7 @@ public abstract class TextSelectionHelper<Cell extends TextSelectionHelper.Selec
     protected CharSequence getSelectedText() {
         CharSequence text = getText(selectedView, false);
         if (text != null) {
-            return EntitiesHelper.commonizeSpans(text.subSequence(selectionStart, selectionEnd));
+            return text.subSequence(selectionStart, selectionEnd);
         }
         return null;
     }

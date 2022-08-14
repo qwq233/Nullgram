@@ -56,7 +56,6 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.Locale;
 
-import top.qwq2333.nullgram.helpers.EntitiesHelper;
 import top.qwq2333.nullgram.utils.MessageUtils;
 
 @SuppressLint({"RtlHardcoded", "NotifyDataSetChanged"})
@@ -167,7 +166,7 @@ public class MessageDetailActivity extends BaseActivity implements NotificationC
     protected void onItemClick(View view, int position, float x, float y) {
         if (position != endRow) {
             TextDetailSettingsCell textCell = (TextDetailSettingsCell) view;
-            AndroidUtilities.addToClipboard(EntitiesHelper.commonizeSpans(textCell.getValueTextView().getText()));
+            AndroidUtilities.addToClipboard(textCell.getValueTextView().getText());
             BulletinFactory.of(this).createCopyBulletin(LocaleController.formatString("TextCopied", R.string.TextCopied)).show();
         }
     }

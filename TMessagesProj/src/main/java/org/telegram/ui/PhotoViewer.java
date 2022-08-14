@@ -69,9 +69,6 @@ import android.transition.TransitionSet;
 import android.transition.TransitionValues;
 import android.util.FloatProperty;
 
-import top.qwq2333.nullgram.config.ConfigManager;
-import top.qwq2333.nullgram.utils.Defines;
-import top.qwq2333.nullgram.utils.Log;
 import android.util.Property;
 import android.util.Range;
 import android.util.SparseArray;
@@ -257,8 +254,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-
-import top.qwq2333.nullgram.helpers.EntitiesHelper;
 
 @SuppressLint("WrongConstant")
 @SuppressWarnings("unchecked")
@@ -6124,7 +6119,7 @@ public class PhotoViewer implements NotificationCenter.NotificationCenterDelegat
                 } else {
                     String name = UserObject.getFirstName(user);
                     Spannable spannable = new SpannableString(name + " ");
-                    spannable.setSpan(EntitiesHelper.isEnabled() ? new URLSpan("tg://user?id=" + user.id) : new URLSpanUserMentionPhotoViewer("" + user.id, true), 0, spannable.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+                    spannable.setSpan(new URLSpanUserMentionPhotoViewer("" + user.id, true), 0, spannable.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
                     captionEditText.replaceWithText(start, len, spannable, false);
                 }
             } else if (object instanceof String) {
