@@ -4528,17 +4528,17 @@ public class MessageObject {
             }
 
             if (!useManualParse || entity instanceof TLRPC.TL_messageEntityBold ||
-                    entity instanceof TLRPC.TL_messageEntityItalic ||
-                    entity instanceof TLRPC.TL_messageEntityStrike ||
-                    entity instanceof TLRPC.TL_messageEntityUnderline ||
-                    entity instanceof TLRPC.TL_messageEntityBlockquote ||
-                    entity instanceof TLRPC.TL_messageEntityCode ||
-                    entity instanceof TLRPC.TL_messageEntityPre ||
-                    entity instanceof TLRPC.TL_messageEntityMentionName ||
-                    entity instanceof TLRPC.TL_inputMessageEntityMentionName ||
-                    entity instanceof TLRPC.TL_messageEntityTextUrl ||
-                    entity instanceof TLRPC.TL_messageEntitySpoiler ||
-                    entity instanceof TLRPC.TL_messageEntityCustomEmoji) {
+                entity instanceof TLRPC.TL_messageEntityItalic ||
+                entity instanceof TLRPC.TL_messageEntityStrike ||
+                entity instanceof TLRPC.TL_messageEntityUnderline ||
+                entity instanceof TLRPC.TL_messageEntityBlockquote ||
+                entity instanceof TLRPC.TL_messageEntityCode ||
+                entity instanceof TLRPC.TL_messageEntityPre ||
+                entity instanceof TLRPC.TL_messageEntityMentionName ||
+                entity instanceof TLRPC.TL_inputMessageEntityMentionName ||
+                entity instanceof TLRPC.TL_messageEntityTextUrl ||
+                entity instanceof TLRPC.TL_messageEntitySpoiler ||
+                entity instanceof TLRPC.TL_messageEntityCustomEmoji) {
                 if (spans != null && spans.length > 0) {
                     for (int b = 0; b < spans.length; b++) {
                         if (spans[b] == null) {
@@ -4681,7 +4681,7 @@ public class MessageObject {
                 spannable.setSpan(new URLSpanBotCommand(url, t, run), run.start, run.end, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
             } else if (run.urlEntity instanceof TLRPC.TL_messageEntityHashtag || run.urlEntity instanceof TLRPC.TL_messageEntityMention || run.urlEntity instanceof TLRPC.TL_messageEntityCashtag) {
                 spannable.setSpan(new URLSpanNoUnderline(url, run), run.start, run.end, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
-                if (run.urlEntity instanceof TLRPC.TL_messageEntityHashtag && run.urlEntity.length > 6 && run.urlEntity.length < 10) {
+                if (run.urlEntity instanceof TLRPC.TL_messageEntityHashtag) {
                     SyntaxHighlight.highlight(run, spannable);
                 }
             } else if (run.urlEntity instanceof TLRPC.TL_messageEntityEmail) {
