@@ -291,7 +291,6 @@ import java.util.regex.Pattern;
 
 import top.qwq2333.nullgram.activity.MessageDetailActivity;
 import top.qwq2333.nullgram.config.ConfigManager;
-import top.qwq2333.nullgram.helpers.EntitiesHelper;
 import top.qwq2333.nullgram.utils.Defines;
 import top.qwq2333.nullgram.utils.Log;
 import top.qwq2333.nullgram.utils.PermissionUtils;
@@ -1329,6 +1328,7 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
     private final static int text_strike = 55;
     private final static int text_underline = 56;
     private final static int text_spoiler = 57;
+    private final static int text_mention = 58;
 
     private final static int search = 40;
 
@@ -2526,6 +2526,11 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
                         chatActivityEnterView.getEditField().setSelectionOverride(editTextStart, editTextEnd);
                         chatActivityEnterView.getEditField().makeSelectedSpoiler();
                     }
+                } else if (id == text_mention) {
+                    if (chatActivityEnterView != null) {
+                        chatActivityEnterView.getEditField().setSelectionOverride(editTextStart, editTextEnd);
+                        chatActivityEnterView.getEditField().makeSelectedMention();
+                    }
                 } else if (id == text_mono) {
                     if (chatActivityEnterView != null) {
                         chatActivityEnterView.getEditField().setSelectionOverride(editTextStart, editTextEnd);
@@ -2869,6 +2874,7 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
             editTextItem.addSubItem(text_underline, stringBuilder);
         }
         editTextItem.addSubItem(text_link, LocaleController.getString("CreateLink", R.string.CreateLink));
+        editTextItem.addSubItem(text_mention, LocaleController.getString("CreateMention", R.string.CreateMention));
         editTextItem.addSubItem(text_regular, LocaleController.getString("Regular", R.string.Regular));
 
         if (chatMode == 0 && threadMessageId == 0 && !UserObject.isReplyUser(currentUser) && reportType < 0) {
@@ -6822,7 +6828,7 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
                     } else {
                         String name = UserObject.getFirstName(user, false);
                         Spannable spannable = new SpannableString(name + " ");
-                        spannable.setSpan(EntitiesHelper.isEnabled() ? new URLSpan("tg://user?id=" + user.id) : new URLSpanUserMention("" + user.id, 3), 0, spannable.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+                        spannable.setSpan(new URLSpanUserMention("" + user.id, 3), 0, spannable.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
                         chatActivityEnterView.replaceWithText(start, len, spannable, false);
                     }
                 }
@@ -17158,7 +17164,8 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
     }
 
     private void loadSendAsPeers(boolean animatedUpdate) {
-        if (sendAsPeersObj != null || currentChat == null || !ChatObject.canSendAsPeers(currentChat) || chatActivityEnterView == null) {
+        if ((sendAsPeersObj != null || currentChat == null || !ChatObject.canSendAsPeers(currentChat) || chatActivityEnterView == null)
+            && !ConfigManager.getBooleanOrFalse(Defines.quickToggleAnonymous)) {
             return;
         }
         sendAsPeersObj = getMessagesController().getSendAsPeers(dialog_id);
@@ -25069,32 +25076,29 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
         }
         boolean noforwards = getMessagesController().isChatNoForwards(currentChat) || (messageObject != null && messageObject.messageOwner != null && messageObject.messageOwner.noforwards);
         if (url instanceof URLSpanMono) {
-            if (!longPress) {
-                ((URLSpanMono) url).copyToClipboard();
-                getUndoView().showWithAction(0, UndoView.ACTION_TEXT_COPIED, null);
-            } else {
-                BottomSheet.Builder builder = new BottomSheet.Builder(getParentActivity(), false, themeDelegate);
-                var style = ((URLSpanMono) url).getStyle();
-                if (style != null && style.urlEntity != null && !TextUtils.isEmpty(style.urlEntity.language))
-                    builder.setTitle(style.urlEntity.language);
-                builder.setItems(new CharSequence[]{LocaleController.getString("ShareFile", R.string.ShareFile), LocaleController.getString("Copy", R.string.Copy)}, (dialog, which) -> {
-                    if (which == 1) {
-                        ((URLSpanMono) url).copyToClipboard();
-                        getUndoView().showWithAction(0, UndoView.ACTION_TEXT_COPIED, null);
-                    } else {
-                        Intent shareIntent = new Intent(Intent.ACTION_SEND);
-                        shareIntent.setType("text/plain");
-                        shareIntent.putExtra(Intent.EXTRA_TEXT, ((URLSpanMono) url).getTextToCopy());
-                        Intent chooserIntent = Intent.createChooser(shareIntent, LocaleController.getString("ShareFile", R.string.ShareFile));
-                        chooserIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                        ApplicationLoader.applicationContext.startActivity(chooserIntent);
-                    }
-                });
-                showDialog(builder.create());
-            }
-
-            if (longPress && cell != null) {
-                cell.resetPressedLink(-1);
+            if (!noforwards) {
+                if (!longPress) {
+                    ((URLSpanMono) url).copyToClipboard();
+                    getUndoView().showWithAction(0, UndoView.ACTION_TEXT_COPIED, null);
+                } else {
+                    BottomSheet.Builder builder = new BottomSheet.Builder(getParentActivity(), false, themeDelegate);
+                    var language = ((URLSpanMono) url).getLanguage();
+                    if (language != null) builder.setTitle(language);
+                    builder.setItems(new CharSequence[]{LocaleController.getString("ShareFile", R.string.ShareFile), LocaleController.getString("Copy", R.string.Copy)}, (dialog, which) -> {
+                        if (which == 1) {
+                            ((URLSpanMono) url).copyToClipboard();
+                            getUndoView().showWithAction(0, UndoView.ACTION_TEXT_COPIED, null);
+                        } else {
+                            Intent shareIntent = new Intent(Intent.ACTION_SEND);
+                            shareIntent.setType("text/plain");
+                            shareIntent.putExtra(Intent.EXTRA_TEXT, ((URLSpanMono) url).getTextToCopy());
+                            Intent chooserIntent = Intent.createChooser(shareIntent, LocaleController.getString("ShareFile", R.string.ShareFile));
+                            chooserIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                            ApplicationLoader.applicationContext.startActivity(chooserIntent);
+                        }
+                    });
+                    showDialog(builder.create());
+                }
             }
             if (longPress && cell != null) {
                 cell.resetPressedLink(-1);
@@ -25747,7 +25751,7 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
                             } else {
                                 String name = UserObject.getFirstName(user, false);
                                 Spannable spannable = new SpannableString(name + " ");
-                                spannable.setSpan(EntitiesHelper.isEnabled() ? new URLSpan("tg://user?id=" + user.id) : new URLSpanUserMention("" + user.id, 3), 0, spannable.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+                                spannable.setSpan(new URLSpanUserMention("" + user.id, 3), 0, spannable.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
                                 sb.append(spannable);
                             }
                             chatActivityEnterView.setFieldText(sb);

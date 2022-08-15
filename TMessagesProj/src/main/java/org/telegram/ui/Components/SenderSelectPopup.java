@@ -31,6 +31,7 @@ import org.telegram.messenger.ChatObject;
 import org.telegram.messenger.LocaleController;
 import org.telegram.messenger.MessagesController;
 import org.telegram.messenger.R;
+import org.telegram.messenger.UserConfig;
 import org.telegram.messenger.UserObject;
 import org.telegram.tgnet.TLRPC;
 import org.telegram.ui.ActionBar.ActionBarPopupWindow;
@@ -40,6 +41,9 @@ import org.telegram.ui.ChatActivity;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+
+import top.qwq2333.nullgram.config.ConfigManager;
+import top.qwq2333.nullgram.utils.Defines;
 
 public class SenderSelectPopup extends ActionBarPopupWindow {
     public final static float SPRING_STIFFNESS = 750f;
@@ -121,6 +125,24 @@ public class SenderSelectPopup extends ActionBarPopupWindow {
 
         List<TLRPC.Peer> peers = sendAsPeers.peers;
 
+        if (ConfigManager.getBooleanOrFalse(Defines.quickToggleAnonymous)) {
+            var chat = messagesController.getChat(chatFull.id);
+            if (chat != null && chat.creator) {
+                if (peers.stream().noneMatch(peer -> peer.channel_id == chat.id)) {
+                    peers.add(0, new TLRPC.TL_peerChannel() {{
+                        channel_id = chat.id;
+                    }});
+                }
+
+                var selfId = UserConfig.getInstance(UserConfig.selectedAccount).getCurrentUser().id;
+                if (peers.stream().noneMatch(peer -> peer.user_id == selfId)) {
+                    peers.add(peers.size() >= 1 ? 1 : 0, new TLRPC.TL_peerUser() {{
+                        user_id = selfId;
+                    }});
+                }
+            }
+        }
+
         recyclerView = new RecyclerListView(context);
         layoutManager = new LinearLayoutManager(context);
         recyclerView.setLayoutManager(layoutManager);
@@ -153,7 +175,10 @@ public class SenderSelectPopup extends ActionBarPopupWindow {
                     TLRPC.Chat chat = messagesController.getChat(-peerId);
                     if (chat != null) {
                         senderView.title.setText(chat.title);
-                        senderView.subtitle.setText(LocaleController.formatPluralString(ChatObject.isChannel(chat) && !chat.megagroup ? "Subscribers" : "Members", chat.participants_count));
+                        senderView.subtitle.setText(
+                            chat.participants_count == 0 ? LocaleController.getString("SendAnonymously", R.string.SendAnonymously)
+                                : LocaleController.formatPluralString(ChatObject.isChannel(chat) && !chat.megagroup ? "Subscribers" : "Members", chat.participants_count)
+                        );
                         senderView.avatar.setAvatar(chat);
                     }
                     senderView.avatar.setSelected(chatFull.default_send_as != null && chatFull.default_send_as.channel_id == peer.channel_id, false);

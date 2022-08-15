@@ -55008,6 +55008,8 @@ public class TLRPC {
         public ArrayList<Chat> chats = new ArrayList<>();
         public ArrayList<User> users = new ArrayList<>();
 
+        public boolean isModifiedByQuickToggleAnonymous = false;
+
         public static TL_channels_sendAsPeers TLdeserialize(AbstractSerializedData stream, int constructor, boolean exception) {
             if (TL_channels_sendAsPeers.constructor != constructor) {
                 if (exception) {
