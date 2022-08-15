@@ -6890,9 +6890,37 @@ public class ChatActivityEnterView extends BlurredFrameLayout implements Notific
         }
         TLRPC.ChatFull full = parentFragment.getMessagesController().getChatFull(-dialog_id);
         TLRPC.Peer defPeer = full != null ? full.default_send_as : null;
-        if (defPeer == null && delegate.getSendAsPeers() != null && !delegate.getSendAsPeers().peers.isEmpty()) {
+        if (defPeer == null && delegate.getSendAsPeers() != null && !delegate.getSendAsPeers().peers.isEmpty() && !delegate.getSendAsPeers().isModifiedByQuickToggleAnonymous) {
             defPeer = delegate.getSendAsPeers().peers.get(0);
         }
+
+        if (ConfigManager.getBooleanOrFalse(Defines.quickToggleAnonymous) && delegate.getSendAsPeers() != null && delegate.getSendAsPeers().isModifiedByQuickToggleAnonymous) {
+            var chat = parentFragment.getMessagesController().getChat(-dialog_id);
+            var self = UserConfig.getInstance(currentAccount).getCurrentUser();
+            if (chat != null) {
+
+                // 要给点时间让tg把admin_rights加载完，否则为null，然后就喜提NullPointerException了
+                try {
+                    Thread.sleep(50);
+                } catch (Exception ignore) {
+                }
+
+                if (chat.megagroup) {
+                    if (chat.creator && chat.admin_rights != null && defPeer == null) {
+                        if (chat.admin_rights.anonymous) {
+                            defPeer = new TLRPC.TL_peerChannel();
+                            defPeer.channel_id = chat.id;
+                        } else {
+                            defPeer = new TLRPC.TL_peerUser();
+                            defPeer.user_id = self.id;
+                        }
+                    }
+                }
+            }
+
+
+        }
+
         if (defPeer != null) {
             if (defPeer.channel_id != 0) {
                 TLRPC.Chat ch = MessagesController.getInstance(currentAccount).getChat(defPeer.channel_id);
