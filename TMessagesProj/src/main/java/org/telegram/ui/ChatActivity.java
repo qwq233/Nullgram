@@ -17164,7 +17164,8 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
     }
 
     private void loadSendAsPeers(boolean animatedUpdate) {
-        if (sendAsPeersObj != null || currentChat == null || !ChatObject.canSendAsPeers(currentChat) || chatActivityEnterView == null) {
+        if ((sendAsPeersObj != null || currentChat == null || !ChatObject.canSendAsPeers(currentChat) || chatActivityEnterView == null)
+            && !ConfigManager.getBooleanOrFalse(Defines.quickToggleAnonymous)) {
             return;
         }
         sendAsPeersObj = getMessagesController().getSendAsPeers(dialog_id);
