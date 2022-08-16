@@ -201,4 +201,5 @@
     <string name="icon_4">Icon 4</string>
     <string name="icon_5">Icon 5</string>
     <string name="disablePremiumSticker">Disable Premium Sticker Tab</string>
+    <string name="hideProxySponsorChannel">Hide Proxy Sponsor Channel</string>
 </resources>

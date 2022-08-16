@@ -27,6 +27,7 @@ public class ExperimentSettingActivity extends BaseActivity {
 
     private int experimentRow;
     private int blockSponsorAdsRow;
+    private int hideProxySponsorChannelRow;
     private int disableSendTypingRow;
     private int syntaxHighlightRow;
     private int aliasChannelRow;
@@ -50,6 +51,11 @@ public class ExperimentSettingActivity extends BaseActivity {
             ConfigManager.toggleBoolean(Defines.blockSponsorAds);
             if (view instanceof TextCheckCell) {
                 ((TextCheckCell) view).setChecked(ConfigManager.getBooleanOrFalse(Defines.blockSponsorAds));
+            }
+        } else if (position == hideProxySponsorChannelRow) {
+            ConfigManager.toggleBoolean(Defines.hideProxySponsorChannel);
+            if (view instanceof TextCheckCell) {
+                ((TextCheckCell) view).setChecked(ConfigManager.getBooleanOrFalse(Defines.hideProxySponsorChannel));
             }
         } else if (position == disableSendTypingRow) {
             ConfigManager.toggleBoolean(Defines.disableSendTyping);
@@ -134,6 +140,7 @@ public class ExperimentSettingActivity extends BaseActivity {
         experimentRow = rowCount++;
         if (ConfigManager.getBooleanOrFalse(Defines.showHiddenSettings)) {
             blockSponsorAdsRow = rowCount++;
+            hideProxySponsorChannelRow = rowCount++;
             disableSendTypingRow = rowCount++;
         }
         syntaxHighlightRow = rowCount++;
@@ -208,6 +215,8 @@ public class ExperimentSettingActivity extends BaseActivity {
                     textCell.setEnabled(true, null);
                     if (position == blockSponsorAdsRow) {
                         textCell.setTextAndCheck(LocaleController.getString("blockSponsorAds", R.string.blockSponsorAds), ConfigManager.getBooleanOrFalse(Defines.blockSponsorAds), true);
+                    } else if (position == hideProxySponsorChannelRow) {
+                        textCell.setTextAndCheck(LocaleController.getString("hideProxySponsorChannel", R.string.hideProxySponsorChannel), ConfigManager.getBooleanOrFalse(Defines.hideProxySponsorChannel), true);
                     } else if (position == disableSendTypingRow) {
                         textCell.setTextAndCheck(LocaleController.getString("disableSendTyping", R.string.disableSendTyping), ConfigManager.getBooleanOrFalse(Defines.disableSendTyping), true);
                     } else if (position == syntaxHighlightRow) {

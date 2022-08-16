@@ -82,6 +82,7 @@ public class Defines {
     public static final String modifyDownloadSpeed = "modifyDownloadSpeed";
     public static final String disableVolumeBtnEnableVideoSound = "disableVolumeBtnEnableVideoSound";
     public static final String quickToggleAnonymous = "quickToggleAnonymous";
+    public static final String hideProxySponsorChannel = "hideProxySponsorChannel";
 
     // Custom API
     public static final String customAPI = "customAPI";
