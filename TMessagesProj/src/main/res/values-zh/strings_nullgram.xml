@@ -197,4 +197,8 @@
     <string name="disableVolumeBtnEnableVideoSound">禁用音量键开启预览视频声音</string>
     <string name="quickToggleAnonymous">快速切换匿名发言</string>
     <string name="quickToggleAnonymousNotice">如果你是群组的所有者的话</string>
+    <string name="Anonymous">匿名</string>
+    <string name="Channel">频道</string>
+    <string name="SwitchToAnonymously">切换至匿名发送</string>
+    <string name="SwitchToPersonalAccount">切换至个人账号</string>
 </resources>

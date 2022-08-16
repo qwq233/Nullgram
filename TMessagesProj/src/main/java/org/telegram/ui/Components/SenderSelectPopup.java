@@ -171,25 +171,42 @@ public class SenderSelectPopup extends ActionBarPopupWindow {
                     peerId = peer.user_id;
                 }
 
+                final var currentChat = messagesController.getChat(chatFull.id);
+                final var isQuickToggleAnonymousEnabled = ConfigManager.getBooleanOrFalse(Defines.quickToggleAnonymous);
+                var flag = -1; // for private select check
+                if (currentChat.creator && isQuickToggleAnonymousEnabled) {
+                    flag = currentChat.admin_rights.anonymous ? 0 : 1;
+                }
+
                 if (peerId < 0) {
                     TLRPC.Chat chat = messagesController.getChat(-peerId);
                     if (chat != null) {
                         senderView.title.setText(chat.title);
-                        senderView.subtitle.setText(
-                            chat.participants_count == 0 ? LocaleController.getString("SendAnonymously", R.string.SendAnonymously)
-                                : LocaleController.formatPluralString(ChatObject.isChannel(chat) && !chat.megagroup ? "Subscribers" : "Members", chat.participants_count)
-                        );
+                        final String text;
+                        if (chat.creator && isQuickToggleAnonymousEnabled && -peerId == currentChat.id) {
+                            text = LocaleController.getString("SwitchToAnonymously", R.string.SwitchToAnonymously);
+                        } else {
+                            text = LocaleController.formatPluralString(ChatObject.isChannel(chat) && !chat.megagroup ? "Subscribers" : "Members", chat.participants_count);
+                        }
+                        senderView.subtitle.setText(text);
                         senderView.avatar.setAvatar(chat);
                     }
-                    senderView.avatar.setSelected(chatFull.default_send_as != null && chatFull.default_send_as.channel_id == peer.channel_id, false);
+                    senderView.avatar.setSelected((chatFull.default_send_as != null && chatFull.default_send_as.channel_id == peer.channel_id) || flag == 0, false);
                 } else {
                     TLRPC.User user = messagesController.getUser(peerId);
                     if (user != null) {
+
                         senderView.title.setText(UserObject.getUserName(user));
-                        senderView.subtitle.setText(LocaleController.getString("VoipGroupPersonalAccount", R.string.VoipGroupPersonalAccount));
+                        final String text;
+                        if (currentChat.creator && isQuickToggleAnonymousEnabled) {
+                            text = LocaleController.getString("SwitchToPersonalAccount", R.string.SwitchToPersonalAccount);
+                        } else {
+                            text = LocaleController.getString("VoipGroupPersonalAccount", R.string.VoipGroupPersonalAccount);
+                        }
+                        senderView.subtitle.setText(text);
                         senderView.avatar.setAvatar(user);
                     }
-                    senderView.avatar.setSelected(chatFull.default_send_as != null && chatFull.default_send_as.user_id == peer.user_id, false);
+                    senderView.avatar.setSelected((chatFull.default_send_as != null && chatFull.default_send_as.user_id == peer.user_id) || flag == 1, false);
                 }
             }
 

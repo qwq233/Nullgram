@@ -11077,7 +11077,8 @@ public class ChatMessageCell extends BaseCell implements SeekBar.SeekBarDelegate
                         }
                     }
 
-                    final String text = currentMessageObject.getChatId() == -currentMessageObject.getSenderId() ? "Anonymous" : "Channel";
+                    final boolean isAnonymous = currentMessageObject.getChatId() == -currentMessageObject.getSenderId();
+                    final String text = LocaleController.getString(isAnonymous ? "Anonymous" : "Channel", isAnonymous ? R.string.Anonymous : R.string.Channel);
                     if (nickname != null) {
                         adminString = StringUtils.ellipsis(nickname, 15) +  " | " + text;
                     } else if (aliasName != null) {
@@ -11104,7 +11105,8 @@ public class ChatMessageCell extends BaseCell implements SeekBar.SeekBarDelegate
                         }
                     }
 
-                    final String text = currentMessageObject.getChatId() == -currentMessageObject.getSenderId() ? "Anonymous" : "Channel";
+                    final boolean isAnonymous = currentMessageObject.getChatId() == -currentMessageObject.getSenderId();
+                    final String text = LocaleController.getString(isAnonymous ? "Anonymous" : "Channel", isAnonymous ? R.string.Anonymous : R.string.Channel);
                     if (nickname != null) {
                         adminString = StringUtils.ellipsis(nickname, 15) + " | " + text;
                     } else {
