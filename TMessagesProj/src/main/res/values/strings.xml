@@ -5543,4 +5543,8 @@
     <string name="disableVolumeBtnEnableVideoSound">Disable volume keys to enable preview video sound</string>
     <string name="quickToggleAnonymous">Quick toggle anonymous</string>
     <string name="quickToggleAnonymousNotice">If you\'re owner of the group</string>
+    <string name="Anonymous">Anonymous</string>
+    <string name="Channel">Channel</string>
+    <string name="SwitchToAnonymously">Switch to anonymously</string>
+    <string name="SwitchToPersonalAccount">Switch to personal account</string>
 </resources>
