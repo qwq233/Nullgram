@@ -6,7 +6,6 @@ plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
     id("com.google.gms.google-services")
-    id("com.google.firebase.crashlytics")
     id("com.github.triplet.play") version "3.7.0"
 }
 
@@ -36,7 +35,6 @@ fun setupPlay(stable: Boolean) {
 
 dependencies {
     implementation(platform("com.google.firebase:firebase-bom:30.2.0"))
-    implementation("com.google.firebase:firebase-crashlytics-ktx")
 
     implementation("androidx.core:core-ktx:1.8.0")
     implementation("androidx.palette:palette-ktx:1.0.0")
