@@ -159,6 +159,7 @@ import java.util.Locale;
 import top.qwq2333.nullgram.config.ConfigManager;
 import top.qwq2333.nullgram.ui.syntaxhighlight.SyntaxHighlight;
 import top.qwq2333.nullgram.utils.Defines;
+import top.qwq2333.nullgram.utils.Log;
 
 public class ChatActivityEnterView extends BlurredFrameLayout implements NotificationCenter.NotificationCenterDelegate, SizeNotifierFrameLayout.SizeNotifierFrameLayoutDelegate, StickersAlert.StickersAlertDelegate {
 
@@ -6898,13 +6899,6 @@ public class ChatActivityEnterView extends BlurredFrameLayout implements Notific
             var chat = parentFragment.getMessagesController().getChat(-dialog_id);
             var self = UserConfig.getInstance(currentAccount).getCurrentUser();
             if (chat != null) {
-
-                // 要给点时间让tg把admin_rights加载完，否则为null，然后就喜提NullPointerException了
-                try {
-                    Thread.sleep(50);
-                } catch (Exception ignore) {
-                }
-
                 if (chat.megagroup) {
                     if (chat.creator && chat.admin_rights != null && defPeer == null) {
                         if (chat.admin_rights.anonymous) {
