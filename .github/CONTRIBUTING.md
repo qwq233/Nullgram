@@ -15,24 +15,26 @@
 
 ## Development
 
-1. Make sure your editor supports EditorConfig,otherwise you should pay attention to your encoding, row bit sequence and other things.
+1. Make sure your editor supports EditorConfig,otherwise you should pay attention to your encoding,
+   row bit sequence and other things.
 
-2. If you're coding with Android Studio/IDEA, make sure you have applied the project Code Style.
+2. Encode in UTF-8, with LF as the end of line sequence.
 
-3. Encode in UTF-8, with LF as the end of line sequence.
+3. Config Key should be defined
+   in [Defines.java](../TMessagesProj/src/main/java/top/qwq2333/nullgram/utils/Defines.java).
 
-4. Config Key should be defined in [Defines.java](../TMessagesProj/src/main/java/top/qwq2333/nullgram/utils/Defines.java).
+4. Variable naming adopts camelcase.
 
-5. Variable naming adopts camelcase.
+5. DO NOT USE FileLog. Use [Log](../TMessagesProj/src/main/java/top/qwq2333/nullgram/utils/Log.kt)
+   instead.
 
-6. DO NOT USE FileLog. Use [LogUtils](../TMessagesProj/src/main/java/top/qwq2333/nullgram/utils/LogUtils.kt) instead.
+6. Indent with 4 spaces.
 
-7. Indent with 4 spaces.
+7. Deprecated code should be deleted but not be commented.
 
-8. Deprecated code should be deleted but not be commented.
+8. Reformat code before you commit.
 
-9. Reformat code before you commit.
+9. Except in some cases, the code header must be added
 
-10. Except in some cases, the code header must be added
-
-11. **At no point should you arbitrarily change [build.gradle](../build.gradle), especially upgrading `com.android.tools.build:gradle` version**
+10. **At no point should you arbitrarily change [build.gradle.kts](../build.gradle.kts), especially
+    upgrading `com.android.tools.build:gradle` version**
