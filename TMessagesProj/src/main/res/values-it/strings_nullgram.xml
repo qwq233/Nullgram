@@ -200,6 +200,6 @@
     <string name="icon_3">Icona 3</string>
     <string name="icon_4">Icona 4</string>
     <string name="icon_5">Icona 5</string>
-    <string name="disablePremiumSticker">Disable Premium Sticker Tab</string>
-    <string name="hideProxySponsorChannel">Hide Proxy Sponsor Channel</string>
+    <string name="disablePremiumSticker">Disattiva scheda sticker premium</string>
+    <string name="hideProxySponsorChannel">Nascondi canale sponsor proxy</string>
 </resources>
