@@ -195,4 +195,12 @@
     <string name="TabTitleTypeIcon">Значки</string>
     <string name="TabTitleTypeMix">Значки с названиями</string>
     <string name="modifyDownloadSpeed">Изменить скорость загрузки</string>
+    <string name="AppIconMain">Основной значок</string>
+    <string name="icon_1">Значок 1</string>
+    <string name="icon_2">Значок 2</string>
+    <string name="icon_3">Значок 3</string>
+    <string name="icon_4">Значок 4</string>
+    <string name="icon_5">Значок 5</string>
+    <string name="disablePremiumSticker">Отключить вкладку премиум стикеров</string>
+    <string name="hideProxySponsorChannel">Скрыть канал спонсора прокси-сервера</string>
 </resources>
