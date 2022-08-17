@@ -709,7 +709,7 @@ public class ChatSettingActivity extends BaseActivity {
         setDisplayNameEditText.setLineColors(getThemedColor(Theme.key_windowBackgroundWhiteInputField), getThemedColor(Theme.key_windowBackgroundWhiteInputFieldActivated), getThemedColor(Theme.key_windowBackgroundWhiteRedText3));
         setDisplayNameEditText.setImeOptions(EditorInfo.IME_ACTION_DONE);
         setDisplayNameEditText.setBackgroundDrawable(null);
-        setDisplayNameEditText.setPadding(0, 0, 0, 0);
+        setDisplayNameEditText.setPadding(AndroidUtilities.dp(36), AndroidUtilities.dp(16), AndroidUtilities.dp(36), AndroidUtilities.dp(16));
         layout.addView(setDisplayNameEditText);
 
         final EditTextBoldCursor setMessageEditText = new EditTextBoldCursor(getParentActivity()) {
@@ -729,7 +729,7 @@ public class ChatSettingActivity extends BaseActivity {
         setMessageEditText.setLineColors(getThemedColor(Theme.key_windowBackgroundWhiteInputField), getThemedColor(Theme.key_windowBackgroundWhiteInputFieldActivated), getThemedColor(Theme.key_windowBackgroundWhiteRedText3));
         setMessageEditText.setImeOptions(EditorInfo.IME_ACTION_DONE);
         setMessageEditText.setBackgroundDrawable(null);
-        setMessageEditText.setPadding(0, 0, 0, 0);
+        setMessageEditText.setPadding(AndroidUtilities.dp(36), AndroidUtilities.dp(16), AndroidUtilities.dp(36), AndroidUtilities.dp(16));
         layout.addView(setMessageEditText);
 
         CheckBoxCell cell = new CheckBoxCell(getParentActivity(), 1);
@@ -780,6 +780,17 @@ public class ChatSettingActivity extends BaseActivity {
             setDisplayNameEditText.setLayoutParams(layoutParams);
         }
         setDisplayNameEditText.setSelection(0, setDisplayNameEditText.getText().length());
+
+        layoutParams = (ViewGroup.MarginLayoutParams) setMessageEditText.getLayoutParams();
+        if (layoutParams != null) {
+            if (layoutParams instanceof FrameLayout.LayoutParams) {
+                ((FrameLayout.LayoutParams) layoutParams).gravity = Gravity.CENTER_HORIZONTAL;
+            }
+            layoutParams.rightMargin = layoutParams.leftMargin = AndroidUtilities.dp(24);
+            layoutParams.height = AndroidUtilities.dp(36);
+            setDisplayNameEditText.setLayoutParams(layoutParams);
+        }
+        setMessageEditText.setSelection(0, setMessageEditText.getText().length());
     }
 
     private class StickerSizeCell extends FrameLayout {
