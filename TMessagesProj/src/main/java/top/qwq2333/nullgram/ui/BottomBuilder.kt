@@ -42,6 +42,7 @@ class BottomBuilder(val ctx: Context) {
     private val rootView = LinearLayout(ctx).apply {
         orientation = LinearLayout.VERTICAL
     }
+
     private val rtl = (if (LocaleController.isRTL) Gravity.RIGHT else Gravity.LEFT)
 
     private val _root = LinearLayout(ctx).apply {
@@ -60,9 +61,7 @@ class BottomBuilder(val ctx: Context) {
 
 
     private val buttonsView by lazy {
-
         FrameLayout(ctx).apply {
-
             setBackgroundColor(Theme.getColor(Theme.key_dialogBackground))
 
             this@BottomBuilder.rootView.addView(
@@ -88,27 +87,19 @@ class BottomBuilder(val ctx: Context) {
     }
 
     private val rightButtonsView by lazy {
-
         LinearLayout(ctx).apply {
-
             orientation = LinearLayout.HORIZONTAL
             weightSum = 1F
-
         }
-
     }
 
     @JvmOverloads
     fun addTitle(title: CharSequence, bigTitle: Boolean = false): HeaderCell {
-
         return addTitle(title, bigTitle, null)
-
     }
 
     fun addTitle(title: CharSequence, subTitle: CharSequence): HeaderCell {
-
         return addTitle(title, true, subTitle)
-
     }
 
     fun addTitle(title: CharSequence, bigTitle: Boolean, subTitle: CharSequence?): HeaderCell {
@@ -122,15 +113,11 @@ class BottomBuilder(val ctx: Context) {
         headerCell.setText(if (title is String) AndroidUtilities.replaceTags(title) else title)
 
         subTitle?.also {
-
             headerCell.setText2(it)
-
         }
 
         rootView.addView(headerCell, LayoutHelper.createLinear(-1, -2).apply {
-
             bottomMargin = AndroidUtilities.dp(8F)
-
         })
 
         return headerCell
@@ -170,7 +157,6 @@ class BottomBuilder(val ctx: Context) {
         }
 
         return checkBoxCell
-
     }
 
     @JvmOverloads
@@ -205,21 +191,14 @@ class BottomBuilder(val ctx: Context) {
     fun doRadioCheck(cell: RadioButtonCell) {
 
         if (!cell.isChecked) {
-
             radioButtonGroup.forEach {
-
                 if (it.isChecked) {
-
                     it.setChecked(false, true)
-
                 }
-
             }
 
             cell.setChecked(true, true)
-
         }
-
     }
 
     @JvmOverloads
@@ -230,24 +209,20 @@ class BottomBuilder(val ctx: Context) {
         listener: (cell: RadioButtonCell) -> Unit
     ): RadioButtonCell {
 
-        val checkBoxCell = RadioButtonCell(ctx, true)
+        val checkBoxCell = RadioButtonCell(ctx, false).apply {
+            valueTextView.setPadding(0, 0, 0, 0)
+        }
         checkBoxCell.setBackgroundDrawable(Theme.getSelectorDrawable(false))
-        checkBoxCell.minimumHeight = AndroidUtilities.dp(50F)
         rootView.addView(checkBoxCell, LayoutHelper.createLinear(-1, -2))
 
         checkBoxCell.setTextAndValue(text, valueText, true, value)
-
-
         radioButtonGroup.add(checkBoxCell)
 
         checkBoxCell.setOnClickListener {
-
             listener(checkBoxCell)
-
         }
 
         return checkBoxCell
-
     }
 
     @JvmOverloads
@@ -268,9 +243,7 @@ class BottomBuilder(val ctx: Context) {
                     value(index, textI),
                     valueText?.invoke(index, textI)
                 ) { cell ->
-
                     listener(index, textI, cell)
-
                 })
 
         }
@@ -377,13 +350,9 @@ class BottomBuilder(val ctx: Context) {
         val list = mutableListOf<TextCell>()
 
         text.forEachIndexed { index, textI ->
-
             list.add(addItem(textI ?: return@forEachIndexed, icon?.get(index) ?: 0) { cell ->
-
                 listener(index, textI, cell)
-
             })
-
         }
 
         return list
@@ -420,8 +389,8 @@ class BottomBuilder(val ctx: Context) {
 
     }
 
-    fun create() = builder.create()
-    fun show() = builder.show()
+    fun create(): BottomSheet = builder.create()
+    fun show(): BottomSheet = builder.show()
     fun dismiss() {
         builder.dismissRunnable.run()
     }

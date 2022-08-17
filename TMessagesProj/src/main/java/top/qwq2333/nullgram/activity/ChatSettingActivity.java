@@ -201,7 +201,7 @@ public class ChatSettingActivity extends BaseActivity {
             final int currentConfig = ConfigManager.getIntOrDefault(Defines.doubleTab, Defines.doubleTabReaction);
             BottomBuilder builder = new BottomBuilder(getParentActivity());
 
-            builder.addTitle(LocaleController.getString("customDoubleTap", R.string.customDoubleTap), true);
+            builder.addTitle(LocaleController.getString("customDoubleTap", R.string.customDoubleTap), false);
 
             builder.addRadioItem(LocaleController.getString("Disable", R.string.Disable), currentConfig == Defines.doubleTabNone, (radioButtonCell) -> {
                 ConfigManager.putInt(Defines.doubleTab, Defines.doubleTabNone);
