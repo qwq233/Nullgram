@@ -17171,7 +17171,7 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
             return;
         }
         sendAsPeersObj = getMessagesController().getSendAsPeers(dialog_id);
-        if (sendAsPeersObj != null) {
+        if (sendAsPeersObj != null && chatActivityEnterView != null) {
             chatActivityEnterView.updateSendAsButton(animatedUpdate);
         }
     }
