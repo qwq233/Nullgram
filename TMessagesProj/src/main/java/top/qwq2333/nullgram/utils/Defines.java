@@ -80,7 +80,7 @@ public class Defines {
     public static final String fastSpeedUpload = "fastSpeedUpload";
     public static final String showTabsOnForward = "showTabsOnForward";
     public static final String modifyDownloadSpeed = "modifyDownloadSpeed";
-    public static final String disableVolumeBtnEnableVideoSound = "disableVolumeBtnEnableVideoSound";
+    public static final String disablePreviewVideoSoundShortcut = "disablePreviewVideoSoundShortcut";
     public static final String quickToggleAnonymous = "quickToggleAnonymous";
     public static final String hideProxySponsorChannel = "hideProxySponsorChannel";
 

@@ -36,7 +36,6 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Parcelable;
 import android.os.StatFs;
-import android.os.StrictMode;
 import android.os.SystemClock;
 import android.provider.ContactsContract;
 import android.provider.Settings;
@@ -6032,7 +6031,7 @@ public class LaunchActivity extends BasePermissionsActivity implements ActionBar
                 }
             } else if (
                 !mainFragmentsStack.isEmpty() && (!PhotoViewer.hasInstance() || !PhotoViewer.getInstance().isVisible()) && event.getRepeatCount() == 0
-                && !ConfigManager.getBooleanOrFalse(Defines.disableVolumeBtnEnableVideoSound)
+                && !ConfigManager.getBooleanOrFalse(Defines.disablePreviewVideoSoundShortcut)
             ) {
                 BaseFragment fragment = mainFragmentsStack.get(mainFragmentsStack.size() - 1);
                 if (fragment instanceof ChatActivity) {
