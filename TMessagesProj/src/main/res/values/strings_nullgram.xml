@@ -202,4 +202,12 @@
     <string name="icon_5">Icon 5</string>
     <string name="disablePremiumSticker">Disable Premium Sticker Tab</string>
     <string name="hideProxySponsorChannel">Hide Proxy Sponsor Channel</string>
+    <string name="disablePreviewVideoSoundShortcut">Disable preview video sound shortcut</string>
+    <string name="disablePreviewVideoSoundShortcutNotice">Disable volume keys to enable preview video sound</string>
+    <string name="quickToggleAnonymous">Quick toggle anonymous</string>
+    <string name="quickToggleAnonymousNotice">If you\'re owner of the group</string>
+    <string name="Anonymous">Anonymous</string>
+    <string name="Channel">Channel</string>
+    <string name="SwitchToAnonymously">Switch to anonymously</string>
+    <string name="SwitchToPersonalAccount">Switch to personal account</string>
 </resources>
