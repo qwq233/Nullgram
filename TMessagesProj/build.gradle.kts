@@ -44,7 +44,7 @@ dependencies {
     implementation("androidx.interpolator:interpolator:1.0.0")
     implementation("androidx.sharetarget:sharetarget:1.2.0-rc02")
 
-    compileOnly("org.checkerframework:checker-qual:3.22.0")
+    compileOnly("org.checkerframework:checker-qual:3.24.0")
     compileOnly("org.checkerframework:checker-compat-qual:2.5.5")
     implementation("com.google.firebase:firebase-messaging:23.0.6")
     implementation("com.google.firebase:firebase-config:21.1.1")
