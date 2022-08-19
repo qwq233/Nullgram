@@ -294,7 +294,7 @@ public class AboutLinkCell extends FrameLayout {
                 int lastLine = firstThreeLinesLayout.getLineCount() - 1;
                 float top = firstThreeLinesLayout.getLineTop(lastLine) + firstThreeLinesLayout.getTopPadding();
                 float x = firstThreeLinesLayout.getLineRight(lastLine) + (needSpace ? SPACE : 0),
-                      y = firstThreeLinesLayout.getLineBottom(lastLine) - firstThreeLinesLayout.getLineTop(lastLine) - firstThreeLinesLayout.getBottomPadding();
+                    y = firstThreeLinesLayout.getLineBottom(lastLine) - firstThreeLinesLayout.getLineTop(lastLine) - firstThreeLinesLayout.getBottomPadding();
                 float t = easeInOutCubic(1f - (float) Math.pow(expandT, 0.25f));
                 if (nextLinesLayouts != null) {
                     for (int line = 0; line < nextLinesLayouts.length; ++line) {
@@ -406,7 +406,7 @@ public class AboutLinkCell extends FrameLayout {
                         onLinkClick(pressedLinkFinal);
                     } else if (which == 1) {
                         AndroidUtilities.addToClipboard(url);
-                        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S) {
+                        if (AndroidUtilities.shouldShowClipboardToast()) {
                             if (url.startsWith("@")) {
                                 BulletinFactory.of(parentFragment).createSimpleBulletin(R.raw.copy, LocaleController.getString("UsernameCopied", R.string.UsernameCopied)).show();
                             } else if (url.startsWith("#") || url.startsWith("$")) {
@@ -459,7 +459,7 @@ public class AboutLinkCell extends FrameLayout {
         }
     }
 
-    private void onLinkClick(ClickableSpan pressedLink) {
+    public void onLinkClick(ClickableSpan pressedLink) {
         if (pressedLink instanceof URLSpanNoUnderline) {
             String url = ((URLSpanNoUnderline) pressedLink).getURL();
             if (url.startsWith("@") || url.startsWith("#") || url.startsWith("/")) {
@@ -506,7 +506,7 @@ public class AboutLinkCell extends FrameLayout {
         private void step(float delta) {
             final float acceleration = (
                 -tension * 0.000001f * (position - 1f) + // spring force
-                -friction * 0.001f * velocity // damping force
+                    -friction * 0.001f * velocity // damping force
             ) / mass; // pt/ms^2
 
             velocity = velocity + acceleration * delta; // pt/ms
@@ -525,7 +525,7 @@ public class AboutLinkCell extends FrameLayout {
         }
 
         float fromValue = expandT,
-              toValue   = value ? 1f : 0f;
+            toValue = value ? 1f : 0f;
         if (animated) {
             if (toValue > 0) {
                 didExtend();
@@ -624,10 +624,10 @@ public class AboutLinkCell extends FrameLayout {
     private StaticLayout makeTextLayout(CharSequence string, int width) {
         if (Build.VERSION.SDK_INT >= 24) {
             return StaticLayout.Builder.obtain(string, 0, string.length(), Theme.profile_aboutTextPaint, width)
-                    .setBreakStrategy(StaticLayout.BREAK_STRATEGY_HIGH_QUALITY)
-                    .setHyphenationFrequency(StaticLayout.HYPHENATION_FREQUENCY_NONE)
-                    .setAlignment(LocaleController.isRTL ? StaticLayoutEx.ALIGN_RIGHT() : StaticLayoutEx.ALIGN_LEFT())
-                    .build();
+                .setBreakStrategy(StaticLayout.BREAK_STRATEGY_HIGH_QUALITY)
+                .setHyphenationFrequency(StaticLayout.HYPHENATION_FREQUENCY_NONE)
+                .setAlignment(LocaleController.isRTL ? StaticLayoutEx.ALIGN_RIGHT() : StaticLayoutEx.ALIGN_LEFT())
+                .build();
         } else {
             return new StaticLayout(string, Theme.profile_aboutTextPaint, width, Layout.Alignment.ALIGN_NORMAL, 1.0f, 0.0f, false);
         }
@@ -682,11 +682,11 @@ public class AboutLinkCell extends FrameLayout {
             if (shouldExpand && firstThreeLinesLayout != null) {
                 setShowMoreMarginBottom(
                     fromHeight()
-                    -AndroidUtilities.dp(8)
-                    -firstThreeLinesLayout.getLineBottom(firstThreeLinesLayout.getLineCount() - 1)
-                    -showMoreTextBackgroundView.getPaddingBottom()
-                    -showMoreTextView.getPaddingBottom()
-                    -(showMoreTextView.getLayout() == null ? 0 : showMoreTextView.getLayout().getHeight() - showMoreTextView.getLayout().getLineBottom(showMoreTextView.getLineCount() - 1))
+                        - AndroidUtilities.dp(8)
+                        - firstThreeLinesLayout.getLineBottom(firstThreeLinesLayout.getLineCount() - 1)
+                        - showMoreTextBackgroundView.getPaddingBottom()
+                        - showMoreTextView.getPaddingBottom()
+                        - (showMoreTextView.getLayout() == null ? 0 : showMoreTextView.getLayout().getHeight() - showMoreTextView.getLayout().getLineBottom(showMoreTextView.getLineCount() - 1))
                 );
             }
         }

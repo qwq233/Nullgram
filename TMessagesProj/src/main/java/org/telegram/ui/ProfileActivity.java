@@ -4312,6 +4312,10 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
             if (position == bioRow && (userInfo == null || TextUtils.isEmpty(userInfo.about))) {
                 return false;
             }
+            if (position == bioRow && UserObject.isUserSelf(userInfo.user)) {
+                presentFragment(new ChangeBioActivity());
+                return false;
+            }
             if (view instanceof AboutLinkCell && ((AboutLinkCell) view).onClick()) {
                 return false;
             }
@@ -8093,7 +8097,7 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
                         while (text.contains("\n\n\n")) {
                             text = text.replace("\n\n\n", "\n\n");
                         }
-                        aboutLinkCell.setText(text, ChatObject.isChannel(currentChat) && !currentChat.megagroup);
+                        aboutLinkCell.setText(text, true);
                     } else if (position == bioRow) {
                         String value;
                         if (userInfo == null || !TextUtils.isEmpty(userInfo.about)) {
@@ -8104,6 +8108,7 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
                             aboutLinkCell.setTextAndValue(LocaleController.getString("UserBio", R.string.UserBio), LocaleController.getString("UserBioDetail", R.string.UserBioDetail), false);
                             currentBio = null;
                         }
+                        aboutLinkCell.setMoreButtonDisabled(true);
                     }
                     if (position == bioRow) {
                         aboutLinkCell.setOnClickListener(e -> {
@@ -8114,7 +8119,6 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
                     } else {
                         aboutLinkCell.setOnClickListener(e -> processOnClickOrPress(position, aboutLinkCell));
                     }
-                    aboutLinkCell.setOnClickListener(e -> processOnClickOrPress(position, aboutLinkCell));
                     break;
                 case VIEW_TYPE_PREMIUM_TEXT_CELL:
                 case VIEW_TYPE_TEXT:
