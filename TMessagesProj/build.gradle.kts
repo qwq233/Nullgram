@@ -145,6 +145,10 @@ android {
             isShrinkResources = true
             proguardFiles(File(projectDir, "proguard-rules.pro"))
         }
+
+        getByName("debug") {
+            signingConfig = signingConfigs.getByName("release")
+        }
     }
 
     defaultConfig {
