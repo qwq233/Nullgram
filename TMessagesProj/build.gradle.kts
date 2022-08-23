@@ -74,7 +74,7 @@ dependencies {
     // https://mvnrepository.com/artifact/org.jetbrains.kotlin/kotlin-stdlib-common
     implementation("org.jetbrains.kotlin:kotlin-stdlib-common:${Version.kotlin}")
     implementation("org.jetbrains.kotlin:kotlin-stdlib:${Version.kotlin}")
-    implementation("org.osmdroid:osmdroid-android:6.1.13")
+    implementation("org.osmdroid:osmdroid-android:6.1.14")
     implementation("com.android.billingclient:billing:5.0.0")
 }
 
