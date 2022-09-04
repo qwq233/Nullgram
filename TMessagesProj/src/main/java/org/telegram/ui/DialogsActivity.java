@@ -1583,6 +1583,17 @@ public class DialogsActivity extends BaseFragment implements NotificationCenter.
                                 }
                                 ((DialogCell) view).startOutAnimation();
                                 parentPage.archivePullViewState = ARCHIVE_ITEM_STATE_SHOWED;
+
+                                if (ConfigManager.getBooleanOrFalse(Defines.openArchiveOnPull)) {
+                                    AndroidUtilities.runOnUIThread(() -> {
+                                        Bundle args = new Bundle();
+                                        args.putInt("folderId", 1);
+                                        args.putBoolean("onlySelect", onlySelect);
+                                        DialogsActivity dialogsActivity = new DialogsActivity(args);
+                                        dialogsActivity.setDelegate(delegate);
+                                        presentFragment(dialogsActivity, onlySelect);
+                                    }, 200);
+                                }
                             }
                         }
 
