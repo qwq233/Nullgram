@@ -210,4 +210,5 @@
     <string name="Channel">频道</string>
     <string name="SwitchToAnonymously">切换到匿名模式</string>
     <string name="SwitchToPersonalAccount">切换到个人账户</string>
+    <string name="openArchiveOnPull">Open Archive On Pull</string>
 </resources>
