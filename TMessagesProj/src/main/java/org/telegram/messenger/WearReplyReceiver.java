@@ -67,7 +67,7 @@ public class WearReplyReceiver extends BroadcastReceiver {
     }
 
     private void sendMessage(AccountInstance accountInstance, CharSequence text, long dialog_id, int max_id) {
-        accountInstance.getSendMessagesHelper().sendMessage(text.toString(), dialog_id, null, null, null, true, null, null, null, true, 0, null);
+        accountInstance.getSendMessagesHelper().sendMessage(text.toString(), dialog_id, null, null, null, true, null, null, null, true, 0, null, false);
         accountInstance.getMessagesController().markDialogAsRead(dialog_id, max_id, max_id, 0, false, 0, 0, true, 0);
     }
 }

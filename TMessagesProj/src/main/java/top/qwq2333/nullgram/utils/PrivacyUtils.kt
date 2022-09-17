@@ -303,7 +303,7 @@ object PrivacyUtils {
 
                 UIUtil.runOnUIThread(Runnable {
 
-                    ctx.presentFragment(TwoStepVerificationActivity(account, password))
+                    ctx.presentFragment(TwoStepVerificationActivity(account))
 
                 })
 
