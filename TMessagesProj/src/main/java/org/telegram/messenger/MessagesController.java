@@ -13671,7 +13671,6 @@ public class MessagesController extends BaseController implements NotificationCe
                     updatesOnMainThread = new ArrayList<>();
                 }
                 updatesOnMainThread.add(baseUpdate);
-                Log.d("kek: TL_updateMoveStickerSetToTop");
             } else if (baseUpdate instanceof TLRPC.TL_updateSavedGifs) {
                 if (updatesOnMainThread == null) {
                     updatesOnMainThread = new ArrayList<>();
@@ -14952,7 +14951,7 @@ public class MessagesController extends BaseController implements NotificationCe
                         }
                     }
                 }
-                getNotificationsController().removeDeletedMessagesFromNotifications(deletedMessagesFinal);
+                getNotificationsController().removeDeletedMessagesFromNotifications(deletedMessagesFinal, false);
             }
             if (scheduledDeletedMessagesFinal != null) {
                 for (int a = 0, size = scheduledDeletedMessagesFinal.size(); a < size; a++) {

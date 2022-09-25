@@ -129,6 +129,7 @@ import top.qwq2333.nullgram.utils.Defines;
 
 public class AlertsCreator {
     public final static int PERMISSIONS_REQUEST_TOP_ICON_SIZE = 72;
+    public final static int NEW_DENY_DIALOG_TOP_ICON_SIZE = 52;
 
     public static Dialog createForgotPasscodeDialog(Context ctx) {
         return new AlertDialog.Builder(ctx)
