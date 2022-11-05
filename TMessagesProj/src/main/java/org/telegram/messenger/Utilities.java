@@ -22,6 +22,7 @@ import java.math.BigInteger;
 import java.nio.ByteBuffer;
 import java.security.MessageDigest;
 import java.security.SecureRandom;
+import java.util.HashMap;
 import java.util.Random;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -130,14 +131,11 @@ public class Utilities {
 //                val = parseInt(str);
                 val = Integer.parseInt(str);
             }
-//            Matcher matcher = pattern.matcher(value);
-//            if (matcher.find()) {
-//                String num = matcher.group(0);
-//                val = Integer.parseInt(num);
-//            }
-        } catch (Exception ignore) {}
+        } catch (Exception ignore) {
+        }
         return val;
     }
+
     private static int parseInt(final String s) {
         int num = 0;
         boolean negative = true;
@@ -463,5 +461,13 @@ public class Utilities {
 
     public static interface Callback<T> {
         public void run(T arg);
+    }
+
+    public static <Key, Value> Value getOrDefault(HashMap<Key, Value> map, Key key, Value defaultValue) {
+        Value v = map.get(key);
+        if (v == null) {
+            return defaultValue;
+        }
+        return v;
     }
 }

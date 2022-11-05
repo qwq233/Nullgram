@@ -20,6 +20,12 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import org.telegram.PhoneFormat.PhoneFormat;
 import org.telegram.messenger.AndroidUtilities;
+import org.telegram.messenger.ChatObject;
+import org.telegram.messenger.LocaleController;
+import org.telegram.messenger.R;
+import org.telegram.messenger.UserObject;
+import org.telegram.tgnet.TLObject;
+import org.telegram.tgnet.TLRPC;
 import org.telegram.messenger.ContactsController;
 import org.telegram.messenger.FileLog;
 import org.telegram.messenger.LocaleController;
@@ -320,7 +326,7 @@ public class SearchAdapter extends RecyclerListView.SelectionAdapter {
                         id = ((TLRPC.User) object).id;
                         self = ((TLRPC.User) object).self;
                     } else if (object instanceof TLRPC.Chat) {
-                        un = ((TLRPC.Chat) object).username;
+                        un = ChatObject.getPublicUsername((TLRPC.Chat) object);
                         id = ((TLRPC.Chat) object).id;
                     }
 

@@ -246,6 +246,9 @@ public class MentionsContainerView extends BlurredFrameLayout {
 
     public void onPanTransitionEnd() {}
 
+    protected void onScrolled(boolean atTop, boolean atBottom) {
+
+    }
 
     public MentionsListView getListView() {
         return listView;
@@ -527,6 +530,8 @@ public class MentionsContainerView extends BlurredFrameLayout {
                     if (visibleItemCount > 0 && lastVisibleItem > adapter.getLastItemCount() - 5) {
                         adapter.searchForContextBotForNextOffset();
                     }
+
+                    MentionsContainerView.this.onScrolled(!canScrollVertically(-1), !canScrollVertically(1));
                 }
             });
             addItemDecoration(new RecyclerView.ItemDecoration() {

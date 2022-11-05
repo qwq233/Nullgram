@@ -9,6 +9,8 @@
 package org.telegram.messenger;
 
 import org.telegram.messenger.time.FastDateFormat;
+import org.telegram.messenger.video.MediaCodecVideoConvertor;
+import org.telegram.ui.LaunchActivity;
 
 import java.io.File;
 import java.io.OutputStreamWriter;
@@ -132,6 +134,26 @@ public class FileLog {
     @Deprecated
     public static void e(final Throwable e, boolean logToAppCenter) {
         Log.e(e);
+        if (needSent(e) && logToAppCenter) {
+            AndroidUtilities.appCenterLog(e);
+        }
+    }
+
+    public static void fatal(final Throwable e) {
+        fatal(e, true);
+    }
+
+    public static void fatal(final Throwable e, boolean logToAppCenter) {
+        if (needSent(e) && logToAppCenter) {
+            AndroidUtilities.appCenterLog(e);
+        }
+    }
+
+    private static boolean needSent(Throwable e) {
+        if (e instanceof InterruptedException || e instanceof MediaCodecVideoConvertor.ConversionCanceledException || e instanceof IgnoreSentException) {
+            return false;
+        }
+        return true;
     }
 
     /**
@@ -156,5 +178,13 @@ public class FileLog {
      */
     @Deprecated
     public static void cleanupLogs() {
+    }
+
+    public static class IgnoreSentException extends Exception{
+
+        public IgnoreSentException(String e) {
+            super(e);
+        }
+
     }
 }

@@ -60,6 +60,7 @@ import com.google.zxing.qrcode.decoder.ErrorCorrectionLevel;
 
 import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.ApplicationLoader;
+import org.telegram.messenger.ChatObject;
 import org.telegram.messenger.ChatThemeController;
 import org.telegram.messenger.ImageLocation;
 import org.telegram.messenger.LocaleController;
@@ -282,7 +283,7 @@ public class QrActivity extends BaseFragment {
         } else if (chatId != 0) {
             TLRPC.Chat chat = getMessagesController().getChat(chatId);
             if (chat != null) {
-                username = chat.username;
+                username = ChatObject.getPublicUsername(chat);
                 avatarDrawable = new AvatarDrawable(chat);
                 imageLocationSmall = ImageLocation.getForChat(chat, ImageLocation.TYPE_SMALL);
                 imageLocation = ImageLocation.getForChat(chat, ImageLocation.TYPE_BIG);
@@ -501,7 +502,7 @@ public class QrActivity extends BaseFragment {
     }
 
     @Override
-    protected AnimatorSet onCustomTransitionAnimation(boolean isOpen, Runnable callback) {
+    public AnimatorSet onCustomTransitionAnimation(boolean isOpen, Runnable callback) {
         if (isOpen) {
             fragmentView.setAlpha(0f);
             fragmentView.setTranslationX(AndroidUtilities.dp(48));

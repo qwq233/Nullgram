@@ -151,7 +151,7 @@ public class GroupVoipInviteAlert extends UsersAlertBase {
 
         rowCount = 0;
         emptyRow = rowCount++;
-        if (!TextUtils.isEmpty(currentChat.username) || ChatObject.canUserDoAdminAction(currentChat, ChatObject.ACTION_INVITE)) {
+        if (ChatObject.isPublic(currentChat) || ChatObject.canUserDoAdminAction(currentChat, ChatObject.ACTION_INVITE)) {
             addNewRow = rowCount++;
         }
         if (!loadingUsers || firstLoaded) {
@@ -487,7 +487,7 @@ public class GroupVoipInviteAlert extends UsersAlertBase {
                 emptyView.showProgress(true, true);
                 listView.setAnimateEmptyView(false, 0);
                 notifyDataSetChanged();
-                listView.setAnimateEmptyView(true, 0);
+                listView.setAnimateEmptyView(true, RecyclerListView.EMPTY_VIEW_ANIMATION_TYPE_ALPHA);
                 searchInProgress = true;
                 int searchId = ++lastSearchId;
                 AndroidUtilities.runOnUIThread(searchRunnable = () -> {

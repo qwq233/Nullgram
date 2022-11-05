@@ -93,7 +93,7 @@ public class DialogOrContactPickerActivity extends BaseFragment {
             if (dids.isEmpty()) {
                 return;
             }
-            long did = dids.get(0);
+            long did = dids.get(0).dialogId;
             if (!DialogObject.isUserDialog(did)) {
                 return;
             }

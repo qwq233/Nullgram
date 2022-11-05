@@ -1150,7 +1150,7 @@ public class MentionsAdapter extends RecyclerListView.SelectionAdapter implement
                         }
                         firstName = chat.title;
                         lastName = null;
-                        username = chat.username;
+                        username = ChatObject.getPublicUsername(chat);
                         object = chat;
                         id = -chat.id;
                     } else {
