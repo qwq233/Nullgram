@@ -503,11 +503,6 @@ public class NotificationCenter {
 
     @UiThread
     public void postNotificationNameInternal(int id, boolean allowDuringAnimation, Object... args) {
-        if (BuildVars.DEBUG_VERSION) {
-            if (Thread.currentThread() != ApplicationLoader.applicationHandler.getLooper().getThread()) {
-                throw new RuntimeException("postNotificationName allowed only from MAIN thread");
-            }
-        }
         if (!allowDuringAnimation && isAnimationInProgress()) {
             DelayedPost delayedPost = new DelayedPost(id, args);
             delayedPosts.add(delayedPost);
