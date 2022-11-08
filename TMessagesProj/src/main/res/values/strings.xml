@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="AppName">Nullgram</string>
-    <string name="AppNameBeta">Nullgram Beta</string>
+    <string name="AppName">Kathgram</string>
+    <string name="AppNameBeta">Kathgram Beta</string>
     <string name="LanguageName">English</string>
     <string name="English">English</string>
     <string name="LanguageNameInEnglish">English</string>
@@ -37,9 +37,9 @@
     <string name="SentAppCodeWithPhone">We\'ve sent the code to the **Telegram** app for %1$s on your other device.</string>
     <string name="SentAppCodeTitle">Check your Telegram messages</string>
     <string name="SentSmsCodeTitle">Enter code</string>
-    <string name="SentCallCode">We\'re calling your phone **%1$s**.\n\nDon\'t accept the call, Nullgram will process everything automatically.</string>
+    <string name="SentCallCode">We\'re calling your phone **%1$s**.\n\nDon\'t accept the call, Kathgram will process everything automatically.</string>
     <string name="SentCallOnly">Calling your phone **%1$s** to dictate the code.</string>
-    <string name="CallText">Nullgram will call you in %1$d:%2$02d</string>
+    <string name="CallText">Kathgram will call you in %1$d:%2$02d</string>
     <string name="SmsText">Sending you an SMS in %1$d:%2$02d</string>
     <string name="Calling">Calling you...</string>
     <string name="SendingSms">Sending SMS...</string>
@@ -49,7 +49,7 @@
     <string name="DidNotGetTheCode">Didn\'t get the code?</string>
     <string name="DidNotGetTheCodeSms">Send the code as an SMS</string>
     <string name="CancelAccountReset">Cancel account reset</string>
-    <string name="CancelAccountResetInfo2">Somebody with access to **%1$s** has requested to delete your Nullgram account and reset your 2-Step Verification password.\n\nIf this wasn\'t you, please enter the code we\'ve just sent you via SMS. You can also cancel this by *changing your phone number*.</string>
+    <string name="CancelAccountResetInfo2">Somebody with access to **%1$s** has requested to delete your Kathgram account and reset your 2-Step Verification password.\n\nIf this wasn\'t you, please enter the code we\'ve just sent you via SMS. You can also cancel this by *changing your phone number*.</string>
     <string name="ResetAccount">Reset account</string>
     <string name="ResetAccountInfo">Since the account **%1$s** is active and protected by a password, we will delete it in 1 week for security purposes.\n\nYou can cancel this process at any time.</string>
     <string name="ResetAccountStatus">You\'ll be able to reset your account in:</string>
@@ -130,7 +130,7 @@
     <string name="PaymentFailed">Sorry, the payment was declined.</string>
     <string name="PaymentConnectionFailed">Unable to reach payment server. Please check your internet connection and try again.</string>
     <string name="PaymentWarning">Warning</string>
-    <string name="PaymentWarningText">Neither Nullgram, nor %1$s will have access to your credit card information. Credit card details will be handled only by the payment system, %2$s.\n\nPayments will go directly to the developer of %1$s. Nullgram cannot provide any guarantees, so proceed at your own risk. In case of problems, please contact the developer of %1$s or your bank.</string>
+    <string name="PaymentWarningText">Neither Kathgram, nor %1$s will have access to your credit card information. Credit card details will be handled only by the payment system, %2$s.\n\nPayments will go directly to the developer of %1$s. Nullgram cannot provide any guarantees, so proceed at your own risk. In case of problems, please contact the developer of %1$s or your bank.</string>
     <string name="PaymentPassword">Password &amp; Email</string>
     <string name="PaymentPasswordTitle">Password</string>
     <string name="PaymentPasswordEnter">Enter a password</string>
