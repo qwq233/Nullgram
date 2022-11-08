@@ -1,7 +1,7 @@
 name: Build CI
 
 on:
-  dispatch:
+  push:
     branches:
       - master
     paths-ignore:
