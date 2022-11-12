@@ -7,8 +7,8 @@ object Version {
     val JavaVersion = "11"
 
     @JvmStatic
-    val officialVersionName = "9.1.0"
+    val officialVersionName = "9.1.3"
 
     @JvmStatic
-    val isStable = true
+    val isStable = false
 }

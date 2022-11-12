@@ -44,6 +44,7 @@ import androidx.core.util.Consumer;
 import androidx.core.view.ViewCompat;
 import androidx.dynamicanimation.animation.DynamicAnimation;
 import androidx.dynamicanimation.animation.FloatPropertyCompat;
+import androidx.dynamicanimation.animation.FloatValueHolder;
 import androidx.dynamicanimation.animation.SpringAnimation;
 import androidx.dynamicanimation.animation.SpringForce;
 
@@ -77,6 +78,8 @@ public class Bulletin {
 
     public int tag;
     public int hash;
+    private View.OnLayoutChangeListener containerLayoutListener;
+    private SpringAnimation bottomOffsetSpring;
 
     public static Bulletin make(@NonNull FrameLayout containerLayout, @NonNull Layout contentLayout, int duration) {
         return new Bulletin(null, containerLayout, contentLayout, duration);
@@ -198,6 +201,33 @@ public class Bulletin {
             visibleBulletin = this;
             layout.onAttach(this);
 
+            containerLayout.addOnLayoutChangeListener(containerLayoutListener = (v, left, top1, right, bottom, oldLeft, oldTop, oldRight, oldBottom) -> {
+                if (!top) {
+                    int newOffset = currentDelegate != null ? currentDelegate.getBottomOffset(tag) : 0;
+                    if (currentBottomOffset != newOffset) {
+                        if (bottomOffsetSpring == null || !bottomOffsetSpring.isRunning()) {
+                            bottomOffsetSpring = new SpringAnimation(new FloatValueHolder(currentBottomOffset))
+                                    .setSpring(new SpringForce()
+                                            .setFinalPosition(newOffset)
+                                            .setStiffness(900f)
+                                            .setDampingRatio(SpringForce.DAMPING_RATIO_NO_BOUNCY));
+                            bottomOffsetSpring.addUpdateListener((animation, value, velocity) -> {
+                                currentBottomOffset = (int) value;
+                                updatePosition();
+                            });
+                            bottomOffsetSpring.addEndListener((animation, canceled, value, velocity) -> {
+                                if (bottomOffsetSpring == animation) {
+                                    bottomOffsetSpring = null;
+                                }
+                            });
+                        } else {
+                            bottomOffsetSpring.getSpring().setFinalPosition(newOffset);
+                        }
+                        bottomOffsetSpring.start();
+                    }
+                }
+            });
+
             layout.addOnLayoutChangeListener(new View.OnLayoutChangeListener() {
                 @Override
                 public void onLayoutChange(View v, int left, int t, int right, int bottom, int oldLeft, int oldTop, int oldRight, int oldBottom) {
@@ -205,7 +235,9 @@ public class Bulletin {
                     if (showing) {
                         layout.onShow();
                         currentDelegate = findDelegate(containerFragment, containerLayout);
-                        currentBottomOffset = currentDelegate != null ? currentDelegate.getBottomOffset(tag) : 0;
+                        if (bottomOffsetSpring == null || !bottomOffsetSpring.isRunning()) {
+                            currentBottomOffset = currentDelegate != null ? currentDelegate.getBottomOffset(tag) : 0;
+                        }
                         if (currentDelegate != null) {
                             currentDelegate.onShow(Bulletin.this);
                         }
@@ -314,6 +346,7 @@ public class Bulletin {
                         layout.onExitTransitionEnd();
                         layout.onHide();
                         containerLayout.removeView(parentLayout);
+                        containerLayout.removeOnLayoutChangeListener(containerLayoutListener);
                         layout.onDetach();
                     }, offset -> {
                         if (currentDelegate != null && !layout.top) {
@@ -332,7 +365,10 @@ public class Bulletin {
             layout.onExitTransitionEnd();
             layout.onHide();
             if (containerLayout != null) {
-                AndroidUtilities.runOnUIThread(() -> containerLayout.removeView(parentLayout));
+                AndroidUtilities.runOnUIThread(() -> {
+                    containerLayout.removeView(parentLayout);
+                    containerLayout.removeOnLayoutChangeListener(containerLayoutListener);
+                });
             }
             layout.onDetach();
         }
@@ -739,10 +775,17 @@ public class Bulletin {
                 if (top) {
                     translation -= delegate.getTopOffset(bulletin != null ? bulletin.tag : 0);
                 } else {
-                    translation += delegate.getBottomOffset(bulletin != null ? bulletin.tag : 0);
+                    translation += getBottomOffset();
                 }
             }
             setTranslationY(-translation + inOutOffset * (top ? -1 : 1));
+        }
+
+        public float getBottomOffset() {
+            if (bulletin != null && bulletin.bottomOffsetSpring != null && bulletin.bottomOffsetSpring.isRunning()) {
+                return bulletin.currentBottomOffset;
+            }
+            return delegate.getBottomOffset(bulletin != null ? bulletin.tag : 0);
         }
 
         public interface Callback {
@@ -919,7 +962,7 @@ public class Bulletin {
                         0,
                         delegate.getTopOffset(bulletin.tag) - getY(),
                         getMeasuredWidth(),
-                        ((View) getParent()).getMeasuredHeight() - delegate.getBottomOffset(bulletin.tag) - getY()
+                        ((View) getParent()).getMeasuredHeight() - getBottomOffset() - getY()
                 );
                 background.draw(canvas);
                 super.dispatchDraw(canvas);
@@ -1150,7 +1193,7 @@ public class Bulletin {
     public static class LottieLayout extends ButtonLayout {
 
         public RLottieImageView imageView;
-        public TextView textView;
+        public LinkSpanDrawable.LinksTextView textView;
 
         private int textColor;
 
@@ -1162,6 +1205,7 @@ public class Bulletin {
             addView(imageView, LayoutHelper.createFrameRelatively(56, 48, Gravity.START | Gravity.CENTER_VERTICAL));
 
             textView = new LinkSpanDrawable.LinksTextView(context);
+            textView.setDisablePaddingsOffset(true);
             textView.setSingleLine();
             textView.setTypeface(Typeface.SANS_SERIF);
             textView.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 15);
@@ -1227,7 +1271,7 @@ public class Bulletin {
             super(context, resourcesProvider);
 
             avatarsImageView = new AvatarsImageView(context, false);
-            avatarsImageView.setStyle(AvatarsDarawable.STYLE_MESSAGE_SEEN);
+            avatarsImageView.setStyle(AvatarsDrawable.STYLE_MESSAGE_SEEN);
             addView(avatarsImageView, LayoutHelper.createFrameRelatively(24 + 12 + 12 + 8, 48, Gravity.START | Gravity.CENTER_VERTICAL, 12, 0, 0, 0));
 
             textView = new LinkSpanDrawable.LinksTextView(context);
@@ -1449,7 +1493,7 @@ public class Bulletin {
             rect.set(AndroidUtilities.dp(1), AndroidUtilities.dp(1), getMeasuredWidth() - AndroidUtilities.dp(1), getMeasuredHeight() - AndroidUtilities.dp(1));
             if (prevSeconds != newSeconds) {
                 prevSeconds = newSeconds;
-                timeLeftString = String.format("%d", Math.max(1, newSeconds));
+                timeLeftString = String.format("%d", Math.max(0, newSeconds));
                 if (timeLayout != null) {
                     timeLayoutOut = timeLayout;
                     timeReplaceProgress = 0;
@@ -1492,7 +1536,7 @@ public class Bulletin {
                 canvas.restore();
             }
 
-            canvas.drawArc(rect, -90, -360 * (timeLeft / 5000.0f), false, progressPaint);
+            canvas.drawArc(rect, -90, -360 * (Math.max(0, timeLeft) / 5000.0f), false, progressPaint);
 
             if (lastUpdateTime != 0) {
                 long newTime = System.currentTimeMillis();

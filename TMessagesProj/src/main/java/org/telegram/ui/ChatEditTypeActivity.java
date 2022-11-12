@@ -19,8 +19,13 @@ import android.graphics.drawable.Drawable;
 import android.os.Vibrator;
 import android.text.Editable;
 import android.text.InputType;
+import android.text.SpannableStringBuilder;
+import android.text.Spanned;
+import android.text.TextPaint;
 import android.text.TextUtils;
 import android.text.TextWatcher;
+import android.text.style.ClickableSpan;
+import android.text.style.ForegroundColorSpan;
 import android.util.TypedValue;
 import android.view.MotionEvent;
 import android.view.View;
@@ -41,6 +46,7 @@ import org.telegram.messenger.LocaleController;
 import org.telegram.messenger.MessagesController;
 import org.telegram.messenger.NotificationCenter;
 import org.telegram.messenger.R;
+import org.telegram.messenger.browser.Browser;
 import org.telegram.tgnet.ConnectionsManager;
 import org.telegram.tgnet.TLRPC;
 import org.telegram.ui.ActionBar.ActionBar;
@@ -69,6 +75,7 @@ import org.telegram.ui.Components.LayoutHelper;
 import org.telegram.ui.Components.LinkActionView;
 import org.telegram.ui.Components.Premium.LimitReachedBottomSheet;
 import org.telegram.ui.Components.RecyclerListView;
+import org.telegram.ui.Components.TypefaceSpan;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -109,6 +116,7 @@ public class ChatEditTypeActivity extends BaseFragment implements NotificationCe
     private ArrayList<TLRPC.TL_username> editableUsernames = new ArrayList<>();
     private ArrayList<TLRPC.TL_username> usernames = new ArrayList<>();
     private ChangeUsernameActivity.UsernameCell editableUsernameCell;
+    private ArrayList<String> loadingUsernames = new ArrayList<>();
 
     // Saving content restrictions block
     private LinearLayout saveContainer;
@@ -476,7 +484,43 @@ public class ChatEditTypeActivity extends BaseFragment implements NotificationCe
         permanentLinkView.setUsers(0, null);
         privateContainer.addView(permanentLinkView);
 
-        checkTextView = new TextInfoPrivacyCell(context);
+        checkTextView = new TextInfoPrivacyCell(context) {
+            @Override
+            public void setText(CharSequence text) {
+                if (text != null) {
+                    SpannableStringBuilder tagsString = AndroidUtilities.replaceTags(text.toString());
+                    int index = tagsString.toString().indexOf('\n');
+                    if (index >= 0) {
+                        tagsString.replace(index, index + 1, " ");
+                        tagsString.setSpan(new ForegroundColorSpan(getThemedColor(Theme.key_windowBackgroundWhiteRedText4)), 0, index, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+                    }
+                    TypefaceSpan[] spans = tagsString.getSpans(0, tagsString.length(), TypefaceSpan.class);
+                    final String username = usernameTextView == null || usernameTextView.getText() == null ? "" : usernameTextView.getText().toString();
+                    for (int i = 0; i < spans.length; ++i) {
+                        tagsString.setSpan(
+                            new ClickableSpan() {
+                                @Override
+                                public void onClick(@NonNull View view) {
+                                    Browser.openUrl(getContext(), "https://fragment.com/username/" + username);
+                                }
+
+                                @Override
+                                public void updateDrawState(@NonNull TextPaint ds) {
+                                    super.updateDrawState(ds);
+                                    ds.setUnderlineText(false);
+                                }
+                            },
+                            tagsString.getSpanStart(spans[i]),
+                            tagsString.getSpanEnd(spans[i]),
+                            Spanned.SPAN_EXCLUSIVE_EXCLUSIVE
+                        );
+                        tagsString.removeSpan(spans[i]);
+                    }
+                    text = tagsString;
+                }
+                super.setText(text);
+            }
+        };
         checkTextView.setBackgroundDrawable(Theme.getThemedDrawable(context, R.drawable.greydivider_bottom, Theme.key_windowBackgroundGrayShadow));
         checkTextView.setBottomPadding(6);
         linearLayout.addView(checkTextView, LayoutHelper.createLinear(LayoutHelper.WRAP_CONTENT, LayoutHelper.WRAP_CONTENT));
@@ -699,32 +743,35 @@ public class ChatEditTypeActivity extends BaseFragment implements NotificationCe
                                     req.channel = inputChannel;
                                     req.username = username.username;
                                     final boolean wasActive = username.active;
-                                    req.active = (username.active = !username.active);
+                                    req.active = !username.active;
                                     getConnectionsManager().sendRequest(req, (res, err) -> {
-                                        if (res instanceof TLRPC.TL_boolTrue) {
-
-                                        } else if (err != null && "USERNAMES_ACTIVE_TOO_MUCH".equals(err.text)) {
-                                            AndroidUtilities.runOnUIThread(() -> {
-                                                new AlertDialog.Builder(getContext(), resourcesProvider)
-                                                    .setTitle(LocaleController.getString("UsernameActivateErrorTitle", R.string.UsernameActivateErrorTitle))
-                                                    .setMessage(LocaleController.getString("UsernameActivateErrorMessage", R.string.UsernameActivateErrorMessage))
-                                                    .setPositiveButton(LocaleController.getString("OK", R.string.OK), (d, v) -> {
-                                                        toggleUsername(username, wasActive, true);
-                                                        checkDoneButton();
-                                                    })
-                                                    .show();
-                                            });
-                                        } else {
-                                            AndroidUtilities.runOnUIThread(() -> {
+                                        AndroidUtilities.runOnUIThread(() -> {
+                                            loadingUsernames.remove(req.username);
+                                            if (res instanceof TLRPC.TL_boolTrue) {
+                                                toggleUsername(username, !wasActive);
+                                            } else if (err != null && "USERNAMES_ACTIVE_TOO_MUCH".equals(err.text)) {
+                                                AndroidUtilities.runOnUIThread(() -> {
+                                                    new AlertDialog.Builder(getContext(), resourcesProvider)
+                                                        .setTitle(LocaleController.getString("UsernameActivateErrorTitle", R.string.UsernameActivateErrorTitle))
+                                                        .setMessage(LocaleController.getString("UsernameActivateErrorMessage", R.string.UsernameActivateErrorMessage))
+                                                        .setPositiveButton(LocaleController.getString("OK", R.string.OK), (d, v) -> {
+                                                            toggleUsername(username, wasActive, true);
+                                                            checkDoneButton();
+                                                        })
+                                                        .show();
+                                                });
+                                            } else {
                                                 toggleUsername(username, wasActive, true);
                                                 checkDoneButton();
-                                            });
-                                        }
-                                    }, ConnectionsManager.RequestFlagDoNotWaitFloodWait);
+                                            }
+                                            getMessagesController().updateUsernameActiveness(currentChat, username.username, username.active);
+                                        });
+                                    });
+                                    loadingUsernames.add(username.username);
+                                    ((ChangeUsernameActivity.UsernameCell) view).setLoading(true);
                                 }
-                                ((ChangeUsernameActivity.UsernameCell) view).update();
                                 checkDoneButton();
-                                toggleUsername(username, username.active);
+//                                toggleUsername(username, username.active);
                             })
                             .setNegativeButton(LocaleController.getString("Cancel", R.string.Cancel), (di, e) -> {
                                 di.dismiss();
@@ -760,28 +807,34 @@ public class ChatEditTypeActivity extends BaseFragment implements NotificationCe
                 return;
             }
             TLRPC.TL_username username = usernames.get(position - 1);
+            if (username == null) {
+                return;
+            }
 
             int toIndex = -1;
-            if (username.active = newActive) {
-                int firstInactive = -1;
-                for (int i = 0; i < usernames.size(); ++i) {
-                    if (!usernames.get(i).active) {
-                        firstInactive = i;
-                        break;
+            boolean changed = username.active != newActive;
+            if (changed) {
+                if (username.active = newActive) {
+                    int firstInactive = -1;
+                    for (int i = 0; i < usernames.size(); ++i) {
+                        if (!usernames.get(i).active) {
+                            firstInactive = i;
+                            break;
+                        }
                     }
-                }
-                if (firstInactive >= 0) {
-                    toIndex = 1 + Math.max(0, firstInactive - 1);
-                }
-            } else {
-                int lastActive = -1;
-                for (int i = 0; i < usernames.size(); ++i) {
-                    if (usernames.get(i).active) {
-                        lastActive = i;
+                    if (firstInactive >= 0) {
+                        toIndex = 1 + Math.max(0, firstInactive - 1);
                     }
-                }
-                if (lastActive >= 0) {
-                    toIndex = 1 + Math.min(usernames.size() - 1, lastActive + 1);
+                } else {
+                    int lastActive = -1;
+                    for (int i = 0; i < usernames.size(); ++i) {
+                        if (usernames.get(i).active) {
+                            lastActive = i;
+                        }
+                    }
+                    if (lastActive >= 0) {
+                        toIndex = 1 + Math.min(usernames.size() - 1, lastActive + 1);
+                    }
                 }
             }
 
@@ -792,6 +845,7 @@ public class ChatEditTypeActivity extends BaseFragment implements NotificationCe
                         AndroidUtilities.shakeView(child);
                     }
                     if (child instanceof ChangeUsernameActivity.UsernameCell) {
+                        ((ChangeUsernameActivity.UsernameCell) child).setLoading(loadingUsernames.contains(username.username));
                         ((ChangeUsernameActivity.UsernameCell) child).update();
                     }
                     break;
@@ -1346,7 +1400,7 @@ public class ChatEditTypeActivity extends BaseFragment implements NotificationCe
                 }
             }
         }
-        if (name == null || name.length() < 5) {
+        if (name == null || name.length() < 4) {
             if (isChannel) {
                 checkTextView.setText(LocaleController.getString("LinkInvalidShort", R.string.LinkInvalidShort));
             } else {
@@ -1376,13 +1430,23 @@ public class ChatEditTypeActivity extends BaseFragment implements NotificationCe
                         checkTextView.setTextColor(Theme.key_windowBackgroundWhiteGreenText);
                         lastNameAvailable = true;
                     } else {
-                        if (error != null && error.text.equals("CHANNELS_ADMIN_PUBLIC_TOO_MUCH")) {
+                        if (error != null && "USERNAME_INVALID".equals(error.text) && req.username.length() == 4) {
+                            checkTextView.setText(LocaleController.getString("UsernameInvalidShort", R.string.UsernameInvalidShort));
+                            checkTextView.setTextColor(Theme.getColor(Theme.key_windowBackgroundWhiteRedText4));
+                        } else if (error != null && "USERNAME_PURCHASE_AVAILABLE".equals(error.text)) {
+                            if (req.username.length() == 4) {
+                                checkTextView.setText(LocaleController.getString("UsernameInvalidShortPurchase", R.string.UsernameInvalidShortPurchase));
+                            } else {
+                                checkTextView.setText(LocaleController.getString("UsernameInUsePurchase", R.string.UsernameInUsePurchase));
+                            }
+                            checkTextView.setTextColor(Theme.getColor(Theme.key_windowBackgroundWhiteGrayText8));
+                        } else if (error != null && "CHANNELS_ADMIN_PUBLIC_TOO_MUCH".equals(error.text)) {
                             canCreatePublic = false;
                             showPremiumIncreaseLimitDialog();
                         } else {
                             checkTextView.setText(LocaleController.getString("LinkInUse", R.string.LinkInUse));
+                            checkTextView.setTextColor(Theme.key_windowBackgroundWhiteRedText4);
                         }
-                        checkTextView.setTextColor(Theme.key_windowBackgroundWhiteRedText4);
                         lastNameAvailable = false;
                     }
                 }

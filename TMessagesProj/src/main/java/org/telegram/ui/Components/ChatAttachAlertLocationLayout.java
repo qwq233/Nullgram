@@ -104,10 +104,6 @@ import java.util.List;
 import kotlin.Unit;
 import top.qwq2333.nullgram.ui.BottomBuilder;
 
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.LinearSmoothScroller;
-import androidx.recyclerview.widget.RecyclerView;
-
 public class ChatAttachAlertLocationLayout extends ChatAttachAlert.AttachAlertLayout implements NotificationCenter.NotificationCenterDelegate {
 
     private ImageView locationButton;
@@ -1350,7 +1346,9 @@ public class ChatAttachAlertLocationLayout extends ChatAttachAlert.AttachAlertLa
         attributionOverlay.bringToFront();
         if (checkGpsEnabled && getParentActivity() != null) {
             checkGpsEnabled = false;
-            if (!getParentActivity().getPackageManager().hasSystemFeature(PackageManager.FEATURE_LOCATION_GPS)) {
+            Activity parentActivity;
+            PackageManager packageManager;
+            if ((parentActivity = getParentActivity()) != null && (packageManager = parentActivity.getPackageManager()) != null && !packageManager.hasSystemFeature(PackageManager.FEATURE_LOCATION_GPS)) {
                 return;
             }
             try {
@@ -1520,7 +1518,7 @@ public class ChatAttachAlertLocationLayout extends ChatAttachAlert.AttachAlertLa
 
             if (locationDenied && isTypeSend()) {
 //                adapter.setOverScrollHeight(overScrollHeight + top);
-//                // TODO(dkaraush): fix ripple effect on buttons
+//                // TODO: fix ripple effect on buttons
                 final int count = adapter.getItemCount();
                 for (int i = 1; i < count; ++i) {
                     holder = listView.findViewHolderForAdapterPosition(i);
