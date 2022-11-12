@@ -5,7 +5,7 @@
     <string name="NullSettings">Ajustes de Nullgram</string>
     <string name="OfficialChannel">Canal oficial</string>
     <string name="Chat">Chat</string>
-    <string name="Experiment">Experimento</string>
+    <string name="Experiment">Experimental</string>
     <string name="OfficialSite">Sitio oficial</string>
     <string name="ViewSourceCode">Ver código fuente</string>
     <string name="Categories">Categorías</string>
@@ -38,13 +38,13 @@
     <string name="DeleteAllFromSelf">Borrar mis mensajes</string>
     <string name="DeleteAllFromSelfAlert">¡Advertencia! Esto **borrará todos los mensajes que hayas enviado** en este chat para **todos** los participantes.</string>
     <string name="MutualContactDescription">Este contacto es un contacto mutuo.</string>
-    <string name="MutualContact">Contacto en común</string>
+    <string name="MutualContact">Contacto mutuo</string>
     <string name="SelectBetween">Seleccionar entre</string>
     <string name="StickerSavedHint">Sticker guardado en la galería</string>
     <string name="MessageDetails">Detalles</string>
     <string name="formatterDay12HSec">h:mm:ss a</string>
     <string name="formatterDay24HSec">HH:mm:ss</string>
-    <string name="DeleteDownloadedFile">Eliminar el archivo descargado</string>
+    <string name="DeleteDownloadedFile">Eliminar archivo descargado</string>
     <string name="Repeat">Repetir</string>
     <string name="saveMessages">Guardar mensajes</string>
     <string name="ViewHistory">Ver historial</string>
@@ -58,7 +58,7 @@
     <string name="StorageResetInfo">Todos los datos de esta aplicación se eliminarán permanentemente (y primero intentaremos cerrar la sesión de todas las cuentas).</string>
     <string name="SendLogsNoSuchThings">Por favor usa logcat para hacer registros de forma manual</string>
     <string name="StorageReset">Limpiar almacenamiento</string>
-    <string name="codeSyntaxHighlight">Code syntax highlight</string>
+    <string name="codeSyntaxHighlight">Resaltar sintaxis de código</string>
     <string name="CreateMono">Crear monoespaciado</string>
     <string name="CreateMonoLanguage">Lenguaje de código</string>
     <string name="codeSyntaxHighlightDetails">Gracias a prismjs y Nekogram</string>
