@@ -28,7 +28,7 @@ if (serviceAccountCredentialsFile.isFile) {
 fun setupPlay(stable: Boolean) {
     val targetTrace = if (stable) "production" else "beta"
     play {
-        track.set(targetTrace);
+        track.set(targetTrace)
         defaultToAppBundles.set(true)
     }
 }
@@ -130,7 +130,7 @@ android {
     signingConfigs {
         create("release") {
             storeFile = File(projectDir, "config/release.keystore")
-            storePassword = (keystorePwd ?: System.getenv("KEYSTORE_PASS"));
+            storePassword = (keystorePwd ?: System.getenv("KEYSTORE_PASS"))
             keyAlias = (alias ?: System.getenv("ALIAS_NAME"))
             keyPassword = (pwd ?: System.getenv("ALIAS_PASS"))
             enableV3Signing = true
