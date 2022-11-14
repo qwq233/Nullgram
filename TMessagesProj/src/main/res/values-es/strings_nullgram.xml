@@ -137,7 +137,7 @@
     <string name="AvatarAsBackground">Foto del perfil como fondo</string>
     <string name="BlurAvatarBackground">Desenfocar foto de perfil</string>
     <string name="DarkenAvatarBackground">Oscurecer foto del perfil</string>
-    <string name="hideTimeForSticker">Ocultar la hora para el Sticker</string>
+    <string name="hideTimeForSticker">Ocultar tiempo para stickers</string>
     <string name="showMessageID">Mostrar ID del mensaje</string>
     <string name="hideQuickSendMediaBottom">Ocultar fondo de Envío Rápido de medios</string>
     <string name="largeAvatarAsBackground">Avatar grande como fondo</string>
@@ -158,7 +158,7 @@
     <string name="UserIDOrBotID">Introducir ID de usuario o ID de bot</string>
     <string name="unableToFindUser">No se puede encontrar el usuario</string>
     <string name="linkedUser">Usuario vinculado</string>
-    <string name="linkUserDetails">Enlace usuarios a los canales.\nSe mostrará al usuario vinculado en el perfil del canal vinculado</string>
+    <string name="linkUserDetails">Vincule usuarios a los canales.\nSe mostrará al usuario vinculado en el perfil del canal vinculado</string>
     <string name="linkUser">Enlace usuario</string>
     <string name="overrideChannelAlias">Anular el alias del canal</string>
     <string name="overrideChannelAliasDetails">Si el usuario vinculado está establecido anulará el alias del canal.</string>
