@@ -11,11 +11,13 @@ package org.telegram.messenger;
 import static org.telegram.messenger.NotificationsController.TYPE_CHANNEL;
 import static org.telegram.messenger.NotificationsController.TYPE_PRIVATE;
 
+import android.Manifest;
 import android.app.Activity;
 import android.appwidget.AppWidgetManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.location.Location;
 import android.os.Build;
 import android.os.Bundle;
@@ -29,6 +31,7 @@ import android.util.SparseBooleanArray;
 import android.util.SparseIntArray;
 
 import androidx.collection.LongSparseArray;
+import androidx.core.app.ActivityCompat;
 import androidx.core.app.NotificationManagerCompat;
 import androidx.core.util.Consumer;
 
@@ -81,7 +84,6 @@ import java.util.concurrent.CountDownLatch;
 
 import top.qwq2333.nullgram.config.ConfigManager;
 import top.qwq2333.nullgram.utils.Defines;
-import top.qwq2333.nullgram.utils.Log;
 
 public class MessagesController extends BaseController implements NotificationCenter.NotificationCenterDelegate {
 
@@ -124,6 +126,7 @@ public class MessagesController extends BaseController implements NotificationCe
     public LongSparseArray<SparseArray<Integer>> printingStringsTypes = new LongSparseArray<>();
     public LongSparseArray<SparseArray<Boolean>>[] sendingTypings = new LongSparseArray[12];
     public ConcurrentHashMap<Long, Integer> onlinePrivacy = new ConcurrentHashMap<>(20, 1.0f, 2);
+    private LongSparseIntArray pendingUnreadCounter = new LongSparseIntArray();
     private int lastPrintingStringCount;
 
     private boolean dialogsInTransaction;
@@ -1336,6 +1339,7 @@ public class MessagesController extends BaseController implements NotificationCe
                 sendLoadPeersRequest(req3, requests, pinnedDialogs, pinnedRemoteDialogs, users, chats, filtersToSave, filtersToDelete, filtersOrder, filterDialogRemovals, filterUserRemovals, filtersUnreadCounterReset);
             }
 
+            //no
             TLRPC.TL_messages_getPeerDialogs req4 = null;
             for (HashMap.Entry<Long, TLRPC.InputPeer> entry : dialogsToLoadMap.entrySet()) {
                 if (req4 == null) {
@@ -4133,6 +4137,7 @@ public class MessagesController extends BaseController implements NotificationCe
         if (did == 0 && (dialogs == null || dialogs.isEmpty())) {
             return;
         }
+        //probably
         TLRPC.TL_messages_getPeerDialogs req = new TLRPC.TL_messages_getPeerDialogs();
         if (dialogs != null) {
             for (int a = 0; a < dialogs.size(); a++) {
@@ -6682,213 +6687,208 @@ public class MessagesController extends BaseController implements NotificationCe
             } else if (response instanceof TLRPC.TL_help_promoData) {
                 TLRPC.TL_help_promoData res = (TLRPC.TL_help_promoData) response;
 
-                SharedConfig.ProxyInfo proxy = SharedConfig.currentProxy;
-                if (res.proxy && (ConfigManager.getBooleanOrFalse(Defines.hideProxySponsorChannel) || (proxy != null && proxy.subId == 1L))) {
-                    nextPromoInfoCheckTime = getConnectionsManager().getCurrentTime() + 60 * 60;
-                    noDialog = true;
+                long did;
+                if (res.peer.user_id != 0) {
+                    did = res.peer.user_id;
+                } else if (res.peer.chat_id != 0) {
+                    did = -res.peer.chat_id;
+                    for (int a = 0; a < res.chats.size(); a++) {
+                        TLRPC.Chat chat = res.chats.get(a);
+                        if (chat.id == res.peer.chat_id) {
+                            if (chat.kicked || chat.restricted) {
+                                noDialog = true;
+                            }
+                            break;
+                        }
+                    }
                 } else {
-                    long did;
-                    if (res.peer.user_id != 0) {
-                        did = res.peer.user_id;
-                    } else if (res.peer.chat_id != 0) {
-                        did = -res.peer.chat_id;
-                        for (int a = 0; a < res.chats.size(); a++) {
-                            TLRPC.Chat chat = res.chats.get(a);
-                            if (chat.id == res.peer.chat_id) {
-                                if (chat.kicked || chat.restricted) {
-                                    noDialog = true;
-                                }
-                                break;
+                    did = -res.peer.channel_id;
+                    for (int a = 0; a < res.chats.size(); a++) {
+                        TLRPC.Chat chat = res.chats.get(a);
+                        if (chat.id == res.peer.channel_id) {
+                            if (chat.kicked || chat.restricted) {
+                                noDialog = true;
                             }
-                        }
-                    } else {
-                        did = -res.peer.channel_id;
-                        for (int a = 0; a < res.chats.size(); a++) {
-                            TLRPC.Chat chat = res.chats.get(a);
-                            if (chat.id == res.peer.channel_id) {
-                                if (chat.kicked || chat.restricted) {
-                                    noDialog = true;
-                                }
-                                break;
-                            }
+                            break;
                         }
                     }
-                    promoDialogId = did;
-                    if (res.proxy) {
-                        promoDialogType = PROMO_TYPE_PROXY;
-                    } else if (!TextUtils.isEmpty(res.psa_type)) {
-                        promoDialogType = PROMO_TYPE_PSA;
-                        promoPsaType = res.psa_type;
-                    } else {
-                        promoDialogType = PROMO_TYPE_OTHER;
-                    }
-                    proxyDialogAddress = proxyAddress + proxySecret;
-                    promoPsaMessage = res.psa_message;
-                    nextPromoInfoCheckTime = res.expires;
-                    SharedPreferences.Editor editor = getGlobalMainSettings().edit();
-                    editor.putLong("proxy_dialog", promoDialogId);
-                    editor.putString("proxyDialogAddress", proxyDialogAddress);
-                    editor.putInt("promo_dialog_type", promoDialogType);
-                    if (promoPsaMessage != null) {
-                        editor.putString("promo_psa_message", promoPsaMessage);
-                    } else {
-                        editor.remove("promo_psa_message");
-                    }
-                    if (promoPsaType != null) {
-                        editor.putString("promo_psa_type", promoPsaType);
-                    } else {
-                        editor.remove("promo_psa_type");
-                    }
-                    editor.putInt("nextPromoInfoCheckTime", nextPromoInfoCheckTime);
-                    editor.commit();
+                }
+                promoDialogId = did;
+                if (res.proxy) {
+                    promoDialogType = PROMO_TYPE_PROXY;
+                } else if (!TextUtils.isEmpty(res.psa_type)) {
+                    promoDialogType = PROMO_TYPE_PSA;
+                    promoPsaType = res.psa_type;
+                } else {
+                    promoDialogType = PROMO_TYPE_OTHER;
+                }
+                proxyDialogAddress = proxyAddress + proxySecret;
+                promoPsaMessage = res.psa_message;
+                nextPromoInfoCheckTime = res.expires;
+                SharedPreferences.Editor editor = getGlobalMainSettings().edit();
+                editor.putLong("proxy_dialog", promoDialogId);
+                editor.putString("proxyDialogAddress", proxyDialogAddress);
+                editor.putInt("promo_dialog_type", promoDialogType);
+                if (promoPsaMessage != null) {
+                    editor.putString("promo_psa_message", promoPsaMessage);
+                } else {
+                    editor.remove("promo_psa_message");
+                }
+                if (promoPsaType != null) {
+                    editor.putString("promo_psa_type", promoPsaType);
+                } else {
+                    editor.remove("promo_psa_type");
+                }
+                editor.putInt("nextPromoInfoCheckTime", nextPromoInfoCheckTime);
+                editor.commit();
 
-                    if (!noDialog) {
-                        AndroidUtilities.runOnUIThread(() -> {
-                            if (promoDialog != null && did != promoDialog.id) {
-                                removePromoDialog();
+                if (!noDialog) {
+                    AndroidUtilities.runOnUIThread(() -> {
+                        if (promoDialog != null && did != promoDialog.id) {
+                            removePromoDialog();
+                        }
+                        promoDialog = dialogs_dict.get(did);
+
+                        if (promoDialog != null) {
+                            checkingPromoInfo = false;
+                            sortDialogs(null);
+                            getNotificationCenter().postNotificationName(NotificationCenter.dialogsNeedReload, true);
+                        } else {
+                            LongSparseArray<TLRPC.User> usersDict = new LongSparseArray<>();
+                            LongSparseArray<TLRPC.Chat> chatsDict = new LongSparseArray<>();
+                            for (int a = 0; a < res.users.size(); a++) {
+                                TLRPC.User u = res.users.get(a);
+                                usersDict.put(u.id, u);
                             }
-                            promoDialog = dialogs_dict.get(did);
+                            for (int a = 0; a < res.chats.size(); a++) {
+                                TLRPC.Chat c = res.chats.get(a);
+                                chatsDict.put(c.id, c);
+                            }
 
-                            if (promoDialog != null) {
-                                checkingPromoInfo = false;
-                                sortDialogs(null);
-                                getNotificationCenter().postNotificationName(NotificationCenter.dialogsNeedReload, true);
+                            //no
+                            TLRPC.TL_messages_getPeerDialogs req1 = new TLRPC.TL_messages_getPeerDialogs();
+                            TLRPC.TL_inputDialogPeer peer = new TLRPC.TL_inputDialogPeer();
+                            if (res.peer.user_id != 0) {
+                                peer.peer = new TLRPC.TL_inputPeerUser();
+                                peer.peer.user_id = res.peer.user_id;
+                                TLRPC.User user = usersDict.get(res.peer.user_id);
+                                if (user != null) {
+                                    peer.peer.access_hash = user.access_hash;
+                                }
+                            } else if (res.peer.chat_id != 0) {
+                                peer.peer = new TLRPC.TL_inputPeerChat();
+                                peer.peer.chat_id = res.peer.chat_id;
+                                TLRPC.Chat chat = chatsDict.get(res.peer.chat_id);
+                                if (chat != null) {
+                                    peer.peer.access_hash = chat.access_hash;
+                                }
                             } else {
-                                LongSparseArray<TLRPC.User> usersDict = new LongSparseArray<>();
-                                LongSparseArray<TLRPC.Chat> chatsDict = new LongSparseArray<>();
-                                for (int a = 0; a < res.users.size(); a++) {
-                                    TLRPC.User u = res.users.get(a);
-                                    usersDict.put(u.id, u);
+                                peer.peer = new TLRPC.TL_inputPeerChannel();
+                                peer.peer.channel_id = res.peer.channel_id;
+                                TLRPC.Chat chat = chatsDict.get(res.peer.channel_id);
+                                if (chat != null) {
+                                    peer.peer.access_hash = chat.access_hash;
                                 }
-                                for (int a = 0; a < res.chats.size(); a++) {
-                                    TLRPC.Chat c = res.chats.get(a);
-                                    chatsDict.put(c.id, c);
-                                }
-
-                                TLRPC.TL_messages_getPeerDialogs req1 = new TLRPC.TL_messages_getPeerDialogs();
-                                TLRPC.TL_inputDialogPeer peer = new TLRPC.TL_inputDialogPeer();
-                                if (res.peer.user_id != 0) {
-                                    peer.peer = new TLRPC.TL_inputPeerUser();
-                                    peer.peer.user_id = res.peer.user_id;
-                                    TLRPC.User user = usersDict.get(res.peer.user_id);
-                                    if (user != null) {
-                                        peer.peer.access_hash = user.access_hash;
-                                    }
-                                } else if (res.peer.chat_id != 0) {
-                                    peer.peer = new TLRPC.TL_inputPeerChat();
-                                    peer.peer.chat_id = res.peer.chat_id;
-                                    TLRPC.Chat chat = chatsDict.get(res.peer.chat_id);
-                                    if (chat != null) {
-                                        peer.peer.access_hash = chat.access_hash;
-                                    }
-                                } else {
-                                    peer.peer = new TLRPC.TL_inputPeerChannel();
-                                    peer.peer.channel_id = res.peer.channel_id;
-                                    TLRPC.Chat chat = chatsDict.get(res.peer.channel_id);
-                                    if (chat != null) {
-                                        peer.peer.access_hash = chat.access_hash;
-                                    }
-                                }
-
-                                req1.peers.add(peer);
-                                checkingPromoInfoRequestId = getConnectionsManager().sendRequest(req1, (response1, error1) -> {
-                                    if (checkPromoId != lastCheckPromoId) {
-                                        return;
-                                    }
-                                    checkingPromoInfoRequestId = 0;
-                                    TLRPC.TL_messages_peerDialogs res2 = (TLRPC.TL_messages_peerDialogs) response1;
-                                    if (res2 != null && !res2.dialogs.isEmpty()) {
-                                        getMessagesStorage().putUsersAndChats(res.users, res.chats, true, true);
-                                        TLRPC.TL_messages_dialogs dialogs = new TLRPC.TL_messages_dialogs();
-                                        dialogs.chats = res2.chats;
-                                        dialogs.users = res2.users;
-                                        dialogs.dialogs = res2.dialogs;
-                                        dialogs.messages = res2.messages;
-                                        getMessagesStorage().putDialogs(dialogs, 2);
-                                        AndroidUtilities.runOnUIThread(() -> {
-                                            putUsers(res.users, false);
-                                            putChats(res.chats, false);
-                                            putUsers(res2.users, false);
-                                            putChats(res2.chats, false);
-
-                                            if (promoDialog != null) {
-                                                if (promoDialog.id < 0) {
-                                                    TLRPC.Chat chat = getChat(-promoDialog.id);
-                                                    if (ChatObject.isNotInChat(chat) || chat.restricted) {
-                                                        removeDialog(promoDialog);
-                                                    }
-                                                } else {
-                                                    removeDialog(promoDialog);
-                                                }
-                                            }
-
-                                            promoDialog = res2.dialogs.get(0);
-                                            promoDialog.id = did;
-                                            promoDialog.folder_id = 0;
-                                            if (DialogObject.isChannel(promoDialog)) {
-                                                channelsPts.put(-promoDialog.id, promoDialog.pts);
-                                            }
-                                            Integer value = dialogs_read_inbox_max.get(promoDialog.id);
-                                            if (value == null) {
-                                                value = 0;
-                                            }
-                                            dialogs_read_inbox_max.put(promoDialog.id, Math.max(value, promoDialog.read_inbox_max_id));
-                                            value = dialogs_read_outbox_max.get(promoDialog.id);
-                                            if (value == null) {
-                                                value = 0;
-                                            }
-                                            dialogs_read_outbox_max.put(promoDialog.id, Math.max(value, promoDialog.read_outbox_max_id));
-                                            dialogs_dict.put(did, promoDialog);
-                                            if (!res2.messages.isEmpty()) {
-                                                LongSparseArray<TLRPC.User> usersDict1 = new LongSparseArray<>();
-                                                LongSparseArray<TLRPC.Chat> chatsDict1 = new LongSparseArray<>();
-                                                for (int a = 0; a < res2.users.size(); a++) {
-                                                    TLRPC.User u = res2.users.get(a);
-                                                    usersDict1.put(u.id, u);
-                                                }
-                                                for (int a = 0; a < res2.chats.size(); a++) {
-                                                    TLRPC.Chat c = res2.chats.get(a);
-                                                    chatsDict1.put(c.id, c);
-                                                }
-                                                MessageObject messageObject = new MessageObject(currentAccount, res2.messages.get(0), usersDict1, chatsDict1, false, true);
-                                                ArrayList<MessageObject> objects = dialogMessage.get(did);
-                                                if (objects == null) {
-                                                    objects = new ArrayList<>(1);
-                                                }
-                                                if (objects.size() > 0 && objects.get(0) != null && objects.get(0).hasValidGroupId() && objects.get(0).getGroupIdForUse() != messageObject.getGroupIdForUse()) {
-                                                    objects.clear();
-                                                }
-                                                objects.add(messageObject);
-                                                dialogMessage.put(did, objects);
-                                                if (promoDialog.last_message_date == 0) {
-                                                    promoDialog.last_message_date = messageObject.messageOwner.date;
-                                                }
-                                            }
-                                            sortDialogs(null);
-                                            getNotificationCenter().postNotificationName(NotificationCenter.dialogsNeedReload, true);
-                                        });
-                                    } else {
-                                        AndroidUtilities.runOnUIThread(() -> {
-                                            if (promoDialog != null) {
-                                                if (promoDialog.id < 0) {
-                                                    TLRPC.Chat chat = getChat(-promoDialog.id);
-                                                    if (ChatObject.isNotInChat(chat) || chat.restricted) {
-                                                        removeDialog(promoDialog);
-                                                    }
-                                                } else {
-                                                    removeDialog(promoDialog);
-                                                }
-                                                promoDialog = null;
-                                                sortDialogs(null);
-                                                getNotificationCenter().postNotificationName(NotificationCenter.dialogsNeedReload);
-                                            }
-                                        });
-                                    }
-                                    checkingPromoInfo = false;
-                                });
                             }
-                        });
-                    }
+
+                            req1.peers.add(peer);
+                            checkingPromoInfoRequestId = getConnectionsManager().sendRequest(req1, (response1, error1) -> {
+                                if (checkPromoId != lastCheckPromoId) {
+                                    return;
+                                }
+                                checkingPromoInfoRequestId = 0;
+                                TLRPC.TL_messages_peerDialogs res2 = (TLRPC.TL_messages_peerDialogs) response1;
+                                if (res2 != null && !res2.dialogs.isEmpty()) {
+                                    getMessagesStorage().putUsersAndChats(res.users, res.chats, true, true);
+                                    TLRPC.TL_messages_dialogs dialogs = new TLRPC.TL_messages_dialogs();
+                                    dialogs.chats = res2.chats;
+                                    dialogs.users = res2.users;
+                                    dialogs.dialogs = res2.dialogs;
+                                    dialogs.messages = res2.messages;
+                                    getMessagesStorage().putDialogs(dialogs, 2);
+                                    AndroidUtilities.runOnUIThread(() -> {
+                                        putUsers(res.users, false);
+                                        putChats(res.chats, false);
+                                        putUsers(res2.users, false);
+                                        putChats(res2.chats, false);
+
+                                        if (promoDialog != null) {
+                                            if (promoDialog.id < 0) {
+                                                TLRPC.Chat chat = getChat(-promoDialog.id);
+                                                if (ChatObject.isNotInChat(chat) || chat.restricted) {
+                                                    removeDialog(promoDialog);
+                                                }
+                                            } else {
+                                                removeDialog(promoDialog);
+                                            }
+                                        }
+
+                                        promoDialog = res2.dialogs.get(0);
+                                        promoDialog.id = did;
+                                        promoDialog.folder_id = 0;
+                                        if (DialogObject.isChannel(promoDialog)) {
+                                            channelsPts.put(-promoDialog.id, promoDialog.pts);
+                                        }
+                                        Integer value = dialogs_read_inbox_max.get(promoDialog.id);
+                                        if (value == null) {
+                                            value = 0;
+                                        }
+                                        dialogs_read_inbox_max.put(promoDialog.id, Math.max(value, promoDialog.read_inbox_max_id));
+                                        value = dialogs_read_outbox_max.get(promoDialog.id);
+                                        if (value == null) {
+                                            value = 0;
+                                        }
+                                        dialogs_read_outbox_max.put(promoDialog.id, Math.max(value, promoDialog.read_outbox_max_id));
+                                        dialogs_dict.put(did, promoDialog);
+                                        if (!res2.messages.isEmpty()) {
+                                            LongSparseArray<TLRPC.User> usersDict1 = new LongSparseArray<>();
+                                            LongSparseArray<TLRPC.Chat> chatsDict1 = new LongSparseArray<>();
+                                            for (int a = 0; a < res2.users.size(); a++) {
+                                                TLRPC.User u = res2.users.get(a);
+                                                usersDict1.put(u.id, u);
+                                            }
+                                            for (int a = 0; a < res2.chats.size(); a++) {
+                                                TLRPC.Chat c = res2.chats.get(a);
+                                                chatsDict1.put(c.id, c);
+                                            }
+                                            MessageObject messageObject = new MessageObject(currentAccount, res2.messages.get(0), usersDict1, chatsDict1, false, true);
+                                            ArrayList<MessageObject> objects = dialogMessage.get(did);
+                                            if (objects == null) {
+                                                objects = new ArrayList<>(1);
+                                            }
+                                            if (objects.size() > 0 && objects.get(0) != null && objects.get(0).hasValidGroupId() && objects.get(0).getGroupIdForUse() != messageObject.getGroupIdForUse()) {
+                                                objects.clear();
+                                            }
+                                            objects.add(messageObject);
+                                            dialogMessage.put(did, objects);
+                                            if (promoDialog.last_message_date == 0) {
+                                                promoDialog.last_message_date = messageObject.messageOwner.date;
+                                            }
+                                        }
+                                        sortDialogs(null);
+                                        getNotificationCenter().postNotificationName(NotificationCenter.dialogsNeedReload, true);
+                                    });
+                                } else {
+                                    AndroidUtilities.runOnUIThread(() -> {
+                                        if (promoDialog != null) {
+                                            if (promoDialog.id < 0) {
+                                                TLRPC.Chat chat = getChat(-promoDialog.id);
+                                                if (ChatObject.isNotInChat(chat) || chat.restricted) {
+                                                    removeDialog(promoDialog);
+                                                }
+                                            } else {
+                                                removeDialog(promoDialog);
+                                            }
+                                            promoDialog = null;
+                                            sortDialogs(null);
+                                            getNotificationCenter().postNotificationName(NotificationCenter.dialogsNeedReload);
+                                        }
+                                    });
+                                }
+                                checkingPromoInfo = false;
+                            });
+                        }
+                    });
                 }
             } else {
                 nextPromoInfoCheckTime = getConnectionsManager().getCurrentTime() + 60 * 60;
@@ -7366,6 +7366,7 @@ public class MessagesController extends BaseController implements NotificationCe
                 getConnectionsManager().bindRequestToGuid(reqId, classGuid);
             } else {
                 if (loadDialog && (load_type == 3 || load_type == 2) && last_message_id == 0) {
+                    //probably--
                     TLRPC.TL_messages_getPeerDialogs req = new TLRPC.TL_messages_getPeerDialogs();
                     TLRPC.InputPeer inputPeer = getInputPeer(dialogId);
                     TLRPC.TL_inputDialogPeer inputDialogPeer = new TLRPC.TL_inputDialogPeer();
@@ -8132,6 +8133,7 @@ public class MessagesController extends BaseController implements NotificationCe
             FileLog.d("load unknown dialog " + dialogId);
         }
 
+        //probably--
         TLRPC.TL_messages_getPeerDialogs req = new TLRPC.TL_messages_getPeerDialogs();
         TLRPC.TL_inputDialogPeer inputDialogPeer = new TLRPC.TL_inputDialogPeer();
         inputDialogPeer.peer = peer;
@@ -9224,6 +9226,7 @@ public class MessagesController extends BaseController implements NotificationCe
                         if (BuildVars.DEBUG_PRIVATE_VERSION) {
                             FileLog.d("can't update dialog " + dialogId + " with new unread " + dialogsToUpdate.valueAt(a));
                         }
+                        pendingUnreadCounter.put(dialogId, dialogsToUpdate.valueAt(a));
                     }
                     if (currentDialog != null) {
                         int prevCount = currentDialog.unread_count;
@@ -11276,6 +11279,7 @@ public class MessagesController extends BaseController implements NotificationCe
 
         gettingUnknownChannels.put(channel.id, true);
 
+        //no
         TLRPC.TL_messages_getPeerDialogs req = new TLRPC.TL_messages_getPeerDialogs();
         TLRPC.TL_inputDialogPeer inputDialogPeer = new TLRPC.TL_inputDialogPeer();
         inputDialogPeer.peer = inputPeer;
@@ -13210,8 +13214,8 @@ public class MessagesController extends BaseController implements NotificationCe
 
         for (int c = 0, size3 = updates.size(); c < size3; c++) {
             TLRPC.Update baseUpdate = updates.get(c);
-            if (BuildVars.LOGS_ENABLED) {
-                FileLog.d("process update " + baseUpdate);
+            if (BuildVars.LOGS_ENABLED && baseUpdate != null) {
+                FileLog.d("process update " + baseUpdate.getClass().getSimpleName());
             }
             if (baseUpdate instanceof TLRPC.TL_updateNewMessage || baseUpdate instanceof TLRPC.TL_updateNewChannelMessage || baseUpdate instanceof TLRPC.TL_updateNewScheduledMessage) {
                 TLRPC.Message message;
@@ -14904,7 +14908,16 @@ public class MessagesController extends BaseController implements NotificationCe
                                 }
                             }
                             TelephonyManager tm = (TelephonyManager) ApplicationLoader.applicationContext.getSystemService(Context.TELEPHONY_SERVICE);
-                            if (svc != null || VoIPService.callIShouldHavePutIntoIntent != null || tm.getCallState() != TelephonyManager.CALL_STATE_IDLE) {
+                            boolean callStateIsIdle = true;
+                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                                //TODO check
+                                if (ActivityCompat.checkSelfPermission(ApplicationLoader.applicationContext, Manifest.permission.READ_PHONE_STATE) == PackageManager.PERMISSION_GRANTED) {
+                                    callStateIsIdle = tm.getCallState() == TelephonyManager.CALL_STATE_IDLE;
+                                }
+                            } else {
+                                callStateIsIdle = tm.getCallState() == TelephonyManager.CALL_STATE_IDLE;
+                            }
+                            if (svc != null || VoIPService.callIShouldHavePutIntoIntent != null || !callStateIsIdle) {
                                 if (BuildVars.LOGS_ENABLED) {
                                     FileLog.d("Auto-declining call " + call.id + " because there's already active one");
                                 }
@@ -15567,6 +15580,7 @@ public class MessagesController extends BaseController implements NotificationCe
             }
             if (needReload) {
                 if (topicId == 0) {
+                    //no
                     TLRPC.TL_messages_getPeerDialogs req = new TLRPC.TL_messages_getPeerDialogs();
                     TLRPC.TL_inputDialogPeer inputDialogPeer = new TLRPC.TL_inputDialogPeer();
                     inputDialogPeer.peer = getInputPeer(dialogId);
@@ -16049,11 +16063,27 @@ public class MessagesController extends BaseController implements NotificationCe
             if (BuildVars.LOGS_ENABLED) {
                 FileLog.d("not found dialog with id " + dialogId + " dictCount = " + dialogs_dict.size() + " allCount = " + allDialogs.size());
             }
+            boolean filterDialogsChanged = false;
             dialog = new TLRPC.TL_dialog();
             dialog.id = dialogId;
             int mid = dialog.top_message = lastMessage.getId();
             dialog.last_message_date = lastMessage.messageOwner.date;
             dialog.flags = ChatObject.isChannel(chat) ? 1 : 0;
+            if (pendingUnreadCounter.get(dialogId, 0) > 0) {
+                dialog.unread_count = pendingUnreadCounter.get(dialogId);
+                pendingUnreadCounter.delete(dialogId);
+                if (!isDialogMuted(dialogId, 0)) {
+                    unreadUnmutedDialogs++;
+                }
+
+                for (int b = 0; b < selectedDialogFilter.length; b++) {
+                    if (selectedDialogFilter[b] != null && (selectedDialogFilter[b].flags & DIALOG_FILTER_FLAG_EXCLUDE_READ) != 0) {
+                        filterDialogsChanged = true;
+                        break;
+                    }
+                }
+
+            }
             dialogs_dict.put(dialogId, dialog);
             allDialogs.add(dialog);
             ArrayList<MessageObject> arrayList = new ArrayList<MessageObject>();
@@ -16072,6 +16102,10 @@ public class MessagesController extends BaseController implements NotificationCe
             dialogMessage.put(dialogId, arrayList);
             changed = true;
 
+            if (filterDialogsChanged) {
+                sortDialogs(null);
+                getNotificationCenter().postNotificationName(NotificationCenter.dialogsNeedReload);
+            }
             TLRPC.Dialog dialogFinal = dialog;
             getMessagesStorage().getDialogFolderId(dialogId, param -> {
                 if (param != -1) {

@@ -2212,7 +2212,9 @@ public class ActionBarLayout extends FrameLayout implements INavigationLayout, F
     private void onCloseAnimationEnd() {
         if (transitionAnimationInProgress && onCloseAnimationEndRunnable != null) {
             if (currentAnimation != null) {
-                currentAnimation.cancel();
+                AnimatorSet animatorSet = currentAnimation;
+                currentAnimation = null;
+                animatorSet.cancel();
             }
             transitionAnimationInProgress = false;
             layoutToIgnore = null;

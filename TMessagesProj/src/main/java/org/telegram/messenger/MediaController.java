@@ -5048,9 +5048,11 @@ public class MediaController implements AudioManager.OnAudioFocusChangeListener,
         } catch (Exception e) {
             FileLog.e(e);
         }
+
         try {
             retriever.release();
-        } catch (Exception e) {
+        } catch (Throwable throwable) {
+            FileLog.e(throwable);
         }
         return bitrate;
     }

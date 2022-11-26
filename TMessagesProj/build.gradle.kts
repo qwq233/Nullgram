@@ -42,7 +42,7 @@ dependencies {
     implementation("androidx.dynamicanimation:dynamicanimation:1.0.0")
     implementation("androidx.multidex:multidex:2.0.1")
     implementation("androidx.interpolator:interpolator:1.0.0")
-    implementation("androidx.sharetarget:sharetarget:1.2.0-rc02")
+    implementation("androidx.sharetarget:sharetarget:1.2.0")
 
     compileOnly("org.checkerframework:checker-qual:3.27.0")
     compileOnly("org.checkerframework:checker-compat-qual:2.5.5")
@@ -87,7 +87,7 @@ dependencies {
 
 android {
     compileSdk = 33
-    buildToolsVersion = "32.0.0"
+    buildToolsVersion = "33.0.0"
     ndkVersion = "21.4.7075529"
 
     defaultConfig.applicationId = "top.qwq2333.nullgram"
