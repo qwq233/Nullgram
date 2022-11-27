@@ -38,7 +38,7 @@ dependencies {
 
     implementation("androidx.core:core-ktx:1.8.0")
     implementation("androidx.palette:palette-ktx:1.0.0")
-    implementation("androidx.exifinterface:exifinterface:1.3.3")
+    implementation("androidx.exifinterface:exifinterface:1.3.5")
     implementation("androidx.dynamicanimation:dynamicanimation:1.0.0")
     implementation("androidx.multidex:multidex:2.0.1")
     implementation("androidx.interpolator:interpolator:1.0.0")
@@ -46,9 +46,9 @@ dependencies {
 
     compileOnly("org.checkerframework:checker-qual:3.27.0")
     compileOnly("org.checkerframework:checker-compat-qual:2.5.5")
-    implementation("com.google.firebase:firebase-messaging:23.0.8")
+    implementation("com.google.firebase:firebase-messaging:23.1.0")
     implementation("com.google.firebase:firebase-config:21.1.2")
-    implementation("com.google.firebase:firebase-datatransport:18.1.6")
+    implementation("com.google.firebase:firebase-datatransport:18.1.7")
     implementation("com.google.firebase:firebase-appindexing:20.0.0")
     implementation("com.google.android.gms:play-services-auth:20.3.0")
     implementation("com.google.android.gms:play-services-vision:20.1.3")
@@ -75,7 +75,7 @@ dependencies {
     implementation("org.jetbrains.kotlin:kotlin-stdlib-common:${Version.kotlin}")
     implementation("org.jetbrains.kotlin:kotlin-stdlib:${Version.kotlin}")
     implementation("org.osmdroid:osmdroid-android:6.1.14")
-    implementation("com.android.billingclient:billing:5.0.0")
+    implementation("com.android.billingclient:billing:5.1.0")
 }
 
 

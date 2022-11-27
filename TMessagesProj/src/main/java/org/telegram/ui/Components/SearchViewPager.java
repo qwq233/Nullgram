@@ -28,6 +28,7 @@ import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.ChatObject;
 import org.telegram.messenger.DialogObject;
 import org.telegram.messenger.LocaleController;
+import org.telegram.messenger.MediaController;
 import org.telegram.messenger.MessageObject;
 import org.telegram.messenger.MessagesController;
 import org.telegram.messenger.R;
@@ -62,6 +63,9 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Set;
 
+import top.qwq2333.nullgram.config.ConfigManager;
+import top.qwq2333.nullgram.utils.Defines;
+
 public class SearchViewPager extends ViewPagerFixed implements FilteredSearchView.UiCallback {
 
     private final ViewPagerAdapter viewPagerAdapter;
@@ -84,12 +88,16 @@ public class SearchViewPager extends ViewPagerFixed implements FilteredSearchVie
 
     public final static int gotoItemId = 200;
     public final static int forwardItemId = 201;
-    public final static int deleteItemId = 202;
-    public final static int speedItemId = 203;
+    public final static int forwardNoQuoteItemId = 202;
+    public final static int saveItemId = 203;
+    public final static int deleteItemId = 204;
+    public final static int speedItemId = 205;
 
     private ActionBarMenuItem speedItem;
     private ActionBarMenuItem gotoItem;
     private ActionBarMenuItem forwardItem;
+    private ActionBarMenuItem forwardNoQuoteItem;
+    private ActionBarMenuItem saveItem;
     private ActionBarMenuItem deleteItem;
 
     private ActionBarMenu actionMode;
@@ -388,7 +396,11 @@ public class SearchViewPager extends ViewPagerFixed implements FilteredSearchVie
             speedItem = actionMode.addItemWithWidth(speedItemId, R.drawable.avd_speed, AndroidUtilities.dp(54), LocaleController.getString("AccDescrPremiumSpeed", R.string.AccDescrPremiumSpeed));
             speedItem.getIconView().setColorFilter(new PorterDuffColorFilter(Theme.getColor(Theme.key_actionBarActionModeDefaultIcon), PorterDuff.Mode.SRC_IN));
             gotoItem = actionMode.addItemWithWidth(gotoItemId, R.drawable.msg_message, AndroidUtilities.dp(54), LocaleController.getString("AccDescrGoToMessage", R.string.AccDescrGoToMessage));
-            forwardItem = actionMode.addItemWithWidth(forwardItemId, R.drawable.msg_forward, AndroidUtilities.dp(54), LocaleController.getString("Forward", R.string.Forward));
+            forwardNoQuoteItem = actionMode.addItemWithWidth(forwardNoQuoteItemId, R.drawable.msg_forward, AndroidUtilities.dp(54), LocaleController.getString("NoQuoteForward", R.string.NoQuoteForward));
+            forwardItem = actionMode.addItemWithWidth(forwardItemId, ConfigManager.getBooleanOrFalse(Defines.showNoQuoteForward) ? R.drawable.msg_noquote_forward :
+                    R.drawable.msg_forward,
+                AndroidUtilities.dp(54), LocaleController.getString("Forward", R.string.Forward));
+            saveItem = actionMode.addItemWithWidth(saveItemId, R.drawable.msg_download, AndroidUtilities.dp(54), LocaleController.getString("SaveToDownloads", R.string.SaveToDownloads));
             deleteItem = actionMode.addItemWithWidth(deleteItemId, R.drawable.msg_delete, AndroidUtilities.dp(54), LocaleController.getString("Delete", R.string.Delete));
         }
         if (parent.getActionBar().getBackButton().getDrawable() instanceof MenuDrawable) {
@@ -404,6 +416,13 @@ public class SearchViewPager extends ViewPagerFixed implements FilteredSearchVie
             speedItem.setVisibility(isSpeedItemVisible() ? View.VISIBLE : View.GONE);
             gotoItem.setVisibility(View.VISIBLE);
             forwardItem.setVisibility(View.VISIBLE);
+            if (ConfigManager.getBooleanOrFalse(Defines.showNoQuoteForward)) {
+                forwardNoQuoteItem.setVisibility(View.VISIBLE);
+                forwardItem.setIcon(R.drawable.msg_noquote_forward);
+            } else {
+                forwardNoQuoteItem.setVisibility(View.GONE);
+                forwardItem.setIcon(R.drawable.msg_forward);
+            }
             deleteItem.setVisibility(View.VISIBLE);
         } else {
             parent.getActionBar().hideActionMode();
@@ -434,7 +453,7 @@ public class SearchViewPager extends ViewPagerFixed implements FilteredSearchVie
             return false;
         }
         for (MessageObject obj : selectedFiles.values()) {
-            if (obj.getDocument() != null && obj.getDocument().size >= 150 * 1024 * 1024) {
+            if (obj.getDocument() != null && obj.getDocument().size >= 300 * 1024 * 1024) {
                 return true;
             }
         }
@@ -452,9 +471,9 @@ public class SearchViewPager extends ViewPagerFixed implements FilteredSearchVie
 
             SpannableStringBuilder spannableStringBuilder = new SpannableStringBuilder();
             spannableStringBuilder
-                    .append(AndroidUtilities.replaceTags(LocaleController.formatPluralString("RemoveDocumentsMessage", selectedFiles.size())))
-                    .append("\n\n")
-                    .append(LocaleController.getString("RemoveDocumentsAlertMessage", R.string.RemoveDocumentsAlertMessage));
+                .append(AndroidUtilities.replaceTags(LocaleController.formatPluralString("RemoveDocumentsMessage", selectedFiles.size())))
+                .append("\n\n")
+                .append(LocaleController.getString("RemoveDocumentsAlertMessage", R.string.RemoveDocumentsAlertMessage));
 
             builder.setMessage(spannableStringBuilder);
             builder.setNegativeButton(LocaleController.getString("Cancel", R.string.Cancel), (dialogInterface, i) -> dialogInterface.dismiss());
@@ -481,18 +500,27 @@ public class SearchViewPager extends ViewPagerFixed implements FilteredSearchVie
             }
             MessageObject messageObject = selectedFiles.values().iterator().next();
             goToMessage(messageObject);
-        } else if (id == forwardItemId) {
+        } else if (id == saveItemId) {
+            ArrayList<MessageObject> messageObjects = new ArrayList<>(selectedFiles.values());
+            hideActionMode();
+            MediaController.saveFilesFromMessages(getContext(), AccountInstance.getInstance(currentAccount), messageObjects, (count) -> {
+                if (count > 0) {
+                    if (getContext() == null) {
+                        return;
+                    }
+                    BulletinFactory.of(fragmentView, null).createDownloadBulletin(BulletinFactory.FileType.UNKNOWNS, count, null).show();
+                }
+            });
+        } else if (id == forwardItemId || id == forwardNoQuoteItemId) {
             Bundle args = new Bundle();
             args.putBoolean("onlySelect", true);
             args.putInt("dialogsType", 3);
             DialogsActivity fragment = new DialogsActivity(args);
+            ArrayList<MessageObject> fmessages = new ArrayList<>(selectedFiles.values());
+            fragment.forwardContext = () -> fmessages;
+            var forwardParams = fragment.forwardContext.getForwardParams();
+            forwardParams.noQuote = id == forwardNoQuoteItemId;
             fragment.setDelegate((fragment1, dids, message, param) -> {
-                ArrayList<MessageObject> fmessages = new ArrayList<>();
-                Iterator<FilteredSearchView.MessageHashId> idIterator = selectedFiles.keySet().iterator();
-                while (idIterator.hasNext()) {
-                    FilteredSearchView.MessageHashId hashId = idIterator.next();
-                    fmessages.add(selectedFiles.get(hashId));
-                }
                 selectedFiles.clear();
 
                 showActionMode(false);
@@ -501,14 +529,16 @@ public class SearchViewPager extends ViewPagerFixed implements FilteredSearchVie
                     for (int a = 0; a < dids.size(); a++) {
                         long did = dids.get(a).dialogId;
                         if (message != null) {
-                            AccountInstance.getInstance(currentAccount).getSendMessagesHelper().sendMessage(message.toString(), did, null, null, null, true, null, null, null, true, 0, null, false);
+                            AccountInstance.getInstance(currentAccount).getSendMessagesHelper().sendMessage(message.toString(), did, null, null, null, true, null, null, null, forwardParams.notify, forwardParams.scheduleDate, null, false);
                         }
-                        AccountInstance.getInstance(currentAccount).getSendMessagesHelper().sendMessage(fmessages, did, false,false, true, 0);
+                        AccountInstance.getInstance(currentAccount).getSendMessagesHelper().sendMessage(fmessages, did, forwardParams.noQuote, forwardParams.noCaption, forwardParams.notify, forwardParams.scheduleDate);
                     }
                     fragment1.finishFragment();
                 } else {
                     long did = dids.get(0).dialogId;
                     Bundle args1 = new Bundle();
+                    args1.putBoolean("forward_noquote", forwardParams.noQuote);
+                    args1.putBoolean("forward_nocaption", forwardParams.noCaption);
                     args1.putBoolean("scrollToTopOnResume", true);
                     if (DialogObject.isEncryptedDialog(did)) {
                         args1.putInt("enc_id", DialogObject.getEncryptedChatId(did));
@@ -603,15 +633,24 @@ public class SearchViewPager extends ViewPagerFixed implements FilteredSearchVie
                     }
                 }
             }
-            if (deleteItem != null) {
-                boolean canShowDelete = true;
-                Set<FilteredSearchView.MessageHashId> keySet = selectedFiles.keySet();
-                for (FilteredSearchView.MessageHashId key : keySet) {
-                    if (!selectedFiles.get(key).isDownloadingFile) {
-                        canShowDelete = false;
-                        break;
-                    }
+            boolean canShowDelete = true;
+            boolean canShowSave = true;
+            Set<FilteredSearchView.MessageHashId> keySet = selectedFiles.keySet();
+            for (FilteredSearchView.MessageHashId key : keySet) {
+                var messageObject = selectedFiles.get(key);
+                if (!messageObject.isDownloadingFile) {
+                    canShowDelete = false;
+                    canShowSave = false;
+                    break;
                 }
+                if (messageObject.getDocument() == null) {
+                    canShowSave = false;
+                }
+            }
+            if (saveItem != null) {
+                saveItem.setVisibility(canShowSave ? View.VISIBLE : View.GONE);
+            }
+            if (deleteItem != null) {
                 deleteItem.setVisibility(canShowDelete ? View.VISIBLE : View.GONE);
             }
         }
@@ -782,7 +821,7 @@ public class SearchViewPager extends ViewPagerFixed implements FilteredSearchVie
         for (int i = 0; i < n; i++) {
             View v = viewsByType.valueAt(i);
             if (v instanceof FilteredSearchView) {
-               ((FilteredSearchView) v).messagesDeleted(channelId, markAsDeletedMessages);
+                ((FilteredSearchView) v).messagesDeleted(channelId, markAsDeletedMessages);
             }
         }
 
