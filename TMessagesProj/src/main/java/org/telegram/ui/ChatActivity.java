@@ -30564,7 +30564,7 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
     }
 
     public boolean processRepeatMessage() {
-        if (isThreadChat() || getMessagesController().isChatNoForwards(currentChat)) {
+        if ((isThreadChat() && !isTopic) || getMessagesController().isChatNoForwards(currentChat)) {
             var messageObject = getMessageUtils().getMessageForRepeat(selectedObject,
                 selectedObjectGroup);
             if (messageObject != null) {
