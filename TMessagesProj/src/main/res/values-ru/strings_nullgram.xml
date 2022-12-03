@@ -203,4 +203,13 @@
     <string name="icon_5">Значок 5</string>
     <string name="disablePremiumSticker">Отключить вкладку премиум стикеров</string>
     <string name="hideProxySponsorChannel">Скрыть канал спонсора прокси-сервера</string>
+    <string name="disablePreviewVideoSoundShortcut">Отключить включение звука кнопками громкости</string>
+    <string name="disablePreviewVideoSoundShortcutNotice">Отключить включение звука видео кнопками громкости</string>
+    <string name="quickToggleAnonymous">Quick toggle anonymous</string>
+    <string name="quickToggleAnonymousNotice">Если вы являетесь владельцем группы</string>
+    <string name="Anonymous">Anonymous</string>
+    <string name="Channel">Channel</string>
+    <string name="SwitchToAnonymously">Switch to anonymously</string>
+    <string name="SwitchToPersonalAccount">Switch to personal account</string>
+    <string name="openArchiveOnPull">Open Archive On Pull</string>
 </resources>

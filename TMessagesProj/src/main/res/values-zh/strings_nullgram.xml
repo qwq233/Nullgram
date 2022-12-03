@@ -171,17 +171,17 @@
     <string name="PasscodeSet">设置密码锁</string>
     <string name="PasscodeEdit">更改密码锁</string>
     <string name="PasscodeRemove">移除密码锁</string>
-    <string name="PasscodeHideAccount">隐藏账号</string>
+    <string name="PasscodeHideAccount">隐藏账户</string>
     <string name="PasscodeAllowPanic">使用恢复代码登出</string>
-    <string name="PasscodeAbout">为每个账号设置不同的密码，然后通过输入相应的密码来切换。</string>
+    <string name="PasscodeAbout">为每个账户设置不同的密码，然后通过输入相应的密码来切换。</string>
     <string name="PasscodePanicCode">恢复代码</string>
     <string name="PasscodePanicCodeSet">设置恢复代码</string>
     <string name="PasscodePanicCodeEdit">更改恢复代码</string>
     <string name="disableSendTyping">禁用发送状态信息</string>
     <string name="PasscodePanicCodeRemove">关闭恢复代码</string>
     <string name="PasscodePanicCodeRemoveConfirmMessage">您确定要关闭恢复代码吗？</string>
-    <string name="PasscodeRemoveConfirmMessage">您确定要移除此账号的密码锁吗？</string>
-    <string name="PasscodePanicCodeAbout">如果出现错误，请使用恢复代码登出账号。</string>
+    <string name="PasscodeRemoveConfirmMessage">您确定要移除此账户的密码锁吗？</string>
+    <string name="PasscodePanicCodeAbout">如果出现错误，请使用恢复代码登出账户。</string>
     <string name="PhotoCopied">图片已复制</string>
     <string name="CopyPhoto">复制图片</string>
     <string name="hidePremiumStickerAnim">隐藏会员贴图动画</string>
@@ -202,4 +202,13 @@
     <string name="icon_5">图标 5</string>
     <string name="disablePremiumSticker">禁用会员贴纸栏</string>
     <string name="hideProxySponsorChannel">隐藏代理赞助商频道</string>
+    <string name="disablePreviewVideoSoundShortcut">禁用预览视频音量快捷键</string>
+    <string name="disablePreviewVideoSoundShortcutNotice">禁用音量键以启用预览视频的声音</string>
+    <string name="quickToggleAnonymous">快速切换匿名发言</string>
+    <string name="quickToggleAnonymousNotice">如果你是该群组的所有者</string>
+    <string name="Anonymous">匿名</string>
+    <string name="Channel">频道</string>
+    <string name="SwitchToAnonymously">切换到匿名模式</string>
+    <string name="SwitchToPersonalAccount">切换到个人账户</string>
+    <string name="openArchiveOnPull">Open Archive On Pull</string>
 </resources>
