@@ -63,10 +63,7 @@ public class FileLog {
     }
 
     public FileLog() {
-        if (!BuildVars.LOGS_ENABLED) {
-            return;
-        }
-        init();
+        return;
     }
 
 
@@ -74,78 +71,11 @@ public class FileLog {
     private static HashSet<String> excludeRequests;
 
     public static void dumpResponseAndRequest(TLObject request, TLObject response, TLRPC.TL_error error, long requestMsgId, long startRequestTimeInMillis, int requestToken) {
-        if (!BuildVars.DEBUG_PRIVATE_VERSION || !BuildVars.LOGS_ENABLED || request == null) {
-            return;
-        }
-        String requestSimpleName = request.getClass().getSimpleName();
-        checkGson();
-
-        if (excludeRequests.contains(requestSimpleName)) {
-            return;
-        }
-        try {
-            String req = "req -> " + requestSimpleName + " : " + gson.toJson(request);
-            String res = "null";
-            if (response != null) {
-                res = "res -> " + response.getClass().getSimpleName() + " : " + gson.toJson(response);
-            } else if (error != null) {
-                res = "err -> " + error.getClass().getSimpleName() + " : " + gson.toJson(error);
-            }
-            String finalRes = res;
-            long time = System.currentTimeMillis();
-            FileLog.getInstance().logQueue.postRunnable(() -> {
-                try {
-                    String metadata = "requestMsgId=" + requestMsgId + " requestingTime=" + (System.currentTimeMillis() - startRequestTimeInMillis) +  " request_token=" + requestToken;
-                    FileLog.getInstance().tlStreamWriter.write(getInstance().dateFormat.format(time) + " " + metadata);
-                    FileLog.getInstance().tlStreamWriter.write("\n");
-                    FileLog.getInstance().tlStreamWriter.write(req);
-                    FileLog.getInstance().tlStreamWriter.write("\n");
-                    FileLog.getInstance().tlStreamWriter.write(finalRes);
-                    FileLog.getInstance().tlStreamWriter.write("\n\n");
-                    FileLog.getInstance().tlStreamWriter.flush();
-
-                    Log.d(mtproto_tag, metadata);
-                    Log.d(mtproto_tag, req);
-                    Log.d(mtproto_tag, finalRes);
-                    Log.d(mtproto_tag, " ");
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-            });
-        } catch (Throwable e) {
-            FileLog.e(e);
-        }
+        return;
     }
 
     public static void dumpUnparsedMessage(TLObject message, long messageId) {
-        if (!BuildVars.DEBUG_PRIVATE_VERSION || !BuildVars.LOGS_ENABLED || message == null) {
-            return;
-        }
-        try {
-            getInstance().dateFormat.format(System.currentTimeMillis());
-            String messageStr = "receive message -> " + message.getClass().getSimpleName() + " : " + gson.toJson(message);
-            String res = "null";
-            long time = System.currentTimeMillis();
-            FileLog.getInstance().logQueue.postRunnable(() -> {
-                try {
-                    String metadata = getInstance().dateFormat.format(time);// + " msgId=" + messageId;
-
-                    FileLog.getInstance().tlStreamWriter.write(metadata);
-                    FileLog.getInstance().tlStreamWriter.write("\n");
-                    FileLog.getInstance().tlStreamWriter.write(messageStr);
-                    FileLog.getInstance().tlStreamWriter.write("\n\n");
-                    FileLog.getInstance().tlStreamWriter.flush();
-
-                    Log.d(mtproto_tag, "msgId=" + messageId);
-                    Log.d(mtproto_tag, messageStr);
-                    Log.d(mtproto_tag, " ");
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-            });
-        } catch (Throwable e) {
-            FileLog.e(e);
-        }
+        return;
     }
 
     private static void checkGson() {
@@ -188,81 +118,18 @@ public class FileLog {
 
 
     public void init() {
-        if (initied) {
-            return;
-        }
-        dateFormat = FastDateFormat.getInstance("dd_MM_yyyy_HH_mm_ss", Locale.US);
-        String date = dateFormat.format(System.currentTimeMillis());
-        try {
-            File sdCard = ApplicationLoader.applicationContext.getExternalFilesDir(null);
-            if (sdCard == null) {
-                return;
-            }
-            File dir = new File(sdCard.getAbsolutePath() + "/logs");
-            dir.mkdirs();
-
-            currentFile = new File(dir, date + ".txt");
-            tlRequestsFile = new File(dir, date + "_mtproto.txt");
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        try {
-            logQueue = new DispatchQueue("logQueue");
-            currentFile.createNewFile();
-            FileOutputStream stream = new FileOutputStream(currentFile);
-            streamWriter = new OutputStreamWriter(stream);
-            streamWriter.write("-----start log " + date + "-----\n");
-            streamWriter.flush();
-
-            FileOutputStream tlStream = new FileOutputStream(tlRequestsFile);
-            tlStreamWriter = new OutputStreamWriter(tlStream);
-            tlStreamWriter.write("-----start log " + date + "-----\n");
-            tlStreamWriter.flush();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        initied = true;
+        return;
     }
 
     public static void ensureInitied() {
-        getInstance().init();
+        return;
     }
 
     public static String getNetworkLogPath() {
-        if (!BuildVars.LOGS_ENABLED) {
-            return "";
-        }
-        try {
-            File sdCard = ApplicationLoader.applicationContext.getExternalFilesDir(null);
-            if (sdCard == null) {
-                return "";
-            }
-            File dir = new File(sdCard.getAbsolutePath() + "/logs");
-            dir.mkdirs();
-            getInstance().networkFile = new File(dir, getInstance().dateFormat.format(System.currentTimeMillis()) + "_net.txt");
-            return getInstance().networkFile.getAbsolutePath();
-        } catch (Throwable e) {
-            e.printStackTrace();
-        }
         return "";
     }
 
     public static String getTonlibLogPath() {
-        if (!BuildVars.LOGS_ENABLED) {
-            return "";
-        }
-        try {
-            File sdCard = ApplicationLoader.applicationContext.getExternalFilesDir(null);
-            if (sdCard == null) {
-                return "";
-            }
-            File dir = new File(sdCard.getAbsolutePath() + "/logs");
-            dir.mkdirs();
-            getInstance().tonlibFile = new File(dir, getInstance().dateFormat.format(System.currentTimeMillis()) + "_tonlib.txt");
-            return getInstance().tonlibFile.getAbsolutePath();
-        } catch (Throwable e) {
-            e.printStackTrace();
-        }
         return "";
     }
 
