@@ -89,6 +89,7 @@ public class ChatSettingActivity extends BaseActivity {
     private int customQuickMessageRow;
     private int scrollableChatPreviewRow;
     private int showTabsOnForwardRow;
+    private int disableStickersAutoReorderRow;
     private int chat2Row;
 
 
@@ -286,6 +287,15 @@ public class ChatSettingActivity extends BaseActivity {
             if (view instanceof TextCheckCell) {
                 ((TextCheckCell) view).setChecked(ConfigManager.getBooleanOrFalse(Defines.showTabsOnForward));
             }
+        } else if (position == disableStickersAutoReorderRow) {
+            if (ConfigManager.getBooleanOrDefault(Defines.disableStickersAutoReorder, true)) {
+                ConfigManager.putBoolean(Defines.disableStickersAutoReorder, false);
+            } else {
+                ConfigManager.putBoolean(Defines.disableStickersAutoReorder, true);
+            }
+            if (view instanceof TextCheckCell) {
+                ((TextCheckCell) view).setChecked(ConfigManager.getBooleanOrFalse(Defines.disableStickersAutoReorder));
+            }
         } else if (position == disablePreviewVideoSoundShortcutRow) {
             ConfigManager.toggleBoolean(Defines.disablePreviewVideoSoundShortcut);
             if (view instanceof TextCheckCell) {
@@ -354,6 +364,7 @@ public class ChatSettingActivity extends BaseActivity {
         customQuickMessageRow = rowCount++;
         scrollableChatPreviewRow = rowCount++;
         showTabsOnForwardRow = rowCount++;
+        disableStickersAutoReorderRow = rowCount++;
         chat2Row = rowCount++;
         if (listAdapter != null) {
             listAdapter.notifyDataSetChanged();
@@ -443,7 +454,9 @@ public class ChatSettingActivity extends BaseActivity {
                     } else if (position == disablePreviewVideoSoundShortcutRow) {
                         textCell.setTextAndValueAndCheck(LocaleController.getString("disablePreviewVideoSoundShortcut", R.string.disablePreviewVideoSoundShortcut),LocaleController.getString("disablePreviewVideoSoundShortcutNotice", R.string.disablePreviewVideoSoundShortcutNotice), ConfigManager.getBooleanOrFalse(Defines.disablePreviewVideoSoundShortcut), true, true);
                     } else if (position == quickToggleAnonymous) {
-                        textCell.setTextAndValueAndCheck(LocaleController.getString("quickToggleAnonymous", R.string.quickToggleAnonymous), LocaleController.getString("quickToggleAnonymousNotice",R.string.quickToggleAnonymousNotice),ConfigManager.getBooleanOrFalse(Defines.quickToggleAnonymous), true, true);
+                        textCell.setTextAndValueAndCheck(LocaleController.getString("quickToggleAnonymous", R.string.quickToggleAnonymous), LocaleController.getString("quickToggleAnonymousNotice", R.string.quickToggleAnonymousNotice), ConfigManager.getBooleanOrFalse(Defines.quickToggleAnonymous), true, true);
+                    } else if (position == disableStickersAutoReorderRow) {
+                        textCell.setTextAndCheck(LocaleController.getString("disableStickersAutoReorder", R.string.disableStickersAutoReorder), ConfigManager.getBooleanOrFalse(Defines.disableStickersAutoReorder), true);
                     }
                     break;
                 }

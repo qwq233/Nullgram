@@ -5788,4 +5788,5 @@
     <string name="DebugMessageSkeletonsSaturation">Saturation</string>
     <string name="DebugAltNavigation">Alternative navigation</string>
     <string name="DebugGeneral">General</string>
+    <string name="disableStickersAutoReorder">Disable sticker packs auto-reorder</string>
 </resources>
