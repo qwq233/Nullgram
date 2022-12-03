@@ -7797,7 +7797,7 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
                         editItemVisible = true;
                     }
                 } else {
-                    if (ChatObject.hasAdminRights(chat) || chat.megagroup && ChatObject.canChangeChatInfo(chat)) {
+                    if ((ChatObject.hasAdminRights(chat) || chat.megagroup && ChatObject.canChangeChatInfo(chat)) || chat.megagroup) {
                         editItemVisible = true;
                     }
                 }
@@ -7850,9 +7850,7 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
                     ChatObject.Call call = getMessagesController().getGroupCall(chatId, false);
                     callItemVisible = call != null;
                 }
-                if (ChatObject.canChangeChatInfo(chat)) {
-                    editItemVisible = true;
-                }
+                editItemVisible = true; // enable edit item by default
                 if (!ChatObject.isKickedFromChat(chat) && !ChatObject.isLeftFromChat(chat)) {
                     canSearchMembers = true;
                     otherItem.addSubItem(search_members, R.drawable.msg_search, LocaleController.getString("SearchMembers", R.string.SearchMembers));

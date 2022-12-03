@@ -68,7 +68,6 @@ import org.telegram.ui.Cells.TextSettingsCell;
 import org.telegram.ui.Components.AlertsCreator;
 import org.telegram.ui.Components.AvatarDrawable;
 import org.telegram.ui.Components.BackupImageView;
-import org.telegram.ui.Components.Bulletin;
 import org.telegram.ui.Components.BulletinFactory;
 import org.telegram.ui.Components.CombinedDrawable;
 import org.telegram.ui.Components.CubicBezierInterpolator;
@@ -565,7 +564,7 @@ public class ChatEditActivity extends BaseFragment implements ImageUpdater.Image
         } else {
             nameTextView.setHint(LocaleController.getString("GroupName", R.string.GroupName));
         }
-        nameTextView.setEnabled(ChatObject.canChangeChatInfo(currentChat));
+        nameTextView.setEnabled(ChatObject.hasAdminRights(currentChat) && ChatObject.canChangeChatInfo(currentChat));
         nameTextView.setFocusable(nameTextView.isEnabled());
         nameTextView.getEditText().addTextChangedListener(new TextWatcher() {
             @Override
@@ -638,7 +637,7 @@ public class ChatEditActivity extends BaseFragment implements ImageUpdater.Image
         descriptionTextView.setGravity(LocaleController.isRTL ? Gravity.RIGHT : Gravity.LEFT);
         descriptionTextView.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_FLAG_CAP_SENTENCES | InputType.TYPE_TEXT_FLAG_MULTI_LINE | InputType.TYPE_TEXT_FLAG_AUTO_CORRECT);
         descriptionTextView.setImeOptions(EditorInfo.IME_ACTION_DONE);
-        descriptionTextView.setEnabled(ChatObject.canChangeChatInfo(currentChat));
+        descriptionTextView.setEnabled(ChatObject.hasAdminRights(currentChat) && ChatObject.canChangeChatInfo(currentChat));
         descriptionTextView.setFocusable(descriptionTextView.isEnabled());
         inputFilters = new InputFilter[1];
         inputFilters[0] = new InputFilter.LengthFilter(255);
