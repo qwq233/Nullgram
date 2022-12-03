@@ -3,6 +3,7 @@ package org.telegram.messenger;
 import android.os.SystemClock;
 import android.text.TextUtils;
 import android.util.Base64;
+import android.util.SparseBooleanArray;
 
 import androidx.annotation.IntDef;
 import androidx.collection.LongSparseArray;
@@ -263,6 +264,8 @@ public class PushListenerController {
                     long chat_id;
                     long user_id;
                     long dialogId = 0;
+
+                    int topicId = 0;
                     boolean scheduled;
                     if (custom.has("channel_id")) {
                         channel_id = custom.getLong("channel_id");
@@ -281,6 +284,9 @@ public class PushListenerController {
                         dialogId = -chat_id;
                     } else {
                         chat_id = 0;
+                    }
+                    if (custom.has("topic_id")) {
+                        topicId =custom.getInt("topic_id");
                     }
                     if (custom.has("encryption_id")) {
                         dialogId = DialogObject.makeEncryptedDialogId(custom.getInt("encryption_id"));
@@ -305,7 +311,7 @@ public class PushListenerController {
                                 TLRPC.TL_updateReadChannelInbox update = new TLRPC.TL_updateReadChannelInbox();
                                 update.channel_id = channel_id;
                                 update.max_id = max_id;
-                                update.still_unread_count = -1;
+                                update.still_unread_count = 0;
                                 updates.add(update);
                             } else {
                                 TLRPC.TL_updateReadHistoryInbox update = new TLRPC.TL_updateReadHistoryInbox();
@@ -329,9 +335,27 @@ public class PushListenerController {
                                 ids.add(Utilities.parseInt(messagesArgs[a]));
                             }
                             deletedMessages.put(-channel_id, ids);
-                            NotificationsController.getInstance(currentAccount).removeDeletedMessagesFromNotifications(deletedMessages);
+                            NotificationsController.getInstance(currentAccount).removeDeletedMessagesFromNotifications(deletedMessages, false);
 
                             MessagesController.getInstance(currentAccount).deleteMessagesByPush(dialogId, ids, channel_id);
+                            if (BuildVars.LOGS_ENABLED) {
+                                FileLog.d(tag + " received " + loc_key + " for dialogId = " + dialogId + " mids = " + TextUtils.join(",", ids));
+                            }
+                        } else if ("READ_REACTION".equals(loc_key)) {
+                            String messages = custom.getString("messages");
+                            String[] messagesArgs = messages.split(",");
+                            LongSparseArray<ArrayList<Integer>> deletedMessages = new LongSparseArray<>();
+                            ArrayList<Integer> ids = new ArrayList<>();
+                            SparseBooleanArray sparseBooleanArray = new SparseBooleanArray();
+                            for (int a = 0; a < messagesArgs.length; a++) {
+                                int messageId = Utilities.parseInt(messagesArgs[a]);
+                                ids.add(messageId);
+                                sparseBooleanArray.put(messageId, false);
+                            }
+                            deletedMessages.put(-channel_id, ids);
+                            NotificationsController.getInstance(currentAccount).removeDeletedMessagesFromNotifications(deletedMessages, true);
+
+                            MessagesController.getInstance(currentAccount).checkUnreadReactions(dialogId, topicId, sparseBooleanArray);
                             if (BuildVars.LOGS_ENABLED) {
                                 FileLog.d(tag + " received " + loc_key + " for dialogId = " + dialogId + " mids = " + TextUtils.join(",", ids));
                             }
@@ -1128,6 +1152,11 @@ public class PushListenerController {
                                     messageOwner.from_scheduled = scheduled;
 
                                     MessageObject messageObject = new MessageObject(currentAccount, messageOwner, messageText, name, userName, localMessage, channel, supergroup, edited);
+                                    if (topicId != 0) {
+                                        messageObject.messageOwner.reply_to = new TLRPC.TL_messageReplyHeader();
+                                        messageObject.messageOwner.reply_to.forum_topic = true;
+                                        messageObject.messageOwner.reply_to.reply_to_top_id = topicId;
+                                    }
                                     messageObject.isReactionPush = loc_key.startsWith("REACT_") || loc_key.startsWith("CHAT_REACT_");
                                     ArrayList<MessageObject> arrayList = new ArrayList<>();
                                     arrayList.add(messageObject);

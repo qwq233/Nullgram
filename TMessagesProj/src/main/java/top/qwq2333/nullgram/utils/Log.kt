@@ -62,6 +62,42 @@ object Log {
 
     /**
      * 日志等级 Debug
+     * @param msg 日志内容
+     */
+    @JvmStatic
+    fun d(tag: String, msg: String) {
+        Log.d(TAG, "$tag: $msg")
+    }
+
+    /**
+     * 日志等级 Info
+     * @param msg 日志内容
+     */
+    @JvmStatic
+    fun i(tag: String, msg: String) {
+        Log.i(TAG, "$tag: $msg")
+    }
+
+    /**
+     * 日志等级 Warn
+     * @param msg 日志内容
+     */
+    @JvmStatic
+    fun w(tag: String, msg: String) {
+        Log.w(TAG, "$tag: $msg")
+    }
+
+    /**
+     * 日志等级 Error
+     * @param msg 日志内容
+     */
+    @JvmStatic
+    fun e(tag: String, msg: String) {
+        Log.e(TAG, "$tag: $msg")
+    }
+
+    /**
+     * 日志等级 Debug
      * @param throwable 异常
      * @param msg 日志内容
      */

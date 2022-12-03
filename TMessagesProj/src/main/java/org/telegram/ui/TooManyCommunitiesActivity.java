@@ -267,7 +267,7 @@ public class TooManyCommunitiesActivity extends BaseFragment {
             for (int i = 0; i < chats.size(); i++) {
                 TLRPC.Chat chat = chats.get(i);
                 getMessagesController().putChat(chat, false);
-                getMessagesController().deleteParticipantFromChat(chat.id, currentUser, null);
+                getMessagesController().deleteParticipantFromChat(chat.id, currentUser);
             }
             finishFragment();
         });
@@ -603,7 +603,7 @@ public class TooManyCommunitiesActivity extends BaseFragment {
                     TLRPC.Chat chat = inactiveChats.get(a);
                     boolean found = false;
                     for (int i = 0; i < 2; i++) {
-                        String name = i == 0 ? chat.title : chat.username;
+                        String name = i == 0 ? chat.title : ChatObject.getPublicUsername(chat);
                         if (name == null) {
                             continue;
                         }

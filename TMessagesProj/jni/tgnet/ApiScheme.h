@@ -95,10 +95,17 @@ public:
     void serializeToStream(NativeByteBuffer *stream);
 };
 
+class Reaction : public TLObject {
+
+public:
+    static Reaction *TLdeserialize(NativeByteBuffer *stream, uint32_t constructor, int32_t instanceNum, bool &error);
+};
+
+
 class TL_config : public TLObject {
 
 public:
-    static const uint32_t constructor = 0x330b4067;
+    static const uint32_t constructor = 0x232566ac;
 
     int32_t flags;
     int32_t date;
@@ -145,6 +152,7 @@ public:
     std::string suggested_lang_code;
     int32_t lang_pack_version;
     int32_t base_lang_pack_version;
+    std::unique_ptr<Reaction> reactions_default;
 
     static TL_config *TLdeserialize(NativeByteBuffer *stream, uint32_t constructor, int32_t instanceNum, bool &error);
     void readParams(NativeByteBuffer *stream, int32_t instanceNum, bool &error);
@@ -293,6 +301,20 @@ public:
     void serializeToStream(NativeByteBuffer *stream);
 };
 
+class TL_username : public TLObject {
+
+public:
+    static const uint32_t constructor = 0xb4073647;
+    int32_t flags;
+    bool editable;
+    bool active;
+    std::string username;
+
+    static TL_username *TLdeserialize(NativeByteBuffer *stream, uint32_t constructor, int32_t instanceNum, bool &error);
+    void readParams(NativeByteBuffer *stream, int32_t instanceNum, bool &error);
+    void serializeToStream(NativeByteBuffer *stream);
+};
+
 class User : public TLObject {
 
 public:
@@ -305,10 +327,12 @@ public:
     std::unique_ptr<UserProfilePhoto> photo;
     std::unique_ptr<UserStatus> status;
     int32_t flags;
+    int32_t flags2;
     int32_t bot_info_version;
     std::vector<std::unique_ptr<TL_restrictionReason>> restriction_reason;
     std::string bot_inline_placeholder;
     std::string lang_code;
+    std::vector<std::unique_ptr<TL_username>> usernames;
 
     static User *TLdeserialize(NativeByteBuffer *stream, uint32_t constructor, int32_t instanceNum, bool &error);
 };
@@ -325,7 +349,7 @@ public:
 class TL_user : public User {
 
 public:
-    static const uint32_t constructor = 0x3ff6ecb0;
+    static const uint32_t constructor = 0x8f97c628;
 
     void readParams(NativeByteBuffer *stream, int32_t instanceNum, bool &error);
     void serializeToStream(NativeByteBuffer *stream);
@@ -733,6 +757,39 @@ class TL_updatesTooLong : public TLObject {
 public:
     static const uint32_t constructor = 0xe317af7e;
 
+    void serializeToStream(NativeByteBuffer *stream);
+};
+
+
+class TL_reactionCustomEmoji : public Reaction {
+
+public:
+    static const uint32_t constructor = 0x8935fc73;
+    int64_t document_id;
+
+    void readParams(NativeByteBuffer *stream, int32_t instanceNum, bool &error);
+    void serializeToStream(NativeByteBuffer *stream);
+};
+
+
+class TL_reactionEmoji : public Reaction {
+
+public:
+    static const uint32_t constructor = 0x1b2286b8;
+    std::string emoticon;
+
+    void readParams(NativeByteBuffer *stream, int32_t instanceNum, bool &error);
+    void serializeToStream(NativeByteBuffer *stream);
+};
+
+
+
+class TL_reactionEmpty : public Reaction {
+
+public:
+    static const uint32_t constructor = 0x79f5d419;
+
+    void readParams(NativeByteBuffer *stream, int32_t instanceNum, bool &error);
     void serializeToStream(NativeByteBuffer *stream);
 };
 

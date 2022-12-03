@@ -86,7 +86,7 @@ public class MessagesSearchAdapter extends RecyclerListView.SelectionAdapter {
             DialogCell cell = (DialogCell) holder.itemView;
             cell.useSeparator = true;
             MessageObject messageObject = (MessageObject) getItem(position);
-            cell.setDialog(messageObject.getDialogId(), messageObject, messageObject.messageOwner.date, true);
+            cell.setDialog(messageObject.getDialogId(), messageObject, messageObject.messageOwner.date, true, false);
         }
     }
 

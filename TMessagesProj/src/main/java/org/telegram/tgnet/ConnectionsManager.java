@@ -46,6 +46,7 @@ import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Objects;
 import java.util.TimeZone;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.Executor;
@@ -80,6 +81,7 @@ public class ConnectionsManager extends BaseController {
     public final static int RequestFlagForceDownload = 32;
     public final static int RequestFlagInvokeAfter = 64;
     public final static int RequestFlagNeedQuickAck = 128;
+    public final static int RequestFlagDoNotWaitFloodWait = 1024;
 
     public final static int ConnectionStateConnecting = 1;
     public final static int ConnectionStateWaitingForNetwork = 2;
@@ -296,12 +298,12 @@ public class ConnectionsManager extends BaseController {
     public int sendRequest(final TLObject object, final RequestDelegate onComplete, final RequestDelegateTimestamp onCompleteTimestamp, final QuickAckDelegate onQuickAck, final WriteToSocketDelegate onWriteToSocket, final int flags, final int datacenterId, final int connetionType, final boolean immediate) {
         final int requestToken = lastRequestToken.getAndIncrement();
         Utilities.stageQueue.postRunnable(() -> {
-            if (BuildVars.LOGS_ENABLED) {
-                Log.d("send request " + object + " with token = " + requestToken);
+            if (false) {
+                // Log.d("send request " + object + " with token = " + requestToken);
             }
             var user = getUserConfig().getCurrentUser();
             if (user != null && user.bot && DatabaseUtils.isUserOnlyMethod(object)) {
-                Log.d("skip send request " + object + " user only method");
+                // Log.d("skip send request " + object + " user only method");
                 Utilities.stageQueue.postRunnable(() -> {
                     var error = new TLRPC.TL_error();
                     error.code = 400;
@@ -319,26 +321,49 @@ public class ConnectionsManager extends BaseController {
                 object.serializeToStream(buffer);
                 object.freeResources();
 
-                native_sendRequest(currentAccount, buffer.address, (response, errorCode, errorText, networkType, timestamp) -> {
+                long startRequestTime = 0;
+                if (BuildVars.DEBUG_PRIVATE_VERSION && false) {
+                    startRequestTime = System.currentTimeMillis();
+                }
+                long finalStartRequestTime = startRequestTime;
+                native_sendRequest(currentAccount, buffer.address, (response, errorCode, errorText, networkType, timestamp, requestMsgId) -> {
                     try {
                         TLObject resp = null;
                         TLRPC.TL_error error = null;
+
                         if (response != 0) {
                             NativeByteBuffer buff = NativeByteBuffer.wrap(response);
                             buff.reused = true;
-                            resp = object.deserializeResponse(buff, buff.readInt32(true), true);
+                            try {
+                                resp = object.deserializeResponse(buff, buff.readInt32(true), true);
+                            } catch (Exception e2) {
+                                if (BuildVars.DEBUG_PRIVATE_VERSION) {
+                                    throw e2;
+                                }
+                                FileLog.fatal(e2);
+                                return;
+                            }
                         } else if (errorText != null) {
                             error = new TLRPC.TL_error();
                             error.code = errorCode;
                             error.text = errorText;
                             Log.e(object + " got error " + error.code + " " + error.text);
                         }
+                        if (BuildVars.DEBUG_PRIVATE_VERSION && !getUserConfig().isClientActivated() && error != null && error.code == 400 && Objects.equals(error.text, "CONNECTION_NOT_INITED")) {
+                            if (false) {
+                                FileLog.d("Cleanup keys for " + currentAccount + " because of CONNECTION_NOT_INITED");
+                            }
+                            cleanup(true);
+                            sendRequest(object, onComplete, onCompleteTimestamp, onQuickAck, onWriteToSocket, flags, datacenterId, connetionType, immediate);
+                            return;
+                        }
                         if (resp != null) {
                             resp.networkType = networkType;
                         }
-                        if (BuildVars.LOGS_ENABLED) {
+                        if (false) {
                             Log.d("java received " + resp + " error = " + error);
                         }
+                        FileLog.dumpResponseAndRequest(object, resp, error, requestMsgId, finalStartRequestTime, requestToken);
                         final TLObject finalResponse = resp;
                         final TLRPC.TL_error finalError = error;
                         Utilities.stageQueue.postRunnable(() -> {
@@ -511,7 +536,7 @@ public class ConnectionsManager extends BaseController {
     public void setAppPaused(final boolean value, final boolean byScreenState) {
         if (!byScreenState) {
             appPaused = value;
-            if (BuildVars.LOGS_ENABLED) {
+            if (false) {
                 FileLog.d("app paused = " + value);
             }
             if (value) {
@@ -519,7 +544,7 @@ public class ConnectionsManager extends BaseController {
             } else {
                 appResumeCount++;
             }
-            if (BuildVars.LOGS_ENABLED) {
+            if (false) {
                 FileLog.d("app resume count " + appResumeCount);
             }
             if (appResumeCount < 0) {
@@ -535,7 +560,7 @@ public class ConnectionsManager extends BaseController {
             if (appPaused) {
                 return;
             }
-            if (BuildVars.LOGS_ENABLED) {
+            if (false) {
                 FileLog.d("reset app pause time");
             }
             if (lastPauseTime != 0 && System.currentTimeMillis() - lastPauseTime > 5000) {
@@ -546,21 +571,22 @@ public class ConnectionsManager extends BaseController {
         }
     }
 
-    public static void onUnparsedMessageReceived(long address, final int currentAccount) {
+    public static void onUnparsedMessageReceived(long address, final int currentAccount, long messageId) {
         try {
             NativeByteBuffer buff = NativeByteBuffer.wrap(address);
             buff.reused = true;
             int constructor = buff.readInt32(true);
             final TLObject message = TLClassStore.Instance().TLdeserialize(buff, constructor, true);
+            FileLog.dumpUnparsedMessage(message, messageId);
             if (message instanceof TLRPC.Updates) {
-                if (BuildVars.LOGS_ENABLED) {
-                    FileLog.d("java received " + message);
+                if (false) {
+                    // FileLog.d("java received " + message);
                 }
                 KeepAliveJob.finishJob();
                 Utilities.stageQueue.postRunnable(() -> AccountInstance.getInstance(currentAccount).getMessagesController().processUpdates((TLRPC.Updates) message, false));
             } else {
-                if (BuildVars.LOGS_ENABLED) {
-                    FileLog.d(String.format("java received unknown constructor 0x%x", constructor));
+                if (false) {
+                    // FileLog.d(String.format("java received unknown constructor 0x%x", constructor));
                 }
             }
         } catch (Exception e) {
@@ -602,7 +628,7 @@ public class ConnectionsManager extends BaseController {
         int flags = 0;
         EmuDetector detector = EmuDetector.with(ApplicationLoader.applicationContext);
         if (detector.detect()) {
-            if (BuildVars.LOGS_ENABLED) {
+            if (false) {
                 FileLog.d("detected emu");
             }
             flags |= 1024;
@@ -623,35 +649,35 @@ public class ConnectionsManager extends BaseController {
             boolean networkOnline = ApplicationLoader.isNetworkOnline();
             Utilities.stageQueue.postRunnable(() -> {
                 if (currentTask != null || second == 0 && Math.abs(lastDnsRequestTime - System.currentTimeMillis()) < 10000 || !networkOnline) {
-                    if (BuildVars.LOGS_ENABLED) {
+                    if (false) {
                         FileLog.d("don't start task, current task = " + currentTask + " next task = " + second + " time diff = " + Math.abs(lastDnsRequestTime - System.currentTimeMillis()) + " network = " + ApplicationLoader.isNetworkOnline());
                     }
                     return;
                 }
                 lastDnsRequestTime = System.currentTimeMillis();
                 if (second == 3) {
-                    if (BuildVars.LOGS_ENABLED) {
+                    if (false) {
                         FileLog.d("start mozilla txt task");
                     }
                     MozillaDnsLoadTask task = new MozillaDnsLoadTask(currentAccount);
                     task.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, null, null, null);
                     currentTask = task;
                 } else if (second == 2) {
-                    if (BuildVars.LOGS_ENABLED) {
+                    if (false) {
                         FileLog.d("start google txt task");
                     }
                     GoogleDnsLoadTask task = new GoogleDnsLoadTask(currentAccount);
                     task.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, null, null, null);
                     currentTask = task;
                 } else if (second == 1) {
-                    if (BuildVars.LOGS_ENABLED) {
+                    if (false) {
                         FileLog.d("start dns txt task");
                     }
                     DnsTxtLoadTask task = new DnsTxtLoadTask(currentAccount);
                     task.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, null, null, null);
                     currentTask = task;
                 } else {
-                    if (BuildVars.LOGS_ENABLED) {
+                    if (false) {
                         FileLog.d("start firebase task");
                     }
                     FirebaseTask task = new FirebaseTask(currentAccount);
@@ -802,7 +828,7 @@ public class ConnectionsManager extends BaseController {
         if (Build.VERSION.SDK_INT < 19) {
             return USE_IPV4_ONLY;
         }
-        if (BuildVars.LOGS_ENABLED) {
+        if (false) {
             try {
                 NetworkInterface networkInterface;
                 Enumeration<NetworkInterface> networkInterfaces = NetworkInterface.getNetworkInterfaces();
@@ -811,20 +837,20 @@ public class ConnectionsManager extends BaseController {
                     if (!networkInterface.isUp() || networkInterface.isLoopback() || networkInterface.getInterfaceAddresses().isEmpty()) {
                         continue;
                     }
-                    if (BuildVars.LOGS_ENABLED) {
+                    if (false) {
                         FileLog.d("valid interface: " + networkInterface);
                     }
                     List<InterfaceAddress> interfaceAddresses = networkInterface.getInterfaceAddresses();
                     for (int a = 0; a < interfaceAddresses.size(); a++) {
                         InterfaceAddress address = interfaceAddresses.get(a);
                         InetAddress inetAddress = address.getAddress();
-                        if (BuildVars.LOGS_ENABLED) {
+                        if (false) {
                             FileLog.d("address: " + inetAddress.getHostAddress());
                         }
                         if (inetAddress.isLinkLocalAddress() || inetAddress.isLoopbackAddress() || inetAddress.isMulticastAddress()) {
                             continue;
                         }
-                        if (BuildVars.LOGS_ENABLED) {
+                        if (false) {
                             FileLog.d("address is good");
                         }
                     }
@@ -1103,7 +1129,7 @@ public class ConnectionsManager extends BaseController {
                 if (result != null) {
                     native_applyDnsConfig(currentAccount, result.address, AccountInstance.getInstance(currentAccount).getUserConfig().getClientPhone(), responseDate);
                 } else {
-                    if (BuildVars.LOGS_ENABLED) {
+                    if (false) {
                         FileLog.d("failed to get dns txt result");
                         FileLog.d("start google task");
                     }
@@ -1221,7 +1247,7 @@ public class ConnectionsManager extends BaseController {
                 if (result != null) {
                     native_applyDnsConfig(currentAccount, result.address, AccountInstance.getInstance(currentAccount).getUserConfig().getClientPhone(), responseDate);
                 } else {
-                    if (BuildVars.LOGS_ENABLED) {
+                    if (false) {
                         FileLog.d("failed to get google result");
                         FileLog.d("start mozilla task");
                     }
@@ -1313,7 +1339,7 @@ public class ConnectionsManager extends BaseController {
                 buffer.writeBytes(bytes);
                 return buffer;
             } catch (Throwable e) {
-                FileLog.e(e);
+                FileLog.e(e, false);
             } finally {
                 try {
                     if (httpConnectionStream != null) {
@@ -1340,7 +1366,7 @@ public class ConnectionsManager extends BaseController {
                 if (result != null) {
                     native_applyDnsConfig(currentAccount, result.address, AccountInstance.getInstance(currentAccount).getUserConfig().getClientPhone(), responseDate);
                 } else {
-                    if (BuildVars.LOGS_ENABLED) {
+                    if (false) {
                         FileLog.d("failed to get mozilla txt result");
                     }
                 }
@@ -1365,7 +1391,7 @@ public class ConnectionsManager extends BaseController {
                 }
                 firebaseRemoteConfig = FirebaseRemoteConfig.getInstance();
                 String currentValue = firebaseRemoteConfig.getString("ipconfigv3");
-                if (BuildVars.LOGS_ENABLED) {
+                if (false) {
                     FileLog.d("current firebase value = " + currentValue);
                 }
 
@@ -1387,7 +1413,7 @@ public class ConnectionsManager extends BaseController {
                                         FileLog.e(e);
                                     }
                                 } else {
-                                    if (BuildVars.LOGS_ENABLED) {
+                                    if (false) {
                                         FileLog.d("failed to get firebase result");
                                         FileLog.d("start dns txt task");
                                     }
@@ -1401,7 +1427,7 @@ public class ConnectionsManager extends BaseController {
                 });
             } catch (Throwable e) {
                 Utilities.stageQueue.postRunnable(() -> {
-                    if (BuildVars.LOGS_ENABLED) {
+                    if (false) {
                         FileLog.d("failed to get firebase result");
                         FileLog.d("start dns txt task");
                     }
@@ -1409,7 +1435,7 @@ public class ConnectionsManager extends BaseController {
                     task.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, null, null, null);
                     currentTask = task;
                 });
-                FileLog.e(e);
+                FileLog.e(e, false);
             }
             return null;
         }

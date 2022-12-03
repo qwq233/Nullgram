@@ -18,6 +18,7 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import org.telegram.messenger.AndroidUtilities;
+import org.telegram.messenger.ChatObject;
 import org.telegram.messenger.Emoji;
 import org.telegram.messenger.MediaDataController;
 import org.telegram.messenger.UserConfig;
@@ -89,8 +90,8 @@ public class MentionCell extends LinearLayout {
             imageView.setImageDrawable(avatarDrawable);
         }
         nameTextView.setText(UserObject.getUserName(user));
-        if (user.username != null) {
-            usernameTextView.setText("@" + user.username);
+        if (UserObject.getPublicUsername(user) != null) {
+            usernameTextView.setText("@" + UserObject.getPublicUsername(user));
         } else {
             usernameTextView.setText("");
         }
@@ -116,6 +117,7 @@ public class MentionCell extends LinearLayout {
     }
 
     public void setChat(TLRPC.Chat chat) {
+        resetEmojiSuggestion();
         if (chat == null) {
             nameTextView.setText("");
             usernameTextView.setText("");
@@ -129,8 +131,9 @@ public class MentionCell extends LinearLayout {
             imageView.setImageDrawable(avatarDrawable);
         }
         nameTextView.setText(chat.title);
-        if (chat.username != null) {
-            usernameTextView.setText("@" + chat.username);
+        String username;
+        if ((username = ChatObject.getPublicUsername(chat)) != null) {
+            usernameTextView.setText("@" + username);
         } else {
             usernameTextView.setText("");
         }
@@ -153,9 +156,12 @@ public class MentionCell extends LinearLayout {
 
     public void resetEmojiSuggestion() {
         nameTextView.setPadding(0, 0, 0, 0);
-        if (emojiDrawable instanceof AnimatedEmojiDrawable) {
-            ((AnimatedEmojiDrawable) emojiDrawable).removeView(this);
+        if (emojiDrawable != null) {
+            if (emojiDrawable instanceof AnimatedEmojiDrawable) {
+                ((AnimatedEmojiDrawable) emojiDrawable).removeView(this);
+            }
             emojiDrawable = null;
+            invalidate();
         }
     }
 

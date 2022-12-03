@@ -35,10 +35,14 @@ import org.telegram.tgnet.ConnectionsManager;
 import org.telegram.tgnet.TLObject;
 import org.telegram.tgnet.TLRPC;
 import org.telegram.ui.ActionBar.Theme;
+import org.telegram.ui.Components.AnimatedEmojiDrawable;
 import org.telegram.ui.Components.AvatarDrawable;
 import org.telegram.ui.Components.CheckBox2;
+import org.telegram.ui.Components.CombinedDrawable;
 import org.telegram.ui.Components.Premium.PremiumGradient;
 import org.telegram.ui.NotificationsSettingsActivity;
+
+import java.util.Locale;
 
 public class ProfileSearchCell extends BaseCell implements NotificationCenter.NotificationCenterDelegate {
 
@@ -87,6 +91,7 @@ public class ProfileSearchCell extends BaseCell implements NotificationCenter.No
 
     private int statusLeft;
     private StaticLayout statusLayout;
+    private AnimatedEmojiDrawable.SwapAnimatedEmojiDrawable statusDrawable;
 
     private final RectF rect = new RectF();
 
@@ -109,6 +114,8 @@ public class ProfileSearchCell extends BaseCell implements NotificationCenter.No
         checkBox.setDrawUnchecked(false);
         checkBox.setDrawBackgroundAsArc(3);
         addView(checkBox);
+
+        statusDrawable = new AnimatedEmojiDrawable.SwapAnimatedEmojiDrawable(this, AndroidUtilities.dp(20));
     }
 
     public void setData(TLObject object, TLRPC.EncryptedChat ec, CharSequence n, CharSequence s, boolean needCount, boolean saved) {
@@ -267,6 +274,7 @@ public class ProfileSearchCell extends BaseCell implements NotificationCenter.No
                 nameLeft = AndroidUtilities.dp(11);
             }
             nameLockTop = AndroidUtilities.dp(22.0f);
+            updateStatus(false, null, false);
         } else {
             if (chat != null) {
                 dialog_id = -chat.id;
@@ -276,6 +284,7 @@ public class ProfileSearchCell extends BaseCell implements NotificationCenter.No
                 } else {
                     nameLeft = AndroidUtilities.dp(11);
                 }
+                updateStatus(drawCheck, null, false);
             } else if (user != null) {
                 dialog_id = user.id;
                 if (!LocaleController.isRTL) {
@@ -286,6 +295,7 @@ public class ProfileSearchCell extends BaseCell implements NotificationCenter.No
                 nameLockTop = AndroidUtilities.dp(21);
                 drawCheck = user.verified;
                 drawPremium = !user.self && MessagesController.getInstance(currentAccount).isPremiumUser(user);
+                updateStatus(drawCheck, user, false);
             }
         }
 
@@ -328,9 +338,10 @@ public class ProfileSearchCell extends BaseCell implements NotificationCenter.No
 
         if (drawCount) {
             TLRPC.Dialog dialog = MessagesController.getInstance(currentAccount).dialogs_dict.get(dialog_id);
-            if (dialog != null && dialog.unread_count != 0) {
-                lastUnreadCount = dialog.unread_count;
-                String countString = String.format("%d", dialog.unread_count);
+            int unreadCount = MessagesController.getInstance(currentAccount).getDialogUnreadCount(dialog);
+            if (unreadCount != 0) {
+                lastUnreadCount = unreadCount;
+                String countString = String.format(Locale.US, "%d", unreadCount);
                 countWidth = Math.max(AndroidUtilities.dp(12), (int) Math.ceil(Theme.dialogs_countTextPaint.measureText(countString)));
                 countLayout = new StaticLayout(countString, Theme.dialogs_countTextPaint, countWidth, Layout.Alignment.ALIGN_CENTER, 1.0f, 0.0f, false);
                 int w = countWidth + AndroidUtilities.dp(18);
@@ -400,9 +411,9 @@ public class ProfileSearchCell extends BaseCell implements NotificationCenter.No
         } else {
             if (ChatObject.isChannel(chat) && !chat.megagroup) {
                 if (chat.participants_count != 0) {
-                    statusString = LocaleController.formatPluralString("Subscribers", chat.participants_count);
+                    statusString = LocaleController.formatPluralStringComma("Subscribers", chat.participants_count);
                 } else {
-                    if (TextUtils.isEmpty(chat.username)) {
+                    if (!ChatObject.isPublic(chat)) {
                         statusString = LocaleController.getString("ChannelPrivate", R.string.ChannelPrivate).toLowerCase();
                     } else {
                         statusString = LocaleController.getString("ChannelPublic", R.string.ChannelPublic).toLowerCase();
@@ -410,11 +421,11 @@ public class ProfileSearchCell extends BaseCell implements NotificationCenter.No
                 }
             } else {
                 if (chat.participants_count != 0) {
-                    statusString = LocaleController.formatPluralString("Members", chat.participants_count);
+                    statusString = LocaleController.formatPluralStringComma("Members", chat.participants_count);
                 } else {
                     if (chat.has_geo) {
                         statusString = LocaleController.getString("MegaLocation", R.string.MegaLocation);
-                    } else if (TextUtils.isEmpty(chat.username)) {
+                    } else if (!ChatObject.isPublic(chat)) {
                         statusString = LocaleController.getString("MegaPrivate", R.string.MegaPrivate).toLowerCase();
                     } else {
                         statusString = LocaleController.getString("MegaPublic", R.string.MegaPublic).toLowerCase();
@@ -490,6 +501,25 @@ public class ProfileSearchCell extends BaseCell implements NotificationCenter.No
         nameLockLeft += getPaddingLeft();
     }
 
+    public void updateStatus(boolean verified, TLRPC.User user, boolean animated) {
+        if (verified) {
+            statusDrawable.set(new CombinedDrawable(Theme.dialogs_verifiedDrawable, Theme.dialogs_verifiedCheckDrawable, 0, 0), animated);
+            statusDrawable.setColor(null);
+        } else if (user != null && !user.self && user.emoji_status instanceof TLRPC.TL_emojiStatusUntil && ((TLRPC.TL_emojiStatusUntil) user.emoji_status).until > (int) (System.currentTimeMillis() / 1000)) {
+            statusDrawable.set(((TLRPC.TL_emojiStatusUntil) user.emoji_status).document_id, animated);
+            statusDrawable.setColor(Theme.getColor(Theme.key_chats_verifiedBackground, resourcesProvider));
+        } else if (user != null && !user.self && user.emoji_status instanceof TLRPC.TL_emojiStatus) {
+            statusDrawable.set(((TLRPC.TL_emojiStatus) user.emoji_status).document_id, animated);
+            statusDrawable.setColor(Theme.getColor(Theme.key_chats_verifiedBackground, resourcesProvider));
+        } else if (user != null && !user.self && MessagesController.getInstance(currentAccount).isPremiumUser(user)) {
+            statusDrawable.set(PremiumGradient.getInstance().premiumStarDrawableMini, animated);
+            statusDrawable.setColor(Theme.getColor(Theme.key_chats_verifiedBackground, resourcesProvider));
+        } else {
+            statusDrawable.set((Drawable) null, animated);
+            statusDrawable.setColor(Theme.getColor(Theme.key_chats_verifiedBackground, resourcesProvider));
+        }
+    }
+
     public void update(int mask) {
         TLRPC.FileLocation photo = null;
         if (user != null) {
@@ -525,6 +555,7 @@ public class ProfileSearchCell extends BaseCell implements NotificationCenter.No
             avatarImage.setImage(null, null, avatarDrawable, null, null, 0);
         }
 
+        avatarImage.setRoundRadius(chat != null && chat.forum ? AndroidUtilities.dp(16) : AndroidUtilities.dp(23));
         if (mask != 0) {
             boolean continueUpdate = false;
             if ((mask & MessagesController.UPDATE_MASK_AVATAR) != 0 && user != null || (mask & MessagesController.UPDATE_MASK_CHAT_AVATAR) != 0 && chat != null) {
@@ -541,6 +572,9 @@ public class ProfileSearchCell extends BaseCell implements NotificationCenter.No
                     continueUpdate = true;
                 }
             }
+            if (!continueUpdate && (mask & MessagesController.UPDATE_MASK_EMOJI_STATUS) != 0 && user != null) {
+                updateStatus(user.verified, user, true);
+            }
             if (!continueUpdate && ((mask & MessagesController.UPDATE_MASK_NAME) != 0 && user != null) || (mask & MessagesController.UPDATE_MASK_CHAT_NAME) != 0 && chat != null) {
                 String newName;
                 if (user != null) {
@@ -554,7 +588,7 @@ public class ProfileSearchCell extends BaseCell implements NotificationCenter.No
             }
             if (!continueUpdate && drawCount && (mask & MessagesController.UPDATE_MASK_READ_DIALOG_MESSAGE) != 0) {
                 TLRPC.Dialog dialog = MessagesController.getInstance(currentAccount).dialogs_dict.get(dialog_id);
-                if (dialog != null && dialog.unread_count != lastUnreadCount) {
+                if (dialog != null && MessagesController.getInstance(currentAccount).getDialogUnreadCount(dialog) != lastUnreadCount) {
                     continueUpdate = true;
                 }
             }
@@ -609,29 +643,20 @@ public class ProfileSearchCell extends BaseCell implements NotificationCenter.No
             canvas.translate(nameLeft, nameTop);
             nameLayout.draw(canvas);
             canvas.restore();
-            if (drawCheck || drawPremium) {
-                int x;
-                Drawable drawable = drawCheck ? Theme.dialogs_verifiedDrawable : PremiumGradient.getInstance().premiumStarDrawableMini;
-                if (LocaleController.isRTL) {
-                    if (nameLayout.getLineLeft(0) == 0) {
-                        x = nameLeft - AndroidUtilities.dp(6) - drawable.getIntrinsicWidth();
-                    } else {
-                        float w = nameLayout.getLineWidth(0);
-                        x = (int) (nameLeft + nameWidth - Math.ceil(w) - AndroidUtilities.dp(6) - drawable.getIntrinsicWidth());
-                    }
+
+            int x;
+            if (LocaleController.isRTL) {
+                if (nameLayout.getLineLeft(0) == 0) {
+                    x = nameLeft - AndroidUtilities.dp(6) - statusDrawable.getIntrinsicWidth();
                 } else {
-                    x = (int) (nameLeft + nameLayout.getLineRight(0) + AndroidUtilities.dp(6));
+                    float w = nameLayout.getLineWidth(0);
+                    x = (int) (nameLeft + nameWidth - Math.ceil(w) - AndroidUtilities.dp(6) - statusDrawable.getIntrinsicWidth());
                 }
-                if (drawCheck) {
-                    setDrawableBounds(Theme.dialogs_verifiedDrawable, x, nameTop + AndroidUtilities.dp(3));
-                    setDrawableBounds(Theme.dialogs_verifiedCheckDrawable, x, nameTop + AndroidUtilities.dp(3));
-                    Theme.dialogs_verifiedDrawable.draw(canvas);
-                    Theme.dialogs_verifiedCheckDrawable.draw(canvas);
-                } else if (drawPremium) {
-                    setDrawableBounds(drawable, x, nameTop + AndroidUtilities.dp(1.5f));
-                    drawable.draw(canvas);
-                }
+            } else {
+                x = (int) (nameLeft + nameLayout.getLineRight(0) + AndroidUtilities.dp(6));
             }
+            setDrawableBounds(statusDrawable, x, nameTop + (nameLayout.getHeight() - statusDrawable.getIntrinsicHeight()) / 2f);
+            statusDrawable.draw(canvas);
         }
 
         if (statusLayout != null) {
@@ -644,7 +669,7 @@ public class ProfileSearchCell extends BaseCell implements NotificationCenter.No
         if (countLayout != null) {
             int x = countLeft - AndroidUtilities.dp(5.5f);
             rect.set(x, countTop, x + countWidth + AndroidUtilities.dp(11), countTop + AndroidUtilities.dp(23));
-            canvas.drawRoundRect(rect, 11.5f * AndroidUtilities.density, 11.5f * AndroidUtilities.density, MessagesController.getInstance(currentAccount).isDialogMuted(dialog_id) ? Theme.dialogs_countGrayPaint : Theme.dialogs_countPaint);
+            canvas.drawRoundRect(rect, 11.5f * AndroidUtilities.density, 11.5f * AndroidUtilities.density, MessagesController.getInstance(currentAccount).isDialogMuted(dialog_id, 0) ? Theme.dialogs_countGrayPaint : Theme.dialogs_countPaint);
             canvas.save();
             canvas.translate(countLeft, countTop + AndroidUtilities.dp(4));
             countLayout.draw(canvas);

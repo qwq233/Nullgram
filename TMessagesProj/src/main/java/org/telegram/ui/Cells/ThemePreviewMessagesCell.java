@@ -25,13 +25,14 @@ import org.telegram.messenger.MessageObject;
 import org.telegram.messenger.R;
 import org.telegram.messenger.UserConfig;
 import org.telegram.tgnet.TLRPC;
-import org.telegram.ui.ActionBar.ActionBarLayout;
 import org.telegram.ui.ActionBar.BaseFragment;
+import org.telegram.ui.ActionBar.INavigationLayout;
 import org.telegram.ui.ActionBar.Theme;
 import org.telegram.ui.Components.BackgroundGradientDrawable;
 import org.telegram.ui.Components.LayoutHelper;
 import org.telegram.ui.Components.MotionBackgroundDrawable;
 import org.telegram.ui.Components.Reactions.ReactionsEffectOverlay;
+import org.telegram.ui.Components.Reactions.ReactionsLayoutInBubble;
 
 public class ThemePreviewMessagesCell extends LinearLayout {
 
@@ -46,13 +47,13 @@ public class ThemePreviewMessagesCell extends LinearLayout {
     private Drawable oldBackgroundDrawable;
     private ChatMessageCell[] cells = new ChatMessageCell[2];
     private Drawable shadowDrawable;
-    private ActionBarLayout parentLayout;
+    private INavigationLayout parentLayout;
     private final int type;
 
     public BaseFragment fragment;
 
     @SuppressLint("ClickableViewAccessibility")
-    public ThemePreviewMessagesCell(Context context, ActionBarLayout layout, int type) {
+    public ThemePreviewMessagesCell(Context context, INavigationLayout layout, int type) {
         super(context);
         this.type = type;
         int currentAccount = UserConfig.selectedAccount;
@@ -190,12 +191,12 @@ public class ThemePreviewMessagesCell extends LinearLayout {
                 private GestureDetector gestureDetector = new GestureDetector(context, new GestureDetector.SimpleOnGestureListener() {
                     @Override
                     public boolean onDoubleTap(MotionEvent e) {
-                        boolean added = getMessageObject().selectReaction(MediaDataController.getInstance(currentAccount).getDoubleTapReaction(), false, false);
+                        boolean added = getMessageObject().selectReaction(ReactionsLayoutInBubble.VisibleReaction.fromEmojicon(MediaDataController.getInstance(currentAccount).getDoubleTapReaction()), false, false);
                         setMessageObject(getMessageObject(), null, false, false);
                         requestLayout();
                         ReactionsEffectOverlay.removeCurrent(false);
                         if (added) {
-                            ReactionsEffectOverlay.show(fragment, null, cells[1], e.getX(), e.getY(), MediaDataController.getInstance(currentAccount).getDoubleTapReaction(), currentAccount, ReactionsEffectOverlay.LONG_ANIMATION);
+                            ReactionsEffectOverlay.show(fragment, null, cells[1], null, e.getX(), e.getY(), ReactionsLayoutInBubble.VisibleReaction.fromEmojicon(MediaDataController.getInstance(currentAccount).getDoubleTapReaction()), currentAccount, ReactionsEffectOverlay.LONG_ANIMATION);
                             ReactionsEffectOverlay.startAnimation();
                         }
                         getViewTreeObserver().addOnPreDrawListener(new ViewTreeObserver.OnPreDrawListener() {

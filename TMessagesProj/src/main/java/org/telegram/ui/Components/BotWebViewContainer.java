@@ -45,11 +45,9 @@ import androidx.core.util.Consumer;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.telegram.PhoneFormat.PhoneFormat;
 import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.ApplicationLoader;
 import org.telegram.messenger.BotWebViewVibrationEffect;
-import org.telegram.messenger.ContactsController;
 import org.telegram.messenger.FileLog;
 import org.telegram.messenger.ImageLocation;
 import org.telegram.messenger.ImageReceiver;
@@ -58,7 +56,6 @@ import org.telegram.messenger.MediaDataController;
 import org.telegram.messenger.MessagesController;
 import org.telegram.messenger.NotificationCenter;
 import org.telegram.messenger.R;
-import org.telegram.messenger.SendMessagesHelper;
 import org.telegram.messenger.SvgHelper;
 import org.telegram.messenger.UserConfig;
 import org.telegram.messenger.UserObject;
@@ -77,7 +74,6 @@ import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -271,6 +267,9 @@ public class BotWebViewContainer extends FrameLayout implements NotificationCent
         settings.setGeolocationEnabled(true);
         settings.setDomStorageEnabled(true);
         settings.setDatabaseEnabled(true);
+
+        // Hackfix text on some Xiaomi devices
+        settings.setTextSize(WebSettings.TextSize.NORMAL);
 
         File databaseStorage = new File(ApplicationLoader.getFilesDirFixed(), "webview_database");
         if (databaseStorage.exists() && databaseStorage.isDirectory() || databaseStorage.mkdirs()) {
@@ -734,7 +733,8 @@ public class BotWebViewContainer extends FrameLayout implements NotificationCent
 
     public void loadFlickerAndSettingsItem(int currentAccount, long botId, ActionBarMenuSubItem settingsItem) {
         TLRPC.User user = MessagesController.getInstance(currentAccount).getUser(botId);
-        if (user.username != null && Objects.equals(user.username, DURGER_KING_USERNAME)) {
+        String username = UserObject.getPublicUsername(user);
+        if (username != null && Objects.equals(username, DURGER_KING_USERNAME)) {
             flickerView.setVisibility(VISIBLE);
             flickerView.setAlpha(1f);
             flickerView.setImageDrawable(SvgHelper.getDrawable(R.raw.durgerking_placeholder, getColor(Theme.key_windowBackgroundGray)));
@@ -867,9 +867,15 @@ public class BotWebViewContainer extends FrameLayout implements NotificationCent
         return isBackButtonVisible;
     }
 
-    @SuppressWarnings("deprecation")
     public void evaluateJs(String script) {
-        checkCreateWebView();
+        evaluateJs(script, true);
+    }
+
+    @SuppressWarnings("deprecation")
+    public void evaluateJs(String script, boolean create) {
+        if (create) {
+            checkCreateWebView();
+        }
         if (webView == null) {
             return;
         }
@@ -905,7 +911,7 @@ public class BotWebViewContainer extends FrameLayout implements NotificationCent
     }
 
     private void notifyEvent(String event, JSONObject eventData) {
-        evaluateJs("window.Telegram.WebView.receiveEvent('" + event + "', " + eventData + ");");
+        evaluateJs("window.Telegram.WebView.receiveEvent('" + event + "', " + eventData + ");", false);
     }
 
     public void setWebViewScrollListener(WebViewScrollListener webViewScrollListener) {
@@ -1171,11 +1177,7 @@ public class BotWebViewContainer extends FrameLayout implements NotificationCent
                         }
                     }
                     if (vibrationEffect != null) {
-                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                            AndroidUtilities.getVibrator().vibrate(vibrationEffect.getVibrationEffectForOreo());
-                        } else {
-                            AndroidUtilities.getVibrator().vibrate(vibrationEffect.fallbackTimings, -1);
-                        }
+                        vibrationEffect.vibrate();
                     }
                 } catch (Exception e) {
                     FileLog.e(e);

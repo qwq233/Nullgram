@@ -151,7 +151,7 @@ public class GroupVoipInviteAlert extends UsersAlertBase {
 
         rowCount = 0;
         emptyRow = rowCount++;
-        if (!TextUtils.isEmpty(currentChat.username) || ChatObject.canUserDoAdminAction(currentChat, ChatObject.ACTION_INVITE)) {
+        if (ChatObject.isPublic(currentChat) || ChatObject.canUserDoAdminAction(currentChat, ChatObject.ACTION_INVITE)) {
             addNewRow = rowCount++;
         }
         if (!loadingUsers || firstLoaded) {
@@ -487,7 +487,7 @@ public class GroupVoipInviteAlert extends UsersAlertBase {
                 emptyView.showProgress(true, true);
                 listView.setAnimateEmptyView(false, 0);
                 notifyDataSetChanged();
-                listView.setAnimateEmptyView(true, 0);
+                listView.setAnimateEmptyView(true, RecyclerListView.EMPTY_VIEW_ANIMATION_TYPE_ALPHA);
                 searchInProgress = true;
                 int searchId = ++lastSearchId;
                 AndroidUtilities.runOnUIThread(searchRunnable = () -> {
@@ -552,10 +552,11 @@ public class GroupVoipInviteAlert extends UsersAlertBase {
                             }
 
                             int found = 0;
+                            String username;
                             for (String q : search) {
                                 if (name.startsWith(q) || name.contains(" " + q) || tName != null && (tName.startsWith(q) || tName.contains(" " + q))) {
                                     found = 1;
-                                } else if (user.username != null && user.username.startsWith(q)) {
+                                } else if ((username = UserObject.getPublicUsername(user)) != null && username.startsWith(q)) {
                                     found = 2;
                                 }
 
@@ -691,7 +692,7 @@ public class GroupVoipInviteAlert extends UsersAlertBase {
                         return;
                     }
 
-                    String un = user.username;
+                    String un = UserObject.getPublicUsername(user);
                     CharSequence username = null;
                     SpannableStringBuilder name = null;
 

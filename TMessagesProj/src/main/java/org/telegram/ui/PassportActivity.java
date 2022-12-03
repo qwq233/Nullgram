@@ -210,7 +210,7 @@ public class PassportActivity extends BaseFragment implements NotificationCenter
     private ArrayList<TLRPC.TL_secureRequiredType> availableDocumentTypes;
     private TLRPC.TL_secureValue currentTypeValue;
     private TLRPC.TL_secureValue currentDocumentsTypeValue;
-    private TLRPC.TL_account_password currentPassword;
+    private TLRPC.account_Password currentPassword;
     private TLRPC.TL_auth_sentCode currentPhoneVerification;
 
     private ActionBarMenuItem doneItem;
@@ -666,7 +666,7 @@ public class PassportActivity extends BaseFragment implements NotificationCenter
         }
     }
 
-    public PassportActivity(int type, long botId, String scope, String publicKey, String payload, String nonce, String callbackUrl, TLRPC.TL_account_authorizationForm form, TLRPC.TL_account_password accountPassword) {
+    public PassportActivity(int type, long botId, String scope, String publicKey, String payload, String nonce, String callbackUrl, TLRPC.TL_account_authorizationForm form, TLRPC.account_Password accountPassword) {
         this(type, form, accountPassword, null, null, null, null, null, null);
         currentBotId = botId;
         currentPayload = payload;
@@ -844,7 +844,7 @@ public class PassportActivity extends BaseFragment implements NotificationCenter
         }
     }
 
-    public PassportActivity(int type, TLRPC.TL_account_authorizationForm form, TLRPC.TL_account_password accountPassword, TLRPC.TL_secureRequiredType secureType, TLRPC.TL_secureValue secureValue, TLRPC.TL_secureRequiredType secureDocumentsType, TLRPC.TL_secureValue secureDocumentsValue, HashMap<String, String> values, HashMap<String, String> documentValues) {
+    public PassportActivity(int type, TLRPC.TL_account_authorizationForm form, TLRPC.account_Password accountPassword, TLRPC.TL_secureRequiredType secureType, TLRPC.TL_secureValue secureValue, TLRPC.TL_secureRequiredType secureDocumentsType, TLRPC.TL_secureValue secureDocumentsValue, HashMap<String, String> values, HashMap<String, String> documentValues) {
         super();
         currentActivityType = type;
         currentForm = form;
@@ -1215,9 +1215,11 @@ public class PassportActivity extends BaseFragment implements NotificationCenter
                                 return;
                             }
                         } else if (currentActivityType == TYPE_EMAIL_VERIFICATION) {
-                            final TLRPC.TL_account_verifyEmail req = new TLRPC.TL_account_verifyEmail();
-                            req.email = currentValues.get("email");
-                            req.code = inputFields[FIELD_EMAIL].getText().toString();
+                            TLRPC.TL_account_verifyEmail req = new TLRPC.TL_account_verifyEmail();
+                            req.purpose = new TLRPC.TL_emailVerifyPurposePassport();
+                            TLRPC.TL_emailVerificationCode code = new TLRPC.TL_emailVerificationCode();
+                            code.code = inputFields[FIELD_EMAIL].getText().toString();
+                            req.verification = code;
                             int reqId = ConnectionsManager.getInstance(currentAccount).sendRequest(req, (response, error) -> AndroidUtilities.runOnUIThread(() -> {
                                 if (error == null) {
                                     delegate.saveValue(currentType, currentValues.get("email"), null, null, null, null, null, null, null, null, finishRunnable, errorRunnable);
@@ -1411,7 +1413,7 @@ public class PassportActivity extends BaseFragment implements NotificationCenter
         TLRPC.TL_account_getPassword req = new TLRPC.TL_account_getPassword();
         int reqId = ConnectionsManager.getInstance(currentAccount).sendRequest(req, (response, error) -> AndroidUtilities.runOnUIThread(() -> {
             if (response != null) {
-                currentPassword = (TLRPC.TL_account_password) response;
+                currentPassword = (TLRPC.account_Password) response;
                 if (!TwoStepVerificationActivity.canHandleCurrentPassword(currentPassword, false)) {
                     AlertsCreator.showUpdateAppAlert(getParentActivity(), LocaleController.getString("UpdateAppAlert", R.string.UpdateAppAlert), true);
                     return;
@@ -1755,7 +1757,7 @@ public class PassportActivity extends BaseFragment implements NotificationCenter
                             TLRPC.TL_account_getPassword getPasswordReq = new TLRPC.TL_account_getPassword();
                             ConnectionsManager.getInstance(currentAccount).sendRequest(getPasswordReq, (response2, error2) -> AndroidUtilities.runOnUIThread(() -> {
                                 if (error2 == null) {
-                                    currentPassword = (TLRPC.TL_account_password) response2;
+                                    currentPassword = (TLRPC.account_Password) response2;
                                     TwoStepVerificationActivity.initPasswordNewAlgo(currentPassword);
                                     resetSecret();
                                 }
@@ -1801,7 +1803,7 @@ public class PassportActivity extends BaseFragment implements NotificationCenter
                                 TLRPC.TL_account_getPassword getPasswordReq = new TLRPC.TL_account_getPassword();
                                 ConnectionsManager.getInstance(currentAccount).sendRequest(getPasswordReq, (response2, error2) -> AndroidUtilities.runOnUIThread(() -> {
                                     if (error2 == null) {
-                                        currentPassword = (TLRPC.TL_account_password) response2;
+                                        currentPassword = (TLRPC.account_Password) response2;
                                         TwoStepVerificationActivity.initPasswordNewAlgo(currentPassword);
                                         generateNewSecret();
                                     }
@@ -1822,7 +1824,7 @@ public class PassportActivity extends BaseFragment implements NotificationCenter
                         TLRPC.TL_account_getPassword getPasswordReq = new TLRPC.TL_account_getPassword();
                         ConnectionsManager.getInstance(currentAccount).sendRequest(getPasswordReq, (response2, error2) -> AndroidUtilities.runOnUIThread(() -> {
                             if (error2 == null) {
-                                currentPassword = (TLRPC.TL_account_password) response2;
+                                currentPassword = (TLRPC.account_Password) response2;
                                 TwoStepVerificationActivity.initPasswordNewAlgo(currentPassword);
                                 onPasswordDone(saved);
                             }
@@ -2231,7 +2233,7 @@ public class PassportActivity extends BaseFragment implements NotificationCenter
                     if (v != null) {
                         v.vibrate(200);
                     }
-                    AndroidUtilities.shakeView(getViewByType(requiredType), 2, 0);
+                    AndroidUtilities.shakeView(getViewByType(requiredType));
                     return;
                 }
                 String key = getNameForType(requiredType.type);
@@ -2241,7 +2243,7 @@ public class PassportActivity extends BaseFragment implements NotificationCenter
                     if (v != null) {
                         v.vibrate(200);
                     }
-                    AndroidUtilities.shakeView(getViewByType(requiredType), 2, 0);
+                    AndroidUtilities.shakeView(getViewByType(requiredType));
                     return;
                 }
                 valuesToSend.add(new ValueToSend(value, requiredType.selfie_required, requiredType.translation_required));
@@ -3577,7 +3579,7 @@ public class PassportActivity extends BaseFragment implements NotificationCenter
         if (v != null) {
             v.vibrate(200);
         }
-        AndroidUtilities.shakeView(field, 2, 0);
+        AndroidUtilities.shakeView(field);
         scrollToField(field);
     }
 
@@ -4871,7 +4873,7 @@ public class PassportActivity extends BaseFragment implements NotificationCenter
                 currentPhotoViewerLayout = documentsLayout;
             }
             SecureDocument document1 = (SecureDocument) v.getTag();
-            PhotoViewer.getInstance().setParentActivity(getParentActivity());
+            PhotoViewer.getInstance().setParentActivity(PassportActivity.this);
             if (type == UPLOADING_TYPE_SELFIE) {
                 ArrayList<SecureDocument> arrayList = new ArrayList<>();
                 arrayList.add(selfieDocument);
@@ -5716,6 +5718,7 @@ public class PassportActivity extends BaseFragment implements NotificationCenter
                             if (error != null) {
                                 if (error.text.equals("EMAIL_VERIFICATION_NEEDED")) {
                                     TLRPC.TL_account_sendVerifyEmailCode req = new TLRPC.TL_account_sendVerifyEmailCode();
+                                    req.purpose = new TLRPC.TL_emailVerifyPurposePassport();
                                     req.email = text;
                                     ConnectionsManager.getInstance(currentAccount).sendRequest(req, (response1, error1) -> AndroidUtilities.runOnUIThread(() -> {
                                         if (response1 != null) {
@@ -6259,7 +6262,7 @@ public class PassportActivity extends BaseFragment implements NotificationCenter
         if (clear) {
             inputFields[FIELD_PASSWORD].setText("");
         }
-        AndroidUtilities.shakeView(inputFields[FIELD_PASSWORD], 2, 0);
+        AndroidUtilities.shakeView(inputFields[FIELD_PASSWORD]);
     }
 
     private void startPhoneVerification(boolean checkPermissions, final String phone, Runnable finishRunnable, ErrorRunnable errorRunnable, final PassportActivityDelegate delegate) {
@@ -7769,7 +7772,7 @@ public class PassportActivity extends BaseFragment implements NotificationCenter
                 code = getCode();
             }
             if (TextUtils.isEmpty(code)) {
-                AndroidUtilities.shakeView(codeFieldContainer, 2, 0);
+                AndroidUtilities.shakeView(codeFieldContainer);
                 return;
             }
             nextPressed = true;

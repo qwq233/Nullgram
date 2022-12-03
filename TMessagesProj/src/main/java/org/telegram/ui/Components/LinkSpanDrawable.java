@@ -6,8 +6,6 @@ import android.graphics.CornerPathEffect;
 import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.Rect;
-import android.graphics.Region;
-import android.os.Build;
 import android.os.SystemClock;
 import android.text.style.CharacterStyle;
 import top.qwq2333.nullgram.utils.Log;
@@ -17,7 +15,6 @@ import android.view.ViewConfiguration;
 import android.text.Layout;
 import android.text.Spannable;
 import android.text.SpannableString;
-import android.text.StaticLayout;
 import android.text.style.CharacterStyle;
 import android.text.style.ClickableSpan;
 import android.util.Pair;
@@ -69,7 +66,7 @@ public class LinkSpanDrawable<S extends CharacterStyle> {
     public LinkSpanDrawable(S span, Theme.ResourcesProvider resourcesProvider, float touchX, float touchY, boolean supportsLongPress) {
         mSpan = span;
         mResourcesProvider = resourcesProvider;
-        setColor(getThemedColor(Theme.key_chat_linkSelectBackground));
+        setColor(Theme.getColor(Theme.key_chat_linkSelectBackground, resourcesProvider));
         mTouchX = touchX;
         mTouchY = touchY;
         final long tapTimeout = ViewConfiguration.getTapTimeout();
@@ -209,11 +206,6 @@ public class LinkSpanDrawable<S extends CharacterStyle> {
         }
 
         return pressT < 1f || mReleaseStart >= 0 || (mSupportsLongPress && now - mStart < mLongPressDuration + mDuration);
-    }
-
-    private int getThemedColor(String key) {
-        Integer color = mResourcesProvider != null ? mResourcesProvider.getColor(key) : null;
-        return color != null ? color : Theme.getColor(key);
     }
 
     public static class LinkCollector {
@@ -388,6 +380,8 @@ public class LinkSpanDrawable<S extends CharacterStyle> {
         private OnLinkPress onPressListener;
         private OnLinkPress onLongPressListener;
 
+        private boolean disablePaddingsOffset;
+
         public LinksTextView(Context context) {
             this(context, null);
         }
@@ -406,6 +400,10 @@ public class LinkSpanDrawable<S extends CharacterStyle> {
             this.resourcesProvider = resourcesProvider;
         }
 
+        public void setDisablePaddingsOffset(boolean disablePaddingsOffset) {
+            this.disablePaddingsOffset = disablePaddingsOffset;
+        }
+
         public void setOnLinkPressListener(OnLinkPress listener) {
             onPressListener = listener;
         }
@@ -414,38 +412,51 @@ public class LinkSpanDrawable<S extends CharacterStyle> {
             onLongPressListener = listener;
         }
 
+        public ClickableSpan hit(int x, int y) {
+            Layout textLayout = getLayout();
+            if (textLayout == null) {
+                return null;
+            }
+            x -= getPaddingLeft();
+            y -= getPaddingTop();
+            final int line = textLayout.getLineForVertical(y);
+            final int off = textLayout.getOffsetForHorizontal(line, x);
+            final float left = getLayout().getLineLeft(line);
+            ClickableSpan span = null;
+            if (left <= x && left + textLayout.getLineWidth(line) >= x && y >= 0 && y <= textLayout.getHeight()) {
+                Spannable buffer = new SpannableString(textLayout.getText());
+                ClickableSpan[] spans = buffer.getSpans(off, off, ClickableSpan.class);
+                if (spans.length != 0 && !AndroidUtilities.isAccessibilityScreenReaderEnabled()) {
+                    return spans[0];
+                }
+            }
+            return null;
+        }
+
         @Override
         public boolean onTouchEvent(MotionEvent event) {
             if (links != null) {
                 Layout textLayout = getLayout();
-                int x = (int) (event.getX() - getPaddingLeft());
-                int y = (int) (event.getY() - getPaddingTop());
-                final int line = textLayout.getLineForVertical(y);
-                final int off = textLayout.getOffsetForHorizontal(line, x);
-                final float left = getLayout().getLineLeft(line);
-                ClickableSpan span = null;
-                if (left <= x && left + textLayout.getLineWidth(line) >= x && y >= 0 && y <= textLayout.getHeight()) {
-                    Spannable buffer = new SpannableString(textLayout.getText());
-                    ClickableSpan[] spans = buffer.getSpans(off, off, ClickableSpan.class);
-                    if (spans.length != 0 && !AndroidUtilities.isAccessibilityScreenReaderEnabled()) {
-                        span = spans[0];
-                        if (event.getAction() == MotionEvent.ACTION_DOWN) {
-                            pressedLink = new LinkSpanDrawable<ClickableSpan>(span, resourcesProvider, event.getX(), event.getY());
-                            links.addLink(pressedLink);
-                            int start = buffer.getSpanStart(pressedLink.getSpan());
-                            int end = buffer.getSpanEnd(pressedLink.getSpan());
-                            LinkPath path = pressedLink.obtainNewPath();
-                            path.setCurrentLayout(textLayout, start, getPaddingTop());
-                            textLayout.getSelectionPath(start, end, path);
-                            AndroidUtilities.runOnUIThread(() -> {
-                                if (onLongPressListener != null) {
-                                    onLongPressListener.run(spans[0]);
-                                    pressedLink = null;
-                                    links.clear();
-                                }
-                            }, ViewConfiguration.getLongPressTimeout());
-                            return true;
-                        }
+                ClickableSpan span;
+                if ((span = hit((int) event.getX(), (int) event.getY())) != null) {
+                    if (event.getAction() == MotionEvent.ACTION_DOWN) {
+                        final LinkSpanDrawable link = new LinkSpanDrawable<ClickableSpan>(span, resourcesProvider, event.getX(), event.getY());
+                        pressedLink = link;
+                        links.addLink(pressedLink);
+                        Spannable buffer = new SpannableString(textLayout.getText());
+                        int start = buffer.getSpanStart(pressedLink.getSpan());
+                        int end = buffer.getSpanEnd(pressedLink.getSpan());
+                        LinkPath path = pressedLink.obtainNewPath();
+                        path.setCurrentLayout(textLayout, start, getPaddingTop());
+                        textLayout.getSelectionPath(start, end, path);
+                        AndroidUtilities.runOnUIThread(() -> {
+                            if (onLongPressListener != null && pressedLink == link) {
+                                onLongPressListener.run(span);
+                                pressedLink = null;
+                                links.clear();
+                            }
+                        }, ViewConfiguration.getLongPressTimeout());
+                        return true;
                     }
                 }
                 if (event.getAction() == MotionEvent.ACTION_UP) {
@@ -471,8 +482,15 @@ public class LinkSpanDrawable<S extends CharacterStyle> {
 
         @Override
         protected void onDraw(Canvas canvas) {
-            if (!isCustomLinkCollector && links.draw(canvas)) {
-                invalidate();
+            if (!isCustomLinkCollector) {
+                canvas.save();
+                if (!disablePaddingsOffset) {
+                    canvas.translate(getPaddingLeft(), getPaddingTop());
+                }
+                if (links.draw(canvas)) {
+                    invalidate();
+                }
+                canvas.restore();
             }
             super.onDraw(canvas);
         }

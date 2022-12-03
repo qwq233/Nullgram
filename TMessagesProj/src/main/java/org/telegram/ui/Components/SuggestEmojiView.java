@@ -7,23 +7,19 @@ import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffColorFilter;
-import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.text.Editable;
 import android.text.Spannable;
 import android.text.SpannableString;
 import android.text.Spanned;
 import android.text.TextWatcher;
-import android.util.Log;
 import android.view.Gravity;
 import android.view.HapticFeedbackConstants;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.OvershootInterpolator;
-import android.widget.EditText;
 import android.widget.FrameLayout;
-import android.widget.ImageView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -31,20 +27,14 @@ import androidx.recyclerview.widget.DefaultItemAnimator;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.google.android.exoplayer2.util.SystemClock;
-
-import org.checkerframework.checker.units.qual.A;
 import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.Emoji;
 import org.telegram.messenger.MediaDataController;
 import org.telegram.messenger.MessageObject;
 import org.telegram.messenger.NotificationCenter;
-import org.telegram.messenger.R;
 import org.telegram.messenger.SharedConfig;
-import org.telegram.messenger.UserConfig;
 import org.telegram.tgnet.TLRPC;
 import org.telegram.ui.ActionBar.Theme;
-import org.telegram.ui.ChatActivity;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -142,12 +132,6 @@ public class SuggestEmojiView extends FrameLayout implements NotificationCenter.
             }
         });
 
-        this.leftGradient = getResources().getDrawable(R.drawable.gradient_right).mutate();
-        this.leftGradient.setColorFilter(new PorterDuffColorFilter(Theme.getColor(Theme.key_chat_stickersHintPanel, resourcesProvider), PorterDuff.Mode.MULTIPLY));
-
-        this.rightGradient = getResources().getDrawable(R.drawable.gradient_left).mutate();
-        this.rightGradient.setColorFilter(new PorterDuffColorFilter(Theme.getColor(Theme.key_chat_stickersHintPanel, resourcesProvider), PorterDuff.Mode.MULTIPLY));
-
         MediaDataController.getInstance(currentAccount).checkStickers(MediaDataController.TYPE_EMOJIPACKS);
     }
 
@@ -163,8 +147,8 @@ public class SuggestEmojiView extends FrameLayout implements NotificationCenter.
         if (backgroundPaint != null) {
             backgroundPaint.setColor(Theme.getColor(Theme.key_chat_stickersHintPanel, resourcesProvider));
         }
-        this.leftGradient.setColorFilter(new PorterDuffColorFilter(Theme.getColor(Theme.key_chat_stickersHintPanel, resourcesProvider), PorterDuff.Mode.MULTIPLY));
-        this.rightGradient.setColorFilter(new PorterDuffColorFilter(Theme.getColor(Theme.key_chat_stickersHintPanel, resourcesProvider), PorterDuff.Mode.MULTIPLY));
+        Theme.chat_gradientLeftDrawable.setColorFilter(new PorterDuffColorFilter(Theme.getColor(Theme.key_chat_stickersHintPanel, resourcesProvider), PorterDuff.Mode.MULTIPLY));
+        Theme.chat_gradientRightDrawable.setColorFilter(new PorterDuffColorFilter(Theme.getColor(Theme.key_chat_stickersHintPanel, resourcesProvider), PorterDuff.Mode.MULTIPLY));
     }
 
     public void forceClose() {
@@ -432,7 +416,6 @@ public class SuggestEmojiView extends FrameLayout implements NotificationCenter.
     private AnimatedFloat showFloat2 = new AnimatedFloat(containerView, 150, 600, CubicBezierInterpolator.EASE_OUT_QUINT);
     private OvershootInterpolator overshootInterpolator = new OvershootInterpolator(.4f);
 
-    private Drawable leftGradient, rightGradient;
     private AnimatedFloat leftGradientAlpha = new AnimatedFloat(containerView, 300, CubicBezierInterpolator.EASE_OUT_QUINT);
     private AnimatedFloat rightGradientAlpha = new AnimatedFloat(containerView, 300, CubicBezierInterpolator.EASE_OUT_QUINT);
 
@@ -558,16 +541,16 @@ public class SuggestEmojiView extends FrameLayout implements NotificationCenter.
 
         float leftAlpha = leftGradientAlpha.set(listView.canScrollHorizontally(-1) ? 1f : 0f);
         if (leftAlpha > 0) {
-            leftGradient.setBounds((int) left, (int) top, (int) left + AndroidUtilities.dp(32), (int) bottom);
-            leftGradient.setAlpha((int) (255 * leftAlpha));
-            leftGradient.draw(canvas);
+            Theme.chat_gradientLeftDrawable.setBounds((int) left, (int) top, (int) left + AndroidUtilities.dp(32), (int) bottom);
+            Theme.chat_gradientLeftDrawable.setAlpha((int) (255 * leftAlpha));
+            Theme.chat_gradientLeftDrawable.draw(canvas);
         }
 
         float rightAlpha = rightGradientAlpha.set(listView.canScrollHorizontally(1) ? 1f : 0f);
         if (rightAlpha > 0) {
-            rightGradient.setBounds((int) right - AndroidUtilities.dp(32), (int) top, (int) right, (int) bottom);
-            rightGradient.setAlpha((int) (255 * rightAlpha));
-            rightGradient.draw(canvas);
+            Theme.chat_gradientRightDrawable.setBounds((int) right - AndroidUtilities.dp(32), (int) top, (int) right, (int) bottom);
+            Theme.chat_gradientRightDrawable.setAlpha((int) (255 * rightAlpha));
+            Theme.chat_gradientRightDrawable.draw(canvas);
         }
 
         canvas.restore();

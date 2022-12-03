@@ -143,7 +143,7 @@ public class ContextLinkCell extends FrameLayout implements DownloadController.F
         linkImageView = new ImageReceiver(this);
         linkImageView.setLayerNum(1);
         linkImageView.setUseSharedAnimationQueue(true);
-        letterDrawable = new LetterDrawable(resourcesProvider);
+        letterDrawable = new LetterDrawable(resourcesProvider, LetterDrawable.STYLE_DEFAULT);
         radialProgress = new RadialProgress2(this);
         TAG = DownloadController.getInstance(currentAccount).generateObserverTag();
         setFocusable(true);
@@ -696,9 +696,9 @@ public class ContextLinkCell extends FrameLayout implements DownloadController.F
             } else if (buttonState == 2) {
                 radialProgress.setProgress(0, false);
                 if (documentAttach != null) {
-                    FileLoader.getInstance(currentAccount).loadFile(documentAttach, inlineResult, 1, 0);
+                    FileLoader.getInstance(currentAccount).loadFile(documentAttach, inlineResult, FileLoader.PRIORITY_NORMAL, 0);
                 } else if (inlineResult.content instanceof TLRPC.TL_webDocument) {
-                    FileLoader.getInstance(currentAccount).loadFile(WebFile.createWithWebDocument(inlineResult.content), 1, 1);
+                    FileLoader.getInstance(currentAccount).loadFile(WebFile.createWithWebDocument(inlineResult.content), FileLoader.PRIORITY_HIGH, 1);
                 }
                 buttonState = 4;
                 radialProgress.setIcon(getIconForCurrentState(), false, true);

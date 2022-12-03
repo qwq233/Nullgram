@@ -8,10 +8,22 @@
 
 package org.telegram.messenger;
 
+import com.google.gson.ExclusionStrategy;
+import com.google.gson.FieldAttributes;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+
+import org.telegram.SQLite.SQLiteException;
 import org.telegram.messenger.time.FastDateFormat;
+import org.telegram.messenger.video.MediaCodecVideoConvertor;
+import org.telegram.tgnet.TLObject;
+import org.telegram.tgnet.TLRPC;
 
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.OutputStreamWriter;
+import java.util.HashSet;
+import java.util.Locale;
 
 import top.qwq2333.nullgram.utils.Log;
 
@@ -20,16 +32,20 @@ import top.qwq2333.nullgram.utils.Log;
  */
 @Deprecated
 public class FileLog {
+    private OutputStreamWriter streamWriter = null;
+    private FastDateFormat dateFormat = null;
+    private DispatchQueue logQueue = null;
 
-    private final OutputStreamWriter streamWriter = null;
-    private final FastDateFormat dateFormat = null;
-    private final DispatchQueue logQueue = null;
-    private final File currentFile = null;
+    private File currentFile = null;
     private File networkFile = null;
     private File tonlibFile = null;
     private boolean initied;
 
+    private OutputStreamWriter tlStreamWriter = null;
+    private File tlRequestsFile = null;
+
     private final static String tag = "tmessages";
+    private final static String mtproto_tag = "MTProto";
 
     private static volatile FileLog Instance = null;
 
@@ -47,58 +63,73 @@ public class FileLog {
     }
 
     public FileLog() {
-        if (!BuildVars.LOGS_ENABLED) {
-            return;
-        }
-        init();
+        return;
     }
 
-    public void init() {
-        if (initied) {
-            return;
+
+    private static Gson gson;
+    private static HashSet<String> excludeRequests;
+
+    public static void dumpResponseAndRequest(TLObject request, TLObject response, TLRPC.TL_error error, long requestMsgId, long startRequestTimeInMillis, int requestToken) {
+        return;
+    }
+
+    public static void dumpUnparsedMessage(TLObject message, long messageId) {
+        return;
+    }
+
+    private static void checkGson() {
+        if (gson == null) {
+            HashSet<String> privateFields = new HashSet<>();
+            privateFields.add("message");
+            privateFields.add("phone");
+            privateFields.add("about");
+            privateFields.add("status_text");
+            privateFields.add("bytes");
+            privateFields.add("secret");
+            privateFields.add("stripped_thumb");
+
+            privateFields.add("networkType");
+            privateFields.add("disableFree");
+
+            //exclude file loading
+            excludeRequests = new HashSet<>();
+            excludeRequests.add("TL_upload_getFile");
+            excludeRequests.add("TL_upload_getWebFile");
+
+            gson = new GsonBuilder().addSerializationExclusionStrategy(new ExclusionStrategy() {
+
+                @Override
+                public boolean shouldSkipField(FieldAttributes f) {
+                    if (privateFields.contains(f.getName())) {
+                        return true;
+                    }
+                    return false;
+                }
+
+                @Override
+                public boolean shouldSkipClass(Class<?> clazz) {
+                    return false;
+                }
+            }).create();
         }
-        initied = true;
+    }
+
+
+
+    public void init() {
+        return;
     }
 
     public static void ensureInitied() {
-        getInstance().init();
+        return;
     }
 
     public static String getNetworkLogPath() {
-        if (!BuildVars.LOGS_ENABLED) {
-            return "";
-        }
-        try {
-            File sdCard = ApplicationLoader.applicationContext.getExternalFilesDir(null);
-            if (sdCard == null) {
-                return "";
-            }
-            File dir = new File(sdCard.getAbsolutePath() + "/logs");
-            dir.mkdirs();
-            getInstance().networkFile = new File(dir, getInstance().dateFormat.format(System.currentTimeMillis()) + "_net.txt");
-            return getInstance().networkFile.getAbsolutePath();
-        } catch (Throwable e) {
-            e.printStackTrace();
-        }
         return "";
     }
 
     public static String getTonlibLogPath() {
-        if (!BuildVars.LOGS_ENABLED) {
-            return "";
-        }
-        try {
-            File sdCard = ApplicationLoader.applicationContext.getExternalFilesDir(null);
-            if (sdCard == null) {
-                return "";
-            }
-            File dir = new File(sdCard.getAbsolutePath() + "/logs");
-            dir.mkdirs();
-            getInstance().tonlibFile = new File(dir, getInstance().dateFormat.format(System.currentTimeMillis()) + "_tonlib.txt");
-            return getInstance().tonlibFile.getAbsolutePath();
-        } catch (Throwable e) {
-            e.printStackTrace();
-        }
         return "";
     }
 
@@ -132,6 +163,26 @@ public class FileLog {
     @Deprecated
     public static void e(final Throwable e, boolean logToAppCenter) {
         Log.e(e);
+        if (needSent(e) && logToAppCenter) {
+            AndroidUtilities.appCenterLog(e);
+        }
+    }
+
+    public static void fatal(final Throwable e) {
+        fatal(e, true);
+    }
+
+    public static void fatal(final Throwable e, boolean logToAppCenter) {
+        if (needSent(e) && logToAppCenter) {
+            AndroidUtilities.appCenterLog(e);
+        }
+    }
+
+    private static boolean needSent(Throwable e) {
+        if (e instanceof InterruptedException || e instanceof MediaCodecVideoConvertor.ConversionCanceledException || e instanceof IgnoreSentException) {
+            return false;
+        }
+        return true;
     }
 
     /**
@@ -156,5 +207,13 @@ public class FileLog {
      */
     @Deprecated
     public static void cleanupLogs() {
+    }
+
+    public static class IgnoreSentException extends Exception{
+
+        public IgnoreSentException(String e) {
+            super(e);
+        }
+
     }
 }

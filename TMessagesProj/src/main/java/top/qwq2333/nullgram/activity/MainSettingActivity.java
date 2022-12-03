@@ -133,7 +133,7 @@ public class MainSettingActivity extends BaseActivity {
             pressCount++;
             if (pressCount >= 2) {
                 ConfigManager.toggleBoolean(Defines.showHiddenSettings);
-                AndroidUtilities.shakeView(view, 2, 0);
+                AndroidUtilities.shakeView(view);
                 return true;
             }
         }
@@ -309,15 +309,12 @@ public class MainSettingActivity extends BaseActivity {
                     view.setBackgroundColor(Theme.getColor(Theme.key_windowBackgroundWhite));
                     break;
                 case 3:
+                case 5:
                     view = new TextSettingsCell(mContext);
                     view.setBackgroundColor(Theme.getColor(Theme.key_windowBackgroundWhite));
                     break;
                 case 4:
                     view = new HeaderCell(mContext);
-                    view.setBackgroundColor(Theme.getColor(Theme.key_windowBackgroundWhite));
-                    break;
-                case 5:
-                    view = new TextSettingsCell(mContext);
                     view.setBackgroundColor(Theme.getColor(Theme.key_windowBackgroundWhite));
                     break;
                 case 6:
@@ -380,9 +377,8 @@ public class MainSettingActivity extends BaseActivity {
             AlertDialog restart = new AlertDialog(context, 0);
             restart.setTitle(LocaleController.getString("AppName", R.string.AppName));
             restart.setMessage(LocaleController.getString("RestartAppToTakeEffect", R.string.RestartAppToTakeEffect));
-            restart.setPositiveButton(LocaleController.getString("OK", R.string.OK), (__, ___) -> {
-                ProcessPhoenix.triggerRebirth(context, new Intent(context, LaunchActivity.class));
-            });
+            restart.setPositiveButton(LocaleController.getString("OK", R.string.OK), (__, ___) ->
+                ProcessPhoenix.triggerRebirth(context, new Intent(context, LaunchActivity.class)));
             restart.show();
         } catch (Exception e) {
             AlertUtil.showSimpleAlert(context, e);

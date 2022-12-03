@@ -28,7 +28,7 @@ if (serviceAccountCredentialsFile.isFile) {
 fun setupPlay(stable: Boolean) {
     val targetTrace = if (stable) "production" else "beta"
     play {
-        track.set(targetTrace);
+        track.set(targetTrace)
         defaultToAppBundles.set(true)
     }
 }
@@ -38,19 +38,19 @@ dependencies {
 
     implementation("androidx.core:core-ktx:1.8.0")
     implementation("androidx.palette:palette-ktx:1.0.0")
-    implementation("androidx.exifinterface:exifinterface:1.3.3")
+    implementation("androidx.exifinterface:exifinterface:1.3.5")
     implementation("androidx.dynamicanimation:dynamicanimation:1.0.0")
     implementation("androidx.multidex:multidex:2.0.1")
     implementation("androidx.interpolator:interpolator:1.0.0")
-    implementation("androidx.sharetarget:sharetarget:1.2.0-rc02")
+    implementation("androidx.sharetarget:sharetarget:1.2.0")
 
-    compileOnly("org.checkerframework:checker-qual:3.24.0")
+    compileOnly("org.checkerframework:checker-qual:3.27.0")
     compileOnly("org.checkerframework:checker-compat-qual:2.5.5")
-    implementation("com.google.firebase:firebase-messaging:23.0.6")
-    implementation("com.google.firebase:firebase-config:21.1.1")
-    implementation("com.google.firebase:firebase-datatransport:18.1.6")
+    implementation("com.google.firebase:firebase-messaging:23.1.0")
+    implementation("com.google.firebase:firebase-config:21.1.2")
+    implementation("com.google.firebase:firebase-datatransport:18.1.7")
     implementation("com.google.firebase:firebase-appindexing:20.0.0")
-    implementation("com.google.android.gms:play-services-auth:20.2.0")
+    implementation("com.google.android.gms:play-services-auth:20.3.0")
     implementation("com.google.android.gms:play-services-vision:20.1.3")
     implementation("com.google.android.gms:play-services-wearable:17.1.0")
     implementation("com.google.android.gms:play-services-location:20.0.0")
@@ -60,7 +60,7 @@ dependencies {
     implementation("com.google.mlkit:language-id:17.0.4")
     implementation(files("libs/libgsaverification-client.aar"))
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.6.4")
-    implementation("com.google.code.gson:gson:2.9.1")
+    implementation("com.google.code.gson:gson:2.10")
     implementation("com.jakewharton:process-phoenix:2.1.2")
     // https://mvnrepository.com/artifact/de.psdev.licensesdialog/licensesdialog
     implementation("de.psdev.licensesdialog:licensesdialog:2.2.0")
@@ -75,19 +75,19 @@ dependencies {
     implementation("org.jetbrains.kotlin:kotlin-stdlib-common:${Version.kotlin}")
     implementation("org.jetbrains.kotlin:kotlin-stdlib:${Version.kotlin}")
     implementation("org.osmdroid:osmdroid-android:6.1.14")
-    implementation("com.android.billingclient:billing:5.0.0")
+    implementation("com.android.billingclient:billing:5.1.0")
 }
 
 
 dependencies {
-    val appCenterSdkVersion = "4.4.5"
+    val appCenterSdkVersion = "5.0.0"
     implementation("com.microsoft.appcenter:appcenter-analytics:${appCenterSdkVersion}")
     implementation("com.microsoft.appcenter:appcenter-crashes:${appCenterSdkVersion}")
 }
 
 android {
     compileSdk = 33
-    buildToolsVersion = "32.0.0"
+    buildToolsVersion = "33.0.0"
     ndkVersion = "21.4.7075529"
 
     defaultConfig.applicationId = "top.qwq2333.nullgram"
@@ -130,7 +130,7 @@ android {
     signingConfigs {
         create("release") {
             storeFile = File(projectDir, "config/release.keystore")
-            storePassword = (keystorePwd ?: System.getenv("KEYSTORE_PASS"));
+            storePassword = (keystorePwd ?: System.getenv("KEYSTORE_PASS"))
             keyAlias = (alias ?: System.getenv("ALIAS_NAME"))
             keyPassword = (pwd ?: System.getenv("ALIAS_PASS"))
             enableV3Signing = true

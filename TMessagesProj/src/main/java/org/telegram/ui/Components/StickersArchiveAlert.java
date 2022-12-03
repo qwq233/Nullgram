@@ -82,7 +82,7 @@ public class StickersArchiveAlert extends AlertDialog.Builder {
         setNegativeButton(LocaleController.getString("Close", R.string.Close), (dialog, which) -> dialog.dismiss());
         if (parentFragment != null) {
             setPositiveButton(LocaleController.getString("Settings", R.string.Settings), (dialog, which) -> {
-                parentFragment.presentFragment(new StickersActivity(currentType));
+                parentFragment.presentFragment(new StickersActivity(currentType, null));
                 dialog.dismiss();
             });
         }

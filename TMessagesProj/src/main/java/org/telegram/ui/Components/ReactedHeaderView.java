@@ -44,6 +44,7 @@ public class ReactedHeaderView extends FrameLayout {
     private List<TLRPC.User> users = new ArrayList<>();
     private long dialogId;
     private MessageObject message;
+    private int fixedWidth;
 
     private boolean isLoaded;
 
@@ -69,7 +70,7 @@ public class ReactedHeaderView extends FrameLayout {
         addView(titleView, LayoutHelper.createFrameRelatively(LayoutHelper.WRAP_CONTENT, LayoutHelper.WRAP_CONTENT, Gravity.START | Gravity.CENTER_VERTICAL, 40, 0, 62, 0));
 
         avatarsImageView = new AvatarsImageView(context, false);
-        avatarsImageView.setStyle(AvatarsDarawable.STYLE_MESSAGE_SEEN);
+        avatarsImageView.setStyle(AvatarsDrawable.STYLE_MESSAGE_SEEN);
         addView(avatarsImageView, LayoutHelper.createFrameRelatively(24 + 12 + 12 + 8, LayoutHelper.MATCH_PARENT, Gravity.END | Gravity.CENTER_VERTICAL, 0, 0, 0, 0));
 
         iconView = new ImageView(context);
@@ -204,6 +205,10 @@ public class ReactedHeaderView extends FrameLayout {
                         }
                         str = String.format(LocaleController.getPluralString("Reacted", c), countStr);
                     }
+
+                    if (getMeasuredWidth() > 0) {
+                        fixedWidth = getMeasuredWidth();
+                    }
                     titleView.setText(str);
                     boolean showIcon = true;
                     if (message.messageOwner.reactions != null && message.messageOwner.reactions.results.size() == 1 && !list.reactions.isEmpty()) {
@@ -287,6 +292,9 @@ public class ReactedHeaderView extends FrameLayout {
 
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+        if (fixedWidth > 0) {
+            widthMeasureSpec = MeasureSpec.makeMeasureSpec(fixedWidth, MeasureSpec.EXACTLY);
+        }
         if (flickerLoadingView.getVisibility() == View.VISIBLE) {
             // Idk what is happening here, but this class is a clone of MessageSeenView, so this might help with something?
             ignoreLayout = true;

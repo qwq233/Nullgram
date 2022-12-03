@@ -198,6 +198,13 @@ public class NativeByteBuffer extends AbstractSerializedData {
     }
 
     public void writeString(String s) {
+        if (s == null) {
+            if (BuildVars.LOGS_ENABLED) {
+                FileLog.e("write string null");
+                FileLog.e(new Throwable());
+            }
+            s = "";
+        }
         try {
             writeByteArray(s.getBytes("UTF-8"));
         } catch (Exception e) {
@@ -578,6 +585,14 @@ public class NativeByteBuffer extends AbstractSerializedData {
     @Override
     public int remaining() {
         return buffer.remaining();
+    }
+
+    @Override
+    protected void finalize() throws Throwable {
+        if (!reused) {
+            reuse();
+        }
+        super.finalize();
     }
 
     public static native long native_getFreeBuffer(int length);

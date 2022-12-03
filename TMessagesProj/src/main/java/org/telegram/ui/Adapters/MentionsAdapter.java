@@ -312,7 +312,7 @@ public class MentionsAdapter extends RecyclerListView.SelectionAdapter implement
                 File f = FileLoader.getInstance(currentAccount).getPathToAttach(thumb, "webp", true);
                 if (!f.exists()) {
                     stickersToLoad.add(FileLoader.getAttachFileName(thumb, "webp"));
-                    FileLoader.getInstance(currentAccount).loadFile(ImageLocation.getForDocument(thumb, result.sticker), result.parent, "webp", 1, 1);
+                    FileLoader.getInstance(currentAccount).loadFile(ImageLocation.getForDocument(thumb, result.sticker), result.parent, "webp", FileLoader.PRIORITY_NORMAL, 1);
                 }
             }
         }
@@ -1113,7 +1113,8 @@ public class MentionsAdapter extends RecyclerListView.SelectionAdapter implement
                     if (user == null) {
                         continue;
                     }
-                    if (!TextUtils.isEmpty(user.username) && (usernameString.length() == 0 || user.username.toLowerCase().startsWith(usernameString))) {
+                    String username = UserObject.getPublicUsername(user);
+                    if (!TextUtils.isEmpty(username) && (usernameString.length() == 0 || username.toLowerCase().startsWith(usernameString))) {
                         newResult.add(user);
                         newResultsHashMap.put(user.id, user);
                         newMap.put(user.id, user);
@@ -1150,7 +1151,7 @@ public class MentionsAdapter extends RecyclerListView.SelectionAdapter implement
                         }
                         firstName = chat.title;
                         lastName = null;
-                        username = chat.username;
+                        username = ChatObject.getPublicUsername(chat);
                         object = chat;
                         id = -chat.id;
                     } else {
@@ -1167,7 +1168,7 @@ public class MentionsAdapter extends RecyclerListView.SelectionAdapter implement
                         }
                         firstName = user.first_name;
                         lastName = user.last_name;
-                        username = user.username;
+                        username = UserObject.getPublicUsername(user);
                         object = user;
                         id = user.id;
                     }

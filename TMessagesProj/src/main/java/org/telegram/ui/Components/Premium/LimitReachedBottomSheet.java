@@ -4,7 +4,6 @@ import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.graphics.Canvas;
-import android.text.SpannableStringBuilder;
 import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.HapticFeedbackConstants;
@@ -15,13 +14,11 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
-import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.ChatObject;
-import org.telegram.messenger.FileLoader;
 import org.telegram.messenger.LocaleController;
 import org.telegram.messenger.MessagesController;
 import org.telegram.messenger.R;
@@ -36,7 +33,6 @@ import org.telegram.ui.Cells.GroupCreateUserCell;
 import org.telegram.ui.Cells.HeaderCell;
 import org.telegram.ui.Cells.ShadowSectionCell;
 import org.telegram.ui.Components.BottomSheetWithRecyclerListView;
-import org.telegram.ui.Components.ColoredImageSpan;
 import org.telegram.ui.Components.FlickerLoadingView;
 import org.telegram.ui.Components.LayoutHelper;
 import org.telegram.ui.Components.RecyclerItemsEnterAnimator;
@@ -124,6 +120,7 @@ public class LimitReachedBottomSheet extends BottomSheetWithRecyclerListView {
         } else if (type == TYPE_TO_MANY_COMMUNITIES) {
             loadInactiveChannels();
         }
+        updatePremiumButtonText();
     }
 
     @Override
@@ -132,7 +129,6 @@ public class LimitReachedBottomSheet extends BottomSheetWithRecyclerListView {
         Context context = containerView.getContext();
 
         premiumButtonView = new PremiumButtonView(context, true);
-        updatePremiumButtonText();
 
         if (!hasFixedSize) {
             divider = new View(context) {
@@ -232,7 +228,7 @@ public class LimitReachedBottomSheet extends BottomSheetWithRecyclerListView {
             for (int i = 0; i < chats.size(); i++) {
                 TLRPC.Chat chat = chats.get(i);
                 MessagesController.getInstance(currentAccount).putChat(chat, false);
-                MessagesController.getInstance(currentAccount).deleteParticipantFromChat(chat.id, currentUser, null);
+                MessagesController.getInstance(currentAccount).deleteParticipantFromChat(chat.id, currentUser);
             }
         });
         AlertDialog alertDialog = builder.create();
@@ -608,9 +604,9 @@ public class LimitReachedBottomSheet extends BottomSheetWithRecyclerListView {
         if (channels.size() == 1) {
             TLRPC.Chat channel = channels.get(0);
             if (parentIsChannel) {
-                builder.setMessage(AndroidUtilities.replaceTags(LocaleController.formatString("RevokeLinkAlertChannel", R.string.RevokeLinkAlertChannel, MessagesController.getInstance(currentAccount).linkPrefix + "/" + channel.username, channel.title)));
+                builder.setMessage(AndroidUtilities.replaceTags(LocaleController.formatString("RevokeLinkAlertChannel", R.string.RevokeLinkAlertChannel, MessagesController.getInstance(currentAccount).linkPrefix + "/" + ChatObject.getPublicUsername(channel), channel.title)));
             } else {
-                builder.setMessage(AndroidUtilities.replaceTags(LocaleController.formatString("RevokeLinkAlert", R.string.RevokeLinkAlert, MessagesController.getInstance(currentAccount).linkPrefix + "/" + channel.username, channel.title)));
+                builder.setMessage(AndroidUtilities.replaceTags(LocaleController.formatString("RevokeLinkAlert", R.string.RevokeLinkAlert, MessagesController.getInstance(currentAccount).linkPrefix + "/" + ChatObject.getPublicUsername(channel), channel.title)));
             }
         } else {
             if (parentIsChannel) {
@@ -693,6 +689,9 @@ public class LimitReachedBottomSheet extends BottomSheetWithRecyclerListView {
                         ((LinearLayoutManager) recyclerListView.getLayoutManager()).scrollToPositionWithOffset(headerRow + 1, savedTop);
                     }
 
+                    if (limitParams == null) {
+                        limitParams = getLimitParams(type, currentAccount);
+                    }
                     int currentValue = Math.max(inactiveChats.size(), limitParams.defaultLimit);
                     limitPreviewView.setIconValue(currentValue);
                     limitPreviewView.setBagePosition(currentValue / (float) limitParams.premiumLimit);

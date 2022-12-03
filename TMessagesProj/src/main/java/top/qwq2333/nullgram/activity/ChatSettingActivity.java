@@ -174,7 +174,7 @@ public class ChatSettingActivity extends BaseActivity {
                     ((TextCheckCell) view).setChecked(ConfigManager.getBooleanOrFalse(Defines.labelChannelUser));
                 }
             } else {
-                AndroidUtilities.shakeView(view, 2, 0);
+                AndroidUtilities.shakeView(view);
                 AlertUtil.showToast(LocaleController.getString("notAllowedWhenChannelAliasIsEnabled", R.string.notAllowedWhenChannelAliasIsEnabled));
             }
         } else if (position == displaySpoilerDirectlyRow) {
@@ -654,7 +654,7 @@ public class ChatSettingActivity extends BaseActivity {
                 ConfigManager.putInt(Defines.maxRecentSticker, 20);
             } else {
                 if (!NumberUtils.isInteger(editText.getText().toString())) {
-                    AndroidUtilities.shakeView(view, 2, 0);
+                    AndroidUtilities.shakeView(view);
                     AlertUtil.showToast(LocaleController.getString("notANumber", R.string.notANumber));
                 } else {
                     final int targetNum = Integer.parseInt(editText.getText().toString().trim());
