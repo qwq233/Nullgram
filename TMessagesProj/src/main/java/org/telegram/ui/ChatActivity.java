@@ -1467,7 +1467,9 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
                         boolean allowRepeat = allowChatActions &&
                             (!isThreadChat() && !noforwards || getMessageUtils().getMessageForRepeat(message, messageGroup) != null);
                         return allowChatActions && (!(isThreadChat() && !isTopic) && !noforwards || getMessageUtils().getMessageForRepeat(message,
-                            messageGroup) != null) && !message.isSponsored() && chatMode != MODE_SCHEDULED && (!message.needDrawBluredPreview() || message.hasExtendedMediaPreview()) && !message.isLiveLocation() && message.type != MessageObject.TYPE_PHONE_CALL && message.type != MessageObject.TYPE_GIFT_PREMIUM && !UserObject.isUserSelf(currentUser);
+                            messageGroup) != null) && !message.isSponsored() && chatMode != MODE_SCHEDULED && (!message.needDrawBluredPreview() ||
+                            message.hasExtendedMediaPreview()) && !message.isLiveLocation() && message.type != MessageObject.TYPE_PHONE_CALL &&
+                            message.type != MessageObject.TYPE_GIFT_PREMIUM && !UserObject.isUserSelf(currentUser);
                     case Defines.doubleTabEdit:
                         return allowEdit;
                 }
@@ -9500,7 +9502,6 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
                         forwardingMessages.hideForwardSendersName,
                         forwardingMessages.hideCaption
                     );
-
                     int hasPoll = 0;
                     boolean hasInvoice = false;
                     for (int a = 0, N = forwardingMessages.messages.size(); a < N; a++) {
@@ -12019,35 +12020,25 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
         });
     }
 
-    private void forwardMessages(ArrayList<MessageObject> arrayList, boolean fromMyName,
-                                 boolean notify, int scheduleDate, long did) {
-        if (arrayList == null || arrayList.isEmpty()) {
-            return;
-        }
-        if ((scheduleDate != 0) == (chatMode == MODE_SCHEDULED)) {
-            waitingForSendingMessageLoad = true;
-        }
-        AlertsCreator.showSendMediaAlert(
-            getSendMessagesHelper().sendMessage(arrayList, did == 0 ? dialog_id : did, fromMyName,
-                false, notify, scheduleDate), this);
-    }
-
-    private void forwardMessages(ArrayList<MessageObject> arrayList, boolean fromMyName,
-                                 boolean hideCaption, boolean notify, int scheduleDate) {
+    private void forwardMessages(ArrayList<MessageObject> arrayList, boolean fromMyName, boolean hideCaption, boolean notify, int scheduleDate) {
         forwardMessages(arrayList, fromMyName, hideCaption, notify, scheduleDate, 0);
     }
 
-    private void forwardMessages(ArrayList<MessageObject> arrayList, boolean fromMyName,
-                                 boolean hideCaption, boolean notify, int scheduleDate, long did) {
+    private void forwardMessages(ArrayList<MessageObject> arrayList, boolean fromMyName, boolean hideCaption, boolean notify, int scheduleDate, long did) {
         if (arrayList == null || arrayList.isEmpty()) {
             return;
         }
         if ((scheduleDate != 0) == (chatMode == MODE_SCHEDULED)) {
             waitingForSendingMessageLoad = true;
         }
-        AlertsCreator.showSendMediaAlert(
-            getSendMessagesHelper().sendMessage(arrayList, dialog_id, fromMyName, hideCaption,
-                notify, scheduleDate), this, themeDelegate);
+        int result = getSendMessagesHelper().sendMessage(arrayList, did != 0 ? did : dialog_id, fromMyName, hideCaption, notify, scheduleDate, getThreadMessage());
+        AlertsCreator.showSendMediaAlert(result, this, themeDelegate);
+        if (result != 0) {
+            AndroidUtilities.runOnUIThread(() -> {
+                waitingForSendingMessageLoad = false;
+                hideFieldPanel(true);
+            });
+        }
     }
 
     public boolean shouldShowImport() {
@@ -23027,8 +23018,11 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
                             }
                         }
                         if (ConfigManager.getBooleanOrDefault(Defines.showRepeat, true)) {
-                            if (!selectedObject.isSponsored() && chatMode != MODE_SCHEDULED && !selectedObject.needDrawBluredPreview() && !selectedObject.isLiveLocation() && selectedObject.type != 16) {
-                                boolean allowRepeat = allowChatActions && (!isThreadChat() && !getMessagesController().isChatNoForwards(currentChat) || getMessageUtils().getMessageForRepeat(selectedObject, selectedObjectGroup) != null);
+                            if (!selectedObject.isSponsored() && chatMode != MODE_SCHEDULED && (!selectedObject.needDrawBluredPreview() || selectedObject.hasExtendedMediaPreview()) &&
+                                !selectedObject.isLiveLocation() && selectedObject.type != MessageObject.TYPE_PHONE_CALL &&
+                                selectedObject.type != MessageObject.TYPE_GIFT_PREMIUM) {
+                                boolean allowRepeat = allowChatActions && (!(isThreadChat() && !isTopic) && !noforwards || getMessageUtils().getMessageForRepeat(selectedObject,
+                                    selectedObjectGroup) != null);
                                 if (allowRepeat) {
                                     items.add(LocaleController.getString("Repeat", R.string.Repeat));
                                     options.add(94);
@@ -25190,9 +25184,8 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
                 } else {
                     messages.add(selectedObject);
                 }
-                forwardMessages(messages, false, true, 0, getUserConfig().getClientUserId());
-                undoView.showWithAction(getUserConfig().getClientUserId(),
-                    UndoView.ACTION_FWD_MESSAGES, messages.size());
+                forwardMessages(messages, false, false, true, 0, getUserConfig().getClientUserId());
+                undoView.showWithAction(getUserConfig().getClientUserId(), UndoView.ACTION_FWD_MESSAGES, messages.size());
                 break;
             }
             case 94: {
@@ -30559,12 +30552,10 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
     }
 
     public boolean processRepeatMessage() {
-        if ((isThreadChat() && !isTopic) || getMessagesController().isChatNoForwards(currentChat)) {
-            var messageObject = getMessageUtils().getMessageForRepeat(selectedObject,
-                selectedObjectGroup);
+        if ((isThreadChat() && !isTopic) || getMessagesController().isChatNoForwards(currentChat) || selectedObject.messageOwner.noforwards) {
+            var messageObject = getMessageUtils().getMessageForRepeat(selectedObject, selectedObjectGroup);
             if (messageObject != null) {
-                if (messageObject.isAnyKindOfSticker() && !messageObject.isAnimatedEmoji()
-                    && !messageObject.isDice()) {
+                if (messageObject.isAnyKindOfSticker() && !messageObject.isAnimatedEmojiStickers() && !messageObject.isAnimatedEmoji() && !messageObject.isDice()) {
                     getSendMessagesHelper().sendSticker(
                         selectedObject.getDocument(), null, dialog_id, threadMessageObject,
                         threadMessageObject, null, null, true, 0, false);
@@ -30573,16 +30564,14 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
                     var message = messageObject.messageOwner.message;
                     if (!TextUtils.isEmpty(message)) {
                         ArrayList<TLRPC.MessageEntity> entities;
-                        if (messageObject.messageOwner.entities != null
-                            && !messageObject.messageOwner.entities.isEmpty()) {
+                        if (messageObject.messageOwner.entities != null && !messageObject.messageOwner.entities.isEmpty()) {
                             entities = new ArrayList<>();
                             for (TLRPC.MessageEntity entity : messageObject.messageOwner.entities) {
                                 if (entity instanceof TLRPC.TL_messageEntityMentionName) {
                                     TLRPC.TL_inputMessageEntityMentionName mention = new TLRPC.TL_inputMessageEntityMentionName();
                                     mention.length = entity.length;
                                     mention.offset = entity.offset;
-                                    mention.user_id = getMessagesController().getInputUser(
-                                        ((TLRPC.TL_messageEntityMentionName) entity).user_id);
+                                    mention.user_id = getMessagesController().getInputUser(((TLRPC.TL_messageEntityMentionName) entity).user_id);
                                     entities.add(mention);
                                 } else {
                                     entities.add(entity);
