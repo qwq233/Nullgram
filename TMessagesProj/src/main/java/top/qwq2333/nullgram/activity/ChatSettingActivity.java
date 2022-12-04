@@ -456,7 +456,8 @@ public class ChatSettingActivity extends BaseActivity {
                     } else if (position == quickToggleAnonymous) {
                         textCell.setTextAndValueAndCheck(LocaleController.getString("quickToggleAnonymous", R.string.quickToggleAnonymous), LocaleController.getString("quickToggleAnonymousNotice", R.string.quickToggleAnonymousNotice), ConfigManager.getBooleanOrFalse(Defines.quickToggleAnonymous), true, true);
                     } else if (position == disableStickersAutoReorderRow) {
-                        textCell.setTextAndCheck(LocaleController.getString("disableStickersAutoReorder", R.string.disableStickersAutoReorder), ConfigManager.getBooleanOrFalse(Defines.disableStickersAutoReorder), true);
+                        textCell.setTextAndCheck(LocaleController.getString("disableStickersAutoReorder", R.string.disableStickersAutoReorder),
+                            ConfigManager.getBooleanOrDefault(Defines.disableStickersAutoReorder, true), true);
                     }
                     break;
                 }
