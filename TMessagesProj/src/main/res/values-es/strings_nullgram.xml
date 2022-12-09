@@ -29,7 +29,6 @@
     <string name="QRLoginMessage">Escanea código QR con otro dispositivo para conectarte.</string>
     <string name="NullgramVersion">Nullgram %1$s\n Basado en Telegram %2$s</string>
     <string name="RestrictionReason">Motivo de la restricción</string>
-    <string name="Hide">Ocultar</string>
     <string name="showBotAPIID">Mostrar ID Bot API</string>
     <string name="hideGroupSticker">Ocultar pack de stickers de grupo</string>
     <string name="ignoreBlockedUser">Ignorar mensajes de usuario bloqueado</string>
@@ -211,4 +210,5 @@
     <string name="SwitchToAnonymously">Cambiar a anónimo</string>
     <string name="SwitchToPersonalAccount">Cambiar a cuenta personal</string>
     <string name="openArchiveOnPull">Abrir archivados al deslizar hacia abajo</string>
+    <string name="disableStickersAutoReorder">Disable sticker packs auto-reorder</string>
 </resources>
