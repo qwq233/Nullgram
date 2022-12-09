@@ -29,7 +29,6 @@
     <string name="QRLoginMessage">Başka bir cihazda oturum açmak için QR Codunuzu tarayın.</string>
     <string name="NullgramVersion">Nullgram %1$s\nTelegram\'a Dayalı %2$s</string>
     <string name="RestrictionReason">Kısıtlama nedeni</string>
-    <string name="Hide">Gizle</string>
     <string name="showBotAPIID">Bot API Kimliğini Göster</string>
     <string name="hideGroupSticker">Grup Stickerlarını Gizle</string>
     <string name="ignoreBlockedUser">Engellenmiş Kullanıcı Mesajlarını Yoksay</string>
@@ -211,4 +210,5 @@
     <string name="SwitchToAnonymously">Switch to anonymously</string>
     <string name="SwitchToPersonalAccount">Switch to personal account</string>
     <string name="openArchiveOnPull">Open Archive On Pull</string>
+    <string name="disableStickersAutoReorder">Disable sticker packs auto-reorder</string>
 </resources>
