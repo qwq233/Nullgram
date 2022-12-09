@@ -6,9 +6,7 @@ import android.os.VibrationEffect
 import android.os.Vibrator
 import android.view.View
 import android.view.ViewGroup
-
 import androidx.core.view.children
-
 import org.telegram.messenger.ApplicationLoader
 import top.qwq2333.nullgram.config.ConfigManager
 
@@ -16,9 +14,11 @@ object VibrationUtils {
     lateinit var vibrator: Vibrator
 
     @JvmStatic
-    fun disableHapticFeedback(view: View) {
-        view.isHapticFeedbackEnabled = false
-        (view as? ViewGroup)?.children?.forEach(::disableHapticFeedback)
+    fun disableHapticFeedback(view: View?) {
+        if (view != null) {
+            view.isHapticFeedbackEnabled = false
+            (view as? ViewGroup)?.children?.forEach(::disableHapticFeedback)
+        }
     }
 
     @JvmStatic
