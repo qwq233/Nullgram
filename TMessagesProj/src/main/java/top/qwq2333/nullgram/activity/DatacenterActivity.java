@@ -256,7 +256,7 @@ public class DatacenterActivity extends BaseActivity implements NotificationCent
         }
     }
 
-    protected ActionBar createActionBar(Context context) {
+    public ActionBar createActionBar(Context context) {
         ActionBar actionBar;
         actionBar = super.createActionBar(context);
         actionBar.setTitle(getActionBarTitle());

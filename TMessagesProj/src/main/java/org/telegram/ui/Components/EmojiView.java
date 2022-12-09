@@ -110,6 +110,7 @@ import org.telegram.tgnet.TLRPC;
 import org.telegram.ui.ActionBar.AlertDialog;
 import org.telegram.ui.ActionBar.BaseFragment;
 import org.telegram.ui.ActionBar.BottomSheet;
+import org.telegram.ui.ActionBar.SimpleTextView;
 import org.telegram.ui.ActionBar.Theme;
 import org.telegram.ui.Cells.ContextLinkCell;
 import org.telegram.ui.Cells.EmptyCell;
@@ -1106,11 +1107,10 @@ public class EmojiView extends FrameLayout implements
             }
         }
 
-
         @Override
         protected void onDraw(Canvas canvas) {
             if (isPressed() && pressedProgress != 1f) {
-                pressedProgress += 16f / 100f;
+                pressedProgress += (float) Math.min(40, 1000f / AndroidUtilities.screenRefreshRate) / 100f;
                 pressedProgress = Utilities.clamp(pressedProgress, 1f, 0);
                 invalidate();
             }
@@ -2851,6 +2851,7 @@ public class EmojiView extends FrameLayout implements
                     AndroidUtilities.rectTmp2.set(imageView.getLeft() + imageView.getPaddingLeft() - startOffset, topOffset, imageView.getRight() - imageView.getPaddingRight() - startOffset, topOffset + imageView.getMeasuredHeight() - imageView.getPaddingTop() - imageView.getPaddingBottom());
                     imageView.backgroundThreadDrawHolder[threadIndex].setBounds(AndroidUtilities.rectTmp2);
                     imageView.drawable = drawable;
+                    imageView.drawable.setColorFilter(Theme.chat_animatedEmojiTextColorFilter);
                     imageView.imageReceiver = drawable.getImageReceiver();
                     drawInBackgroundViews.add(imageView);
                 }
@@ -3286,7 +3287,9 @@ public class EmojiView extends FrameLayout implements
                 installFadeAway = ValueAnimator.ofFloat(addButtonView.getAlpha(), installed ? .6f : 1f);
                 addButtonView.setAlpha(addButtonView.getAlpha());
                 installFadeAway.addUpdateListener(anm -> {
-                    addButtonView.setAlpha((float) anm.getAnimatedValue());
+                    if (addButtonView != null) {
+                        addButtonView.setAlpha((float) anm.getAnimatedValue());
+                    }
                 });
                 installFadeAway.setDuration(450);
                 installFadeAway.setInterpolator(CubicBezierInterpolator.EASE_OUT_QUINT);
@@ -3315,8 +3318,12 @@ public class EmojiView extends FrameLayout implements
                 lockAnimator = ValueAnimator.ofFloat(lockT, show ? 1f : 0f);
                 lockAnimator.addUpdateListener(anm -> {
                     lockT = (float) anm.getAnimatedValue();
-                    addButtonView.setAlpha(1f - lockT);
-                    premiumButtonView.setAlpha(lockT);
+                    if (addButtonView != null) {
+                        addButtonView.setAlpha(1f - lockT);
+                    }
+                    if (premiumButtonView != null) {
+                        premiumButtonView.setAlpha(lockT);
+                    }
                 });
                 lockAnimator.addListener(new AnimatorListenerAdapter() {
                     @Override
@@ -3343,7 +3350,7 @@ public class EmojiView extends FrameLayout implements
     private class EmojiPackHeader extends FrameLayout implements NotificationCenter.NotificationCenterDelegate {
 
         RLottieImageView lockView;
-        TextView headerView;
+        SimpleTextView headerView;
 
         FrameLayout buttonsView;
         TextView addButtonView;
@@ -3363,8 +3370,8 @@ public class EmojiView extends FrameLayout implements
             lockView.setColorFilter(getThemedColor(Theme.key_chat_emojiPanelStickerSetName));
             addView(lockView, LayoutHelper.createFrameRelatively(20, 20, Gravity.START, 10, 15, 0, 0));
 
-            headerView = new TextView(context);
-            headerView.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 15);
+            headerView = new SimpleTextView(context);
+            headerView.setTextSize(15);
             headerView.setTextColor(getThemedColor(Theme.key_chat_emojiPanelStickerSetName));
             headerView.setTypeface(AndroidUtilities.getTypeface("fonts/rmedium.ttf"));
             headerView.setOnClickListener(e -> {
@@ -3372,7 +3379,8 @@ public class EmojiView extends FrameLayout implements
                     openEmojiPackAlert(this.pack.set);
                 }
             });
-            addView(headerView, LayoutHelper.createFrameRelatively(LayoutHelper.WRAP_CONTENT, LayoutHelper.MATCH_PARENT, Gravity.START, 15, 15, 52, 0));
+            headerView.setEllipsizeByGradient(true);
+            addView(headerView, LayoutHelper.createFrameRelatively(LayoutHelper.WRAP_CONTENT, LayoutHelper.MATCH_PARENT, Gravity.START, 15, 15, 0, 0));
 
             buttonsView = new FrameLayout(context);
             buttonsView.setPadding(AndroidUtilities.dp(11), AndroidUtilities.dp(11), AndroidUtilities.dp(11), 0);
@@ -3506,6 +3514,12 @@ public class EmojiView extends FrameLayout implements
                 MeasureSpec.makeMeasureSpec(MeasureSpec.getSize(widthMeasureSpec), MeasureSpec.EXACTLY),
                 MeasureSpec.makeMeasureSpec(AndroidUtilities.dp(currentButtonState == BUTTON_STATE_EMPTY ? 32 : 42), MeasureSpec.EXACTLY)
             );
+        }
+
+        @Override
+        protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
+            super.onLayout(changed, left, top, right, bottom);
+            headerView.setRightPadding(buttonsView.getWidth() + AndroidUtilities.dp(11));
         }
 
         public void setStickerSet(EmojiPack pack, boolean divider) {
@@ -5095,7 +5109,6 @@ public class EmojiView extends FrameLayout implements
                 bottomTabContainerBackground.setBackgroundColor(getThemedColor(Theme.key_chat_emojiPanelBackground));
             }
         }
-
         if (emojiTabs != null) {
             emojiTabs.setBackgroundColor(getThemedColor(Theme.key_chat_emojiPanelBackground));
             emojiTabsShadow.setBackgroundColor(getThemedColor(Theme.key_chat_emojiPanelShadowLine));
@@ -6407,7 +6420,7 @@ public class EmojiView extends FrameLayout implements
                         coloredCode = null;
                         for (int a = 0; a < EmojiData.dataColored.length; a++) {
                             int size = EmojiData.dataColored[a].length + 1;
-                            if (position < count + size) {
+                            if (position - count - 1 >= 0 && position < count + size) {
                                 coloredCode = code = EmojiData.dataColored[a][position - count - 1];
                                 String color = Emoji.emojiColor.get(code);
                                 if (color != null) {

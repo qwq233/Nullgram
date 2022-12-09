@@ -40,6 +40,7 @@ public class FileLog {
     private File networkFile = null;
     private File tonlibFile = null;
     private boolean initied;
+    public static boolean databaseIsMalformed = false;
 
     private OutputStreamWriter tlStreamWriter = null;
     private File tlRequestsFile = null;

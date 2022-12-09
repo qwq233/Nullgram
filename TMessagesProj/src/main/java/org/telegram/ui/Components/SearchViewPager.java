@@ -68,7 +68,7 @@ import top.qwq2333.nullgram.utils.Defines;
 
 public class SearchViewPager extends ViewPagerFixed implements FilteredSearchView.UiCallback {
 
-    private final ViewPagerAdapter viewPagerAdapter;
+    protected final ViewPagerAdapter viewPagerAdapter;
     public FrameLayout searchContainer;
     public RecyclerListView searchListView;
     public StickerEmptyView emptyView;
@@ -115,6 +115,9 @@ public class SearchViewPager extends ViewPagerFixed implements FilteredSearchVie
     private int keyboardSize;
 
     private boolean showOnlyDialogsAdapter;
+    protected boolean includeDownloads() {
+        return true;
+    }
 
     ChatPreviewDelegate chatPreviewDelegate;
     SizeNotifierFrameLayout fragmentView;
@@ -198,9 +201,13 @@ public class SearchViewPager extends ViewPagerFixed implements FilteredSearchVie
             @Override
             public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
                 int firstVisibleItem = searchLayoutManager.findFirstVisibleItemPosition();
+                int lastVisibleItem = searchLayoutManager.findLastVisibleItemPosition();
                 int visibleItemCount = Math.abs(searchLayoutManager.findLastVisibleItemPosition() - firstVisibleItem) + 1;
                 int totalItemCount = recyclerView.getAdapter().getItemCount();
-                if (visibleItemCount > 0 && searchLayoutManager.findLastVisibleItemPosition() == totalItemCount - 1 && !dialogsSearchAdapter.isMessagesSearchEndReached()) {
+                if (visibleItemCount > 0 && !dialogsSearchAdapter.isMessagesSearchEndReached() && (
+                    lastVisibleItem == totalItemCount - 1 ||
+                    dialogsSearchAdapter.delegate != null && dialogsSearchAdapter.delegate.getSearchForumDialogId() != 0 && dialogsSearchAdapter.localMessagesLoadingRow >= 0 && firstVisibleItem <= dialogsSearchAdapter.localMessagesLoadingRow && lastVisibleItem >= dialogsSearchAdapter.localMessagesLoadingRow
+                )) {
                     dialogsSearchAdapter.loadMoreSearchMessages();
                 }
                 fragmentView.invalidateBlur();
@@ -270,8 +277,21 @@ public class SearchViewPager extends ViewPagerFixed implements FilteredSearchVie
         search(view, getCurrentPosition(), text, reset);
     }
 
+    protected long getDialogId(String query) {
+        return 0;
+    }
+
+    public void updateTabs() {
+        viewPagerAdapter.updateItems();
+        fillTabs();
+        if (tabsView != null) {
+            tabsView.finishAddingTabs();
+        }
+    }
+
     private void search(View view, int position, String query, boolean reset) {
-        long dialogId = 0;
+        long forumDialogId = dialogsSearchAdapter.delegate != null ? dialogsSearchAdapter.delegate.getSearchForumDialogId() : 0;
+        long dialogId = position == 0 ? 0 : forumDialogId;
         long minDate = 0;
         long maxDate = 0;
         boolean includeFolder = false;
@@ -292,7 +312,7 @@ public class SearchViewPager extends ViewPagerFixed implements FilteredSearchVie
         }
 
         if (view == searchContainer) {
-            if (dialogId == 0 && minDate == 0 && maxDate == 0) {
+            if (dialogId == 0 && minDate == 0 && maxDate == 0 || forumDialogId != 0) {
                 lastSearchScrolledToTop = false;
                 dialogsSearchAdapter.searchDialogs(query, includeFolder ? 1 : 0);
                 dialogsSearchAdapter.setFiltersDelegate(filteredSearchViewDelegate, false);
@@ -340,6 +360,7 @@ public class SearchViewPager extends ViewPagerFixed implements FilteredSearchVie
             emptyView.setKeyboardHeight(keyboardSize, false);
             noMediaFiltersSearchView.setKeyboardHeight(keyboardSize, false);
         } else if (view instanceof FilteredSearchView) {
+            ((FilteredSearchView) view).setUseFromUserAsAvatar(forumDialogId != 0);
             ((FilteredSearchView) view).setKeyboardHeight(keyboardSize, false);
             ViewPagerAdapter.Item item = viewPagerAdapter.items.get(position);
             ((FilteredSearchView) view).search(dialogId, minDate, maxDate, FiltersView.filters[item.filterIndex], includeFolder, query, reset);
@@ -402,6 +423,11 @@ public class SearchViewPager extends ViewPagerFixed implements FilteredSearchVie
                 AndroidUtilities.dp(54), LocaleController.getString("Forward", R.string.Forward));
             saveItem = actionMode.addItemWithWidth(saveItemId, R.drawable.msg_download, AndroidUtilities.dp(54), LocaleController.getString("SaveToDownloads", R.string.SaveToDownloads));
             deleteItem = actionMode.addItemWithWidth(deleteItemId, R.drawable.msg_delete, AndroidUtilities.dp(54), LocaleController.getString("Delete", R.string.Delete));
+        }
+        if (selectedMessagesCountTextView != null) {
+            boolean isForumSearch = dialogsSearchAdapter != null && dialogsSearchAdapter.delegate != null && dialogsSearchAdapter.delegate.getSearchForumDialogId() != 0;
+            ((MarginLayoutParams) selectedMessagesCountTextView.getLayoutParams()).leftMargin = AndroidUtilities.dp(72 + (isForumSearch ? 56 : 0));
+            selectedMessagesCountTextView.setLayoutParams(selectedMessagesCountTextView.getLayoutParams());
         }
         if (parent.getActionBar().getBackButton().getDrawable() instanceof MenuDrawable) {
             BackDrawable backDrawable = new BackDrawable(false);
@@ -917,12 +943,19 @@ public class SearchViewPager extends ViewPagerFixed implements FilteredSearchVie
         private final static int FILTER_TYPE = 2;
 
         public ViewPagerAdapter() {
+            updateItems();
+        }
+
+        public void updateItems() {
+            items.clear();
             items.add(new Item(DIALOGS_TYPE));
             if (!showOnlyDialogsAdapter) {
                 Item item = new Item(FILTER_TYPE);
                 item.filterIndex = 0;
                 items.add(item);
-                items.add(new Item(DOWNLOADS_TYPE));
+                if (includeDownloads()) {
+                    items.add(new Item(DOWNLOADS_TYPE));
+                }
                 item = new Item(FILTER_TYPE);
                 item.filterIndex = 1;
                 items.add(item);

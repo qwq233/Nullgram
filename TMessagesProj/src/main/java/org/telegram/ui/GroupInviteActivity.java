@@ -86,6 +86,7 @@ public class GroupInviteActivity extends BaseFragment implements NotificationCen
 
     @Override
     public void onFragmentDestroy() {
+        super.onFragmentDestroy();
         NotificationCenter.getInstance(currentAccount).removeObserver(this, NotificationCenter.chatInfoDidLoad);
     }
 
