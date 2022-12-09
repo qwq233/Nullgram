@@ -29,7 +29,6 @@
     <string name="QRLoginMessage">قم بمسح QRCode باستخدام جهاز آخر لتسجيل الدخول.</string>
     <string name="NullgramVersion">نولجرام %1$s\nمبني على تيليجرام %2$s</string>
     <string name="RestrictionReason">سبب التقييد</string>
-    <string name="Hide">إخفاء</string>
     <string name="showBotAPIID">عرض API ID للبوت</string>
     <string name="hideGroupSticker">إخفاء حزمة ملصقات المجموعات</string>
     <string name="ignoreBlockedUser">تجاهل رسائل المستخدم المحظور</string>
@@ -213,4 +212,5 @@
     <string name="SwitchToAnonymously">Switch to anonymously</string>
     <string name="SwitchToPersonalAccount">Switch to personal account</string>
     <string name="openArchiveOnPull">Open Archive On Pull</string>
+    <string name="disableStickersAutoReorder">Disable sticker packs auto-reorder</string>
 </resources>
