@@ -232,7 +232,6 @@ import top.qwq2333.nullgram.activity.DatacenterActivity;
 import top.qwq2333.nullgram.activity.MainSettingActivity;
 import top.qwq2333.nullgram.config.ConfigManager;
 import top.qwq2333.nullgram.ui.BottomBuilder;
-import top.qwq2333.nullgram.utils.APKUtils;
 import top.qwq2333.nullgram.utils.AlertUtil;
 import top.qwq2333.nullgram.utils.Defines;
 import top.qwq2333.nullgram.utils.Log;
@@ -8839,7 +8838,7 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
                     try {
                         PackageInfo pInfo = ApplicationLoader.applicationContext.getPackageManager().getPackageInfo(ApplicationLoader.applicationContext.getPackageName(), 0);
                         int code = pInfo.versionCode;
-                        String abi = APKUtils.getAbi();
+                        String abi = BuildConfig.FLAVOR;
                         cell.setText(LocaleController.formatString("NullgramVersion", R.string.NullgramVersion, String.format(Locale.US, "%s (%d) %s", pInfo.versionName, code, abi), String.format(Locale.US, "%s (%d)", BuildVars.BUILD_VERSION_STRING, BuildVars.BUILD_VERSION)));
                     } catch (Exception e) {
                         FileLog.e(e);

@@ -19,17 +19,7 @@
 
 package top.qwq2333.nullgram.utils;
 
-import org.telegram.messenger.BuildConfig;
-
 public class APKUtils {
-
-    /**
-     * @deprecated 已弃用
-     */
-    @Deprecated
-    public static String getAbi() {
-        return BuildConfig.FLAVOR;
-    }
 
     /**
      * 挂起当前线程

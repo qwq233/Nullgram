@@ -10,7 +10,6 @@ import java.util.Collections;
 import java.util.List;
 
 import top.qwq2333.nullgram.config.ConfigManager;
-import top.qwq2333.nullgram.utils.APKUtils;
 import top.qwq2333.nullgram.utils.Defines;
 import top.qwq2333.nullgram.utils.Log;
 
@@ -206,7 +205,7 @@ public class UpdateHelper {
                         }
                         TLRPC.messages_Messages res = (TLRPC.messages_Messages) response;
                         Log.d("Retrieve update messages, size:" + res.messages.size());
-                        final String target = APKUtils.getAbi() + ".apk";
+                        final String target = BuildConfig.FLAVOR + ".apk";
                         Log.d("target:" + target);
                         for (int i = 0; i < res.messages.size(); i++) {
                             if (res.messages.get(i).media == null) {
@@ -218,7 +217,7 @@ public class UpdateHelper {
                             String fileName = apkDocument.attributes.size() == 0 ? ""
                                 : apkDocument.attributes.get(0).file_name;
                             Log.d("file_name： " + apkDocument.attributes.get(0).file_name);
-                            if (!(fileName.contains(APKUtils.getAbi()) && fileName.contains(
+                            if (!(fileName.contains(BuildConfig.FLAVOR) && fileName.contains(
                                 metadata.versionName))) {
                                 continue;
                             }
