@@ -12,6 +12,7 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 
 import org.telegram.messenger.AndroidUtilities;
+import org.telegram.messenger.ChatObject;
 import org.telegram.messenger.LocaleController;
 import org.telegram.messenger.R;
 import org.telegram.messenger.UserObject;
@@ -32,7 +33,7 @@ public class MemberRequestCell extends FrameLayout {
     private TLRPC.TL_chatInviteImporter importer;
     private boolean isNeedDivider;
 
-    public MemberRequestCell(@NonNull Context context, OnClickListener clickListener, boolean isChannel) {
+    public MemberRequestCell(@NonNull Context context, OnClickListener clickListener, boolean isChannel, TLRPC.Chat chat) {
         super(context);
 
         avatarImageView.setRoundRadius(AndroidUtilities.dp(23));
@@ -85,9 +86,32 @@ public class MemberRequestCell extends FrameLayout {
         });
         FrameLayout.LayoutParams dismissLayoutParams = new LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, AndroidUtilities.dp(32), LocaleController.isRTL ? Gravity.RIGHT : Gravity.LEFT);
         dismissLayoutParams.topMargin = AndroidUtilities.dp(62);
-        dismissLayoutParams.leftMargin = LocaleController.isRTL ? 0 : (int)(addButtonWidth + AndroidUtilities.dp(73 + 6));
-        dismissLayoutParams.rightMargin = LocaleController.isRTL ? (int)(addButtonWidth + AndroidUtilities.dp(73 + 6)) : 0;
+        dismissLayoutParams.leftMargin = LocaleController.isRTL ? 0 : (int) (addButtonWidth + AndroidUtilities.dp(73 + 6));
+        dismissLayoutParams.rightMargin = LocaleController.isRTL ? (int) (addButtonWidth + AndroidUtilities.dp(73 + 6)) : 0;
         addView(dismissButton, dismissLayoutParams);
+
+        float dismissButtonWidth = dismissButton.getPaint().measureText(dismissButton.getText().toString()) + btnPadding * 2;
+        TextView banButton = new TextView(getContext());
+        banButton.setBackground(Theme.AdaptiveRipple.filledRect(Theme.key_dialogTextRed2, 4));
+        banButton.setGravity((LocaleController.isRTL ? Gravity.RIGHT : Gravity.LEFT) | Gravity.CENTER_VERTICAL);
+        banButton.setMaxLines(1);
+        banButton.setPadding(btnPadding, 0, btnPadding, 0);
+        banButton.setText(LocaleController.getString("Ban", R.string.Ban));
+        banButton.setTextColor(Theme.getColor(Theme.key_featuredStickers_buttonText));
+        banButton.setTextSize(14);
+        banButton.setTypeface(AndroidUtilities.getTypeface("fonts/rmedium.ttf"));
+        banButton.setOnClickListener(v -> {
+            if (clickListener != null && importer != null) {
+                clickListener.onBanClicked(importer);
+            }
+        });
+        FrameLayout.LayoutParams banLayoutParams = new LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, AndroidUtilities.dp(32), LocaleController.isRTL ? Gravity.RIGHT : Gravity.LEFT);
+        banLayoutParams.topMargin = AndroidUtilities.dp(62);
+        banLayoutParams.leftMargin = LocaleController.isRTL ? 0 : (int) (addButtonWidth + dismissButtonWidth + AndroidUtilities.dp(73 + 6));
+        banLayoutParams.rightMargin = LocaleController.isRTL ? (int) (addButtonWidth + dismissButtonWidth + AndroidUtilities.dp(73 + 6)) : 0;
+        if (ChatObject.canBlockUsers(chat)) {
+            addView(banButton, banLayoutParams);
+        }
     }
 
     public void setData(LongSparseArray<TLRPC.User> users, TLRPC.TL_chatInviteImporter importer, boolean isNeedDivider) {
@@ -143,5 +167,7 @@ public class MemberRequestCell extends FrameLayout {
         void onAddClicked(TLRPC.TL_chatInviteImporter importer);
 
         void onDismissClicked(TLRPC.TL_chatInviteImporter importer);
+
+        void onBanClicked(TLRPC.TL_chatInviteImporter importer);
     }
 }
