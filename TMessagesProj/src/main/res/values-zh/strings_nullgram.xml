@@ -29,7 +29,6 @@
     <string name="QRLoginMessage">用另一个设备扫描二维码登录。</string>
     <string name="NullgramVersion">Nullgram %1$s\n基于 Telegram %2$s</string>
     <string name="RestrictionReason">限制原因</string>
-    <string name="Hide">隐藏</string>
     <string name="showBotAPIID">显示Bot API ID</string>
     <string name="hideGroupSticker">隐藏群组贴纸包</string>
     <string name="ignoreBlockedUser">忽略被屏蔽的用户信息</string>
@@ -211,4 +210,5 @@
     <string name="SwitchToAnonymously">切换到匿名模式</string>
     <string name="SwitchToPersonalAccount">切换到个人账户</string>
     <string name="openArchiveOnPull">Open Archive On Pull</string>
+    <string name="disableStickersAutoReorder">Disable sticker packs auto-reorder</string>
 </resources>
