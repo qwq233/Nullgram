@@ -29,7 +29,6 @@
     <string name="QRLoginMessage">Kirish uchun QR kodini boshqa qurilma bilan skanerlang.</string>
     <string name="NullgramVersion">Nullgram %1$s\nBased on Telegram %2$s</string>
     <string name="RestrictionReason">Restriction reason</string>
-    <string name="Hide">Yashirin</string>
     <string name="showBotAPIID">Bot api idni ko\'rsatish</string>
     <string name="hideGroupSticker">Guruh stickerlarini yashirish</string>
     <string name="ignoreBlockedUser">Ignore Blocked User Messages</string>
@@ -211,4 +210,5 @@
     <string name="SwitchToAnonymously">Switch to anonymously</string>
     <string name="SwitchToPersonalAccount">Switch to personal account</string>
     <string name="openArchiveOnPull">Open Archive On Pull</string>
+    <string name="disableStickersAutoReorder">Disable sticker packs auto-reorder</string>
 </resources>
