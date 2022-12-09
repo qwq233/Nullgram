@@ -1,9 +1,18 @@
 package top.qwq2333.nullgram.utils
 
+import android.content.Context
 import android.graphics.Typeface
+import android.net.ConnectivityManager
+import android.net.Network
+import android.net.NetworkCapabilities
+import android.net.NetworkRequest
+import android.os.Build
 import android.util.Base64
+import org.telegram.messenger.ApplicationLoader
 import org.telegram.messenger.LocaleController
 import org.telegram.messenger.MessageObject
+import org.telegram.messenger.NotificationCenter
+import org.telegram.messenger.SharedConfig
 import top.qwq2333.nullgram.config.ConfigManager
 import java.io.BufferedReader
 import java.io.FileReader
@@ -99,6 +108,56 @@ object Utils {
             }
         }
         return systemEmojiTypeface
+    }
+
+    @JvmStatic
+    fun isVPNEnabled(): Boolean {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
+            return false
+        }
+        runCatching {
+            val connectivityManager = ApplicationLoader.applicationContext.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+            val network = connectivityManager.activeNetwork
+            val networkCapabilities = connectivityManager.getNetworkCapabilities(network)
+            return networkCapabilities!!.hasTransport(NetworkCapabilities.TRANSPORT_VPN)
+        }
+        return false
+    }
+
+    @JvmStatic
+    fun registerNetworkCallback() {
+        val connectivityManager = ApplicationLoader.applicationContext.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+        val networkCallback: ConnectivityManager.NetworkCallback =
+            object : ConnectivityManager.NetworkCallback() {
+                override fun onAvailable(network: Network) {
+                    val networkCapabilities = connectivityManager.getNetworkCapabilities(network)
+                    val vpn = networkCapabilities!!.hasTransport(NetworkCapabilities.TRANSPORT_VPN)
+                    if (!vpn) {
+                        if (SharedConfig.currentProxy == null) {
+                            if (!SharedConfig.proxyList.isEmpty()) {
+                                SharedConfig.setCurrentProxy(SharedConfig.proxyList[0])
+                            } else {
+                                return
+                            }
+                        }
+                    }
+                    if ((SharedConfig.proxyEnabled && vpn) || (!SharedConfig.proxyEnabled && !vpn)) {
+                        SharedConfig.setProxyEnable(!vpn)
+                        UIUtil.runOnUIThread(Runnable {
+                            NotificationCenter.getGlobalInstance()
+                                .postNotificationName(NotificationCenter.proxySettingsChanged)
+                        })
+                    }
+                }
+            }
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            connectivityManager.registerDefaultNetworkCallback(networkCallback)
+        } else {
+            val request: NetworkRequest = NetworkRequest.Builder()
+                .addCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET).build()
+            connectivityManager.registerNetworkCallback(request, networkCallback)
+        }
     }
 
 }

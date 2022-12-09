@@ -191,6 +191,7 @@ import top.qwq2333.nullgram.helpers.SettingsHelper;
 import top.qwq2333.nullgram.helpers.UpdateHelper;
 import top.qwq2333.nullgram.utils.Defines;
 import top.qwq2333.nullgram.utils.Log;
+import top.qwq2333.nullgram.utils.Utils;
 
 public class LaunchActivity extends BasePermissionsActivity implements INavigationLayout.INavigationLayoutDelegate, NotificationCenter.NotificationCenterDelegate, DialogsActivity.DialogsActivityDelegate {
     public final static Pattern PREFIX_T_ME_PATTERN = Pattern.compile("^(?:http(?:s|)://|)([A-z0-9-]+?)\\.t\\.me");
@@ -5390,6 +5391,17 @@ public class LaunchActivity extends BasePermissionsActivity implements INavigati
             }
             passcodeView.onResume();
         }
+
+        if (ConfigManager.getBooleanOrFalse(Defines.autoDisableBuiltInProxy)) {
+            if (SharedConfig.proxyEnabled && Utils.isVPNEnabled()) {
+                SharedConfig.setProxyEnable(false);
+            } else if (!Utils.isVPNEnabled()) {
+                SharedConfig.setProxyEnable(true);
+            }
+            Utils.registerNetworkCallback();
+            NotificationCenter.getGlobalInstance().postNotificationName(NotificationCenter.proxySettingsChanged);
+        }
+
         ConnectionsManager.getInstance(currentAccount).setAppPaused(false, false);
         updateCurrentConnectionState(currentAccount);
         if (PhotoViewer.hasInstance() && PhotoViewer.getInstance().isVisible()) {

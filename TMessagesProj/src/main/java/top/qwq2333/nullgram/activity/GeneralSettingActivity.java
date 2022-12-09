@@ -56,6 +56,7 @@ public class GeneralSettingActivity extends BaseActivity {
     private int disableVibrationRow;
     private int tabsTitleTypeRow;
     private int openArchiveOnPullRow;
+    private int autoDisableBuiltInProxyRow;
     private int general2Row;
 
 
@@ -175,6 +176,11 @@ public class GeneralSettingActivity extends BaseActivity {
             if (view instanceof TextCheckCell) {
                 ((TextCheckCell) view).setChecked(ConfigManager.getBooleanOrFalse(Defines.openArchiveOnPull));
             }
+        } else if (position == autoDisableBuiltInProxyRow) {
+            ConfigManager.toggleBoolean(Defines.autoDisableBuiltInProxy);
+            if (view instanceof TextCheckCell) {
+                ((TextCheckCell) view).setChecked(ConfigManager.getBooleanOrFalse(Defines.autoDisableBuiltInProxy));
+            }
         }
 
     }
@@ -215,6 +221,7 @@ public class GeneralSettingActivity extends BaseActivity {
         autoProxySwitchRow = rowCount++;
         useSystemEmojiRow = rowCount++;
         openArchiveOnPullRow = rowCount++;
+        autoDisableBuiltInProxyRow = rowCount++;
         disableVibrationRow = rowCount++;
         tabsTitleTypeRow = rowCount++;
         general2Row = rowCount++;
@@ -299,6 +306,10 @@ public class GeneralSettingActivity extends BaseActivity {
                         textCell.setTextAndCheck(LocaleController.getString("DisableVibration", R.string.disableVibration), ConfigManager.getBooleanOrFalse(Defines.disableVibration), true);
                     } else if (position == openArchiveOnPullRow) {
                         textCell.setTextAndCheck(LocaleController.getString("openArchiveOnPull", R.string.openArchiveOnPull), ConfigManager.getBooleanOrFalse(Defines.openArchiveOnPull), true);
+                    } else if (position == autoDisableBuiltInProxyRow) {
+                        textCell.setTextAndValueAndCheck(LocaleController.getString("autoDisableBuiltInProxy", R.string.autoDisableBuiltInProxy),
+                            LocaleController.getString("autoDisableBuiltInProxyDesc", R.string.autoDisableBuiltInProxyDesc),
+                            ConfigManager.getBooleanOrFalse(Defines.autoDisableBuiltInProxy), true, true);
                     }
                     break;
                 }
