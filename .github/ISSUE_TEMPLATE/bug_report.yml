@@ -58,7 +58,7 @@ body:
     id: logs
     attributes:
       label: Logs
-      description: For usage issues, please provide the log zip saved from manager. Without log, the issue will be closed. /使用问题请提供从管理器保存的日志压缩包；激活问题请提供 [bugreport](https://developer.android.google.cn/studio/debug/bug-report?hl=zh-cn) 日志。无日志提交会被关闭。
+      description: For usage issues, please provide the log. Without log, the issue will be closed. /使用问题请提供日志；无日志提交会被关闭。
       placeholder: Upload logs by clicking the bar on the bottom. 
     validations:
       required: true
