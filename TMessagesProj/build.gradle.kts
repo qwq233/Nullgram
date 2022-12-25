@@ -104,7 +104,7 @@ android {
     }
 
     lint {
-        checkReleaseBuilds = false
+        checkReleaseBuilds = true
         disable += listOf(
             "MissingTranslation", "ExtraTranslation", "BlockedPrivateApi"
         )

@@ -5185,9 +5185,9 @@ public class MessageObject {
             if (isSupergroup()) {
                 return false;
             }
-            return messageOwner.peer_id.channel_id != 0 && (
-                messageOwner.via_bot_id == 0 && messageOwner.reply_to == null
-                    || type != TYPE_STICKER && type != TYPE_ANIMATED_STICKER);
+            if (messageOwner.peer_id.channel_id != 0 && (messageOwner.via_bot_id == 0 && messageOwner.reply_to == null || type != TYPE_STICKER && type != TYPE_ANIMATED_STICKER)) {
+                return true;
+            }
         }
         return false;
     }
