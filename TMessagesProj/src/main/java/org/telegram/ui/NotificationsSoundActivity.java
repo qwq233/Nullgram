@@ -1,6 +1,5 @@
 package org.telegram.ui;
 
-import android.app.NotificationManager;
 import android.content.ClipData;
 import android.content.Context;
 import android.content.DialogInterface;

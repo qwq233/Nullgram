@@ -7,8 +7,6 @@ import android.media.MediaExtractor;
 import android.media.MediaFormat;
 import android.os.Build;
 
-import com.google.android.exoplayer2.util.Log;
-
 import org.telegram.messenger.BuildVars;
 import org.telegram.messenger.FileLog;
 import org.telegram.messenger.MediaController;

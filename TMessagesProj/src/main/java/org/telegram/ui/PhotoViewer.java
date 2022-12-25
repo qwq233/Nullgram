@@ -67,7 +67,6 @@ import android.transition.TransitionManager;
 import android.transition.TransitionSet;
 import android.transition.TransitionValues;
 import android.util.FloatProperty;
-
 import android.util.Property;
 import android.util.Range;
 import android.util.SparseArray;
@@ -256,9 +255,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
-
-import top.qwq2333.nullgram.config.ConfigManager;
-import top.qwq2333.nullgram.utils.Defines;
 
 @SuppressLint("WrongConstant")
 @SuppressWarnings("unchecked")

@@ -12,9 +12,9 @@ import android.graphics.drawable.BitmapDrawable;
 import android.os.Build;
 import android.text.TextUtils;
 
-import org.osmdroid.util.TileSystemWebMercator;
 import androidx.annotation.Nullable;
 
+import org.osmdroid.util.TileSystemWebMercator;
 import org.telegram.messenger.FileLoader;
 import org.telegram.messenger.FileLog;
 import org.telegram.messenger.ImageLoader;

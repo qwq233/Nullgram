@@ -17,7 +17,6 @@ import android.media.AudioFormat;
 import android.media.AudioManager;
 import android.media.AudioRecord;
 import android.media.AudioRecordingConfiguration;
-import android.media.AudioTimestamp;
 import android.media.MediaRecorder.AudioSource;
 import android.os.Build;
 import android.os.Process;
@@ -25,9 +24,14 @@ import android.os.Process;
 import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
 
-import com.google.android.exoplayer2.util.Log;
+import org.webrtc.CalledByNative;
+import org.webrtc.Logging;
+import org.webrtc.ThreadUtils;
+import org.webrtc.audio.JavaAudioDeviceModule.AudioRecordErrorCallback;
+import org.webrtc.audio.JavaAudioDeviceModule.AudioRecordStartErrorCode;
+import org.webrtc.audio.JavaAudioDeviceModule.AudioRecordStateCallback;
+import org.webrtc.audio.JavaAudioDeviceModule.SamplesReadyCallback;
 
-import java.lang.System;
 import java.nio.ByteBuffer;
 import java.util.Arrays;
 import java.util.Iterator;
@@ -40,14 +44,6 @@ import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
-
-import org.webrtc.CalledByNative;
-import org.webrtc.Logging;
-import org.webrtc.ThreadUtils;
-import org.webrtc.audio.JavaAudioDeviceModule.AudioRecordErrorCallback;
-import org.webrtc.audio.JavaAudioDeviceModule.AudioRecordStartErrorCode;
-import org.webrtc.audio.JavaAudioDeviceModule.AudioRecordStateCallback;
-import org.webrtc.audio.JavaAudioDeviceModule.SamplesReadyCallback;
 
 class WebRtcAudioRecord {
   private static final String TAG = "WebRtcAudioRecordExternal";

@@ -4,13 +4,9 @@ import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.ValueAnimator;
 import android.content.Context;
-import android.text.SpannableStringBuilder;
 import android.text.StaticLayout;
 import android.text.TextPaint;
 import android.view.View;
-
-import org.checkerframework.checker.units.qual.C;
-import org.telegram.messenger.AndroidUtilities;
 
 import java.util.ArrayList;
 

@@ -110,7 +110,6 @@ import java.util.Stack;
 
 import top.qwq2333.nullgram.config.ConfigManager;
 import top.qwq2333.nullgram.utils.Defines;
-import top.qwq2333.nullgram.utils.Log;
 
 
 public class DialogCell extends BaseCell {

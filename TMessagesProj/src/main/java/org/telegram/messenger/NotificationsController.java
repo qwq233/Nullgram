@@ -43,7 +43,6 @@ import android.provider.Settings;
 import android.text.TextUtils;
 import android.util.SparseArray;
 import android.util.SparseBooleanArray;
-import android.view.View;
 
 import androidx.collection.LongSparseArray;
 import androidx.core.app.NotificationCompat;
@@ -56,8 +55,6 @@ import androidx.core.content.pm.ShortcutInfoCompat;
 import androidx.core.content.pm.ShortcutManagerCompat;
 import androidx.core.graphics.drawable.IconCompat;
 
-import com.google.android.exoplayer2.util.Log;
-
 import org.telegram.messenger.support.LongSparseIntArray;
 import org.telegram.tgnet.ConnectionsManager;
 import org.telegram.tgnet.TLRPC;
@@ -68,7 +65,6 @@ import org.telegram.ui.PopupNotificationActivity;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;

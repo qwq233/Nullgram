@@ -20,7 +20,11 @@
 package top.qwq2333.nullgram.utils
 
 import android.content.Context
-import org.telegram.messenger.*
+import org.telegram.messenger.LocaleController
+import org.telegram.messenger.MessagesController
+import org.telegram.messenger.MessagesStorage
+import org.telegram.messenger.R
+import org.telegram.messenger.UserConfig
 import org.telegram.messenger.browser.Browser
 import org.telegram.tgnet.ConnectionsManager
 import org.telegram.tgnet.TLObject

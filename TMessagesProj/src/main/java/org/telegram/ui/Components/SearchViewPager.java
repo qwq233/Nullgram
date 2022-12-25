@@ -60,7 +60,6 @@ import org.telegram.ui.PremiumPreviewFragment;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Set;
 
 import top.qwq2333.nullgram.config.ConfigManager;

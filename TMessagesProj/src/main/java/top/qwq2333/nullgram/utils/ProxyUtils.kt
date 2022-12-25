@@ -13,7 +13,9 @@ import org.telegram.messenger.UserConfig
 import org.telegram.tgnet.ConnectionsManager
 import org.telegram.ui.ProxyListActivity
 import top.qwq2333.nullgram.config.ConfigManager
-import java.util.*
+import java.util.LinkedList
+import java.util.Timer
+import java.util.TimerTask
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.atomic.AtomicBoolean
 

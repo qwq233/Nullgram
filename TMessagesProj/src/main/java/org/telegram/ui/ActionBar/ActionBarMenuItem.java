@@ -30,7 +30,6 @@ import android.transition.TransitionManager;
 import android.transition.TransitionSet;
 import android.transition.TransitionValues;
 import android.transition.Visibility;
-import top.qwq2333.nullgram.utils.Log;
 import android.util.TypedValue;
 import android.view.ActionMode;
 import android.view.Gravity;

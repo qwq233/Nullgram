@@ -159,7 +159,6 @@ import java.util.Locale;
 import top.qwq2333.nullgram.config.ConfigManager;
 import top.qwq2333.nullgram.ui.syntaxhighlight.SyntaxHighlight;
 import top.qwq2333.nullgram.utils.Defines;
-import top.qwq2333.nullgram.utils.Log;
 
 public class ChatActivityEnterView extends BlurredFrameLayout implements NotificationCenter.NotificationCenterDelegate, SizeNotifierFrameLayout.SizeNotifierFrameLayoutDelegate, StickersAlert.StickersAlertDelegate {
 

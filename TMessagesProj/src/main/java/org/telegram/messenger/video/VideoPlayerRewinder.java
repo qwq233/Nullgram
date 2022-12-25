@@ -4,7 +4,6 @@ import com.google.android.exoplayer2.C;
 
 import org.telegram.messenger.AndroidUtilities;
 import org.telegram.ui.Components.PhotoViewerWebView;
-import org.telegram.ui.Components.VideoForwardDrawable;
 import org.telegram.ui.Components.VideoPlayer;
 
 public class VideoPlayerRewinder {

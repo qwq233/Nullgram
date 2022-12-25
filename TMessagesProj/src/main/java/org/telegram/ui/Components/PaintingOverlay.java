@@ -27,8 +27,6 @@ import org.telegram.ui.Components.Paint.Views.EditTextOutline;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
 
 public class PaintingOverlay extends FrameLayout {
 

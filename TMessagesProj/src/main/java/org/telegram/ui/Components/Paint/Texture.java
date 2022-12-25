@@ -1,10 +1,7 @@
 package org.telegram.ui.Components.Paint;
 
 import android.graphics.Bitmap;
-import android.graphics.Color;
 import android.opengl.GLES20;
-
-import androidx.core.graphics.ColorUtils;
 
 import org.telegram.ui.Components.Size;
 

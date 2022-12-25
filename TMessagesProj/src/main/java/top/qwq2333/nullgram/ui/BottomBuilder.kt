@@ -23,7 +23,11 @@ import android.content.Context
 import android.text.TextUtils
 import android.util.TypedValue
 import android.view.Gravity
-import android.widget.*
+import android.widget.EditText
+import android.widget.FrameLayout
+import android.widget.LinearLayout
+import android.widget.ScrollView
+import android.widget.TextView
 import org.telegram.messenger.AndroidUtilities
 import org.telegram.messenger.LocaleController
 import org.telegram.messenger.R
@@ -34,7 +38,7 @@ import org.telegram.ui.Cells.RadioButtonCell
 import org.telegram.ui.Cells.TextCell
 import org.telegram.ui.Cells.TextCheckCell
 import org.telegram.ui.Components.LayoutHelper
-import java.util.*
+import java.util.LinkedList
 
 class BottomBuilder(val ctx: Context) {
     val builder = BottomSheet.Builder(ctx, true)

@@ -3,7 +3,6 @@ package org.telegram.ui.Components;
 
 import android.animation.TimeInterpolator;
 import android.os.SystemClock;
-import android.util.Log;
 import android.view.View;
 
 import androidx.core.math.MathUtils;
