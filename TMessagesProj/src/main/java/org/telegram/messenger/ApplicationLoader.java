@@ -32,6 +32,7 @@ import android.os.SystemClock;
 import android.telephony.TelephonyManager;
 
 import androidx.annotation.NonNull;
+import androidx.multidex.MultiDex;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesUtil;
@@ -81,6 +82,7 @@ public class ApplicationLoader extends Application {
     @Override
     protected void attachBaseContext(Context base) {
         super.attachBaseContext(base);
+        MultiDex.install(this);
         AppcenterUtils.start(this);
         AppcenterUtils.trackEvent("App start");
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
