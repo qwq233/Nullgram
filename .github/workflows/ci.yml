@@ -51,7 +51,7 @@ jobs:
         uses: actions/cache@v2
         with:
           path: ~/.gradle
-          key: gradle-${{ hashFiles('**/*.gradle') }}
+          key: gradle-${{ hashFiles('**/*.gradle.kts') }}
       - name: Prepare Environment
         run: |
             echo "Removing large packages"
@@ -152,7 +152,7 @@ jobs:
         uses: actions/cache@v2
         with:
           path: ~/.gradle
-          key: gradle-${{ hashFiles('**/*.gradle') }}
+          key: gradle-${{ hashFiles('**/*.gradle.kts') }}
       - name: Prepare Environment
         run: |
           sudo apt-get install bison gcc make curl ninja-build ccache -y
