@@ -76,6 +76,8 @@ dependencies {
     implementation("org.jetbrains.kotlin:kotlin-stdlib:${Version.kotlin}")
     implementation("org.osmdroid:osmdroid-android:6.1.14")
     implementation("com.android.billingclient:billing:5.1.0")
+
+    implementation(project(":tcp2ws"))
 }
 
 

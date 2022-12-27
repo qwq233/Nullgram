@@ -81,11 +81,16 @@ public class LicenseActivity extends BaseFragment {
 
         Notice markwon = new Notice("Markwon", "https://github.com/noties/Markwon", "Copyright 2017 Dimitry Ivanov (mail@dimitryivanov.ru)", new ApacheSoftwareLicense20());
         Notice nekogram = new Notice("Nekogram", "https://gitlab.com/Nekogram/Nekogram", "Author: NekoInverter", new GnuGeneralPublicLicense20());
+        Notice tcp2ws = new Notice("java-socks-proxy-server", "https://github.com/bbottema/java-socks-proxy-server/", "author bbottema, modified by NekoInverter",
+            new ApacheSoftwareLicense20());
+        Notice nvWebsocketClient = new Notice("nv-websocket-client", "https://github.com/TakahikoKawasaki/nv-websocket-client/", "TakahikoKawasaki", new ApacheSoftwareLicense20());
         Notice nekox = new Notice("NekoX", "https://github.com/NekoX-dev/NekoX", "Author: NekoX-Dev", new GnuGeneralPublicLicense20());
         Notice genuine = new Notice("Genuine", "https://github.com/brevent/genuine", "Copyright brevent", new CCBYNCSA40());
         notices.addNotice(markwon);
         notices.addNotice(nekogram);
         notices.addNotice(nekox);
+        notices.addNotice(tcp2ws);
+        notices.addNotice(nvWebsocketClient);
         notices.addNotice(genuine);
         notices.addNotice(LicensesDialog.LICENSES_DIALOG_NOTICE);
 

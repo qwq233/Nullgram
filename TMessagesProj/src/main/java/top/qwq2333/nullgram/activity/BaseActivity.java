@@ -5,6 +5,8 @@ import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.Rect;
+import android.text.SpannableStringBuilder;
+import android.text.Spanned;
 import android.view.View;
 import android.view.ViewGroup;
 
@@ -37,6 +39,7 @@ import org.telegram.ui.Components.BulletinFactory;
 import org.telegram.ui.Components.LayoutHelper;
 import org.telegram.ui.Components.RecyclerListView;
 import org.telegram.ui.Components.SizeNotifierFrameLayout;
+import org.telegram.ui.Components.URLSpanNoUnderline;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -48,6 +51,18 @@ public abstract class BaseActivity extends BaseFragment {
     protected LinearLayoutManager layoutManager;
 
     protected int rowCount;
+
+    public static final int TYPE_SHADOW = 1;
+    public static final int TYPE_SETTINGS = 2;
+    public static final int TYPE_CHECK = 3;
+    public static final int TYPE_HEADER = 4;
+    public static final int TYPE_NOTIFICATION_CHECK = 5;
+    public static final int TYPE_DETAIL_SETTINGS = 6;
+    public static final int TYPE_INFO_PRIVACY = 7;
+    public static final int TYPE_TEXT = 8;
+    public static final int TYPE_CHECKBOX = 9;
+    public static final int TYPE_RADIO = 10;
+    public static final int TYPE_ACCOUNT = 11;
     protected HashMap<String, Integer> rowMap = new HashMap<>(20);
     protected HashMap<Integer, String> rowMapReverse = new HashMap<>(20);
 
@@ -78,6 +93,19 @@ public abstract class BaseActivity extends BaseFragment {
         if (listAdapter != null) {
             listAdapter.notifyDataSetChanged();
         }
+    }
+
+    protected CharSequence getSpannedString(String key, int id, String url) {
+        var text = LocaleController.getString(key, id);
+        var builder = new SpannableStringBuilder(text);
+        int index1 = text.indexOf("**");
+        int index2 = text.lastIndexOf("**");
+        if (index1 >= 0 && index2 >= 0 && index1 != index2) {
+            builder.replace(index2, index2 + 2, "");
+            builder.replace(index1, index1 + 2, "");
+            builder.setSpan(new URLSpanNoUnderline(url), index1, index2 - 2, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+        }
+        return builder;
     }
 
     @Override

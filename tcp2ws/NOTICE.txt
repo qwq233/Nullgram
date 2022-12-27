@@ -1,0 +1,11 @@
+  =========================================================================
+  ==  NOTICE file for use with the Apache License, Version 2.0           ==
+  =========================================================================
+  
+  java-socks-proxy-server, Copyright (C) 2019 Benny Bottema (benny@bennybottema.com)
+  
+  This product uses no commercial products.
+  
+  This product is based on  the following external (Open Source) library:
+
+    - java-socks-proxy-server (https://github.com/damico/java-socks-proxy-server)

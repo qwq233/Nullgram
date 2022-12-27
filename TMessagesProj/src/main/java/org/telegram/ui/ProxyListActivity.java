@@ -54,6 +54,8 @@ import org.telegram.ui.Components.RecyclerListView;
 import java.util.ArrayList;
 import java.util.List;
 
+import top.qwq2333.nullgram.activity.WsSettingsActivity;
+import top.qwq2333.nullgram.helpers.WebSocketHelper;
 import top.qwq2333.nullgram.utils.APKUtils;
 import top.qwq2333.nullgram.utils.AlertUtil;
 import top.qwq2333.nullgram.utils.Log;
@@ -122,7 +124,13 @@ public class ProxyListActivity extends BaseFragment implements NotificationCente
             checkImageView.setScaleType(ImageView.ScaleType.CENTER);
             checkImageView.setContentDescription(LocaleController.getString("Edit", R.string.Edit));
             addView(checkImageView, LayoutHelper.createFrame(48, 48, (LocaleController.isRTL ? Gravity.LEFT : Gravity.RIGHT) | Gravity.TOP, 8, 8, 8, 0));
-            checkImageView.setOnClickListener(v -> presentFragment(new ProxySettingsActivity(currentInfo)));
+            checkImageView.setOnClickListener(v -> {
+                if (WebSocketHelper.NekogramPublicProxyServer.equals(currentInfo.address) || WebSocketHelper.NekogramXPublicProxyServer.equals(currentInfo.address)) {
+                    presentFragment(new WsSettingsActivity(currentInfo));
+                } else {
+                    presentFragment(new ProxySettingsActivity(currentInfo));
+                }
+            });
 
             setWillNotDraw(false);
         }
@@ -133,7 +141,11 @@ public class ProxyListActivity extends BaseFragment implements NotificationCente
         }
 
         public void setProxy(SharedConfig.ProxyInfo proxyInfo) {
-            textView.setText(proxyInfo.address + ":" + proxyInfo.port);
+            if (WebSocketHelper.NekogramPublicProxyServer.equals(proxyInfo.address) || WebSocketHelper.NekogramXPublicProxyServer.equals(proxyInfo.address)) {
+                textView.setText(LocaleController.getString("PublicProxy", R.string.PublicProxy));
+            } else {
+                textView.setText(proxyInfo.address + ":" + proxyInfo.port);
+            }
             currentInfo = proxyInfo;
         }
 
@@ -367,6 +379,9 @@ public class ProxyListActivity extends BaseFragment implements NotificationCente
         listView.setOnItemLongClickListener((view, position) -> {
             if (position >= proxyStartRow && position < proxyEndRow) {
                 final SharedConfig.ProxyInfo info = SharedConfig.proxyList.get(position - proxyStartRow);
+                if (info.address.equals(WebSocketHelper.NekogramPublicProxyServer) || info.address.equals(WebSocketHelper.NekogramXPublicProxyServer)) {
+                    return false;
+                }
                 AlertDialog.Builder builder = new AlertDialog.Builder(getParentActivity());
                 builder.setMessage(LocaleController.getString("DeleteProxy", R.string.DeleteProxy));
                 builder.setNegativeButton(LocaleController.getString("Cancel", R.string.Cancel), null);

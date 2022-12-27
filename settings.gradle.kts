@@ -21,4 +21,5 @@ dependencyResolutionManagement {
 rootProject.name = "Nullgram"
 include(
     ":TMessagesProj",
+    ":tcp2ws",
 )

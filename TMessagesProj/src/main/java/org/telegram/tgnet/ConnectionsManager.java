@@ -56,6 +56,7 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import top.qwq2333.nullgram.helpers.WebSocketHelper;
 import top.qwq2333.nullgram.utils.DatabaseUtils;
 import top.qwq2333.nullgram.utils.Log;
 import top.qwq2333.nullgram.utils.ProxyUtils;
@@ -436,7 +437,11 @@ public class ConnectionsManager extends BaseController {
         int proxyPort = preferences.getInt("proxy_port", 1080);
 
         if (preferences.getBoolean("proxy_enabled", false) && !TextUtils.isEmpty(proxyAddress)) {
-            native_setProxySettings(currentAccount, proxyAddress, proxyPort, proxyUsername, proxyPassword, proxySecret);
+            if (WebSocketHelper.serverHost.equals(proxyAddress)) {
+                native_setProxySettings(currentAccount, "127.0.0.1", WebSocketHelper.getSocksPort(), "", "", WebSocketHelper.wsUseMTP ? "00000000000000000000000000000000" : "");
+            } else {
+                native_setProxySettings(currentAccount, proxyAddress, proxyPort, proxyUsername, proxyPassword, proxySecret);
+            }
         }
         String installer = "";
         try {
@@ -530,6 +535,11 @@ public class ConnectionsManager extends BaseController {
         if (secret == null) {
             secret = "";
         }
+        if (address.equals(WebSocketHelper.serverHost)) {
+            address = "127.0.0.1";
+            port = WebSocketHelper.getSocksPort();
+        }
+
         return native_checkProxy(currentAccount, address, port, username, password, secret, requestTimeDelegate);
     }
 
@@ -758,6 +768,11 @@ public class ConnectionsManager extends BaseController {
         if (secret == null) {
             secret = "";
         }
+        if (address.equals(WebSocketHelper.serverHost)) {
+            address = "127.0.0.1";
+            port = WebSocketHelper.getSocksPort();
+        }
+
 
         for (int a = 0; a < UserConfig.MAX_ACCOUNT_COUNT; a++) {
             if (enabled && !TextUtils.isEmpty(address)) {

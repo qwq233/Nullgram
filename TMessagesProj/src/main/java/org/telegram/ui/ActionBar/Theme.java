@@ -2317,7 +2317,7 @@ public class Theme {
             }
             if ("Dark Blue".equals(name) || "Night".equals(name) || "AMOLED".equals(name) || "Monet Dark".equals(name) || "Monet AMOLED".equals(name)) {
                 isDark = DARK;
-            } else if ("Blue".equals(name) || "Arctic Blue".equals(name) || "Day".equals(name) || "Monet Light".equals(name)) {
+            } else if ("Blue".equals(name) || "Arctic Blue".equals(name) || "Day".equals(name) || "Monet Light".equals(name) || "Arctic".equals(name)) {
                 isDark = LIGHT;
             }
             if (isDark == UNKNOWN) {

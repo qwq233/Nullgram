@@ -134,6 +134,13 @@ public class Defines {
     public static final int tabMenuMix = 1;
     public static final int tabMenuIcon = 2;
 
+    // WebSocket Proxy
+    public static final String wsEnableTLS = "wsEnableTLS";
+    public static final String wsUseMTP = "wsUseMTP";
+    public static final String wsUseDoH = "wsUseDoH";
+    public static final String wsServerHost = "serverHost";
+    public static final String wsBuiltInProxyBackend = "wsBuiltInProxyBackend";
+
     // Misc
     public static final long[] officialID = {
         966253902,  // Developer

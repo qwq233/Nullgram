@@ -40,6 +40,7 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.Locale;
 
+import top.qwq2333.nullgram.helpers.WebSocketHelper;
 import top.qwq2333.nullgram.utils.AlertUtil;
 import top.qwq2333.nullgram.utils.StringUtils;
 import top.qwq2333.nullgram.utils.UIUtil;
@@ -429,16 +430,11 @@ public class SharedConfig {
     }
 
 
-    public static void reloadProxyList() {
+    public static void reloadProxyList(boolean changedBackend) {
         proxyListLoaded = false;
-        loadProxyList();
-
-        if (proxyEnabled && currentProxy == null) {
-            setProxyEnable(false);
-        }
+        loadProxyList(changedBackend);
 
     }
-
 
     public static LinkedList<ProxyInfo> proxyList = new LinkedList<>();
 
@@ -1341,6 +1337,10 @@ public class SharedConfig {
     }
 
     public static void loadProxyList() {
+        loadProxyList(false);
+    }
+
+    public static void loadProxyList(boolean changedBackend) {
         if (proxyListLoaded) {
             return;
         }
@@ -1375,8 +1375,18 @@ public class SharedConfig {
             }
             data.cleanup();
         }
-        if (currentProxy == null && !TextUtils.isEmpty(proxyAddress)) {
+        String currentBackend = WebSocketHelper.backend == 0 ? WebSocketHelper.NekogramPublicProxyServer : WebSocketHelper.NekogramXPublicProxyServer;
+        String previousBackend = WebSocketHelper.backend == 0 ? WebSocketHelper.NekogramXPublicProxyServer : WebSocketHelper.NekogramPublicProxyServer;
+        if (currentProxy == null && !TextUtils.isEmpty(proxyAddress) && !previousBackend.equals(proxyAddress)) {
             ProxyInfo info = currentProxy = new ProxyInfo(proxyAddress, proxyPort, proxyUsername, proxyPassword, proxySecret);
+            proxyList.add(0, info);
+        }
+        if (!currentBackend.equals(proxyAddress) && !changedBackend) {
+            ProxyInfo info = new ProxyInfo(currentBackend, 6356, "", "", "");
+            proxyList.add(0, info);
+        }
+        if (changedBackend) {
+            ProxyInfo info = currentProxy = new ProxyInfo(currentBackend, 6356, "", "", "");
             proxyList.add(0, info);
         }
     }
@@ -1384,9 +1394,12 @@ public class SharedConfig {
     public static void saveProxyList() {
         SerializedData serializedData = new SerializedData();
         int count = proxyList.size();
-        serializedData.writeInt32(count);
+        serializedData.writeInt32(count - 1);
         for (int a = 0; a < count; a++) {
             ProxyInfo info = proxyList.get(a);
+            if (WebSocketHelper.NekogramPublicProxyServer.equals(info.address) || WebSocketHelper.NekogramXPublicProxyServer.equals(info.address)) {
+                continue;
+            }
             serializedData.writeString(info.address != null ? info.address : "");
             serializedData.writeInt32(info.port);
             serializedData.writeString(info.username != null ? info.username : "");
