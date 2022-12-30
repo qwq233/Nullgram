@@ -356,7 +356,7 @@ public class MessageObject {
     }
 
     public boolean hasMediaSpoilers() {
-        return messageOwner.media != null && messageOwner.media.spoiler;
+        return messageOwner.media != null && messageOwner.media.spoiler && !ConfigManager.getBooleanOrFalse(Defines.displaySpoilerMsgDirectly);
     }
 
     public boolean shouldDrawReactionsInLayout() {
