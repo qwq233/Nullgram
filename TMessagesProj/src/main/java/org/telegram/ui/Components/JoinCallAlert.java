@@ -202,7 +202,7 @@ public class JoinCallAlert extends BottomSheet {
             callback.run(cachedChats.size() == 1);
             return;
         }
-        final AlertDialog progressDialog = new AlertDialog(context, 3);
+        final AlertDialog progressDialog = new AlertDialog(context, AlertDialog.ALERT_TYPE_SPINNER);
         TLRPC.TL_phone_getGroupCallJoinAs req = new TLRPC.TL_phone_getGroupCallJoinAs();
         req.peer = accountInstance.getMessagesController().getInputPeer(did);
         int reqId = accountInstance.getConnectionsManager().sendRequest(req, (response, error) -> AndroidUtilities.runOnUIThread(() -> {
@@ -242,7 +242,7 @@ public class JoinCallAlert extends BottomSheet {
                 showAlert(context, did, cachedChats, fragment, type, scheduledPeer, delegate);
             }
         } else {
-            final AlertDialog progressDialog = new AlertDialog(context, 3);
+            final AlertDialog progressDialog = new AlertDialog(context, AlertDialog.ALERT_TYPE_SPINNER);
             TLRPC.TL_phone_getGroupCallJoinAs req = new TLRPC.TL_phone_getGroupCallJoinAs();
             req.peer = accountInstance.getMessagesController().getInputPeer(did);
             int reqId = accountInstance.getConnectionsManager().sendRequest(req, (response, error) -> AndroidUtilities.runOnUIThread(() -> {

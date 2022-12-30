@@ -207,6 +207,9 @@ public class MediaActionDrawable extends Drawable {
     }
 
     public void setProgress(float value, boolean animated) {
+        if (downloadProgress == value) {
+            return;
+        }
         if (!animated) {
             animatedDownloadProgress = value;
             downloadProgressAnimationStart = value;

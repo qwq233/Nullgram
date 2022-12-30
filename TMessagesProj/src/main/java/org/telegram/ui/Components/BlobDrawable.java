@@ -5,6 +5,8 @@ import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.Path;
 
+import org.telegram.messenger.SharedConfig;
+
 import java.util.Random;
 
 public class BlobDrawable {
@@ -83,6 +85,9 @@ public class BlobDrawable {
     }
 
     public void update(float amplitude, float speedScale) {
+        if (SharedConfig.getLiteMode().enabled()) {
+            return;
+        }
         for (int i = 0; i < N; i++) {
             progress[i] += (speed[i] * MIN_SPEED) + amplitude * speed[i] * MAX_SPEED * speedScale;
             if (progress[i] >= 1f) {
@@ -95,6 +100,9 @@ public class BlobDrawable {
     }
 
     public void draw(float cX, float cY, Canvas canvas, Paint paint) {
+        if (SharedConfig.getLiteMode().enabled()) {
+            return;
+        }
         path.reset();
 
         for (int i = 0; i < N; i++) {
@@ -163,6 +171,9 @@ public class BlobDrawable {
 
     public void setValue(float value, boolean isBig) {
         animateToAmplitude = value;
+        if (SharedConfig.getLiteMode().enabled()) {
+            return;
+        }
         if (isBig) {
             if (animateToAmplitude > amplitude) {
                 animateAmplitudeDiff = (animateToAmplitude - amplitude) / (100f + 300f * animationSpeed);

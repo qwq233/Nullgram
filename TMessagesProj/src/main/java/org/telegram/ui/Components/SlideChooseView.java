@@ -132,7 +132,7 @@ public class SlideChooseView extends View {
                 }
             }
             if (startMoving) {
-                if (Math.abs(xTouchDown - x) >= AndroidUtilities.dp(2)) {
+                if (Math.abs(xTouchDown - x) >= AndroidUtilities.touchSlop) {
                     moving = true;
                     startMoving = false;
                 }
@@ -148,7 +148,7 @@ public class SlideChooseView extends View {
         } else if (event.getAction() == MotionEvent.ACTION_UP || event.getAction() == MotionEvent.ACTION_CANCEL) {
             if (!moving) {
                 selectedIndexTouch = indexTouch;
-                if (Math.round(selectedIndexTouch) != selectedIndex) {
+                if (event.getAction() == MotionEvent.ACTION_UP && Math.round(selectedIndexTouch) != selectedIndex) {
                     setOption(Math.round(selectedIndexTouch));
                 }
             } else {
