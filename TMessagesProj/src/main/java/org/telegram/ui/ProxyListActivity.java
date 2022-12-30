@@ -827,6 +827,10 @@ public class ProxyListActivity extends BaseFragment implements NotificationCente
                 return;
             }
             SharedConfig.ProxyInfo info = proxyList.get(position - proxyStartRow);
+            if (info.address.equals(WebSocketHelper.NekogramPublicProxyServer) || info.address.equals(WebSocketHelper.NekogramXPublicProxyServer)) {
+                return;
+            }
+
             if (selectedItems.contains(info)) {
                 selectedItems.remove(info);
             } else {
@@ -911,7 +915,9 @@ public class ProxyListActivity extends BaseFragment implements NotificationCente
                     cell.setProxy(info);
                     cell.setChecked(SharedConfig.currentProxy == info);
                     cell.setItemSelected(selectedItems.contains(proxyList.get(position - proxyStartRow)), false);
-                    cell.setSelectionEnabled(!selectedItems.isEmpty(), false);
+                    if (!info.address.equals(WebSocketHelper.NekogramPublicProxyServer) && !info.address.equals(WebSocketHelper.NekogramXPublicProxyServer)) {
+                        cell.setSelectionEnabled(!selectedItems.isEmpty(), false);
+                    }
                     break;
                 }
             }
@@ -922,11 +928,14 @@ public class ProxyListActivity extends BaseFragment implements NotificationCente
         public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position, @NonNull List payloads) {
             if (holder.getItemViewType() == 5 && !payloads.isEmpty()) {
                 TextDetailProxyCell cell = (TextDetailProxyCell) holder.itemView;
-                if (payloads.contains(PAYLOAD_SELECTION_CHANGED)) {
-                    cell.setItemSelected(selectedItems.contains(proxyList.get(position - proxyStartRow)), true);
-                }
-                if (payloads.contains(PAYLOAD_SELECTION_MODE_CHANGED)) {
-                    cell.setSelectionEnabled(!selectedItems.isEmpty(), true);
+                SharedConfig.ProxyInfo info = proxyList.get(position - proxyStartRow);
+                if (!info.address.equals(WebSocketHelper.NekogramPublicProxyServer) && !info.address.equals(WebSocketHelper.NekogramXPublicProxyServer)) {
+                    if (payloads.contains(PAYLOAD_SELECTION_CHANGED)) {
+                        cell.setItemSelected(selectedItems.contains(proxyList.get(position - proxyStartRow)), true);
+                    }
+                    if (payloads.contains(PAYLOAD_SELECTION_MODE_CHANGED)) {
+                        cell.setSelectionEnabled(!selectedItems.isEmpty(), true);
+                    }
                 }
             } else if (holder.getItemViewType() == 3 && payloads.contains(PAYLOAD_CHECKED_CHANGED)) {
                 TextCheckCell checkCell = (TextCheckCell) holder.itemView;
