@@ -90,8 +90,8 @@ public class FileLoadOperation {
     private int downloadChunkSizeBig = 1024 * ConfigManager.getIntOrDefault(Defines.modifyDownloadSpeed, 512);
     ;
     private int cdnChunkCheckSize = 1024 * 128;
-    private int maxDownloadRequests = 8;
-    private int maxDownloadRequestsBig = 8;
+    private int maxDownloadRequests = 4;
+    private int maxDownloadRequestsBig = 4;
     private int bigFileSizeFrom = 10 * 1024 * 1024;
     private int maxCdnParts = (int) (FileLoader.DEFAULT_MAX_FILE_SIZE / downloadChunkSizeBig);
 
@@ -218,12 +218,12 @@ public class FileLoadOperation {
     private void updateParams() {
         if (!forceSmallChunk) {
             downloadChunkSizeBig = 1024 * ConfigManager.getIntOrDefault(Defines.modifyDownloadSpeed, 512);
-            maxDownloadRequests = 8;
-            maxDownloadRequestsBig = 8;
+            maxDownloadRequests = 4;
+            maxDownloadRequestsBig = 4;
         } else {
             downloadChunkSizeBig = 1024 * 128;
-            maxDownloadRequests = 8;
-            maxDownloadRequestsBig = 8;
+            maxDownloadRequests = 4;
+            maxDownloadRequestsBig = 4;
         }
         maxCdnParts = (int) (FileLoader.DEFAULT_MAX_FILE_SIZE / downloadChunkSizeBig);
     }

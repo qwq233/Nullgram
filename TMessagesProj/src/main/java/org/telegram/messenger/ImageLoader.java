@@ -85,7 +85,7 @@ import java.util.zip.GZIPInputStream;
  * isc - ignore cache for small images
  * b - need blur image
  * g - autoplay
- * lastframe - return firstframe for Lottie animation
+ * lastframe - return lastframe for Lottie animation
  * firstframe - return firstframe for Lottie animation
  */
 public class ImageLoader {
@@ -1058,7 +1058,7 @@ public class ImageLoader {
                 boolean needInvert = false;
                 int orientation = 0;
                 File cacheFileFinal = cacheImage.finalFilePath;
-                boolean inEncryptedFile = cacheImage.secureDocument != null || cacheImage.encryptionKeyPath != null && cacheFileFinal != null && (cacheFileFinal.getAbsolutePath().endsWith(".enc") || cacheFileFinal.getAbsolutePath().endsWith(".64enc"));
+                boolean inEncryptedFile = cacheImage.secureDocument != null || cacheImage.encryptionKeyPath != null && cacheFileFinal != null && cacheFileFinal.getAbsolutePath().endsWith(".enc");
                 SecureDocumentKey secureDocumentKey;
                 byte[] secureDocumentHash;
                 if (cacheImage.secureDocument != null) {
@@ -1841,7 +1841,7 @@ public class ImageLoader {
                         AnimatedFileDrawable fileDrawable = (AnimatedFileDrawable) image;
                         for (int a = 0; a < finalImageReceiverArray.size(); a++) {
                             ImageReceiver imgView = finalImageReceiverArray.get(a);
-                            AnimatedFileDrawable toSet = fileDrawable;
+                            AnimatedFileDrawable toSet = (a == 0 ? fileDrawable : fileDrawable.makeCopy());
                             if (imgView.setImageBitmapByKey(toSet, key, type, false, finalImageReceiverGuidsArray.get(a))) {
                                 if (toSet == fileDrawable) {
                                     imageSet = true;
@@ -1963,6 +1963,7 @@ public class ImageLoader {
         };
 
         lottieMemCache = new LruCache<BitmapDrawable>(512 * 512 * 2 * 4 * 5) {
+
             @Override
             protected int sizeOf(String key, BitmapDrawable value) {
                 return value.getIntrinsicWidth() * value.getIntrinsicHeight() * 4 * 2;
@@ -2204,14 +2205,14 @@ public class ImageLoader {
                     try {
                         if (ApplicationLoader.applicationContext.getExternalMediaDirs().length > 0) {
                             publicMediaDir = ApplicationLoader.applicationContext.getExternalMediaDirs()[0];
-                            publicMediaDir = new File(publicMediaDir, "Telegram");
+                            publicMediaDir = new File(publicMediaDir, "Nullgram");
                             publicMediaDir.mkdirs();
                         }
                     } catch (Exception e) {
                         FileLog.e(e);
                     }
                     newPath = ApplicationLoader.applicationContext.getExternalFilesDir(null);
-                    telegramPath = new File(newPath, "Telegram");
+                    telegramPath = new File(newPath, "Nullgram");
                 } else {
                     telegramPath = new File(path, "Nullgram");
                 }
@@ -2286,7 +2287,7 @@ public class ImageLoader {
                     }
 
                     try {
-                        File normalNamesPath = new File(telegramPath, "Telegram Files");
+                        File normalNamesPath = new File(telegramPath, "Nullgram Files");
                         normalNamesPath.mkdir();
                         if (normalNamesPath.isDirectory() && canMoveFiles(cachePath, normalNamesPath, FileLoader.MEDIA_DIR_FILES)) {
                             AndroidUtilities.createEmptyFile(new File(normalNamesPath, ".nomedia"));
@@ -2301,7 +2302,7 @@ public class ImageLoader {
                 }
                 if (publicMediaDir != null && publicMediaDir.isDirectory()) {
                     try {
-                        File imagePath = new File(publicMediaDir, "Telegram Images");
+                        File imagePath = new File(publicMediaDir, "Nullgram Images");
                         imagePath.mkdir();
                         if (imagePath.isDirectory() && canMoveFiles(cachePath, imagePath, FileLoader.MEDIA_DIR_IMAGE)) {
                             mediaDirs.put(FileLoader.MEDIA_DIR_IMAGE_PUBLIC, imagePath);
@@ -2314,7 +2315,7 @@ public class ImageLoader {
                     }
 
                     try {
-                        File videoPath = new File(publicMediaDir, "Telegram Video");
+                        File videoPath = new File(publicMediaDir, "Nullgram Video");
                         videoPath.mkdir();
                         if (videoPath.isDirectory() && canMoveFiles(cachePath, videoPath, FileLoader.MEDIA_DIR_VIDEO)) {
                             mediaDirs.put(FileLoader.MEDIA_DIR_VIDEO_PUBLIC, videoPath);
@@ -3770,9 +3771,9 @@ public class ImageLoader {
         }
         final File cacheFile = new File(fileDir, fileName);
         //TODO was crash in DEBUG_PRIVATE
-//        if (compressFormat == Bitmap.CompressFormat.JPEG && progressive && BuildVars.DEBUG_VERSION) {
-//            photoSize.size = Utilities.saveProgressiveJpeg(scaledBitmap, scaledBitmap.getWidth(), scaledBitmap.getHeight(), scaledBitmap.getRowBytes(), quality, cacheFile.getAbsolutePath());
-//        } else {
+        //        if (compressFormat == Bitmap.CompressFormat.JPEG && progressive && BuildVars.DEBUG_VERSION) {
+        //            photoSize.size = Utilities.saveProgressiveJpeg(scaledBitmap, scaledBitmap.getWidth(), scaledBitmap.getHeight(), scaledBitmap.getRowBytes(), quality, cacheFile.getAbsolutePath());
+        //        } else {
         FileOutputStream stream = new FileOutputStream(cacheFile);
         scaledBitmap.compress(compressFormat, quality, stream);
         if (!cache) {

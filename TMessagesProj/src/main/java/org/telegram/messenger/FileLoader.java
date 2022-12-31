@@ -553,11 +553,11 @@ public class FileLoader extends BaseController {
                     queue.cancel(operation);
                 }
             });
-//            if (removed && document != null) {
-//                AndroidUtilities.runOnUIThread(() -> {
-//                    getNotificationCenter().postNotificationName(NotificationCenter.onDownloadingFilesChanged);
-//                });
-//            }
+            //            if (removed && document != null) {
+            //                AndroidUtilities.runOnUIThread(() -> {
+            //                    getNotificationCenter().postNotificationName(NotificationCenter.onDownloadingFilesChanged);
+            //                });
+            //            }
         }
     }
 
@@ -633,10 +633,6 @@ public class FileLoader extends BaseController {
             getDownloadController().startDownloadFile(document, (MessageObject) parentObject);
         }
 
-        if (document != null && parentObject instanceof MessageObject && ((MessageObject) parentObject).putInDownloadsStore && !((MessageObject) parentObject).isAnyKindOfSticker()) {
-            getDownloadController().startDownloadFile(document, (MessageObject) parentObject);
-        }
-
         FileLoadOperation operation = loadOperationPaths.get(fileName);
         if (BuildVars.LOGS_ENABLED) {
             FileLog.d("checkFile operation fileName=" + fileName + " documentName=" + getDocumentFileName(document) + " operation=" + operation);
@@ -675,8 +671,6 @@ public class FileLoader extends BaseController {
             type = MEDIA_DIR_IMAGE;
         } else if (document != null) {
             operation = new FileLoadOperation(document, parentObject);
-            documentId = document.id;
-            dcId = document.dc_id;
             if (MessageObject.isVoiceDocument(document)) {
                 type = MEDIA_DIR_AUDIO;
             } else if (MessageObject.isVideoDocument(document)) {
