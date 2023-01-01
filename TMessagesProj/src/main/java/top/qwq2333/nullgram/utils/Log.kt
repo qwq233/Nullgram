@@ -138,6 +138,22 @@ object Log {
     }
 
     /**
+     * 触发一次崩溃
+     * 当throwable为null时，触发一个空指针异常
+     * 当throwable不为null时，触发throwable
+     *
+     * @param throwable 异常
+     */
+    @JvmStatic
+    fun crash(throwable: Throwable?) {
+        if (throwable != null) {
+            throw throwable
+        } else {
+            throw NullPointerException("manual crash")
+        }
+    }
+
+    /**
      * 日志等级 Info
      * @param throwable 异常
      */

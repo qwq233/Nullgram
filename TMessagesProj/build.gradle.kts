@@ -88,10 +88,6 @@ dependencies {
 }
 
 android {
-    compileSdk = 33
-    buildToolsVersion = "33.0.0"
-    ndkVersion = "21.4.7075529"
-
     defaultConfig.applicationId = "top.qwq2333.nullgram"
 
     sourceSets.getByName("main") {
