@@ -55,7 +55,6 @@ public class GeneralSettingActivity extends BaseActivity {
     private int useSystemEmojiRow;
     private int disableVibrationRow;
     private int tabsTitleTypeRow;
-    private int openArchiveOnPullRow;
     private int autoDisableBuiltInProxyRow;
     private int general2Row;
 
@@ -171,11 +170,6 @@ public class GeneralSettingActivity extends BaseActivity {
                 listAdapter.notifyItemChanged(tabsTitleTypeRow);
                 getNotificationCenter().postNotificationName(NotificationCenter.dialogFiltersUpdated);
             });
-        } else if (position == openArchiveOnPullRow) {
-            ConfigManager.toggleBoolean(Defines.openArchiveOnPull);
-            if (view instanceof TextCheckCell) {
-                ((TextCheckCell) view).setChecked(ConfigManager.getBooleanOrFalse(Defines.openArchiveOnPull));
-            }
         } else if (position == autoDisableBuiltInProxyRow) {
             ConfigManager.toggleBoolean(Defines.autoDisableBuiltInProxy);
             if (view instanceof TextCheckCell) {
@@ -220,7 +214,6 @@ public class GeneralSettingActivity extends BaseActivity {
         skipOpenLinkConfirmRow = rowCount++;
         autoProxySwitchRow = rowCount++;
         useSystemEmojiRow = rowCount++;
-        openArchiveOnPullRow = rowCount++;
         autoDisableBuiltInProxyRow = rowCount++;
         disableVibrationRow = rowCount++;
         tabsTitleTypeRow = rowCount++;
@@ -304,8 +297,6 @@ public class GeneralSettingActivity extends BaseActivity {
                         textCell.setTextAndCheck(LocaleController.getString("UseSystemEmoji", R.string.useSystemEmoji), ConfigManager.getBooleanOrFalse(Defines.useSystemEmoji), true);
                     } else if (position == disableVibrationRow) {
                         textCell.setTextAndCheck(LocaleController.getString("DisableVibration", R.string.disableVibration), ConfigManager.getBooleanOrFalse(Defines.disableVibration), true);
-                    } else if (position == openArchiveOnPullRow) {
-                        textCell.setTextAndCheck(LocaleController.getString("openArchiveOnPull", R.string.openArchiveOnPull), ConfigManager.getBooleanOrFalse(Defines.openArchiveOnPull), true);
                     } else if (position == autoDisableBuiltInProxyRow) {
                         textCell.setTextAndValueAndCheck(LocaleController.getString("autoDisableBuiltInProxy", R.string.autoDisableBuiltInProxy),
                             LocaleController.getString("autoDisableBuiltInProxyDesc", R.string.autoDisableBuiltInProxyDesc),
