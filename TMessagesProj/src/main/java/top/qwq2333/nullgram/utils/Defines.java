@@ -42,6 +42,7 @@ public class Defines {
     public static final String linkedUserPrefix = "linkedUser_";
     public static final String overrideChannelAlias = "overrideChannelAlias";
     public static final String hidePhone = "hidePhone";
+    public static final String openArchiveOnPull = "openArchiveOnPull";
     public static final String disableJumpToNextChannel = "disableJumpToNextChannel";
     public static final String verifyLinkTip = "verifyLinkTip";
     public static final String showExactNumber = "showExactNumber";
