@@ -221,4 +221,11 @@
     <string name="WsEnableDoh">Enable DoH</string>
     <string name="PublicProxy">Built-in Public Proxy</string>
     <string name="SwitchBackend">Switch Backend</string>
+    <string name="UpdateInstalling">Installing update...</string>
+    <string name="UpdateInstallingRelaunch">The app will relaunch when the update completes.</string>
+    <string name="UpdateInstallingNotification">A notification will be shown when the update completes.</string>
+    <string name="NoUpdateAvailablePlay">Please check for update in Play Store.</string>
+    <string name="NoUpdateAvailablePlayDelay">Update in Play Store usually comes slower than direct APKs due to Google\'s review.</string>
+    <string name="UpdateInstalledNotification">Update installation finished, tap to launch the app.</string>
+    <string name="UpdateFailedToInstall">Failed to install update: %d</string>
 </resources>
