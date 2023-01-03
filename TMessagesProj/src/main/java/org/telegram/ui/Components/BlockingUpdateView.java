@@ -6,12 +6,10 @@ import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
 import android.app.Activity;
 import android.content.Context;
-import android.content.Intent;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.GradientDrawable;
-import android.net.Uri;
 import android.os.Build;
 import android.text.SpannableStringBuilder;
 import android.util.TypedValue;
@@ -22,8 +20,6 @@ import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.ScrollView;
 import android.widget.TextView;
-
-import androidx.core.content.FileProvider;
 
 import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.ApplicationLoader;
@@ -43,6 +39,8 @@ import org.telegram.ui.Components.voip.CellFlickerDrawable;
 
 import java.io.File;
 import java.util.Locale;
+
+import top.qwq2333.nullgram.utils.APKUtils;
 
 public class BlockingUpdateView extends FrameLayout implements NotificationCenter.NotificationCenterDelegate {
 
@@ -238,22 +236,9 @@ public class BlockingUpdateView extends FrameLayout implements NotificationCente
     public static boolean openApkInstall(Activity activity, TLRPC.Document document) {
         boolean exists = false;
         try {
-            String fileName = FileLoader.getAttachFileName(document);
             File f = FileLoader.getInstance(UserConfig.selectedAccount).getPathToAttach(document, true);
             if (exists = f.exists()) {
-                Intent intent = new Intent(Intent.ACTION_VIEW);
-                intent.setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-
-                if (Build.VERSION.SDK_INT >= 24) {
-                    intent.setDataAndType(FileProvider.getUriForFile(activity, ApplicationLoader.getApplicationId() + ".provider", f), "application/vnd.android.package-archive");
-                } else {
-                    intent.setDataAndType(Uri.fromFile(f), "application/vnd.android.package-archive");
-                }
-                try {
-                    activity.startActivityForResult(intent, 500);
-                } catch (Exception e) {
-                    FileLog.e(e);
-                }
+                APKUtils.installUpdate(activity, SharedConfig.pendingAppUpdate.document);
             }
         } catch (Exception e) {
             FileLog.e(e);

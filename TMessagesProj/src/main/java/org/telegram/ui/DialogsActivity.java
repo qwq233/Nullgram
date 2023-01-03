@@ -206,6 +206,7 @@ import top.qwq2333.nullgram.helpers.PasscodeHelper;
 import top.qwq2333.nullgram.ui.AppLinkVerifyBottomSheet;
 import top.qwq2333.nullgram.ui.BottomBuilder;
 import top.qwq2333.nullgram.ui.SendOptionsMenuLayout;
+import top.qwq2333.nullgram.utils.APKUtils;
 import top.qwq2333.nullgram.utils.Defines;
 
 public class DialogsActivity extends BaseFragment implements NotificationCenter.NotificationCenterDelegate, FloatingDebugProvider {
@@ -4251,7 +4252,7 @@ public class DialogsActivity extends BaseFragment implements NotificationCenter.
                 if (!SharedConfig.isAppUpdateAvailable()) {
                     return;
                 }
-                AndroidUtilities.openForView(SharedConfig.pendingAppUpdate.document, true, getParentActivity());
+                APKUtils.installUpdate(getParentActivity(), SharedConfig.pendingAppUpdate.document);
             });
 
             updateLayoutIcon = new RadialProgress2(updateLayout);

@@ -160,6 +160,10 @@ public class UpdateHelper {
     }
 
     public static void checkUpdate(checkUpdateCallback callback) {
+        if (BuildConfig.isPlay) {
+            return;
+        }
+
         long CHANNEL_APKS_ID;
         String CHANNEL_APKS_NAME;
         switch (ConfigManager.getIntOrDefault(Defines.updateChannel,-1)) {

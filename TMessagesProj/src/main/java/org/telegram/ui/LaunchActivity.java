@@ -85,6 +85,7 @@ import org.telegram.messenger.AccountInstance;
 import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.ApplicationLoader;
 import org.telegram.messenger.BotWebViewVibrationEffect;
+import org.telegram.messenger.BuildConfig;
 import org.telegram.messenger.BuildVars;
 import org.telegram.messenger.ChatObject;
 import org.telegram.messenger.ContactsController;
@@ -192,6 +193,7 @@ import top.qwq2333.nullgram.config.ConfigManager;
 import top.qwq2333.nullgram.helpers.MonetHelper;
 import top.qwq2333.nullgram.helpers.SettingsHelper;
 import top.qwq2333.nullgram.helpers.UpdateHelper;
+import top.qwq2333.nullgram.utils.APKUtils;
 import top.qwq2333.nullgram.utils.Defines;
 import top.qwq2333.nullgram.utils.Log;
 import top.qwq2333.nullgram.utils.Utils;
@@ -4700,7 +4702,7 @@ public class LaunchActivity extends BasePermissionsActivity implements INavigati
                 FileLoader.getInstance(currentAccount).cancelLoadFile(SharedConfig.pendingAppUpdate.document);
                 updateAppUpdateViews(true);
             } else {
-                AndroidUtilities.openForView(SharedConfig.pendingAppUpdate.document, true, this);
+                APKUtils.installUpdate(this, SharedConfig.pendingAppUpdate.document);
             }
         });
         updateLayoutIcon = new RadialProgress2(updateLayout);
@@ -4848,14 +4850,14 @@ public class LaunchActivity extends BasePermissionsActivity implements INavigati
             } else {
                 Log.d("checkUpdate: res is null");
                 if (force) {
-                    if (error) {
-                        Toast.makeText(LaunchActivity.this,
-                            LocaleController.getString("ErrorOccurred", R.string.ErrorOccurred),
-                            Toast.LENGTH_SHORT).show();
+                    if (!error) {
+                        if (!BuildConfig.isPlay) {
+                            showBulletin(factory -> factory.createErrorBulletin(LocaleController.getString("VersionUpdateNoUpdate", R.string.VersionUpdateNoUpdate)));
+                        } else {
+                            showBulletin(factory -> factory.createSimpleBulletin(R.raw.chats_infotip, LocaleController.getString("NoUpdateAvailablePlay", R.string.NoUpdateAvailablePlay), LocaleController.getString("NoUpdateAvailablePlayDelay", R.string.NoUpdateAvailablePlayDelay)));
+                        }
                     } else {
-                        Toast.makeText(LaunchActivity.this,
-                            LocaleController.getString("VersionUpdateNoUpdate",
-                                R.string.VersionUpdateNoUpdate), Toast.LENGTH_SHORT).show();
+                        AlertsCreator.createSimpleAlert(this, LocaleController.getString("ErrorOccurred", R.string.ErrorOccurred) + "\n" + error).show();
                     }
                 }
                 SharedConfig.setNewAppVersionAvailable(null);
