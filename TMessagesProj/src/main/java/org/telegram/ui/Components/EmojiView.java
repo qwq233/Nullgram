@@ -5648,6 +5648,12 @@ public class EmojiView extends FrameLayout implements
         return stickersGridAdapter != null && stickersGridAdapter.getItemCount() > 0;
     }
 
+    private Runnable updateStickersLoadedDelayed = () -> {
+        if (emojiAdapter != null) {
+            emojiAdapter.notifyDataSetChanged(true);
+        }
+    };
+
     @SuppressWarnings("unchecked")
     @Override
     public void didReceivedNotification(int id, int account, Object... args) {
@@ -5696,9 +5702,8 @@ public class EmojiView extends FrameLayout implements
                     }
                 }
             }
-            if (emojiAdapter != null) {
-                emojiAdapter.notifyDataSetChanged(true);
-            }
+            AndroidUtilities.cancelRunOnUIThread(updateStickersLoadedDelayed);
+            AndroidUtilities.runOnUIThread(updateStickersLoadedDelayed, 100);
         } else if (id == NotificationCenter.emojiLoaded) {
             if (stickersGridView != null) {
                 int count = stickersGridView.getChildCount();
@@ -6688,7 +6693,7 @@ public class EmojiView extends FrameLayout implements
                 if (set instanceof TLRPC.TL_stickerSetFullCovered) {
                     pack.documents = ((TLRPC.TL_stickerSetFullCovered) set).documents;
                 } else if (set instanceof TLRPC.TL_stickerSetNoCovered) {
-                    TLRPC.TL_messages_stickerSet stickerSet = mediaDataController.getStickerSet(MediaDataController.getInputStickerSet(set.set), false);
+                    TLRPC.TL_messages_stickerSet stickerSet = mediaDataController.getStickerSet(MediaDataController.getInputStickerSet(set.set), set.set.hash, false);
                     if (stickerSet != null) {
                         pack.documents = stickerSet.documents;
                     }

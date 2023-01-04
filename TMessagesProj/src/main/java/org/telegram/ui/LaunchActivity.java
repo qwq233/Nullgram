@@ -4991,7 +4991,6 @@ public class LaunchActivity extends BasePermissionsActivity implements INavigati
             final ChatActivity fragment;
             if (dids.size() <= 1) {
                 final long did = dids.get(0).dialogId;
-                final int topicId = dids.get(0).topicId;
 
                 Bundle args = new Bundle();
                 args.putBoolean("scrollToTopOnResume", true);
@@ -5064,8 +5063,16 @@ public class LaunchActivity extends BasePermissionsActivity implements INavigati
                 String captionToSend = null;
                 for (int i = 0; i < dids.size(); i++) {
                     final long did = dids.get(i).dialogId;
+                    final int topicId = dids.get(i).topicId;
 
                     AccountInstance accountInstance = AccountInstance.getInstance(UserConfig.selectedAccount);
+                    MessageObject replyToMsg = null;
+                    if (topicId != 0) {
+                        TLRPC.TL_forumTopic topic = accountInstance.getMessagesController().getTopicsController().findTopic(-did, topicId);
+                        if (topic != null && topic.topicStartMessage != null) {
+                            replyToMsg = new MessageObject(accountInstance.getCurrentAccount(), topic.topicStartMessage, false, false);
+                        }
+                    }
                     boolean photosEditorOpened = false, videoEditorOpened = false;
                     if (fragment != null) {
                         boolean withoutAnimation = dialogsFragment == null || (videoPath != null || (photoPathsArray != null && photoPathsArray.size() > 0));
@@ -6690,8 +6697,12 @@ public class LaunchActivity extends BasePermissionsActivity implements INavigati
         if (actionBarLayout != null) {
             actionBarLayout.onLowMemory();
             if (AndroidUtilities.isTablet()) {
-                rightActionBarLayout.onLowMemory();
-                layersActionBarLayout.onLowMemory();
+                if (rightActionBarLayout != null) {
+                    rightActionBarLayout.onLowMemory();
+                }
+                if (layersActionBarLayout != null) {
+                    layersActionBarLayout.onLowMemory();
+                }
             }
         }
     }
