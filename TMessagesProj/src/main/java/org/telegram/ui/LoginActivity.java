@@ -2987,11 +2987,11 @@ public class LoginActivity extends BaseFragment {
                     testBackendCheckBox.setChecked(true, true);
                 }
             }
+            boolean testBackend = /*BuildVars.DEBUG_PRIVATE_VERSION && */getConnectionsManager().isTestBackend();
             if (testBackend != LoginActivity.this.testBackend) {
                 getConnectionsManager().switchBackend(false);
                 testBackend = LoginActivity.this.testBackend;
             }
-            boolean testBackend = /*BuildVars.DEBUG_PRIVATE_VERSION && */getConnectionsManager().isTestBackend();
             if (getParentActivity() instanceof LaunchActivity) {
                 for (int a = 0; a < UserConfig.MAX_ACCOUNT_COUNT; a++) {
                     UserConfig userConfig = UserConfig.getInstance(a);

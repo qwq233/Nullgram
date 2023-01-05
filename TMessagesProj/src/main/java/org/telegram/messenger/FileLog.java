@@ -8,11 +8,6 @@
 
 package org.telegram.messenger;
 
-import com.google.gson.ExclusionStrategy;
-import com.google.gson.FieldAttributes;
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-
 import org.telegram.messenger.time.FastDateFormat;
 import org.telegram.messenger.video.MediaCodecVideoConvertor;
 import org.telegram.tgnet.TLObject;
@@ -20,7 +15,6 @@ import org.telegram.tgnet.TLRPC;
 
 import java.io.File;
 import java.io.OutputStreamWriter;
-import java.util.HashSet;
 
 import top.qwq2333.nullgram.utils.Log;
 
@@ -65,9 +59,6 @@ public class FileLog {
     }
 
 
-    private static Gson gson;
-    private static HashSet<String> excludeRequests;
-
     public static void dumpResponseAndRequest(TLObject request, TLObject response, TLRPC.TL_error error, long requestMsgId, long startRequestTimeInMillis, int requestToken) {
         return;
     }
@@ -75,44 +66,6 @@ public class FileLog {
     public static void dumpUnparsedMessage(TLObject message, long messageId) {
         return;
     }
-
-    private static void checkGson() {
-        if (gson == null) {
-            HashSet<String> privateFields = new HashSet<>();
-            privateFields.add("message");
-            privateFields.add("phone");
-            privateFields.add("about");
-            privateFields.add("status_text");
-            privateFields.add("bytes");
-            privateFields.add("secret");
-            privateFields.add("stripped_thumb");
-
-            privateFields.add("networkType");
-            privateFields.add("disableFree");
-
-            //exclude file loading
-            excludeRequests = new HashSet<>();
-            excludeRequests.add("TL_upload_getFile");
-            excludeRequests.add("TL_upload_getWebFile");
-
-            gson = new GsonBuilder().addSerializationExclusionStrategy(new ExclusionStrategy() {
-
-                @Override
-                public boolean shouldSkipField(FieldAttributes f) {
-                    if (privateFields.contains(f.getName())) {
-                        return true;
-                    }
-                    return false;
-                }
-
-                @Override
-                public boolean shouldSkipClass(Class<?> clazz) {
-                    return false;
-                }
-            }).create();
-        }
-    }
-
 
 
     public void init() {
@@ -193,7 +146,7 @@ public class FileLog {
     }
 
     /**
-     * @deprecated use {@link Log#w(String msg)} )} instead
+     * @deprecated use {@link Log#w(String msg)} instead
      */
     @Deprecated
     public static void w(final String message) {
