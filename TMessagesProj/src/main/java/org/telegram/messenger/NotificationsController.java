@@ -4067,9 +4067,6 @@ public class NotificationsController extends BaseController {
             }
 
             void call() {
-                if (BuildVars.LOGS_ENABLED) {
-                    FileLog.w("show dialog notification with id " + id + " " + dialogId +  " user=" + user + " chat=" + chat);
-                }
                 try {
                     notificationManager.notify(id, notification.build());
                 } catch (SecurityException e) {

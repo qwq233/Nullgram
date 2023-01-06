@@ -146,6 +146,7 @@ android {
 
         getByName("debug") {
             signingConfig = signingConfigs.getByName("release")
+            isDefault = true
         }
     }
 
@@ -166,18 +167,19 @@ android {
 
     flavorDimensions += "abi"
     productFlavors {
+        create("arm64") {
+            isDefault = true
+            dimension = "abi"
+            buildConfigField("boolean", "isPlay", "false")
+            ndk {
+                abiFilters.add("arm64-v8a")
+            }
+        }
         create("arm32") {
             dimension = "abi"
             buildConfigField("boolean", "isPlay", "false")
             ndk {
                 abiFilters.add("armeabi-v7a")
-            }
-        }
-        create("arm64") {
-            dimension = "abi"
-            buildConfigField("boolean", "isPlay", "false")
-            ndk {
-                abiFilters.add("arm64-v8a")
             }
         }
         create("x86") {

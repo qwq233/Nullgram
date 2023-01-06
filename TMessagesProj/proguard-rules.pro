@@ -6,17 +6,6 @@
 -keep class org.webrtc.* { *; }
 -keep class org.webrtc.audio.* { *; }
 -keep class org.webrtc.voiceengine.* { *; }
--keep class org.telegram.messenger.* { *; }
--keep class org.telegram.messenger.camera.* { *; }
--keep class org.telegram.messenger.secretmedia.* { *; }
--keep class org.telegram.messenger.support.* { *; }
--keep class org.telegram.messenger.support.* { *; }
--keep class org.telegram.messenger.time.* { *; }
--keep class org.telegram.messenger.video.* { *; }
--keep class org.telegram.messenger.voip.* { *; }
--keep class org.telegram.SQLite.** { *; }
--keep class org.telegram.tgnet.ConnectionsManager { *; }
--keep class org.telegram.tgnet.NativeByteBuffer { *; }
 -keep class org.telegram.tgnet.RequestDelegateInternal { *; }
 -keep class org.telegram.tgnet.RequestTimeDelegate { *; }
 -keep class org.telegram.tgnet.RequestDelegate { *; }
@@ -27,74 +16,15 @@
 -keep class com.google.android.exoplayer2.metadata.flac.PictureFrame { *; }
 -keep class com.google.android.exoplayer2.decoder.SimpleOutputBuffer { *; }
 
+-dontwarn org.bouncycastle.jsse.*
+-dontwarn org.bouncycastle.jsse.provider.BouncyCastleJsseProvider
+-dontwarn org.conscrypt.*
+-dontwarn org.openjsse.javax.net.ssl.SSLParameters
+-dontwarn org.openjsse.javax.net.ssl.SSLSocket
+-dontwarn org.openjsse.net.ssl.OpenJSSE
+-dontwarn org.slf4j.impl.StaticLoggerBinder
+
 -keepnames class org.telegram.tgnet.TLRPC$TL_* {}
-
--dontwarn org.dizitart.no2.**  
--dontwarn org.slf4j.** 
--dontwarn org.h2.** 
--dontwarn org.objenesis.** 
--dontwarn com.fasterxml.jackson.** 
--dontwarn org.springframework.** 
--dontwarn org.thymeleaf.** 
--dontwarn org.tinylog.** 
--dontwarn org.wltea.** 
--dontwarn org.yaml.** 
--dontwarn oshi.** 
--dontwarn redis.clients.** 
--dontwarn retrofit2.** 
--dontwarn springfox.documentation.spring.web.json.Json
-
--dontwarn ch.ethz.** 
--dontwarn cn.beecp.** 
--dontwarn com.alibaba.** 
--dontwarn com.chenlb.** 
--dontwarn com.github.houbb.** 
--dontwarn com.github.promeg.** 
--dontwarn com.github.stuxuhai.** 
--dontwarn com.google.common.** 
--dontwarn com.google.zxing.** 
--dontwarn com.googlecode.** 
--dontwarn com.hankcs.** 
--dontwarn com.jcraft.** 
--dontwarn com.jfinal.** 
--dontwarn com.jfirer.** 
--dontwarn com.mayabot.** 
--dontwarn com.mchange.** 
--dontwarn com.mongodb.** 
--dontwarn com.rnkrsoft.** 
--dontwarn com.rnkrsoft.bopomofo4j.ToneType
--dontwarn com.sun.net.** 
--dontwarn com.vdurmont.** 
--dontwarn com.zaxxer.** 
--dontwarn freemarker.** 
--dontwarn io.github.logtube.** 
--dontwarn java.awt.** 
--dontwarn java.beans.** 
--dontwarn java.lang.management.ClassLoadingMXBean
--dontwarn javax.** 
--dontwarn net.sf.** 
--dontwarn net.sourceforge.** 
--dontwarn okhttp3.** 
--dontwarn org.ansj.** 
--dontwarn org.apache.** 
--dontwarn org.apdplat.** 
--dontwarn org.beetl.** 
--dontwarn org.bouncycastle.** 
--dontwarn org.febit.** 
--dontwarn org.glassfish.** 
--dontwarn org.javamoney.** 
--dontwarn org.jboss.** 
--dontwarn org.jboss.** 
--dontwarn org.joda.** 
--dontwarn org.lionsoul.** 
--dontwarn org.mozilla.** 
--dontwarn org.mvel2.** 
--dontwarn org.ofdrw.** 
--dontwarn org.openxmlformats.** 
--dontwarn org.pmw.tinylog.** 
--dontwarn org.rythmengine.** 
--dontwarn org.slf4j.** 
-
 # https://developers.google.com/ml-kit/known-issues#android_issues
 -keep class com.google.mlkit.nl.languageid.internal.LanguageIdentificationJni { *; }
 
@@ -161,10 +91,83 @@
   <init>(com.google.android.exoplayer2.upstream.DataSource$Factory);
 }
 
-# Don't warn about checkerframework and Kotlin annotations
--dontwarn org.checkerframework.**
--dontwarn javax.annotation.**
+-keep class com.microsoft.appcenter.AppCenter {
+    private com.microsoft.appcenter.channel.Channel mChannel;
+    private android.os.Handler mHandler;
+}
 
-# Use -keep to explicitly keep any other classes shrinking would remove
--dontoptimize
--dontobfuscate
+-keep class org.telegram.messenger.voip.* { *; }
+-keep class org.telegram.messenger.AnimatedFileDrawableStream { <methods>; }
+-keep class org.telegram.SQLite.SQLiteException { <methods>; }
+-keep class org.telegram.tgnet.ConnectionsManager { <methods>; }
+-keep class org.telegram.tgnet.NativeByteBuffer { <methods>; }
+-keepnames class org.telegram.tgnet.TLRPC$TL_* {}
+-keepclassmembernames class org.telegram.ui.* { <fields>; }
+-keepclassmembernames class org.telegram.ui.Cells.* { <fields>; }
+-keepclassmembernames class org.telegram.ui.Components.* { <fields>; }
+-keep,allowshrinking,allowobfuscation class org.telegram.ui.Components.GroupCreateSpan {
+    public void updateColors();
+ }
+-keepclassmembernames class top.qwq2333.nullgram.activity.DatacenterActivity$DatacenterCell { <fields>; }
+-keepclassmembernames class top.qwq2333.nullgram.activity.DatacenterActivity$DatacenterHeaderCell { <fields>; }
+-keepclassmembernames class top.qwq2333.nullgram.activity.MessageDetailsActivity$TextDetailSimpleCell { <fields>; }
+-keepclassmembernames class top.qwq2333.nullgram.activity.PasscodeSettingActivity$AccountCell {
+<fields>; }
+-keepclassmembernames class top.qwq2333.nullgram.activityChatSettingsActivity$StickerSizeCell { <fields>; }
+
+-keepclassmembernames class androidx.core.widget.NestedScrollView {
+    private android.widget.OverScroller mScroller;
+    private void abortAnimatedScroll();
+}
+
+-keepclasseswithmembernames,includedescriptorclasses class * {
+    native <methods>;
+}
+-keepclassmembers class * {
+    @android.webkit.JavascriptInterface <methods>;
+}
+
+-assumenosideeffects class android.util.Log {
+    public static *** v(...);
+    public static *** d(...);
+}
+
+
+# Keep `Companion` object fields of serializable classes.
+# This avoids serializer lookup through `getDeclaredClasses` as done for named companion objects.
+-if @kotlinx.serialization.Serializable class **
+-keepclassmembers class <1> {
+   static <1>$Companion Companion;
+}
+
+# Keep `serializer()` on companion objects (both default and named) of serializable classes.
+-if @kotlinx.serialization.Serializable class ** {
+   static **$* *;
+}
+-keepclassmembers class <2>$<3> {
+   kotlinx.serialization.KSerializer serializer(...);
+}
+
+# Keep `INSTANCE.serializer()` of serializable objects.
+-if @kotlinx.serialization.Serializable class ** {
+   public static ** INSTANCE;
+}
+-keepclassmembers class <1> {
+   public static <1> INSTANCE;
+   kotlinx.serialization.KSerializer serializer(...);
+}
+
+# @Serializable and @Polymorphic are used at runtime for polymorphic serialization.
+-keepattributes RuntimeVisibleAnnotations,AnnotationDefault
+
+-dontwarn org.jetbrains.annotations.NotNull
+-dontwarn org.jetbrains.annotations.Nullable
+
+-repackageclasses
+-allowaccessmodification
+-overloadaggressively
+-keepattributes SourceDir,SourceFile,LineNumberTable,LocalVariableTable
+-obfuscationdictionary          proguard-dic.txt
+-renamesourcefileattribute      proguard-dic.txt
+-classobfuscationdictionary     proguard-dic.txt
+-packageobfuscationdictionary   proguard-dic.txt
