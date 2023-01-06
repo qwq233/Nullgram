@@ -6584,6 +6584,9 @@ public class ChatMessageCell extends BaseCell implements SeekBar.SeekBarDelegate
                     } else {
                         photoImage.setImage(null, null, thumb, null, messageObject, 0);
                     }
+                    if (messageObject.useCustomPhoto) {
+                        photoImage.setImageBitmap(getResources().getDrawable(R.drawable.sticker));
+                    }
                     if (!reactionsLayoutInBubble.isSmall) {
                         reactionsLayoutInBubble.measure(maxWidth, currentMessageObject.isOutOwner() && (currentMessageObject.isAnimatedEmoji() || currentMessageObject.isAnyKindOfSticker()) ? Gravity.RIGHT : Gravity.LEFT);
                         reactionsLayoutInBubble.drawServiceShaderBackground = 1f;
