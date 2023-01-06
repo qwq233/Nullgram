@@ -26587,8 +26587,8 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
                 builder.setTitleMultipleLines(true);
             }
             final int finalTimestamp = timestamp;
-            boolean noforwards = getMessagesController().isChatNoForwards(currentChat) || (messageObject != null && messageObject.messageOwner != null && messageObject.messageOwner.noforwards);
-            builder.setItems(noforwards ? new CharSequence[] {LocaleController.getString("Open", R.string.Open)} : new CharSequence[]{LocaleController.getString("Open", R.string.Open), LocaleController.getString("Copy", R.string.Copy)}, (dialog, which) -> {
+            boolean noforwards = false;
+            builder.setItems(new CharSequence[]{LocaleController.getString("Open", R.string.Open), LocaleController.getString("Copy", R.string.Copy)}, (dialog, which) -> {
                 if (which == 0) {
                     if (str.startsWith("video?")) {
                         didPressMessageUrl(url, false, messageObject, cell);
@@ -26789,7 +26789,7 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
         if (url == null || getParentActivity() == null) {
             return;
         }
-        boolean noforwards = getMessagesController().isChatNoForwards(currentChat) || (messageObject != null && messageObject.messageOwner != null && messageObject.messageOwner.noforwards);
+        boolean noforwards = false;
         if (url instanceof URLSpanMono) {
             if (!noforwards) {
                 if (!longPress) {
@@ -26957,7 +26957,7 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
                 builder.setItems(new CharSequence[]{LocaleController.getString("Open", R.string.Open), LocaleController.getString("ShareFile", R.string.ShareFile), LocaleController.getString("Copy", R.string.Copy)}, (dialog, which) -> {
                     if (which == 0) {
                         processExternalUrl(1, urlFinal, url, finalCell, false);
-                    } else if (which == 1) {
+                    } else if (which == 1 || which == 2) {
                         String url1 = urlFinal;
                         boolean tel = false;
                         boolean mail = false;
