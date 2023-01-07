@@ -8,6 +8,7 @@ import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.ValueAnimator;
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.Canvas;
 import android.graphics.CornerPathEffect;
 import android.graphics.Paint;
@@ -58,9 +59,10 @@ import org.telegram.ui.ArticleViewer;
 import org.telegram.ui.Components.AnimatedEmojiSpan;
 import org.telegram.ui.Components.LayoutHelper;
 import org.telegram.ui.Components.RecyclerListView;
-import org.telegram.ui.RestrictedLanguagesSelectActivity;
 
 import java.util.ArrayList;
+
+import top.qwq2333.nullgram.helpers.TranslateHelper;
 
 public abstract class TextSelectionHelper<Cell extends TextSelectionHelper.SelectableView> {
 
@@ -295,7 +297,6 @@ public abstract class TextSelectionHelper<Cell extends TextSelectionHelper.Selec
     public void setOnTranslate(OnTranslateListener listener) {
         onTranslateListener = listener;
     }
-
 
     public void setParentView(ViewGroup view) {
         if (view instanceof RecyclerListView) {
@@ -1103,8 +1104,8 @@ public abstract class TextSelectionHelper<Cell extends TextSelectionHelper.Selec
                                 canvas.drawPath(path, handleViewPaint);
                                 canvas.restore();
                                 endArea.set(
-                                        xOffset + x, yOffset + y - handleViewSize,
-                                        xOffset + x + handleViewSize, yOffset + y + handleViewSize
+                                    xOffset + x, yOffset + y - handleViewSize,
+                                    xOffset + x + handleViewSize, yOffset + y + handleViewSize
                                 );
                                 endArea.inset(-AndroidUtilities.dp(8), -AndroidUtilities.dp(8));
                                 count++;
@@ -1119,8 +1120,8 @@ public abstract class TextSelectionHelper<Cell extends TextSelectionHelper.Selec
                                 canvas.drawPath(path, handleViewPaint);
                                 canvas.restore();
                                 endArea.set(
-                                        xOffset + x - handleViewSize, yOffset + y - handleViewSize,
-                                        xOffset + x, yOffset + y + handleViewSize
+                                    xOffset + x - handleViewSize, yOffset + y - handleViewSize,
+                                    xOffset + x, yOffset + y + handleViewSize
                                 );
                                 endArea.inset(-AndroidUtilities.dp(8), -AndroidUtilities.dp(8));
                             }
@@ -1164,8 +1165,8 @@ public abstract class TextSelectionHelper<Cell extends TextSelectionHelper.Selec
                                 canvas.drawPath(path, handleViewPaint);
                                 canvas.restore();
                                 startArea.set(
-                                        xOffset + x - handleViewSize, yOffset + y - handleViewSize,
-                                        xOffset + x, yOffset + y + handleViewSize
+                                    xOffset + x - handleViewSize, yOffset + y - handleViewSize,
+                                    xOffset + x, yOffset + y + handleViewSize
                                 );
                                 startArea.inset(-AndroidUtilities.dp(8), -AndroidUtilities.dp(8));
                                 count++;
@@ -1180,8 +1181,8 @@ public abstract class TextSelectionHelper<Cell extends TextSelectionHelper.Selec
                                 canvas.drawPath(path, handleViewPaint);
                                 canvas.restore();
                                 startArea.set(
-                                        xOffset + x, yOffset + y - handleViewSize,
-                                        xOffset + x + handleViewSize, yOffset + y + handleViewSize
+                                    xOffset + x, yOffset + y - handleViewSize,
+                                    xOffset + x + handleViewSize, yOffset + y + handleViewSize
                                 );
                                 startArea.inset(-AndroidUtilities.dp(8), -AndroidUtilities.dp(8));
                             }
@@ -1287,7 +1288,8 @@ public abstract class TextSelectionHelper<Cell extends TextSelectionHelper.Selec
             public boolean onCreateActionMode(ActionMode mode, Menu menu) {
                 menu.add(Menu.NONE, android.R.id.copy, 0, android.R.string.copy);
                 menu.add(Menu.NONE, android.R.id.selectAll, 1, android.R.string.selectAll);
-                menu.add(Menu.NONE, TRANSLATE, 2, LocaleController.getString("TranslateMessage", R.string.TranslateMessage));
+                menu.add(Menu.NONE, android.R.id.shareText, 2, LocaleController.getString("ShareFile", R.string.ShareFile));
+                menu.add(Menu.NONE, android.R.id.textAssist, 3, LocaleController.getString("TranslateMessage", R.string.TranslateMessage));
                 return true;
             }
 
@@ -1301,9 +1303,9 @@ public abstract class TextSelectionHelper<Cell extends TextSelectionHelper.Selec
                         menu.getItem(1).setVisible(true);
                     }
                 }
-                if (onTranslateListener != null && LanguageDetector.hasSupport() && getSelectedText() != null) {
+                if (LanguageDetector.hasSupport() && getSelectedText() != null) {
                     LanguageDetector.detectLanguage(getSelectedText().toString(), lng -> {
-                        translateFromLanguage = lng;
+                        translateFromLanguage = TranslateHelper.stripLanguageCode(lng);
                         updateTranslateButton(menu);
                     }, err -> {
                         FileLog.e("mlkit: failed to detect language in selection");
@@ -1320,16 +1322,7 @@ public abstract class TextSelectionHelper<Cell extends TextSelectionHelper.Selec
 
             private String translateFromLanguage = null;
             private void updateTranslateButton(Menu menu) {
-                String translateToLanguage = LocaleController.getInstance().getCurrentLocale().getLanguage();
-                menu.getItem(2).setVisible(
-                    onTranslateListener != null && (
-                        (
-                            translateFromLanguage != null &&
-                            (!translateFromLanguage.equals(translateToLanguage) || translateFromLanguage.equals("und")) &&
-                            !RestrictedLanguagesSelectActivity.getRestrictedLanguages().contains(translateFromLanguage)
-                        ) || !LanguageDetector.hasSupport()
-                    )
-                );
+                menu.getItem(3).setVisible(!LanguageDetector.hasSupport() || translateFromLanguage != null && !TranslateHelper.isLanguageRestricted(translateFromLanguage));
             }
 
             @Override
@@ -1337,30 +1330,60 @@ public abstract class TextSelectionHelper<Cell extends TextSelectionHelper.Selec
                 if (!isSelectionMode()) {
                     return true;
                 }
-                switch (item.getItemId()) {
-                    case android.R.id.copy:
-                        copyText();
+                int itemId = item.getItemId();
+                if (itemId == android.R.id.copy) {
+                    copyText();
+                    return true;
+                } else if (itemId == android.R.id.selectAll) {
+                    CharSequence text = getText(selectedView, false);
+                    if (text == null) {
                         return true;
-                    case android.R.id.selectAll:
-                        CharSequence text = getText(selectedView, false);
-                        if (text == null) {
-                            return true;
-                        }
-                        selectionStart = 0;
-                        selectionEnd = text.length();
-                        hideActions();
-                        invalidate();
-                        showActions();
+                    }
+                    selectionStart = 0;
+                    selectionEnd = text.length();
+                    hideActions();
+                    invalidate();
+                    showActions();
+                    return true;
+                } else if (itemId == android.R.id.textAssist) {
+                    if (!isSelectionMode()) {
                         return true;
-                    case TRANSLATE:
-                        if (onTranslateListener != null) {
-                            String translateToLanguage = LocaleController.getInstance().getCurrentLocale().getLanguage();
-                            onTranslateListener.run(getSelectedText(), translateFromLanguage, translateToLanguage, () -> showActions());
-                        }
-                        hideActions();
+                    }
+                    CharSequence str = getSelectedText();
+                    if (str == null) {
                         return true;
-                    default:
-                        clear();
+                    }
+                    TranslateHelper.showTranslateDialog(textSelectionOverlay.getContext(), str.toString(), null, translateFromLanguage, null);
+                    hideActions();
+                    clear(true);
+                    if (TextSelectionHelper.this.callback != null) {
+                        TextSelectionHelper.this.callback.onTextTranslated();
+                    }
+
+                    clear();
+                } else if (itemId == android.R.id.shareText) {
+                    if (!isSelectionMode()) {
+                        return true;
+                    }
+                    CharSequence str = getSelectedText();
+                    if (str == null) {
+                        return true;
+                    }
+                    Intent shareIntent = new Intent(Intent.ACTION_SEND);
+                    shareIntent.setType("text/plain");
+                    shareIntent.putExtra(Intent.EXTRA_TEXT, str);
+                    Intent chooserIntent = Intent.createChooser(shareIntent, LocaleController.getString("ShareFile", R.string.ShareFile));
+                    chooserIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                    ApplicationLoader.applicationContext.startActivity(chooserIntent);
+                    hideActions();
+                    clear(true);
+                    if (TextSelectionHelper.this.callback != null) {
+                        TextSelectionHelper.this.callback.onTextTranslated();
+                    }
+
+                    clear();
+                } else {
+                    clear();
                 }
                 return true;
             }
@@ -1418,8 +1441,8 @@ public abstract class TextSelectionHelper<Cell extends TextSelectionHelper.Selec
                         x2 = coords[0] + textX;
                     }
                     outRect.set(
-                            Math.min(x1, x2), y1,
-                            Math.max(x1, x2), y1 + 1
+                        Math.min(x1, x2), y1,
+                        Math.max(x1, x2), y1 + 1
                     );
                 }
             };
@@ -1534,9 +1557,9 @@ public abstract class TextSelectionHelper<Cell extends TextSelectionHelper.Selec
         }
 
         float startLeft = layout.getPrimaryHorizontal(selectionStart),
-                endRight = layout.getPrimaryHorizontal(selectionEnd);
+            endRight = layout.getPrimaryHorizontal(selectionEnd);
         float startBottom = layout.getLineBottom(startLine),
-                endBottom = layout.getLineBottom(endLine);
+            endBottom = layout.getLineBottom(endLine);
 
         if (hasStart && hasEnd && startBottom == endBottom && Math.abs(endRight - startLeft) < R) {
             float left = Math.min(startLeft, endRight), right = Math.max(startLeft, endRight);
@@ -1619,6 +1642,7 @@ public abstract class TextSelectionHelper<Cell extends TextSelectionHelper.Selec
     public static class Callback {
         public void onStateChanged(boolean isSelected){};
         public void onTextCopied(){};
+        public void onTextTranslated(){};
     }
 
     protected void fillLayoutForOffset(int offset, LayoutBlock layoutBlock) {
@@ -1673,20 +1697,20 @@ public abstract class TextSelectionHelper<Cell extends TextSelectionHelper.Selec
 
             if (maybeIsDescription && chatMessageCell.getDescriptionlayout() != null) {
                 textArea.set(
-                        maybeTextX, maybeTextY,
-                        maybeTextX + chatMessageCell.getDescriptionlayout().getWidth(),
-                        maybeTextY + chatMessageCell.getDescriptionlayout().getHeight()
+                    maybeTextX, maybeTextY,
+                    maybeTextX + chatMessageCell.getDescriptionlayout().getWidth(),
+                    maybeTextY + chatMessageCell.getDescriptionlayout().getHeight()
                 );
             } else if (chatMessageCell.hasCaptionLayout()) {
                 textArea.set(maybeTextX, maybeTextY,
-                        maybeTextX + chatMessageCell.getCaptionLayout().getWidth(),
-                        maybeTextY + chatMessageCell.getCaptionLayout().getHeight());
+                    maybeTextX + chatMessageCell.getCaptionLayout().getWidth(),
+                    maybeTextY + chatMessageCell.getCaptionLayout().getHeight());
             } else if (messageObject != null && messageObject.textLayoutBlocks != null && messageObject.textLayoutBlocks.size() > 0) {
                 MessageObject.TextLayoutBlock block = messageObject.textLayoutBlocks.get(messageObject.textLayoutBlocks.size() - 1);
                 textArea.set(
-                        maybeTextX, maybeTextY,
-                        maybeTextX + block.textLayout.getWidth(),
-                        (int) (maybeTextY + block.textYOffset + block.textLayout.getHeight())
+                    maybeTextX, maybeTextY,
+                    maybeTextX + block.textLayout.getWidth(),
+                    (int) (maybeTextY + block.textYOffset + block.textLayout.getHeight())
                 );
             } else {
                 this.maybeSelectedView = null;
@@ -2039,8 +2063,8 @@ public abstract class TextSelectionHelper<Cell extends TextSelectionHelper.Selec
                 currentEditDate = messageObject.messageOwner.edit_date;
             } catch (Exception ignore) {}
             if (selectedCellId == messageObject.getId() // &&
-//                !(selectedCellEditDate != null && selectedCellEditDate.equals(currentEditDate) ||
-//                  selectedCellEditDate == null && currentEditDate == null)
+                //                !(selectedCellEditDate != null && selectedCellEditDate.equals(currentEditDate) ||
+                //                  selectedCellEditDate == null && currentEditDate == null)
             ) {
                 clear(true);
             }

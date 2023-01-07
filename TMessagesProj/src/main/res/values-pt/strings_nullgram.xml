@@ -97,7 +97,7 @@
     <string name="customDoubleTap">Costomizar o Duplo Toque</string>
     <string name="OpenSource">Licenças de código-aberto</string>
     <string name="disableCustomAPI">Não usar API customizada</string>
-    <string name="useOfficialAPI">TELEOFFICAL</string>
+    <string name="useOfficialAPI">TELEOFFICIAL</string>
     <string name="customAPI">API personalizada</string>
     <string name="useCustomApiNotice">Faça o login usando a API personalizada, se você não puder se registrar ou fazer login, isso pode ajudar.\n\nNota: fcm não funcionará se você estiver usando a versão de lançamento.</string>
     <string name="useCustomAPI">Entrada manual</string>

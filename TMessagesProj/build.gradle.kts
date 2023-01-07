@@ -7,6 +7,7 @@ plugins {
     id("org.jetbrains.kotlin.android")
     id("com.google.gms.google-services")
     id("com.github.triplet.play") version "3.7.0"
+    kotlin("plugin.serialization") version Version.kotlin
 }
 
 configurations {
@@ -36,7 +37,7 @@ fun setupPlay(stable: Boolean) {
 dependencies {
     implementation(platform("com.google.firebase:firebase-bom:30.2.0"))
 
-    implementation("androidx.core:core-ktx:1.8.0")
+    implementation("androidx.core:core-ktx:1.9.0")
     implementation("androidx.palette:palette-ktx:1.0.0")
     implementation("androidx.exifinterface:exifinterface:1.3.5")
     implementation("androidx.dynamicanimation:dynamicanimation:1.0.0")
@@ -69,13 +70,17 @@ dependencies {
     implementation("org.codeberg.qwerty287:prism4j:003cb5e380")
 
     coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:1.1.5")
-    implementation("androidx.core:core-ktx:1.8.0")
     // https://mvnrepository.com/artifact/org.jetbrains.kotlin/kotlin-stdlib
     // https://mvnrepository.com/artifact/org.jetbrains.kotlin/kotlin-stdlib-common
     implementation("org.jetbrains.kotlin:kotlin-stdlib-common:${Version.kotlin}")
     implementation("org.jetbrains.kotlin:kotlin-stdlib:${Version.kotlin}")
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.4.1")
     implementation("org.osmdroid:osmdroid-android:6.1.14")
     implementation("com.android.billingclient:billing:5.1.0")
+
+    implementation("io.ktor:ktor-client-core:${Version.ktor}")
+    implementation("io.ktor:ktor-client-okhttp:${Version.ktor}")
+    implementation("io.ktor:ktor-client-encoding:${Version.ktor}")
 
     implementation(project(":tcp2ws"))
 }

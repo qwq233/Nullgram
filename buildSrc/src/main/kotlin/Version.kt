@@ -4,6 +4,9 @@ object Version {
     val kotlin = "1.8.0"
 
     @JvmStatic
+    val ktor = "2.2.1"
+
+    @JvmStatic
     val JavaVersion = "11"
 
     @JvmStatic

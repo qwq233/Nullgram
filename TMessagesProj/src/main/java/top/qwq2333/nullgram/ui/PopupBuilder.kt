@@ -24,7 +24,7 @@ object PopupBuilder {
         itemView: View?,
         listener: SimpleMenuPopupWindow.OnItemClickListener
     ) {
-        show(entries, title, checkedIndex, context, itemView, listener, null)
+        show(entries, title, checkedIndex, context, itemView, null, listener)
     }
 
     @JvmStatic
@@ -34,8 +34,8 @@ object PopupBuilder {
         checkedIndex: Int,
         context: Context?,
         itemView: View?,
-        listener: SimpleMenuPopupWindow.OnItemClickListener,
-        resourcesProvider: Theme.ResourcesProvider?
+        resourcesProvider: Theme.ResourcesProvider?,
+        listener: SimpleMenuPopupWindow.OnItemClickListener
     ) {
         if (itemView == null) {
             val builder = AlertDialog.Builder(context, resourcesProvider)

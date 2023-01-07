@@ -177,8 +177,8 @@ import org.telegram.ui.Components.ColoredImageSpan;
 import org.telegram.ui.Components.CombinedDrawable;
 import org.telegram.ui.Components.CrossfadeDrawable;
 import org.telegram.ui.Components.CubicBezierInterpolator;
-import org.telegram.ui.Components.EditTextBoldCursor;
 import org.telegram.ui.Components.DotDividerSpan;
+import org.telegram.ui.Components.EditTextBoldCursor;
 import org.telegram.ui.Components.EmojiPacksAlert;
 import org.telegram.ui.Components.EmptyStubSpan;
 import org.telegram.ui.Components.FloatingDebug.FloatingDebugController;
@@ -205,7 +205,6 @@ import org.telegram.ui.Components.SharedMediaLayout;
 import org.telegram.ui.Components.SizeNotifierFrameLayout;
 import org.telegram.ui.Components.StickerEmptyView;
 import org.telegram.ui.Components.TimerDrawable;
-import org.telegram.ui.Components.TranslateAlert;
 import org.telegram.ui.Components.TypefaceSpan;
 import org.telegram.ui.Components.UndoView;
 import org.telegram.ui.Components.voip.VoIPHelper;
@@ -226,6 +225,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Set;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
@@ -234,6 +234,9 @@ import kotlin.Unit;
 import top.qwq2333.nullgram.activity.DatacenterActivity;
 import top.qwq2333.nullgram.activity.MainSettingActivity;
 import top.qwq2333.nullgram.config.ConfigManager;
+import top.qwq2333.nullgram.helpers.TranslateHelper;
+import top.qwq2333.nullgram.translate.LanguageDetectorTimeout;
+import top.qwq2333.nullgram.ui.AutoTranslatePopupWrapper;
 import top.qwq2333.nullgram.ui.BottomBuilder;
 import top.qwq2333.nullgram.utils.AlertUtil;
 import top.qwq2333.nullgram.utils.Defines;
@@ -5053,10 +5056,6 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
             if (position == bioRow && (userInfo == null || TextUtils.isEmpty(userInfo.about))) {
                 return false;
             }
-            if (position == bioRow && UserObject.isUserSelf(userInfo.user)) {
-                presentFragment(new ChangeBioActivity());
-                return false;
-            }
             if (view instanceof AboutLinkCell && ((AboutLinkCell) view).onClick()) {
                 return false;
             }
@@ -5074,10 +5073,10 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
             }
             final String[] fromLanguage = new String[1];
             fromLanguage[0] = "und";
-            final boolean translateButtonEnabled = MessagesController.getGlobalMainSettings().getBoolean("translate_button", false);
             final boolean[] withTranslate = new boolean[1];
             withTranslate[0] = position == bioRow || position == channelInfoRow || position == userInfoRow;
-            final String toLang = LocaleController.getInstance().getCurrentLocale().getLanguage();
+            final AtomicBoolean waitForLangDetection = new AtomicBoolean(false);
+            final AtomicReference<Runnable> onLangDetectionDone = new AtomicReference<>(null);
             Runnable showMenu = () -> {
                 if (getParentActivity() == null) {
                     return;
@@ -5116,13 +5115,13 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
                                     BulletinFactory.of(this).createCopyBulletin(LocaleController.getString("TextCopied", R.string.TextCopied)).show();
                                 }
                             } else if (j == 1) {
-                                TranslateAlert.showAlert(fragmentView.getContext(), this, currentAccount, fromLanguage[0], toLang, finalText, false, span -> {
+                                TranslateHelper.showTranslateDialog(getParentActivity(), finalText, this, fromLanguage[0], span -> {
                                     if (span != null) {
                                         openUrl(span.getURL(), null);
                                         return true;
                                     }
                                     return false;
-                                }, null);
+                                });
                             }
                         } catch (Exception e) {
                             FileLog.e(e);
@@ -5160,16 +5159,25 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
             };
             if (withTranslate[0]) {
                 if (LanguageDetector.hasSupport()) {
-                    LanguageDetector.detectLanguage(finalText, (fromLang) -> {
-                        fromLanguage[0] = fromLang;
-                        withTranslate[0] = fromLang != null && (!fromLang.equals(toLang) || fromLang.equals("und")) && (
-                            translateButtonEnabled && !RestrictedLanguagesSelectActivity.getRestrictedLanguages().contains(fromLang) ||
-                            (currentChat != null && (currentChat.has_link || ChatObject.isPublic(currentChat))) && ("uk".equals(fromLang) || "ru".equals(fromLang)));
-                        showMenu.run();
-                    }, (error) -> {
-                        FileLog.e("mlkit: failed to detect language in selection", error);
-                        showMenu.run();
-                    });
+                    withTranslate[0] = false;
+                    LanguageDetectorTimeout.detectLanguage(
+                        view, finalText,
+                        (String fromLang) -> {
+                            fromLanguage[0] = TranslateHelper.stripLanguageCode(fromLang);
+                            if (!TranslateHelper.isLanguageRestricted(fromLang) || (currentChat != null && (currentChat.has_link || ChatObject.isPublic(currentChat))) && ("uk".equals(fromLang) || "ru".equals(fromLang))) {
+                                withTranslate[0] = true;
+                            }
+                        },
+                        null, waitForLangDetection, onLangDetectionDone
+                    );
+                    view.postDelayed(() -> {
+                        if (onLangDetectionDone.get() != null) {
+                            onLangDetectionDone.getAndSet(null).run();
+                        }
+                    }, 250);
+                }
+                if (waitForLangDetection.get()) {
+                    onLangDetectionDone.set(showMenu);
                 } else {
                     showMenu.run();
                 }
@@ -8065,6 +8073,7 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
                 }
                 if (isBot || getContactsController().contactsDict.get(userId) == null) {
                     if (MessagesController.isSupportUser(user)) {
+                        createAutoTranslateItem(userId);
                         if (userBlocked) {
                             otherItem.addSubItem(block_contact, R.drawable.msg_block, LocaleController.getString("Unblock", R.string.Unblock));
                         }
@@ -8072,6 +8081,7 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
                         if (currentEncryptedChat == null) {
                             createAutoDeleteItem(context);
                         }
+                        createAutoTranslateItem(userId);
                         if (isBot) {
                             otherItem.addSubItem(share, R.drawable.msg_share, LocaleController.getString("BotShare", R.string.BotShare));
                         } else {
@@ -8090,6 +8100,7 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
                     if (currentEncryptedChat == null) {
                         createAutoDeleteItem(context);
                     }
+                    createAutoTranslateItem(userId);
 
                     if (!TextUtils.isEmpty(user.phone)) {
                         otherItem.addSubItem(share_contact, R.drawable.msg_share, LocaleController.getString("ShareContact", R.string.ShareContact));
@@ -8116,6 +8127,7 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
             if (topicId == 0 && ChatObject.canUserDoAdminAction(chat, ChatObject.ACTION_DELETE_MESSAGES)) {
                 createAutoDeleteItem(context);
             }
+            createAutoTranslateItem(-chatId, topicId);
             if (ChatObject.isChannel(chat)) {
                 if (isTopic) {
                     if (ChatObject.canManageTopic(currentAccount, chat, topicId)) {
@@ -8324,6 +8336,16 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
     public Drawable getThemedDrawable(String drawableKey) {
         Drawable drawable = resourcesProvider != null ? resourcesProvider.getDrawable(drawableKey) : null;
         return drawable != null ? drawable : super.getThemedDrawable(drawableKey);
+    }
+
+    private void createAutoTranslateItem(long dialogId) {
+        createAutoTranslateItem(dialogId, 0);
+    }
+
+    private void createAutoTranslateItem(long dialogId, int topicId) {
+        var autoTranslatePopupWrapper = new AutoTranslatePopupWrapper(ProfileActivity.this, otherItem.getPopupLayout().getSwipeBack(), dialogId, topicId, getResourceProvider());
+        otherItem.addSwipeBackItem(R.drawable.msg_translate, null, LocaleController.getString("AutoTranslate", R.string.AutoTranslate), autoTranslatePopupWrapper.windowLayout);
+        otherItem.addColoredGap();
     }
 
     private void setAutoDeleteHistory(int time, int action) {

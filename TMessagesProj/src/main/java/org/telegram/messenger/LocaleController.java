@@ -1075,8 +1075,8 @@ public class LocaleController {
 
         if (value.contains("Telegram"))
             value = value.replace("Telegram", "Nullgram");
-        if (value.contains("TELEOFFICAL"))
-            value = value.replace("TELEOFFICAL", "Telegram");
+        if (value.contains("TELEOFFICIAL"))
+            value = value.replace("TELEOFFICIAL", "Telegram");
         return value;
     }
 

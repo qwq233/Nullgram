@@ -97,7 +97,7 @@
     <string name="customDoubleTap">Özel Çift Dokunma</string>
     <string name="OpenSource">Açık Kaynak Yazılım Lisansları</string>
     <string name="disableCustomAPI">Özel API kullanmayın</string>
-    <string name="useOfficialAPI">TELEOFFICAL</string>
+    <string name="useOfficialAPI">TELEOFFICIAL</string>
     <string name="customAPI">Özel API</string>
     <string name="useCustomApiNotice">Özel api\'yi kullanarak oturum açın, kaydolamıyorsanız veya oturum açamıyorsanız bu yardımcı olabilir.\n\nNot: Yayın sürümünü kullanıyorsanız fcm çalışmayacaktır.</string>
     <string name="useCustomAPI">Manuel giriş</string>

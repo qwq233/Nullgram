@@ -119,8 +119,6 @@ public class Defines {
     // Auto Update
     public static final String ignoredUpdateTag = "skipUpdate";
     public static final String lastCheckUpdateTime = "lastCheckUpdateTime";
-    public static final String nextUpdateCheckTime = "nextUpdateCheckTime";
-    public static final String skipUpdateVersion = "skipUpdateVersion";
     public static final String updateChannel = "updateChannel";
     public static final int stableChannel = 1;
     public static final int disableAutoUpdate = 0;
@@ -140,6 +138,14 @@ public class Defines {
     public static final String wsUseDoH = "wsUseDoH";
     public static final String wsServerHost = "serverHost";
     public static final String wsBuiltInProxyBackend = "wsBuiltInProxyBackend";
+
+    // Translate
+    public static final String showOriginal = "showOriginal";
+    public static final String translatorProvider = "translatorProvider";
+    public static final String translatorStatus = "translatorStatus";
+    public static final String targetLanguage = "targetLanguage";
+    public static final String restrictedLanguages = "restrictedLanguages";
+    public static final String autoTranslate = "autoTranslate";
 
     // Misc
     public static final long[] officialID = {

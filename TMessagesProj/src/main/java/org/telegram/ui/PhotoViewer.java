@@ -147,6 +147,7 @@ import org.telegram.messenger.FileLog;
 import org.telegram.messenger.ImageLoader;
 import org.telegram.messenger.ImageLocation;
 import org.telegram.messenger.ImageReceiver;
+import org.telegram.messenger.LanguageDetector;
 import org.telegram.messenger.LocaleController;
 import org.telegram.messenger.MediaController;
 import org.telegram.messenger.MediaDataController;
@@ -197,7 +198,6 @@ import org.telegram.ui.Components.CombinedDrawable;
 import org.telegram.ui.Components.Crop.CropTransform;
 import org.telegram.ui.Components.Crop.CropView;
 import org.telegram.ui.Components.CubicBezierInterpolator;
-import org.telegram.ui.Components.EmojiPacksAlert;
 import org.telegram.ui.Components.FadingTextViewLayout;
 import org.telegram.ui.Components.FilterShaders;
 import org.telegram.ui.Components.FloatSeekBarAccessibilityDelegate;
@@ -258,8 +258,12 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 
+import kotlin.Unit;
 import top.qwq2333.nullgram.config.ConfigManager;
+import top.qwq2333.nullgram.helpers.TranslateHelper;
 import top.qwq2333.nullgram.utils.Defines;
+import top.qwq2333.nullgram.utils.Log;
+import top.qwq2333.nullgram.utils.MessageUtils;
 
 @SuppressLint("WrongConstant")
 @SuppressWarnings("unchecked")
@@ -279,6 +283,7 @@ public class PhotoViewer implements NotificationCenter.NotificationCenterDelegat
     private int slideshowMessageId;
     private String nameOverride;
     private int dateOverride;
+    private String translateFromLanguage = null;
 
     private AnimatorSet miniProgressAnimator;
     private Runnable miniProgressShowRunnable = () -> toggleMiniProgressInternal(true);
@@ -330,6 +335,8 @@ public class PhotoViewer implements NotificationCenter.NotificationCenterDelegat
     private ActionBarMenuItem pipItem;
     private ActionBarMenuItem masksItem;
     private ActionBarMenuItem shareItem;
+    private ActionBarMenuSubItem translateItem;
+    private AlertDialog progressDialog;
     private LinearLayout itemsLayout;
     ChooseSpeedLayout chooseSpeedLayout;
     private Map<View, Boolean> actionBarItemsVisibility = new HashMap<>(3);
@@ -1328,6 +1335,8 @@ public class PhotoViewer implements NotificationCenter.NotificationCenterDelegat
     private final static int gallery_menu_edit_avatar = 17;
     private final static int gallery_menu_share2 = 18;
     private final static int gallery_menu_speed = 19;
+    private final static int gallery_menu_translate = 91;
+
 
     private static DecelerateInterpolator decelerateInterpolator;
     private static Paint progressPaint;
@@ -4794,6 +4803,8 @@ public class PhotoViewer implements NotificationCenter.NotificationCenterDelegat
                         thumb = null;
                     }
                     placeProvider.openPhotoForEdit(f.getAbsolutePath(), thumb, isVideo);
+                } else if (id == gallery_menu_translate) {
+                    translateCaption();
                 }
             }
 
@@ -4872,6 +4883,9 @@ public class PhotoViewer implements NotificationCenter.NotificationCenterDelegat
         menuItem.addSubItem(gallery_menu_set_as_main, R.drawable.msg_openprofile, LocaleController.getString("SetAsMain", R.string.SetAsMain)).setColors(0xfffafafa, 0xfffafafa);
         menuItem.addSubItem(gallery_menu_delete, R.drawable.msg_delete, LocaleController.getString("Delete", R.string.Delete)).setColors(0xfffafafa, 0xfffafafa);
         menuItem.addSubItem(gallery_menu_cancel_loading, R.drawable.msg_cancel, LocaleController.getString("StopDownload", R.string.StopDownload)).setColors(0xfffafafa, 0xfffafafa);
+        translateItem = menuItem.addSubItem(gallery_menu_translate, R.drawable.msg_translate, LocaleController.getString("TranslateMessage", R.string.TranslateMessage));
+        translateItem.setColors(0xfffafafa, 0xfffafafa);
+
         menuItem.redrawPopup(0xf9222222);
         setMenuItemIcon();
         menuItem.setPopupItemsSelectorColor(0x0fffffff);
@@ -11103,6 +11117,7 @@ public class PhotoViewer implements NotificationCenter.NotificationCenterDelegat
         menuItem.hideSubItem(gallery_menu_edit_avatar);
         menuItem.hideSubItem(gallery_menu_set_as_main);
         menuItem.hideSubItem(gallery_menu_delete);
+        menuItem.hideSubItem(gallery_menu_translate);
         speedItem.setVisibility(View.GONE);
         speedGap.setVisibility(View.GONE);
         actionBar.setTranslationY(0);
@@ -11516,6 +11531,28 @@ public class PhotoViewer implements NotificationCenter.NotificationCenterDelegat
                 nameTextView.setText("");
                 dateTextView.setText("");
             } else {
+                menuItem.hideSubItem(gallery_menu_translate);
+                if (TranslateHelper.getCurrentStatus() != TranslateHelper.Status.External) {
+                    var messageUtils = MessageUtils.getInstance(currentAccount);
+                    var messageObject = messageUtils.getMessageForTranslate(newMessageObject, null);
+                    if (messageObject != null) {
+                        if (!messageObject.translated && LanguageDetector.hasSupport()) {
+                            LanguageDetector.detectLanguage(
+                                messageUtils.getMessagePlainText(messageObject),
+                                (String lang) -> {
+                                    translateFromLanguage = TranslateHelper.stripLanguageCode(lang);
+                                    if (!TranslateHelper.isLanguageRestricted(lang)) {
+                                        menuItem.showSubItem(gallery_menu_translate);
+                                    }
+                                }, e -> Log.e("mlkit: failed to detect language")
+                            );
+                        } else {
+                            menuItem.showSubItem(gallery_menu_translate);
+                        }
+                        translateItem.setText(newMessageObject.translated ? LocaleController.getString("UndoTranslate", R.string.UndoTranslate) : LocaleController.getString("TranslateMessage", R.string.TranslateMessage));
+                    }
+                }
+
                 allowShare = !noforwards;
                 if (newMessageObject.isNewGif() && allowShare) {
                     menuItem.showSubItem(gallery_menu_savegif);
@@ -17510,6 +17547,70 @@ public class PhotoViewer implements NotificationCenter.NotificationCenterDelegat
                 setAlpha(alpha);
             }
         }
+    }
+
+    private void translateCaption() {
+        if (currentMessageObject == null) {
+            return;
+        }
+        if (currentMessageObject.translated && currentMessageObject.originalMessage != null) {
+            final String finalMessage = (String) currentMessageObject.originalMessage;
+            currentMessageObject.messageOwner.message = finalMessage;
+            currentMessageObject.translated = false;
+            currentMessageObject.caption = null;
+            currentMessageObject.generateCaption();
+
+            setCurrentCaption(currentMessageObject, finalMessage, true);
+            translateItem.setText(LocaleController.getString("TranslateMessage", R.string.TranslateMessage));
+            return;
+        }
+        if (TranslateHelper.getCurrentStatus() != TranslateHelper.Status.InMessage) {
+            TranslateHelper.showTranslateDialog(parentActivity, currentMessageObject.messageOwner.message,
+                null, translateFromLanguage, urlSpan -> {
+                    onLinkClick(urlSpan, captionTextViewSwitcher.getCurrentView());
+                    return true;
+                });
+            return;
+        }
+        Object original = currentMessageObject.messageOwner.message;
+        currentMessageObject.originalMessage = original;
+        final MessageObject finalMessageObject = currentMessageObject;
+        try {
+            progressDialog.dismiss();
+        } catch (Throwable ignore) {
+
+        }
+        progressDialog = new AlertDialog(parentActivity, 3, resourcesProvider);
+        progressDialog.showDelayed(400);
+        TranslateHelper.translate(original, translateFromLanguage,(translation, sourceLanguage, targetLanguage) -> {
+            try {
+                progressDialog.dismiss();
+            } catch (Throwable ignore) {
+
+            }
+            if (translation instanceof String) {
+                final String finalMessage = original +
+                    "\n" +
+                    "--------" +
+                    "\n" +
+                    translation;
+                finalMessageObject.messageOwner.message = finalMessage;
+                finalMessageObject.translated = true;
+                finalMessageObject.caption = null;
+                finalMessageObject.generateCaption();
+
+                setCurrentCaption(finalMessageObject, finalMessage, true);
+                translateItem.setText(LocaleController.getString("UndoTranslate", R.string.UndoTranslate));
+            }
+            return Unit.INSTANCE;
+        }, e -> {
+            try {
+                progressDialog.dismiss();
+            } catch (Throwable ignore) {
+            }
+            TranslateHelper.handleTranslationError(parentActivity, e, () -> translateCaption(), resourcesProvider);
+            return Unit.INSTANCE;
+        });
     }
 
     private int getThemedColor(String key) {

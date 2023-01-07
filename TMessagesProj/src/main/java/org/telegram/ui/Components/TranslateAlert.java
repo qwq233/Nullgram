@@ -49,6 +49,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.core.graphics.ColorUtils;
 import androidx.core.widget.NestedScrollView;
 
 import org.telegram.messenger.AndroidUtilities;
@@ -61,14 +62,18 @@ import org.telegram.messenger.MessageObject;
 import org.telegram.messenger.R;
 import org.telegram.messenger.Utilities;
 import org.telegram.messenger.XiaomiUtilities;
+import org.telegram.messenger.browser.Browser;
 import org.telegram.tgnet.ConnectionsManager;
 import org.telegram.tgnet.TLRPC;
 import org.telegram.ui.ActionBar.BaseFragment;
 import org.telegram.ui.ActionBar.Theme;
 
 import java.util.ArrayList;
+import java.util.Locale;
 
+import kotlin.Unit;
 import top.qwq2333.nullgram.config.ConfigManager;
+import top.qwq2333.nullgram.helpers.TranslateHelper;
 import top.qwq2333.nullgram.utils.Defines;
 
 public class TranslateAlert extends Dialog {
@@ -84,6 +89,7 @@ public class TranslateAlert extends Dialog {
     private ImageView subtitleArrowView;
     private TextView subtitleToView;
     private ImageView backButton;
+    private ImageView copyButton;
     private FrameLayout header;
     private FrameLayout headerShadowView;
     private NestedScrollView scrollView;
@@ -96,6 +102,7 @@ public class TranslateAlert extends Dialog {
 
     private FrameLayout.LayoutParams titleLayout;
     private FrameLayout.LayoutParams subtitleLayout;
+    private FrameLayout.LayoutParams copyLayout;
     private FrameLayout.LayoutParams headerLayout;
     private FrameLayout.LayoutParams scrollViewLayout;
 
@@ -126,6 +133,15 @@ public class TranslateAlert extends Dialog {
             subtitleLayout.bottomMargin
         );
         subtitleView.setLayoutParams(subtitleLayout);
+
+        copyLayout.setMargins(
+            copyLayout.leftMargin,
+            dp(lerp(15, 0, t)),
+            copyLayout.rightMargin,
+            copyLayout.bottomMargin
+        );
+        copyButton.setLayoutParams(copyLayout);
+        copyButton.setColorFilter(ColorUtils.blendARGB(Theme.getColor(Theme.key_player_actionBarSubtitle), Theme.getColor(Theme.key_dialogTextBlack), t), PorterDuff.Mode.MULTIPLY);
 
         backButton.setAlpha(t);
         backButton.setScaleX(.75f + .25f * t);
@@ -190,13 +206,13 @@ public class TranslateAlert extends Dialog {
         int textsViewHeight = textsView == null ? 0 : textsView.getMeasuredHeight();
         int height =
             textsViewHeight +
-            dp(
-                66 + // header
-                1 +  // button separator
-                16 + // button top padding
-                48 + // button
-                16   // button bottom padding
-            );
+                dp(
+                    66 + // header
+                        1 +  // button separator
+                        16 + // button top padding
+                        48 + // button
+                        16   // button bottom padding
+                );
         if (firstMinHeight < 0 && textsViewHeight > 0)
             firstMinHeight = height;
         if (firstMinHeight > 0 && textBlocks.size() > 1 && !full)
@@ -206,7 +222,7 @@ public class TranslateAlert extends Dialog {
     private boolean canExpand() {
         return (
             textsView.getBlocksCount() < textBlocks.size() ||
-            minHeight(true) >= (AndroidUtilities.displayMetrics.heightPixels * heightMaxPercent)
+                minHeight(true) >= (AndroidUtilities.displayMetrics.heightPixels * heightMaxPercent)
         );
     }
     private void updateCanExpand() {
@@ -232,8 +248,8 @@ public class TranslateAlert extends Dialog {
     private boolean noforwards;
     private OnLinkPress onLinkPress;
     private Runnable onDismiss;
-    public TranslateAlert(BaseFragment fragment, Context context, int currentAccount, String fromLanguage, String toLanguage, CharSequence text, boolean noforwards, OnLinkPress onLinkPress, Runnable onDismiss) {
-        this(fragment, context, currentAccount, null, -1, fromLanguage, toLanguage, text, noforwards, onLinkPress, onDismiss);
+    public TranslateAlert(BaseFragment fragment, Context context, String fromLanguage, String toLanguage, CharSequence text, boolean noforwards, OnLinkPress onLinkPress, Runnable onDismiss) {
+        this(fragment, context, -1, null, -1, fromLanguage, toLanguage, text, noforwards, onLinkPress, onDismiss);
     }
     public TranslateAlert(BaseFragment fragment, Context context, int currentAccount, TLRPC.InputPeer peer, int msgId, String fromLanguage, String toLanguage, CharSequence text, boolean noforwards, OnLinkPress onLinkPress, Runnable onDismiss) {
         super(context, R.style.TransparentDialog);
@@ -241,12 +257,12 @@ public class TranslateAlert extends Dialog {
         this.onLinkPress = onLinkPress;
         this.noforwards = noforwards;
         this.fragment = fragment;
-        this.fromLanguage = fromLanguage != null && fromLanguage.equals("und") ? "auto" : fromLanguage;
+        this.fromLanguage = /*fromLanguage != null && fromLanguage.equals("und") ? "auto" : */fromLanguage;
         this.toLanguage = toLanguage;
         this.text = text;
         this.textBlocks = new ArrayList<>();
         this.textBlocks.add(text);
-//        cutInBlocks(text, 1024);
+        //        cutInBlocks(text, 1024);
         this.onDismiss = onDismiss;
 
         this.currentAccount = currentAccount;
@@ -412,6 +428,18 @@ public class TranslateAlert extends Dialog {
             0
         ));
 
+        copyButton = new ImageView(context);
+        copyButton.setImageResource(R.drawable.msg_copy);
+        copyButton.setColorFilter(new PorterDuffColorFilter(Theme.getColor(Theme.key_player_actionBarSubtitle), PorterDuff.Mode.MULTIPLY));
+        copyButton.setScaleType(ImageView.ScaleType.FIT_CENTER);
+        copyButton.setPadding(AndroidUtilities.dp(16), 0, AndroidUtilities.dp(16), 0);
+        copyButton.setBackground(Theme.createSelectorDrawable(Theme.getColor(Theme.key_dialogButtonSelector)));
+        header.addView(copyButton, copyLayout = LayoutHelper.createFrame(56, 56, !LocaleController.isRTL ? Gravity.RIGHT : Gravity.LEFT, 0, 15, 0, 0));
+        copyButton.setOnClickListener(v -> {
+            AndroidUtilities.addToClipboard(allTextsView.getText());
+            BulletinFactory.of(bulletinContainer, null).createCopyBulletin(LocaleController.getString("TextCopied", R.string.TextCopied)).show();
+        });
+
         backButton = new ImageView(context);
         backButton.setImageResource(R.drawable.ic_ab_back);
         backButton.setColorFilter(new PorterDuffColorFilter(Theme.getColor(Theme.key_dialogTextBlack), PorterDuff.Mode.MULTIPLY));
@@ -470,7 +498,7 @@ public class TranslateAlert extends Dialog {
                 if (id == android.R.id.copy && isFocused()) {
                     android.content.ClipboardManager clipboard = (android.content.ClipboardManager) ApplicationLoader.applicationContext.getSystemService(Context.CLIPBOARD_SERVICE);
                     android.content.ClipData clip = android.content.ClipData.newPlainText(
-                    "label",
+                        "label",
                         getText().subSequence(
                             Math.max(0, Math.min(getSelectionStart(), getSelectionEnd())),
                             Math.max(0, Math.max(getSelectionStart(), getSelectionEnd()))
@@ -488,7 +516,7 @@ public class TranslateAlert extends Dialog {
         links = new LinkSpanDrawable.LinkCollector(allTextsView);
         allTextsView.setTextColor(0x00000000);
         allTextsView.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 16);
-        allTextsView.setTextIsSelectable(!noforwards);
+        allTextsView.setTextIsSelectable(true);
         allTextsView.setHighlightColor(Theme.getColor(Theme.key_chat_inTextSelectionHighlight));
         int handleColor = Theme.getColor(Theme.key_chat_TextSelectionCursor);
         try {
@@ -540,7 +568,7 @@ public class TranslateAlert extends Dialog {
         buttonTextView.setText(LocaleController.getString("CloseTranslation", R.string.CloseTranslation));
 
         buttonView = new FrameLayout(context);
-//        buttonView.setBackground(Theme.AdaptiveRipple.filledRect(Theme.key_featuredStickers_addButton, 4));
+        //        buttonView.setBackground(Theme.AdaptiveRipple.filledRect(Theme.key_featuredStickers_addButton, 4));
         buttonView.setBackground(Theme.AdaptiveRipple.filledRect(Theme.getColor(Theme.key_featuredStickers_addButton), 4));
         buttonView.addView(buttonTextView);
         buttonView.setOnClickListener(e -> dismiss());
@@ -645,9 +673,9 @@ public class TranslateAlert extends Dialog {
                                     links.removeLink(pressedLink);
                                 }
                                 pressedLink = null;
-                                allTextsView.setTextIsSelectable(!noforwards);
+                                allTextsView.setTextIsSelectable(true);
                             } else if (event.getAction() == MotionEvent.ACTION_DOWN) {
-                                pressedLink = new LinkSpanDrawable(linkSpans[0], fragment.getResourceProvider(), tx, ty, false);
+                                pressedLink = new LinkSpanDrawable(linkSpans[0], fragment != null ? fragment.getResourceProvider() : null, tx, ty, false);
                                 if (links != null) {
                                     links.addLink(pressedLink);
                                 }
@@ -678,8 +706,8 @@ public class TranslateAlert extends Dialog {
             if (pressedLink == null && /*!(scrollRect.contains((int) x, (int) y) && !canExpand() && containerOpenAnimationT < .5f && !scrolling) &&*/ !hasSelection()) {
                 if (
                     !backRect.contains((int) x, (int) y) &&
-                    !buttonRect.contains((int) x, (int) y) &&
-                    event.getAction() == MotionEvent.ACTION_DOWN
+                        !buttonRect.contains((int) x, (int) y) &&
+                        event.getAction() == MotionEvent.ACTION_DOWN
                 ) {
                     fromScrollRect = scrollRect.contains((int) x, (int) y) && (containerOpenAnimationT > 0 || !canExpand());
                     maybeScrolling = true;
@@ -703,7 +731,7 @@ public class TranslateAlert extends Dialog {
                         allowScroll = false;
                     }
                     float fullHeight = AndroidUtilities.displayMetrics.heightPixels,
-                          minHeight = Math.min(minHeight(), fullHeight * heightMaxPercent);
+                        minHeight = Math.min(minHeight(), fullHeight * heightMaxPercent);
                     float scrollYPx = minHeight * (1f - -Math.min(Math.max(fromScrollY, -1), 0)) + (fullHeight - minHeight) * Math.min(1, Math.max(fromScrollY, 0)) + dy;
                     float scrollY = scrollYPx > minHeight ? (scrollYPx - minHeight) / (fullHeight - minHeight) : -(1f - scrollYPx / minHeight);
                     if (!canExpand()) {
@@ -715,7 +743,7 @@ public class TranslateAlert extends Dialog {
                         setScrollY(scrollY);
                         if (event.getAction() == MotionEvent.ACTION_UP) {
                             scrolling = false;
-                            allTextsView.setTextIsSelectable(!noforwards);
+                            allTextsView.setTextIsSelectable(true);
                             maybeScrolling = false;
                             allowScroll = true;
                             scrollYTo(
@@ -733,7 +761,7 @@ public class TranslateAlert extends Dialog {
             }
             if (hasSelection() && maybeScrolling) {
                 scrolling = false;
-                allTextsView.setTextIsSelectable(!noforwards);
+                allTextsView.setTextIsSelectable(true);
                 maybeScrolling = false;
                 allowScroll = true;
                 scrollYTo(Math.round(fromScrollY));
@@ -767,8 +795,8 @@ public class TranslateAlert extends Dialog {
         if (Build.VERSION.SDK_INT >= 21) {
             params.flags |=
                 WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN |
-                WindowManager.LayoutParams.FLAG_LAYOUT_INSET_DECOR |
-                WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS;
+                    WindowManager.LayoutParams.FLAG_LAYOUT_INSET_DECOR |
+                    WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS;
         }
         params.flags |= WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN;
         params.height = ViewGroup.LayoutParams.MATCH_PARENT;
@@ -843,7 +871,7 @@ public class TranslateAlert extends Dialog {
                 if (T <= 0f) {
                     dismissInternal();
                 } else if (setAfter) {
-                    allTextsView.setTextIsSelectable(!noforwards);
+                    allTextsView.setTextIsSelectable(true);
                     allTextsView.invalidate();
                     scrollView.stopNestedScroll();
                     openAnimation(T - 1f);
@@ -869,18 +897,13 @@ public class TranslateAlert extends Dialog {
         if (locale == null || locale.equals("und") || locale.equals("auto")) {
             return null;
         }
-        LocaleController.LocaleInfo thisLanguageInfo = LocaleController.getInstance().getBuiltinLanguageByPlural(locale),
-                                    currentLanguageInfo = LocaleController.getInstance().getCurrentLocaleInfo();
-        if (thisLanguageInfo == null) {
-            return null;
-        }
-        boolean isCurrentLanguageEnglish = currentLanguageInfo != null && "en".equals(currentLanguageInfo.pluralLangCode);
-        if (isCurrentLanguageEnglish) {
-            // trying to show this language in a language of the interface, but there are only names in english and its own
-            return thisLanguageInfo.nameEnglish;
+        String toLang;
+        if (locale.equals("app")) {
+            toLang = LocaleController.getInstance().getCurrentLocaleInfo().name;
         } else {
-            return thisLanguageInfo.name;
+            toLang = Locale.forLanguageTag(locale).getDisplayName();
         }
+        return toLang;
     }
 
     public void updateSourceLanguage() {
@@ -953,8 +976,10 @@ public class TranslateAlert extends Dialog {
                                             fastHide = true;
                                             dismiss();
                                         }
-                                    } else {
+                                    } else if (fragment != null) {
                                         AlertsCreator.showOpenUrlAlert(fragment, urlSpan.getURL(), false, false);
+                                    } else {
+                                        Browser.openUrl(view.getContext(), urlSpan.getURL(), true, true);
                                     }
                                 }
 
@@ -987,7 +1012,11 @@ public class TranslateAlert extends Dialog {
                             new ClickableSpan() {
                                 @Override
                                 public void onClick(@NonNull View view) {
-                                    AlertsCreator.showOpenUrlAlert(fragment, urlSpan.getURL(), false, false);
+                                    if (fragment != null) {
+                                        AlertsCreator.showOpenUrlAlert(fragment, urlSpan.getURL(), false, false);
+                                    } else {
+                                        Browser.openUrl(view.getContext(), urlSpan.getURL(), true, true);
+                                    }
                                 }
 
                                 @Override
@@ -1066,23 +1095,16 @@ public class TranslateAlert extends Dialog {
         public void run(boolean rateLimit);
     }
     private void fetchTranslation(CharSequence text, long minDuration, OnTranslationSuccess onSuccess, OnTranslationFail onFail) {
-        final long start = System.currentTimeMillis();
-        Utilities.Callback<String> onDone = (string) -> {
+        TranslateHelper.translate(text, fromLanguage, (translation,sourceLanguage,ignore)->{
             AndroidUtilities.runOnUIThread(() -> {
-                if (string != null) {
-                    onSuccess.run(string, null);
-                } else {
-                    onFail.run(false);
-                }
-            }, Math.max((System.currentTimeMillis() - start) - minDuration, 1));
-        };
-        if (peer != null) {
-            translateText(currentAccount, peer, msgId, fromLanguage, toLanguage, onDone);
-        } else if (text != null) {
-            translateText(currentAccount, text.toString(), fromLanguage, toLanguage, onDone);
-        } else {
-            onFail.run(false);
-        }
+                if (onSuccess != null)
+                    onSuccess.run((String) translation, sourceLanguage);
+            });
+            return Unit.INSTANCE;
+        },e->{
+            TranslateHelper.handleTranslationError(getContext(), e, () -> fetchTranslation(text, minDuration, onSuccess, onFail), null);
+            return Unit.INSTANCE;
+        });
     }
 
     private static void translateText(int currentAccount, TLRPC.InputPeer peer, int msg_id, String from_lang, String to_lang, Utilities.Callback<String> onDone) {
@@ -1157,8 +1179,8 @@ public class TranslateAlert extends Dialog {
         }
         return alert;
     }
-    public static TranslateAlert showAlert(Context context, BaseFragment fragment, int currentAccount, String fromLanguage, String toLanguage, CharSequence text, boolean noforwards, OnLinkPress onLinkPress, Runnable onDismiss) {
-        TranslateAlert alert = new TranslateAlert(fragment, context, currentAccount, fromLanguage, toLanguage, text, noforwards, onLinkPress, onDismiss);
+    public static TranslateAlert showAlert(Context context, BaseFragment fragment, String fromLanguage, String toLanguage, CharSequence text, boolean noforwards, OnLinkPress onLinkPress, Runnable onDismiss) {
+        TranslateAlert alert = new TranslateAlert(fragment, context, fromLanguage, toLanguage, text, noforwards, onLinkPress, onDismiss);
         if (fragment != null) {
             if (fragment.getParentActivity() != null) {
                 fragment.showDialog(alert);
@@ -1301,7 +1323,7 @@ public class TranslateAlert extends Dialog {
     public static class InlineLoadingTextView extends ViewGroup {
 
         public static final int paddingHorizontal = dp(6),
-                                paddingVertical = 0;
+            paddingVertical = 0;
 
 
         public boolean showLoadingText = true;
@@ -1462,9 +1484,9 @@ public class TranslateAlert extends Dialog {
 
         private final RectF rect = new RectF();
         private final Path inPath = new Path(),
-                tempPath = new Path(),
-                loadingPath = new Path(),
-                shadePath = new Path();
+            tempPath = new Path(),
+            loadingPath = new Path(),
+            shadePath = new Path();
         private final Paint loadingPaint = new Paint();
         private final float gradientWidth = dp(350f);
         @Override
@@ -1472,12 +1494,12 @@ public class TranslateAlert extends Dialog {
             float w = getWidth(), h = getHeight();
 
             float cx = LocaleController.isRTL ? Math.max(w / 2f, w - 8f) : Math.min(w / 2f, 8f),
-                    cy = Math.min(h / 2f, 8f),
-                    R = (float) Math.sqrt(Math.max(
-                        Math.max(cx*cx + cy*cy, (w-cx)*(w-cx) + cy*cy),
-                        Math.max(cx*cx + (h-cy)*(h-cy), (w-cx)*(w-cx) + (h-cy)*(h-cy))
-                    )),
-                    r = loadingT * R;
+                cy = Math.min(h / 2f, 8f),
+                R = (float) Math.sqrt(Math.max(
+                    Math.max(cx*cx + cy*cy, (w-cx)*(w-cx) + cy*cy),
+                    Math.max(cx*cx + (h-cy)*(h-cy), (w-cx)*(w-cx) + (h-cy)*(h-cy))
+                )),
+                r = loadingT * R;
             inPath.reset();
             inPath.addCircle(cx, cy, r, Path.Direction.CW);
 
@@ -1532,7 +1554,7 @@ public class TranslateAlert extends Dialog {
     public static class LoadingTextView2 extends ViewGroup {
 
         public static final int paddingHorizontal = dp(6),
-                                paddingVertical = dp(1.5f);
+            paddingVertical = dp(1.5f);
 
         public boolean showLoadingText = true;
 
@@ -1709,11 +1731,11 @@ public class TranslateAlert extends Dialog {
                     final int lineCount = loadingLayout.getLineCount();
                     for (int i = 0; i < lineCount; ++i) {
                         float s = loadingLayout.getLineLeft(i),
-                              e = loadingLayout.getLineRight(i),
-                              l = Math.min(s, e),
-                              r = Math.max(s, e);
+                            e = loadingLayout.getLineRight(i),
+                            l = Math.min(s, e),
+                            r = Math.max(s, e);
                         int start = loadingLayout.getLineStart(i),
-                              end = loadingLayout.getLineEnd(i);
+                            end = loadingLayout.getLineEnd(i);
                         boolean hasNonEmptyChar = false;
                         for (int j = start; j < end; ++j) {
                             char c = text.charAt(j);
@@ -1738,9 +1760,9 @@ public class TranslateAlert extends Dialog {
 
         private final RectF rect = new RectF();
         private final Path inPath = new Path(),
-                           tempPath = new Path(),
-                           loadingPath = new Path(),
-                           shadePath = new Path();
+            tempPath = new Path(),
+            loadingPath = new Path(),
+            shadePath = new Path();
         private final Paint loadingPaint = new Paint();
         private final float gradientWidth = dp(350f);
         @Override
@@ -1748,12 +1770,12 @@ public class TranslateAlert extends Dialog {
             float w = getWidth(), h = getHeight();
 
             float cx = LocaleController.isRTL ? Math.max(w / 2f, w - 8f) : Math.min(w / 2f, 8f),
-                  cy = Math.min(h / 2f, 8f),
-                  R = (float) Math.sqrt(Math.max(
+                cy = Math.min(h / 2f, 8f),
+                R = (float) Math.sqrt(Math.max(
                     Math.max(cx*cx + cy*cy, (w-cx)*(w-cx) + cy*cy),
                     Math.max(cx*cx + (h-cy)*(h-cy), (w-cx)*(w-cx) + (h-cy)*(h-cy))
-                  )),
-                  r = loadingT * R;
+                )),
+                r = loadingT * R;
             inPath.reset();
             inPath.addCircle(cx, cy, r, Path.Direction.CW);
 

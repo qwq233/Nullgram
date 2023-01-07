@@ -97,7 +97,7 @@
     <string name="customDoubleTap">Doble toque personalizado</string>
     <string name="OpenSource">Licencias de software de código abierto</string>
     <string name="disableCustomAPI">No usar API personalizada</string>
-    <string name="useOfficialAPI">TELEOFFICAL</string>
+    <string name="useOfficialAPI">TELEOFFICIAL</string>
     <string name="customAPI">API personalizada</string>
     <string name="useCustomApiNotice">Inicia sesión con api personalizada, si no puedes registrarte o iniciar sesión, esto puede servir. \n\nNota: fcm no funcionará si estás usando la versión estable.</string>
     <string name="useCustomAPI">Inicio manual</string>

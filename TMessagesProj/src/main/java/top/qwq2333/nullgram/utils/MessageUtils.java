@@ -29,6 +29,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.text.TextUtils;
 import android.util.Base64;
+import android.util.Pair;
 import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.ViewGroup;
@@ -47,12 +48,14 @@ import org.telegram.messenger.ApplicationLoader;
 import org.telegram.messenger.BaseController;
 import org.telegram.messenger.BuildConfig;
 import org.telegram.messenger.ChatObject;
+import org.telegram.messenger.Emoji;
 import org.telegram.messenger.FileLoader;
 import org.telegram.messenger.LocaleController;
 import org.telegram.messenger.MediaController;
 import org.telegram.messenger.MediaDataController;
 import org.telegram.messenger.MessageObject;
 import org.telegram.messenger.MessagesController;
+import org.telegram.messenger.NotificationCenter;
 import org.telegram.messenger.R;
 import org.telegram.messenger.UserConfig;
 import org.telegram.messenger.Utilities;
@@ -70,6 +73,7 @@ import org.telegram.ui.Components.Bulletin;
 import org.telegram.ui.Components.EditTextBoldCursor;
 import org.telegram.ui.Components.Forum.ForumUtilities;
 import org.telegram.ui.Components.LayoutHelper;
+import org.telegram.ui.Components.TranscribeButton;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -122,7 +126,6 @@ public class MessageUtils extends BaseController {
         }
         return messageObject;
     }
-
     public static MessageUtils getInstance(int num) {
         MessageUtils localInstance = Instance[num];
         if (localInstance == null) {
@@ -553,5 +556,102 @@ public class MessageUtils extends BaseController {
         }
         return null;
     }
+
+    public boolean isMessageObjectAutoTranslatable(MessageObject messageObject) {
+        if (messageObject.translated || messageObject.translating || messageObject.isOutOwner()) {
+            return false;
+        }
+        if (messageObject.isPoll()) {
+            return true;
+        }
+        return !TextUtils.isEmpty(messageObject.messageOwner.message) && !isLinkOrEmojiOnlyMessage(messageObject);
+    }
+
+    public boolean isLinkOrEmojiOnlyMessage(MessageObject messageObject) {
+        var entities = messageObject.messageOwner.entities;
+        if (entities != null) {
+            for (TLRPC.MessageEntity entity : entities) {
+                if (entity instanceof TLRPC.TL_messageEntityBotCommand ||
+                    entity instanceof TLRPC.TL_messageEntityEmail ||
+                    entity instanceof TLRPC.TL_messageEntityUrl ||
+                    entity instanceof TLRPC.TL_messageEntityMention ||
+                    entity instanceof TLRPC.TL_messageEntityCashtag ||
+                    entity instanceof TLRPC.TL_messageEntityHashtag ||
+                    entity instanceof TLRPC.TL_messageEntityBankCard ||
+                    entity instanceof TLRPC.TL_messageEntityPhone) {
+                    if (entity.offset == 0 && entity.length == messageObject.messageOwner.message.length()) {
+                        return true;
+                    }
+                }
+            }
+        }
+        return Emoji.fullyConsistsOfEmojis(messageObject.messageOwner.message);
+    }
+
+    public String getMessagePlainText(MessageObject messageObject) {
+        String message;
+        if (messageObject.isPoll()) {
+            TLRPC.Poll poll = ((TLRPC.TL_messageMediaPoll) messageObject.messageOwner.media).poll;
+            StringBuilder pollText = new StringBuilder(poll.question).append("\n");
+            for (TLRPC.TL_pollAnswer answer : poll.answers) {
+                pollText.append("\n\uD83D\uDD18 ");
+                pollText.append(answer.text);
+            }
+            message = pollText.toString();
+        } else if (messageObject.isVoiceTranscriptionOpen()) {
+            message = messageObject.messageOwner.voiceTranscription;
+        } else {
+            message = messageObject.messageOwner.message;
+        }
+        return message;
+    }
+
+    public MessageObject getMessageForTranslate(MessageObject selectedObject, MessageObject.GroupedMessages selectedObjectGroup) {
+        MessageObject messageObject = null;
+        if (selectedObjectGroup != null && !selectedObjectGroup.isDocuments) {
+            messageObject = getTargetMessageObjectFromGroup(selectedObjectGroup);
+        } else if (selectedObject.isPoll()) {
+            messageObject = selectedObject;
+        } else if (selectedObject.isVoiceTranscriptionOpen() && !TextUtils.isEmpty(selectedObject.messageOwner.voiceTranscription) && !TranscribeButton.isTranscribing(selectedObject)) {
+            messageObject = selectedObject;
+        } else if (!selectedObject.isVoiceTranscriptionOpen() && !TextUtils.isEmpty(selectedObject.messageOwner.message) && !isLinkOrEmojiOnlyMessage(selectedObject)) {
+            messageObject = selectedObject;
+        }
+        if (messageObject != null && messageObject.translating) {
+            return null;
+        }
+        return messageObject;
+    }
+
+    public void resetMessageContent(long dialogId, MessageObject messageObject, boolean translated) {
+        resetMessageContent(dialogId, messageObject, translated, null, false, null);
+    }
+
+    public void resetMessageContent(long dialogId, MessageObject messageObject, boolean translated, boolean translating) {
+        resetMessageContent(dialogId, messageObject, translated, null, translating, null);
+    }
+
+    public void resetMessageContent(long dialogId, MessageObject messageObject, boolean translated, Object original, boolean translating, Pair<String, String> translatedLanguage) {
+        TLRPC.Message message = messageObject.messageOwner;
+
+        MessageObject obj = new MessageObject(currentAccount, message, true, true);
+        obj.originalMessage = original;
+        obj.translating = translating;
+        obj.translatedLanguage = translatedLanguage;
+        obj.translated = translated;
+        if (messageObject.isSponsored()) {
+            obj.sponsoredId = messageObject.sponsoredId;
+            obj.botStartParam = messageObject.botStartParam;
+        }
+
+        replaceMessagesObject(dialogId, obj);
+    }
+
+    private void replaceMessagesObject(long dialogId, MessageObject messageObject) {
+        ArrayList<MessageObject> arrayList = new ArrayList<>();
+        arrayList.add(messageObject);
+        getNotificationCenter().postNotificationName(NotificationCenter.replaceMessagesObjects, dialogId, arrayList, false);
+    }
+
 
 }

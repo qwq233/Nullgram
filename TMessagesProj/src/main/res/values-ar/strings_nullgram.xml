@@ -97,7 +97,7 @@
     <string name="customDoubleTap">النقر المزدوج المخصص</string>
     <string name="OpenSource">تراخيص برمجيات مفتوحة المصدر</string>
     <string name="disableCustomAPI">لا تستخدم API مخصص</string>
-    <string name="useOfficialAPI">TELEOFFICAL</string>
+    <string name="useOfficialAPI">TELEOFFICIAL</string>
     <string name="customAPI">API مخصص</string>
     <string name="useCustomApiNotice">قم بتسجيل الدخول باستخدام واجهة برمجة التطبيقات المخصصة ، إذا كنت غير قادر على التسجيل أو تسجيل الدخول ، فقد يساعدك ذلك.
 \n

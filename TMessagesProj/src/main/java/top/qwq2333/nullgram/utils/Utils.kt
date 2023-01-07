@@ -16,6 +16,7 @@ import org.telegram.messenger.SharedConfig
 import top.qwq2333.nullgram.config.ConfigManager
 import java.io.BufferedReader
 import java.io.FileReader
+import java.net.URLEncoder
 import java.security.MessageDigest
 import java.security.NoSuchAlgorithmException
 import java.security.SecureRandom
@@ -65,7 +66,7 @@ object Utils {
     }
 
     @JvmStatic
-    public fun getSalt(): ByteArray {
+    fun getSalt(): ByteArray {
         val random = SecureRandom()
         val salt = ByteArray(32)
         random.nextBytes(salt)
@@ -161,3 +162,5 @@ object Utils {
     }
 
 }
+
+fun String.encodeUrl(): String = URLEncoder.encode(this, "UTF-8")

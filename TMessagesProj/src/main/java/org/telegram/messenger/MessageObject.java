@@ -27,6 +27,7 @@ import android.text.style.ClickableSpan;
 import android.text.style.URLSpan;
 import android.text.util.Linkify;
 import android.util.Base64;
+import android.util.Pair;
 import android.view.View;
 
 import androidx.collection.LongSparseArray;
@@ -262,6 +263,11 @@ public class MessageObject {
     public boolean hideSendersName;
     public TLRPC.Peer sendAsPeer;
     public Drawable[] topicIconDrawable = new Drawable[1];
+
+    public boolean translating;
+    public boolean translated;
+    public Pair<String, String> translatedLanguage;
+    public Object originalMessage;
 
     static final String[] excludeWords = new String[]{
             " vs. ",

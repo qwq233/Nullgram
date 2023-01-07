@@ -6049,4 +6049,5 @@
     <string name="DeleteAllProxies">Delete All Proxies</string>
     <string name="DeleteAllProxiesConfirm">Are you sure you want to delete all proxies?</string>
     <string name="AccDescrSendAs">Send as %1$s</string>
+    <string name="TranslatorTypeInMessage">In Message</string>
 </resources>

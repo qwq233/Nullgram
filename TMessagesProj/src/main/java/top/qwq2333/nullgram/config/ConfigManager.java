@@ -36,6 +36,7 @@ import org.telegram.messenger.ApplicationLoader;
 
 import java.util.ArrayList;
 import java.util.Map;
+import java.util.Set;
 import java.util.function.Function;
 
 import kotlin.text.StringsKt;
@@ -109,6 +110,16 @@ public class ConfigManager {
      */
     public static float getFloatOrDefault(@NonNull String key, float def) {
         return preferences.getFloat(key, def);
+    }
+
+    /**
+     * 获取一个 StringSet
+     * @param key key
+     * @param def 默认值
+     * @return key对应值
+     */
+    public static Set<String> getStringSetOrDefault(@NonNull String key, @Nullable Set<String> def) {
+        return preferences.getStringSet(key, def);
     }
 
 
@@ -191,6 +202,21 @@ public class ConfigManager {
                 preferences.edit().putFloat(key, value).apply();
             } catch (Throwable thr) {
                 Log.e("putFloat: ", thr);
+            }
+        }
+    }
+
+    /**
+     * 设置一个 StringSet
+     * @param key key
+     * @param value 值
+     */
+    public static void putStringSet(@NonNull String key, Set<String> value) {
+        synchronized (preferences) {
+            try {
+                preferences.edit().putStringSet(key, value).apply();
+            } catch (Throwable thr) {
+                Log.e("putStringSet: ", thr);
             }
         }
     }

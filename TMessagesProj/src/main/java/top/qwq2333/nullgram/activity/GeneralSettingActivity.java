@@ -2,13 +2,17 @@ package top.qwq2333.nullgram.activity;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.text.TextUtils;
 import android.transition.TransitionManager;
 import android.view.View;
 import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
+import androidx.core.text.HtmlCompat;
+import androidx.core.util.Pair;
 import androidx.recyclerview.widget.RecyclerView;
 
+import org.telegram.messenger.LanguageDetector;
 import org.telegram.messenger.LocaleController;
 import org.telegram.messenger.NotificationCenter;
 import org.telegram.messenger.R;
@@ -21,11 +25,15 @@ import org.telegram.ui.Cells.TextCheckCell;
 import org.telegram.ui.Cells.TextDetailSettingsCell;
 import org.telegram.ui.Cells.TextInfoPrivacyCell;
 import org.telegram.ui.Cells.TextSettingsCell;
+import org.telegram.ui.Components.BulletinFactory;
 import org.telegram.ui.Components.RecyclerListView;
 
 import java.util.ArrayList;
+import java.util.Locale;
 
+import kotlin.Unit;
 import top.qwq2333.nullgram.config.ConfigManager;
+import top.qwq2333.nullgram.helpers.TranslateHelper;
 import top.qwq2333.nullgram.ui.DrawerProfilePreviewCell;
 import top.qwq2333.nullgram.ui.PopupBuilder;
 import top.qwq2333.nullgram.utils.Defines;
@@ -44,6 +52,15 @@ public class GeneralSettingActivity extends BaseActivity {
     private int largeAvatarAsBackgroundRow;
     private int hidePhoneRow;
     private int drawer2Row;
+
+    private int translatorRow;
+    private int showOriginalRow;
+    private int translatorTypeRow;
+    private int translationProviderRow;
+    private int translationTargetRow;
+    private int doNotTranslateRow;
+    private int autoTranslateRow;
+    private int translator2Row;
 
 
     private int showBotAPIRow;
@@ -181,6 +198,70 @@ public class GeneralSettingActivity extends BaseActivity {
             if (view instanceof TextCheckCell) {
                 ((TextCheckCell) view).setChecked(ConfigManager.getBooleanOrFalse(Defines.autoDisableBuiltInProxy));
             }
+        } else if (position == translationProviderRow) {
+            TranslateHelper.showTranslationProviderSelector(getParentActivity(), view, null, param -> {
+                if (param) {
+                    listAdapter.notifyItemChanged(translationProviderRow);
+                } else {
+                    listAdapter.notifyItemChanged(translationProviderRow);
+                    listAdapter.notifyItemChanged(translationTargetRow);
+                }
+                return Unit.INSTANCE;
+            });
+        } else if (position == translationTargetRow) {
+            TranslateHelper.showTranslationTargetSelector(this, view, () -> {
+                listAdapter.notifyItemChanged(translationTargetRow);
+                if (getRestrictedLanguages().size() == 1) {
+                    listAdapter.notifyItemChanged(doNotTranslateRow);
+                }
+                return Unit.INSTANCE;
+            });
+        }  else if (position == translatorTypeRow) {
+            var oldType = TranslateHelper.getCurrentStatus();
+            TranslateHelper.showTranslatorTypeSelector(getParentActivity(), view, () -> {
+                var newType = TranslateHelper.getCurrentStatus();
+                listAdapter.notifyItemChanged(translatorTypeRow);
+                if (oldType != newType) {
+                    int count = 3;
+                    if (oldType == TranslateHelper.Status.InMessage || newType == TranslateHelper.Status.InMessage) {
+                        count++;
+                    }
+                    if (oldType == TranslateHelper.Status.External) {
+                        updateRows();
+                        listAdapter.notifyItemRangeInserted(translationProviderRow, count);
+                    } else if (newType == TranslateHelper.Status.External) {
+                        listAdapter.notifyItemRangeRemoved(translationProviderRow, count);
+                        updateRows();
+                    } else if (oldType == TranslateHelper.Status.InMessage) {
+                        listAdapter.notifyItemRemoved(showOriginalRow);
+                        updateRows();
+                    } else if (newType == TranslateHelper.Status.InMessage) {
+                        updateRows();
+                        listAdapter.notifyItemInserted(showOriginalRow);
+                    }
+                }
+                return Unit.INSTANCE;
+            });
+        } else if (position == doNotTranslateRow) {
+            if (!LanguageDetector.hasSupport()) {
+                BulletinFactory.of(this).createErrorBulletinSubtitle(LocaleController.getString("BrokenMLKit", R.string.BrokenMLKit), LocaleController.getString("BrokenMLKitDetail", R.string.BrokenMLKitDetail), null).show();
+                return;
+            }
+            presentFragment(new LanguageSelectActivity(LanguageSelectActivity.TYPE_RESTRICTED, true));
+        } else if (position == autoTranslateRow) {
+            if (!LanguageDetector.hasSupport()) {
+                BulletinFactory.of(this).createErrorBulletinSubtitle(LocaleController.getString("BrokenMLKit", R.string.BrokenMLKit), LocaleController.getString("BrokenMLKitDetail", R.string.BrokenMLKitDetail), null).show();
+                return;
+            }
+            TranslateHelper.toggleAutoTranslate();
+            if (view instanceof TextCheckCell) {
+                ((TextCheckCell) view).setChecked(TranslateHelper.getAutoTranslate());
+            }
+        } else if (position == showOriginalRow) {
+            TranslateHelper.toggleShowOriginal();
+            if (view instanceof TextCheckCell) {
+                ((TextCheckCell) view).setChecked(TranslateHelper.getShowOriginal());
+            }
         }
 
     }
@@ -211,6 +292,25 @@ public class GeneralSettingActivity extends BaseActivity {
         }
         hidePhoneRow = rowCount++;
         drawer2Row = rowCount++;
+
+        translatorRow = rowCount++;
+        translatorTypeRow = rowCount++;
+        if (TranslateHelper.getCurrentStatus() != TranslateHelper.Status.External) {
+            showOriginalRow = TranslateHelper.getCurrentStatus() == TranslateHelper.Status.InMessage ? rowCount++ : -1;
+            translationProviderRow = rowCount++;
+            translationTargetRow = rowCount++;
+            doNotTranslateRow = rowCount++;
+            autoTranslateRow = rowCount++;
+        } else {
+            showOriginalRow = -1;
+            translationProviderRow = -1;
+            translationTargetRow = -1;
+            doNotTranslateRow = -1;
+            autoTranslateRow = -1;
+        }
+        translator2Row = rowCount++;
+
+
 
         generalRow = rowCount++;
         showBotAPIRow = rowCount++;
@@ -272,6 +372,63 @@ public class GeneralSettingActivity extends BaseActivity {
                                 value = LocaleController.getString("TabTitleTypeMix", R.string.TabTitleTypeMix);
                         }
                         textCell.setTextAndValue(LocaleController.getString("TabTitleType", R.string.TabTitleType), value, false);
+                    }  else if (position == translationProviderRow) {
+                        Pair<ArrayList<String>, ArrayList<TranslateHelper.ProviderType>> providers = TranslateHelper.getProviders();
+                        ArrayList<String> names = providers.first;
+                        ArrayList<TranslateHelper.ProviderType> types = providers.second;
+                        if (names == null || types == null) {
+                            return;
+                        }
+                        int index = types.indexOf(TranslateHelper.getCurrentProviderType());
+                        if (index < 0) {
+                            textCell.setTextAndValue(LocaleController.getString("TranslationProviderShort", R.string.TranslationProviderShort), "", true);
+                        } else {
+                            String value = names.get(index);
+                            textCell.setTextAndValue(LocaleController.getString("TranslationProviderShort", R.string.TranslationProviderShort), value, true);
+                        }
+                    } else if (position == translationTargetRow) {
+                        String language = TranslateHelper.getCurrentTargetLanguage();
+                        CharSequence value;
+                        if (language.equals("app")) {
+                            value = LocaleController.getString("TranslationTargetApp", R.string.TranslationTargetApp);
+                        } else {
+                            Locale locale = Locale.forLanguageTag(language);
+                            if (!TextUtils.isEmpty(locale.getScript())) {
+                                value = HtmlCompat.fromHtml(locale.getDisplayScript(), HtmlCompat.FROM_HTML_MODE_LEGACY);
+                            } else {
+                                value = locale.getDisplayName();
+                            }
+                        }
+                        textCell.setTextAndValue(LocaleController.getString("TranslationTarget", R.string.TranslationTarget), value, true);
+                    }  else if (position == translatorTypeRow) {
+                        String value;
+                        switch (TranslateHelper.getCurrentStatus()) {
+                            case Popup:
+                                value = LocaleController.getString("TranslatorTypePopup", R.string.TranslatorTypePopup);
+                                break;
+                            case External:
+                                value = LocaleController.getString("TranslatorTypeExternal", R.string.TranslatorTypeExternal);
+                                break;
+                            case InMessage:
+                            default:
+                                value = LocaleController.getString("TranslatorTypeInMessage", R.string.TranslatorTypeInMessage);
+                                break;
+                        }
+                        textCell.setTextAndValue(LocaleController.getString("TranslatorType", R.string.TranslatorType), value, position + 1 != translator2Row);
+                    } else if (position == doNotTranslateRow) {
+                        ArrayList<String> langCodes = getRestrictedLanguages();
+                        CharSequence value;
+                        if (langCodes.size() == 1) {
+                            Locale locale = Locale.forLanguageTag(langCodes.get(0));
+                            if (!TextUtils.isEmpty(locale.getScript())) {
+                                value = HtmlCompat.fromHtml(locale.getDisplayScript(), HtmlCompat.FROM_HTML_MODE_LEGACY);
+                            } else {
+                                value = locale.getDisplayName();
+                            }
+                        } else {
+                            value = LocaleController.formatPluralString("Languages", langCodes.size());
+                        }
+                        textCell.setTextAndValue(LocaleController.getString("DoNotTranslate", R.string.DoNotTranslate), value, true);
                     }
                     break;
                 }
@@ -310,6 +467,13 @@ public class GeneralSettingActivity extends BaseActivity {
                         textCell.setTextAndValueAndCheck(LocaleController.getString("autoDisableBuiltInProxy", R.string.autoDisableBuiltInProxy),
                             LocaleController.getString("autoDisableBuiltInProxyDesc", R.string.autoDisableBuiltInProxyDesc),
                             ConfigManager.getBooleanOrFalse(Defines.autoDisableBuiltInProxy), true, true);
+                    } else if (position == autoTranslateRow) {
+                        textCell.setEnabled(LanguageDetector.hasSupport(), null);
+                        textCell.setTextAndValueAndCheck(LocaleController.getString("AutoTranslate", R.string.AutoTranslate),
+                            LocaleController.getString("AutoTranslateAbout",
+                            R.string.AutoTranslateAbout), TranslateHelper.getAutoTranslate(), true, false);
+                    } else if (position == showOriginalRow) {
+                        textCell.setTextAndCheck(LocaleController.getString("TranslatorShowOriginal", R.string.TranslatorShowOriginal), TranslateHelper.getShowOriginal(), true);
                     }
                     break;
                 }
@@ -317,6 +481,8 @@ public class GeneralSettingActivity extends BaseActivity {
                     HeaderCell headerCell = (HeaderCell) holder.itemView;
                     if (position == generalRow) {
                         headerCell.setText(LocaleController.getString("General", R.string.General));
+                    } else if (position == translatorRow) {
+                        headerCell.setText(LocaleController.getString("Translator", R.string.Translator));
                     }
                     break;
                 }
@@ -383,18 +549,27 @@ public class GeneralSettingActivity extends BaseActivity {
 
         @Override
         public int getItemViewType(int position) {
-            if (position == general2Row || position == drawer2Row) {
+            if (position == general2Row || position == drawer2Row || position == translator2Row) {
                 return 1;
-            } else if (position == tabsTitleTypeRow) {
+            } else if (position == tabsTitleTypeRow || position == translationProviderRow || position == translationTargetRow || position == translatorTypeRow || position == doNotTranslateRow) {
                 return 2;
-            } else if ((position > generalRow && position < general2Row) || (position > drawerRow && position < drawer2Row)) {
-                return 3;
-            } else if (position == generalRow) {
+            }  else if (position == generalRow || position == translatorRow) {
                 return 4;
             } else if (position == drawerRow) {
                 return 8;
+            } else if ((position > generalRow && position < general2Row) || (position > drawerRow && position < drawer2Row) || (position > translatorRow && position < translator2Row)) {
+                return 3;
             }
             return -1;
         }
+    }
+
+    private ArrayList<String> getRestrictedLanguages() {
+        String currentLang = TranslateHelper.stripLanguageCode(TranslateHelper.getCurrentProvider().getCurrentTargetLanguage());
+        ArrayList<String> langCodes = new ArrayList<>(TranslateHelper.getRestrictedLanguages());
+        if (!langCodes.contains(currentLang)) {
+            langCodes.add(currentLang);
+        }
+        return langCodes;
     }
 }
