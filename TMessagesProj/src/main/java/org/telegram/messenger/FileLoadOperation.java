@@ -87,7 +87,7 @@ public class FileLoadOperation {
     private final static int stateCanceled = 4;
 
     private int downloadChunkSize = 1024 * 32;
-    private int downloadChunkSizeBig = 1024 * ConfigManager.getIntOrDefault(Defines.modifyDownloadSpeed, 512);
+    private int downloadChunkSizeBig = 1024 * ConfigManager.getIntOrDefault(Defines.modifyDownloadSpeed, 768);
     ;
     private int cdnChunkCheckSize = 1024 * 128;
     private int maxDownloadRequests = 4;
@@ -216,7 +216,7 @@ public class FileLoadOperation {
     }
 
     private void updateParams() {
-        downloadChunkSizeBig = 1024 * ConfigManager.getIntOrDefault(Defines.modifyDownloadSpeed, 512);
+        downloadChunkSizeBig = 1024 * ConfigManager.getIntOrDefault(Defines.modifyDownloadSpeed, 768);
         maxDownloadRequests = 12;
         maxDownloadRequestsBig = 12;
         maxCdnParts = (int) (FileLoader.DEFAULT_MAX_FILE_SIZE / downloadChunkSizeBig);

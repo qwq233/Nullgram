@@ -112,12 +112,13 @@ public class ExperimentSettingActivity extends BaseActivity {
             for (int speed : speeds) {
                 speedsStr.add(speed + " Kb/block");
             }
-            PopupBuilder.show(speedsStr, LocaleController.getString("modifyDownloadSpeed", R.string.modifyDownloadSpeed), speedsStr.indexOf(ConfigManager.getIntOrDefault(Defines.modifyDownloadSpeed, 512) + " Kb/block"), getParentActivity(), view, i -> {
-                Log.i("speeds[i]: " + speeds[i]);
-                Log.i("i: " + i);
-                ConfigManager.putInt(Defines.modifyDownloadSpeed, speeds[i]);
-                listAdapter.notifyItemChanged(modifyDownloadSpeedRow);
-            });
+            PopupBuilder.show(speedsStr, LocaleController.getString("modifyDownloadSpeed", R.string.modifyDownloadSpeed),
+                speedsStr.indexOf(ConfigManager.getIntOrDefault(Defines.modifyDownloadSpeed, 768) + " Kb/block"), getParentActivity(), view, i -> {
+                    Log.i("speeds[i]: " + speeds[i]);
+                    Log.i("i: " + i);
+                    ConfigManager.putInt(Defines.modifyDownloadSpeed, speeds[i]);
+                    listAdapter.notifyItemChanged(modifyDownloadSpeedRow);
+                });
         }
 
     }
