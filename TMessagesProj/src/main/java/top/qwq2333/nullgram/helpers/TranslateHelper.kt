@@ -11,9 +11,10 @@ import android.view.View
 import androidx.core.text.HtmlCompat
 import androidx.core.util.Pair
 import io.ktor.http.HttpStatusCode
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.DelicateCoroutinesApi
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.future.future
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
 import org.telegram.messenger.LocaleController
 import org.telegram.messenger.R
 import org.telegram.ui.ActionBar.AlertDialog
@@ -143,20 +144,18 @@ object TranslateHelper {
         if (!translator.supportLanguage(language)) {
             onError(UnsupportedTargetLanguageException())
         } else {
-            val result = GlobalScope.future {
-                translator.translate(obj, from, language)
-            }.get()
-
-            if (result.error != null) {
-                if (result.error == HttpStatusCode.TooManyRequests) {
-                    onError(TooManyRequestException())
+            CoroutineScope(Dispatchers.IO).async {
+                val result = translator.translate(obj, from, language)
+                if (result.error != null) {
+                    if (result.error == HttpStatusCode.TooManyRequests) {
+                        onError(TooManyRequestException())
+                    } else {
+                        onError(Exception(result.error.toString()))
+                    }
                 } else {
-                    onError(Exception(result.error.toString()))
+                    onSuccess(result.result!!, translator.convertLanguageCode(result.from, true), language)
                 }
-            } else {
-                onSuccess(result.result!!, translator.convertLanguageCode(result.from, true), language)
             }
-
         }
     }
 
