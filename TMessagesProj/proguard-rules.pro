@@ -168,6 +168,5 @@
 -overloadaggressively
 -keepattributes SourceDir,SourceFile,LineNumberTable,LocalVariableTable
 -obfuscationdictionary          proguard-dic.txt
--renamesourcefileattribute      proguard-dic.txt
 -classobfuscationdictionary     proguard-dic.txt
 -packageobfuscationdictionary   proguard-dic.txt
