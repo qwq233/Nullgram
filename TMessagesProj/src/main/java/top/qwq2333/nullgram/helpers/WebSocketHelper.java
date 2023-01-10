@@ -8,6 +8,7 @@ import org.telegram.messenger.SharedConfig;
 
 import java.net.ServerSocket;
 import java.util.HashMap;
+import java.util.concurrent.atomic.AtomicReference;
 
 import top.qwq2333.nullgram.config.ConfigManager;
 import top.qwq2333.nullgram.utils.AppcenterUtils;
@@ -18,7 +19,7 @@ public class WebSocketHelper {
     public static final String NekogramPublicProxyServer = "ws.neko";
     public static final String NekogramXPublicProxyServer = "tehcneko.xyz";
     public static int backend = ConfigManager.getIntOrDefault(Defines.wsBuiltInProxyBackend, 0); // 0 -> Nekogram; 1 -> Nekogram X
-    public static String serverHost = ConfigManager.getStringOrDefault(Defines.wsServerHost, NekogramPublicProxyServer);
+    public static AtomicReference<String> serverHost = new AtomicReference<>(ConfigManager.getStringOrDefault(Defines.wsServerHost, NekogramPublicProxyServer));
 
     private static int socksPort = -1;
     private static boolean tcp2wsStarted = false;
@@ -43,6 +44,7 @@ public class WebSocketHelper {
     }
 
     public static void setBackend(int targetBackend) {
+        Log.d("setBackend:" + targetBackend);
         ConfigManager.putInt(Defines.wsBuiltInProxyBackend, targetBackend);
         backend = targetBackend;
         setServerHost(targetBackend == 0 ? NekogramPublicProxyServer : NekogramXPublicProxyServer);
@@ -52,8 +54,9 @@ public class WebSocketHelper {
     }
 
     public static void setServerHost(String targetServerHost) {
+        Log.d("set server host:" + targetServerHost);
         ConfigManager.putString(Defines.wsServerHost, targetServerHost);
-        serverHost = targetServerHost;
+        serverHost.set(targetServerHost);
         wsReloadConfig();
     }
 
@@ -62,9 +65,10 @@ public class WebSocketHelper {
     }
 
     public static void wsReloadConfig() {
+        Log.d("ws reload config");
         if (tcp2wsServer != null) {
             try {
-                tcp2wsServer.setTls(wsEnableTLS).setIfMTP(wsUseMTP).setIfDoH(wsUseDoH);
+                tcp2wsServer.setTls(false).setIfMTP(wsUseMTP).setIfDoH(wsUseDoH);
             } catch (Exception e) {
                 Log.e(e);
             }
@@ -86,7 +90,7 @@ public class WebSocketHelper {
             if (!tcp2wsStarted) {
                 tcp2wsServer = new tcp2wsServer()
                     .setTgaMode(false)
-                    .setTls(wsEnableTLS)
+                    .setTls(false)
                     .setIfMTP(wsUseMTP)
                     .setIfDoH(wsUseDoH);
                 tcp2wsServer.start(socksPort);
@@ -97,6 +101,8 @@ public class WebSocketHelper {
                 map.put("isPlay", String.valueOf(BuildConfig.isPlay));
                 AppcenterUtils.trackEvent("tcp2ws started", map);
             }
+            Log.d("tcp2ws started on port " + socksPort);
+            Log.d("serverHost: " + serverHost);
             return socksPort;
         } catch (Exception e) {
             FileLog.e(e);

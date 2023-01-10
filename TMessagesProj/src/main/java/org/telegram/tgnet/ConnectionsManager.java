@@ -61,6 +61,7 @@ import top.qwq2333.nullgram.utils.DatabaseUtils;
 import top.qwq2333.nullgram.utils.Log;
 import top.qwq2333.nullgram.utils.ProxyUtils;
 
+@SuppressWarnings("JavaJniMissingFunction")
 public class ConnectionsManager extends BaseController {
 
     public final static int ConnectionTypeGeneric = 1;
@@ -156,8 +157,9 @@ public class ConnectionsManager extends BaseController {
     private static final HashMap<String, ResolvedDomain> dnsCache = new HashMap<>();
 
     private static int lastClassGuid = 1;
-    
+
     private static final ConnectionsManager[] Instance = new ConnectionsManager[UserConfig.MAX_ACCOUNT_COUNT];
+
     public static ConnectionsManager getInstance(int num) {
         ConnectionsManager localInstance = Instance[num];
         if (localInstance == null) {
@@ -437,7 +439,9 @@ public class ConnectionsManager extends BaseController {
         int proxyPort = preferences.getInt("proxy_port", 1080);
 
         if (preferences.getBoolean("proxy_enabled", false) && !TextUtils.isEmpty(proxyAddress)) {
-            if (WebSocketHelper.serverHost.equals(proxyAddress)) {
+            Log.d("proxy address: " + proxyAddress);
+            if (WebSocketHelper.serverHost.get().equals(proxyAddress)) {
+                Log.d("using websocket proxy: " + WebSocketHelper.serverHost.get());
                 native_setProxySettings(currentAccount, "127.0.0.1", WebSocketHelper.getSocksPort(), "", "", WebSocketHelper.wsUseMTP ? "00000000000000000000000000000000" : "");
             } else {
                 native_setProxySettings(currentAccount, proxyAddress, proxyPort, proxyUsername, proxyPassword, proxySecret);
@@ -535,9 +539,10 @@ public class ConnectionsManager extends BaseController {
         if (secret == null) {
             secret = "";
         }
-        if (address.equals(WebSocketHelper.serverHost)) {
+        if (address.equals(WebSocketHelper.serverHost.get())) {
             address = "127.0.0.1";
             port = WebSocketHelper.getSocksPort();
+            secret = WebSocketHelper.wsUseMTP ? "00000000000000000000000000000000" : "";
         }
 
         return native_checkProxy(currentAccount, address, port, username, password, secret, requestTimeDelegate);
@@ -768,9 +773,12 @@ public class ConnectionsManager extends BaseController {
         if (secret == null) {
             secret = "";
         }
-        if (address.equals(WebSocketHelper.serverHost)) {
+        if (address.equals(WebSocketHelper.serverHost.get())) {
+            Log.d("using websocket proxy");
+            Log.d("ws server host: " + WebSocketHelper.serverHost.get());
             address = "127.0.0.1";
             port = WebSocketHelper.getSocksPort();
+            secret = WebSocketHelper.wsUseMTP ? "00000000000000000000000000000000" : "";
         }
 
 
@@ -788,25 +796,45 @@ public class ConnectionsManager extends BaseController {
     }
 
     public static native void native_switchBackend(int currentAccount, boolean restart);
+
     public static native int native_isTestBackend(int currentAccount);
+
     public static native void native_pauseNetwork(int currentAccount);
+
     public static native void native_setIpStrategy(int currentAccount, byte value);
+
     public static native void native_updateDcSettings(int currentAccount);
+
     public static native void native_setNetworkAvailable(int currentAccount, boolean value, int networkType, boolean slow);
+
     public static native void native_resumeNetwork(int currentAccount, boolean partial);
+
     public static native long native_getCurrentTimeMillis(int currentAccount);
+
     public static native int native_getCurrentTime(int currentAccount);
+
     public static native int native_getCurrentDatacenterId(int currentAccount);
+
     public static native int native_getTimeDifference(int currentAccount);
+
     public static native void native_sendRequest(int currentAccount, long object, RequestDelegateInternal onComplete, QuickAckDelegate onQuickAck, WriteToSocketDelegate onWriteToSocket, int flags, int datacenterId, int connetionType, boolean immediate, int requestToken);
+
     public static native void native_cancelRequest(int currentAccount, int token, boolean notifyServer);
+
     public static native void native_cleanUp(int currentAccount, boolean resetKeys);
+
     public static native void native_cancelRequestsForGuid(int currentAccount, int guid);
+
     public static native void native_bindRequestToGuid(int currentAccount, int requestToken, int guid);
+
     public static native void native_applyDatacenterAddress(int currentAccount, int datacenterId, String ipAddress, int port);
+
     public static native int native_getConnectionState(int currentAccount);
+
     public static native void native_setUserId(int currentAccount, long id);
+
     public static native void native_init(int currentAccount, int version, int layer, int apiId, String deviceModel, String systemVersion, String appVersion, String langCode, String systemLangCode, String configPath, String logPath, String regId, String cFingerprint, String installer, String packageId, int timezoneOffset, long userId, boolean enablePushConnection, boolean hasNetwork, int networkType);
+
     public static native void native_setProxySettings(int currentAccount, String address, int port, String username, String password, String secret);
 
     public static native void native_setLangCode(int currentAccount, String langCode);
@@ -814,12 +842,19 @@ public class ConnectionsManager extends BaseController {
     public static native void native_moveToDatacenter(int currentAccount, int datacenterId);
 
     public static native void native_setRegId(int currentAccount, String regId);
+
     public static native void native_setSystemLangCode(int currentAccount, String langCode);
+
     public static native void native_seSystemLangCode(int currentAccount, String langCode);
+
     public static native void native_setJava(boolean useJavaByteBuffers);
+
     public static native void native_setPushConnectionEnabled(int currentAccount, boolean value);
+
     public static native void native_applyDnsConfig(int currentAccount, long address, String phone, int date);
+
     public static native long native_checkProxy(int currentAccount, String address, int port, String username, String password, String secret, RequestTimeDelegate requestTimeDelegate);
+
     public static native void native_onHostNameResolved(String host, long address, String ip);
 
     public static int generateClassGuid() {
@@ -924,8 +959,8 @@ public class ConnectionsManager extends BaseController {
 
     private static class ResolveHostByNameTask extends AsyncTask<Void, Void, ResolvedDomain> {
 
-        private final ArrayList<Long> addresses = new ArrayList<>();
-        private final String currentHostName;
+        private ArrayList<Long> addresses = new ArrayList<>();
+        private String currentHostName;
 
         public ResolveHostByNameTask(String hostName) {
             super();
@@ -944,10 +979,9 @@ public class ConnectionsManager extends BaseController {
             InputStream httpConnectionStream = null;
             boolean done = false;
             try {
-                URL downloadUrl = new URL("https://www.google.com/resolve?name=" + currentHostName + "&type=A");
+                URL downloadUrl = new URL("https://dns.google/resolve?name=" + currentHostName + "&type=A");
                 URLConnection httpConnection = downloadUrl.openConnection();
                 httpConnection.addRequestProperty("User-Agent", "Mozilla/5.0 (iPhone; CPU iPhone OS 10_0 like Mac OS X) AppleWebKit/602.1.38 (KHTML, like Gecko) Version/10.0 Mobile/14A5297c Safari/602.1");
-                httpConnection.addRequestProperty("Host", "dns.google.com");
                 httpConnection.setConnectTimeout(1000);
                 httpConnection.setReadTimeout(2000);
                 httpConnection.connect();
