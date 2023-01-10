@@ -251,4 +251,6 @@
     <string name="NoTranslatorAppInstalled">You don\'t have applications that can handle translate intent, please install one to continue</string>
     <string name="UndoTranslate">Undo Translate</string>
     <string name="TranslateFailed">Translate server error</string>
+    <string name="SensitiveDisableFiltering">Disable sensitive content filtering</string>
+    <string name="SensitiveAbout">Display sensitive media in public channels on all your devices.</string>
 </resources>
