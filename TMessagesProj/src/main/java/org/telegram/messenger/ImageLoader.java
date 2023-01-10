@@ -2200,7 +2200,7 @@ public class ImageLoader {
                 }
 
                 File publicMediaDir = null;
-                if (Build.VERSION.SDK_INT >= 30) {
+                if (Build.VERSION.SDK_INT >= 24) {
                     File newPath;
                     try {
                         if (ApplicationLoader.applicationContext.getExternalMediaDirs().length > 0) {

@@ -190,7 +190,7 @@ public class FilesMigrationService extends Service {
         if (!Environment.isExternalStorageLegacy() || sharedPreferences.getBoolean("migration_to_scoped_storage_finished", false) || sharedPreferences.getInt("migration_to_scoped_storage_count", 0) >= 5 || wasShown || filesMigrationBottomSheet != null || isRunning) {
             return;
         }
-        if (Build.VERSION.SDK_INT >= 30) {
+        if (Build.VERSION.SDK_INT >= 24) {
             File path = Environment.getExternalStorageDirectory();
             if (!TextUtils.isEmpty(SharedConfig.storageCacheDir)) {
                 ArrayList<File> dirs = AndroidUtilities.getRootDirs();
@@ -204,7 +204,7 @@ public class FilesMigrationService extends Service {
                     }
                 }
             }
-            File oldDirectory = new File(path, "Telegram");
+            File oldDirectory = new File(path, "Nullgram");
             hasOldFolder = oldDirectory.exists();
         }
         if (hasOldFolder) {
