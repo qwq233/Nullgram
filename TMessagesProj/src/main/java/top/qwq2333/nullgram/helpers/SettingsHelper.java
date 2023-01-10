@@ -39,7 +39,7 @@ public class SettingsHelper {
                     break;
                 case "experimental":
                 case "e":
-                    fragment = new ExperimentSettingActivity();
+                    fragment = new ExperimentSettingActivity(false, false);
                     break;
                 case "general":
                 case "g":

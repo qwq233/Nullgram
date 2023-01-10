@@ -43,6 +43,7 @@ import org.telegram.messenger.MessagesController;
 import org.telegram.messenger.R;
 import org.telegram.messenger.SendMessagesHelper;
 import org.telegram.messenger.browser.Browser;
+import org.telegram.tgnet.TLRPC;
 import org.telegram.ui.ActionBar.ActionBar;
 import org.telegram.ui.ActionBar.ActionBarMenu;
 import org.telegram.ui.ActionBar.ActionBarMenuItem;
@@ -54,6 +55,7 @@ import org.telegram.ui.Cells.TextCell;
 import org.telegram.ui.Cells.TextDetailSettingsCell;
 import org.telegram.ui.Cells.TextInfoPrivacyCell;
 import org.telegram.ui.Cells.TextSettingsCell;
+import org.telegram.ui.Components.AlertsCreator;
 import org.telegram.ui.Components.RecyclerListView;
 import org.telegram.ui.DocumentSelectActivity;
 import org.telegram.ui.LaunchActivity;
@@ -90,6 +92,9 @@ public class MainSettingActivity extends BaseActivity {
     private int pressCount = 0;
     private Context context;
 
+    private boolean sensitiveEnabled;
+    private boolean sensitiveCanChange;
+
     private static final int backup_settings = 1;
     private static final int import_settings = 2;
 
@@ -111,7 +116,7 @@ public class MainSettingActivity extends BaseActivity {
         } else if (position == generalRow) {
             presentFragment(new GeneralSettingActivity());
         } else if (position == experimentRow) {
-            presentFragment(new ExperimentSettingActivity());
+            presentFragment(new ExperimentSettingActivity(sensitiveEnabled, sensitiveCanChange));
         } else if (position == channelRow) {
             MessagesController.getInstance(currentAccount).openByUserName(LocaleController.getString("OfficialChannelName", R.string.OfficialChannelName), this, 1);
         } else if (position == websiteRow) {
@@ -143,6 +148,19 @@ public class MainSettingActivity extends BaseActivity {
     @Override
     protected String getKey() {
         return "";
+    }
+
+    private void checkSensitive() {
+        TLRPC.TL_account_getContentSettings req = new TLRPC.TL_account_getContentSettings();
+        getConnectionsManager().sendRequest(req, (response, error) -> AndroidUtilities.runOnUIThread(() -> {
+            if (error == null) {
+                TLRPC.TL_account_contentSettings settings = (TLRPC.TL_account_contentSettings) response;
+                sensitiveEnabled = settings.sensitive_enabled;
+                sensitiveCanChange = settings.sensitive_can_change;
+            } else {
+                AndroidUtilities.runOnUIThread(() -> AlertsCreator.processError(currentAccount, error, this, req));
+            }
+        }));
     }
 
     @Override
@@ -197,6 +215,12 @@ public class MainSettingActivity extends BaseActivity {
         return fragmentView;
     }
 
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        checkSensitive();
+    }
 
     @Override
     protected void updateRows() {

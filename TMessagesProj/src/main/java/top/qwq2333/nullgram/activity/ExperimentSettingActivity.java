@@ -6,13 +6,17 @@ import android.view.View;
 
 import androidx.recyclerview.widget.RecyclerView;
 
+import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.LocaleController;
 import org.telegram.messenger.R;
+import org.telegram.tgnet.TLRPC;
+import org.telegram.ui.ActionBar.AlertDialog;
 import org.telegram.ui.ActionBar.Theme;
 import org.telegram.ui.Cells.HeaderCell;
 import org.telegram.ui.Cells.NotificationsCheckCell;
 import org.telegram.ui.Cells.TextCheckCell;
 import org.telegram.ui.Cells.TextSettingsCell;
+import org.telegram.ui.Components.AlertsCreator;
 
 import java.util.ArrayList;
 
@@ -26,6 +30,7 @@ public class ExperimentSettingActivity extends BaseActivity {
 
 
     private int experimentRow;
+    private int disableFilteringRow;
     private int blockSponsorAdsRow;
     private int hideProxySponsorChannelRow;
     private int disableSendTypingRow;
@@ -43,6 +48,14 @@ public class ExperimentSettingActivity extends BaseActivity {
     private int premium2Row;
 
     private int experiment2Row;
+
+    private boolean sensitiveEnabled;
+    private boolean sensitiveCanChange;
+
+    public ExperimentSettingActivity(boolean sensitiveEnabled, boolean sensitiveCanChange) {
+        this.sensitiveEnabled = sensitiveEnabled;
+        this.sensitiveCanChange = sensitiveCanChange;
+    }
 
 
     @Override
@@ -67,6 +80,23 @@ public class ExperimentSettingActivity extends BaseActivity {
             if (view instanceof TextCheckCell) {
                 ((TextCheckCell) view).setChecked(ConfigManager.getBooleanOrDefault(Defines.codeSyntaxHighlight, true));
             }
+        }
+        if (position == disableFilteringRow) {
+            sensitiveEnabled = !sensitiveEnabled;
+            TLRPC.TL_account_setContentSettings req = new TLRPC.TL_account_setContentSettings();
+            req.sensitive_enabled = sensitiveEnabled;
+            AlertDialog progressDialog = new AlertDialog(getParentActivity(), 3);
+            progressDialog.show();
+            getConnectionsManager().sendRequest(req, (response, error) -> AndroidUtilities.runOnUIThread(() -> {
+                progressDialog.dismiss();
+                if (error == null) {
+                    if (response instanceof TLRPC.TL_boolTrue && view instanceof TextCheckCell) {
+                        ((TextCheckCell) view).setChecked(sensitiveEnabled);
+                    }
+                } else {
+                    AndroidUtilities.runOnUIThread(() -> AlertsCreator.processError(currentAccount, error, this, req));
+                }
+            }));
         } else if (position == aliasChannelRow) {
             boolean currentStatus = ConfigManager.getBooleanOrFalse(Defines.channelAlias);
             if (!currentStatus && !ConfigManager.getBooleanOrFalse(Defines.labelChannelUser)) {
@@ -144,6 +174,7 @@ public class ExperimentSettingActivity extends BaseActivity {
             hideProxySponsorChannelRow = rowCount++;
             disableSendTypingRow = rowCount++;
         }
+        disableFilteringRow = sensitiveCanChange ? rowCount++ : -1;
         syntaxHighlightRow = rowCount++;
         aliasChannelRow = rowCount++;
         keepFormattingRow = rowCount++;
@@ -222,6 +253,10 @@ public class ExperimentSettingActivity extends BaseActivity {
                         textCell.setTextAndCheck(LocaleController.getString("disableSendTyping", R.string.disableSendTyping), ConfigManager.getBooleanOrFalse(Defines.disableSendTyping), true);
                     } else if (position == syntaxHighlightRow) {
                         textCell.setTextAndValueAndCheck(LocaleController.getString("codeSyntaxHighlight", R.string.codeSyntaxHighlight), LocaleController.getString("codeSyntaxHighlightDetails", R.string.codeSyntaxHighlightDetails), ConfigManager.getBooleanOrFalse(Defines.codeSyntaxHighlight), true, true);
+                    }
+                    if (position == disableFilteringRow) {
+                        textCell.setTextAndValueAndCheck(LocaleController.getString("SensitiveDisableFiltering", R.string.SensitiveDisableFiltering), LocaleController.getString("SensitiveAbout", R.string.SensitiveAbout), sensitiveEnabled, true, true);
+                        textCell.setEnabled(sensitiveCanChange, null);
                     } else if (position == aliasChannelRow) {
                         textCell.setTextAndValueAndCheck(LocaleController.getString("channelAlias", R.string.channelAlias), LocaleController.getString("channelAliasDetails", R.string.channelAliasDetails), ConfigManager.getBooleanOrFalse(Defines.channelAlias), true, true);
                     } else if (position == keepFormattingRow) {
