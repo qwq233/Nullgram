@@ -227,7 +227,7 @@ public class SenderSelectPopup extends ActionBarPopupWindow {
                         senderView.subtitle.setText(text);
                         senderView.avatar.setAvatar(chat);
                     }
-                    senderView.avatar.setSelected(chatFull.default_send_as != null ? chatFull.default_send_as.channel_id == peer.channel_id : position == 0, false);
+                    senderView.avatar.setSelected((chatFull.default_send_as != null ? chatFull.default_send_as.channel_id == peer.channel_id : position == 0)  || flag == 0, false);
                 } else {
                     TLRPC.User user = messagesController.getUser(peerId);
                     if (user != null) {
@@ -242,7 +242,7 @@ public class SenderSelectPopup extends ActionBarPopupWindow {
                         senderView.subtitle.setText(text);
                         senderView.avatar.setAvatar(user);
                     }
-                    senderView.avatar.setSelected(chatFull.default_send_as != null ? chatFull.default_send_as.user_id == peer.user_id : position == 0, false);
+                    senderView.avatar.setSelected((chatFull.default_send_as != null ? chatFull.default_send_as.user_id == peer.user_id : position == 0) || flag == 1, false);
                 }
             }
 
