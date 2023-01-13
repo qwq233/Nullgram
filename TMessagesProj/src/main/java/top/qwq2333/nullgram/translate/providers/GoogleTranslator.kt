@@ -54,9 +54,9 @@ object GoogleTranslator : BaseTranslator() {
             if (targetLanguages.contains("$languageLowerCase-$countryUpperCase")) {
                 "$languageLowerCase-$countryUpperCase"
             } else if (languageLowerCase == "zh") {
-                when(countryUpperCase){
-                    "DG"-> "zh-CN"
-                    "HK"-> "zh-TW"
+                when (countryUpperCase) {
+                    "DG" -> "zh-CN"
+                    "HK" -> "zh-TW"
                     else -> language
                 }
             } else {
@@ -84,7 +84,7 @@ object GoogleTranslator : BaseTranslator() {
             }
         }.let {
             Log.d("response: ${it.bodyAsText()}")
-            when(it.status) {
+            when (it.status) {
                 HttpStatusCode.OK -> {
                     val jsonObject = JSONObject(it.bodyAsText())
                     buildString {

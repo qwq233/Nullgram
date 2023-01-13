@@ -20,10 +20,11 @@ object LingoTranslator : BaseTranslator() {
 
     @Serializable
     data class Request(
-        val source:String,
-        val trans_type:String,
-        val request_id:String = System.currentTimeMillis().toString(),
-        val detect: Boolean = true)
+        val source: String,
+        val trans_type: String,
+        val request_id: String = System.currentTimeMillis().toString(),
+        val detect: Boolean = true
+    )
 
     @Serializable
     data class Response(
@@ -38,7 +39,7 @@ object LingoTranslator : BaseTranslator() {
             header("X-Authorization", "token 9sdftiq37bnv410eon2l")
             setBody(Json.encodeToString(Request(text, "auto2$to")))
         }.let {
-            when(it.status) {
+            when (it.status) {
                 HttpStatusCode.OK -> {
                     Log.w(it.bodyAsText())
 

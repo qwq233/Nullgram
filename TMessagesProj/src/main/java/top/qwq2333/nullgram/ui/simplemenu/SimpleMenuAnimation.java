@@ -45,7 +45,7 @@ class SimpleMenuAnimation {
         if (view instanceof ViewGroup) {
             for (int i = 0; i < ((ViewGroup) view).getChildCount(); i++) {
                 int offset = selectedIndex - i;
-                startChild(((ViewGroup) view).getChildAt(i), delay + 30 * Math.abs(offset),
+                startChild(((ViewGroup) view).getChildAt(i), delay + 30L * Math.abs(offset),
                     offset == 0 ? 0 : (int) (itemHeight * 0.2) * (offset < 0 ? -1 : 1));
             }
         }

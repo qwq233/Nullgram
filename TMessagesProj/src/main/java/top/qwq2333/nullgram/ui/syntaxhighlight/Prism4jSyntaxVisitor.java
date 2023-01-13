@@ -17,10 +17,10 @@ class Prism4jSyntaxVisitor extends Visitor {
     private int currentPos;
 
     Prism4jSyntaxVisitor(
-            @NonNull String language,
-            @NonNull Prism4jTheme theme,
-            @NonNull Spannable spannable,
-            int start) {
+        @NonNull String language,
+        @NonNull Prism4jTheme theme,
+        @NonNull Spannable spannable,
+        int start) {
         this.language = language;
         this.theme = theme;
         this.spannable = spannable;

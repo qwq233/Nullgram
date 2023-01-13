@@ -28,7 +28,7 @@ public class UpdateHelper {
     static void retrieveUpdateMetadata(retrieveUpdateMetadataCallback callback) {
         long CHANNEL_METADATA_ID;
         String CHANNEL_METADATA_NAME;
-        switch (ConfigManager.getIntOrDefault(Defines.updateChannel,-1)) {
+        switch (ConfigManager.getIntOrDefault(Defines.updateChannel, -1)) {
             case Defines.stableChannel:
                 CHANNEL_METADATA_ID = STABLE_METADATA_CHANNEL_ID;
                 CHANNEL_METADATA_NAME = STABLE_METADATA_CHANNEL_NAME;
@@ -166,7 +166,7 @@ public class UpdateHelper {
 
         long CHANNEL_APKS_ID;
         String CHANNEL_APKS_NAME;
-        switch (ConfigManager.getIntOrDefault(Defines.updateChannel,-1)) {
+        switch (ConfigManager.getIntOrDefault(Defines.updateChannel, -1)) {
             case Defines.stableChannel:
                 CHANNEL_APKS_ID = STABLE_UPDATE_CHANNEL_APKS_ID;
                 CHANNEL_APKS_NAME = STABLE_UPDATE_CHANNEL_APKS_NAME;

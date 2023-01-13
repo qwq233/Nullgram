@@ -38,11 +38,10 @@ import org.telegram.ui.Components.Switch;
 import java.util.ArrayList;
 
 public class TextCheckCell extends FrameLayout {
-
     private boolean isAnimatingToThumbInsteadOfTouch;
 
-    private final TextView textView;
-    private final TextView valueTextView;
+    private TextView textView;
+    private TextView valueTextView;
     public Switch checkBox;
     public CheckBoxSquare checkBoxSquare;
     private boolean needDivider;
@@ -347,7 +346,7 @@ public class TextCheckCell extends FrameLayout {
     @Override
     public void onInitializeAccessibilityNodeInfo(AccessibilityNodeInfo info) {
         super.onInitializeAccessibilityNodeInfo(info);
-        info.setClassName("android.widget.Switch");
+        info.setClassName("android.widget.CheckBox");
         info.setCheckable(true);
         info.setChecked(checkBox.isChecked());
         StringBuilder sb = new StringBuilder();

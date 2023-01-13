@@ -210,9 +210,11 @@ object PrivacyUtils {
                     0 -> LocaleController.getString(
                         "PrivacyNoticePhoneVisible", R.string.PrivacyNoticePhoneVisible
                     )
+
                     1 -> LocaleController.getString(
                         "PrivacyNoticeAddByPhone", R.string.PrivacyNoticeAddByPhone
                     )
+
                     else -> LocaleController.getString(
                         "PrivacyNoticeP2p", R.string.PrivacyNoticeP2p
                     )

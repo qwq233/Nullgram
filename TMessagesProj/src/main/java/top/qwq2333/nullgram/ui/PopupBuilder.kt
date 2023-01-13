@@ -62,7 +62,7 @@ object PopupBuilder {
             builder.setNegativeButton(LocaleController.getString("Cancel", R.string.Cancel), null)
             builder.show()
         } else {
-            val container = itemView.parent as View ?: return
+            val container = itemView.parent as View
             if (mPopupWindow != null) {
                 try {
                     if (mPopupWindow!!.isShowing) mPopupWindow!!.dismiss()

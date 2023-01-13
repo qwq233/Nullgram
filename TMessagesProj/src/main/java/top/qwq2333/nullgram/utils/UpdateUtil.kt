@@ -103,7 +103,7 @@ object UpdateUtil {
                     "DoNotRemindAgain", R.string.DoNotRemindAgain
                 )
             ) { _, _ ->
-                ConfigManager.putBoolean(Defines.updateChannelSkip, true);
+                ConfigManager.putBoolean(Defines.updateChannelSkip, true)
             }
 
             try {

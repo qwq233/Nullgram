@@ -27,9 +27,7 @@ import android.content.pm.PackageManager;
 import android.os.Build;
 import android.text.format.DateFormat;
 import android.view.View;
-import android.view.ViewGroup;
 
-import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.gson.JsonObject;
@@ -48,15 +46,10 @@ import org.telegram.ui.ActionBar.ActionBar;
 import org.telegram.ui.ActionBar.ActionBarMenu;
 import org.telegram.ui.ActionBar.ActionBarMenuItem;
 import org.telegram.ui.ActionBar.AlertDialog;
-import org.telegram.ui.ActionBar.Theme;
 import org.telegram.ui.Cells.HeaderCell;
-import org.telegram.ui.Cells.ShadowSectionCell;
 import org.telegram.ui.Cells.TextCell;
-import org.telegram.ui.Cells.TextDetailSettingsCell;
-import org.telegram.ui.Cells.TextInfoPrivacyCell;
 import org.telegram.ui.Cells.TextSettingsCell;
 import org.telegram.ui.Components.AlertsCreator;
-import org.telegram.ui.Components.RecyclerListView;
 import org.telegram.ui.DocumentSelectActivity;
 import org.telegram.ui.LaunchActivity;
 
@@ -266,10 +259,10 @@ public class MainSettingActivity extends BaseActivity {
         @Override
         public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
             switch (holder.getItemViewType()) {
-                case 1: {
+                case TYPE_SHADOW: {
                     break;
                 }
-                case 2: {
+                case TYPE_TEXT: {
                     TextCell textCell = (TextCell) holder.itemView;
                     if (position == chatRow) {
                         textCell.setTextAndIcon(LocaleController.getString("Chat", R.string.Chat), R.drawable.menu_chats, true);
@@ -282,7 +275,7 @@ public class MainSettingActivity extends BaseActivity {
                     }
                     break;
                 }
-                case 3: {
+                case TYPE_SETTINGS: {
                     TextSettingsCell textCell = (TextSettingsCell) holder.itemView;
                     if (position == channelRow) {
                         textCell.setTextAndValue(LocaleController.getString("OfficialChannel", R.string.OfficialChannel), "@" + LocaleController.getString("OfficialChannelName", R.string.OfficialChannelName), true);
@@ -293,21 +286,17 @@ public class MainSettingActivity extends BaseActivity {
                     } else if (position == licenseRow) {
                         textCell.setText(LocaleController.getString("OpenSource", R.string.OpenSource), true);
                     }
+                    if (position == updateRow) {
+                        textCell.setTextAndValue(LocaleController.getString("CheckUpdate", R.string.CheckUpdate), "Click Me", true);
+                    }
                     break;
                 }
-                case 4: {
+                case TYPE_HEADER: {
                     HeaderCell headerCell = (HeaderCell) holder.itemView;
                     if (position == categoriesRow) {
                         headerCell.setText(LocaleController.getString("Categories", R.string.Categories));
                     } else if (position == aboutRow) {
                         headerCell.setText(LocaleController.getString("About", R.string.About));
-                    }
-                    break;
-                }
-                case 5: {
-                    TextSettingsCell textCell = (TextSettingsCell) holder.itemView;
-                    if (position == updateRow) {
-                        textCell.setTextAndValue(LocaleController.getString("CheckUpdate", R.string.CheckUpdate), "Click Me", true);
                     }
                     break;
                 }
@@ -320,55 +309,18 @@ public class MainSettingActivity extends BaseActivity {
             return type == 2 || type == 3 || type == 5;
         }
 
-        @NonNull
-        @Override
-        public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-            View view = null;
-            switch (viewType) {
-                case 1:
-                    view = new ShadowSectionCell(mContext);
-                    break;
-                case 2:
-                    view = new TextCell(mContext);
-                    view.setBackgroundColor(Theme.getColor(Theme.key_windowBackgroundWhite));
-                    break;
-                case 3:
-                case 5:
-                    view = new TextSettingsCell(mContext);
-                    view.setBackgroundColor(Theme.getColor(Theme.key_windowBackgroundWhite));
-                    break;
-                case 4:
-                    view = new HeaderCell(mContext);
-                    view.setBackgroundColor(Theme.getColor(Theme.key_windowBackgroundWhite));
-                    break;
-                case 6:
-                    view = new TextDetailSettingsCell(mContext);
-                    view.setBackgroundColor(Theme.getColor(Theme.key_windowBackgroundWhite));
-                    break;
-                case 7:
-                    view = new TextInfoPrivacyCell(mContext);
-                    view.setBackground(Theme.getThemedDrawable(mContext, R.drawable.greydivider, Theme.key_windowBackgroundGrayShadow));
-                    break;
-            }
-            //noinspection ConstantConditions
-            view.setLayoutParams(new RecyclerView.LayoutParams(RecyclerView.LayoutParams.MATCH_PARENT, RecyclerView.LayoutParams.WRAP_CONTENT));
-            return new RecyclerListView.Holder(view);
-        }
-
         @Override
         public int getItemViewType(int position) {
-            if (position == updateRow) {
-                return 5;
-            } else if (position == categories2Row || position == about2Row) {
-                return 1;
+            if (position == categories2Row || position == about2Row) {
+                return TYPE_SHADOW;
             } else if (position > categoriesRow && position < categories2Row) {
-                return 2;
-            } else if (position >= channelRow && position < about2Row) {
-                return 3;
+                return TYPE_TEXT;
+            } else if ((position >= channelRow && position < about2Row) || position == updateRow) {
+                return TYPE_SETTINGS;
             } else if (position == categoriesRow || position == aboutRow) {
-                return 4;
+                return TYPE_HEADER;
             }
-            return 2;
+            return TYPE_TEXT;
         }
     }
 

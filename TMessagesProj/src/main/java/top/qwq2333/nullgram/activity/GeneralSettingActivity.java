@@ -101,7 +101,7 @@ public class GeneralSettingActivity extends BaseActivity {
             }
             parentLayout.rebuildAllFragmentViews(false, false);
             getNotificationCenter().postNotificationName(NotificationCenter.mainUserInfoChanged);
-            listAdapter.notifyItemChanged(drawerRow, new Object());
+            listAdapter.notifyItemChanged(drawerRow, PARTIAL);
         } else if (position == avatarAsDrawerBackgroundRow) {
             ConfigManager.toggleBoolean(Defines.avatarAsDrawerBackground);
             if (view instanceof TextCheckCell) {
@@ -109,7 +109,7 @@ public class GeneralSettingActivity extends BaseActivity {
             }
             getNotificationCenter().postNotificationName(NotificationCenter.mainUserInfoChanged);
             TransitionManager.beginDelayedTransition(profilePreviewCell);
-            listAdapter.notifyItemChanged(drawerRow, new Object());
+            listAdapter.notifyItemChanged(drawerRow, PARTIAL);
             if (ConfigManager.getBooleanOrFalse(Defines.avatarAsDrawerBackground)) {
                 updateRows();
                 listAdapter.notifyItemRangeInserted(avatarBackgroundBlurRow, 2);
@@ -123,19 +123,19 @@ public class GeneralSettingActivity extends BaseActivity {
                 ((TextCheckCell) view).setChecked(ConfigManager.getBooleanOrFalse(Defines.avatarBackgroundBlur));
             }
             getNotificationCenter().postNotificationName(NotificationCenter.mainUserInfoChanged);
-            listAdapter.notifyItemChanged(drawerRow, new Object());
+            listAdapter.notifyItemChanged(drawerRow, PARTIAL);
         } else if (position == avatarBackgroundDarkenRow) {
             ConfigManager.toggleBoolean(Defines.avatarBackgroundDarken);
             if (view instanceof TextCheckCell) {
                 ((TextCheckCell) view).setChecked(ConfigManager.getBooleanOrFalse(Defines.avatarBackgroundDarken));
             }
             getNotificationCenter().postNotificationName(NotificationCenter.mainUserInfoChanged);
-            listAdapter.notifyItemChanged(drawerRow, new Object());
+            listAdapter.notifyItemChanged(drawerRow, PARTIAL);
         } else if (position == largeAvatarAsBackgroundRow) {
             ConfigManager.toggleBoolean(Defines.largeAvatarAsBackground);
             getNotificationCenter().postNotificationName(NotificationCenter.mainUserInfoChanged);
             TransitionManager.beginDelayedTransition(profilePreviewCell);
-            listAdapter.notifyItemChanged(drawerRow, new Object());
+            listAdapter.notifyItemChanged(drawerRow, PARTIAL);
             if (view instanceof TextCheckCell) {
                 ((TextCheckCell) view).setChecked(ConfigManager.getBooleanOrFalse(Defines.largeAvatarAsBackground));
             }
@@ -185,7 +185,7 @@ public class GeneralSettingActivity extends BaseActivity {
             types.add(Defines.tabMenuMix);
             PopupBuilder.show(arrayList, LocaleController.getString("TabTitleType", R.string.TabTitleType), types.indexOf(ConfigManager.getIntOrDefault(Defines.tabMenu, Defines.tabMenuMix)), getParentActivity(), view, i -> {
                 ConfigManager.putInt(Defines.tabMenu, types.get(i));
-                listAdapter.notifyItemChanged(tabsTitleTypeRow);
+                listAdapter.notifyItemChanged(tabsTitleTypeRow, PARTIAL);
                 getNotificationCenter().postNotificationName(NotificationCenter.dialogFiltersUpdated);
             });
         } else if (position == openArchiveOnPullRow) {
@@ -201,26 +201,26 @@ public class GeneralSettingActivity extends BaseActivity {
         } else if (position == translationProviderRow) {
             TranslateHelper.showTranslationProviderSelector(getParentActivity(), view, null, param -> {
                 if (param) {
-                    listAdapter.notifyItemChanged(translationProviderRow);
+                    listAdapter.notifyItemChanged(translationProviderRow, PARTIAL);
                 } else {
-                    listAdapter.notifyItemChanged(translationProviderRow);
-                    listAdapter.notifyItemChanged(translationTargetRow);
+                    listAdapter.notifyItemChanged(translationProviderRow, PARTIAL);
+                    listAdapter.notifyItemChanged(translationTargetRow, PARTIAL);
                 }
                 return Unit.INSTANCE;
             });
         } else if (position == translationTargetRow) {
             TranslateHelper.showTranslationTargetSelector(this, view, () -> {
-                listAdapter.notifyItemChanged(translationTargetRow);
+                listAdapter.notifyItemChanged(translationTargetRow, PARTIAL);
                 if (getRestrictedLanguages().size() == 1) {
-                    listAdapter.notifyItemChanged(doNotTranslateRow);
+                    listAdapter.notifyItemChanged(doNotTranslateRow, PARTIAL);
                 }
                 return Unit.INSTANCE;
             });
-        }  else if (position == translatorTypeRow) {
+        } else if (position == translatorTypeRow) {
             var oldType = TranslateHelper.getCurrentStatus();
             TranslateHelper.showTranslatorTypeSelector(getParentActivity(), view, () -> {
                 var newType = TranslateHelper.getCurrentStatus();
-                listAdapter.notifyItemChanged(translatorTypeRow);
+                listAdapter.notifyItemChanged(translatorTypeRow, PARTIAL);
                 if (oldType != newType) {
                     int count = 3;
                     if (oldType == TranslateHelper.Status.InMessage || newType == TranslateHelper.Status.InMessage) {
@@ -311,7 +311,6 @@ public class GeneralSettingActivity extends BaseActivity {
         translator2Row = rowCount++;
 
 
-
         generalRow = rowCount++;
         showBotAPIRow = rowCount++;
         showExactNumberRow = rowCount++;
@@ -345,7 +344,7 @@ public class GeneralSettingActivity extends BaseActivity {
         }
 
         @Override
-        public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
+        public void onBindViewHolder(RecyclerView.ViewHolder holder, int position, boolean payload) {
             switch (holder.getItemViewType()) {
                 case 1: {
                     if (position == general2Row) {
@@ -371,8 +370,8 @@ public class GeneralSettingActivity extends BaseActivity {
                             default:
                                 value = LocaleController.getString("TabTitleTypeMix", R.string.TabTitleTypeMix);
                         }
-                        textCell.setTextAndValue(LocaleController.getString("TabTitleType", R.string.TabTitleType), value, false);
-                    }  else if (position == translationProviderRow) {
+                        textCell.setTextAndValue(LocaleController.getString("TabTitleType", R.string.TabTitleType), value, payload, false);
+                    } else if (position == translationProviderRow) {
                         Pair<ArrayList<String>, ArrayList<TranslateHelper.ProviderType>> providers = TranslateHelper.getProviders();
                         ArrayList<String> names = providers.first;
                         ArrayList<TranslateHelper.ProviderType> types = providers.second;
@@ -381,10 +380,10 @@ public class GeneralSettingActivity extends BaseActivity {
                         }
                         int index = types.indexOf(TranslateHelper.getCurrentProviderType());
                         if (index < 0) {
-                            textCell.setTextAndValue(LocaleController.getString("TranslationProviderShort", R.string.TranslationProviderShort), "", true);
+                            textCell.setTextAndValue(LocaleController.getString("TranslationProviderShort", R.string.TranslationProviderShort), "", payload, true);
                         } else {
                             String value = names.get(index);
-                            textCell.setTextAndValue(LocaleController.getString("TranslationProviderShort", R.string.TranslationProviderShort), value, true);
+                            textCell.setTextAndValue(LocaleController.getString("TranslationProviderShort", R.string.TranslationProviderShort), value, payload, true);
                         }
                     } else if (position == translationTargetRow) {
                         String language = TranslateHelper.getCurrentTargetLanguage();
@@ -399,8 +398,8 @@ public class GeneralSettingActivity extends BaseActivity {
                                 value = locale.getDisplayName();
                             }
                         }
-                        textCell.setTextAndValue(LocaleController.getString("TranslationTarget", R.string.TranslationTarget), value, true);
-                    }  else if (position == translatorTypeRow) {
+                        textCell.setTextAndValue(LocaleController.getString("TranslationTarget", R.string.TranslationTarget), value, payload, true);
+                    } else if (position == translatorTypeRow) {
                         String value;
                         switch (TranslateHelper.getCurrentStatus()) {
                             case Popup:
@@ -414,7 +413,7 @@ public class GeneralSettingActivity extends BaseActivity {
                                 value = LocaleController.getString("TranslatorTypeInMessage", R.string.TranslatorTypeInMessage);
                                 break;
                         }
-                        textCell.setTextAndValue(LocaleController.getString("TranslatorType", R.string.TranslatorType), value, position + 1 != translator2Row);
+                        textCell.setTextAndValue(LocaleController.getString("TranslatorType", R.string.TranslatorType), value, payload, position + 1 != translator2Row);
                     } else if (position == doNotTranslateRow) {
                         ArrayList<String> langCodes = getRestrictedLanguages();
                         CharSequence value;
@@ -428,7 +427,7 @@ public class GeneralSettingActivity extends BaseActivity {
                         } else {
                             value = LocaleController.formatPluralString("Languages", langCodes.size());
                         }
-                        textCell.setTextAndValue(LocaleController.getString("DoNotTranslate", R.string.DoNotTranslate), value, true);
+                        textCell.setTextAndValue(LocaleController.getString("DoNotTranslate", R.string.DoNotTranslate), value, payload, true);
                     }
                     break;
                 }
@@ -471,7 +470,7 @@ public class GeneralSettingActivity extends BaseActivity {
                         textCell.setEnabled(LanguageDetector.hasSupport(), null);
                         textCell.setTextAndValueAndCheck(LocaleController.getString("AutoTranslate", R.string.AutoTranslate),
                             LocaleController.getString("AutoTranslateAbout",
-                            R.string.AutoTranslateAbout), TranslateHelper.getAutoTranslate(), true, false);
+                                R.string.AutoTranslateAbout), TranslateHelper.getAutoTranslate(), true, false);
                     } else if (position == showOriginalRow) {
                         textCell.setTextAndCheck(LocaleController.getString("TranslatorShowOriginal", R.string.TranslatorShowOriginal), TranslateHelper.getShowOriginal(), true);
                     }
@@ -553,7 +552,7 @@ public class GeneralSettingActivity extends BaseActivity {
                 return 1;
             } else if (position == tabsTitleTypeRow || position == translationProviderRow || position == translationTargetRow || position == translatorTypeRow || position == doNotTranslateRow) {
                 return 2;
-            }  else if (position == generalRow || position == translatorRow) {
+            } else if (position == generalRow || position == translatorRow) {
                 return 4;
             } else if (position == drawerRow) {
                 return 8;

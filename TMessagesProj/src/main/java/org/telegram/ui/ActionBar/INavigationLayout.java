@@ -258,6 +258,7 @@ public interface INavigationLayout {
         /**
          * @deprecated You should override {@link INavigationLayoutDelegate#needPresentFragment(INavigationLayout, NavigationParams)} for more fields
          */
+        @Deprecated
         default boolean needPresentFragment(BaseFragment fragment, boolean removeLast, boolean forceWithoutAnimation, INavigationLayout layout) {
             return true;
         }
@@ -354,13 +355,13 @@ public interface INavigationLayout {
 
     class StartColorsProvider implements Theme.ResourcesProvider {
         HashMap<String, Integer> colors = new HashMap<>();
-        String[] keysToSave = new String[] {
-                Theme.key_chat_outBubble,
-                Theme.key_chat_outBubbleGradient1,
-                Theme.key_chat_outBubbleGradient2,
-                Theme.key_chat_outBubbleGradient3,
-                Theme.key_chat_outBubbleGradientAnimated,
-                Theme.key_chat_outBubbleShadow
+        String[] keysToSave = new String[]{
+            Theme.key_chat_outBubble,
+            Theme.key_chat_outBubbleGradient1,
+            Theme.key_chat_outBubbleGradient2,
+            Theme.key_chat_outBubbleGradient3,
+            Theme.key_chat_outBubbleGradientAnimated,
+            Theme.key_chat_outBubbleShadow
         };
 
         @Override

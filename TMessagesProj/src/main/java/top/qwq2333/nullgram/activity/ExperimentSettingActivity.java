@@ -50,7 +50,7 @@ public class ExperimentSettingActivity extends BaseActivity {
     private int experiment2Row;
 
     private boolean sensitiveEnabled;
-    private boolean sensitiveCanChange;
+    private final boolean sensitiveCanChange;
 
     public ExperimentSettingActivity(boolean sensitiveEnabled, boolean sensitiveCanChange) {
         this.sensitiveEnabled = sensitiveEnabled;
@@ -147,7 +147,7 @@ public class ExperimentSettingActivity extends BaseActivity {
                     Log.i("speeds[i]: " + speeds[i]);
                     Log.i("i: " + i);
                     ConfigManager.putInt(Defines.modifyDownloadSpeed, speeds[i]);
-                    listAdapter.notifyItemChanged(modifyDownloadSpeedRow);
+                    listAdapter.notifyItemChanged(modifyDownloadSpeedRow, PARTIAL);
                 });
         }
 
@@ -224,7 +224,7 @@ public class ExperimentSettingActivity extends BaseActivity {
         }
 
         @Override
-        public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
+        public void onBindViewHolder(RecyclerView.ViewHolder holder, int position, boolean payload) {
             switch (holder.getItemViewType()) {
                 case 1: {
                     if (position == experiment2Row) {
@@ -238,7 +238,7 @@ public class ExperimentSettingActivity extends BaseActivity {
                     TextSettingsCell textCell = (TextSettingsCell) holder.itemView;
                     textCell.setTextColor(Theme.getColor(Theme.key_windowBackgroundWhiteBlackText));
                     if (position == modifyDownloadSpeedRow) {
-                        textCell.setTextAndValue(LocaleController.getString("modifyDownloadSpeed", R.string.modifyDownloadSpeed), String.valueOf(ConfigManager.getIntOrDefault(Defines.modifyDownloadSpeed, 128) + " Kb/block"), false);
+                        textCell.setTextAndValue(LocaleController.getString("modifyDownloadSpeed", R.string.modifyDownloadSpeed), ConfigManager.getIntOrDefault(Defines.modifyDownloadSpeed, 128) + " Kb/block", payload, false);
                     }
                     break;
                 }

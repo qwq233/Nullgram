@@ -138,7 +138,7 @@ object APKUtils {
         imageView.playAnimation()
         linearLayout.addView(imageView, LayoutHelper.createLinear(160, 160, Gravity.CENTER_HORIZONTAL or Gravity.TOP, 17, 24, 17, 0))
         val textView = TextView(context)
-        textView.setTypeface(AndroidUtilities.getTypeface("fonts/rmedium.ttf"))
+        textView.typeface = AndroidUtilities.getTypeface("fonts/rmedium.ttf")
         textView.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 16f)
         textView.setTextColor(Theme.getColor(Theme.key_dialogTextBlack))
         textView.isSingleLine = true
@@ -198,7 +198,8 @@ object APKUtils {
         return receiver
     }
 
-    private class InstallReceiver(private val context: Context, private val packageName: String, private val onSuccess: Runnable) : BroadcastReceiver() {
+    private class InstallReceiver(private val context: Context, private val packageName: String, private val onSuccess: Runnable) :
+        BroadcastReceiver() {
         private val latch = CountDownLatch(1)
         private lateinit var intent: Intent
 
@@ -228,7 +229,13 @@ object APKUtils {
                     }
                     if (context is LaunchActivity) {
                         context.showBulletin { factory: BulletinFactory ->
-                            factory.createErrorBulletin(LocaleController.formatString("UpdateFailedToInstall", R.string.UpdateFailedToInstall, status))
+                            factory.createErrorBulletin(
+                                LocaleController.formatString(
+                                    "UpdateFailedToInstall",
+                                    R.string.UpdateFailedToInstall,
+                                    status
+                                )
+                            )
                         }
                     }
                     onSuccess.run()

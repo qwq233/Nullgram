@@ -126,6 +126,7 @@ public class MessageUtils extends BaseController {
         }
         return messageObject;
     }
+
     public static MessageUtils getInstance(int num) {
         MessageUtils localInstance = Instance[num];
         if (localInstance == null) {

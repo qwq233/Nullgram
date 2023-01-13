@@ -243,7 +243,7 @@ public class ChatSettingActivity extends BaseActivity {
             }
         } else if (position == maxRecentStickerRow) {
             setMaxRecentSticker(view, position);
-            listAdapter.notifyItemChanged(position);
+            listAdapter.notifyItemChanged(position, PARTIAL);
         } else if (position == unreadBadgeOnBackButtonRow) {
             ConfigManager.toggleBoolean(Defines.unreadBadgeOnBackButton);
             if (view instanceof TextCheckCell) {
@@ -276,7 +276,7 @@ public class ChatSettingActivity extends BaseActivity {
             }
         } else if (position == customQuickMessageRow) {
             setCustomQuickMessage();
-            listAdapter.notifyItemChanged(position);
+            listAdapter.notifyItemChanged(position, PARTIAL);
         } else if (position == scrollableChatPreviewRow) {
             ConfigManager.toggleBoolean(Defines.scrollableChatPreview);
             if (view instanceof TextCheckCell) {
@@ -288,11 +288,7 @@ public class ChatSettingActivity extends BaseActivity {
                 ((TextCheckCell) view).setChecked(ConfigManager.getBooleanOrFalse(Defines.showTabsOnForward));
             }
         } else if (position == disableStickersAutoReorderRow) {
-            if (ConfigManager.getBooleanOrDefault(Defines.disableStickersAutoReorder, true)) {
-                ConfigManager.putBoolean(Defines.disableStickersAutoReorder, false);
-            } else {
-                ConfigManager.putBoolean(Defines.disableStickersAutoReorder, true);
-            }
+            ConfigManager.putBoolean(Defines.disableStickersAutoReorder, !ConfigManager.getBooleanOrDefault(Defines.disableStickersAutoReorder, true));
             if (view instanceof TextCheckCell) {
                 ((TextCheckCell) view).setChecked(ConfigManager.getBooleanOrFalse(Defines.disableStickersAutoReorder));
             }
@@ -382,9 +378,9 @@ public class ChatSettingActivity extends BaseActivity {
         }
 
         @Override
-        public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
+        public void onBindViewHolder(RecyclerView.ViewHolder holder, int position, boolean payload) {
             switch (holder.getItemViewType()) {
-                case 1: {
+                case TYPE_SHADOW: {
                     if (position == chat2Row) {
                         holder.itemView.setBackground(Theme.getThemedDrawable(mContext, R.drawable.greydivider_bottom, Theme.key_windowBackgroundGrayShadow));
                     } else {
@@ -392,15 +388,16 @@ public class ChatSettingActivity extends BaseActivity {
                     }
                     break;
                 }
-                case 2: {
+                case TYPE_SETTINGS: {
                     TextSettingsCell textCell = (TextSettingsCell) holder.itemView;
                     textCell.setTextColor(Theme.getColor(Theme.key_windowBackgroundWhiteBlackText));
                     if (position == stickerSizeRow) {
-                        textCell.setTextAndValue(LocaleController.getString("StickerSize", R.string.StickerSize), String.valueOf(Math.round(ConfigManager.getFloatOrDefault(Defines.stickerSize, 14.0f))), true);
+                        textCell.setTextAndValue(LocaleController.getString("StickerSize", R.string.StickerSize),
+                            String.valueOf(Math.round(ConfigManager.getFloatOrDefault(Defines.stickerSize, 14.0f))), payload, true);
                     } else if (position == messageMenuRow) {
                         textCell.setText(LocaleController.getString("MessageMenu", R.string.MessageMenu), false);
                     } else if (position == maxRecentStickerRow) {
-                        textCell.setTextAndValue(LocaleController.getString("maxRecentSticker", R.string.maxRecentSticker), String.valueOf(ConfigManager.getIntOrDefault(Defines.maxRecentSticker, 30)), true);
+                        textCell.setTextAndValue(LocaleController.getString("maxRecentSticker", R.string.maxRecentSticker), String.valueOf(ConfigManager.getIntOrDefault(Defines.maxRecentSticker, 30)), payload, true);
 
                     } else if (position == customDoubleClickTapRow) {
                         textCell.setText(LocaleController.getString("customDoubleTap", R.string.customDoubleTap), true);
@@ -409,7 +406,7 @@ public class ChatSettingActivity extends BaseActivity {
                     }
                     break;
                 }
-                case 3: {
+                case TYPE_CHECK: {
                     TextCheckCell textCell = (TextCheckCell) holder.itemView;
                     textCell.setEnabled(true, null);
                     if (position == ignoreBlockedUserMessagesRow) {
@@ -452,7 +449,7 @@ public class ChatSettingActivity extends BaseActivity {
                     } else if (position == showTabsOnForwardRow) {
                         textCell.setTextAndCheck(LocaleController.getString("showTabsOnForward", R.string.showTabsOnForward), ConfigManager.getBooleanOrFalse(Defines.showTabsOnForward), true);
                     } else if (position == disablePreviewVideoSoundShortcutRow) {
-                        textCell.setTextAndValueAndCheck(LocaleController.getString("disablePreviewVideoSoundShortcut", R.string.disablePreviewVideoSoundShortcut),LocaleController.getString("disablePreviewVideoSoundShortcutNotice", R.string.disablePreviewVideoSoundShortcutNotice), ConfigManager.getBooleanOrFalse(Defines.disablePreviewVideoSoundShortcut), true, true);
+                        textCell.setTextAndValueAndCheck(LocaleController.getString("disablePreviewVideoSoundShortcut", R.string.disablePreviewVideoSoundShortcut), LocaleController.getString("disablePreviewVideoSoundShortcutNotice", R.string.disablePreviewVideoSoundShortcutNotice), ConfigManager.getBooleanOrFalse(Defines.disablePreviewVideoSoundShortcut), true, true);
                     } else if (position == quickToggleAnonymous) {
                         textCell.setTextAndValueAndCheck(LocaleController.getString("quickToggleAnonymous", R.string.quickToggleAnonymous), LocaleController.getString("quickToggleAnonymousNotice", R.string.quickToggleAnonymousNotice), ConfigManager.getBooleanOrFalse(Defines.quickToggleAnonymous), true, true);
                     } else if (position == disableStickersAutoReorderRow) {
@@ -461,7 +458,7 @@ public class ChatSettingActivity extends BaseActivity {
                     }
                     break;
                 }
-                case 4: {
+                case TYPE_HEADER: {
                     HeaderCell headerCell = (HeaderCell) holder.itemView;
                     if (position == chatRow) {
                         headerCell.setText(LocaleController.getString("Chat", R.string.Chat));
@@ -470,7 +467,7 @@ public class ChatSettingActivity extends BaseActivity {
                     }
                     break;
                 }
-                case 5: {
+                case TYPE_NOTIFICATION_CHECK: {
                     NotificationsCheckCell textCell = (NotificationsCheckCell) holder.itemView;
                     break;
                 }
@@ -488,34 +485,34 @@ public class ChatSettingActivity extends BaseActivity {
         public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
             View view = null;
             switch (viewType) {
-                case 1:
+                case TYPE_SHADOW:
                     view = new ShadowSectionCell(mContext);
                     break;
-                case 2:
+                case TYPE_SETTINGS:
                     view = new TextSettingsCell(mContext);
                     view.setBackgroundColor(Theme.getColor(Theme.key_windowBackgroundWhite));
                     break;
-                case 3:
+                case TYPE_CHECK:
                     view = new TextCheckCell(mContext);
                     view.setBackgroundColor(Theme.getColor(Theme.key_windowBackgroundWhite));
                     break;
-                case 4:
+                case TYPE_HEADER:
                     view = new HeaderCell(mContext);
                     view.setBackgroundColor(Theme.getColor(Theme.key_windowBackgroundWhite));
                     break;
-                case 5:
+                case TYPE_NOTIFICATION_CHECK:
                     view = new NotificationsCheckCell(mContext);
                     view.setBackgroundColor(Theme.getColor(Theme.key_windowBackgroundWhite));
                     break;
-                case 6:
+                case TYPE_DETAIL_SETTINGS:
                     view = new TextDetailSettingsCell(mContext);
                     view.setBackgroundColor(Theme.getColor(Theme.key_windowBackgroundWhite));
                     break;
-                case 7:
+                case TYPE_INFO_PRIVACY:
                     view = new TextInfoPrivacyCell(mContext);
                     view.setBackground(Theme.getThemedDrawable(mContext, R.drawable.greydivider, Theme.key_windowBackgroundGrayShadow));
                     break;
-                case 8:
+                case TYPE_STICKER_SIZE:
                     view = stickerSizeCell = new StickerSizeCell(mContext);
                     view.setBackgroundColor(Theme.getColor(Theme.key_windowBackgroundWhite));
                     break;
@@ -528,15 +525,15 @@ public class ChatSettingActivity extends BaseActivity {
         @Override
         public int getItemViewType(int position) {
             if (position == chat2Row || position == stickerSize2Row) {
-                return 1;
+                return TYPE_SHADOW;
             } else if (position == messageMenuRow || position == customDoubleClickTapRow || position == maxRecentStickerRow || position == customQuickMessageRow) {
-                return 2;
+                return TYPE_SETTINGS;
             } else if (position == chatRow || position == stickerSizeHeaderRow) {
-                return 4;
+                return TYPE_HEADER;
             } else if (position == stickerSizeRow) {
-                return 8;
+                return TYPE_STICKER_SIZE;
             }
-            return 3;
+            return TYPE_CHECK;
         }
     }
 
@@ -678,7 +675,7 @@ public class ChatSettingActivity extends BaseActivity {
                         ConfigManager.putInt(Defines.maxRecentSticker, Integer.parseInt(editText.getText().toString()));
                 }
             }
-            listAdapter.notifyItemChanged(pos);
+            listAdapter.notifyItemChanged(pos, PARTIAL);
         });
         builder.setNegativeButton(LocaleController.getString("Cancel", R.string.Cancel), null);
         builder.show().setOnShowListener(dialog -> {

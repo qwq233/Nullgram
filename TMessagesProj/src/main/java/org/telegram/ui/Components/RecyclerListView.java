@@ -70,18 +70,19 @@ import java.util.Objects;
 @SuppressWarnings("JavaReflectionMemberAccess")
 public class RecyclerListView extends RecyclerView {
     public final static int SECTIONS_TYPE_SIMPLE = 0,
-            SECTIONS_TYPE_STICKY_HEADERS = 1,
-            SECTIONS_TYPE_DATE = 2,
-            SECTIONS_TYPE_FAST_SCROLL_ONLY = 3;
+        SECTIONS_TYPE_STICKY_HEADERS = 1,
+        SECTIONS_TYPE_DATE = 2,
+        SECTIONS_TYPE_FAST_SCROLL_ONLY = 3;
 
     @Retention(RetentionPolicy.SOURCE)
     @IntDef({
-            SECTIONS_TYPE_SIMPLE,
-            SECTIONS_TYPE_STICKY_HEADERS,
-            SECTIONS_TYPE_DATE,
-            SECTIONS_TYPE_FAST_SCROLL_ONLY
+        SECTIONS_TYPE_SIMPLE,
+        SECTIONS_TYPE_STICKY_HEADERS,
+        SECTIONS_TYPE_DATE,
+        SECTIONS_TYPE_FAST_SCROLL_ONLY
     })
-    public @interface SectionsType {}
+    public @interface SectionsType {
+    }
 
     public final static int EMPTY_VIEW_ANIMATION_TYPE_ALPHA_SCALE = 1;
     public final static int EMPTY_VIEW_ANIMATION_TYPE_ALPHA = 0;

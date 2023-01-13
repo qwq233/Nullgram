@@ -50,20 +50,24 @@ object MicrosoftTranslator : BaseTranslator() {
 
         val uuid = UUID.randomUUID().toString().replace("-", "")
         val currentTime = getCurrentTime()
-        val bytes = String.format("%s%s%s%s",
+        val bytes = String.format(
+            "%s%s%s%s",
             "MSTranslatorAndroidApp",
             url.encodeUrl(),
             currentTime,
-            uuid).lowercase().toByteArray()
+            uuid
+        ).lowercase().toByteArray()
         val secretKeySpec =
             SecretKeySpec(Base64.decode("oik6PdDdMnOXemTbwvMn9de/h9lFnfBaCWbGMMZqqoSaQaqUOqjVGm5NqsmjcBI1x+sS9ugjB55HEJWRiFXYFw", 3), "HmacSHA256")
         val mac = Mac.getInstance("HmacSHA256")
         mac.init(secretKeySpec)
-        val key = String.format("%s::%s::%s::%s",
+        val key = String.format(
+            "%s::%s::%s::%s",
             "MSTranslatorAndroidApp",
             Base64.encodeToString(mac.doFinal(bytes), 2),
             currentTime,
-            uuid);
+            uuid
+        )
 
         Log.d("Microsoft Translator posting")
         Log.d("key: $key")
@@ -76,7 +80,7 @@ object MicrosoftTranslator : BaseTranslator() {
             setBody(Json.encodeToString(listOf(Request(text))))
 
         }.let {
-            when(it.status) {
+            when (it.status) {
                 HttpStatusCode.OK -> {
                     val jsonObject = JSONArray(it.bodyAsText()).getJSONObject(0)
                     if (!jsonObject.has("translations") && jsonObject.has("message")) {
@@ -97,7 +101,6 @@ object MicrosoftTranslator : BaseTranslator() {
     }
 
 
-
     override fun convertLanguageCode(language: String, country: String?): String {
         val languageLowerCase = language.lowercase(Locale.getDefault())
         val code: String = if (!TextUtils.isEmpty(country)) {
@@ -105,9 +108,9 @@ object MicrosoftTranslator : BaseTranslator() {
             if (targetLanguages.contains("$languageLowerCase-$countryUpperCase")) {
                 "$languageLowerCase-$countryUpperCase"
             } else if (languageLowerCase == "zh") {
-                when(countryUpperCase){
-                    "DG"-> "zh-CN"
-                    "HK"-> "zh-TW"
+                when (countryUpperCase) {
+                    "DG" -> "zh-CN"
+                    "HK" -> "zh-TW"
                     else -> language
                 }
             } else {

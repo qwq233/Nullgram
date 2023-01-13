@@ -86,7 +86,7 @@ object TranslateHelper {
         }
 
     @JvmStatic
-    fun getProvider(providerType: ProviderType) = when(providerType) {
+    fun getProvider(providerType: ProviderType) = when (providerType) {
         ProviderType.GoogleTranslator -> GoogleTranslator
         ProviderType.TelegramTranslator -> TelegramTranslator
         ProviderType.MicrosoftTranslator -> MicrosoftTranslator
@@ -138,7 +138,7 @@ object TranslateHelper {
 
     @OptIn(DelicateCoroutinesApi::class)
     @JvmStatic
-    fun translate(obj: Any,from: String, onSuccess: (Any,String,String) -> Unit, onError: (Exception) -> Unit) {
+    fun translate(obj: Any, from: String, onSuccess: (Any, String, String) -> Unit, onError: (Exception) -> Unit) {
         val translator = getCurrentProvider()
         val language = translator.getCurrentTargetLanguage()
         if (!translator.supportLanguage(language)) {
@@ -158,7 +158,6 @@ object TranslateHelper {
             }
         }
     }
-
 
 
     @JvmStatic
@@ -201,7 +200,12 @@ object TranslateHelper {
 
 
     @JvmStatic
-    fun showTranslationProviderSelector(context: Context, view: View?, resourcesProvider: ResourcesProvider? = null, result: (param: Boolean)-> Unit) {
+    fun showTranslationProviderSelector(
+        context: Context,
+        view: View?,
+        resourcesProvider: ResourcesProvider? = null,
+        result: (param: Boolean) -> Unit
+    ) {
         val providers = getProviders()
         val names = providers.first
         val types = providers.second
@@ -222,7 +226,12 @@ object TranslateHelper {
                 val builder = AlertDialog.Builder(context, resourcesProvider)
                     .setMessage(LocaleController.getString("TranslateApiUnsupported", R.string.TranslateApiUnsupported))
                 if ("app" == currentTargetLanguage) {
-                    builder.setPositiveButton(LocaleController.getString("UseGoogleTranslate", R.string.UseGoogleTranslate)) { _: DialogInterface?, _: Int ->
+                    builder.setPositiveButton(
+                        LocaleController.getString(
+                            "UseGoogleTranslate",
+                            R.string.UseGoogleTranslate
+                        )
+                    ) { _: DialogInterface?, _: Int ->
                         currentProviderType = ProviderType.GoogleTranslator
                         result(true)
                     }
@@ -291,12 +300,12 @@ object TranslateHelper {
     }
 
     @JvmStatic
-    fun showTranslatorTypeSelector(context: Context?, view: View?, callback: ()-> Unit) {
+    fun showTranslatorTypeSelector(context: Context?, view: View?, callback: () -> Unit) {
         showTranslatorTypeSelector(context, view, null, callback)
     }
 
     @JvmStatic
-    fun showTranslatorTypeSelector(context: Context?, view: View?, resourcesProvider: ResourcesProvider? = null, callback: ()-> Unit) {
+    fun showTranslatorTypeSelector(context: Context?, view: View?, resourcesProvider: ResourcesProvider? = null, callback: () -> Unit) {
         val arrayList = arrayListOf<String>()
         val types = arrayListOf<Status>()
         arrayList.add(LocaleController.getString("TranslatorTypeInMessage", R.string.TranslatorTypeInMessage))
@@ -357,7 +366,7 @@ object TranslateHelper {
             builder.setPositiveButton(
                 LocaleController.getString("TranslationProviderShort", R.string.TranslationProviderShort)
             ) { _: DialogInterface?, _: Int ->
-                showTranslationProviderSelector(context, null, resourcesProvider,) {}
+                showTranslationProviderSelector(context, null, resourcesProvider) {}
             }
         } else {
             if (e is TooManyRequestException) {

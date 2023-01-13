@@ -75,7 +75,7 @@ public class NumberUtils {
     public static Number parseNumber(String numberStr) throws NumberFormatException {
         try {
             final NumberFormat format = NumberFormat.getInstance();
-            if(format instanceof DecimalFormat){
+            if (format instanceof DecimalFormat) {
                 // issue#1818@Github
                 // 当字符串数字超出double的长度时，会导致截断，此处使用BigDecimal接收
                 ((DecimalFormat) format).setParseBigDecimal(true);

@@ -101,6 +101,7 @@ public class ConfigManager {
     public static String getStringOrDefault(@NonNull String key, @Nullable String def) {
         return preferences.getString(key, def);
     }
+
     /**
      * 获取Float值
      *
@@ -114,6 +115,7 @@ public class ConfigManager {
 
     /**
      * 获取一个 StringSet
+     *
      * @param key key
      * @param def 默认值
      * @return key对应值
@@ -208,7 +210,8 @@ public class ConfigManager {
 
     /**
      * 设置一个 StringSet
-     * @param key key
+     *
+     * @param key   key
      * @param value 值
      */
     public static void putStringSet(@NonNull String key, Set<String> value) {

@@ -40,13 +40,13 @@ public class TranslatorSettingsPopupWrapper {
             item.setOnClickListener(view -> {
                 switch ((Integer) view.getTag()) {
                     case 0:
-                        TranslateHelper.showTranslatorTypeSelector(context, null, resourcesProvider, ()-> Unit.INSTANCE );
+                        TranslateHelper.showTranslatorTypeSelector(context, null, resourcesProvider, () -> Unit.INSTANCE);
                         break;
                     case 1:
-                        TranslateHelper.showTranslationTargetSelector(fragment, null, false,resourcesProvider, ()-> Unit.INSTANCE);
+                        TranslateHelper.showTranslationTargetSelector(fragment, null, false, resourcesProvider, () -> Unit.INSTANCE);
                         break;
                     case 2:
-                        TranslateHelper.showTranslationProviderSelector(context, null, resourcesProvider, ignore-> Unit.INSTANCE);
+                        TranslateHelper.showTranslationProviderSelector(context, null, resourcesProvider, ignore -> Unit.INSTANCE);
                         break;
                 }
             });

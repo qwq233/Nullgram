@@ -19,6 +19,7 @@ abstract class BaseTranslator {
      * cache pool
      */
     private val cache: LruCache<Pair<Any, String>, TranslateResult> = LruCache<Pair<Any, String>, TranslateResult>(200)
+
     data class RequestResult(
         val from: String, val result: String?, val error: HttpStatusCode? = null
     )

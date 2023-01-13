@@ -27,7 +27,7 @@ object TelegramTranslator : BaseTranslator() {
                     result.set(RequestResult(from, null, HttpStatusCode.TooManyRequests))
                 }
             } else {
-                result.set(RequestResult(from, null, HttpStatusCode(500,error.text)))
+                result.set(RequestResult(from, null, HttpStatusCode(500, error.text)))
             }
             latch.countDown()
         }
