@@ -76,7 +76,7 @@ public class ExperimentSettingActivity extends BaseActivity {
                 ((TextCheckCell) view).setChecked(ConfigManager.getBooleanOrFalse(Defines.disableSendTyping));
             }
         } else if (position == syntaxHighlightRow) {
-            ConfigManager.putBoolean(Defines.codeSyntaxHighlight, ConfigManager.getBooleanOrDefault(Defines.codeSyntaxHighlight, true));
+            ConfigManager.putBoolean(Defines.codeSyntaxHighlight, !ConfigManager.getBooleanOrDefault(Defines.codeSyntaxHighlight, true));
             if (view instanceof TextCheckCell) {
                 ((TextCheckCell) view).setChecked(ConfigManager.getBooleanOrDefault(Defines.codeSyntaxHighlight, true));
             }
