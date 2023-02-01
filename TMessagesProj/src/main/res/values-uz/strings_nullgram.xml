@@ -253,4 +253,5 @@
     <string name="TranslateFailed">Translate server error</string>
     <string name="SensitiveDisableFiltering">Disable sensitive content filtering</string>
     <string name="SensitiveAbout">Display sensitive media in public channels on all your devices.</string>
+    <string name="InstallProhibitedPlay">Installing app from apk file in chat is not available in the Play Store version of the app.\nPlease save it manually and install from File Manager.</string>
 </resources>
