@@ -186,6 +186,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import top.qwq2333.nullgram.config.ConfigManager;
+import top.qwq2333.nullgram.utils.AlertUtil;
 import top.qwq2333.nullgram.utils.AppcenterUtils;
 import top.qwq2333.nullgram.utils.Defines;
 
@@ -3235,6 +3236,10 @@ public class AndroidUtilities {
                     //    intent.setDataAndType(Uri.fromFile(f), realMimeType != null ? realMimeType : "text/plain");
                     //}
                     if (realMimeType != null) {
+                        if (BuildConfig.isPlay && realMimeType.equals("application/vnd.android.package-archive")) {
+                            AlertUtil.showSimpleAlert(activity, LocaleController.getString("InstallProhibitedPlay", R.string.InstallProhibitedPlay));
+                            return;
+                        }
                         try {
                             activity.startActivityForResult(intent, 500);
                         } catch (Exception e) {
@@ -3286,6 +3291,10 @@ public class AndroidUtilities {
                         realMimeType = null;
                     }
                 }
+            }
+            if (BuildConfig.isPlay && realMimeType != null && realMimeType.equals("application/vnd.android.package-archive")) {
+                AlertUtil.showSimpleAlert(activity, LocaleController.getString("InstallProhibitedPlay", R.string.InstallProhibitedPlay));
+                return true;
             }
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O && realMimeType != null && realMimeType.equals("application/vnd.android.package-archive") && !ApplicationLoader.applicationContext.getPackageManager().canRequestPackageInstalls()) {
                 AlertsCreator.createApkRestrictedDialog(activity, resourcesProvider).show();
