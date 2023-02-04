@@ -60,10 +60,8 @@ import org.telegram.messenger.FileLog;
 import org.telegram.messenger.LocaleController;
 import org.telegram.messenger.MessageObject;
 import org.telegram.messenger.R;
-import org.telegram.messenger.Utilities;
 import org.telegram.messenger.XiaomiUtilities;
 import org.telegram.messenger.browser.Browser;
-import org.telegram.tgnet.ConnectionsManager;
 import org.telegram.tgnet.TLRPC;
 import org.telegram.ui.ActionBar.BaseFragment;
 import org.telegram.ui.ActionBar.Theme;
@@ -1105,67 +1103,6 @@ public class TranslateAlert extends Dialog {
             TranslateHelper.handleTranslationError(getContext(), e, () -> fetchTranslation(text, minDuration, onSuccess, onFail), null);
             return Unit.INSTANCE;
         });
-    }
-
-    private static void translateText(int currentAccount, TLRPC.InputPeer peer, int msg_id, String from_lang, String to_lang, Utilities.Callback<String> onDone) {
-        if (onDone == null) {
-            return;
-        }
-        if (from_lang == null || from_lang.equals("und")) {
-            from_lang = null;
-        }
-
-        TLRPC.TL_messages_translateText req = new TLRPC.TL_messages_translateText();
-        req.peer = peer;
-        req.msg_id = msg_id;
-        req.flags |= 1;
-        if (from_lang != null) {
-            req.from_lang = from_lang;
-            req.flags |= 4;
-        }
-        req.to_lang = to_lang;
-
-        try {
-            ConnectionsManager.getInstance(currentAccount).sendRequest(req, (res, err) -> {
-                if (res instanceof TLRPC.TL_messages_translateResultText) {
-                    onDone.run(((TLRPC.TL_messages_translateResultText) res).text);
-                    return;
-                }
-                onDone.run(null);
-            });
-        } catch (Exception e) {
-            FileLog.e(e);
-        }
-    }
-
-    private static void translateText(int currentAccount, String text, String from_lang, String to_lang, Utilities.Callback<String> onDone) {
-        if (onDone == null) {
-            return;
-        }
-        if (from_lang == null || from_lang.equals("und")) {
-            from_lang = null;
-        }
-
-        TLRPC.TL_messages_translateText req = new TLRPC.TL_messages_translateText();
-        req.flags |= 2;
-        req.text = text;
-        if (from_lang != null) {
-            req.from_lang = from_lang;
-            req.flags |= 4;
-        }
-        req.to_lang = to_lang;
-
-        try {
-            ConnectionsManager.getInstance(currentAccount).sendRequest(req, (res, err) -> {
-                if (res instanceof TLRPC.TL_messages_translateResultText) {
-                    onDone.run(((TLRPC.TL_messages_translateResultText) res).text);
-                    return;
-                }
-                onDone.run(null);
-            });
-        } catch (Exception e) {
-            FileLog.e(e);
-        }
     }
 
     public static TranslateAlert showAlert(Context context, BaseFragment fragment, int currentAccount, TLRPC.InputPeer peer, int msgId, String fromLanguage, String toLanguage, CharSequence text, boolean noforwards, OnLinkPress onLinkPress, Runnable onDismiss) {

@@ -444,5 +444,6 @@ public class FilePathDatabase {
         public long dialogId;
         public int messageId;
         public int messageType;
+        public long messageSize;
     }
 }

@@ -309,6 +309,7 @@ public class ApplicationLoader extends Application {
         countDownLatch.countDown();
 
         LauncherIconController.tryFixLauncherIconIfNeeded();
+        ProxyRotationController.init();
     }
 
     public static void startPushService() {

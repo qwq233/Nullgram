@@ -27,7 +27,6 @@ import top.qwq2333.nullgram.translate.BaseTranslator
 import top.qwq2333.nullgram.translate.providers.GoogleTranslator
 import top.qwq2333.nullgram.translate.providers.LingoTranslator
 import top.qwq2333.nullgram.translate.providers.MicrosoftTranslator
-import top.qwq2333.nullgram.translate.providers.TelegramTranslator
 import top.qwq2333.nullgram.ui.PopupBuilder
 import top.qwq2333.nullgram.utils.Defines
 import java.util.Locale
@@ -67,7 +66,7 @@ object TranslateHelper {
 
     enum class ProviderType(val num: Int) {
         GoogleTranslator(1),
-        TelegramTranslator(2),
+//        TelegramTranslator(2),
         MicrosoftTranslator(3),
         LingoTranslator(4),
     }
@@ -75,10 +74,10 @@ object TranslateHelper {
     @JvmStatic
     var currentProviderType = when (ConfigManager.getIntOrDefault(Defines.translatorProvider, ProviderType.GoogleTranslator.num)) {
         ProviderType.GoogleTranslator.num -> ProviderType.GoogleTranslator
-        ProviderType.TelegramTranslator.num -> ProviderType.TelegramTranslator
+//        ProviderType.TelegramTranslator.num -> ProviderType.TelegramTranslator
         ProviderType.MicrosoftTranslator.num -> ProviderType.MicrosoftTranslator
         ProviderType.LingoTranslator.num -> ProviderType.LingoTranslator
-        else -> ProviderType.TelegramTranslator
+        else -> ProviderType.GoogleTranslator
     }
         set(value) {
             ConfigManager.putInt(Defines.translatorProvider, value.num)
@@ -88,7 +87,7 @@ object TranslateHelper {
     @JvmStatic
     fun getProvider(providerType: ProviderType) = when (providerType) {
         ProviderType.GoogleTranslator -> GoogleTranslator
-        ProviderType.TelegramTranslator -> TelegramTranslator
+//        ProviderType.TelegramTranslator -> TelegramTranslator
         ProviderType.MicrosoftTranslator -> MicrosoftTranslator
         ProviderType.LingoTranslator -> LingoTranslator
     }
@@ -96,7 +95,7 @@ object TranslateHelper {
     @JvmStatic
     fun getCurrentProvider(): BaseTranslator = when (currentProviderType) {
         ProviderType.GoogleTranslator -> GoogleTranslator
-        ProviderType.TelegramTranslator -> TelegramTranslator
+//        ProviderType.TelegramTranslator -> TelegramTranslator
         ProviderType.MicrosoftTranslator -> MicrosoftTranslator
         ProviderType.LingoTranslator -> LingoTranslator
     }
@@ -104,10 +103,10 @@ object TranslateHelper {
     @JvmStatic
     fun getProviderType(num: Int): ProviderType = when (num) {
         ProviderType.GoogleTranslator.num -> ProviderType.GoogleTranslator
-        ProviderType.TelegramTranslator.num -> ProviderType.TelegramTranslator
+//        ProviderType.TelegramTranslator.num -> ProviderType.TelegramTranslator
         ProviderType.MicrosoftTranslator.num -> ProviderType.MicrosoftTranslator
         ProviderType.LingoTranslator.num -> ProviderType.LingoTranslator
-        else -> ProviderType.TelegramTranslator
+        else -> ProviderType.GoogleTranslator
     }
 
     enum class Status(val num: Int) {
@@ -189,8 +188,8 @@ object TranslateHelper {
         val types = ArrayList<ProviderType>()
         names.add(LocaleController.getString("ProviderGoogleTranslate", R.string.ProviderGoogleTranslate))
         types.add(ProviderType.GoogleTranslator)
-        names.add(LocaleController.getString("ProviderTelegramTranslate", R.string.ProviderTelegramTranslate))
-        types.add(ProviderType.TelegramTranslator)
+//        names.add(LocaleController.getString("ProviderTelegramTranslate", R.string.ProviderTelegramTranslate))
+//        types.add(ProviderType.TelegramTranslator)
         names.add(LocaleController.getString("ProviderMicrosoftTranslate", R.string.ProviderMicrosoftTranslate))
         types.add(ProviderType.MicrosoftTranslator)
         names.add(LocaleController.getString("ProviderLingoTranslate", R.string.ProviderLingoTranslate))

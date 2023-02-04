@@ -66,14 +66,16 @@ public class VideoScreenPreview extends FrameLayout implements PagerHeaderView, 
                     AndroidUtilities.runOnUIThread(nextCheck = this::checkVideo, 300);
                     return;
                 }
+
                 try {
                     MediaMetadataRetriever retriever = new MediaMetadataRetriever();
                     retriever.setDataSource(ApplicationLoader.applicationContext, Uri.fromFile(file));
-                    int width = Integer.valueOf(retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_VIDEO_WIDTH));
-                    int height = Integer.valueOf(retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_VIDEO_HEIGHT));
+                    int width = Integer.parseInt(retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_VIDEO_WIDTH));
+                    int height = Integer.parseInt(retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_VIDEO_HEIGHT));
                     retriever.release();
                     aspectRatio = width / (float) height;
-                } catch (Exception ignore) {
+                } catch (Exception e) {
+                    aspectRatio = 0.671f;
                 }
             } else {
                 aspectRatio = 0.671f;
@@ -104,6 +106,7 @@ public class VideoScreenPreview extends FrameLayout implements PagerHeaderView, 
     private float roundRadius;
     StarParticlesView.Drawable starDrawable;
     SpeedLineParticles.Drawable speedLinesDrawable;
+    HelloParticles.Drawable helloParticlesDrawable;
     private final static float[] speedScaleVideoTimestamps = new float[]{0.02f, 1f, 1f, 1f, 1f, 1f, 1f, 1f, 1f, 0.02f};
     private MatrixParticlesDrawable matrixParticlesDrawable;
 
@@ -144,6 +147,9 @@ public class VideoScreenPreview extends FrameLayout implements PagerHeaderView, 
         } else if (type == PremiumPreviewFragment.PREMIUM_FEATURE_DOWNLOAD_SPEED) {
             speedLinesDrawable = new SpeedLineParticles.Drawable(200);
             speedLinesDrawable.init();
+        } else if (type == PremiumPreviewFragment.PREMIUM_FEATURE_TRANSLATIONS) {
+            helloParticlesDrawable = new HelloParticles.Drawable(25);
+            helloParticlesDrawable.init();
         } else {
             int particlesCount = 100;
             if (SharedConfig.getDevicePerformanceClass() == SharedConfig.PERFORMANCE_CLASS_HIGH) {
@@ -185,7 +191,7 @@ public class VideoScreenPreview extends FrameLayout implements PagerHeaderView, 
                     AndroidUtilities.rectTmp.set(0, 0, getMeasuredWidth(), (int) (getMeasuredHeight() + roundRadius));
                 }
                 float rad = roundRadius - AndroidUtilities.dp(3);
-                clipPath.addRoundRect(AndroidUtilities.rectTmp, new float[]{rad, rad, rad, rad, rad, rad, rad, rad}, Path.Direction.CW);
+                clipPath.addRoundRect(AndroidUtilities.rectTmp, rad, rad, Path.Direction.CW);
             }
 
             @Override
@@ -327,13 +333,19 @@ public class VideoScreenPreview extends FrameLayout implements PagerHeaderView, 
                 speedLinesDrawable.rect.offset(0, getMeasuredHeight() * 0.1f);
                 speedLinesDrawable.resetPositions();
             }
+            if (helloParticlesDrawable != null) {
+                helloParticlesDrawable.rect.set(0, 0, getMeasuredWidth(), getMeasuredHeight());
+                helloParticlesDrawable.screenRect.set(0, 0, getMeasuredWidth(), getMeasuredHeight());
+                helloParticlesDrawable.rect.inset(AndroidUtilities.dp(0), getMeasuredHeight() * 0.1f);
+                helloParticlesDrawable.resetPositions();
+            }
         }
     }
 
 
     @Override
     protected void dispatchDraw(Canvas canvas) {
-        if ((starDrawable != null || speedLinesDrawable != null || matrixParticlesDrawable != null) && progress < 0.5f) {
+        if ((starDrawable != null || speedLinesDrawable != null || helloParticlesDrawable != null || matrixParticlesDrawable != null) && progress < 0.5f) {
             float s = (float) Math.pow(1f - progress, 2f);
             canvas.save();
             canvas.scale(s, s, getMeasuredWidth() / 2f, getMeasuredHeight() / 2f);
@@ -360,6 +372,8 @@ public class VideoScreenPreview extends FrameLayout implements PagerHeaderView, 
                 float progressSpeedScale = 0.1f + 0.9f * (1f - Utilities.clamp(progress / 0.1f, 1f, 0));
                 speedLinesDrawable.speedScale = 150 * progressSpeedScale * videoSpeedScale;
                 speedLinesDrawable.onDraw(canvas);
+            } else if (helloParticlesDrawable != null) {
+                helloParticlesDrawable.onDraw(canvas);
             }
             canvas.restore();
             invalidate();
@@ -474,6 +488,10 @@ public class VideoScreenPreview extends FrameLayout implements PagerHeaderView, 
         attached = false;
         updateAttachState();
         NotificationCenter.getInstance(currentAccount).removeObserver(this, NotificationCenter.fileLoaded);
+        if (helloParticlesDrawable != null) {
+            helloParticlesDrawable.recycle();
+            helloParticlesDrawable = null;
+        }
     }
 
     @Override
