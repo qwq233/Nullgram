@@ -41,6 +41,7 @@ import org.telegram.ui.Components.RLottieImageView;
 import org.telegram.ui.Components.Switch;
 
 import java.util.ArrayList;
+import java.util.Locale;
 
 public class TextCheckCell extends FrameLayout {
     private boolean isAnimatingToThumbInsteadOfTouch;
@@ -61,6 +62,7 @@ public class TextCheckCell extends FrameLayout {
     private int padding;
     private Theme.ResourcesProvider resourcesProvider;
     ImageView imageView;
+    private boolean isRTL;
 
     public static final Property<TextCheckCell, Float> ANIMATION_PROGRESS = new AnimationProperties.FloatProperty<TextCheckCell>("animationProgress") {
         @Override
@@ -123,6 +125,8 @@ public class TextCheckCell extends FrameLayout {
         addView(checkBox, LayoutHelper.createFrame(37, 20, (LocaleController.isRTL ? Gravity.LEFT : Gravity.RIGHT) | Gravity.CENTER_VERTICAL, 22, 0, 22, 0));
 
         setClipChildren(false);
+
+        isRTL = LocaleController.isRTL;
     }
 
     @Override
@@ -169,6 +173,11 @@ public class TextCheckCell extends FrameLayout {
     }
 
     public void updateRTL() {
+        if (isRTL == LocaleController.isRTL) {
+            return;
+        }
+        isRTL = LocaleController.isRTL;
+
         textView.setGravity((LocaleController.isRTL ? Gravity.RIGHT : Gravity.LEFT) | Gravity.CENTER_VERTICAL);
         removeView(textView);
         addView(textView, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, LayoutHelper.MATCH_PARENT, (LocaleController.isRTL ? Gravity.RIGHT : Gravity.LEFT) | Gravity.TOP, LocaleController.isRTL ? 70 : padding, 0, LocaleController.isRTL ? padding : 70, 0));

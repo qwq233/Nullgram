@@ -114,6 +114,7 @@ public class FileUploadOperation {
             return;
         }
         state = 1;
+        SharedConfig.lockFile(uploadingFilePath);
         Utilities.stageQueue.postRunnable(() -> {
             preferences = ApplicationLoader.applicationContext.getSharedPreferences("uploadinfo", Activity.MODE_PRIVATE);
             slowNetwork = ApplicationLoader.isConnectionSlow();
@@ -174,6 +175,7 @@ public class FileUploadOperation {
                 ConnectionsManager.getInstance(currentAccount).cancelRequest(requestTokens.valueAt(a), true);
             }
         });
+        SharedConfig.unlockFile(uploadingFilePath);
         delegate.didFailedUploadingFile(this);
         cleanup();
     }
@@ -197,6 +199,7 @@ public class FileUploadOperation {
         } catch (Exception e) {
             FileLog.e(e);
         }
+        SharedConfig.unlockFile(uploadingFilePath);
     }
 
     protected void checkNewDataAvailable(final long newAvailableSize, final long finalSize) {

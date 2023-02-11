@@ -217,7 +217,7 @@ public class LanguageSelectActivity extends BaseFragment implements Notification
                     boolean sameLang = prevLocale == localeInfo;
 
                     final AlertDialog progressDialog = new AlertDialog(getContext(), AlertDialog.ALERT_TYPE_SPINNER);
-                    int reqId = LocaleController.getInstance().applyLanguage(localeInfo, true, false, false, true, currentAccount, () -> {
+                    int reqId = LocaleController.getInstance().applyLanguage(localeInfo, true, false, false, true, false, currentAccount, () -> {
                         progressDialog.dismiss();
                         if (!sameLang) {
                             actionBar.closeSearchField();

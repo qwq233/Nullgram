@@ -236,19 +236,7 @@ public class RLottieDrawable extends BitmapDrawable implements Animatable, Bitma
         if (destroyWhenDone) {
             checkRunningTasks();
             if (loadFrameTask == null && cacheGenerateTask == null && nativePtr != 0) {
-                long nativePtrFinal = nativePtr;
-                long secondNativePtrFinal = secondNativePtr;
-                nativePtr = 0;
-                secondNativePtr = 0;
-                DispatchQueuePoolBackground.execute(() -> {
-                    if (nativePtrFinal != 0) {
-                        destroy(nativePtrFinal);
-                    }
-                    if (secondNativePtrFinal != 0) {
-                        destroy(secondNativePtrFinal);
-                    }
-                });
-
+                recycleNativePtr(true);
             }
         }
         if ((nativePtr == 0 || fallbackCache) && secondNativePtr == 0 && bitmapsCache == null) {
@@ -260,6 +248,35 @@ public class RLottieDrawable extends BitmapDrawable implements Animatable, Bitma
             stop();
         }
         scheduleNextGetFrame();
+    }
+
+    private void recycleNativePtr(boolean uiThread) {
+        long nativePtrFinal = nativePtr;
+        long secondNativePtrFinal = secondNativePtr;
+
+        nativePtr = 0;
+        secondNativePtr = 0;
+        if (nativePtrFinal != 0 || secondNativePtrFinal != 0) {
+            if (uiThread) {
+                DispatchQueuePoolBackground.execute(() -> {
+                    if (nativePtrFinal != 0) {
+                        destroy(nativePtrFinal);
+                    }
+                    if (secondNativePtrFinal != 0) {
+                        destroy(secondNativePtrFinal);
+                    }
+                });
+            } else {
+                Utilities.globalQueue.postRunnable(() ->{
+                    if (nativePtrFinal != 0) {
+                        destroy(nativePtrFinal);
+                    }
+                    if (secondNativePtrFinal != 0) {
+                        destroy(secondNativePtrFinal);
+                    }
+                });
+            }
+        }
     }
 
     protected void recycleResources() {
@@ -531,7 +548,13 @@ public class RLottieDrawable extends BitmapDrawable implements Animatable, Bitma
         try {
             LottieMetadata lottieMetadata;
             if (file != null) {
-                lottieMetadata = gson.fromJson(new FileReader(file.getAbsolutePath()), LottieMetadata.class);
+                FileReader reader = new FileReader(file.getAbsolutePath());
+                lottieMetadata = gson.fromJson(reader, LottieMetadata.class);
+                try {
+                    reader.close();
+                } catch (Exception e) {
+
+                }
             } else {
                 lottieMetadata = gson.fromJson(json, LottieMetadata.class);
             }
@@ -601,7 +624,7 @@ public class RLottieDrawable extends BitmapDrawable implements Animatable, Bitma
             AndroidUtilities.runOnUIThread(() -> {
                 loadingInBackground = false;
                 if (!secondLoadingInBackground && destroyAfterLoading) {
-                    recycle();
+                    recycle(true);
                     return;
                 }
                 timeBetweenFrames = Math.max(16, (int) (1000.0f / metaData[1]));
@@ -635,7 +658,7 @@ public class RLottieDrawable extends BitmapDrawable implements Animatable, Bitma
                 AndroidUtilities.runOnUIThread(() -> {
                     secondLoadingInBackground = false;
                     if (!loadingInBackground && destroyAfterLoading) {
-                        recycle();
+                        recycle(true);
                     }
                 });
                 return;
@@ -645,7 +668,7 @@ public class RLottieDrawable extends BitmapDrawable implements Animatable, Bitma
             AndroidUtilities.runOnUIThread(() -> {
                 secondLoadingInBackground = false;
                 if (!secondLoadingInBackground && destroyAfterLoading) {
-                    recycle();
+                    recycle(true);
                     return;
                 }
                 secondFramesCount = metaData2[0];
@@ -807,21 +830,14 @@ public class RLottieDrawable extends BitmapDrawable implements Animatable, Bitma
         }
     }
 
-    public void recycle() {
+    public void recycle(boolean uiThread) {
         isRunning = false;
         isRecycled = true;
         checkRunningTasks();
         if (loadingInBackground || secondLoadingInBackground) {
             destroyAfterLoading = true;
         } else if (loadFrameTask == null && cacheGenerateTask == null && !generatingCache) {
-            if (nativePtr != 0) {
-                destroy(nativePtr);
-                nativePtr = 0;
-            }
-            if (secondNativePtr != 0) {
-                destroy(secondNativePtr);
-                secondNativePtr = 0;
-            }
+            recycleNativePtr(uiThread);
             if (bitmapsCache != null) {
                 bitmapsCache.recycle();
                 bitmapsCache = null;
@@ -850,7 +866,7 @@ public class RLottieDrawable extends BitmapDrawable implements Animatable, Bitma
     @Override
     protected void finalize() throws Throwable {
         try {
-            recycle();
+            recycle(false);
         } finally {
             super.finalize();
         }

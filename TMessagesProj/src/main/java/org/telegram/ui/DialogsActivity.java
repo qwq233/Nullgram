@@ -2224,7 +2224,7 @@ public class DialogsActivity extends BaseFragment implements NotificationCenter.
     }
 
     public interface DialogsActivityDelegate {
-        boolean didSelectDialogs(DialogsActivity fragment, ArrayList<MessagesStorage.TopicKey> dids, CharSequence message, boolean param);
+        boolean didSelectDialogs(DialogsActivity fragment, ArrayList<MessagesStorage.TopicKey> dids, CharSequence message, boolean param, TopicsFragment topicsFragment);
     }
 
     public DialogsActivity(Bundle args) {
@@ -3422,7 +3422,7 @@ public class DialogsActivity extends BaseFragment implements NotificationCenter.
                             if (closeFragment) {
                                 removeSelfFromStack();
                             }
-                            dialogsActivityDelegate.didSelectDialogs(DialogsActivity.this, arrayList, null, true);
+                            dialogsActivityDelegate.didSelectDialogs(DialogsActivity.this, arrayList, null, true, null);
                         }
 
                         @Override
@@ -3892,7 +3892,7 @@ public class DialogsActivity extends BaseFragment implements NotificationCenter.
                 for (int i = 0; i < selectedDialogs.size(); i++) {
                     topicKeys.add(MessagesStorage.TopicKey.of(selectedDialogs.get(i), 0));
                 }
-                delegate.didSelectDialogs(DialogsActivity.this, topicKeys, null, false);
+                delegate.didSelectDialogs(DialogsActivity.this, topicKeys, null, false, null);
             } else {
                 if (floatingButton.getVisibility() != View.VISIBLE) {
                     return;
@@ -4031,7 +4031,7 @@ public class DialogsActivity extends BaseFragment implements NotificationCenter.
                     for (int i = 0; i < selectedDialogs.size(); i++) {
                         topicKeys.add(MessagesStorage.TopicKey.of(selectedDialogs.get(i), 0));
                     }
-                    delegate.didSelectDialogs(DialogsActivity.this, topicKeys, message, false);
+                    delegate.didSelectDialogs(DialogsActivity.this, topicKeys, message, false, null);
                 }
 
                 @Override
@@ -4224,7 +4224,7 @@ public class DialogsActivity extends BaseFragment implements NotificationCenter.
                 for (int i = 0; i < selectedDialogs.size(); i++) {
                     topicKeys.add(MessagesStorage.TopicKey.of(selectedDialogs.get(i), 0));
                 }
-                delegate.didSelectDialogs(DialogsActivity.this, topicKeys, commentView.getFieldText(), false);
+                delegate.didSelectDialogs(DialogsActivity.this, topicKeys, commentView.getFieldText(), false, null);
             });
             writeButtonBackground.setOnLongClickListener(v -> {
                 if (isNextButton) {
@@ -4879,7 +4879,7 @@ public class DialogsActivity extends BaseFragment implements NotificationCenter.
                         if (delegate != null) {
                             ArrayList<MessagesStorage.TopicKey> keys = new ArrayList<>();
                             keys.add(MessagesStorage.TopicKey.of(-chatId, 0));
-                            delegate.didSelectDialogs(DialogsActivity.this, keys, null, false);
+                            delegate.didSelectDialogs(DialogsActivity.this, keys, null, false, null);
                         }
                     }
                 );
@@ -4980,7 +4980,7 @@ public class DialogsActivity extends BaseFragment implements NotificationCenter.
                             if (delegate != null) {
                                 ArrayList<MessagesStorage.TopicKey> keys = new ArrayList<>();
                                 keys.add(MessagesStorage.TopicKey.of(-chatId, 0));
-                                delegate.didSelectDialogs(DialogsActivity.this, keys, null, false);
+                                delegate.didSelectDialogs(DialogsActivity.this, keys, null, false, null);
                             }
                         }
                     );
@@ -5307,6 +5307,7 @@ public class DialogsActivity extends BaseFragment implements NotificationCenter.
                         int[] position = new int[2];
                         passcodeItem.getLocationInWindow(position);
                         ((LaunchActivity) getParentActivity()).showPasscodeActivity(false, true, position[0] + passcodeItem.getMeasuredWidth() / 2, position[1] + passcodeItem.getMeasuredHeight() / 2, () -> passcodeItem.setAlpha(1.0f), () -> passcodeItem.setAlpha(0.0f));
+                        getNotificationsController().showNotifications();
                         updatePasscodeButton();
                     } else if (id == 2) {
                         presentFragment(new ProxyListActivity());
@@ -6267,6 +6268,9 @@ public class DialogsActivity extends BaseFragment implements NotificationCenter.
         }
         if (fragmentView != null) {
             fragmentView.invalidate();
+        }
+        if (dialogsHintCell != null) {
+            dialogsHintCell.setAlpha(1f - progress);
         }
         if (full) {
 //
@@ -9558,6 +9562,10 @@ public class DialogsActivity extends BaseFragment implements NotificationCenter.
     }
 
     public void didSelectResult(final long dialogId, int topicId, boolean useAlert, final boolean param) {
+        didSelectResult(dialogId, topicId, useAlert, param, null);
+    }
+
+    public void didSelectResult(final long dialogId, int topicId, boolean useAlert, final boolean param, TopicsFragment topicsFragment) {
         if (!checkCanWrite(dialogId)) {
             return;
         }
@@ -9598,7 +9606,7 @@ public class DialogsActivity extends BaseFragment implements NotificationCenter.
                         setDialogsListFrozen(true);
                         ArrayList<MessagesStorage.TopicKey> dids = new ArrayList<>();
                         dids.add(MessagesStorage.TopicKey.of(dialogId, 0));
-                        delegate.didSelectDialogs(DialogsActivity.this, dids, null, param);
+                        delegate.didSelectDialogs(DialogsActivity.this, dids, null, param, null);
                     });
                 } else {
                     AlertsCreator.processError(currentAccount, error, this, req);
@@ -9666,7 +9674,7 @@ public class DialogsActivity extends BaseFragment implements NotificationCenter.
             }
             builder.setTitle(title);
             builder.setMessage(AndroidUtilities.replaceTags(message));
-            builder.setPositiveButton(buttonText, (dialogInterface, i) -> didSelectResult(dialogId, topicId,false, false));
+            builder.setPositiveButton(buttonText, (dialogInterface, i) -> didSelectResult(dialogId, topicId,false, false, topicsFragment));
             builder.setNegativeButton(LocaleController.getString("Cancel", R.string.Cancel), null);
             showDialog(builder.create());
         } else if (initialDialogsType == DIALOGS_TYPE_BOT_REQUEST_PEER) {
@@ -9674,7 +9682,7 @@ public class DialogsActivity extends BaseFragment implements NotificationCenter.
                 if (delegate != null) {
                     ArrayList<MessagesStorage.TopicKey> dids = new ArrayList<>();
                     dids.add(MessagesStorage.TopicKey.of(dialogId, topicId));
-                    delegate.didSelectDialogs(DialogsActivity.this, dids, null, param);
+                    delegate.didSelectDialogs(DialogsActivity.this, dids, null, param, topicsFragment);
                     if (resetDelegate) {
                         delegate = null;
                     }
@@ -9702,7 +9710,7 @@ public class DialogsActivity extends BaseFragment implements NotificationCenter.
             if (delegate != null) {
                 ArrayList<MessagesStorage.TopicKey> dids = new ArrayList<>();
                 dids.add(MessagesStorage.TopicKey.of(dialogId, topicId));
-                boolean res = delegate.didSelectDialogs(DialogsActivity.this, dids, null, param);
+                boolean res = delegate.didSelectDialogs(DialogsActivity.this, dids, null, param, topicsFragment);
                 if (res && resetDelegate) {
                     delegate = null;
                 }
@@ -9791,8 +9799,9 @@ public class DialogsActivity extends BaseFragment implements NotificationCenter.
             for (int i = 0; i < selectedDialogs.size(); i++) {
                 topicKeys.add(MessagesStorage.TopicKey.of(selectedDialogs.get(i), 0));
             }
-            delegate.didSelectDialogs(DialogsActivity.this, topicKeys, commentView.getFieldText(), false);
+            delegate.didSelectDialogs(DialogsActivity.this, topicKeys, commentView.getFieldText(), false, null);
         }, resourcesProvider);
+        
 
         sendPopupWindow = new ActionBarPopupWindow(layout, LayoutHelper.WRAP_CONTENT, LayoutHelper.WRAP_CONTENT);
         sendPopupWindow.setAnimationEnabled(false);

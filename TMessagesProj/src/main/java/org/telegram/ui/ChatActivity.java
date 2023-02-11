@@ -15106,7 +15106,9 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
             fillEditingMediaWithCaption(photos.get(0).caption, photos.get(0).entities);
             SendMessagesHelper.prepareSendingMedia(getAccountInstance(), photos, dialog_id, replyingMessageObject, getThreadMessage(), null, forceDocument, true, null, notify, scheduleDate, photos.get(0).updateStickersOrder);
             afterMessageSend();
-            chatActivityEnterView.setFieldText("");
+            if (chatActivityEnterView != null) {
+                chatActivityEnterView.setFieldText("");
+            }
         }
         if (scheduleDate != 0) {
             if (scheduledMessagesCount == -1) {
@@ -16688,7 +16690,7 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
                 if (AndroidUtilities.isTablet() && parentLayout != null && parentLayout.getFragmentStack().size() > 1) {
                     finishFragment();
                 } else {
-                    removeSelfFromStack();
+                    removeSelfFromStack(true);
                 }
             }
         } else if (id == NotificationCenter.commentsRead) {
@@ -22204,7 +22206,7 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
             }
             emojiStatusSpamHint.setText(text);
             emojiStatusSpamHint.measure(View.MeasureSpec.makeMeasureSpec(AndroidUtilities.displaySize.x - AndroidUtilities.dp(50), View.MeasureSpec.AT_MOST), View.MeasureSpec.makeMeasureSpec(99999, View.MeasureSpec.AT_MOST));
-            topChatPanelHeight += AndroidUtilities.dp(6);
+            topChatPanelHeight += AndroidUtilities.dp(4);
             emojiStatusSpamHint.setTranslationY(topChatPanelHeight);
             topChatPanelHeight += AndroidUtilities.dp(10) + emojiStatusSpamHint.getMeasuredHeight();
         } else {
@@ -24600,7 +24602,7 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
                             @Override
                             public void onSwipeBackProgress(PopupSwipeBackLayout layout, float toProgress, float progress) {
                                 if (toProgress == 0 && !isEnter) {
-                                    finalReactionsLayout.startEnterAnimation();
+                                    finalReactionsLayout.startEnterAnimation(false);
                                     isEnter = true;
                                 } else if (toProgress == 1 && isEnter) {
                                     finalReactionsLayout.setAlpha(1f - progress);
@@ -24696,6 +24698,7 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
             }
 
             ReactionsContainerLayout finalReactionsLayout1 = reactionsLayout;
+            reactionsLayout.setParentLayout(scrimPopupContainerLayout);
             scrimPopupWindow = new ActionBarPopupWindow(scrimPopupContainerLayout, LayoutHelper.WRAP_CONTENT, LayoutHelper.WRAP_CONTENT) {
                 @Override
                 public void dismiss() {
@@ -24733,7 +24736,11 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
             scrimPopupWindow.setDismissAnimationDuration(220);
             scrimPopupWindow.setOutsideTouchable(true);
             scrimPopupWindow.setClippingEnabled(true);
-            scrimPopupWindow.setAnimationStyle(R.style.PopupContextAnimation);
+            if (!isReactionsAvailable || reactionsLayout == null) {
+                scrimPopupWindow.setAnimationStyle(R.style.PopupContextAnimation);
+            } else {
+                scrimPopupWindow.setAnimationStyle(0);
+            }
             scrimPopupWindow.setFocusable(true);
             scrimPopupContainerLayout.measure(View.MeasureSpec.makeMeasureSpec(AndroidUtilities.dp(1000), View.MeasureSpec.AT_MOST), View.MeasureSpec.makeMeasureSpec(AndroidUtilities.dp(1000), View.MeasureSpec.AT_MOST));
             scrimPopupWindow.setInputMethodMode(ActionBarPopupWindow.INPUT_METHOD_NOT_NEEDED);
@@ -24782,7 +24789,7 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
                 }
                 scrimPopupWindow.showAtLocation(chatListView, Gravity.LEFT | Gravity.TOP, finalPopupX, finalPopupY);
                 if (isReactionsAvailable && finalReactionsLayout != null) {
-                    finalReactionsLayout.startEnterAnimation();
+                    finalReactionsLayout.startEnterAnimation(true);
                 }
                 AndroidUtilities.runOnUIThread(() -> {
                     if (scrimPopupWindowItems != null && scrimPopupWindowItems.length > 0 && scrimPopupWindowItems[0] != null) {
@@ -26080,7 +26087,7 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
     }
 
     @Override
-    public boolean didSelectDialogs(DialogsActivity fragment, ArrayList<MessagesStorage.TopicKey> dids, CharSequence message, boolean param) {
+    public boolean didSelectDialogs(DialogsActivity fragment, ArrayList<MessagesStorage.TopicKey> dids, CharSequence message, boolean param, TopicsFragment topicsFragment) {
         if (forwardingMessage == null && selectedMessagesIds[0].size() == 0 && selectedMessagesIds[1].size() == 0) {
             return false;
         }
