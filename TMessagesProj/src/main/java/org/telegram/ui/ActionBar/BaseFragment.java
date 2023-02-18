@@ -850,7 +850,8 @@ public abstract class BaseFragment {
     }
 
     public boolean isLightStatusBar() {
-        if (hasForceLightStatusBar() && !Theme.getActiveTheme().isDark()) {
+        // Fix status bar color
+        if (hasForceLightStatusBar() && !Theme.getCurrentTheme().isDark()) {
             return true;
         }
         Theme.ResourcesProvider resourcesProvider = getResourceProvider();
