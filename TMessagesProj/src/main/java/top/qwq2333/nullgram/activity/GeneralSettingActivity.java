@@ -69,11 +69,18 @@ public class GeneralSettingActivity extends BaseActivity {
     private int disableUndoRow;
     private int skipOpenLinkConfirmRow;
     private int autoProxySwitchRow;
-    private int useSystemEmojiRow;
-    private int disableVibrationRow;
     private int tabsTitleTypeRow;
     private int openArchiveOnPullRow;
+
+
+    private int devicesRow;
+    private int useSystemEmojiRow;
+    private int disableVibrationRow;
     private int autoDisableBuiltInProxyRow;
+    private int overrideDevicePerformanceRow;
+    private int overrideDevicePerformanceDescRow;
+    private int devices2Row;
+
     private int general2Row;
 
 
@@ -187,6 +194,21 @@ public class GeneralSettingActivity extends BaseActivity {
                 ConfigManager.putInt(Defines.tabMenu, types.get(i));
                 listAdapter.notifyItemChanged(tabsTitleTypeRow, PARTIAL);
                 getNotificationCenter().postNotificationName(NotificationCenter.dialogFiltersUpdated);
+            });
+        } else if (position == overrideDevicePerformanceRow) {
+            ArrayList<String> arrayList = new ArrayList<>();
+            ArrayList<Integer> types = new ArrayList<>();
+            arrayList.add(LocaleController.getString("DevicePerformanceAuto", R.string.DevicePerformanceAuto));
+            types.add(Defines.devicePerformanceAuto);
+            arrayList.add(LocaleController.getString("DevicePerformanceLow", R.string.DevicePerformanceLow));
+            types.add(Defines.devicePerformanceLow);
+            arrayList.add(LocaleController.getString("DevicePerformanceMedium", R.string.DevicePerformanceMedium));
+            types.add(Defines.devicePerformanceMedium);
+            arrayList.add(LocaleController.getString("DevicePerformanceHigh", R.string.DevicePerformanceHigh));
+            types.add(Defines.devicePerformanceHigh);
+            PopupBuilder.show(arrayList, LocaleController.getString("OverrideDevicePerformance", R.string.OverrideDevicePerformance), types.indexOf(ConfigManager.getIntOrDefault(Defines.devicePerformance, Defines.devicePerformanceAuto)), getParentActivity(), view, i -> {
+                ConfigManager.putInt(Defines.devicePerformance, types.get(i));
+                listAdapter.notifyItemChanged(overrideDevicePerformanceRow, PARTIAL);
             });
         } else if (position == openArchiveOnPullRow) {
             ConfigManager.toggleBoolean(Defines.openArchiveOnPull);
@@ -318,12 +340,18 @@ public class GeneralSettingActivity extends BaseActivity {
         disableUndoRow = rowCount++;
         skipOpenLinkConfirmRow = rowCount++;
         autoProxySwitchRow = rowCount++;
-        useSystemEmojiRow = rowCount++;
         openArchiveOnPullRow = rowCount++;
-        autoDisableBuiltInProxyRow = rowCount++;
-        disableVibrationRow = rowCount++;
         tabsTitleTypeRow = rowCount++;
         general2Row = rowCount++;
+
+        devicesRow = rowCount++;
+        useSystemEmojiRow = rowCount++;
+        autoDisableBuiltInProxyRow = rowCount++;
+        disableVibrationRow = rowCount++;
+        overrideDevicePerformanceRow = rowCount++;
+        overrideDevicePerformanceDescRow = rowCount++;
+        devices2Row = rowCount++;
+
         if (listAdapter != null) {
             listAdapter.notifyDataSetChanged();
         }
@@ -371,6 +399,22 @@ public class GeneralSettingActivity extends BaseActivity {
                                 value = LocaleController.getString("TabTitleTypeMix", R.string.TabTitleTypeMix);
                         }
                         textCell.setTextAndValue(LocaleController.getString("TabTitleType", R.string.TabTitleType), value, payload, false);
+                    } else if (position == overrideDevicePerformanceRow) {
+                        String value;
+                        switch (ConfigManager.getIntOrDefault(Defines.devicePerformance, Defines.devicePerformanceAuto)) {
+                            case Defines.devicePerformanceLow:
+                                value = LocaleController.getString("DevicePerformanceLow", R.string.DevicePerformanceLow);
+                                break;
+                            case Defines.devicePerformanceMedium:
+                                value = LocaleController.getString("DevicePerformanceMedium", R.string.DevicePerformanceMedium);
+                                break;
+                            case Defines.devicePerformanceHigh:
+                                value = LocaleController.getString("DevicePerformanceHigh", R.string.DevicePerformanceHigh);
+                                break;
+                            default:
+                                value = LocaleController.getString("DevicePerformanceAuto", R.string.DevicePerformanceAuto);
+                        }
+                        textCell.setTextAndValue(LocaleController.getString("OverrideDevicePerformance", R.string.OverrideDevicePerformance), value, payload, false);
                     } else if (position == translationProviderRow) {
                         Pair<ArrayList<String>, ArrayList<TranslateHelper.ProviderType>> providers = TranslateHelper.getProviders();
                         ArrayList<String> names = providers.first;
@@ -482,11 +526,20 @@ public class GeneralSettingActivity extends BaseActivity {
                         headerCell.setText(LocaleController.getString("General", R.string.General));
                     } else if (position == translatorRow) {
                         headerCell.setText(LocaleController.getString("Translator", R.string.Translator));
+                    } else if (position == devicesRow) {
+                        headerCell.setText(LocaleController.getString("Devices", R.string.Devices));
                     }
                     break;
                 }
                 case 5: {
                     NotificationsCheckCell textCell = (NotificationsCheckCell) holder.itemView;
+                    break;
+                }
+                case 7: {
+                    TextInfoPrivacyCell cell = (TextInfoPrivacyCell) holder.itemView;
+                    if (position == overrideDevicePerformanceDescRow) {
+                        cell.setText(LocaleController.getString("OverrideDevicePerformanceDesc", R.string.OverrideDevicePerformanceDesc));
+                    }
                     break;
                 }
                 case 8: {
@@ -548,15 +601,18 @@ public class GeneralSettingActivity extends BaseActivity {
 
         @Override
         public int getItemViewType(int position) {
-            if (position == general2Row || position == drawer2Row || position == translator2Row) {
+            if (position == general2Row || position == drawer2Row || position == translator2Row || position == devices2Row) {
                 return 1;
-            } else if (position == tabsTitleTypeRow || position == translationProviderRow || position == translationTargetRow || position == translatorTypeRow || position == doNotTranslateRow) {
+            } else if (position == tabsTitleTypeRow || position == translationProviderRow || position == translationTargetRow || position == translatorTypeRow ||
+                position == doNotTranslateRow || position == overrideDevicePerformanceRow) {
                 return 2;
-            } else if (position == generalRow || position == translatorRow) {
+            } else if (position == generalRow || position == translatorRow || position == devicesRow) {
                 return 4;
+            } else if (position == overrideDevicePerformanceDescRow) {
+                return 7;
             } else if (position == drawerRow) {
                 return 8;
-            } else if ((position > generalRow && position < general2Row) || (position > drawerRow && position < drawer2Row) || (position > translatorRow && position < translator2Row)) {
+            } else if ((position > generalRow && position < general2Row) || (position > devicesRow && position < devices2Row) || (position > drawerRow && position < drawer2Row) || (position > translatorRow && position < translator2Row)) {
                 return 3;
             }
             return -1;

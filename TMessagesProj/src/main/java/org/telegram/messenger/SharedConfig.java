@@ -48,8 +48,10 @@ import java.util.Locale;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
+import top.qwq2333.nullgram.config.ConfigManager;
 import top.qwq2333.nullgram.helpers.WebSocketHelper;
 import top.qwq2333.nullgram.utils.AlertUtil;
+import top.qwq2333.nullgram.utils.Defines;
 import top.qwq2333.nullgram.utils.StringUtils;
 import top.qwq2333.nullgram.utils.UIUtil;
 
@@ -1788,6 +1790,10 @@ public class SharedConfig {
 
     @PerformanceClass
     public static int getDevicePerformanceClass() {
+        if (ConfigManager.getIntOrDefault(Defines.devicePerformance, Defines.devicePerformanceAuto) != Defines.devicePerformanceAuto) {
+            return ConfigManager.getIntOrDefault(Defines.devicePerformance, Defines.devicePerformanceAuto);
+        }
+
         if (devicePerformanceClass == -1) {
             int androidVersion = Build.VERSION.SDK_INT;
             int cpuCount = ConnectionsManager.CPU_COUNT;

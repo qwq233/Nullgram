@@ -256,4 +256,10 @@
     <string name="InstallProhibitedPlay">Installing app from apk file in chat is not available in the Play Store version of the app.\nPlease save it manually and install from File Manager.</string>
     <string name="TranslatorTypeInMessage">In Message</string>
     <string name="SmsDisabled">Login via sms is currently disabled for any 3rd TELEOFFICIAL client due to TELEOFFICIAL\'s policy.\nWe apologize for any inconvenience caused.</string>
+    <string name="DevicePerformanceAuto">Default</string>
+    <string name="DevicePerformanceLow">Low</string>
+    <string name="DevicePerformanceMedium">Medium</string>
+    <string name="DevicePerformanceHigh">High</string>
+    <string name="OverrideDevicePerformance">Override performance detect</string>
+    <string name="OverrideDevicePerformanceDesc">Override TELEOFFICIAL\'s device performance detector.\nLow mode will reduce animation effects and other stuff as much as possible, which may help to save power in the foreground.\nHigh mode may greatly increase power consumption and performance burden and cause stuttering.</string>
 </resources>

@@ -132,6 +132,13 @@ public class Defines {
     public static final int tabMenuMix = 1;
     public static final int tabMenuIcon = 2;
 
+    // Override device
+    public static final String devicePerformance = "devicePerformance";
+    public static final int devicePerformanceAuto = -1;
+    public static final int devicePerformanceLow = 0;
+    public static final int devicePerformanceMedium = 1;
+    public static final int devicePerformanceHigh = 2;
+
     // WebSocket Proxy
     public static final String wsEnableTLS = "wsEnableTLS";
     public static final String wsUseMTP = "wsUseMTP";
