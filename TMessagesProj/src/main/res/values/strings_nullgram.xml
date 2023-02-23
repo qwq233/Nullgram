@@ -262,4 +262,5 @@
     <string name="DevicePerformanceHigh">High</string>
     <string name="OverrideDevicePerformance">Override performance detect</string>
     <string name="OverrideDevicePerformanceDesc">Override TELEOFFICIAL\'s device performance detector.\nLow mode will reduce animation effects and other stuff as much as possible, which may help to save power in the foreground.\nHigh mode may greatly increase power consumption and performance burden and cause stuttering.</string>
+    <string name="JumpToBeginning">Jump To Beginning</string>
 </resources>

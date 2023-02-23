@@ -5698,9 +5698,12 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
                 datePicker.setMinDate(1375315200000L);
                 datePicker.setMaxDate(System.currentTimeMillis());
                 dialog.setButton(DialogInterface.BUTTON_POSITIVE, LocaleController.getString("JumpToDate", R.string.JumpToDate), dialog);
-                dialog.setButton(DialogInterface.BUTTON_NEGATIVE, LocaleController.getString("Cancel", R.string.Cancel), (dialog1, which) -> {
+                dialog.setButton(DialogInterface.BUTTON_NEUTRAL, LocaleController.getString("Cancel", R.string.Cancel), (dialog1, which) -> {
 
                 });
+                dialog.setButton(DialogInterface.BUTTON_NEGATIVE, LocaleController.getString("JumpToBeginning", R.string.JumpToBeginning),(dialog2, which)->{
+                    scrollToMessageId(1, 0, false, 0, true, 0);
+                } );
                 if (Build.VERSION.SDK_INT >= 21) {
                     dialog.setOnShowListener(dialog12 -> {
                         int count = datePicker.getChildCount();
