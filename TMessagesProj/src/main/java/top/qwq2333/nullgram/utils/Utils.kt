@@ -27,7 +27,9 @@ import java.util.regex.Pattern
 object Utils {
 
     @JvmStatic
-    fun showForwardDate(obj: MessageObject, orig: CharSequence): String = if (ConfigManager.getBooleanOrFalse(Defines.dateOfForwardedMsg)) {
+    fun showForwardDate(obj: MessageObject, orig: CharSequence): String = if (ConfigManager.getBooleanOrFalse(Defines.dateOfForwardedMsg) &&
+        obj.messageOwner.fwd_from.date.toLong() != 0L
+    ) {
         "$orig • ${LocaleController.formatDate(obj.messageOwner.fwd_from.date.toLong())}"
     } else {
         orig.toString()
