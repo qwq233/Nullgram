@@ -7519,7 +7519,6 @@ public class MessagesController extends BaseController implements NotificationCe
                 });
                 getConnectionsManager().bindRequestToGuid(reqId, classGuid);
             } else if (mode == 2) {
-
             } else if (mode == 1) {
                 TLRPC.TL_messages_getScheduledHistory req = new TLRPC.TL_messages_getScheduledHistory();
                 req.peer = getInputPeer(dialogId);
@@ -7838,7 +7837,8 @@ public class MessagesController extends BaseController implements NotificationCe
         if (BuildVars.LOGS_ENABLED) {
             FileLog.d("process time = " + (SystemClock.elapsedRealtime() - startProcessTime) + " file time = " + fileProcessTime + " for dialog = " + dialogId);
         }
-        AndroidUtilities.runOnUIThread(() -> {
+
+        Runnable uiThread = () -> {
             putUsers(messagesRes.users, isCache);
             putChats(messagesRes.chats, isCache);
 
@@ -7885,7 +7885,12 @@ public class MessagesController extends BaseController implements NotificationCe
             if (!webpagesToReload.isEmpty()) {
                 reloadWebPages(dialogId, webpagesToReload, mode == 1);
             }
-        });
+        };
+        if (loadIndex == 1) {
+            ApplicationLoader.applicationHandler.postAtFrontOfQueue(uiThread);
+        } else {
+            ApplicationLoader.applicationHandler.post(uiThread);
+        }
     }
 
     public void loadHintDialogs() {
