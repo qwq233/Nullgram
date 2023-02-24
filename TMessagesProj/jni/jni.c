@@ -9,10 +9,9 @@
 #include <unistd.h>
 #include <dirent.h>
 #include <sys/stat.h>
-#include "genuine.h"
-#include <android/log.h>
+#include "v2sign.h"
+#include "log.h"
 #include <errno.h>
-#define LOGE(...) __android_log_print(ANDROID_LOG_ERROR, "Nullgram", __VA_ARGS__)
 
 
 int registerNativeTgNetFunctions(JavaVM *vm, JNIEnv *env);
@@ -28,8 +27,7 @@ jint JNI_OnLoad(JavaVM *vm, void *reserved) {
 		return -1;
 	}
 
-    if (!checkGenuine(env)) {
-        LOGE("checkGenuine: failed!");
+    if (!checkSignature(env)) {
         return JNI_ERR;
     }
 
