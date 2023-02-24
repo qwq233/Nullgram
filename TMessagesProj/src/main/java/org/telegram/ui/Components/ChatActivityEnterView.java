@@ -2206,7 +2206,7 @@ public class ChatActivityEnterView extends BlurredFrameLayout implements Notific
         });
 
         if (ConfigManager.getBooleanOrFalse(Defines.hideQuickSendMediaBottom)) {
-            audioVideoButtonContainer.setVisibility(View.GONE);
+            audioVideoButtonContainer.setVisibility(View.INVISIBLE);
         }
 
         audioVideoSendButton = new ChatActivityEnterViewAnimatedIconView(context);
