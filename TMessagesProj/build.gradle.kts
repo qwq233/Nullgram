@@ -70,7 +70,7 @@ dependencies {
     implementation("org.lsposed.hiddenapibypass:hiddenapibypass:4.3")
     implementation("org.codeberg.qwerty287:prism4j:003cb5e380")
 
-    coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:1.1.5")
+    coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:1.2.2")
     // https://mvnrepository.com/artifact/org.jetbrains.kotlin/kotlin-stdlib
     // https://mvnrepository.com/artifact/org.jetbrains.kotlin/kotlin-stdlib-common
     implementation("org.jetbrains.kotlin:kotlin-stdlib-common:${Version.kotlin}")
