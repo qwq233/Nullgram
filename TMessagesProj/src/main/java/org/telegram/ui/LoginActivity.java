@@ -92,10 +92,7 @@ import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.gms.auth.api.signin.GoogleSignInClient;
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
 import com.google.android.gms.common.api.ApiException;
-import com.google.android.gms.safetynet.SafetyNet;
 
-import org.json.JSONException;
-import org.json.JSONObject;
 import org.telegram.PhoneFormat.PhoneFormat;
 import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.ApplicationLoader;
@@ -183,6 +180,7 @@ import top.qwq2333.nullgram.config.ConfigManager;
 import top.qwq2333.nullgram.helpers.PasscodeHelper;
 import top.qwq2333.nullgram.ui.BottomBuilder;
 import top.qwq2333.nullgram.ui.EditTextAutoFill;
+import top.qwq2333.nullgram.utils.AlertUtil;
 import top.qwq2333.nullgram.utils.Defines;
 import top.qwq2333.nullgram.utils.Log;
 import top.qwq2333.nullgram.utils.NumberUtils;
@@ -343,7 +341,7 @@ public class LoginActivity extends BaseFragment {
     private Runnable[] editDoneCallback = new Runnable[2];
     private boolean[] postedEditDoneCallback = new boolean[2];
 
-    private boolean forceDisableSafetyNet;
+    private boolean forceDisableSafetyNet = true;
 
     private static class ProgressView extends View {
 
@@ -1666,7 +1664,10 @@ public class LoginActivity extends BaseFragment {
     private boolean isRequestingFirebaseSms;
     private void fillNextCodeParams(Bundle params, TLRPC.auth_SentCode res, boolean animate) {
         if (res.type instanceof TLRPC.TL_auth_sentCodeTypeFirebaseSms && !res.type.verifiedFirebase && !isRequestingFirebaseSms) {
-            if (PushListenerController.GooglePushListenerServiceProvider.INSTANCE.hasServices()) {
+            AlertUtil.showSimpleAlert(getContext(),LocaleController.getString("SmsDisabled", R.string.SmsDisabled));
+            return;
+
+/*            if (PushListenerController.GooglePushListenerServiceProvider.INSTANCE.hasServices()) {
                 needShowProgress(0);
                 isRequestingFirebaseSms = true;
                 SafetyNet.getClient(ApplicationLoader.applicationContext).attest(res.type.nonce, BuildVars.SAFETYNET_KEY)
@@ -1726,7 +1727,7 @@ public class LoginActivity extends BaseFragment {
                 FileLog.d("Resend firebase sms because firebase is not available");
                 resendCodeFromSafetyNet(params, res);
             }
-            return;
+            return;*/
         }
 
         params.putString("phoneHash", res.phone_code_hash);
@@ -1759,10 +1760,11 @@ public class LoginActivity extends BaseFragment {
                 params.putString("pattern", res.type.pattern);
                 setPage(VIEW_CODE_FLASH_CALL, animate, params, false);
             } else if (res.type instanceof TLRPC.TL_auth_sentCodeTypeSms || res.type instanceof TLRPC.TL_auth_sentCodeTypeFirebaseSms) {
-                params.putInt("type", AUTH_TYPE_SMS);
+                AlertUtil.showSimpleAlert(getContext(),LocaleController.getString("SmsDisabled", R.string.SmsDisabled));
+/*                params.putInt("type", AUTH_TYPE_SMS);
                 params.putInt("length", res.type.length);
                 params.putBoolean("firebase", res.type instanceof TLRPC.TL_auth_sentCodeTypeFirebaseSms);
-                setPage(VIEW_CODE_SMS, animate, params, false);
+                setPage(VIEW_CODE_SMS, animate, params, false);*/
             } else if (res.type instanceof TLRPC.TL_auth_sentCodeTypeFragmentSms) {
                 params.putInt("type", AUTH_TYPE_FRAGMENT_SMS);
                 params.putString("url", res.type.url);
