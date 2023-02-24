@@ -25,6 +25,7 @@ import com.jakewharton.processphoenix.ProcessPhoenix;
 
 import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.LocaleController;
+import org.telegram.messenger.NotificationCenter;
 import org.telegram.messenger.R;
 import org.telegram.ui.ActionBar.ActionBar;
 import org.telegram.ui.ActionBar.ActionBarMenu;
@@ -45,9 +46,10 @@ import org.telegram.ui.Components.RecyclerListView;
 import org.telegram.ui.Components.SeekBarView;
 import org.telegram.ui.LaunchActivity;
 
-import kotlin.Unit;
+import java.util.ArrayList;
+
 import top.qwq2333.nullgram.config.ConfigManager;
-import top.qwq2333.nullgram.ui.BottomBuilder;
+import top.qwq2333.nullgram.ui.PopupBuilder;
 import top.qwq2333.nullgram.ui.StickerSizePreviewMessagesCell;
 import top.qwq2333.nullgram.utils.AlertUtil;
 import top.qwq2333.nullgram.utils.Defines;
@@ -200,42 +202,26 @@ public class ChatSettingActivity extends BaseActivity {
             }
         } else if (position == customDoubleClickTapRow) {
             final int currentConfig = ConfigManager.getIntOrDefault(Defines.doubleTab, Defines.doubleTabReaction);
-            BottomBuilder builder = new BottomBuilder(getParentActivity());
-
-            builder.addTitle(LocaleController.getString("customDoubleTap", R.string.customDoubleTap), true);
-
-            builder.addRadioItem(LocaleController.getString("Disable", R.string.Disable), currentConfig == Defines.doubleTabNone, (radioButtonCell) -> {
-                ConfigManager.putInt(Defines.doubleTab, Defines.doubleTabNone);
-                builder.doRadioCheck(radioButtonCell);
-                return Unit.INSTANCE;
+            ArrayList<String> arrayList = new ArrayList<>();
+            ArrayList<Integer> types = new ArrayList<>();
+            arrayList.add(LocaleController.getString("Disable", R.string.Disable));
+            types.add(Defines.doubleTabNone);
+            arrayList.add(LocaleController.getString("Reactions", R.string.Reactions));
+            types.add(Defines.doubleTabReaction);
+            arrayList.add(LocaleController.getString("Reply", R.string.Reply));
+            types.add(Defines.doubleTabReply);
+            arrayList.add(LocaleController.getString("Edit", R.string.Edit));
+            types.add(Defines.doubleTabEdit);
+            arrayList.add(LocaleController.getString("saveMessages", R.string.saveMessages));
+            types.add(Defines.doubleTabSaveMessages);
+            arrayList.add(LocaleController.getString("Repeat", R.string.Repeat));
+            types.add(Defines.doubleTabRepeat);
+            PopupBuilder.show(arrayList, LocaleController.getString("customDoubleTap", R.string.customDoubleTap), types.indexOf(ConfigManager.getIntOrDefault(Defines.doubleTab,
+                Defines.doubleTabReaction)), getParentActivity(), view, i -> {
+                ConfigManager.putInt(Defines.doubleTab, types.get(i));
+                listAdapter.notifyItemChanged(customDoubleClickTapRow, PARTIAL);
+                getNotificationCenter().postNotificationName(NotificationCenter.dialogFiltersUpdated);
             });
-            builder.addRadioItem(LocaleController.getString("Reactions", R.string.Reactions), currentConfig == Defines.doubleTabReaction, (radioButtonCell) -> {
-                ConfigManager.putInt(Defines.doubleTab, Defines.doubleTabReaction);
-                builder.doRadioCheck(radioButtonCell);
-                return Unit.INSTANCE;
-            });
-            builder.addRadioItem(LocaleController.getString("Reply", R.string.Reply), currentConfig == Defines.doubleTabReply, (radioButtonCell) -> {
-                ConfigManager.putInt(Defines.doubleTab, Defines.doubleTabReply);
-                builder.doRadioCheck(radioButtonCell);
-                return Unit.INSTANCE;
-            });
-            builder.addRadioItem(LocaleController.getString("Edit", R.string.Edit), currentConfig == Defines.doubleTabEdit, (radioButtonCell) -> {
-                ConfigManager.putInt(Defines.doubleTab, Defines.doubleTabEdit);
-                builder.doRadioCheck(radioButtonCell);
-                return Unit.INSTANCE;
-            });
-            builder.addRadioItem(LocaleController.getString("saveMessages", R.string.saveMessages), currentConfig == Defines.doubleTabSaveMessages, (radioButtonCell) -> {
-                ConfigManager.putInt(Defines.doubleTab, Defines.doubleTabSaveMessages);
-                builder.doRadioCheck(radioButtonCell);
-                return Unit.INSTANCE;
-            });
-            builder.addRadioItem(LocaleController.getString("Repeat", R.string.Repeat), currentConfig == Defines.doubleTabRepeat, (radioButtonCell) -> {
-                ConfigManager.putInt(Defines.doubleTab, Defines.doubleTabRepeat);
-                builder.doRadioCheck(radioButtonCell);
-                return Unit.INSTANCE;
-            });
-
-            showDialog(builder.create());
         } else if (position == confirmToSendMediaMessagesRow) {
             ConfigManager.toggleBoolean(Defines.confirmToSendMediaMessages);
             if (view instanceof TextCheckCell) {
@@ -400,7 +386,30 @@ public class ChatSettingActivity extends BaseActivity {
                         textCell.setTextAndValue(LocaleController.getString("maxRecentSticker", R.string.maxRecentSticker), String.valueOf(ConfigManager.getIntOrDefault(Defines.maxRecentSticker, 30)), payload, true);
 
                     } else if (position == customDoubleClickTapRow) {
-                        textCell.setText(LocaleController.getString("customDoubleTap", R.string.customDoubleTap), true);
+                        String value;
+                        switch (ConfigManager.getIntOrDefault(Defines.doubleTab, Defines.doubleTabReaction)) {
+                            case Defines.doubleTabNone:
+                                value = LocaleController.getString("Disable", R.string.Disable);
+                                break;
+                            case Defines.doubleTabReaction:
+                                value = LocaleController.getString("Reactions", R.string.Reactions);
+                                break;
+                            case Defines.doubleTabReply:
+                                value = LocaleController.getString("Reply", R.string.Reply);
+                                break;
+                            case Defines.doubleTabEdit:
+                                value = LocaleController.getString("Edit", R.string.Edit);
+                                break;
+                            case Defines.doubleTabSaveMessages:
+                                value = LocaleController.getString("saveMessages", R.string.saveMessages);
+                                break;
+                            case Defines.doubleTabRepeat:
+                                value = LocaleController.getString("Repeat", R.string.Repeat);
+                                break;
+                            default:
+                                value = LocaleController.getString("Reactions", R.string.Reactions);
+                        }
+                        textCell.setTextAndValue(LocaleController.getString("customDoubleTap", R.string.customDoubleTap), value, payload, true);
                     } else if (position == customQuickMessageRow) {
                         textCell.setText(LocaleController.getString("setCustomQuickMessage", R.string.setCustomQuickMessage), true);
                     }
