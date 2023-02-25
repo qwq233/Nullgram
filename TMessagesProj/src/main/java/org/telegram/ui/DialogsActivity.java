@@ -4790,6 +4790,15 @@ public class DialogsActivity extends BaseFragment implements NotificationCenter.
         if (dialogsHintCell == null) {
             return;
         }
+
+        if (MessagesController.getInstance(currentAccount).pendingSuggestions.contains("PREMIUM_UPGRADE")) {
+            MessagesController.getInstance(currentAccount).removeSuggestion(0, "PREMIUM_UPGRADE");
+            updateDialogsHint();
+        } else if (MessagesController.getInstance(currentAccount).pendingSuggestions.contains("PREMIUM_ANNUAL")) {
+            MessagesController.getInstance(currentAccount).removeSuggestion(0, "PREMIUM_ANNUAL");
+            updateDialogsHint();
+        }
+
         if (isPremiumHintVisible()) {
             dialogsHintCell.setVisibility(View.VISIBLE);
             dialogsHintCell.setOnClickListener(v -> {
@@ -8798,8 +8807,14 @@ public class DialogsActivity extends BaseFragment implements NotificationCenter.
         } else if (id == NotificationCenter.filterSettingsUpdated) {
             showFiltersHint();
         } else if (id == NotificationCenter.newSuggestionsAvailable) {
-            showNextSupportedSuggestion();
-            updateDialogsHint();
+            if (MessagesController.getInstance(currentAccount).pendingSuggestions.contains("PREMIUM_UPGRADE")) {
+                MessagesController.getInstance(currentAccount).removeSuggestion(0, "PREMIUM_UPGRADE");
+            } else if (MessagesController.getInstance(currentAccount).pendingSuggestions.contains("PREMIUM_ANNUAL")) {
+                MessagesController.getInstance(currentAccount).removeSuggestion(0, "PREMIUM_ANNUAL");
+            } else {
+                showNextSupportedSuggestion();
+                updateDialogsHint();
+            }
         } else if (id == NotificationCenter.forceImportContactsStart) {
             setFloatingProgressVisible(true, true);
             for (ViewPage page : viewPages) {
