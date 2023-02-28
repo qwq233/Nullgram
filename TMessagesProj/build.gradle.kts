@@ -6,7 +6,7 @@ plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
     id("com.google.gms.google-services")
-    id("com.github.triplet.play") version "3.8.0"
+    id("com.github.triplet.play") version "3.8.1"
     kotlin("plugin.serialization") version Version.kotlin
 }
 
