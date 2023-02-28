@@ -62,7 +62,7 @@ dependencies {
     implementation("com.google.mlkit:language-id:17.0.4")
     implementation(files("libs/libgsaverification-client.aar"))
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.6.4")
-    implementation("com.google.code.gson:gson:2.10")
+    implementation("com.google.code.gson:gson:2.10.1")
     implementation("com.jakewharton:process-phoenix:2.1.2")
     // https://mvnrepository.com/artifact/de.psdev.licensesdialog/licensesdialog
     implementation("de.psdev.licensesdialog:licensesdialog:2.2.0")
