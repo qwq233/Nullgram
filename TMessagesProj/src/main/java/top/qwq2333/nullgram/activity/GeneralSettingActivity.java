@@ -589,7 +589,7 @@ public class GeneralSettingActivity extends BaseActivity {
                     view.setBackground(Theme.getThemedDrawable(mContext, R.drawable.greydivider, Theme.key_windowBackgroundGrayShadow));
                     break;
                 case 8:
-                    profilePreviewCell = new DrawerProfilePreviewCell(mContext, mDrawerLayoutContainer);
+                    profilePreviewCell = new DrawerProfilePreviewCell(mContext);
                     profilePreviewCell.setBackgroundColor(Theme.getColor(Theme.key_windowBackgroundWhite));
                     profilePreviewCell.setLayoutParams(new RecyclerView.LayoutParams(RecyclerView.LayoutParams.MATCH_PARENT, RecyclerView.LayoutParams.WRAP_CONTENT));
                     return new RecyclerListView.Holder(profilePreviewCell);

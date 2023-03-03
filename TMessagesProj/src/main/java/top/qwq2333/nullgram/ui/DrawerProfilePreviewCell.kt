@@ -4,12 +4,10 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.view.MotionEvent
 import org.telegram.messenger.AndroidUtilities
-import org.telegram.ui.ActionBar.DrawerLayoutContainer
 import org.telegram.ui.Cells.DrawerProfileCell
 
 
-class DrawerProfilePreviewCell(context: Context?, drawerLayoutContainer: DrawerLayoutContainer?) :
-    DrawerProfileCell(context, drawerLayoutContainer) {
+class DrawerProfilePreviewCell(context: Context?) : DrawerProfileCell(context, null) {
     init {
         importantForAccessibility = IMPORTANT_FOR_ACCESSIBILITY_NO_HIDE_DESCENDANTS
     }
