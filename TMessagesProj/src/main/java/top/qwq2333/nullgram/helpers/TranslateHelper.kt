@@ -24,6 +24,7 @@ import org.telegram.ui.Components.TranslateAlert
 import top.qwq2333.nullgram.activity.LanguageSelectActivity
 import top.qwq2333.nullgram.config.ConfigManager
 import top.qwq2333.nullgram.translate.BaseTranslator
+import top.qwq2333.nullgram.translate.providers.BaiduTranslator
 import top.qwq2333.nullgram.translate.providers.GoogleTranslator
 import top.qwq2333.nullgram.translate.providers.LingoTranslator
 import top.qwq2333.nullgram.translate.providers.MicrosoftTranslator
@@ -70,6 +71,7 @@ object TranslateHelper {
         TelegramTranslator(2),
         MicrosoftTranslator(3),
         LingoTranslator(4),
+        BaiduTranslator(5),
     }
 
     @JvmStatic
@@ -78,6 +80,7 @@ object TranslateHelper {
         ProviderType.TelegramTranslator.num -> ProviderType.TelegramTranslator
         ProviderType.MicrosoftTranslator.num -> ProviderType.MicrosoftTranslator
         ProviderType.LingoTranslator.num -> ProviderType.LingoTranslator
+        ProviderType.BaiduTranslator.num -> ProviderType.BaiduTranslator
         else -> ProviderType.GoogleTranslator
     }
         set(value) {
@@ -91,6 +94,7 @@ object TranslateHelper {
         ProviderType.TelegramTranslator -> TelegramTranslator
         ProviderType.MicrosoftTranslator -> MicrosoftTranslator
         ProviderType.LingoTranslator -> LingoTranslator
+        ProviderType.BaiduTranslator -> BaiduTranslator
     }
 
     @JvmStatic
@@ -99,6 +103,7 @@ object TranslateHelper {
         ProviderType.TelegramTranslator -> TelegramTranslator
         ProviderType.MicrosoftTranslator -> MicrosoftTranslator
         ProviderType.LingoTranslator -> LingoTranslator
+        ProviderType.BaiduTranslator -> BaiduTranslator
     }
 
     @JvmStatic
@@ -107,6 +112,7 @@ object TranslateHelper {
         ProviderType.TelegramTranslator.num -> ProviderType.TelegramTranslator
         ProviderType.MicrosoftTranslator.num -> ProviderType.MicrosoftTranslator
         ProviderType.LingoTranslator.num -> ProviderType.LingoTranslator
+        ProviderType.BaiduTranslator.num -> ProviderType.BaiduTranslator
         else -> ProviderType.GoogleTranslator
     }
 
@@ -195,6 +201,8 @@ object TranslateHelper {
         types.add(ProviderType.MicrosoftTranslator)
         names.add(LocaleController.getString("ProviderLingoTranslate", R.string.ProviderLingoTranslate))
         types.add(ProviderType.LingoTranslator)
+        names.add(LocaleController.getString("ProviderBaiduTranslate", R.string.ProviderBaiduTranslate))
+        types.add(ProviderType.BaiduTranslator)
         return Pair(names, types)
     }
 
@@ -273,9 +281,7 @@ object TranslateHelper {
                 val locale = Locale.forLanguageTag(language)
                 if (!TextUtils.isEmpty(locale.script)) {
                     names.add(
-                        HtmlCompat.fromHtml(
-                            String.format("%s - %s", locale.displayScript, locale.getDisplayScript(locale)), HtmlCompat.FROM_HTML_MODE_LEGACY
-                        )
+                        HtmlCompat.fromHtml(String.format("%s - %s", locale.displayScript, locale.getDisplayScript(locale)), HtmlCompat.FROM_HTML_MODE_LEGACY)
                     )
                 } else {
                     names.add(String.format("%s - %s", locale.displayName, locale.getDisplayName(locale)))

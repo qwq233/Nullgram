@@ -15,7 +15,7 @@ import top.qwq2333.nullgram.utils.Log
 
 object LingoTranslator : BaseTranslator() {
 
-    private val targetLanguages = listOf("zh", "en", "es", "fr", "ja", "ru")
+    private val targetLanguages = listOf("zh", "en", "ja", "ko", "es", "fr", "ru")
     override fun getTargetLanguages(): List<String> = targetLanguages
 
     @Serializable
@@ -41,7 +41,7 @@ object LingoTranslator : BaseTranslator() {
         }.let {
             when (it.status) {
                 HttpStatusCode.OK -> {
-                    Log.w(it.bodyAsText())
+                    Log.d(it.bodyAsText())
 
                     Json.decodeFromString(Response.serializer(), it.bodyAsText()).let { response ->
                         if (response.error != null) {

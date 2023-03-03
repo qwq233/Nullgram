@@ -2,10 +2,9 @@ package top.qwq2333.nullgram.translate.providers
 
 import android.text.TextUtils
 import io.ktor.client.request.get
-import io.ktor.client.request.headers
 import io.ktor.client.statement.bodyAsText
-import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpStatusCode
+import io.ktor.http.userAgent
 import org.json.JSONObject
 import top.qwq2333.nullgram.translate.BaseTranslator
 import top.qwq2333.nullgram.utils.Log
@@ -79,9 +78,7 @@ object GoogleTranslator : BaseTranslator() {
             "&ie=UTF-8&oe=UTF-8&client=at&dt=t&otf=2"
 
         client.get(url) {
-            headers {
-                append(HttpHeaders.UserAgent, "GoogleTranslate/6.28.0.05.421483610 (${devices.random()})")
-            }
+            userAgent("GoogleTranslate/6.28.0.05.421483610 (${devices.random()})")
         }.let {
             Log.d("response: ${it.bodyAsText()}")
             when (it.status) {
