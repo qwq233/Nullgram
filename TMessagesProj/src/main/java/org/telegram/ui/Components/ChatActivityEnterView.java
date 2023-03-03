@@ -674,9 +674,6 @@ public class ChatActivityEnterView extends BlurredFrameLayout implements Notific
     private Runnable recordAudioVideoRunnable = new Runnable() {
         @Override
         public void run() {
-            if (ConfigManager.getBooleanOrFalse(Defines.hideQuickSendMediaBottom)) {
-                return;
-            }
             if (delegate == null || parentActivity == null) {
                 return;
             }
@@ -2031,6 +2028,8 @@ public class ChatActivityEnterView extends BlurredFrameLayout implements Notific
         audioVideoButtonContainer.setFocusable(true);
         audioVideoButtonContainer.setImportantForAccessibility(View.IMPORTANT_FOR_ACCESSIBILITY_YES);
         audioVideoButtonContainer.setOnTouchListener((view, motionEvent) -> {
+            if (ConfigManager.getBooleanOrFalse(Defines.hideQuickSendMediaBottom))
+                return true;
             createRecordCircle();
             if (motionEvent.getAction() == MotionEvent.ACTION_DOWN) {
                 if (recordCircle.isSendButtonVisible()) {
@@ -4055,9 +4054,6 @@ public class ChatActivityEnterView extends BlurredFrameLayout implements Notific
     }
 
     private void setRecordVideoButtonVisible(boolean visible, boolean animated) {
-        if (ConfigManager.getBooleanOrFalse(Defines.hideQuickSendMediaBottom)) {
-            return;
-        }
         if (audioVideoSendButton == null) {
             return;
         }

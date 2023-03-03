@@ -452,7 +452,8 @@ public class ChatSettingActivity extends BaseActivity {
                     } else if (position == showMessageIDRow) {
                         textCell.setTextAndCheck(LocaleController.getString("showMessageID", R.string.showMessageID), ConfigManager.getBooleanOrFalse(Defines.showMessageID), true);
                     } else if (position == hideQuickSendMediaBottomRow) {
-                        textCell.setTextAndCheck(LocaleController.getString("hideQuickSendMediaBottom", R.string.hideQuickSendMediaBottom), ConfigManager.getBooleanOrFalse(Defines.hideQuickSendMediaBottom), true);
+                        textCell.setTextAndCheck(LocaleController.getString("DisableQuickSendMediaBottom", R.string.DisableQuickSendMediaBottom),
+                            ConfigManager.getBooleanOrFalse(Defines.hideQuickSendMediaBottom), true);
                     } else if (position == scrollableChatPreviewRow) {
                         textCell.setTextAndCheck(LocaleController.getString("scrollableChatPreview", R.string.scrollableChatPreview), ConfigManager.getBooleanOrFalse(Defines.scrollableChatPreview), true);
                     } else if (position == showTabsOnForwardRow) {
