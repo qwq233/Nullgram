@@ -16,19 +16,14 @@
 package com.google.android.exoplayer2.upstream;
 
 import android.net.Uri;
-
 import androidx.annotation.Nullable;
-
 import com.google.android.exoplayer2.C;
 import com.google.android.exoplayer2.util.Assertions;
-
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
-/**
- * Tees data into a {@link DataSink} as the data is read.
- */
+/** Tees data into a {@link DataSink} as the data is read. */
 public final class TeeDataSource implements DataSource {
 
   private final DataSource upstream;
@@ -48,6 +43,7 @@ public final class TeeDataSource implements DataSource {
 
   @Override
   public void addTransferListener(TransferListener transferListener) {
+    Assertions.checkNotNull(transferListener);
     upstream.addTransferListener(transferListener);
   }
 
@@ -67,11 +63,11 @@ public final class TeeDataSource implements DataSource {
   }
 
   @Override
-  public int read(byte[] buffer, int offset, int max) throws IOException {
+  public int read(byte[] buffer, int offset, int length) throws IOException {
     if (bytesRemaining == 0) {
       return C.RESULT_END_OF_INPUT;
     }
-    int bytesRead = upstream.read(buffer, offset, max);
+    int bytesRead = upstream.read(buffer, offset, length);
     if (bytesRead > 0) {
       // TODO: Consider continuing even if writes to the sink fail.
       dataSink.write(buffer, offset, bytesRead);
@@ -104,5 +100,4 @@ public final class TeeDataSource implements DataSource {
       }
     }
   }
-
 }

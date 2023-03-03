@@ -17,12 +17,10 @@ package com.google.android.exoplayer2.ui;
 
 import android.content.Context;
 import android.graphics.Matrix;
+import androidx.annotation.IntDef;
 import android.view.TextureView;
 import android.view.View;
 import android.widget.FrameLayout;
-
-import androidx.annotation.IntDef;
-
 import java.lang.annotation.Documented;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;

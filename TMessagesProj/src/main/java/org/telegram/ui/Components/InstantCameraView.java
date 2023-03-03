@@ -71,6 +71,7 @@ import com.google.android.exoplayer2.ExoPlayer;
 
 import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.ApplicationLoader;
+import org.telegram.messenger.AutoDeleteMediaTask;
 import org.telegram.messenger.BuildVars;
 import org.telegram.messenger.DispatchQueue;
 import org.telegram.messenger.FileLoader;
@@ -590,8 +591,7 @@ public class InstantCameraView extends FrameLayout implements NotificationCenter
         }
         MediaController.getInstance().pauseMessage(MediaController.getInstance().getPlayingMessageObject());
 
-        FileLoader.getDirectory(FileLoader.MEDIA_DIR_CACHE).mkdirs();
-        cameraFile = new File(FileLoader.getDirectory(FileLoader.MEDIA_DIR_CACHE), SharedConfig.getLastLocalId() + ".mp4") {
+        cameraFile = new File(FileLoader.getDirectory(FileLoader.MEDIA_DIR_DOCUMENT), System.currentTimeMillis() + "_" + SharedConfig.getLastLocalId() + ".mp4") {
             @Override
             public boolean delete() {
                 if (BuildVars.LOGS_ENABLED) {
@@ -602,6 +602,7 @@ public class InstantCameraView extends FrameLayout implements NotificationCenter
         };
 
         SharedConfig.saveConfig();
+        AutoDeleteMediaTask.lockFile(cameraFile);
 
         if (BuildVars.LOGS_ENABLED) {
             FileLog.d("show round camera " + cameraFile.getAbsolutePath());
@@ -762,6 +763,9 @@ public class InstantCameraView extends FrameLayout implements NotificationCenter
             videoPlayer = null;
         }
         if (state == 4) {
+            if (BuildVars.DEBUG_VERSION && !cameraFile.exists()) {
+                FileLog.e(new RuntimeException("file not found :( round video"));
+            }
             if (videoEditedInfo.needConvert()) {
                 file = null;
                 encryptedFile = null;
@@ -863,6 +867,7 @@ public class InstantCameraView extends FrameLayout implements NotificationCenter
                 FileLog.e("delete camera file by cancel");
             }
             cameraFile.delete();
+            AutoDeleteMediaTask.unlockFile(cameraFile);
             cameraFile = null;
         }
         MediaController.getInstance().requestAudioFocus(false);

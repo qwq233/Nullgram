@@ -1392,7 +1392,8 @@ public class NotificationsController extends BaseController {
                                     }
                                 }
                             } catch (Exception e) {
-                                FileLog.e(e);
+                                //ignore, no thread synchronizations for fast
+                                FileLog.e(e, false);
                             }
                         } else {
                             count += controller.pushDialogs.size();
@@ -3793,7 +3794,7 @@ public class NotificationsController extends BaseController {
                 }
             }
             intent.putExtra("currentAccount", currentAccount);
-            PendingIntent contentIntent = PendingIntent.getActivity(ApplicationLoader.applicationContext, 0, intent, PendingIntent.FLAG_MUTABLE | PendingIntent.FLAG_ONE_SHOT);
+            PendingIntent contentIntent = PendingIntent.getActivity(ApplicationLoader.applicationContext, 0, intent, PendingIntent.FLAG_IMMUTABLE | PendingIntent.FLAG_ONE_SHOT);
 
             mBuilder.setContentTitle(name)
                     .setSmallIcon(R.drawable.notification)
@@ -3814,10 +3815,14 @@ public class NotificationsController extends BaseController {
                 mBuilder.addPerson("tel:+" + user.phone);
             }
 
-            Intent dismissIntent = new Intent(ApplicationLoader.applicationContext, NotificationDismissReceiver.class);
-            dismissIntent.putExtra("messageDate", lastMessageObject.messageOwner.date);
-            dismissIntent.putExtra("currentAccount", currentAccount);
-            mBuilder.setDeleteIntent(PendingIntent.getBroadcast(ApplicationLoader.applicationContext, 1, dismissIntent, PendingIntent.FLAG_MUTABLE | PendingIntent.FLAG_UPDATE_CURRENT));
+            try {
+                Intent dismissIntent = new Intent(ApplicationLoader.applicationContext, NotificationDismissReceiver.class);
+                dismissIntent.putExtra("messageDate", lastMessageObject.messageOwner.date);
+                dismissIntent.putExtra("currentAccount", currentAccount);
+                mBuilder.setDeleteIntent(PendingIntent.getBroadcast(ApplicationLoader.applicationContext, 1, dismissIntent, PendingIntent.FLAG_MUTABLE | PendingIntent.FLAG_UPDATE_CURRENT));
+            } catch (Throwable e) {
+                FileLog.e(e);
+            }
 
             if (photoPath != null) {
                 BitmapDrawable img = ImageLoader.getInstance().getImageFromMemory(photoPath, null, "50_50");
@@ -4541,7 +4546,7 @@ public class NotificationsController extends BaseController {
                 intent.putExtra("topicId", topicId);
             }
             intent.putExtra("currentAccount", currentAccount);
-            PendingIntent contentIntent = PendingIntent.getActivity(ApplicationLoader.applicationContext, 0, intent, PendingIntent.FLAG_MUTABLE | PendingIntent.FLAG_ONE_SHOT);
+            PendingIntent contentIntent = PendingIntent.getActivity(ApplicationLoader.applicationContext, 0, intent, PendingIntent.FLAG_IMMUTABLE | PendingIntent.FLAG_ONE_SHOT);
 
             NotificationCompat.WearableExtender wearableExtender = new NotificationCompat.WearableExtender();
             if (wearReplyAction != null) {
@@ -4598,11 +4603,15 @@ public class NotificationsController extends BaseController {
                     .setSortKey(String.valueOf(Long.MAX_VALUE - date))
                     .setCategory(NotificationCompat.CATEGORY_MESSAGE);
 
-            Intent dismissIntent = new Intent(ApplicationLoader.applicationContext, NotificationDismissReceiver.class);
-            dismissIntent.putExtra("messageDate", maxDate);
-            dismissIntent.putExtra("dialogId", dialogId);
-            dismissIntent.putExtra("currentAccount", currentAccount);
-            builder.setDeleteIntent(PendingIntent.getBroadcast(ApplicationLoader.applicationContext, internalId, dismissIntent, PendingIntent.FLAG_MUTABLE | PendingIntent.FLAG_UPDATE_CURRENT));
+            try {
+                Intent dismissIntent = new Intent(ApplicationLoader.applicationContext, NotificationDismissReceiver.class);
+                dismissIntent.putExtra("messageDate", maxDate);
+                dismissIntent.putExtra("dialogId", dialogId);
+                dismissIntent.putExtra("currentAccount", currentAccount);
+                builder.setDeleteIntent(PendingIntent.getBroadcast(ApplicationLoader.applicationContext, internalId, dismissIntent, PendingIntent.FLAG_MUTABLE | PendingIntent.FLAG_UPDATE_CURRENT));
+            } catch (Exception e) {
+                FileLog.e(e);
+            }
 
             if (useSummaryNotification) {
                 builder.setGroup(notificationGroup);

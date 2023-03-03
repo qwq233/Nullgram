@@ -16,7 +16,6 @@
 package com.google.android.exoplayer2.source.chunk;
 
 import com.google.android.exoplayer2.upstream.DataSpec;
-
 import java.util.NoSuchElementException;
 
 /**

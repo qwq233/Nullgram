@@ -16,12 +16,11 @@
 package com.google.android.exoplayer2.extractor.ts;
 
 import com.google.android.exoplayer2.util.Assertions;
-
 import java.util.Arrays;
 
 /**
- * A buffer that fills itself with data corresponding to a specific NAL unit, as it is
- * encountered in the stream.
+ * A buffer that fills itself with data corresponding to a specific NAL unit, as it is encountered
+ * in the stream.
  */
 /* package */ final class NalUnitTargetBuffer {
 
@@ -41,17 +40,13 @@ import java.util.Arrays;
     nalData[2] = 1;
   }
 
-  /**
-   * Resets the buffer, clearing any data that it holds.
-   */
+  /** Resets the buffer, clearing any data that it holds. */
   public void reset() {
     isFilling = false;
     isCompleted = false;
   }
 
-  /**
-   * Returns whether the buffer currently holds a complete NAL unit of the target type.
-   */
+  /** Returns whether the buffer currently holds a complete NAL unit of the target type. */
   public boolean isCompleted() {
     return isCompleted;
   }
@@ -93,8 +88,8 @@ import java.util.Arrays;
   /**
    * Called to indicate that a NAL unit has ended.
    *
-   * @param discardPadding The number of excess bytes that were passed to
-   *     {@link #appendToNalUnit(byte[], int, int)}, which should be discarded.
+   * @param discardPadding The number of excess bytes that were passed to {@link
+   *     #appendToNalUnit(byte[], int, int)}, which should be discarded.
    * @return Whether the ended NAL unit is of the target type.
    */
   public boolean endNalUnit(int discardPadding) {
@@ -106,5 +101,4 @@ import java.util.Arrays;
     isCompleted = true;
     return true;
   }
-
 }

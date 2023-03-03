@@ -6,6 +6,7 @@ plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
     id("com.google.gms.google-services")
+    id("com.google.firebase.crashlytics")
     id("com.github.triplet.play") version "3.8.0"
     kotlin("plugin.serialization") version Version.kotlin
 }
@@ -36,6 +37,8 @@ fun setupPlay(stable: Boolean) {
 
 dependencies {
     implementation(platform("com.google.firebase:firebase-bom:30.2.0"))
+    implementation("com.google.firebase:firebase-crashlytics-ktx")
+    implementation("com.google.firebase:firebase-analytics-ktx")
 
     implementation("androidx.core:core-ktx:1.9.0")
     implementation("androidx.palette:palette-ktx:1.0.0")
@@ -45,7 +48,6 @@ dependencies {
     implementation("androidx.interpolator:interpolator:1.0.0")
     implementation("androidx.sharetarget:sharetarget:1.2.0")
 
-    compileOnly("org.checkerframework:checker-qual:3.28.0")
     compileOnly("org.checkerframework:checker-compat-qual:2.5.5")
     implementation("com.google.firebase:firebase-messaging:23.1.0")
     implementation("com.google.firebase:firebase-config:21.1.2")
@@ -71,13 +73,13 @@ dependencies {
     implementation("org.codeberg.qwerty287:prism4j:003cb5e380")
 
     coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:1.2.2")
-    // https://mvnrepository.com/artifact/org.jetbrains.kotlin/kotlin-stdlib
-    // https://mvnrepository.com/artifact/org.jetbrains.kotlin/kotlin-stdlib-common
     implementation("org.jetbrains.kotlin:kotlin-stdlib-common:${Version.kotlin}")
     implementation("org.jetbrains.kotlin:kotlin-stdlib:${Version.kotlin}")
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.4.1")
     implementation("org.osmdroid:osmdroid-android:6.1.14")
     implementation("com.android.billingclient:billing:5.1.0")
+    implementation("com.google.guava:guava:31.1-android")
+
 
     implementation("io.ktor:ktor-client-core:${Version.ktor}")
     implementation("io.ktor:ktor-client-okhttp:${Version.ktor}")

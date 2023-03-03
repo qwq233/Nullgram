@@ -16,7 +16,6 @@
 package com.google.android.exoplayer2.video;
 
 import androidx.annotation.Nullable;
-
 import com.google.android.exoplayer2.util.ParsableByteArray;
 
 /** Dolby Vision configuration data. */
@@ -46,7 +45,7 @@ public final class DolbyVisionConfig {
     } else {
       return null;
     }
-    String codecs = codecsPrefix + ".0" + dvProfile + ".0" + dvLevel;
+    String codecs = codecsPrefix + ".0" + dvProfile + (dvLevel < 10 ? ".0" : ".") + dvLevel;
     return new DolbyVisionConfig(dvProfile, dvLevel, codecs);
   }
 

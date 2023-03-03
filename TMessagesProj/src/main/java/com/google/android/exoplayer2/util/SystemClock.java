@@ -18,7 +18,6 @@ package com.google.android.exoplayer2.util;
 import android.os.Handler;
 import android.os.Handler.Callback;
 import android.os.Looper;
-
 import androidx.annotation.Nullable;
 
 /**
@@ -45,12 +44,12 @@ public class SystemClock implements Clock {
   }
 
   @Override
-  public void sleep(long sleepTimeMs) {
-    android.os.SystemClock.sleep(sleepTimeMs);
+  public HandlerWrapper createHandler(Looper looper, @Nullable Callback callback) {
+    return new SystemHandlerWrapper(new Handler(looper, callback));
   }
 
   @Override
-  public HandlerWrapper createHandler(Looper looper, @Nullable Callback callback) {
-    return new SystemHandlerWrapper(new Handler(looper, callback));
+  public void onThreadBlocked() {
+    // Do nothing.
   }
 }

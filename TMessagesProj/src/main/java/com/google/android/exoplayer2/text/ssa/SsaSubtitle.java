@@ -20,13 +20,10 @@ import com.google.android.exoplayer2.text.Cue;
 import com.google.android.exoplayer2.text.Subtitle;
 import com.google.android.exoplayer2.util.Assertions;
 import com.google.android.exoplayer2.util.Util;
-
 import java.util.Collections;
 import java.util.List;
 
-/**
- * A representation of an SSA/ASS subtitle.
- */
+/** A representation of an SSA/ASS subtitle. */
 /* package */ final class SsaSubtitle implements Subtitle {
 
   private final List<List<Cue>> cues;

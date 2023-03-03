@@ -19,14 +19,10 @@ import static com.google.android.exoplayer2.util.Util.castNonNull;
 
 import android.os.Parcel;
 import android.os.Parcelable;
-
 import androidx.annotation.Nullable;
-
 import com.google.android.exoplayer2.util.Util;
 
-/**
- * Comment ID3 frame.
- */
+/** Comment ID3 frame. */
 public final class CommentFrame extends Id3Frame {
 
   public static final String ID = "COMM";
@@ -58,7 +54,8 @@ public final class CommentFrame extends Id3Frame {
       return false;
     }
     CommentFrame other = (CommentFrame) obj;
-    return Util.areEqual(description, other.description) && Util.areEqual(language, other.language)
+    return Util.areEqual(description, other.description)
+        && Util.areEqual(language, other.language)
         && Util.areEqual(text, other.text);
   }
 
@@ -97,7 +94,5 @@ public final class CommentFrame extends Id3Frame {
         public CommentFrame[] newArray(int size) {
           return new CommentFrame[size];
         }
-
       };
-
 }

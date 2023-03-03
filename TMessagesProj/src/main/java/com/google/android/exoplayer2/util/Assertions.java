@@ -17,16 +17,12 @@ package com.google.android.exoplayer2.util;
 
 import android.os.Looper;
 import android.text.TextUtils;
-
 import androidx.annotation.Nullable;
-
 import com.google.android.exoplayer2.ExoPlayerLibraryInfo;
-
 import org.checkerframework.checker.nullness.qual.EnsuresNonNull;
+import org.checkerframework.dataflow.qual.Pure;
 
-/**
- * Provides methods for asserting the truth of expressions and properties.
- */
+/** Provides methods for asserting the truth of expressions and properties. */
 public final class Assertions {
 
   private Assertions() {}
@@ -37,6 +33,7 @@ public final class Assertions {
    * @param expression The expression to evaluate.
    * @throws IllegalArgumentException If {@code expression} is false.
    */
+  @Pure
   public static void checkArgument(boolean expression) {
     if (ExoPlayerLibraryInfo.ASSERTIONS_ENABLED && !expression) {
       throw new IllegalArgumentException();
@@ -51,6 +48,7 @@ public final class Assertions {
    *     to a {@link String} using {@link String#valueOf(Object)}.
    * @throws IllegalArgumentException If {@code expression} is false.
    */
+  @Pure
   public static void checkArgument(boolean expression, Object errorMessage) {
     if (ExoPlayerLibraryInfo.ASSERTIONS_ENABLED && !expression) {
       throw new IllegalArgumentException(String.valueOf(errorMessage));
@@ -66,6 +64,7 @@ public final class Assertions {
    * @return The {@code index} that was validated.
    * @throws IndexOutOfBoundsException If {@code index} falls outside the specified bounds.
    */
+  @Pure
   public static int checkIndex(int index, int start, int limit) {
     if (index < start || index >= limit) {
       throw new IndexOutOfBoundsException();
@@ -79,6 +78,7 @@ public final class Assertions {
    * @param expression The expression to evaluate.
    * @throws IllegalStateException If {@code expression} is false.
    */
+  @Pure
   public static void checkState(boolean expression) {
     if (ExoPlayerLibraryInfo.ASSERTIONS_ENABLED && !expression) {
       throw new IllegalStateException();
@@ -93,6 +93,7 @@ public final class Assertions {
    *     to a {@link String} using {@link String#valueOf(Object)}.
    * @throws IllegalStateException If {@code expression} is false.
    */
+  @Pure
   public static void checkState(boolean expression, Object errorMessage) {
     if (ExoPlayerLibraryInfo.ASSERTIONS_ENABLED && !expression) {
       throw new IllegalStateException(String.valueOf(errorMessage));
@@ -107,8 +108,9 @@ public final class Assertions {
    * @return The non-null reference that was validated.
    * @throws IllegalStateException If {@code reference} is null.
    */
-  @SuppressWarnings({"contracts.postcondition.not.satisfied", "return.type.incompatible"})
+  @SuppressWarnings({"nullness:contracts.postcondition", "nullness:return"})
   @EnsuresNonNull({"#1"})
+  @Pure
   public static <T> T checkStateNotNull(@Nullable T reference) {
     if (ExoPlayerLibraryInfo.ASSERTIONS_ENABLED && reference == null) {
       throw new IllegalStateException();
@@ -126,8 +128,9 @@ public final class Assertions {
    * @return The non-null reference that was validated.
    * @throws IllegalStateException If {@code reference} is null.
    */
-  @SuppressWarnings({"contracts.postcondition.not.satisfied", "return.type.incompatible"})
+  @SuppressWarnings({"nullness:contracts.postcondition", "nullness:return"})
   @EnsuresNonNull({"#1"})
+  @Pure
   public static <T> T checkStateNotNull(@Nullable T reference, Object errorMessage) {
     if (ExoPlayerLibraryInfo.ASSERTIONS_ENABLED && reference == null) {
       throw new IllegalStateException(String.valueOf(errorMessage));
@@ -143,8 +146,9 @@ public final class Assertions {
    * @return The non-null reference that was validated.
    * @throws NullPointerException If {@code reference} is null.
    */
-  @SuppressWarnings({"contracts.postcondition.not.satisfied", "return.type.incompatible"})
+  @SuppressWarnings({"nullness:contracts.postcondition", "nullness:return"})
   @EnsuresNonNull({"#1"})
+  @Pure
   public static <T> T checkNotNull(@Nullable T reference) {
     if (ExoPlayerLibraryInfo.ASSERTIONS_ENABLED && reference == null) {
       throw new NullPointerException();
@@ -162,8 +166,9 @@ public final class Assertions {
    * @return The non-null reference that was validated.
    * @throws NullPointerException If {@code reference} is null.
    */
-  @SuppressWarnings({"contracts.postcondition.not.satisfied", "return.type.incompatible"})
+  @SuppressWarnings({"nullness:contracts.postcondition", "nullness:return"})
   @EnsuresNonNull({"#1"})
+  @Pure
   public static <T> T checkNotNull(@Nullable T reference, Object errorMessage) {
     if (ExoPlayerLibraryInfo.ASSERTIONS_ENABLED && reference == null) {
       throw new NullPointerException(String.valueOf(errorMessage));
@@ -178,8 +183,9 @@ public final class Assertions {
    * @return The non-null, non-empty string that was validated.
    * @throws IllegalArgumentException If {@code string} is null or 0-length.
    */
-  @SuppressWarnings({"contracts.postcondition.not.satisfied", "return.type.incompatible"})
+  @SuppressWarnings({"nullness:contracts.postcondition", "nullness:return"})
   @EnsuresNonNull({"#1"})
+  @Pure
   public static String checkNotEmpty(@Nullable String string) {
     if (ExoPlayerLibraryInfo.ASSERTIONS_ENABLED && TextUtils.isEmpty(string)) {
       throw new IllegalArgumentException();
@@ -196,8 +202,9 @@ public final class Assertions {
    * @return The non-null, non-empty string that was validated.
    * @throws IllegalArgumentException If {@code string} is null or 0-length.
    */
-  @SuppressWarnings({"contracts.postcondition.not.satisfied", "return.type.incompatible"})
+  @SuppressWarnings({"nullness:contracts.postcondition", "nullness:return"})
   @EnsuresNonNull({"#1"})
+  @Pure
   public static String checkNotEmpty(@Nullable String string, Object errorMessage) {
     if (ExoPlayerLibraryInfo.ASSERTIONS_ENABLED && TextUtils.isEmpty(string)) {
       throw new IllegalArgumentException(String.valueOf(errorMessage));
@@ -211,10 +218,10 @@ public final class Assertions {
    *
    * @throws IllegalStateException If the calling thread is not the application's main thread.
    */
+  @Pure
   public static void checkMainThread() {
     if (ExoPlayerLibraryInfo.ASSERTIONS_ENABLED && Looper.myLooper() != Looper.getMainLooper()) {
       throw new IllegalStateException("Not in applications main thread");
     }
   }
-
 }

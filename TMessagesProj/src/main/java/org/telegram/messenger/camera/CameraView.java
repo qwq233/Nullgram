@@ -1162,6 +1162,7 @@ public class CameraView extends FrameLayout implements TextureView.SurfaceTextur
 
     private void createCamera(final SurfaceTexture surfaceTexture) {
         AndroidUtilities.runOnUIThread(() -> {
+            CameraGLThread cameraThread = this.cameraThread;
             if (cameraThread == null) {
                 return;
             }

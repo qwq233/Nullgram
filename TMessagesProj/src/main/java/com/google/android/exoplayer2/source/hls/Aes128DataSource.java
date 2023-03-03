@@ -16,16 +16,13 @@
 package com.google.android.exoplayer2.source.hls;
 
 import android.net.Uri;
-
 import androidx.annotation.Nullable;
-
 import com.google.android.exoplayer2.C;
 import com.google.android.exoplayer2.upstream.DataSource;
 import com.google.android.exoplayer2.upstream.DataSourceInputStream;
 import com.google.android.exoplayer2.upstream.DataSpec;
 import com.google.android.exoplayer2.upstream.TransferListener;
 import com.google.android.exoplayer2.util.Assertions;
-
 import java.io.IOException;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
@@ -34,7 +31,6 @@ import java.security.NoSuchAlgorithmException;
 import java.security.spec.AlgorithmParameterSpec;
 import java.util.List;
 import java.util.Map;
-
 import javax.crypto.Cipher;
 import javax.crypto.CipherInputStream;
 import javax.crypto.NoSuchPaddingException;
@@ -70,6 +66,7 @@ import javax.crypto.spec.SecretKeySpec;
 
   @Override
   public final void addTransferListener(TransferListener transferListener) {
+    Assertions.checkNotNull(transferListener);
     upstream.addTransferListener(transferListener);
   }
 
@@ -99,9 +96,9 @@ import javax.crypto.spec.SecretKeySpec;
   }
 
   @Override
-  public final int read(byte[] buffer, int offset, int readLength) throws IOException {
+  public final int read(byte[] buffer, int offset, int length) throws IOException {
     Assertions.checkNotNull(cipherInputStream);
-    int bytesRead = cipherInputStream.read(buffer, offset, readLength);
+    int bytesRead = cipherInputStream.read(buffer, offset, length);
     if (bytesRead < 0) {
       return C.RESULT_END_OF_INPUT;
     }

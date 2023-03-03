@@ -15,6 +15,7 @@
 #include <sys/epoll.h>
 #include <map>
 #include <atomic>
+#include <unordered_set>
 #include "Defines.h"
 
 #ifdef ANDROID
@@ -209,6 +210,7 @@ private:
     requestsList requestsQueue;
     requestsList runningRequests;
     std::vector<uint32_t> requestingSaltsForDc;
+    std::unordered_set<int32_t> tokensToBeCancelled;
     int32_t lastPingId = 0;
     int64_t lastInvokeAfterMessageId = 0;
 

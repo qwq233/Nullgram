@@ -16,7 +16,6 @@
 package com.google.android.exoplayer2.source.ads;
 
 import androidx.annotation.VisibleForTesting;
-
 import com.google.android.exoplayer2.C;
 import com.google.android.exoplayer2.Timeline;
 import com.google.android.exoplayer2.source.ForwardingTimeline;
@@ -53,8 +52,8 @@ public final class SinglePeriodAdTimeline extends ForwardingTimeline {
         period.windowIndex,
         durationUs,
         period.getPositionInWindowUs(),
-        adPlaybackState);
+        adPlaybackState,
+        period.isPlaceholder);
     return period;
   }
-
 }

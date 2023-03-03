@@ -17,7 +17,6 @@ package com.google.android.exoplayer2.offline;
 
 import androidx.annotation.Nullable;
 import androidx.annotation.WorkerThread;
-
 import java.io.IOException;
 
 /** An index of {@link Download Downloads}. */

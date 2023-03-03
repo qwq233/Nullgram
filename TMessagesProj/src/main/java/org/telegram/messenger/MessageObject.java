@@ -2387,6 +2387,7 @@ public class MessageObject {
         messageOwner.peer_id.channel_id = chat.id;
         messageOwner.unread = false;
         MediaController mediaController = MediaController.getInstance();
+        isOutOwnerCached = null;
 
         if (message instanceof TLRPC.TL_messageEmpty) {
             message = null;
@@ -4470,7 +4471,7 @@ public class MessageObject {
                     return FileLoader.getAttachFileName(sizeFull);
                 }
             }
-        } else if (getMedia(messageOwner) instanceof TLRPC.TL_messageMediaWebPage) {
+        } else if (getMedia(messageOwner) instanceof TLRPC.TL_messageMediaWebPage && getMedia(messageOwner).webpage != null) {
             return FileLoader.getAttachFileName(getMedia(messageOwner).webpage.document);
         }
         return "";
@@ -5587,15 +5588,13 @@ public class MessageObject {
                 for (int n = 0; n < currentBlockLinesCount; n++) {
                     try {
                         lineWidth = block.textLayout.getLineWidth(n);
-                    } catch (Exception e) {
-                        FileLog.e(e);
+                    } catch (Exception ignore) {
                         lineWidth = 0;
                     }
 
                     try {
                         lineLeft = block.textLayout.getLineLeft(n);
-                    } catch (Exception e) {
-                        FileLog.e(e);
+                    } catch (Exception ignore) {
                         lineLeft = 0;
                     }
 
@@ -5657,7 +5656,7 @@ public class MessageObject {
         return messageOwner.out;
     }
 
-    Boolean isOutOwnerCached;
+    public Boolean isOutOwnerCached;
     public boolean isOutOwner() {
         if (preview) {
             return true;
@@ -6133,7 +6132,7 @@ public class MessageObject {
     }
 
     public static boolean canAutoplayAnimatedSticker(TLRPC.Document document) {
-        return (isAnimatedStickerDocument(document, true) || isVideoStickerDocument(document)) && SharedConfig.getDevicePerformanceClass() != SharedConfig.PERFORMANCE_CLASS_LOW && !SharedConfig.getLiteMode().enabled();
+        return (isAnimatedStickerDocument(document, true) || isVideoStickerDocument(document)) && SharedConfig.getDevicePerformanceClass() != SharedConfig.PERFORMANCE_CLASS_LOW && LiteMode.isEnabled(LiteMode.FLAG_ANIMATED_STICKERS_CHAT);
     }
 
     public static boolean isMaskDocument(TLRPC.Document document) {

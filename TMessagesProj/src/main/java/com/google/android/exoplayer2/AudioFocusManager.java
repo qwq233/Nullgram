@@ -15,26 +15,26 @@
  */
 package com.google.android.exoplayer2;
 
+import static com.google.android.exoplayer2.util.Assertions.checkNotNull;
+import static java.lang.annotation.ElementType.TYPE_USE;
+
 import android.content.Context;
 import android.media.AudioFocusRequest;
 import android.media.AudioManager;
 import android.os.Handler;
-
 import androidx.annotation.IntDef;
 import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
 import androidx.annotation.VisibleForTesting;
-
 import com.google.android.exoplayer2.audio.AudioAttributes;
 import com.google.android.exoplayer2.util.Assertions;
 import com.google.android.exoplayer2.util.Log;
 import com.google.android.exoplayer2.util.Util;
-
-import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
-
 import java.lang.annotation.Documented;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
+import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 
 /** Manages requesting and responding to changes in audio focus. */
 /* package */ final class AudioFocusManager {
@@ -62,6 +62,7 @@ import java.lang.annotation.RetentionPolicy;
    */
   @Documented
   @Retention(RetentionPolicy.SOURCE)
+  @Target(TYPE_USE)
   @IntDef({
     PLAYER_COMMAND_DO_NOT_PLAY,
     PLAYER_COMMAND_WAIT_FOR_CALLBACK,
@@ -78,6 +79,7 @@ import java.lang.annotation.RetentionPolicy;
   /** Audio focus state. */
   @Documented
   @Retention(RetentionPolicy.SOURCE)
+  @Target(TYPE_USE)
   @IntDef({
     AUDIO_FOCUS_STATE_NO_FOCUS,
     AUDIO_FOCUS_STATE_HAVE_FOCUS,
@@ -94,6 +96,47 @@ import java.lang.annotation.RetentionPolicy;
   /** Audio focus has been temporarily lost, but playback may continue with reduced volume. */
   private static final int AUDIO_FOCUS_STATE_LOSS_TRANSIENT_DUCK = 3;
 
+  /**
+   * Audio focus types. One of {@link #AUDIOFOCUS_NONE}, {@link #AUDIOFOCUS_GAIN}, {@link
+   * #AUDIOFOCUS_GAIN_TRANSIENT}, {@link #AUDIOFOCUS_GAIN_TRANSIENT_MAY_DUCK} or {@link
+   * #AUDIOFOCUS_GAIN_TRANSIENT_EXCLUSIVE}.
+   */
+  @Documented
+  @Retention(RetentionPolicy.SOURCE)
+  @Target(TYPE_USE)
+  @IntDef({
+    AUDIOFOCUS_NONE,
+    AUDIOFOCUS_GAIN,
+    AUDIOFOCUS_GAIN_TRANSIENT,
+    AUDIOFOCUS_GAIN_TRANSIENT_MAY_DUCK,
+    AUDIOFOCUS_GAIN_TRANSIENT_EXCLUSIVE
+  })
+  private @interface AudioFocusGain {}
+  /**
+   * @see AudioManager#AUDIOFOCUS_NONE
+   */
+  @SuppressWarnings("InlinedApi")
+  private static final int AUDIOFOCUS_NONE = AudioManager.AUDIOFOCUS_NONE;
+  /**
+   * @see AudioManager#AUDIOFOCUS_GAIN
+   */
+  private static final int AUDIOFOCUS_GAIN = AudioManager.AUDIOFOCUS_GAIN;
+  /**
+   * @see AudioManager#AUDIOFOCUS_GAIN_TRANSIENT
+   */
+  private static final int AUDIOFOCUS_GAIN_TRANSIENT = AudioManager.AUDIOFOCUS_GAIN_TRANSIENT;
+  /**
+   * @see AudioManager#AUDIOFOCUS_GAIN_TRANSIENT_MAY_DUCK
+   */
+  private static final int AUDIOFOCUS_GAIN_TRANSIENT_MAY_DUCK =
+      AudioManager.AUDIOFOCUS_GAIN_TRANSIENT_MAY_DUCK;
+  /**
+   * @see AudioManager#AUDIOFOCUS_GAIN_TRANSIENT_EXCLUSIVE
+   */
+  @SuppressWarnings("InlinedApi")
+  private static final int AUDIOFOCUS_GAIN_TRANSIENT_EXCLUSIVE =
+      AudioManager.AUDIOFOCUS_GAIN_TRANSIENT_EXCLUSIVE;
+
   private static final String TAG = "AudioFocusManager";
 
   private static final float VOLUME_MULTIPLIER_DUCK = 0.2f;
@@ -104,8 +147,8 @@ import java.lang.annotation.RetentionPolicy;
   @Nullable private PlayerControl playerControl;
   @Nullable private AudioAttributes audioAttributes;
 
-  @AudioFocusState private int audioFocusState;
-  @C.AudioFocusGain private int focusGain;
+  private @AudioFocusState int audioFocusState;
+  private @AudioFocusGain int focusGainToRequest;
   private float volumeMultiplier = VOLUME_MULTIPLIER_DEFAULT;
 
   private @MonotonicNonNull AudioFocusRequest audioFocusRequest;
@@ -120,7 +163,8 @@ import java.lang.annotation.RetentionPolicy;
    */
   public AudioFocusManager(Context context, Handler eventHandler, PlayerControl playerControl) {
     this.audioManager =
-        (AudioManager) context.getApplicationContext().getSystemService(Context.AUDIO_SERVICE);
+        checkNotNull(
+            (AudioManager) context.getApplicationContext().getSystemService(Context.AUDIO_SERVICE));
     this.playerControl = playerControl;
     this.focusListener = new AudioFocusListener(eventHandler);
     this.audioFocusState = AUDIO_FOCUS_STATE_NO_FOCUS;
@@ -143,9 +187,9 @@ import java.lang.annotation.RetentionPolicy;
   public void setAudioAttributes(@Nullable AudioAttributes audioAttributes) {
     if (!Util.areEqual(this.audioAttributes, audioAttributes)) {
       this.audioAttributes = audioAttributes;
-      focusGain = convertAudioAttributesToFocusGain(audioAttributes);
+      focusGainToRequest = convertAudioAttributesToFocusGain(audioAttributes);
       Assertions.checkArgument(
-          focusGain == C.AUDIOFOCUS_GAIN || focusGain == C.AUDIOFOCUS_NONE,
+          focusGainToRequest == AUDIOFOCUS_GAIN || focusGainToRequest == AUDIOFOCUS_NONE,
           "Automatic handling of audio focus is only available for USAGE_MEDIA and USAGE_GAME.");
     }
   }
@@ -157,10 +201,10 @@ import java.lang.annotation.RetentionPolicy;
    * @param playbackState The desired playback state.
    * @return A {@link PlayerCommand} to execute on the player.
    */
-  @PlayerCommand
-  public int updateAudioFocus(boolean playWhenReady, @Player.State int playbackState) {
-    if (shouldAbandonAudioFocus(playbackState)) {
-      abandonAudioFocus();
+  public @PlayerCommand int updateAudioFocus(
+      boolean playWhenReady, @Player.State int playbackState) {
+    if (shouldAbandonAudioFocusIfHeld(playbackState)) {
+      abandonAudioFocusIfHeld();
       return playWhenReady ? PLAYER_COMMAND_PLAY_WHEN_READY : PLAYER_COMMAND_DO_NOT_PLAY;
     }
     return playWhenReady ? requestAudioFocus() : PLAYER_COMMAND_DO_NOT_PLAY;
@@ -172,7 +216,7 @@ import java.lang.annotation.RetentionPolicy;
    */
   public void release() {
     playerControl = null;
-    abandonAudioFocus();
+    abandonAudioFocusIfHeld();
   }
 
   // Internal methods.
@@ -182,12 +226,11 @@ import java.lang.annotation.RetentionPolicy;
     return focusListener;
   }
 
-  private boolean shouldAbandonAudioFocus(@Player.State int playbackState) {
-    return playbackState == Player.STATE_IDLE || focusGain != C.AUDIOFOCUS_GAIN;
+  private boolean shouldAbandonAudioFocusIfHeld(@Player.State int playbackState) {
+    return playbackState == Player.STATE_IDLE || focusGainToRequest != AUDIOFOCUS_GAIN;
   }
 
-  @PlayerCommand
-  private int requestAudioFocus() {
+  private @PlayerCommand int requestAudioFocus() {
     if (audioFocusState == AUDIO_FOCUS_STATE_HAVE_FOCUS) {
       return PLAYER_COMMAND_PLAY_WHEN_READY;
     }
@@ -201,7 +244,7 @@ import java.lang.annotation.RetentionPolicy;
     }
   }
 
-  private void abandonAudioFocus() {
+  private void abandonAudioFocusIfHeld() {
     if (audioFocusState == AUDIO_FOCUS_STATE_NO_FOCUS) {
       return;
     }
@@ -216,8 +259,8 @@ import java.lang.annotation.RetentionPolicy;
   private int requestAudioFocusDefault() {
     return audioManager.requestAudioFocus(
         focusListener,
-        Util.getStreamTypeForAudioUsage(Assertions.checkNotNull(audioAttributes).usage),
-        focusGain);
+        Util.getStreamTypeForAudioUsage(checkNotNull(audioAttributes).usage),
+        focusGainToRequest);
   }
 
   @RequiresApi(26)
@@ -225,13 +268,14 @@ import java.lang.annotation.RetentionPolicy;
     if (audioFocusRequest == null || rebuildAudioFocusRequest) {
       AudioFocusRequest.Builder builder =
           audioFocusRequest == null
-              ? new AudioFocusRequest.Builder(focusGain)
+              ? new AudioFocusRequest.Builder(focusGainToRequest)
               : new AudioFocusRequest.Builder(audioFocusRequest);
 
       boolean willPauseWhenDucked = willPauseWhenDucked();
       audioFocusRequest =
           builder
-              .setAudioAttributes(Assertions.checkNotNull(audioAttributes).getAudioAttributesV21())
+              .setAudioAttributes(
+                  checkNotNull(audioAttributes).getAudioAttributesV21().audioAttributes)
               .setWillPauseWhenDucked(willPauseWhenDucked)
               .setOnAudioFocusChangeListener(focusListener)
               .build();
@@ -253,7 +297,7 @@ import java.lang.annotation.RetentionPolicy;
   }
 
   private boolean willPauseWhenDucked() {
-    return audioAttributes != null && audioAttributes.contentType == C.CONTENT_TYPE_SPEECH;
+    return audioAttributes != null && audioAttributes.contentType == C.AUDIO_CONTENT_TYPE_SPEECH;
   }
 
   /**
@@ -264,12 +308,12 @@ import java.lang.annotation.RetentionPolicy;
    * @param audioAttributes The audio attributes associated with this focus request.
    * @return The type of audio focus gain that should be requested.
    */
-  @C.AudioFocusGain
-  private static int convertAudioAttributesToFocusGain(@Nullable AudioAttributes audioAttributes) {
+  private static @AudioFocusGain int convertAudioAttributesToFocusGain(
+      @Nullable AudioAttributes audioAttributes) {
     if (audioAttributes == null) {
       // Don't handle audio focus. It may be either video only contents or developers
       // want to have more finer grained control. (e.g. adding audio focus listener)
-      return C.AUDIOFOCUS_NONE;
+      return AUDIOFOCUS_NONE;
     }
 
     switch (audioAttributes.usage) {
@@ -277,13 +321,13 @@ import java.lang.annotation.RetentionPolicy;
         // during the phone call when AUDIOFOCUS_GAIN_TRANSIENT is requested for that.
         // Don't request audio focus here.
       case C.USAGE_VOICE_COMMUNICATION_SIGNALLING:
-        return C.AUDIOFOCUS_NONE;
+        return AUDIOFOCUS_NONE;
 
         // Javadoc says 'AUDIOFOCUS_GAIN: Examples of uses of this focus gain are for music
         // playback, for a game or a video player'
       case C.USAGE_GAME:
       case C.USAGE_MEDIA:
-        return C.AUDIOFOCUS_GAIN;
+        return AUDIOFOCUS_GAIN;
 
         // Special usages: USAGE_UNKNOWN shouldn't be used. Request audio focus to prevent
         // multiple media playback happen at the same time.
@@ -292,13 +336,13 @@ import java.lang.annotation.RetentionPolicy;
             TAG,
             "Specify a proper usage in the audio attributes for audio focus"
                 + " handling. Using AUDIOFOCUS_GAIN by default.");
-        return C.AUDIOFOCUS_GAIN;
+        return AUDIOFOCUS_GAIN;
 
         // Javadoc says 'AUDIOFOCUS_GAIN_TRANSIENT: An example is for playing an alarm, or
         // during a VoIP call'
       case C.USAGE_ALARM:
       case C.USAGE_VOICE_COMMUNICATION:
-        return C.AUDIOFOCUS_GAIN_TRANSIENT;
+        return AUDIOFOCUS_GAIN_TRANSIENT;
 
         // Javadoc says 'AUDIOFOCUS_GAIN_TRANSIENT_MAY_DUCK: Examples are when playing
         // driving directions or notifications'
@@ -310,28 +354,28 @@ import java.lang.annotation.RetentionPolicy;
       case C.USAGE_NOTIFICATION_COMMUNICATION_REQUEST:
       case C.USAGE_NOTIFICATION_EVENT:
       case C.USAGE_NOTIFICATION_RINGTONE:
-        return C.AUDIOFOCUS_GAIN_TRANSIENT_MAY_DUCK;
+        return AUDIOFOCUS_GAIN_TRANSIENT_MAY_DUCK;
 
         // Javadoc says 'AUDIOFOCUS_GAIN_EXCLUSIVE: This is typically used if you are doing
         // audio recording or speech recognition'.
         // Assistant is considered as both recording and notifying developer
       case C.USAGE_ASSISTANT:
         if (Util.SDK_INT >= 19) {
-          return C.AUDIOFOCUS_GAIN_TRANSIENT_EXCLUSIVE;
+          return AUDIOFOCUS_GAIN_TRANSIENT_EXCLUSIVE;
         } else {
-          return C.AUDIOFOCUS_GAIN_TRANSIENT;
+          return AUDIOFOCUS_GAIN_TRANSIENT;
         }
 
         // Special usages:
       case C.USAGE_ASSISTANCE_ACCESSIBILITY:
-        if (audioAttributes.contentType == C.CONTENT_TYPE_SPEECH) {
+        if (audioAttributes.contentType == C.AUDIO_CONTENT_TYPE_SPEECH) {
           // Voice shouldn't be interrupted by other playback.
-          return C.AUDIOFOCUS_GAIN_TRANSIENT;
+          return AUDIOFOCUS_GAIN_TRANSIENT;
         }
-        return C.AUDIOFOCUS_GAIN_TRANSIENT_MAY_DUCK;
+        return AUDIOFOCUS_GAIN_TRANSIENT_MAY_DUCK;
       default:
         Log.w(TAG, "Unidentified audio usage: " + audioAttributes.usage);
-        return C.AUDIOFOCUS_NONE;
+        return AUDIOFOCUS_NONE;
     }
   }
 
@@ -362,7 +406,7 @@ import java.lang.annotation.RetentionPolicy;
         return;
       case AudioManager.AUDIOFOCUS_LOSS:
         executePlayerCommand(PLAYER_COMMAND_DO_NOT_PLAY);
-        abandonAudioFocus();
+        abandonAudioFocusIfHeld();
         return;
       case AudioManager.AUDIOFOCUS_LOSS_TRANSIENT:
       case AudioManager.AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK:

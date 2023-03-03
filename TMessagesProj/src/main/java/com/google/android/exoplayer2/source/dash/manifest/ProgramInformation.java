@@ -16,11 +16,10 @@
 package com.google.android.exoplayer2.source.dash.manifest;
 
 import androidx.annotation.Nullable;
-
 import com.google.android.exoplayer2.util.Util;
 
 /** A parsed program information element. */
-public class ProgramInformation {
+public final class ProgramInformation {
   /** The title for the media presentation. */
   @Nullable public final String title;
 
@@ -54,7 +53,7 @@ public class ProgramInformation {
     if (this == obj) {
       return true;
     }
-    if (obj == null || getClass() != obj.getClass()) {
+    if (!(obj instanceof ProgramInformation)) {
       return false;
     }
     ProgramInformation other = (ProgramInformation) obj;

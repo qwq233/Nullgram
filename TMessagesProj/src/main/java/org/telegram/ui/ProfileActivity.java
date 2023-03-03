@@ -321,6 +321,7 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
     private int lastMeasuredContentHeight;
     private int listContentHeight;
     private boolean openingAvatar;
+    private boolean fragmentViewAttached;
 
     private boolean doNotSetForeground;
 
@@ -1157,13 +1158,27 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
 
         @Override
         public void onNestedScroll(View target, int dxConsumed, int dyConsumed, int dxUnconsumed, int dyUnconsumed, int type, int[] consumed) {
-            if (target == listView && sharedMediaLayoutAttached) {
-                RecyclerListView innerListView = sharedMediaLayout.getCurrentListView();
-                int top = sharedMediaLayout.getTop();
-                if (top == 0) {
-                    consumed[1] = dyUnconsumed;
-                    innerListView.scrollBy(0, dyUnconsumed);
+            try {
+                if (target == listView && sharedMediaLayoutAttached) {
+                    RecyclerListView innerListView = sharedMediaLayout.getCurrentListView();
+                    int top = sharedMediaLayout.getTop();
+                    if (top == 0) {
+                        consumed[1] = dyUnconsumed;
+                        innerListView.scrollBy(0, dyUnconsumed);
+                    }
                 }
+            } catch (Throwable e) {
+                FileLog.e(e);
+                AndroidUtilities.runOnUIThread(() -> {
+                    try {
+                        RecyclerListView innerListView = sharedMediaLayout.getCurrentListView();
+                        if (innerListView != null && innerListView.getAdapter() != null) {
+                            innerListView.getAdapter().notifyDataSetChanged();
+                        }
+                    } catch (Throwable e2) {
+
+                    }
+                });
             }
         }
 
@@ -1699,12 +1714,6 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
         }
         if (pinchToZoomHelper != null) {
             pinchToZoomHelper.clear();
-        }
-
-        for (int a = 0; a < 2; ++a) {
-            if (emojiStatusDrawable[a] != null) {
-                emojiStatusDrawable[a].detach();
-            }
         }
     }
 
@@ -2647,6 +2656,28 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
                 }
                 return super.drawChild(canvas, child, drawingTime);
             }
+
+            @Override
+            protected void onAttachedToWindow() {
+                super.onAttachedToWindow();
+                fragmentViewAttached = true;
+                for (int i = 0; i < emojiStatusDrawable.length; i++) {
+                    if (emojiStatusDrawable[i] != null) {
+                        emojiStatusDrawable[i].attach();
+                    }
+                }
+            }
+
+            @Override
+            protected void onDetachedFromWindow() {
+                super.onDetachedFromWindow();
+                fragmentViewAttached = false;
+                for (int i = 0; i < emojiStatusDrawable.length; i++) {
+                    if (emojiStatusDrawable[i] != null) {
+                        emojiStatusDrawable[i].detach();
+                    }
+                }
+            }
         };
 
         ArrayList<Integer> users = chatInfo != null && chatInfo.participants != null && chatInfo.participants.participants.size() > 5 ? sortedUsers : null;
@@ -3153,7 +3184,9 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
                     public void toggleMute() {
                         boolean muted = getMessagesController().isDialogMuted(did, topicId);
                         getNotificationsController().muteDialog(did, topicId, !muted);
-                        BulletinFactory.createMuteBulletin(ProfileActivity.this, !muted, null).show();
+                        if (ProfileActivity.this.fragmentView != null) {
+                            BulletinFactory.createMuteBulletin(ProfileActivity.this, !muted, null).show();
+                        }
                         updateExceptions();
                         if (notificationsRow >= 0 && listAdapter != null) {
                             listAdapter.notifyItemChanged(notificationsRow);
@@ -3901,7 +3934,7 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
             @Override
             protected void dispatchDraw(Canvas canvas) {
                 super.dispatchDraw(canvas);
-                if (animatedEmojiDrawable != null) {
+                if (animatedEmojiDrawable != null && animatedEmojiDrawable.getImageReceiver() != null) {
                     animatedEmojiDrawable.getImageReceiver().startAnimation();
                 }
             }
@@ -5125,6 +5158,9 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
                             break;
                         case PHONE_OPTION_TELEGRAM_CALL:
                         case PHONE_OPTION_TELEGRAM_VIDEO_CALL:
+                            if (getParentActivity() == null) {
+                                return;
+                            }
                             VoIPHelper.startCall(user, action == PHONE_OPTION_TELEGRAM_VIDEO_CALL, userInfo != null && userInfo.video_calls_available, getParentActivity(), userInfo, getAccountInstance());
                             break;
                     }
@@ -6660,7 +6696,7 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
         }
         if (userId != 0) {
             final TLRPC.User user = getMessagesController().getUser(userId);
-            if (user.photo == null) {
+            if (user != null && user.photo == null) {
                 if (extraHeight >= AndroidUtilities.dp(88f)) {
                     expandAnimator.cancel();
                     expandAnimatorValues[0] = 1f;
@@ -7082,6 +7118,10 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
             animatorSet.addListener(new AnimatorListenerAdapter() {
                 @Override
                 public void onAnimationEnd(Animator animation) {
+                    if (fragmentView == null) {
+                        callback.run();
+                        return;
+                    }
                     listView.setLayerType(View.LAYER_TYPE_NONE, null);
                     if (animatingItem != null) {
                         ActionBarMenu menu = actionBar.createMenu();
@@ -7666,6 +7706,9 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
     private Drawable getEmojiStatusDrawable(TLRPC.EmojiStatus emojiStatus, boolean switchable, boolean animated, int a) {
         if (emojiStatusDrawable[a] == null) {
             emojiStatusDrawable[a] = new AnimatedEmojiDrawable.SwapAnimatedEmojiDrawable(nameTextView[a], AndroidUtilities.dp(24), a == 0 ? AnimatedEmojiDrawable.CACHE_TYPE_EMOJI_STATUS : AnimatedEmojiDrawable.CACHE_TYPE_KEYBOARD);
+            if (fragmentViewAttached) {
+                emojiStatusDrawable[a].attach();
+            }
         }
         if (emojiStatus instanceof TLRPC.TL_emojiStatus) {
             emojiStatusDrawable[a].set(((TLRPC.TL_emojiStatus) emojiStatus).document_id, animated);
@@ -8987,8 +9030,10 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
         progressDialog.show();
         Utilities.globalQueue.postRunnable(() -> {
             try {
-                File sdCard = ApplicationLoader.applicationContext.getExternalFilesDir(null);
-                File dir = new File(sdCard.getAbsolutePath() + "/logs");
+                File dir = AndroidUtilities.getLogsDir();
+                if (dir == null) {
+                    return;
+                }
 
                 File zipFile = new File(dir, "logs.zip");
                 if (zipFile.exists()) {

@@ -16,11 +16,8 @@
 package com.google.android.exoplayer2.offline;
 
 import android.net.Uri;
-
 import androidx.annotation.Nullable;
-
 import com.google.android.exoplayer2.upstream.ParsingLoadable.Parser;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;

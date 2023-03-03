@@ -15,23 +15,21 @@
  */
 package com.google.android.exoplayer2.upstream.cache;
 
+import static com.google.android.exoplayer2.util.Assertions.checkNotNull;
+
 import android.content.ContentValues;
 import android.database.Cursor;
 import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
-
 import androidx.annotation.WorkerThread;
-
 import com.google.android.exoplayer2.database.DatabaseIOException;
 import com.google.android.exoplayer2.database.DatabaseProvider;
 import com.google.android.exoplayer2.database.VersionTable;
 import com.google.android.exoplayer2.util.Assertions;
-
-import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
-
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
+import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 
 /** Maintains an index of cache file metadata. */
 /* package */ final class CacheFileMetadataIndex {
@@ -96,7 +94,9 @@ import java.util.Set;
     }
   }
 
-  /** @param databaseProvider Provides the database in which the index is stored. */
+  /**
+   * @param databaseProvider Provides the database in which the index is stored.
+   */
   public CacheFileMetadataIndex(DatabaseProvider databaseProvider) {
     this.databaseProvider = databaseProvider;
   }
@@ -150,7 +150,7 @@ import java.util.Set;
     try (Cursor cursor = getCursor()) {
       Map<String, CacheFileMetadata> fileMetadata = new HashMap<>(cursor.getCount());
       while (cursor.moveToNext()) {
-        String name = cursor.getString(COLUMN_INDEX_NAME);
+        String name = checkNotNull(cursor.getString(COLUMN_INDEX_NAME));
         long length = cursor.getLong(COLUMN_INDEX_LENGTH);
         long lastTouchTimestamp = cursor.getLong(COLUMN_INDEX_LAST_TOUCH_TIMESTAMP);
         fileMetadata.put(name, new CacheFileMetadata(length, lastTouchTimestamp));

@@ -2211,7 +2211,7 @@ public class ImageLoader {
         try {
             if (Environment.MEDIA_MOUNTED.equals(Environment.getExternalStorageState())) {
                 File path = Environment.getExternalStorageDirectory();
-                if (Build.VERSION.SDK_INT >= 19 && !TextUtils.isEmpty(SharedConfig.storageCacheDir)) {
+                if (!TextUtils.isEmpty(SharedConfig.storageCacheDir)) {
                     ArrayList<File> dirs = AndroidUtilities.getRootDirs();
                     if (dirs != null) {
                         for (int a = 0, N = dirs.size(); a < N; a++) {
@@ -2239,6 +2239,9 @@ public class ImageLoader {
                     newPath = ApplicationLoader.applicationContext.getExternalFilesDir(null);
                     telegramPath = new File(newPath, "Nullgram");
                 } else {
+                    if (!(path.exists() ? path.isDirectory() : path.mkdirs()) || !path.canWrite()) {
+                        path = ApplicationLoader.applicationContext.getExternalFilesDir(null);
+                    }
                     telegramPath = new File(path, "Nullgram");
                 }
                 telegramPath.mkdirs();
@@ -2247,7 +2250,7 @@ public class ImageLoader {
                     ArrayList<File> dirs = AndroidUtilities.getDataDirs();
                     for (int a = 0, N = dirs.size(); a < N; a++) {
                         File dir = dirs.get(a);
-                        if (dir.getAbsolutePath().startsWith(SharedConfig.storageCacheDir)) {
+                        if (dir != null && !TextUtils.isEmpty(SharedConfig.storageCacheDir) && dir.getAbsolutePath().startsWith(SharedConfig.storageCacheDir)) {
                             path = dir;
                             telegramPath = new File(path, "Nullgram");
                             telegramPath.mkdirs();

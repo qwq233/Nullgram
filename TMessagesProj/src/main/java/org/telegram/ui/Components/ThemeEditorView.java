@@ -114,7 +114,7 @@ public class ThemeEditorView {
             windowManager.removeViewImmediate(windowView);
             windowView = null;
         } catch (Exception e) {
-            FileLog.e(e);
+            FileLog.e(e, false);
         }
         try {
             if (editorAlert != null) {

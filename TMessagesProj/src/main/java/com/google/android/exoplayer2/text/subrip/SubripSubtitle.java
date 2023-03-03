@@ -20,13 +20,10 @@ import com.google.android.exoplayer2.text.Cue;
 import com.google.android.exoplayer2.text.Subtitle;
 import com.google.android.exoplayer2.util.Assertions;
 import com.google.android.exoplayer2.util.Util;
-
 import java.util.Collections;
 import java.util.List;
 
-/**
- * A representation of a SubRip subtitle.
- */
+/** A representation of a SubRip subtitle. */
 /* package */ final class SubripSubtitle implements Subtitle {
 
   private final Cue[] cues;
@@ -69,5 +66,4 @@ import java.util.List;
       return Collections.singletonList(cues[index]);
     }
   }
-
 }

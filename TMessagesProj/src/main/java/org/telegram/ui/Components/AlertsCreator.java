@@ -820,7 +820,10 @@ public class AlertsCreator {
                 request.report_spam = true;
                 if (fragment.getParentActivity() != null) {
                     if (fragment instanceof ChatActivity) {
-                        fragment.getUndoView().showWithAction(0, UndoView.ACTION_REPORT_SENT, null);
+                        UndoView undoView = fragment.getUndoView();
+                        if (undoView != null) {
+                            undoView.showWithAction(0, UndoView.ACTION_REPORT_SENT, null);
+                        }
                     } else if (fragment != null) {
                         BulletinFactory.of(fragment).createReportSent(resourcesProvider).show();
                     } else {
@@ -4063,7 +4066,10 @@ public class AlertsCreator {
                         TLRPC.InputPeer peer = MessagesController.getInstance(UserConfig.selectedAccount).getInputPeer(dialog_id);
                         sendReport(peer, type, message, ids);
                         if (parentFragment instanceof ChatActivity) {
-                            ((ChatActivity) parentFragment).getUndoView().showWithAction(0, UndoView.ACTION_REPORT_SENT, null);
+                            UndoView undoView = ((ChatActivity) parentFragment).getUndoView();
+                            if (undoView != null) {
+                                undoView.showWithAction(0, UndoView.ACTION_REPORT_SENT, null);
+                            }
                         }
                     }
                 });
@@ -4115,7 +4121,10 @@ public class AlertsCreator {
 
             });
             if (parentFragment instanceof ChatActivity) {
-                ((ChatActivity) parentFragment).getUndoView().showWithAction(0, UndoView.ACTION_REPORT_SENT, null);
+                UndoView undoView = ((ChatActivity) parentFragment).getUndoView();
+                if (undoView != null) {
+                    undoView.showWithAction(0, UndoView.ACTION_REPORT_SENT, null);
+                }
             } else {
                 BulletinFactory.of(parentFragment).createReportSent(resourcesProvider).show();
             }
@@ -4155,14 +4164,8 @@ public class AlertsCreator {
         fragment.showDialog(builder.create(), true, null);
     }
 
-    public static void showSendMediaAlert(int result, final BaseFragment fragment) {
-        showSendMediaAlert(result, fragment, null);
-    }
-
-
-    public static void showSendMediaAlert(int result, final BaseFragment fragment,
-        Theme.ResourcesProvider resourcesProvider) {
-        if (result == 0) {
+    public static void showSendMediaAlert(int result, final BaseFragment fragment, Theme.ResourcesProvider resourcesProvider) {
+        if (result == 0 || fragment == null || fragment.getParentActivity() == null) {
             return;
         }
         AlertDialog.Builder builder = new AlertDialog.Builder(fragment.getParentActivity(), resourcesProvider);

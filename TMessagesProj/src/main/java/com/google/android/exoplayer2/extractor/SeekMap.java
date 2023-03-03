@@ -16,7 +16,6 @@
 package com.google.android.exoplayer2.extractor;
 
 import androidx.annotation.Nullable;
-
 import com.google.android.exoplayer2.C;
 import com.google.android.exoplayer2.util.Assertions;
 
@@ -74,7 +73,9 @@ public interface SeekMap {
     /** The second seek point, or {@link #first} if there's only one seek point. */
     public final SeekPoint second;
 
-    /** @param point The single seek point. */
+    /**
+     * @param point The single seek point.
+     */
     public SeekPoints(SeekPoint point) {
       this(point, point);
     }

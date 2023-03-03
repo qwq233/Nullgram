@@ -16,7 +16,6 @@
 package com.google.android.exoplayer2.upstream;
 
 import androidx.annotation.Nullable;
-
 import com.google.android.exoplayer2.upstream.HttpDataSource.BaseFactory;
 import com.google.android.exoplayer2.upstream.HttpDataSource.Factory;
 import com.google.android.exoplayer2.util.Assertions;
