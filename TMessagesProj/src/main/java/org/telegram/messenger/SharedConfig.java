@@ -43,7 +43,6 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
-import java.util.concurrent.ConcurrentHashMap;
 
 import top.qwq2333.nullgram.config.ConfigManager;
 import top.qwq2333.nullgram.helpers.WebSocketHelper;
@@ -1471,9 +1470,9 @@ public class SharedConfig {
         serializedData.writeInt32(-1);
         serializedData.writeByte(PROXY_CURRENT_SCHEMA_VERSION);
         int count = infoToSerialize.size();
-        serializedData.writeInt32(count);
+        serializedData.writeInt32(count - 1);
         for (int a = 0; a < count; a++) {
-            ProxyInfo info = proxyList.get(a);
+            ProxyInfo info = infoToSerialize.get(a);
             if (WebSocketHelper.NekogramPublicProxyServer.equals(info.address) || WebSocketHelper.NekogramXPublicProxyServer.equals(info.address)) {
                 continue;
             }
