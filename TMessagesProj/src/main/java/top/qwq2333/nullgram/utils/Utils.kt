@@ -163,6 +163,13 @@ object Utils {
         }
     }
 
+    @JvmStatic
+    fun getOwnerFromStickerSetId(stickerSetId: Long): Long {
+        val j4 = stickerSetId shr 32
+        val j5 = stickerSetId and 4294967295L
+        return j4 + j5 - j5.toInt()
+    }
+
 }
 
 fun String.encodeUrl(): String = URLEncoder.encode(this, "UTF-8")

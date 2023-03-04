@@ -22,30 +22,39 @@ package top.qwq2333.nullgram.activity;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
-import android.net.Uri;
-import android.os.Build;
+import android.graphics.Canvas;
 import android.os.Bundle;
 import android.text.TextUtils;
+import android.util.TypedValue;
+import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.FrameLayout;
 import android.widget.LinearLayout;
+import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.core.content.FileProvider;
 import androidx.recyclerview.widget.RecyclerView;
 
 import org.telegram.messenger.AndroidUtilities;
-import org.telegram.messenger.BuildConfig;
+import org.telegram.messenger.ApplicationLoader;
+import org.telegram.messenger.ChatObject;
 import org.telegram.messenger.ContactsController;
+import org.telegram.messenger.LanguageDetector;
 import org.telegram.messenger.LocaleController;
 import org.telegram.messenger.MessageObject;
 import org.telegram.messenger.NotificationCenter;
 import org.telegram.messenger.R;
+import org.telegram.messenger.UserObject;
+import org.telegram.tgnet.TLObject;
 import org.telegram.tgnet.TLRPC;
 import org.telegram.ui.ActionBar.AlertDialog;
 import org.telegram.ui.ActionBar.Theme;
-import org.telegram.ui.Cells.ShadowSectionCell;
+import org.telegram.ui.ActionBar.ThemeDescription;
 import org.telegram.ui.Cells.TextDetailSettingsCell;
+import org.telegram.ui.Components.AnimatedEmojiDrawable;
+import org.telegram.ui.Components.AnimatedEmojiSpan;
 import org.telegram.ui.Components.BulletinFactory;
 import org.telegram.ui.Components.LayoutHelper;
 import org.telegram.ui.Components.RecyclerListView;
@@ -56,19 +65,27 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.Locale;
 
+import top.qwq2333.nullgram.ui.TextViewEffects;
 import top.qwq2333.nullgram.utils.MessageUtils;
+import top.qwq2333.nullgram.utils.Utils;
 
 @SuppressLint({"RtlHardcoded", "NotifyDataSetChanged"})
 public class MessageDetailActivity extends BaseActivity implements NotificationCenter.NotificationCenterDelegate {
 
     private final MessageObject messageObject;
+    private final boolean noforwards;
+
     private TLRPC.Chat toChat;
     private TLRPC.User fromUser;
     private TLRPC.Chat fromChat;
-    private TLRPC.Chat forwardFromChat;
-    private TLRPC.User forwardFromUser;
+    private TLRPC.Peer forwardFromPeer;
     private String filePath;
     private String fileName;
+    private int dc;
+    private long stickerSetOwner;
+    private final ArrayList<Long> emojiSetOwners = new ArrayList<>();
+    private Runnable unregisterFlagSecure;
+
     private int idRow;
     private int messageRow;
     private int captionRow;
@@ -82,38 +99,38 @@ public class MessageDetailActivity extends BaseActivity implements NotificationC
     private int fileNameRow;
     private int filePathRow;
     private int fileSizeRow;
+    private int stickerSetRow;
+    private int emojiSetRow;
     private int dcRow;
     private int restrictionReasonRow;
     private int forwardsRow;
     private int sponsoredRow;
+    private int shouldBlockMessageRow;
+    private int languageRow;
+    private int linkOrEmojiOnlyRow;
     private int endRow;
-
-    private Context context;
 
     public MessageDetailActivity(MessageObject messageObject) {
         this.messageObject = messageObject;
 
         if (messageObject.messageOwner.peer_id != null) {
-            if (messageObject.messageOwner.peer_id.channel_id != 0) {
-                toChat = getMessagesController().getChat(messageObject.messageOwner.peer_id.channel_id);
-            } else if (messageObject.messageOwner.peer_id.chat_id != 0) {
-                toChat = getMessagesController().getChat(messageObject.messageOwner.peer_id.chat_id);
-            }
-        }
-        if (messageObject.messageOwner.fwd_from != null && messageObject.messageOwner.fwd_from.from_id != null) {
-            if (messageObject.messageOwner.fwd_from.from_id.channel_id != 0) {
-                forwardFromChat = getMessagesController().getChat(messageObject.messageOwner.fwd_from.from_id.channel_id);
-            } else if (messageObject.messageOwner.fwd_from.from_id.chat_id != 0) {
-                forwardFromChat = getMessagesController().getChat(messageObject.messageOwner.fwd_from.from_id.chat_id);
-            } else if (messageObject.messageOwner.fwd_from.from_id.user_id != 0) {
-                forwardFromUser = getMessagesController().getUser(messageObject.messageOwner.fwd_from.from_id.user_id);
+            var peer = messageObject.messageOwner.peer_id;
+            if (peer.channel_id != 0 || peer.chat_id != 0) {
+                toChat = getMessagesController().getChat(peer.channel_id != 0 ? peer.channel_id : peer.chat_id);
             }
         }
 
-        if (messageObject.messageOwner.from_id.user_id != 0) {
-            fromUser = getMessagesController().getUser(messageObject.messageOwner.from_id.user_id);
-        } else if (messageObject.messageOwner.from_id.channel_id != 0) {
-            fromChat = getMessagesController().getChat(messageObject.messageOwner.from_id.channel_id);
+        if (messageObject.messageOwner.fwd_from != null && messageObject.messageOwner.fwd_from.from_id != null) {
+            forwardFromPeer = messageObject.messageOwner.fwd_from.from_id;
+        }
+
+        if (messageObject.messageOwner.from_id != null) {
+            var peer = messageObject.messageOwner.from_id;
+            if (peer.channel_id != 0 || peer.chat_id != 0) {
+                fromChat = getMessagesController().getChat(peer.channel_id != 0 ? peer.channel_id : peer.chat_id);
+            } else if (peer.user_id != 0) {
+                fromUser = getMessagesController().getUser(peer.user_id);
+            }
         }
 
         filePath = messageObject.messageOwner.attachPath;
@@ -138,18 +155,240 @@ public class MessageDetailActivity extends BaseActivity implements NotificationC
             }
         }
 
-        if (messageObject.messageOwner.media != null && messageObject.messageOwner.media.document != null) {
-            if (TextUtils.isEmpty(messageObject.messageOwner.media.document.file_name)) {
-                for (int a = 0; a < messageObject.messageOwner.media.document.attributes.size(); a++) {
-                    if (messageObject.messageOwner.media.document.attributes.get(a) instanceof TLRPC.TL_documentAttributeFilename) {
-                        fileName = messageObject.messageOwner.media.document.attributes.get(a).file_name;
-                    }
+        if (MessageObject.getMedia(messageObject.messageOwner) != null && MessageObject.getMedia(messageObject.messageOwner).document != null) {
+            for (var attribute : MessageObject.getMedia(messageObject.messageOwner).document.attributes) {
+                if (attribute instanceof TLRPC.TL_documentAttributeFilename) {
+                    fileName = attribute.file_name;
                 }
-            } else {
-                fileName = messageObject.messageOwner.media.document.file_name;
+                if (attribute instanceof TLRPC.TL_documentAttributeSticker) {
+                    stickerSetOwner = Utils.getOwnerFromStickerSetId(attribute.stickerset.id);
+                }
             }
         }
 
+        if (messageObject.messageOwner.entities != null) {
+            for (var entity : messageObject.messageOwner.entities) {
+                if (entity instanceof TLRPC.TL_messageEntityCustomEmoji) {
+                    TLRPC.Document document = AnimatedEmojiDrawable.findDocument(currentAccount, ((TLRPC.TL_messageEntityCustomEmoji) entity).document_id);
+                    TLRPC.InputStickerSet stickerSet = MessageObject.getInputStickerSet(document);
+                    if (stickerSet == null) {
+                        continue;
+                    }
+
+                    long j3 = stickerSet.id;
+                    long j4 = j3 >> 32;
+                    long j5 = j3 & 4294967295L;
+                    this.stickerSetOwner = (j4 + j5) - ((int) j5);
+
+                    long owner = Utils.getOwnerFromStickerSetId(stickerSet.id);
+                    if (!emojiSetOwners.contains(owner)) {
+                        emojiSetOwners.add(owner);
+                    }
+                }
+            }
+        }
+
+        if (MessageObject.getMedia(messageObject.messageOwner) != null) {
+            if (MessageObject.getMedia(messageObject.messageOwner).photo != null && MessageObject.getMedia(messageObject.messageOwner).photo.dc_id > 0) {
+                dc = MessageObject.getMedia(messageObject.messageOwner).photo.dc_id;
+            } else if (MessageObject.getMedia(messageObject.messageOwner).document != null && MessageObject.getMedia(messageObject.messageOwner).document.dc_id > 0) {
+                dc = MessageObject.getMedia(messageObject.messageOwner).document.dc_id;
+            } else if (MessageObject.getMedia(messageObject.messageOwner).webpage != null && MessageObject.getMedia(messageObject.messageOwner).webpage.photo != null && MessageObject.getMedia(messageObject.messageOwner).webpage.photo.dc_id > 0) {
+                dc = MessageObject.getMedia(messageObject.messageOwner).webpage.photo.dc_id;
+            } else if (MessageObject.getMedia(messageObject.messageOwner).webpage != null && MessageObject.getMedia(messageObject.messageOwner).webpage.document != null && MessageObject.getMedia(messageObject.messageOwner).webpage.document.dc_id > 0) {
+                dc = MessageObject.getMedia(messageObject.messageOwner).webpage.document.dc_id;
+            }
+        }
+
+        noforwards = false;
+    }
+
+    @Override
+    public boolean onFragmentCreate() {
+        super.onFragmentCreate();
+
+        NotificationCenter.getGlobalInstance().addObserver(this, NotificationCenter.emojiLoaded);
+
+        return true;
+    }
+
+    @Override
+    protected boolean hasWhiteActionBar() {
+        return false;
+    }
+
+    private void showNoForwards() {
+        if (getMessagesController().isChatNoForwards(toChat)) {
+            BulletinFactory.of(this).createErrorBulletin(toChat.broadcast ?
+                LocaleController.getString("ForwardsRestrictedInfoChannel", R.string.ForwardsRestrictedInfoChannel) :
+                LocaleController.getString("ForwardsRestrictedInfoGroup", R.string.ForwardsRestrictedInfoGroup)
+            ).show();
+        } else {
+            BulletinFactory.of(this).createErrorBulletin(
+                LocaleController.getString("ForwardsRestrictedInfoBot", R.string.ForwardsRestrictedInfoBot)).show();
+        }
+    }
+
+    @Override
+    public View createView(Context context) {
+        View fragmentView = super.createView(context);
+
+        if (noforwards) {
+            unregisterFlagSecure = AndroidUtilities.registerFlagSecure(getParentActivity().getWindow());
+        }
+
+        return fragmentView;
+    }
+
+    @Override
+    protected void onItemClick(View view, int position, float x, float y) {
+        if (position == dcRow) {
+            int dc = 0;
+            if (MessageObject.getMedia(messageObject.messageOwner).photo != null && MessageObject.getMedia(messageObject.messageOwner).photo.dc_id > 0) {
+                dc = MessageObject.getMedia(messageObject.messageOwner).photo.dc_id;
+            } else if (MessageObject.getMedia(messageObject.messageOwner).document != null && MessageObject.getMedia(messageObject.messageOwner).document.dc_id > 0) {
+                dc = MessageObject.getMedia(messageObject.messageOwner).document.dc_id;
+            }
+            presentFragment(new DatacenterActivity(dc));
+        } else if (position == filePathRow) {
+            if (!noforwards) {
+                Intent intent = new Intent(Intent.ACTION_SEND);
+                var uri = FileProvider.getUriForFile(getParentActivity(), ApplicationLoader.getApplicationId() + ".provider", new File(filePath));
+                intent.setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+                intent.putExtra(Intent.EXTRA_STREAM, uri);
+                intent.setDataAndType(uri, messageObject.getMimeType());
+                startActivityForResult(Intent.createChooser(intent, LocaleController.getString("ShareFile", R.string.ShareFile)), 500);
+            } else {
+                showNoForwards();
+            }
+        } else if (position == channelRow || position == groupRow) {
+            if (toChat != null) {
+                Bundle args = new Bundle();
+                args.putLong("chat_id", toChat.id);
+                ProfileActivity fragment = new ProfileActivity(args);
+                presentFragment(fragment);
+            }
+        } else if (position == fromRow) {
+            Bundle args = new Bundle();
+            if (fromChat != null) {
+                args.putLong("chat_id", fromChat.id);
+            } else if (fromUser != null) {
+                args.putLong("user_id", fromUser.id);
+            }
+            ProfileActivity fragment = new ProfileActivity(args);
+            presentFragment(fragment);
+        } else if (position == forwardRow) {
+            if (forwardFromPeer != null) {
+                Bundle args = new Bundle();
+                if (forwardFromPeer.channel_id != 0 || forwardFromPeer.chat_id != 0) {
+                    args.putLong("chat_id", forwardFromPeer.channel_id != 0 ? forwardFromPeer.channel_id : forwardFromPeer.chat_id);
+                } else if (forwardFromPeer.user_id != 0) {
+                    args.putLong("user_id", forwardFromPeer.user_id);
+                }
+                ProfileActivity fragment = new ProfileActivity(args);
+                presentFragment(fragment);
+            }
+        } else if (position == restrictionReasonRow) {
+            ArrayList<TLRPC.TL_restrictionReason> reasons = messageObject.messageOwner.restriction_reason;
+            LinearLayout ll = new LinearLayout(getParentActivity());
+            ll.setOrientation(LinearLayout.VERTICAL);
+
+            AlertDialog dialog = new AlertDialog.Builder(getParentActivity(), resourcesProvider)
+                .setView(ll)
+                .create();
+
+            for (TLRPC.TL_restrictionReason reason : reasons) {
+                TextDetailSettingsCell cell = new TextDetailSettingsCell(getParentActivity(), resourcesProvider);
+                cell.setBackground(Theme.getSelectorDrawable(false));
+                cell.setMultilineDetail(true);
+                cell.setOnClickListener(v1 -> {
+                    dialog.dismiss();
+                    AndroidUtilities.addToClipboard(cell.getValueTextView().getText());
+                    BulletinFactory.of(this).createCopyBulletin(LocaleController.formatString("TextCopied", R.string.TextCopied)).show();
+                });
+                cell.setTextAndValue(reason.reason + "-" + reason.platform, reason.text, false);
+
+                ll.addView(cell, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT));
+            }
+
+            showDialog(dialog);
+        } else if (position == stickerSetRow) {
+            if (stickerSetOwner != 0) {
+                Bundle args = new Bundle();
+                args.putLong("user_id", stickerSetOwner);
+                ProfileActivity fragment = new ProfileActivity(args);
+                presentFragment(fragment);
+            }
+        } else if (position == emojiSetRow) {
+            LinearLayout ll = new LinearLayout(getParentActivity());
+            ll.setOrientation(LinearLayout.VERTICAL);
+
+            AlertDialog dialog = new AlertDialog.Builder(getParentActivity(), resourcesProvider)
+                .setView(ll)
+                .create();
+
+            for (Long emojiSetOwner : emojiSetOwners) {
+                TextDetailSettingsCell cell = new TextDetailSettingsCell(getParentActivity(), true, resourcesProvider);
+                cell.setBackground(Theme.getSelectorDrawable(false));
+                cell.setMultilineDetail(true);
+                cell.setOnClickListener(v1 -> {
+                    dialog.dismiss();
+                    Bundle args = new Bundle();
+                    args.putLong("user_id", emojiSetOwner);
+                    ProfileActivity fragment = new ProfileActivity(args);
+                    presentFragment(fragment);
+                });
+                ll.addView(cell, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT));
+
+                StringBuilder builder = new StringBuilder();
+                TLRPC.User user = getMessagesController().getUser(emojiSetOwner);
+                if (user != null) {
+                    appendUserOrChat(user, builder);
+                } else {
+                    getMessageUtils().searchUser(emojiSetOwner, user1 -> {
+                        StringBuilder builder1 = new StringBuilder();
+                        if (user1 != null) {
+                            appendUserOrChat(user1, builder1);
+                        } else {
+                            builder1.append(emojiSetOwner);
+                        }
+                        cell.setTextAndValueWithEmoji("", builder1, false);
+                    });
+                    builder.append("Loading...");
+                    builder.append("\n");
+                    builder.append(emojiSetOwner);
+                }
+                cell.setTextAndValueWithEmoji("", builder, false);
+            }
+
+            showDialog(dialog);
+        }
+    }
+
+    @Override
+    protected boolean onItemLongClick(View view, int position, float x, float y) {
+        if (position != endRow) {
+            if (!noforwards || !(position == messageRow || position == captionRow || position == filePathRow)) {
+                CharSequence text;
+                if (view instanceof TextDetailSettingsCell) {
+                    TextDetailSettingsCell textCell = (TextDetailSettingsCell) view;
+                    text = textCell.getValueTextView().getText();
+                } else {
+                    TextDetailSimpleCell textCell = (TextDetailSimpleCell) view;
+                    text = textCell.getValueTextView().getText();
+                }
+                AndroidUtilities.addToClipboard(text);
+                BulletinFactory.of(this).createCopyBulletin(LocaleController.formatString("TextCopied", R.string.TextCopied)).show();
+            } else {
+                showNoForwards();
+            }
+        }
+        return true;
+    }
+
+    @Override
+    protected String getKey() {
+        return null;
     }
 
     @Override
@@ -163,113 +402,8 @@ public class MessageDetailActivity extends BaseActivity implements NotificationC
     }
 
     @Override
-    protected void onItemClick(View view, int position, float x, float y) {
-        if (position != endRow) {
-            TextDetailSettingsCell textCell = (TextDetailSettingsCell) view;
-            AndroidUtilities.addToClipboard(textCell.getValueTextView().getText());
-            BulletinFactory.of(this).createCopyBulletin(LocaleController.formatString("TextCopied", R.string.TextCopied)).show();
-        }
-    }
-
-    @Override
-    protected boolean onItemLongClick(View view, int position, float x, float y) {
-        {
-            if (position == filePathRow) {
-                Intent intent = new Intent(Intent.ACTION_SEND);
-                intent.setType("application/octet-stream");
-                if (Build.VERSION.SDK_INT >= 24) {
-                    try {
-                        intent.putExtra(Intent.EXTRA_STREAM, FileProvider.getUriForFile(getParentActivity(), BuildConfig.APPLICATION_ID + ".provider", new File(filePath)));
-                        intent.setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-                    } catch (Exception ignore) {
-                        intent.putExtra(Intent.EXTRA_STREAM, Uri.fromFile(new File(filePath)));
-                    }
-                } else {
-                    intent.putExtra(Intent.EXTRA_STREAM, Uri.fromFile(new File(filePath)));
-                }
-                startActivityForResult(Intent.createChooser(intent, LocaleController.getString("ShareFile", R.string.ShareFile)), 500);
-            } else if (position == channelRow || position == groupRow) {
-                if (toChat != null) {
-                    Bundle args = new Bundle();
-                    args.putLong("chat_id", toChat.id);
-                    ProfileActivity fragment = new ProfileActivity(args);
-                    presentFragment(fragment);
-                }
-            } else if (position == fromRow) {
-                if (fromUser != null) {
-                    Bundle args = new Bundle();
-                    args.putLong("user_id", fromUser.id);
-                    ProfileActivity fragment = new ProfileActivity(args);
-                    presentFragment(fragment);
-                } else if (fromChat != null) {
-                    Bundle args = new Bundle();
-                    args.putLong("chat_id", fromChat.id);
-                    ProfileActivity fragment = new ProfileActivity(args);
-                    presentFragment(fragment);
-                }
-            } else if (position == forwardRow) {
-                if (forwardFromUser != null) {
-                    Bundle args = new Bundle();
-                    args.putLong("user_id", forwardFromUser.id);
-                    ProfileActivity fragment = new ProfileActivity(args);
-                    presentFragment(fragment);
-                } else if (forwardFromChat != null) {
-                    Bundle args = new Bundle();
-                    args.putLong("chat_id", forwardFromChat.id);
-                    ProfileActivity fragment = new ProfileActivity(args);
-                    presentFragment(fragment);
-                }
-            } else if (position == restrictionReasonRow) {
-                ArrayList<TLRPC.TL_restrictionReason> reasons = messageObject.messageOwner.restriction_reason;
-                LinearLayout ll = new LinearLayout(context);
-                ll.setOrientation(LinearLayout.VERTICAL);
-
-                AlertDialog dialog = new AlertDialog.Builder(context).setView(ll).create();
-
-                for (TLRPC.TL_restrictionReason reason : reasons) {
-                    TextDetailSettingsCell cell = new TextDetailSettingsCell(context);
-                    cell.setBackground(Theme.getSelectorDrawable(false));
-                    cell.setMultilineDetail(true);
-                    cell.setOnClickListener(v1 -> {
-                        dialog.dismiss();
-                        AndroidUtilities.addToClipboard(cell.getValueTextView().getText());
-                        BulletinFactory.of(this).createCopyBulletin(LocaleController.formatString("TextCopied", R.string.TextCopied)).show();
-                    });
-                    cell.setTextAndValue(reason.reason + "-" + reason.platform, reason.text, false);
-
-                    ll.addView(cell, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT));
-                }
-
-                showDialog(dialog);
-            } else if (position == dcRow) {
-                int dc = 0;
-                if (messageObject.messageOwner.media.photo != null && messageObject.messageOwner.media.photo.dc_id > 0) {
-                    dc = messageObject.messageOwner.media.photo.dc_id;
-                } else if (messageObject.messageOwner.media.document != null && messageObject.messageOwner.media.document.dc_id > 0) {
-                    dc = messageObject.messageOwner.media.document.dc_id;
-                }
-                presentFragment(new DatacenterActivity(dc));
-            } else {
-                return false;
-            }
-            return true;
-        }
-    }
-
-    @Override
-    protected String getKey() {
-        return "msgdetails";
-    }
-
-    @Override
-    public View createView(Context mContext) {
-        context = mContext;
-        return super.createView(mContext);
-    }
-
-    @Override
     protected void updateRows() {
-        super.updateRows();
+        rowCount = 0;
         idRow = messageObject.isSponsored() ? -1 : rowCount++;
         messageRow = TextUtils.isEmpty(messageObject.messageText) ? -1 : rowCount++;
         captionRow = TextUtils.isEmpty(messageObject.caption) ? -1 : rowCount++;
@@ -283,18 +417,16 @@ public class MessageDetailActivity extends BaseActivity implements NotificationC
         fileNameRow = TextUtils.isEmpty(fileName) ? -1 : rowCount++;
         filePathRow = TextUtils.isEmpty(filePath) ? -1 : rowCount++;
         fileSizeRow = messageObject.getSize() != 0 ? rowCount++ : -1;
-        if (messageObject.messageOwner.media != null && ((messageObject.messageOwner.media.photo != null && messageObject.messageOwner.media.photo.dc_id > 0) || (messageObject.messageOwner.media.document != null && messageObject.messageOwner.media.document.dc_id > 0))) {
-            dcRow = rowCount++;
-        } else {
-            dcRow = -1;
-        }
+        stickerSetRow = stickerSetOwner == 0 ? -1 : rowCount++;
+        emojiSetRow = emojiSetOwners.size() == 0 ? -1 : rowCount++;
+        dcRow = dc != 0 ? rowCount++ : -1;
         restrictionReasonRow = messageObject.messageOwner.restriction_reason.isEmpty() ? -1 : rowCount++;
         forwardsRow = messageObject.messageOwner.forwards > 0 ? rowCount++ : -1;
         sponsoredRow = messageObject.isSponsored() ? rowCount++ : -1;
+        shouldBlockMessageRow = messageObject.isBlockedMessage() ? rowCount++ : -1;
+        languageRow = TextUtils.isEmpty(getMessageUtils().getMessagePlainText(messageObject)) ? -1 : rowCount++;
+        linkOrEmojiOnlyRow = !TextUtils.isEmpty(messageObject.messageOwner.message) && getMessageUtils().isLinkOrEmojiOnlyMessage(messageObject) ? rowCount++ : -1;
         endRow = rowCount++;
-        if (listAdapter != null) {
-            listAdapter.notifyDataSetChanged();
-        }
     }
 
     @Override
@@ -306,114 +438,68 @@ public class MessageDetailActivity extends BaseActivity implements NotificationC
         }
     }
 
+    @Override
+    public void onFragmentDestroy() {
+        super.onFragmentDestroy();
+        NotificationCenter.getGlobalInstance().removeObserver(this, NotificationCenter.emojiLoaded);
+        if (unregisterFlagSecure != null) {
+            unregisterFlagSecure.run();
+        }
+    }
+
     private class ListAdapter extends BaseListAdapter {
+
         public ListAdapter(Context context) {
             super(context);
         }
 
         @Override
-        public int getItemCount() {
-            return rowCount;
-        }
-
-        @Override
-        public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
+        public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
             switch (holder.getItemViewType()) {
-                case 1: {
-                    holder.itemView.setBackground(Theme.getThemedDrawable(mContext, R.drawable.greydivider_bottom, Theme.key_windowBackgroundGrayShadow));
+                case TYPE_SHADOW: {
+                    holder.itemView.setBackground(Theme.getThemedDrawable(mContext, R.drawable.greydivider_bottom, getThemedColor(Theme.key_windowBackgroundGrayShadow)));
                     break;
                 }
-                case 2: {
+                case TYPE_DETAIL_SETTINGS: {
                     TextDetailSettingsCell textCell = (TextDetailSettingsCell) holder.itemView;
                     textCell.setMultilineDetail(true);
                     boolean divider = position + 1 != endRow;
                     if (position == idRow) {
                         textCell.setTextAndValue("ID", String.valueOf(messageObject.messageOwner.id), divider);
-                    } else if (position == messageRow) {
-                        textCell.setTextAndValue("Message", messageObject.messageText, divider);
-                    } else if (position == captionRow) {
-                        textCell.setTextAndValue("Caption", messageObject.caption, divider);
                     } else if (position == channelRow || position == groupRow) {
                         StringBuilder builder = new StringBuilder();
-                        builder.append(toChat.title);
-                        builder.append("\n");
-                        if (!TextUtils.isEmpty(toChat.username)) {
-                            builder.append("@");
-                            builder.append(toChat.username);
-                            builder.append("\n");
-                        }
-                        builder.append(toChat.id);
-                        textCell.setTextAndValue(position == channelRow ? "Channel" : "Group", builder.toString(), divider);
+                        appendUserOrChat(toChat, builder);
+                        textCell.setTextAndValueWithEmoji(position == channelRow ? "Channel" : "Group", builder, divider);
                     } else if (position == fromRow) {
                         StringBuilder builder = new StringBuilder();
                         if (fromUser != null) {
-                            builder.append(ContactsController.formatName(fromUser.first_name, fromUser.last_name));
-                            builder.append("\n");
-                            if (!TextUtils.isEmpty(fromUser.username)) {
-                                builder.append("@");
-                                builder.append(fromUser.username);
-                                builder.append("\n");
-                            }
-                            builder.append(fromUser.id);
+                            appendUserOrChat(fromUser, builder);
                         } else if (fromChat != null) {
-                            builder.append(fromChat.title);
-                            builder.append("\n");
-                            if (!TextUtils.isEmpty(fromChat.username)) {
-                                builder.append("@");
-                                builder.append(fromChat.username);
-                                builder.append("\n");
-                            }
-                            builder.append(fromChat.id);
+                            appendUserOrChat(fromChat, builder);
                         } else if (!TextUtils.isEmpty(messageObject.messageOwner.post_author)) {
                             builder.append(messageObject.messageOwner.post_author);
                         }
-                        textCell.setTextAndValue("From", builder.toString(), divider);
+                        textCell.setTextAndValueWithEmoji("From", builder, divider);
                     } else if (position == botRow) {
                         textCell.setTextAndValue("Bot", "Yes", divider);
                     } else if (position == dateRow) {
-                        long date = (long) messageObject.messageOwner.date * 1000;
-                        textCell.setTextAndValue(messageObject.scheduled ? "Scheduled date" : "Date", messageObject.messageOwner.date == 0x7ffffffe ? "When online" : LocaleController.formatString("formatDateAtTime", R.string.formatDateAtTime, LocaleController.getInstance().formatterYear.format(new Date(date)), LocaleController.getInstance().formatterDayWithSeconds.format(new Date(date))), divider);
+                        textCell.setTextAndValue(messageObject.scheduled ? "Scheduled date" : "Date", formatTime(messageObject.messageOwner.date), divider);
                     } else if (position == editedRow) {
-                        long date = (long) messageObject.messageOwner.edit_date * 1000;
-                        textCell.setTextAndValue("Edited", LocaleController.formatString("formatDateAtTime", R.string.formatDateAtTime, LocaleController.getInstance().formatterYear.format(new Date(date)), LocaleController.getInstance().formatterDayWithSeconds.format(new Date(date))), divider);
+                        textCell.setTextAndValue("Edited", formatTime(messageObject.messageOwner.edit_date), divider);
                     } else if (position == forwardRow) {
                         StringBuilder builder = new StringBuilder();
-                        if (messageObject.messageOwner.fwd_from.from_id != null) {
-                            if (messageObject.messageOwner.fwd_from.from_id.channel_id != 0) {
-                                TLRPC.Chat chat = getMessagesController().getChat(messageObject.messageOwner.fwd_from.from_id.channel_id);
-                                builder.append(chat.title);
-                                builder.append("\n");
-                                if (!TextUtils.isEmpty(chat.username)) {
-                                    builder.append("@");
-                                    builder.append(chat.username);
-                                    builder.append("\n");
-                                }
-                                builder.append(chat.id);
-                            } else if (messageObject.messageOwner.fwd_from.from_id.user_id != 0) {
-                                TLRPC.User user = getMessagesController().getUser(messageObject.messageOwner.fwd_from.from_id.user_id);
-                                builder.append(ContactsController.formatName(user.first_name, user.last_name));
-                                builder.append("\n");
-                                if (!TextUtils.isEmpty(user.username)) {
-                                    builder.append("@");
-                                    builder.append(user.username);
-                                    builder.append("\n");
-                                }
-                                builder.append(user.id);
-                            } else if (messageObject.messageOwner.fwd_from.from_id.chat_id != 0) {
-                                TLRPC.Chat chat = getMessagesController().getChat(messageObject.messageOwner.fwd_from.from_id.chat_id);
-                                builder.append(chat.title);
-                                builder.append("\n");
-                                if (!TextUtils.isEmpty(chat.username)) {
-                                    builder.append("@");
-                                    builder.append(chat.username);
-                                    builder.append("\n");
-                                }
-                                builder.append(chat.id);
+                        if (forwardFromPeer != null) {
+                            if (forwardFromPeer.channel_id != 0 || forwardFromPeer.chat_id != 0) {
+                                TLRPC.Chat chat = getMessagesController().getChat(forwardFromPeer.channel_id != 0 ? forwardFromPeer.channel_id : forwardFromPeer.chat_id);
+                                appendUserOrChat(chat, builder);
+                            } else if (forwardFromPeer.user_id != 0) {
+                                TLRPC.User user = getMessagesController().getUser(forwardFromPeer.user_id);
+                                appendUserOrChat(user, builder);
                             }
                         } else if (!TextUtils.isEmpty(messageObject.messageOwner.fwd_from.from_name)) {
                             builder.append(messageObject.messageOwner.fwd_from.from_name);
                         }
-                        textCell.setTextAndValue("Forward from", builder.toString(), divider);
+                        textCell.setTextAndValueWithEmoji("Forward from", builder, divider);
                     } else if (position == fileNameRow) {
                         textCell.setTextAndValue("File name", fileName, divider);
                     } else if (position == filePathRow) {
@@ -421,13 +507,6 @@ public class MessageDetailActivity extends BaseActivity implements NotificationC
                     } else if (position == fileSizeRow) {
                         textCell.setTextAndValue("File size", AndroidUtilities.formatFileSize(messageObject.getSize()), divider);
                     } else if (position == dcRow) {
-                        int dc = 0;
-                        if (messageObject.messageOwner.media.photo != null && messageObject.messageOwner.media.photo.dc_id > 0) {
-                            dc = messageObject.messageOwner.media.photo.dc_id;
-                        } else if (messageObject.messageOwner.media.document != null && messageObject.messageOwner.media.document.dc_id > 0) {
-                            dc = messageObject.messageOwner.media.document.dc_id;
-                        }
-                        textCell.setTextAndValue("DC", String.format(Locale.US, "%d, %s", dc, MessageUtils.getDCLocation(dc)), divider);
                         textCell.setTextAndValue("DC", String.format(Locale.US, "DC%d %s, %s", dc, MessageUtils.getDCName(dc), MessageUtils.getDCLocation(dc)), divider);
                     } else if (position == restrictionReasonRow) {
                         ArrayList<TLRPC.TL_restrictionReason> reasons = messageObject.messageOwner.restriction_reason;
@@ -440,11 +519,53 @@ public class MessageDetailActivity extends BaseActivity implements NotificationC
                                 value.append(", ");
                             }
                         }
-                        textCell.setTextAndValue("Restriction reason", value.toString(), divider);
+                        textCell.setTextAndValue("Restriction reason", value, divider);
                     } else if (position == forwardsRow) {
                         textCell.setTextAndValue("Forwards", String.format(Locale.US, "%d", messageObject.messageOwner.forwards), divider);
                     } else if (position == sponsoredRow) {
                         textCell.setTextAndValue("Sponsored", "Yes", divider);
+                    } else if (position == shouldBlockMessageRow) {
+                        textCell.setTextAndValue("Blocked", "Yes", divider);
+                    } else if (position == languageRow) {
+                        textCell.setTextAndValue("Language", "Loading...", divider);
+                        LanguageDetector.detectLanguage(
+                            getMessageUtils().getMessagePlainText(messageObject),
+                            lang -> textCell.setTextAndValue("Language", lang, divider),
+                            e -> textCell.setTextAndValue("Language", e.getLocalizedMessage(), divider));
+                    } else if (position == linkOrEmojiOnlyRow) {
+                        textCell.setTextAndValue("Link or emoji only", "Yes", divider);
+                    } else if (position == stickerSetRow) {
+                        StringBuilder builder = new StringBuilder();
+                        TLRPC.User user = getMessagesController().getUser(stickerSetOwner);
+                        if (user != null) {
+                            appendUserOrChat(user, builder);
+                        } else {
+                            getMessageUtils().searchUser(stickerSetOwner, user1 -> {
+                                StringBuilder builder1 = new StringBuilder();
+                                if (user1 != null) {
+                                    appendUserOrChat(user1, builder1);
+                                } else {
+                                    builder1.append(stickerSetOwner);
+                                }
+                                textCell.setTextAndValueWithEmoji("Sticker Pack creator", builder1, divider);
+                            });
+                            builder.append("Loading...");
+                            builder.append("\n");
+                            builder.append(stickerSetOwner);
+                        }
+                        textCell.setTextAndValueWithEmoji("Sticker Pack creator", builder, divider);
+                    } else if (position == emojiSetRow) {
+                        textCell.setTextAndValue("Emoji Pack creators", TextUtils.join(", ", emojiSetOwners), divider);
+                    }
+                    break;
+                }
+                case Integer.MAX_VALUE: {
+                    TextDetailSimpleCell textCell = (TextDetailSimpleCell) holder.itemView;
+                    boolean divider = position + 1 != endRow;
+                    if (position == messageRow) {
+                        textCell.setTextAndValue("Message", AnimatedEmojiSpan.cloneSpans(messageObject.messageText), messageObject.getEmojiOnlyCount(), divider);
+                    } else if (position == captionRow) {
+                        textCell.setTextAndValue("Caption", AnimatedEmojiSpan.cloneSpans(messageObject.caption), messageObject.getEmojiOnlyCount(), divider);
                     }
                     break;
                 }
@@ -453,35 +574,137 @@ public class MessageDetailActivity extends BaseActivity implements NotificationC
 
         @Override
         public boolean isEnabled(RecyclerView.ViewHolder holder) {
-            int position = holder.getAdapterPosition();
-            return position != endRow;
+            return super.isEnabled(holder) || holder.getItemViewType() == Integer.MAX_VALUE;
         }
 
         @NonNull
         @Override
         public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-            View view = null;
-            switch (viewType) {
-                case 1:
-                    view = new ShadowSectionCell(mContext);
-                    break;
-                case 2:
-                    view = new TextDetailSettingsCell(mContext);
-                    view.setBackgroundColor(Theme.getColor(Theme.key_windowBackgroundWhite));
-                    break;
+            if (viewType == Integer.MAX_VALUE) {
+                var view = new TextDetailSimpleCell(mContext, resourcesProvider);
+                view.setBackgroundColor(getThemedColor(Theme.key_windowBackgroundWhite));
+                view.setLayoutParams(new RecyclerView.LayoutParams(RecyclerView.LayoutParams.MATCH_PARENT, RecyclerView.LayoutParams.WRAP_CONTENT));
+                return new RecyclerListView.Holder(view);
+            } else {
+                return super.onCreateViewHolder(parent, viewType);
             }
-            //noinspection ConstantConditions
-            view.setLayoutParams(new RecyclerView.LayoutParams(RecyclerView.LayoutParams.MATCH_PARENT, RecyclerView.LayoutParams.WRAP_CONTENT));
-            return new RecyclerListView.Holder(view);
         }
 
         @Override
         public int getItemViewType(int position) {
             if (position == endRow) {
-                return 1;
+                return TYPE_SHADOW;
+            } else if (position == messageRow || position == captionRow) {
+                return Integer.MAX_VALUE;
             } else {
-                return 2;
+                return TYPE_DETAIL_SETTINGS;
             }
         }
+
+        private String formatTime(int timestamp) {
+            if (timestamp == 0x7ffffffe) {
+                return "When online";
+            } else {
+                return timestamp + "\n" + LocaleController.formatString("formatDateAtTime", R.string.formatDateAtTime, LocaleController.getInstance().formatterYear.format(new Date(timestamp * 1000L)), LocaleController.getInstance().formatterDayWithSeconds.format(new Date(timestamp * 1000L)));
+            }
+        }
+    }
+
+    private void appendUserOrChat(TLObject object, StringBuilder builder) {
+        if (object instanceof TLRPC.User) {
+            TLRPC.User user = (TLRPC.User) object;
+            builder.append(ContactsController.formatName(user.first_name, user.last_name));
+            builder.append("\n");
+            if (!TextUtils.isEmpty(user.username)) {
+                builder.append("@");
+                builder.append(UserObject.getPublicUsername(user));
+                builder.append("\n");
+            }
+            builder.append(user.id);
+        } else if (object instanceof TLRPC.Chat) {
+            TLRPC.Chat chat = (TLRPC.Chat) object;
+            builder.append(chat.title);
+            builder.append("\n");
+            if (!TextUtils.isEmpty(chat.username)) {
+                builder.append("@");
+                builder.append(ChatObject.getPublicUsername(chat));
+                builder.append("\n");
+            }
+            builder.append(chat.id);
+        }
+    }
+
+    @SuppressLint("ViewConstructor")
+    public static class TextDetailSimpleCell extends FrameLayout {
+
+        private final TextView textView;
+        private final TextViewEffects valueTextView;
+        private boolean needDivider;
+
+        public TextDetailSimpleCell(Context context, Theme.ResourcesProvider resourcesProvider) {
+            super(context);
+            setClipChildren(false);
+
+            textView = new TextView(context);
+            textView.setTextColor(Theme.getColor(Theme.key_windowBackgroundWhiteBlackText, resourcesProvider));
+            textView.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 16);
+            textView.setLines(1);
+            textView.setMaxLines(1);
+            textView.setSingleLine(true);
+            textView.setEllipsize(TextUtils.TruncateAt.END);
+            textView.setGravity((LocaleController.isRTL ? Gravity.RIGHT : Gravity.LEFT) | Gravity.CENTER_VERTICAL);
+            addView(textView, LayoutHelper.createFrame(LayoutHelper.WRAP_CONTENT, LayoutHelper.WRAP_CONTENT, (LocaleController.isRTL ? Gravity.RIGHT : Gravity.LEFT) | Gravity.TOP, 21, 10, 21, 0));
+
+            valueTextView = new TextViewEffects(context, resourcesProvider);
+            valueTextView.setTextColor(Theme.getColor(Theme.key_windowBackgroundWhiteGrayText2, resourcesProvider));
+            valueTextView.setTextSize(13);
+            valueTextView.setGravity(LocaleController.isRTL ? Gravity.RIGHT : Gravity.LEFT);
+            valueTextView.setSingleLine(false);
+            valueTextView.setPadding(0, 0, 0, AndroidUtilities.dp(12));
+            valueTextView.setLinkTextColor(Theme.getColor(Theme.key_windowBackgroundWhiteLinkText, resourcesProvider));
+            addView(valueTextView, LayoutHelper.createFrame(LayoutHelper.WRAP_CONTENT, LayoutHelper.WRAP_CONTENT, (LocaleController.isRTL ? Gravity.RIGHT : Gravity.LEFT) | Gravity.TOP, 21, 35, 21, 0));
+        }
+
+        @Override
+        protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+            super.onMeasure(MeasureSpec.makeMeasureSpec(MeasureSpec.getSize(widthMeasureSpec), MeasureSpec.EXACTLY), MeasureSpec.makeMeasureSpec(0, MeasureSpec.UNSPECIFIED));
+        }
+
+        public TextViewEffects getValueTextView() {
+            return valueTextView;
+        }
+
+        public void setTextAndValue(String text, CharSequence value, int emojiOnlyCount, boolean divider) {
+            textView.setText(text);
+            valueTextView.setText(value, emojiOnlyCount);
+            needDivider = divider;
+            setWillNotDraw(!divider);
+        }
+
+        @Override
+        public void invalidate() {
+            super.invalidate();
+            textView.invalidate();
+        }
+
+        @Override
+        protected void onDraw(Canvas canvas) {
+            if (needDivider && Theme.dividerPaint != null) {
+                canvas.drawLine(LocaleController.isRTL ? 0 : AndroidUtilities.dp(20), getMeasuredHeight() - 1, getMeasuredWidth() - (LocaleController.isRTL ? AndroidUtilities.dp(20) : 0), getMeasuredHeight() - 1, Theme.dividerPaint);
+            }
+        }
+    }
+
+    @Override
+    public ArrayList<ThemeDescription> getThemeDescriptions() {
+        ArrayList<ThemeDescription> themeDescriptions = super.getThemeDescriptions();
+
+        themeDescriptions.add(new ThemeDescription(listView, ThemeDescription.FLAG_CELLBACKGROUNDCOLOR, new Class[]{TextDetailSimpleCell.class}, null, null, null, Theme.key_windowBackgroundWhite));
+
+        themeDescriptions.add(new ThemeDescription(listView, 0, new Class[]{TextDetailSimpleCell.class}, new String[]{"textView"}, null, null, null, Theme.key_windowBackgroundWhiteBlackText));
+        themeDescriptions.add(new ThemeDescription(listView, 0, new Class[]{TextDetailSimpleCell.class}, new String[]{"valueTextView"}, null, null, null, Theme.key_windowBackgroundWhiteGrayText2));
+        themeDescriptions.add(new ThemeDescription(listView, ThemeDescription.FLAG_LINKCOLOR, new Class[]{TextDetailSimpleCell.class}, new String[]{"valueTextView"}, null, null, null, Theme.key_windowBackgroundWhiteLinkText));
+
+        return themeDescriptions;
     }
 }
