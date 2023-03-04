@@ -20,7 +20,7 @@ jobs:
     env:
       CCACHE_COMPILERCHECK: "%compiler% -dumpmachine; %compiler% -dumpversion"
       CCACHE_NOHASHDIR: "true"
-      CCACHE_MAXSIZE: "5G"
+      CCACHE_MAXSIZE: "10G"
       CCACHE_HARDLINK: "true"
     steps:
       - uses: actions/checkout@v2
@@ -80,7 +80,7 @@ jobs:
         run: |
           echo -e "RELEASE_KEY_PASSWORD=${{ secrets.RELEASE_KEY_PASSWORD }}\nRELEASE_KEY_ALIAS=${{ secrets.RELEASE_KEY_ALIAS }}\nRELEASE_STORE_PASSWORD=${{ secrets.RELEASE_STORE_PASSWORD }}">>local.properties
           cat > service_account_credentials.json << EOF
-          ${{ secrets.ANDROID_PUBLISHER_CREDENTIALS }}" 
+          ${{ secrets.ANDROID_PUBLISHER_CREDENTIALS }}"
           EOF
           ./gradlew TMessagesProj:assembleRelease
           echo "APK_FILE=$(find TMessagesProj/build/outputs/apk -name '*arm64*.apk')" >> $GITHUB_ENV
@@ -114,10 +114,11 @@ jobs:
           name: mapping
           path: TMessagesProj/build/outputs/mapping
 
-  
+
   play-build:
     name: Gradle Build (play store)
     runs-on: ubuntu-latest
+    if: ${{ github.event_name != 'pull_request' && success() && github.ref == 'refs/heads/master' }}
     env:
       CCACHE_COMPILERCHECK: "%compiler% -dumpmachine; %compiler% -dumpversion"
       CCACHE_NOHASHDIR: "true"

@@ -1,8 +1,6 @@
 @file:Suppress("UnstableApiUsage")
 
 import com.android.build.gradle.internal.cxx.configure.gradleLocalProperties
-import org.gradle.nativeplatform.platform.internal.DefaultNativePlatform
-import java.nio.file.Paths
 
 plugins {
     id("com.android.application")
@@ -107,16 +105,6 @@ android {
     externalNativeBuild {
         cmake {
             path = File(projectDir, "jni/CMakeLists.txt")
-            System.getenv("PATH").split(File.pathSeparator).any { path ->
-                val file = Paths.get("${path}${File.separator}ccache${if (DefaultNativePlatform.getCurrentOperatingSystem().isWindows) ".exe" else ""}").toFile()
-                if (file.exists()) {
-                    println("Using ccache ${file.getAbsolutePath()}")
-                    arguments += listOf(
-                        "-DANDROID_CCACHE=${file.getAbsolutePath()}"
-                    )
-                }
-                return@any true
-            }
         }
     }
 
@@ -176,8 +164,10 @@ android {
                 arguments += listOf(
                     "-DANDROID_STL=c++_static",
                     "-DANDROID_PLATFORM=android-21",
+                    "-DCMAKE_C_COMPILER_LAUNCHER=ccache",
+                    "-DCMAKE_CXX_COMPILER_LAUNCHER=ccache",
+                    "-DNDK_CCACHE=ccache"
                 )
-
             }
         }
     }
