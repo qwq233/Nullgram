@@ -108,6 +108,9 @@
 -keep,allowshrinking,allowobfuscation class org.telegram.ui.Components.GroupCreateSpan {
     public void updateColors();
  }
+ -keep,allowshrinking,allowobfuscation class org.telegram.ui.Components.Premium.GLIcon.ObjLoader {
+     public <init>();
+  }
 -keepclassmembernames class top.qwq2333.nullgram.activity.DatacenterActivity$DatacenterCell { <fields>; }
 -keepclassmembernames class top.qwq2333.nullgram.activity.DatacenterActivity$DatacenterHeaderCell { <fields>; }
 -keepclassmembernames class top.qwq2333.nullgram.activity.MessageDetailsActivity$TextDetailSimpleCell { <fields>; }
