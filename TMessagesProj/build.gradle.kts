@@ -107,6 +107,16 @@ android {
     externalNativeBuild {
         cmake {
             path = File(projectDir, "jni/CMakeLists.txt")
+            System.getenv("PATH").split(File.pathSeparator).any { path ->
+                val file = Paths.get("${path}${File.separator}ccache${if (DefaultNativePlatform.getCurrentOperatingSystem().isWindows) ".exe" else ""}").toFile()
+                if (file.exists()) {
+                    println("Using ccache ${file.getAbsolutePath()}")
+                    arguments += listOf(
+                        "-DANDROID_CCACHE=${file.getAbsolutePath()}"
+                    )
+                }
+                return@any true
+            }
         }
     }
 
@@ -167,19 +177,6 @@ android {
                     "-DANDROID_STL=c++_static",
                     "-DANDROID_PLATFORM=android-21",
                 )
-
-                System.getenv("PATH").split(File.pathSeparator).any { path ->
-                    val file = Paths.get("${path}${File.separator}ccache${if (DefaultNativePlatform.getCurrentOperatingSystem().isWindows) ".exe" else ""}").toFile()
-
-                    if (file.exists()) {
-                        println("Using ccache ${file.getAbsolutePath()}")
-                        arguments += listOf(
-                            "-DANDROID_CCACHE=${file.getAbsolutePath()}"
-                        )
-                    }
-
-                    return@any true
-                }
 
             }
         }
