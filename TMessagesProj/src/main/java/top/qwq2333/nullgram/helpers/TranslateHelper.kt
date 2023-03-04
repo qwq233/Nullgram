@@ -234,20 +234,13 @@ object TranslateHelper {
                 val builder = AlertDialog.Builder(context, resourcesProvider)
                     .setMessage(LocaleController.getString("TranslateApiUnsupported", R.string.TranslateApiUnsupported))
                 if ("app" == currentTargetLanguage) {
-                    builder.setPositiveButton(
-                        LocaleController.getString(
-                            "UseGoogleTranslate",
-                            R.string.UseGoogleTranslate
-                        )
-                    ) { _: DialogInterface?, _: Int ->
+                    builder.setPositiveButton(LocaleController.getString("UseGoogleTranslate", R.string.UseGoogleTranslate)) { _: DialogInterface?, _: Int ->
                         currentProviderType = ProviderType.GoogleTranslator
                         result(true)
                     }
                     builder.setNegativeButton(LocaleController.getString("Cancel", R.string.Cancel), null)
                 } else if (translator.supportLanguage(translator.getCurrentAppLanguage())) {
-                    builder.setPositiveButton(
-                        LocaleController.getString("ResetLanguage", R.string.ResetLanguage)
-                    ) { _: DialogInterface?, _: Int ->
+                    builder.setPositiveButton(LocaleController.getString("ResetLanguage", R.string.ResetLanguage)) { _: DialogInterface?, _: Int ->
                         currentProviderType = types[i]
                         currentTargetLanguage = "app"
                         result(false)
@@ -275,19 +268,17 @@ object TranslateHelper {
         fragment: BaseFragment, view: View?, whiteActionBar: Boolean, resourcesProvider: ResourcesProvider? = null, callback: () -> Unit
     ) {
         if (getCurrentProvider().getTargetLanguages().size <= 30) {
-            val targetLanguages = getCurrentProvider().getTargetLanguages().toMutableList()
+            val targetLanguages = ArrayList<String>(getCurrentProvider().getTargetLanguages())
             val names = arrayListOf<CharSequence>()
             for (language in targetLanguages) {
                 val locale = Locale.forLanguageTag(language)
                 if (!TextUtils.isEmpty(locale.script)) {
-                    names.add(
-                        HtmlCompat.fromHtml(String.format("%s - %s", locale.displayScript, locale.getDisplayScript(locale)), HtmlCompat.FROM_HTML_MODE_LEGACY)
-                    )
+                    names.add(HtmlCompat.fromHtml(String.format("%s - %s", locale.displayScript, locale.getDisplayScript(locale)), HtmlCompat.FROM_HTML_MODE_LEGACY))
                 } else {
                     names.add(String.format("%s - %s", locale.displayName, locale.getDisplayName(locale)))
                 }
             }
-            targetLanguages[0] = "app"
+            targetLanguages.add(0, "app")
             names.add(0, LocaleController.getString("TranslationTargetApp", R.string.TranslationTargetApp))
             PopupBuilder.show(
                 names,

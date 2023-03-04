@@ -10,7 +10,7 @@ import io.ktor.http.userAgent
 import org.json.JSONObject
 import org.telegram.messenger.Utilities
 import top.qwq2333.nullgram.translate.BaseTranslator
-import java.net.URLEncoder
+import top.qwq2333.nullgram.utils.encodeUrl
 import java.util.Locale
 import java.util.UUID
 
@@ -72,7 +72,7 @@ object BaiduTranslator : BaseTranslator()  {
         client.post("https://fanyi-app.baidu.com/transapp/agent.php?product=transapp&type=json&version=153&plat=android&req=v2trans&cuid=$cuid") {
             contentType(ContentType.Application.FormUrlEncoded)
             userAgent("BDTApp; Android 12; BaiduTranslate/10.2.1")
-            setBody("sign=${sign}&sofireId=&zhType=0&use_cache_response=1&from=auto&timestamp=${currentTime}&query=${URLEncoder.encode(text, "UTF-8")}&needfixl=1&lfixver=1&is_show_ad=1&appRecommendSwitch=1&to=${to}&page=translate")
+            setBody("sign=${sign}&sofireId=&zhType=0&use_cache_response=1&from=auto&timestamp=${currentTime}&query=${text.encodeUrl()}&needfixl=1&lfixver=1&is_show_ad=1&appRecommendSwitch=1&to=${to}&page=translate")
         }.let {
             if (TextUtils.isEmpty(it.bodyAsText())) {
                 return RequestResult(from,null,it.status)
