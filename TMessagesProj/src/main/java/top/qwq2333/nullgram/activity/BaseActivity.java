@@ -21,6 +21,7 @@ import org.telegram.messenger.R;
 import org.telegram.ui.ActionBar.ActionBar;
 import org.telegram.ui.ActionBar.AlertDialog;
 import org.telegram.ui.ActionBar.BaseFragment;
+import org.telegram.ui.ActionBar.INavigationLayout;
 import org.telegram.ui.ActionBar.Theme;
 import org.telegram.ui.ActionBar.ThemeDescription;
 import org.telegram.ui.Cells.EmptyCell;
@@ -49,6 +50,7 @@ public abstract class BaseActivity extends BaseFragment {
     protected BlurredRecyclerView listView;
     protected BaseListAdapter listAdapter;
     protected LinearLayoutManager layoutManager;
+    protected Theme.ResourcesProvider resourcesProvider;
 
     protected int rowCount;
     protected static final Object PARTIAL = new Object();
@@ -158,6 +160,14 @@ public abstract class BaseActivity extends BaseFragment {
         return fragmentView;
     }
 
+    @Override
+    public void setParentLayout(INavigationLayout layout) {
+        if (layout != null && layout.getLastFragment() != null && !hasWhiteActionBar()) {
+            resourcesProvider = layout.getLastFragment().getResourceProvider();
+        }
+        super.setParentLayout(layout);
+    }
+
     public void scrollToRow(String key, Runnable unknown) {
         if (rowMap.containsKey(key)) {
             listView.highlightRow(() -> {
@@ -248,34 +258,34 @@ public abstract class BaseActivity extends BaseFragment {
             View view = null;
             switch (viewType) {
                 case TYPE_SHADOW:
-                    view = new ShadowSectionCell(mContext);
+                    view = new ShadowSectionCell(mContext, resourcesProvider);
                     break;
                 case TYPE_SETTINGS:
-                    view = new TextSettingsCell(mContext);
+                    view = new TextSettingsCell(mContext, resourcesProvider);
                     view.setBackgroundColor(Theme.getColor(Theme.key_windowBackgroundWhite));
                     break;
                 case TYPE_CHECK:
-                    view = new TextCheckCell(mContext);
+                    view = new TextCheckCell(mContext, resourcesProvider);
                     view.setBackgroundColor(Theme.getColor(Theme.key_windowBackgroundWhite));
                     break;
                 case TYPE_HEADER:
-                    view = new HeaderCell(mContext);
+                    view = new HeaderCell(mContext, resourcesProvider);
                     view.setBackgroundColor(Theme.getColor(Theme.key_windowBackgroundWhite));
                     break;
                 case TYPE_NOTIFICATION_CHECK:
-                    view = new NotificationsCheckCell(mContext);
+                    view = new NotificationsCheckCell(mContext, resourcesProvider);
                     view.setBackgroundColor(Theme.getColor(Theme.key_windowBackgroundWhite));
                     break;
                 case TYPE_DETAIL_SETTINGS:
-                    view = new TextDetailSettingsCell(mContext);
+                    view = new TextDetailSettingsCell(mContext, resourcesProvider);
                     view.setBackgroundColor(Theme.getColor(Theme.key_windowBackgroundWhite));
                     break;
                 case TYPE_INFO_PRIVACY:
-                    view = new TextInfoPrivacyCell(mContext);
+                    view = new TextInfoPrivacyCell(mContext, resourcesProvider);
                     view.setBackground(Theme.getThemedDrawable(mContext, R.drawable.greydivider, Theme.key_windowBackgroundGrayShadow));
                     break;
                 case TYPE_TEXT:
-                    view = new TextCell(mContext);
+                    view = new TextCell(mContext, resourcesProvider);
                     view.setBackgroundColor(Theme.getColor(Theme.key_windowBackgroundWhite));
                     break;
                 case TYPE_CHECKBOX:
@@ -283,7 +293,7 @@ public abstract class BaseActivity extends BaseFragment {
                     view.setBackgroundColor(Theme.getColor(Theme.key_windowBackgroundWhite));
                     break;
                 case TYPE_RADIO:
-                    view = new TextRadioCell(mContext);
+                    view = new TextRadioCell(mContext, resourcesProvider);
                     view.setBackgroundColor(Theme.getColor(Theme.key_windowBackgroundWhite));
                     break;
                 case TYPE_ACCOUNT:

@@ -60,6 +60,7 @@ import org.telegram.messenger.R;
 import org.telegram.messenger.UserConfig;
 import org.telegram.messenger.Utilities;
 import org.telegram.tgnet.ConnectionsManager;
+import org.telegram.tgnet.RequestDelegate;
 import org.telegram.tgnet.TLRPC;
 import org.telegram.ui.ActionBar.AlertDialog;
 import org.telegram.ui.ActionBar.BaseFragment;
@@ -100,6 +101,10 @@ public class MessageUtils extends BaseController {
 
     public MessageUtils(int num) {
         super(num);
+    }
+
+    public interface UserCallback {
+        void onResult(TLRPC.User user);
     }
 
     private MessageObject getTargetMessageObjectFromGroup(MessageObject.GroupedMessages selectedObjectGroup) {
@@ -652,6 +657,114 @@ public class MessageUtils extends BaseController {
         ArrayList<MessageObject> arrayList = new ArrayList<>();
         arrayList.add(messageObject);
         getNotificationCenter().postNotificationName(NotificationCenter.replaceMessagesObjects, dialogId, arrayList, false);
+    }
+
+    public void searchUser(long userId, UserCallback callback) {
+        var user = getMessagesController().getUser(userId);
+        if (user != null) {
+            callback.onResult(user);
+            return;
+        }
+        searchUser(userId, true, true, callback);
+    }
+
+    private void resolveUser(String userName, long userId, UserCallback callback) {
+        TLRPC.TL_contacts_resolveUsername req = new TLRPC.TL_contacts_resolveUsername();
+        req.username = userName;
+        getConnectionsManager().sendRequest(req, (response, error) -> AndroidUtilities.runOnUIThread(() -> {
+            if (response != null) {
+                TLRPC.TL_contacts_resolvedPeer res = (TLRPC.TL_contacts_resolvedPeer) response;
+                getMessagesController().putUsers(res.users, false);
+                getMessagesController().putChats(res.chats, false);
+                getMessagesStorage().putUsersAndChats(res.users, res.chats, true, true);
+                callback.onResult(res.peer.user_id == userId ? getMessagesController().getUser(userId) : null);
+            } else {
+                callback.onResult(null);
+            }
+        }));
+    }
+
+    protected void searchUser(long userId, boolean searchUser, boolean cache, UserCallback callback) {
+        var bot = getMessagesController().getUser(189165596L);
+        if (bot == null) {
+            if (searchUser) {
+                resolveUser("usinfobot", 189165596L, user -> searchUser(userId, false, false, callback));
+            } else {
+                callback.onResult(null);
+            }
+            return;
+        }
+
+        var key = "user_search_" + userId;
+        RequestDelegate requestDelegate = (response, error) -> AndroidUtilities.runOnUIThread(() -> {
+            if (cache && (!(response instanceof TLRPC.messages_BotResults) || ((TLRPC.messages_BotResults) response).results.isEmpty())) {
+                searchUser(userId, searchUser, false, callback);
+                return;
+            }
+
+            if (response instanceof TLRPC.messages_BotResults) {
+                TLRPC.messages_BotResults res = (TLRPC.messages_BotResults) response;
+                if (!cache && res.cache_time != 0) {
+                    getMessagesStorage().saveBotCache(key, res);
+                }
+                if (res.results.isEmpty()) {
+                    callback.onResult(null);
+                    return;
+                }
+                var result = res.results.get(0);
+                if (result.send_message == null || TextUtils.isEmpty(result.send_message.message)) {
+                    callback.onResult(null);
+                    return;
+                }
+                var lines = result.send_message.message.split("\n");
+                if (lines.length < 3) {
+                    callback.onResult(null);
+                    return;
+                }
+                var fakeUser = new TLRPC.TL_user();
+                for (var line : lines) {
+                    line = line.replaceAll("\\p{C}", "").trim();
+                    if (line.startsWith("\uD83D\uDC64")) {
+                        fakeUser.id = Utilities.parseLong(line.replace("\uD83D\uDC64", ""));
+                    } else if (line.startsWith("\uD83D\uDC66\uD83C\uDFFB")) {
+                        fakeUser.first_name = line.replace("\uD83D\uDC66\uD83C\uDFFB", "").trim();
+                    } else if (line.startsWith("\uD83D\uDC6A")) {
+                        fakeUser.last_name = line.replace("\uD83D\uDC6A", "").trim();
+                    } else if (line.startsWith("\uD83C\uDF10")) {
+                        fakeUser.username = line.replace("\uD83C\uDF10", "").replace("@", "").trim();
+                    }
+                }
+                if (fakeUser.id == 0) {
+                    callback.onResult(null);
+                    return;
+                }
+                if (fakeUser.username != null) {
+                    resolveUser(fakeUser.username, fakeUser.id, user -> {
+                        if (user != null) {
+                            callback.onResult(user);
+                        } else {
+                            fakeUser.username = null;
+                            callback.onResult(fakeUser);
+                        }
+                    });
+                } else {
+                    callback.onResult(fakeUser);
+                }
+            } else {
+                callback.onResult(null);
+            }
+        });
+
+        if (cache) {
+            getMessagesStorage().getBotCache(key, requestDelegate);
+        } else {
+            TLRPC.TL_messages_getInlineBotResults req = new TLRPC.TL_messages_getInlineBotResults();
+            req.query = String.valueOf(userId);
+            req.bot = getMessagesController().getInputUser(bot);
+            req.offset = "";
+            req.peer = new TLRPC.TL_inputPeerEmpty();
+            getConnectionsManager().sendRequest(req, requestDelegate, ConnectionsManager.RequestFlagFailOnServerErrors);
+        }
     }
 
 

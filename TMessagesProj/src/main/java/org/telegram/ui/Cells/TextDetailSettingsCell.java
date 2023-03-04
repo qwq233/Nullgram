@@ -34,10 +34,18 @@ public class TextDetailSettingsCell extends FrameLayout {
     private boolean multiline;
 
     public TextDetailSettingsCell(Context context) {
+        this(context, null);
+    }
+
+    public TextDetailSettingsCell(Context context, Theme.ResourcesProvider resourcesProvider) {
+        this(context, false, resourcesProvider);
+    }
+
+    public TextDetailSettingsCell(Context context, boolean valueOnly, Theme.ResourcesProvider resourcesProvider) {
         super(context);
 
         textView = new TextView(context);
-        textView.setTextColor(Theme.getColor(Theme.key_windowBackgroundWhiteBlackText));
+        textView.setTextColor(Theme.getColor(Theme.key_windowBackgroundWhiteBlackText, resourcesProvider));
         textView.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 16);
         textView.setLines(1);
         textView.setMaxLines(1);
@@ -47,18 +55,18 @@ public class TextDetailSettingsCell extends FrameLayout {
         addView(textView, LayoutHelper.createFrame(LayoutHelper.WRAP_CONTENT, LayoutHelper.WRAP_CONTENT, (LocaleController.isRTL ? Gravity.RIGHT : Gravity.LEFT) | Gravity.TOP, 21, 10, 21, 0));
 
         valueTextView = new TextView(context);
-        valueTextView.setTextColor(Theme.getColor(Theme.key_windowBackgroundWhiteGrayText2));
+        valueTextView.setTextColor(Theme.getColor(Theme.key_windowBackgroundWhiteGrayText2, resourcesProvider));
         valueTextView.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 13);
         valueTextView.setGravity(LocaleController.isRTL ? Gravity.RIGHT : Gravity.LEFT);
         valueTextView.setLines(1);
         valueTextView.setMaxLines(1);
         valueTextView.setSingleLine(true);
         valueTextView.setPadding(0, 0, 0, 0);
-        addView(valueTextView, LayoutHelper.createFrame(LayoutHelper.WRAP_CONTENT, LayoutHelper.WRAP_CONTENT, (LocaleController.isRTL ? Gravity.RIGHT : Gravity.LEFT) | Gravity.TOP, 21, 35, 21, 0));
+        addView(valueTextView, LayoutHelper.createFrame(LayoutHelper.WRAP_CONTENT, LayoutHelper.WRAP_CONTENT, (LocaleController.isRTL ? Gravity.RIGHT : Gravity.LEFT) | Gravity.TOP, 21, valueOnly ? 10 : 35, 21, 0));
 
         imageView = new ImageView(context);
         imageView.setScaleType(ImageView.ScaleType.CENTER);
-        imageView.setColorFilter(new PorterDuffColorFilter(Theme.getColor(Theme.key_windowBackgroundWhiteGrayIcon), PorterDuff.Mode.MULTIPLY));
+        imageView.setColorFilter(new PorterDuffColorFilter(Theme.getColor(Theme.key_windowBackgroundWhiteGrayIcon, resourcesProvider), PorterDuff.Mode.MULTIPLY));
         imageView.setVisibility(GONE);
         addView(imageView, LayoutHelper.createFrame(52, 52, (LocaleController.isRTL ? Gravity.RIGHT : Gravity.LEFT) | Gravity.TOP, 8, 6, 8, 0));
     }
@@ -103,6 +111,14 @@ public class TextDetailSettingsCell extends FrameLayout {
         setWillNotDraw(!divider);
     }
 
+    public void setTextAndValueWithEmoji(String text, CharSequence value, boolean divider) {
+        textView.setText(text);
+        valueTextView.setText(Emoji.replaceEmoji(value, valueTextView.getPaint().getFontMetricsInt(), AndroidUtilities.dp(13), false));
+        needDivider = divider;
+        imageView.setVisibility(GONE);
+        setWillNotDraw(!divider);
+    }
+
     public void setTextAndValueAndIcon(String text, CharSequence value, int resId, boolean divider) {
         textView.setText(text);
         valueTextView.setText(value);
@@ -123,6 +139,15 @@ public class TextDetailSettingsCell extends FrameLayout {
         valueTextView.setText(value);
         needDivider = divider;
         setWillNotDraw(!divider);
+    }
+
+    @Override
+    public void setEnabled(boolean enabled) {
+        super.setEnabled(enabled);
+        textView.setAlpha(enabled ? 1.0f : 0.5f);
+        if (valueTextView.getVisibility() == VISIBLE) {
+            valueTextView.setAlpha(enabled ? 1.0f : 0.5f);
+        }
     }
 
     @Override
