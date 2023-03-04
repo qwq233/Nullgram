@@ -5080,6 +5080,7 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
             }
 
             showDialog(dialog);
+            return true;
         } else if (position == linkedUserRow) {
             Browser.openUrl(getParentActivity(), "tg://user?id=" + ConfigManager.getLongOrDefault(Defines.linkedUserPrefix + getCurrentChat().id, 1578562490L));
         } else if (position == phoneRow || position == numberRow) {
@@ -7526,7 +7527,7 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
                 sharedMediaRow = rowCount++;
             }
         } else if (chatId != 0) {
-            if (chatInfo != null && (!TextUtils.isEmpty(chatInfo.about) || chatInfo.location instanceof TLRPC.TL_channelLocation) || ChatObject.isPublic(currentChat)) {
+            if (chatInfo != null && (!TextUtils.isEmpty(chatInfo.about) || chatInfo.location instanceof TLRPC.TL_channelLocation) || ChatObject.isPublic(currentChat) || !currentChat.restriction_reason.isEmpty()) {
                 if (LocaleController.isRTL && ChatObject.isChannel(currentChat) && chatInfo != null && !currentChat.megagroup && chatInfo.linked_chat_id != 0) {
                     emptyRow = rowCount++;
                 }

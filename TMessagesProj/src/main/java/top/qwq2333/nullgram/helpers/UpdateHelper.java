@@ -74,8 +74,8 @@ public class UpdateHelper {
                         continue;
                     }
                     String[] split = message.message.split(",");
-                    if (split.length < 4) {
-                        Log.i("CheckUpdate: split < 4");
+                    if (split.length < 5) {
+                        Log.i("CheckUpdate: split < 5");
                         continue;
                     }
                     UpdateMetadata metaData = new UpdateMetadata(message.id, split);
@@ -228,7 +228,7 @@ public class UpdateHelper {
                             TLRPC.TL_help_appUpdate update = new TLRPC.TL_help_appUpdate();
                             update.version = metadata.versionName;
                             update.document = apkDocument;
-                            update.can_not_skip = false;
+                            update.can_not_skip = metadata.canNotSkip;
                             update.flags |= 2;
                             if (metadata.updateLog != null) {
                                 update.text = metadata.updateLog;
@@ -304,6 +304,7 @@ public class UpdateHelper {
         int versionCode;
         int apkChannelMessageID;
         int UpdateLogMessageID;
+        boolean canNotSkip;
         String updateLog = null;
         ArrayList<TLRPC.MessageEntity> updateLogEntities = null;
 
@@ -313,6 +314,7 @@ public class UpdateHelper {
             versionCode = Integer.parseInt(split[1]);
             apkChannelMessageID = Integer.parseInt(split[2]);
             UpdateLogMessageID = Integer.parseInt(split[3]);
+            canNotSkip = split[4].equals("true");
         }
     }
 
