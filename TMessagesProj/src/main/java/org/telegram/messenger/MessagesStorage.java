@@ -34,7 +34,6 @@ import org.telegram.tgnet.TLObject;
 import org.telegram.tgnet.TLRPC;
 import org.telegram.ui.ActionBar.Theme;
 import org.telegram.ui.Adapters.DialogsSearchAdapter;
-import org.telegram.ui.ChatActivity;
 import org.telegram.ui.DialogsActivity;
 import org.telegram.ui.EditWidgetActivity;
 
@@ -56,7 +55,6 @@ import java.util.function.Consumer;
 
 import top.qwq2333.nullgram.config.ConfigManager;
 import top.qwq2333.nullgram.utils.Defines;
-import top.qwq2333.nullgram.utils.Log;
 
 public class MessagesStorage extends BaseController {
 
@@ -665,11 +663,6 @@ public class MessagesStorage extends BaseController {
             databaseMigrationInProgress = true;
             NotificationCenter.getInstance(currentAccount).postNotificationName(NotificationCenter.onDatabaseMigration, true);
         });
-
-        if (!ConfigManager.getBooleanOrFalse(Defines.hasUpdateDialogFilterDatabase)) {
-            database.executeFast("ALTER TABLE dialog_filter ADD COLUMN emoticon TEXT;").stepThis().dispose();
-            ConfigManager.putBoolean(Defines.hasUpdateDialogFilterDatabase, true);
-        }
 
         int version = currentVersion;
         FileLog.d("MessagesStorage start db migration from " + version + " to " + LAST_DB_VERSION);
