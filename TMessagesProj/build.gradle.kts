@@ -1,6 +1,7 @@
 @file:Suppress("UnstableApiUsage")
 
 import com.android.build.gradle.internal.cxx.configure.gradleLocalProperties
+import com.google.firebase.crashlytics.buildtools.gradle.CrashlyticsExtension
 
 plugins {
     id("com.android.application")
@@ -149,6 +150,8 @@ android {
             isMinifyEnabled = true
             isShrinkResources = true
             proguardFiles(File(projectDir, "proguard-rules.pro"))
+            the<CrashlyticsExtension>().nativeSymbolUploadEnabled = true
+            the<CrashlyticsExtension>().mappingFileUploadEnabled = true
         }
 
         getByName("debug") {

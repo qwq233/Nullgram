@@ -15,6 +15,7 @@
 -keep class com.google.android.exoplayer2.util.FlacStreamMetadata { *; }
 -keep class com.google.android.exoplayer2.metadata.flac.PictureFrame { *; }
 -keep class com.google.android.exoplayer2.decoder.SimpleOutputBuffer { *; }
+-keep public class * extends java.lang.Exception
 
 -dontwarn org.bouncycastle.jsse.*
 -dontwarn org.bouncycastle.jsse.provider.BouncyCastleJsseProvider

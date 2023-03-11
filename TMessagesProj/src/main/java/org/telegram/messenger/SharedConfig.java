@@ -60,6 +60,7 @@ public class SharedConfig {
 
     public final static int PASSCODE_TYPE_PIN = 0,
             PASSCODE_TYPE_PASSWORD = 1;
+    private static int legacyDevicePerformanceClass = -1;
 
     public static boolean loopStickers() {
         return LiteMode.isEnabled(LiteMode.FLAG_ANIMATED_STICKERS_CHAT);
@@ -148,11 +149,9 @@ public class SharedConfig {
     public static boolean streamAllVideo = false;
     public static boolean streamMkv = false;
     public static boolean saveStreamMedia = true;
-    public static boolean smoothKeyboard = true;
     public static boolean pauseMusicOnRecord = false;
     public static boolean noiseSupression;
-    public static boolean noStatusBar = true;
-    public static boolean forceRtmpStream;
+    public static final boolean noStatusBar = true;
     public static boolean debugWebView;
     public static boolean sortContactsByName;
     public static boolean sortFilesByName;
@@ -644,7 +643,6 @@ public class SharedConfig {
 
                 editor = ApplicationLoader.applicationContext.getSharedPreferences("mainconfig", Context.MODE_PRIVATE).edit();
                 editor.putBoolean("hasEmailLogin", hasEmailLogin);
-                editor.putBoolean("useLNavigation", useLNavigation);
                 editor.putBoolean("floatingDebugActive", isFloatingDebugActive);
                 editor.putBoolean("record_via_sco", recordViaSco);
                 editor.apply();
@@ -753,7 +751,6 @@ public class SharedConfig {
             useSystemEmoji = preferences.getBoolean("useSystemEmoji", false);
             streamMedia = preferences.getBoolean("streamMedia", true);
             saveStreamMedia = preferences.getBoolean("saveStreamMedia", true);
-            smoothKeyboard = preferences.getBoolean("smoothKeyboard2", true);
             pauseMusicOnRecord = preferences.getBoolean("pauseMusicOnRecord", false);
             forceDisableTabletMode = preferences.getBoolean("forceDisableTabletMode", false);
             streamAllVideo = preferences.getBoolean("streamAllVideo", BuildVars.DEBUG_VERSION);
@@ -770,8 +767,6 @@ public class SharedConfig {
             archiveHidden = preferences.getBoolean("archiveHidden", false);
             distanceSystemType = preferences.getInt("distanceSystemType", 0);
             keepMedia = preferences.getInt("keep_media", CacheByChatsController.KEEP_MEDIA_ONE_MONTH);
-            noStatusBar = preferences.getBoolean("noStatusBar", true);
-            forceRtmpStream = preferences.getBoolean("forceRtmpStream", false);
             debugWebView = preferences.getBoolean("debugWebView", false);
             lastKeepMediaCheckTime = preferences.getInt("lastKeepMediaCheckTime", 0);
             lastLogsCheckTime = preferences.getInt("lastLogsCheckTime", 0);
@@ -792,7 +787,6 @@ public class SharedConfig {
             fastScrollHintCount = preferences.getInt("fastScrollHintCount", 3);
             dontAskManageStorage = preferences.getBoolean("dontAskManageStorage", false);
             hasEmailLogin = preferences.getBoolean("hasEmailLogin", false);
-            useLNavigation = preferences.getBoolean("useLNavigation", false);
             isFloatingDebugActive = preferences.getBoolean("floatingDebugActive", false);
             updateStickersOrderOnSend = ConfigManager.getBooleanOrFalse(Defines.disableStickersAutoReorder);
 
@@ -1101,14 +1095,6 @@ public class SharedConfig {
         editor.commit();
     }
 
-    public static void toggleForceRTMPStream() {
-        forceRtmpStream = !forceRtmpStream;
-        SharedPreferences preferences = MessagesController.getGlobalMainSettings();
-        SharedPreferences.Editor editor = preferences.edit();
-        editor.putBoolean("forceRtmpStream", forceRtmpStream);
-        editor.apply();
-    }
-
     public static void toggleDebugWebView() {
         debugWebView = !debugWebView;
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
@@ -1118,14 +1104,6 @@ public class SharedConfig {
         SharedPreferences.Editor editor = preferences.edit();
         editor.putBoolean("debugWebView", debugWebView);
         editor.apply();
-    }
-
-    public static void toggleNoStatusBar() {
-        noStatusBar = !noStatusBar;
-        SharedPreferences preferences = MessagesController.getGlobalMainSettings();
-        SharedPreferences.Editor editor = preferences.edit();
-        editor.putBoolean("noStatusBar", noStatusBar);
-        editor.commit();
     }
 
     public static void toggleLoopStickers() {
@@ -1313,14 +1291,6 @@ public class SharedConfig {
         SharedPreferences preferences = MessagesController.getGlobalMainSettings();
         SharedPreferences.Editor editor = preferences.edit();
         editor.putBoolean("saveStreamMedia", saveStreamMedia);
-        editor.commit();
-    }
-
-    public static void toggleSmoothKeyboard() {
-        smoothKeyboard = !smoothKeyboard;
-        SharedPreferences preferences = MessagesController.getGlobalMainSettings();
-        SharedPreferences.Editor editor = preferences.edit();
-        editor.putBoolean("smoothKeyboard2", smoothKeyboard);
         editor.commit();
     }
 
@@ -1790,5 +1760,40 @@ public class SharedConfig {
 
     public static boolean deviceIsHigh() {
         return getDevicePerformanceClass() >= PERFORMANCE_CLASS_HIGH;
+    }
+
+    @Deprecated
+    public static int getLegacyDevicePerformanceClass() {
+        if (ConfigManager.getIntOrDefault(Defines.devicePerformance, Defines.devicePerformanceAuto) != Defines.devicePerformanceAuto) {
+            return ConfigManager.getIntOrDefault(Defines.devicePerformance, Defines.devicePerformanceAuto);
+        }
+        if (legacyDevicePerformanceClass == -1) {
+            int androidVersion = Build.VERSION.SDK_INT;
+            int cpuCount = ConnectionsManager.CPU_COUNT;
+            int memoryClass = ((ActivityManager) ApplicationLoader.applicationContext.getSystemService(Context.ACTIVITY_SERVICE)).getMemoryClass();
+            int totalCpuFreq = 0;
+            int freqResolved = 0;
+            for (int i = 0; i < cpuCount; i++) {
+                try {
+                    RandomAccessFile reader = new RandomAccessFile(String.format(Locale.ENGLISH, "/sys/devices/system/cpu/cpu%d/cpufreq/cpuinfo_max_freq", i), "r");
+                    String line = reader.readLine();
+                    if (line != null) {
+                        totalCpuFreq += Utilities.parseInt(line) / 1000;
+                        freqResolved++;
+                    }
+                    reader.close();
+                } catch (Throwable ignore) {}
+            }
+            int maxCpuFreq = freqResolved == 0 ? -1 : (int) Math.ceil(totalCpuFreq / (float) freqResolved);
+
+            if (androidVersion < 21 || cpuCount <= 2 || memoryClass <= 100 || cpuCount <= 4 && maxCpuFreq != -1 && maxCpuFreq <= 1250 || cpuCount <= 4 && maxCpuFreq <= 1600 && memoryClass <= 128 && androidVersion <= 21 || cpuCount <= 4 && maxCpuFreq <= 1300 && memoryClass <= 128 && androidVersion <= 24) {
+                legacyDevicePerformanceClass = PERFORMANCE_CLASS_LOW;
+            } else if (cpuCount < 8 || memoryClass <= 160 || maxCpuFreq != -1 && maxCpuFreq <= 2050 || maxCpuFreq == -1 && cpuCount == 8 && androidVersion <= 23) {
+                legacyDevicePerformanceClass = PERFORMANCE_CLASS_AVERAGE;
+            } else {
+                legacyDevicePerformanceClass = PERFORMANCE_CLASS_HIGH;
+            }
+        }
+        return legacyDevicePerformanceClass;
     }
 }

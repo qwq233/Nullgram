@@ -24,6 +24,7 @@ import android.os.Handler;
 
 import androidx.annotation.NonNull;
 
+import com.google.firebase.crashlytics.FirebaseCrashlytics;
 import com.microsoft.appcenter.AppCenter;
 import com.microsoft.appcenter.analytics.Analytics;
 import com.microsoft.appcenter.channel.AbstractChannelListener;
@@ -33,6 +34,7 @@ import com.microsoft.appcenter.ingestion.models.Log;
 
 import org.telegram.messenger.BuildConfig;
 import org.telegram.messenger.BuildVars;
+import org.telegram.messenger.UserConfig;
 
 import java.util.HashMap;
 
@@ -73,6 +75,11 @@ public class AppcenterUtils {
     }
 
     public static void start(Application app) {
+        try {
+            var currentUser = UserConfig.getInstance(UserConfig.selectedAccount);
+            FirebaseCrashlytics.getInstance().setUserId(String.valueOf(currentUser.getClientUserId()));
+        } catch (Exception ignored) { }
+
         AppCenter.start(app, appCenterToken, Crashes.class, Analytics.class);
         patchDevice();
     }
@@ -86,6 +93,7 @@ public class AppcenterUtils {
     }
 
     public static void trackCrashes(Throwable thr) {
+        FirebaseCrashlytics.getInstance().recordException(thr);
         Crashes.trackError(thr);
     }
 

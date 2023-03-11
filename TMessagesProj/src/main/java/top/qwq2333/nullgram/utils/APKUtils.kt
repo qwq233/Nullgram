@@ -18,6 +18,7 @@
  */
 package top.qwq2333.nullgram.utils
 
+import android.Manifest
 import android.annotation.SuppressLint
 import android.app.Activity
 import android.app.PendingIntent
@@ -26,6 +27,7 @@ import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.content.pm.PackageInstaller
+import android.content.pm.PackageManager
 import android.os.Build
 import android.provider.Settings
 import android.text.TextUtils
@@ -33,6 +35,7 @@ import android.util.TypedValue
 import android.view.Gravity
 import android.widget.LinearLayout
 import android.widget.TextView
+import androidx.core.app.ActivityCompat
 import androidx.core.app.NotificationChannelCompat
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
@@ -257,9 +260,9 @@ object APKUtils {
 
         suspend fun waitIntent(): Intent {
             withContext(Dispatchers.IO) {
-                latch.await(5, TimeUnit.SECONDS)
+                latch.await(10, TimeUnit.SECONDS)
             }
-            return intent
+            return if (this::intent.isInitialized) intent else Intent()
         }
     }
 

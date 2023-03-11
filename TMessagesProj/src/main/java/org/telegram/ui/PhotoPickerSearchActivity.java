@@ -27,7 +27,6 @@ import androidx.recyclerview.widget.RecyclerView;
 import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.LocaleController;
 import org.telegram.messenger.R;
-import org.telegram.messenger.SharedConfig;
 import org.telegram.ui.ActionBar.ActionBar;
 import org.telegram.ui.ActionBar.ActionBarMenu;
 import org.telegram.ui.ActionBar.ActionBarMenuItem;
@@ -241,7 +240,7 @@ public class PhotoPickerSearchActivity extends BaseFragment {
                 setMeasuredDimension(widthSize, heightSize);
 
                 measureChildWithMargins(actionBar, widthMeasureSpec, 0, heightMeasureSpec, 0);
-                int keyboardSize = SharedConfig.smoothKeyboard ? 0 : measureKeyboardHeight();
+                int keyboardSize = 0;
                 if (keyboardSize <= AndroidUtilities.dp(20)) {
                     if (!AndroidUtilities.isInMultiwindow) {
                         heightSize -= commentTextView.getEmojiPadding();
@@ -291,7 +290,7 @@ public class PhotoPickerSearchActivity extends BaseFragment {
             protected void onLayout(boolean changed, int l, int t, int r, int b) {
                 final int count = getChildCount();
 
-                int keyboardSize = SharedConfig.smoothKeyboard ? 0 : measureKeyboardHeight();
+                int keyboardSize = 0;
                 int paddingBottom = keyboardSize <= AndroidUtilities.dp(20) && !AndroidUtilities.isInMultiwindow && !AndroidUtilities.isTablet() ? commentTextView.getEmojiPadding() : 0;
                 setBottomClip(paddingBottom);
 
@@ -675,7 +674,7 @@ public class PhotoPickerSearchActivity extends BaseFragment {
         super.onResume();
         if (searchItem != null) {
             searchItem.openSearch(true);
-            getParentActivity().getWindow().setSoftInputMode(SharedConfig.smoothKeyboard ? WindowManager.LayoutParams.SOFT_INPUT_ADJUST_PAN : WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE);
+            getParentActivity().getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_PAN);
         }
         if (imagesSearch != null) {
             imagesSearch.onResume();

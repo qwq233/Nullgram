@@ -278,7 +278,7 @@ object PrivacyUtils {
         runCatching {
 
             (builder.show().getButton(DialogInterface.BUTTON_NEUTRAL) as TextView?)?.setTextColor(
-                Theme.getColor(Theme.key_dialogTextRed2)
+                Theme.getColor(Theme.key_dialogTextRed)
             )
 
         }
@@ -329,7 +329,7 @@ object PrivacyUtils {
         runCatching {
 
             (builder.show().getButton(DialogInterface.BUTTON_NEUTRAL) as TextView?)?.setTextColor(
-                Theme.getColor(Theme.key_dialogTextRed2)
+                Theme.getColor(Theme.key_dialogTextRed)
             )
 
         }

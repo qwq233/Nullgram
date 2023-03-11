@@ -341,8 +341,7 @@ public class DocumentSelectActivity extends BaseFragment {
                 setMeasuredDimension(widthSize, heightSize);
 
                 int kbHeight = getKeyboardHeight();
-                int keyboardSize = SharedConfig.smoothKeyboard ? 0 : kbHeight;
-                if (keyboardSize <= AndroidUtilities.dp(20)) {
+                if (kbHeight <= AndroidUtilities.dp(20)) {
                     if (!AndroidUtilities.isInMultiwindow && commentTextView != null
                         && frameLayout2.getParent() == this) {
                         heightSize -= commentTextView.getEmojiPadding();
@@ -401,7 +400,7 @@ public class DocumentSelectActivity extends BaseFragment {
                 }
                 final int count = getChildCount();
 
-                int keyboardSize = SharedConfig.smoothKeyboard ? 0 : getKeyboardHeight();
+                int keyboardSize = getKeyboardHeight();
                 int paddingBottom = commentTextView != null && frameLayout2.getParent() == this
                     && keyboardSize <= AndroidUtilities.dp(20) && !AndroidUtilities.isInMultiwindow
                     && !AndroidUtilities.isTablet() ? commentTextView.getEmojiPadding() : 0;
@@ -698,7 +697,7 @@ public class DocumentSelectActivity extends BaseFragment {
 
         } else {
 
-            writeButton.setImageResource(R.drawable.msg_check);
+            writeButton.setImageResource(R.drawable.msg_text_check);
 
         }
 
