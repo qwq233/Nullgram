@@ -71,6 +71,7 @@ public class GeneralSettingActivity extends BaseActivity {
     private int autoProxySwitchRow;
     private int tabsTitleTypeRow;
     private int openArchiveOnPullRow;
+    private int hideAllTabRow;
 
 
     private int devicesRow;
@@ -215,6 +216,11 @@ public class GeneralSettingActivity extends BaseActivity {
             if (view instanceof TextCheckCell) {
                 ((TextCheckCell) view).setChecked(ConfigManager.getBooleanOrFalse(Defines.openArchiveOnPull));
             }
+        } else if (position == hideAllTabRow) {
+            ConfigManager.toggleBoolean(Defines.hideAllTab);
+            if (view instanceof TextCheckCell) {
+                ((TextCheckCell) view).setChecked(ConfigManager.getBooleanOrFalse(Defines.hideAllTab));
+            }
         } else if (position == autoDisableBuiltInProxyRow) {
             ConfigManager.toggleBoolean(Defines.autoDisableBuiltInProxy);
             if (view instanceof TextCheckCell) {
@@ -341,6 +347,7 @@ public class GeneralSettingActivity extends BaseActivity {
         skipOpenLinkConfirmRow = rowCount++;
         autoProxySwitchRow = rowCount++;
         openArchiveOnPullRow = rowCount++;
+        hideAllTabRow = rowCount++;
         tabsTitleTypeRow = rowCount++;
         general2Row = rowCount++;
 
@@ -506,6 +513,8 @@ public class GeneralSettingActivity extends BaseActivity {
                         textCell.setTextAndCheck(LocaleController.getString("DisableVibration", R.string.disableVibration), ConfigManager.getBooleanOrFalse(Defines.disableVibration), true);
                     } else if (position == openArchiveOnPullRow) {
                         textCell.setTextAndCheck(LocaleController.getString("openArchiveOnPull", R.string.openArchiveOnPull), ConfigManager.getBooleanOrFalse(Defines.openArchiveOnPull), true);
+                    } else if (position == hideAllTabRow) {
+                        textCell.setTextAndCheck(LocaleController.getString("hideAllTab", R.string.hideAllTab), ConfigManager.getBooleanOrFalse(Defines.hideAllTab), true);
                     } else if (position == autoDisableBuiltInProxyRow) {
                         textCell.setTextAndValueAndCheck(LocaleController.getString("autoDisableBuiltInProxy", R.string.autoDisableBuiltInProxy),
                             LocaleController.getString("autoDisableBuiltInProxyDesc", R.string.autoDisableBuiltInProxyDesc),
