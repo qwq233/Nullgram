@@ -1,21 +1,26 @@
-name: Build CI
+name: Build CI (Pull Request)
 
 on:
   pull_request:
     branches:
       - master
     paths-ignore:
-      - '**.md'
-      - '**.txt'
-      - '.github/**'
-      - '!.github/workflows/**'
-      - "TMessagesProj/src/main/res/values**/**"
-
+        - '**.md'
+        - '**.txt'
+        - '.github/**'
+        - '!.github/workflows/**'
+        - "TMessagesProj/src/main/res/values**/**"
 
 jobs:
   build:
     name: Gradle Build
+    if: ${{ github.event_name = 'pull_request' && success() }}
     runs-on: ubuntu-latest
+    env:
+      CCACHE_COMPILERCHECK: "%compiler% -dumpmachine; %compiler% -dumpversion"
+      CCACHE_NOHASHDIR: "true"
+      CCACHE_MAXSIZE: "10G"
+      CCACHE_HARDLINK: "true"
     steps:
       - uses: actions/checkout@v2
         with:
@@ -25,32 +30,28 @@ jobs:
         uses: jwlawson/actions-setup-cmake@v1.12
         with:
           cmake-version: '3.22.1'
-      - name: Prepare Java 16
-        uses: actions/setup-java@v1
+      - name: Setup Java
+        uses: actions/setup-java@v3
         with:
-          java-version: 16
-          java-package: jdk
-      - name: Setup Android SDK Tools
-        uses: android-actions/setup-android@v2
-        
-      - name: Native Cache
-        uses: actions/cache@v2
+          distribution: 'temurin'
+          java-version: '17'
+          cache: 'gradle'
+      - name: Cache Gradle Build
+        uses: actions/cache@v3
         with:
           path: |
-            TMessagesProj/.cxx
-            TMessagesProj/build/intermediates/cmake
-            TMessagesProj/build/intermediates/stripped_native_libs
-            TMessagesProj/build/intermediates/cxx
-            TMessagesProj/build/intermediates/merged_jni_libs
-            TMessagesProj/build/intermediates/merged_native_libs
-            ~/.cache/ccache
-            ~/.ccache
-          key: native-cache
-      - name: Gradle cache
-        uses: actions/cache@v2
+            ~/.gradle/caches/build-cache-*
+            ~/.gradle/buildOutputCleanup/cache.properties
+          key: gradle-builds-${{ github.sha }}
+          restore-keys: |
+            gradle-builds
+      - name: Set up ccache
+        uses: hendrikmuhs/ccache-action@v1.2
         with:
-          path: ~/.gradle
-          key: gradle-${{ hashFiles('**/*.gradle') }}
+          key: ccache
+          restore-keys: ccache
+      - name: Setup Android SDK Tools
+        uses: android-actions/setup-android@v2
       - name: Prepare Environment
         run: |
             echo "Removing large packages"
@@ -59,10 +60,9 @@ jobs:
             sudo apt-get remove -y 'php.*'
             sudo apt-get remove -y '^mongodb-.*'
             sudo apt-get remove -y '^mysql-.*'
-            sudo apt-get remove -y azure-cli google-cloud-sdk hhvm google-chrome-stable firefox powershell mono-devel libgl1-mesa-dri
+            sudo apt-get remove -y azure-cli google-cloud-sdk google-chrome-stable firefox powershell mono-devel libgl1-mesa-dri
             sudo apt-get autoremove -y
             sudo apt-get clean
-            df -h
             echo "Removing large directories"
             sudo rm -rf /usr/share/dotnet/
             sudo rm -rf /usr/local/graalvm/
@@ -75,11 +75,10 @@ jobs:
             sudo apt-get install bison gcc make curl ninja-build ccache -y
             echo "y" | sudo ${ANDROID_HOME}/tools/bin/sdkmanager --install "ndk;21.4.7075529" --sdk_root=${ANDROID_SDK_ROOT} &> /dev/null
             ln -s  ${ANDROID_HOME}/cmake/3.18.1/bin/ninja /opt/hostedtoolcache/cmake/3.22.1/x64/cmake-3.22.1-linux-x86_64/bin/
-            ccache -zp
-            ccache -o max_size=10G
-            ccache -o hash_dir=false
-            ccache -o compiler_check='%compiler% -dumpmachine; %compiler% -dumpversion'
       - name: Debug Build
         run: |
-          ./gradlew TMessagesProj:assembleDebug
-          ccache -s
+          echo -e "RELEASE_KEY_PASSWORD=${{ secrets.RELEASE_KEY_PASSWORD }}\nRELEASE_KEY_ALIAS=${{ secrets.RELEASE_KEY_ALIAS }}\nRELEASE_STORE_PASSWORD=${{ secrets.RELEASE_STORE_PASSWORD }}">>local.properties
+          ./gradlew TMessagesProj:assembleArm64Release
+        
+
+  
