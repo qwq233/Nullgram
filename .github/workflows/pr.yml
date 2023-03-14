@@ -14,7 +14,7 @@ on:
 jobs:
   build:
     name: Gradle Build
-    if: ${{ github.event_name = 'pull_request' && success() }}
+    if: ${{ github.event_name == 'pull_request' && success() }}
     runs-on: ubuntu-latest
     env:
       CCACHE_COMPILERCHECK: "%compiler% -dumpmachine; %compiler% -dumpversion"
