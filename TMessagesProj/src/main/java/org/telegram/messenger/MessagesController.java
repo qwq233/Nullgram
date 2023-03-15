@@ -3942,6 +3942,9 @@ public class MessagesController extends BaseController implements NotificationCe
         if (chat == null) {
             return false;
         }
+        if(ConfigManager.getBooleanOrFalse(Defines.disableRestrictSavingContent)) {
+            return false;
+        }
         if (chat.migrated_to != null) {
             TLRPC.Chat migratedTo = getChat(chat.migrated_to.channel_id);
             if (migratedTo != null) {

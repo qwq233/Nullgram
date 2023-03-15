@@ -34,6 +34,7 @@ public class ExperimentSettingActivity extends BaseActivity {
     private int blockSponsorAdsRow;
     private int hideProxySponsorChannelRow;
     private int disableSendTypingRow;
+    private int disableRestrictSavingContentRow;
     private int syntaxHighlightRow;
     private int aliasChannelRow;
     private int keepFormattingRow;
@@ -74,6 +75,11 @@ public class ExperimentSettingActivity extends BaseActivity {
             ConfigManager.toggleBoolean(Defines.disableSendTyping);
             if (view instanceof TextCheckCell) {
                 ((TextCheckCell) view).setChecked(ConfigManager.getBooleanOrFalse(Defines.disableSendTyping));
+            }
+        } else if (position == disableRestrictSavingContentRow) {
+            ConfigManager.toggleBoolean(Defines.disableRestrictSavingContentRow);
+            if (view instanceof TextCheckCell) {
+                ((TextCheckCell) view).setChecked(ConfigManager.getBooleanOrFalse(Defines.disableRestrictSavingContentRow));
             }
         } else if (position == syntaxHighlightRow) {
             ConfigManager.putBoolean(Defines.codeSyntaxHighlight, !ConfigManager.getBooleanOrDefault(Defines.codeSyntaxHighlight, true));
@@ -173,6 +179,7 @@ public class ExperimentSettingActivity extends BaseActivity {
             blockSponsorAdsRow = rowCount++;
             hideProxySponsorChannelRow = rowCount++;
             disableSendTypingRow = rowCount++;
+            disableRestrictSavingContentRow = rowCount++;
         }
         disableFilteringRow = sensitiveCanChange ? rowCount++ : -1;
         syntaxHighlightRow = rowCount++;
@@ -251,6 +258,8 @@ public class ExperimentSettingActivity extends BaseActivity {
                         textCell.setTextAndCheck(LocaleController.getString("hideProxySponsorChannel", R.string.hideProxySponsorChannel), ConfigManager.getBooleanOrFalse(Defines.hideProxySponsorChannel), true);
                     } else if (position == disableSendTypingRow) {
                         textCell.setTextAndCheck(LocaleController.getString("disableSendTyping", R.string.disableSendTyping), ConfigManager.getBooleanOrFalse(Defines.disableSendTyping), true);
+                    } else if (position == disableRestrictSavingContentRow) {
+                        textCell.setTextAndValueAndCheck(LocaleController.getString("disableRestrictSavingContent", R.string.disableRestrictSavingContent), LocaleController.getString("disableRestrictSavingContentDetails", R.string.disableRestrictSavingContentDetails), ConfigManager.getBooleanOrFalse(Defines.disableRestrictSavingContent), true, true);
                     } else if (position == syntaxHighlightRow) {
                         textCell.setTextAndValueAndCheck(LocaleController.getString("codeSyntaxHighlight", R.string.codeSyntaxHighlight), LocaleController.getString("codeSyntaxHighlightDetails", R.string.codeSyntaxHighlightDetails), ConfigManager.getBooleanOrFalse(Defines.codeSyntaxHighlight), true, true);
                     }
