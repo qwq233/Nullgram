@@ -115,7 +115,7 @@ public class Defines {
     public static final int doubleTabSaveMessages = 3;
     public static final int doubleTabRepeat = 4;
     public static final int doubleTabEdit = 5;
-
+    public static final int doubleTabTranslate = 6;
 
     // Auto Update
     public static final String ignoredUpdateTag = "skipUpdate";
