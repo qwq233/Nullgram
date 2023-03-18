@@ -77,7 +77,7 @@ public class AppcenterUtils {
     }
 
     public static void start(Application app) {
-        if (isInit) {
+        if (isInit || !BuildConfig.APPLICATION_ID.equals("top.qwq2333.nullgram")) {
             return;
         }
         try {
@@ -108,14 +108,20 @@ public class AppcenterUtils {
     }
 
     public static void trackEvent(String event) {
+        if (!BuildConfig.APPLICATION_ID.equals("top.qwq2333.nullgram"))
+            return;
         Analytics.trackEvent(event);
     }
 
     public static void trackEvent(String event, HashMap<String, String> map) {
+        if (!BuildConfig.APPLICATION_ID.equals("top.qwq2333.nullgram"))
+            return;
         Analytics.trackEvent(event, map);
     }
 
     public static void trackCrashes(Throwable thr) {
+        if (!BuildConfig.APPLICATION_ID.equals("top.qwq2333.nullgram"))
+            return;
         FirebaseCrashlytics.getInstance().recordException(thr);
         Crashes.trackError(thr);
     }
