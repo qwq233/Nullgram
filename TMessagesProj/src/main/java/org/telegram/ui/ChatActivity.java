@@ -1290,7 +1290,7 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
     private final static int text_strike = 55;
     private final static int text_underline = 56;
     private final static int text_spoiler = 57;
-    private final static int text_mention = 58;
+    private final static int text_mention = 158;
 
     private final static int view_as_topics = 58;
 
@@ -3076,7 +3076,7 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
                         chatActivityEnterView.getEditField().setSelectionOverride(editTextStart, editTextEnd);
                         chatActivityEnterView.getEditField().makeSelectedSpoiler();
                     }
-                } else if (id == text_mono) {
+                } else if (id == text_mention) {
                     if (chatActivityEnterView != null && chatActivityEnterView.getEditField() != null) {
                         chatActivityEnterView.getEditField().setSelectionOverride(editTextStart, editTextEnd);
                         chatActivityEnterView.getEditField().makeSelectedMention();
@@ -7907,6 +7907,7 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
             item.addSubItem(text_underline, stringBuilder);
         }
         item.addSubItem(text_link, LocaleController.getString("CreateLink", R.string.CreateLink));
+        item.addSubItem(text_mention, LocaleController.getString("CreateMention", R.string.CreateMention));
         item.addSubItem(text_regular, LocaleController.getString("Regular", R.string.Regular));
 
         filledEditTextItemMenu = true;
@@ -20695,6 +20696,7 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
             menu.add(R.id.menu_groupbolditalic, R.id.menu_underline, order++, stringBuilder);
         }
         menu.add(R.id.menu_groupbolditalic, R.id.menu_link, order++, LocaleController.getString("CreateLink", R.string.CreateLink));
+        menu.add(R.id.menu_groupbolditalic, R.id.menu_mention, order++, LocaleController.getString("CreateMention", R.string.CreateMention));
         menu.add(R.id.menu_groupbolditalic, R.id.menu_regular, order++, LocaleController.getString("Regular", R.string.Regular));
     }
 
