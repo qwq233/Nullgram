@@ -141,7 +141,7 @@
     <string name="hideQuickSendMediaBottom">Ocultar fondo de Envío Rápido de medios</string>
     <string name="largeAvatarAsBackground">Avatar grande como fondo</string>
     <string name="useSystemEmoji">Usar emojis del sistema</string>
-    <string name="Command">Comando</string>
+    <string name="Command">Orden</string>
     <string name="setCustomQuickMessage">Definir mensaje rápido personalizado</string>
     <string name="emptyInput">No puedes escribir nada aquí</string>
     <string name="numberInvalid"><![CDATA[El número debe ser >20 y 150<]]></string>
