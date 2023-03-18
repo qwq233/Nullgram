@@ -210,7 +210,7 @@
     <string name="SwitchToAnonymously">Cambiar a anónimo</string>
     <string name="SwitchToPersonalAccount">Cambiar a cuenta personal</string>
     <string name="openArchiveOnPull">Abrir archivados al deslizar hacia abajo</string>
-    <string name="hideAllTab">Hide \"All Chats\" tab</string>
+    <string name="hideAllTab">Ocultar pestaña \"Todos los chats\"</string>
     <string name="disableStickersAutoReorder">Desactivar order dinámico de packs de stickers</string>
     <string name="Ban">Ban</string>
     <string name="autoDisableBuiltInProxy">Deshabilitar automáticamente el proxy integrado</string>
@@ -257,14 +257,14 @@
     <string name="InstallProhibitedPlay">La instalación de la aplicación desde el archivo apk en el chat no está disponible en la versión Play Store de la aplicación.\nPor favor, guárdelo manualmente e instale desde el Administrador de archivos.</string>
     <string name="TranslatorTypeInMessage">En mensaje</string>
     <string name="SmsDisabled">El inicio de sesión vía sms está actualmente deshabilitado para cualquier cliente de terceros debido a la política de TELEOFICIAL.\nNos disculpamos por cualquier inconveniente causado.</string>
-    <string name="DevicePerformanceAuto">Default</string>
-    <string name="DevicePerformanceLow">Low</string>
-    <string name="DevicePerformanceMedium">Medium</string>
-    <string name="DevicePerformanceHigh">High</string>
-    <string name="OverrideDevicePerformance">Override performance detect</string>
-    <string name="OverrideDevicePerformanceDesc">Override TELEOFFICIAL\'s device performance detector.\nLow mode will reduce animation effects and other stuff as much as possible, which may help to save power in the foreground.\nHigh mode may greatly increase power consumption and performance burden and cause stuttering.</string>
-    <string name="JumpToBeginning">Jump To Beginning</string>
-    <string name="DisableQuickSendMediaBottom">Disable Quick Send Media Bottom</string>
-    <string name="ProviderBaiduTranslate">Baidu Translator</string>
-    <string name="alwaysSendWithoutSound">Always Send Without Sound</string>
+    <string name="DevicePerformanceAuto">Por defecto</string>
+    <string name="DevicePerformanceLow">Bajo</string>
+    <string name="DevicePerformanceMedium">Medio</string>
+    <string name="DevicePerformanceHigh">Alto</string>
+    <string name="OverrideDevicePerformance">Anular detección de rendimiento</string>
+    <string name="OverrideDevicePerformanceDesc">Anular el detector de rendimiento del dispositivo TELEOFICIAL.\nEl modo bajo reducirá al máximo los efectos de animación y otras cosas, lo que puede ayudar a ahorrar energía en primer plano.\nEl modo alto puede aumentar en gran medida el consumo de energía y la carga de rendimiento y causar lentitud.</string>
+    <string name="JumpToBeginning">Ir al inicio</string>
+    <string name="DisableQuickSendMediaBottom">Desactivar rápida envío de medios instantáneos</string>
+    <string name="ProviderBaiduTranslate">Traductor Baidu</string>
+    <string name="alwaysSendWithoutSound">Siempre enviar sin sonido</string>
 </resources>
