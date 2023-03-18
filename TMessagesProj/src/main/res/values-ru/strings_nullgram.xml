@@ -46,7 +46,7 @@
     <string name="DeleteDownloadedFile">Удалить загруженный файл</string>
     <string name="Repeat">Повторить</string>
     <string name="saveMessages">Сохранить сообщения</string>
-    <string name="ViewHistory">Посмотреть историю</string>
+    <string name="ViewHistory">Сообщения пользователя</string>
     <string name="NoQuoteForward">Переслать без автора</string>
     <string name="MessageMenu">Меню сообщений</string>
     <string name="allowScreenshotOnNoForwardChat">Отключить ограничение на скриншот</string>
