@@ -51,7 +51,6 @@ import org.telegram.messenger.LocaleController;
 import org.telegram.messenger.MessagesController;
 import org.telegram.messenger.NotificationCenter;
 import org.telegram.messenger.R;
-import org.telegram.messenger.SharedConfig;
 import org.telegram.messenger.UserConfig;
 import org.telegram.tgnet.TLRPC;
 import org.telegram.ui.ActionBar.AdjustPanLayoutHelper;
@@ -218,6 +217,7 @@ public class PhotoViewerCaptionEnterView extends FrameLayout implements Notifica
                 invalidateForce();
             }
         };
+        messageEditText.setShowDisableMarkdown(true);
         messageEditText.setOnFocusChangeListener((view, focused) -> {
             if (focused) {
                 try {

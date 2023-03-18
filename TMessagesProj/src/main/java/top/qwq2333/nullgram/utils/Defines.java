@@ -87,6 +87,9 @@ public class Defines {
     public static final String hideProxySponsorChannel = "hideProxySponsorChannel";
     public static final String hideAllTab = "hideAllTab";
     public static final String alwaysSendWithoutSound = "alwaysSendWithoutSound";
+    public static final String markdownDisabled = "markdownEnable";
+    public static final String markdownParseLinks = "markdownParseLinks";
+    public static final String newMarkdownParser = "newMarkdownParser";
 
     // Custom API
     public static final String customAPI = "customAPI";

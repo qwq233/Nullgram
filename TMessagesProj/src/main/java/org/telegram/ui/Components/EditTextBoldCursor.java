@@ -60,6 +60,9 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 
+import top.qwq2333.nullgram.config.ConfigManager;
+import top.qwq2333.nullgram.utils.Defines;
+
 public class EditTextBoldCursor extends EditTextEffects {
 
     private static Field mEditor;
@@ -149,6 +152,8 @@ public class EditTextBoldCursor extends EditTextEffects {
 
     private static Method canUndoMethod;
     private static Method canRedoMethod;
+    public static boolean disableMarkdown = ConfigManager.getBooleanOrFalse(Defines.markdownDisabled);
+    private boolean showDisableMarkdown = false;
 
     static {
         try {
@@ -193,9 +198,8 @@ public class EditTextBoldCursor extends EditTextEffects {
         return false;
     }
 
-    private void addUndoRedo(Menu menu) {
-        if (canUndo()) menu.add(R.id.menu_undoredo, android.R.id.undo, 2, LocaleController.getString("EditUndo", R.string.EditUndo));
-        if (canRedo()) menu.add(R.id.menu_undoredo, android.R.id.redo, 3, LocaleController.getString("EditRedo", R.string.EditRedo));
+    public void setShowDisableMarkdown(boolean show) {
+        showDisableMarkdown = show;
     }
 
     @TargetApi(23)
@@ -1062,6 +1066,30 @@ public class EditTextBoldCursor extends EditTextEffects {
         } else {
             return super.startActionMode(callback);
         }
+    }
+
+    private void addUndoRedo(Menu menu) {
+        if (menu.findItem(android.R.id.undo) == null && menu.findItem(android.R.id.redo) == null) {
+            if (canUndo()) {
+                menu.add(R.id.menu_undoredo, android.R.id.undo, 2, LocaleController.getString("EditUndo", R.string.EditUndo));
+            }
+            if (canRedo()) {
+                menu.add(R.id.menu_undoredo, android.R.id.redo, 3, LocaleController.getString("EditRedo", R.string.EditRedo));
+            }
+        }
+        if (showDisableMarkdown) {
+            menu.add(R.id.menu_groupbolditalic, R.id.menu_markdown, 20, disableMarkdown ? LocaleController.getString("EditEnableMarkdown", R.string.EditEnableMarkdown) : LocaleController.getString("EditDisableMarkdown", R.string.EditDisableMarkdown));
+        }
+    }
+
+    @Override
+    public boolean onTextContextMenuItem(int id) {
+        if (id == R.id.menu_markdown) {
+            disableMarkdown = !disableMarkdown;
+            floatingActionMode.finish();
+            return true;
+        }
+        return super.onTextContextMenuItem(id);
     }
 
     @Override

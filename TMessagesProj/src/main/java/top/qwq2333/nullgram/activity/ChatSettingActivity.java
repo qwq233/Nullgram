@@ -8,6 +8,7 @@ import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.os.Bundle;
 import android.text.TextPaint;
+import android.text.TextUtils;
 import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.View;
@@ -49,6 +50,7 @@ import org.telegram.ui.LaunchActivity;
 import java.util.ArrayList;
 
 import top.qwq2333.nullgram.config.ConfigManager;
+import top.qwq2333.nullgram.helpers.EntitiesHelper;
 import top.qwq2333.nullgram.ui.PopupBuilder;
 import top.qwq2333.nullgram.ui.StickerSizePreviewMessagesCell;
 import top.qwq2333.nullgram.utils.AlertUtil;
@@ -93,6 +95,12 @@ public class ChatSettingActivity extends BaseActivity {
     private int showTabsOnForwardRow;
     private int disableStickersAutoReorderRow;
     private int chat2Row;
+
+    private int markdownRow;
+    private int markdownDisableRow;
+    private int markdownParserRow;
+    private int markdownParseLinksRow;
+    private int markdown2Row;
 
 
     @Override
@@ -298,6 +306,36 @@ public class ChatSettingActivity extends BaseActivity {
                 ProcessPhoenix.triggerRebirth(getContext(), new Intent(getContext(), LaunchActivity.class));
             });
             restart.show();
+        } else if (position == markdownParserRow) {
+            ArrayList<String> arrayList = new ArrayList<>();
+            arrayList.add("Nullgram");
+            arrayList.add("Telegram");
+            boolean oldParser = ConfigManager.getBooleanOrDefault(Defines.newMarkdownParser, true);
+            PopupBuilder.show(arrayList, LocaleController.getString("MarkdownParser", R.string.MarkdownParser), ConfigManager.getBooleanOrDefault(Defines.newMarkdownParser, true) ? 0 : 1, getParentActivity(), view, i -> {
+                ConfigManager.putBoolean(Defines.newMarkdownParser, (i == 0));
+                listAdapter.notifyItemChanged(markdownParserRow, PARTIAL);
+                if (oldParser != ConfigManager.getBooleanOrDefault(Defines.newMarkdownParser, true)) {
+                    if (oldParser) {
+                        listAdapter.notifyItemRemoved(markdownParseLinksRow);
+                        updateRows();
+                    } else {
+                        updateRows();
+                        listAdapter.notifyItemInserted(markdownParseLinksRow);
+                    }
+                    listAdapter.notifyItemChanged(markdown2Row, PARTIAL);
+                }
+            });
+        } else if (position == markdownParseLinksRow) {
+            ConfigManager.putBoolean(Defines.markdownParseLinks, !ConfigManager.getBooleanOrDefault(Defines.markdownParseLinks, true));
+            if (view instanceof TextCheckCell) {
+                ((TextCheckCell) view).setChecked(ConfigManager.getBooleanOrDefault(Defines.markdownParseLinks, true));
+            }
+            listAdapter.notifyItemChanged(markdown2Row);
+        } else if (position == markdownDisableRow) {
+            ConfigManager.toggleBoolean(Defines.markdownDisabled);
+            if (view instanceof TextCheckCell) {
+                ((TextCheckCell) view).setChecked(ConfigManager.getBooleanOrFalse(Defines.markdownDisabled));
+            }
         }
 
     }
@@ -350,6 +388,12 @@ public class ChatSettingActivity extends BaseActivity {
         showTabsOnForwardRow = rowCount++;
         disableStickersAutoReorderRow = rowCount++;
         chat2Row = rowCount++;
+        markdownRow = rowCount++;
+        markdownDisableRow = rowCount++;
+        markdownParserRow = rowCount++;
+        markdownParseLinksRow = ConfigManager.getBooleanOrFalse(Defines.newMarkdownParser) ? rowCount++ : -1;
+        markdown2Row = rowCount++;
+
         if (listAdapter != null) {
             listAdapter.notifyDataSetChanged();
         }
@@ -417,6 +461,8 @@ public class ChatSettingActivity extends BaseActivity {
                         textCell.setTextAndValue(LocaleController.getString("customDoubleTap", R.string.customDoubleTap), value, payload, true);
                     } else if (position == customQuickMessageRow) {
                         textCell.setText(LocaleController.getString("setCustomQuickMessage", R.string.setCustomQuickMessage), true);
+                    } else if (position == markdownParserRow) {
+                        textCell.setTextAndValue(LocaleController.getString("MarkdownParser", R.string.MarkdownParser), ConfigManager.getBooleanOrDefault(Defines.newMarkdownParser, true) ? "Nullgram" : "Telegram", payload, position + 1 != markdown2Row);
                     }
                     break;
                 }
@@ -470,6 +516,10 @@ public class ChatSettingActivity extends BaseActivity {
                     } else if (position == disableStickersAutoReorderRow) {
                         textCell.setTextAndCheck(LocaleController.getString("disableStickersAutoReorder", R.string.disableStickersAutoReorder),
                             ConfigManager.getBooleanOrDefault(Defines.disableStickersAutoReorder, true), true);
+                    } else if (position == markdownParseLinksRow) {
+                        textCell.setTextAndCheck(LocaleController.getString("MarkdownParseLinks", R.string.MarkdownParseLinks), ConfigManager.getBooleanOrDefault(Defines.markdownParseLinks, true), false);
+                    } else if (position == markdownDisableRow) {
+                        textCell.setTextAndCheck(LocaleController.getString("MarkdownDisableByDefault", R.string.MarkdownDisableByDefault), ConfigManager.getBooleanOrFalse(Defines.markdownDisabled), true);
                     }
                     break;
                 }
@@ -479,11 +529,22 @@ public class ChatSettingActivity extends BaseActivity {
                         headerCell.setText(LocaleController.getString("Chat", R.string.Chat));
                     } else if (position == stickerSizeHeaderRow) {
                         headerCell.setText(LocaleController.getString("StickerSize", R.string.StickerSize));
+                    } else if (position == markdownRow) {
+                        headerCell.setText(LocaleController.getString("Markdown", R.string.Markdown));
                     }
                     break;
                 }
                 case TYPE_NOTIFICATION_CHECK: {
                     NotificationsCheckCell textCell = (NotificationsCheckCell) holder.itemView;
+                    break;
+                }
+                case TYPE_INFO_PRIVACY: {
+                    TextInfoPrivacyCell cell = (TextInfoPrivacyCell) holder.itemView;
+                    if (position == markdown2Row) {
+                        cell.getTextView().setMovementMethod(null);
+                        cell.setBackground(Theme.getThemedDrawable(mContext, R.drawable.greydivider_bottom, Theme.key_windowBackgroundGrayShadow));
+                        cell.setText(TextUtils.expandTemplate(EntitiesHelper.parseMarkdown(ConfigManager.getBooleanOrDefault(Defines.newMarkdownParser, true) && ConfigManager.getBooleanOrDefault(Defines.markdownParseLinks, true) ? LocaleController.getString("MarkdownAbout", R.string.MarkdownAbout) : LocaleController.getString("MarkdownAbout2", R.string.MarkdownAbout2)), "**", "__", "~~", "`", "||", "[", "](", ")"));
+                    }
                     break;
                 }
             }
@@ -541,12 +602,16 @@ public class ChatSettingActivity extends BaseActivity {
         public int getItemViewType(int position) {
             if (position == chat2Row || position == stickerSize2Row) {
                 return TYPE_SHADOW;
-            } else if (position == messageMenuRow || position == customDoubleClickTapRow || position == maxRecentStickerRow || position == customQuickMessageRow) {
+            } else if (position == messageMenuRow || position == customDoubleClickTapRow || position == maxRecentStickerRow || position == customQuickMessageRow || position == markdownParserRow) {
                 return TYPE_SETTINGS;
-            } else if (position == chatRow || position == stickerSizeHeaderRow) {
+            } else if (position == chatRow || position == stickerSizeHeaderRow || position == markdownRow) {
                 return TYPE_HEADER;
             } else if (position == stickerSizeRow) {
                 return TYPE_STICKER_SIZE;
+            } else if ((position > chatRow && position < chat2Row) || (position > markdownRow && position < markdown2Row) || (position > stickerSizeRow && position < stickerSize2Row)) {
+                return TYPE_CHECK;
+            } else if (position == markdown2Row) {
+                return TYPE_INFO_PRIVACY;
             }
             return TYPE_CHECK;
         }
