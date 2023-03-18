@@ -101,6 +101,9 @@ import org.telegram.ui.Components.StickerEmptyView;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+import top.qwq2333.nullgram.config.ConfigManager;
+import top.qwq2333.nullgram.utils.Defines;
+
 public class PhotoPickerActivity extends BaseFragment implements NotificationCenter.NotificationCenterDelegate {
 
     public interface PhotoPickerActivityDelegate {
@@ -383,7 +386,7 @@ public class PhotoPickerActivity extends BaseFragment implements NotificationCen
 
         @Override
         public boolean cancelButtonPressed() {
-            delegate.actionButtonPressed(true, true, 0);
+            delegate.actionButtonPressed(true, !ConfigManager.getBooleanOrFalse(Defines.alwaysSendWithoutSound), 0);
             finishFragment();
             return true;
         }
@@ -1067,7 +1070,7 @@ public class PhotoPickerActivity extends BaseFragment implements NotificationCen
                 if (chatActivity != null && chatActivity.isInScheduleMode()) {
                     AlertsCreator.createScheduleDatePickerDialog(getParentActivity(), chatActivity.getDialogId(), this::sendSelectedPhotos);
                 } else {
-                    sendSelectedPhotos(true, 0);
+                    sendSelectedPhotos(!ConfigManager.getBooleanOrFalse(Defines.alwaysSendWithoutSound), 0);
                 }
             });
             writeButton.setOnLongClickListener(view -> {
@@ -1130,7 +1133,7 @@ public class PhotoPickerActivity extends BaseFragment implements NotificationCen
                             if (num == 0) {
                                 AlertsCreator.createScheduleDatePickerDialog(getParentActivity(), chatActivity.getDialogId(), this::sendSelectedPhotos);
                             } else {
-                                sendSelectedPhotos(true, 0);
+                                sendSelectedPhotos(!ConfigManager.getBooleanOrFalse(Defines.alwaysSendWithoutSound), 0);
                             }
                         });
                     }

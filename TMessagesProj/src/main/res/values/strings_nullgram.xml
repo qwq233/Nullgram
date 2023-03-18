@@ -266,4 +266,5 @@
     <string name="JumpToBeginning">Jump To Beginning</string>
     <string name="DisableQuickSendMediaBottom">Disable Quick Send Media Bottom</string>
     <string name="ProviderBaiduTranslate">Baidu Translator</string>
+    <string name="alwaysSendWithoutSound">Always Send Without Sound</string>
 </resources>

@@ -116,6 +116,8 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
 
+import top.qwq2333.nullgram.config.ConfigManager;
+import top.qwq2333.nullgram.utils.Defines;
 import top.qwq2333.nullgram.utils.PermissionUtils;
 
 public class ChatAttachAlert extends BottomSheet implements NotificationCenter.NotificationCenterDelegate, BottomSheet.BottomSheetDelegateInterface {
@@ -2449,7 +2451,7 @@ public class ChatAttachAlert extends BottomSheet implements NotificationCenter.N
                 }, resourcesProvider);
             } else {
                 if (currentAttachLayout == photoLayout || currentAttachLayout == photoPreviewLayout) {
-                    sendPressed(true, 0);
+                    sendPressed(!ConfigManager.getBooleanOrFalse(Defines.alwaysSendWithoutSound), 0);
                 } else {
                     currentAttachLayout.sendSelectedItems(true, 0);
                     allowPassConfirmationAlert = true;

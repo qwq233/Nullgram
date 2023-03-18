@@ -256,4 +256,5 @@
     <string name="InstallProhibitedPlay">Installing app from apk file in chat is not available in the Play Store version of the app.\nPlease save it manually and install from File Manager.</string>
     <string name="TranslatorTypeInMessage">In Message</string>
     <string name="SmsDisabled">Login via sms is currently disabled for any 3rd TELEOFFICIAL client due to TELEOFFICIAL\'s policy.\nWe apologize for any inconvenience caused.</string>
+    <string name="alwaysSendWithoutSound">总是静音发送</string>
 </resources>

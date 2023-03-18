@@ -5095,7 +5095,7 @@ public class ChatActivityEnterView extends BlurredFrameLayout implements Notific
         if (isInScheduleMode()) {
             AlertsCreator.createScheduleDatePickerDialog(parentActivity, parentFragment.getDialogId(), this::sendMessageInternal, resourcesProvider);
         } else {
-            sendMessageInternal(true, 0);
+            sendMessageInternal(!ConfigManager.getBooleanOrFalse(Defines.alwaysSendWithoutSound), 0);
         }
     }
 
