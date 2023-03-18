@@ -192,10 +192,10 @@ public abstract class BaseActivity extends BaseFragment {
             actionBar = super.createActionBar(context);
         } else {
             actionBar = new ActionBar(context);
-            actionBar.setBackgroundColor(Theme.getColor(Theme.key_windowBackgroundWhite));
-            actionBar.setItemsColor(Theme.getColor(Theme.key_windowBackgroundWhiteBlackText), false);
+            actionBar.setBackgroundColor(Theme.getColor(Theme.key_actionBarDefault));
+            actionBar.setItemsColor(Theme.getColor(Theme.key_actionBarDefaultIcon), false);
             actionBar.setItemsBackgroundColor(Theme.getColor(Theme.key_actionBarWhiteSelector), false);
-            actionBar.setTitleColor(Theme.getColor(Theme.key_windowBackgroundWhiteBlackText));
+            actionBar.setTitleColor(Theme.getColor(Theme.key_actionBarDefaultTitle));
             actionBar.setCastShadows(false);
         }
         actionBar.setTitle(getActionBarTitle());
