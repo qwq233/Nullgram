@@ -96,7 +96,7 @@
     <string name="customDoubleTap">Costomizar o Duplo Toque</string>
     <string name="OpenSource">Licenças de código-aberto</string>
     <string name="disableCustomAPI">Não usar API customizada</string>
-    <string name="useOfficialAPI">TELEOFFICIAL</string>
+    <string name="useOfficialAPI">TeleOficial</string>
     <string name="customAPI">API personalizada</string>
     <string name="useCustomApiNotice">Faça o login usando a API personalizada, se você não puder se registrar ou fazer login, isso pode ajudar.\n\nNota: fcm não funcionará se você estiver usando a versão de lançamento.</string>
     <string name="useCustomAPI">Entrada manual</string>
@@ -210,6 +210,7 @@
     <string name="SwitchToAnonymously">Switch to anonymously</string>
     <string name="SwitchToPersonalAccount">Switch to personal account</string>
     <string name="openArchiveOnPull">Open Archive On Pull</string>
+    <string name="hideAllTab">Hide \"All Chats\" tab</string>
     <string name="disableStickersAutoReorder">Disable sticker packs auto-reorder</string>
     <string name="Ban">Ban</string>
     <string name="autoDisableBuiltInProxy">Auto Disable Built-In Proxy</string>
@@ -256,4 +257,14 @@
     <string name="InstallProhibitedPlay">Installing app from apk file in chat is not available in the Play Store version of the app.\nPlease save it manually and install from File Manager.</string>
     <string name="TranslatorTypeInMessage">In Message</string>
     <string name="SmsDisabled">Login via sms is currently disabled for any 3rd TELEOFFICIAL client due to TELEOFFICIAL\'s policy.\nWe apologize for any inconvenience caused.</string>
+    <string name="DevicePerformanceAuto">Default</string>
+    <string name="DevicePerformanceLow">Low</string>
+    <string name="DevicePerformanceMedium">Medium</string>
+    <string name="DevicePerformanceHigh">High</string>
+    <string name="OverrideDevicePerformance">Override performance detect</string>
+    <string name="OverrideDevicePerformanceDesc">Override TELEOFFICIAL\'s device performance detector.\nLow mode will reduce animation effects and other stuff as much as possible, which may help to save power in the foreground.\nHigh mode may greatly increase power consumption and performance burden and cause stuttering.</string>
+    <string name="JumpToBeginning">Jump To Beginning</string>
+    <string name="DisableQuickSendMediaBottom">Disable Quick Send Media Bottom</string>
+    <string name="ProviderBaiduTranslate">Baidu Translator</string>
+    <string name="alwaysSendWithoutSound">Always Send Without Sound</string>
 </resources>
