@@ -77,8 +77,9 @@ jobs:
             ln -s  ${ANDROID_HOME}/cmake/3.18.1/bin/ninja /opt/hostedtoolcache/cmake/3.22.1/x64/cmake-3.22.1-linux-x86_64/bin/
       - name: Debug Build
         run: |
-          sed '/signingConfig =/d' TMessagesProj/build.gradle.kts > TMessagesProj/build.gradle.kts
-          ./gradlew TMessagesProj:assembleArm64Release
+          sed '/signingConfig =/d' TMessagesProj/build.gradle.kts > TMessagesProj/build.gradle.kts.tmp
+          cp TMessagesProj/build.gradle.kts.tmp TMessagesProj/build.gradle.kts
+          ./gradlew TMessagesProj:assembleArm64Debug
         
 
   
