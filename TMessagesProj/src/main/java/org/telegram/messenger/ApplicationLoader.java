@@ -10,8 +10,6 @@ package org.telegram.messenger;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
-import android.app.ActivityManager;
-import android.app.AlarmManager;
 import android.app.Application;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -43,7 +41,6 @@ import org.telegram.ui.Components.ForegroundDetector;
 import org.telegram.ui.LauncherIconController;
 
 import java.io.File;
-import java.util.HashMap;
 import java.util.concurrent.CountDownLatch;
 
 import top.qwq2333.nullgram.utils.AppcenterUtils;
@@ -82,26 +79,6 @@ public class ApplicationLoader extends Application {
     protected void attachBaseContext(Context base) {
         super.attachBaseContext(base);
         MultiDex.install(this);
-        AppcenterUtils.start(this);
-        AppcenterUtils.trackEvent("App start");
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-            var am = getSystemService(ActivityManager.class);
-            var map = new HashMap<String, String>(1);
-            var reasons = am.getHistoricalProcessExitReasons(null, 0, 1);
-            if (reasons.size() == 1) {
-                map.put("description", reasons.get(0).getDescription());
-                map.put("importance", String.valueOf(reasons.get(0).getImportance()));
-                map.put("process", reasons.get(0).getProcessName());
-                map.put("reason", String.valueOf(reasons.get(0).getReason()));
-                map.put("status", String.valueOf(reasons.get(0).getStatus()));
-                AppcenterUtils.trackEvent("Last exit reasons", map);
-            }
-        }
-        HashMap<String, String> info = new HashMap<>();
-        info.put("OSversion", ""+ Build.VERSION.SDK_INT);
-        info.put("versionName", BuildVars.BUILD_VERSION_STRING);
-        info.put("versionCode", "" + BuildConfig.VERSION_CODE);
-        AppcenterUtils.trackEvent("info",info);
     }
 
     public static ILocationServiceProvider getLocationServiceProvider() {
@@ -257,6 +234,9 @@ public class ApplicationLoader extends Application {
         }
         ChatThemeController.init();
         BillingController.getInstance().startConnection();
+
+        AppcenterUtils.start(applicationLoaderInstance);
+
     }
 
     public ApplicationLoader() {

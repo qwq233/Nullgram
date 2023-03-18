@@ -19,7 +19,9 @@
 
 package top.qwq2333.nullgram.utils;
 
+import android.app.ActivityManager;
 import android.app.Application;
+import android.os.Build;
 import android.os.Handler;
 
 import androidx.annotation.NonNull;
@@ -30,7 +32,6 @@ import com.microsoft.appcenter.analytics.Analytics;
 import com.microsoft.appcenter.channel.AbstractChannelListener;
 import com.microsoft.appcenter.channel.Channel;
 import com.microsoft.appcenter.crashes.Crashes;
-import com.microsoft.appcenter.ingestion.models.Log;
 
 import org.telegram.messenger.BuildConfig;
 import org.telegram.messenger.BuildVars;
@@ -41,9 +42,10 @@ import java.util.HashMap;
 public class AppcenterUtils {
 
     private final static String appCenterToken = BuildVars.APPCENTER_HASH;
+    private static boolean isInit = false;
     private static final Channel.Listener patchDeviceListener = new AbstractChannelListener() {
         @Override
-        public void onPreparedLog(@NonNull Log log, @NonNull String groupName, int flags) {
+        public void onPreparedLog(@NonNull com.microsoft.appcenter.ingestion.models.Log log, @NonNull String groupName, int flags) {
             var device = log.getDevice();
             device.setAppVersion(BuildConfig.VERSION_NAME);
             device.setAppBuild(String.valueOf(BuildConfig.VERSION_CODE));
@@ -58,7 +60,7 @@ public class AppcenterUtils {
             assert channel != null;
             channel.addListener(patchDeviceListener);
         } catch (ReflectiveOperationException e) {
-            top.qwq2333.nullgram.utils.Log.e("add listener", e);
+            Log.e("add listener", e);
         }
     }
 
@@ -70,18 +72,39 @@ public class AppcenterUtils {
             assert handler != null;
             handler.post(AppcenterUtils::addPatchDeviceListener);
         } catch (ReflectiveOperationException e) {
-            top.qwq2333.nullgram.utils.Log.e("patch device", e);
+            Log.e("patch device", e);
         }
     }
 
     public static void start(Application app) {
+        if (isInit) {
+            return;
+        }
         try {
             var currentUser = UserConfig.getInstance(UserConfig.selectedAccount);
+            Log.d("FirebaseCrashlytics start: set user id: " + currentUser.getClientUserId());
             FirebaseCrashlytics.getInstance().setUserId(String.valueOf(currentUser.getClientUserId()));
         } catch (Exception ignored) { }
 
         AppCenter.start(app, appCenterToken, Crashes.class, Analytics.class);
         patchDevice();
+
+        AppcenterUtils.trackEvent("App start");
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            var am = app.getSystemService(ActivityManager.class);
+            var map = new HashMap<String, String>(1);
+            var reasons = am.getHistoricalProcessExitReasons(null, 0, 1);
+            if (reasons.size() == 1) {
+                map.put("description", reasons.get(0).getDescription());
+                map.put("importance", String.valueOf(reasons.get(0).getImportance()));
+                map.put("process", reasons.get(0).getProcessName());
+                map.put("reason", String.valueOf(reasons.get(0).getReason()));
+                map.put("status", String.valueOf(reasons.get(0).getStatus()));
+                AppcenterUtils.trackEvent("Last exit reasons", map);
+            }
+        }
+
+        isInit = true;
     }
 
     public static void trackEvent(String event) {

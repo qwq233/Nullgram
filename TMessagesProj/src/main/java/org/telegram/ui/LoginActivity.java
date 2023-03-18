@@ -3650,7 +3650,9 @@ public class LoginActivity extends BaseFragment {
         }
 
         private void handleError(String errorText) {
-            qrDialog.dismiss();
+            if (qrDialog != null) {
+                qrDialog.dismiss();
+            }
             if (errorText.contains("SESSION_PASSWORD_NEEDED")) {
                 TLRPC.TL_account_getPassword req = new TLRPC.TL_account_getPassword();
                 getConnectionsManager().sendRequest(req, (response, error) -> AndroidUtilities.runOnUIThread(() -> {
