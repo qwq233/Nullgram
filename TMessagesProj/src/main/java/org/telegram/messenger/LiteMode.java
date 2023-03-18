@@ -5,9 +5,6 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.BatteryManager;
 import android.os.Build;
-import android.os.PowerManager;
-import android.util.SparseArray;
-import android.util.SparseIntArray;
 
 import androidx.annotation.RequiresApi;
 import androidx.core.math.MathUtils;
@@ -19,9 +16,6 @@ import org.telegram.ui.Components.AnimatedEmojiDrawable;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
-
-import org.telegram.ui.ActionBar.Theme;
-import org.telegram.ui.Components.AnimatedEmojiDrawable;
 
 public class LiteMode {
 
@@ -123,12 +117,14 @@ public class LiteMode {
     }
 
     private static int preprocessFlag(int flag) {
-        if (flag == FLAG_ANIMATED_EMOJI_KEYBOARD) {
-            return UserConfig.hasPremiumOnAccounts() ? FLAG_ANIMATED_EMOJI_KEYBOARD_PREMIUM : FLAG_ANIMATED_EMOJI_KEYBOARD_NOT_PREMIUM;
-        } else if (flag == FLAG_ANIMATED_EMOJI_REACTIONS) {
-            return UserConfig.hasPremiumOnAccounts() ? FLAG_ANIMATED_EMOJI_REACTIONS_PREMIUM : FLAG_ANIMATED_EMOJI_REACTIONS_NOT_PREMIUM;
-        } else if (flag == FLAG_ANIMATED_EMOJI_CHAT) {
-            return UserConfig.hasPremiumOnAccounts() ? FLAG_ANIMATED_EMOJI_CHAT_PREMIUM : FLAG_ANIMATED_EMOJI_CHAT_NOT_PREMIUM;
+        if ((flag & FLAG_ANIMATED_EMOJI_KEYBOARD) > 0) {
+            flag = flag & ~FLAG_ANIMATED_EMOJI_KEYBOARD | (UserConfig.hasPremiumOnAccounts() ? FLAG_ANIMATED_EMOJI_KEYBOARD_PREMIUM : FLAG_ANIMATED_EMOJI_KEYBOARD_NOT_PREMIUM);
+        }
+        if ((flag & FLAG_ANIMATED_EMOJI_REACTIONS) > 0) {
+            flag = flag & ~FLAG_ANIMATED_EMOJI_REACTIONS | (UserConfig.hasPremiumOnAccounts() ? FLAG_ANIMATED_EMOJI_REACTIONS_PREMIUM : FLAG_ANIMATED_EMOJI_REACTIONS_NOT_PREMIUM);
+        }
+        if ((flag & FLAG_ANIMATED_EMOJI_CHAT) > 0) {
+            flag = flag & ~FLAG_ANIMATED_EMOJI_CHAT | (UserConfig.hasPremiumOnAccounts() ? FLAG_ANIMATED_EMOJI_CHAT_PREMIUM : FLAG_ANIMATED_EMOJI_CHAT_NOT_PREMIUM);
         }
         return flag;
     }

@@ -12,6 +12,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.SharedPreferences;
 import android.graphics.Canvas;
+import android.text.TextUtils;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
@@ -51,13 +52,11 @@ import org.telegram.ui.Components.EmptyTextProgressView;
 import org.telegram.ui.Components.LayoutHelper;
 import org.telegram.ui.Components.Premium.PremiumFeatureBottomSheet;
 import org.telegram.ui.Components.RecyclerListView;
-import org.telegram.ui.Components.TranslateAlert2;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.Timer;
 
 import top.qwq2333.nullgram.activity.GeneralSettingActivity;
@@ -410,6 +409,23 @@ public class LanguageSelectActivity extends BaseFragment implements Notification
         Collections.sort(unofficialLanguages, comparator);
     }
 
+    private static boolean patching = false;
+
+    @Override
+    public void onBecomeFullyVisible() {
+        super.onBecomeFullyVisible();
+        boolean shouldPatch = getMessagesController().checkResetLangpack > 0 && !MessagesController.getGlobalMainSettings().getBoolean("langpack_patched", false) && !patching;
+        if (shouldPatch) {
+            patching = true;
+            LocaleController.getInstance().reloadCurrentRemoteLocale(currentAccount, null, true, () -> {
+                AndroidUtilities.runOnUIThread(() -> {
+                    MessagesController.getGlobalMainSettings().edit().putBoolean("langpack_patched", true).apply();
+                    updateLanguage();
+                });
+            });
+        }
+    }
+
     @Override
     public void onResume() {
         super.onResume();
@@ -433,7 +449,10 @@ public class LanguageSelectActivity extends BaseFragment implements Notification
 
     private void updateLanguage() {
         if (actionBar != null) {
-            actionBar.setTitleAnimated(LocaleController.getString("Language", R.string.Language), true, 350, CubicBezierInterpolator.EASE_OUT_QUINT);
+            String newTitle = LocaleController.getString("Language", R.string.Language);
+            if (!TextUtils.equals(actionBar.getTitle(), newTitle)) {
+                actionBar.setTitleAnimated(newTitle, true, 350, CubicBezierInterpolator.EASE_OUT_QUINT);
+            }
         }
         if (listAdapter != null) {
             listAdapter.notifyItemRangeChanged(0, listAdapter.getItemCount());

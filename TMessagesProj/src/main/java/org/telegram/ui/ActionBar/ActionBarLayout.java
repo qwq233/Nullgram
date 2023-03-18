@@ -61,7 +61,6 @@ import org.telegram.ui.Components.LayoutHelper;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 
 import top.qwq2333.nullgram.config.ConfigManager;
@@ -1448,7 +1447,7 @@ public class ActionBarLayout extends FrameLayout implements INavigationLayout, F
                                     if (delayedAnimationResumed) {
                                         delayedOpenAnimationRunnable.run();
                                     } else {
-                                        AndroidUtilities.runOnUIThread(delayedOpenAnimationRunnable, 100);
+                                        AndroidUtilities.runOnUIThread(delayedOpenAnimationRunnable, 200);
                                     }
                                 }
                             }
@@ -1877,7 +1876,7 @@ public class ActionBarLayout extends FrameLayout implements INavigationLayout, F
 
     @Override
     public void bringToFront(int i) {
-        if (fragmentsStack.isEmpty()) {
+        if (fragmentsStack.isEmpty() || !fragmentsStack.isEmpty() && fragmentsStack.size() - 1 == i && fragmentsStack.get(i).fragmentView != null) {
             return;
         }
         for (int a = 0; a < i; a++) {
