@@ -78,7 +78,7 @@ jobs:
       - name: Debug Build
         run: |
           sed '/signingConfig =/d' TMessagesProj/build.gradle.kts > TMessagesProj/build.gradle.kts
-          ./gradlew TMessagesProj:assembleArm64Debug
+          ./gradlew TMessagesProj:assembleArm64Release
         
 
   
