@@ -1524,6 +1524,9 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
                             message.type != MessageObject.TYPE_GIFT_PREMIUM && !UserObject.isUserSelf(currentUser);
                     case Defines.doubleTabEdit:
                         return allowEdit;
+                    case Defines.doubleTabTranslate:
+                        boolean allowTranslate = getMessagesController().getTranslateController().isDialogTranslatable(message.getDialogId()) && !getMessagesController().getTranslateController().isTranslateDialogHidden(message.getDialogId());
+                        return allowTranslate;
                 }
             }
             return false;
@@ -1573,7 +1576,7 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
                 selectedObjectGroup = getValidGroupedMessage(message);
                 switch (currentConfig) {
                     case Defines.doubleTabReply:
-                        processSelectedOption(8);
+                        processSelectedOption(OPTION_REPLY);
                         break;
                     case Defines.doubleTabSaveMessages:
                         processSelectedOption(93);
@@ -1582,7 +1585,10 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
                         processSelectedOption(94);
                         break;
                     case Defines.doubleTabEdit:
-                        processSelectedOption(12);
+                        processSelectedOption(OPTION_EDIT);
+                        break;
+                    case Defines.doubleTabTranslate:
+                        processSelectedOption(OPTION_TRANSLATE);
                         break;
                 }
             }
