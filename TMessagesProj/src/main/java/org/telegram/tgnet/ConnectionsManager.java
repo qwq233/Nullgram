@@ -57,12 +57,10 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import top.qwq2333.nullgram.helpers.WebSocketHelper;
-import top.qwq2333.nullgram.utils.DatabaseUtils;
-import top.qwq2333.nullgram.utils.Log;
-import top.qwq2333.nullgram.utils.ProxyUtils;
-
 import javax.net.ssl.SSLException;
+
+import top.qwq2333.nullgram.helpers.WebSocketHelper;
+import top.qwq2333.nullgram.utils.Log;
 
 @SuppressWarnings("JavaJniMissingFunction")
 public class ConnectionsManager extends BaseController {
@@ -625,7 +623,6 @@ public class ConnectionsManager extends BaseController {
         try {
             AndroidUtilities.runOnUIThread(() -> {
                 getInstance(currentAccount).connectionState = state;
-                ProxyUtils.didReceivedNotification(state);
                 AccountInstance.getInstance(currentAccount).getNotificationCenter().postNotificationName(NotificationCenter.didUpdateConnectionState);
             });
         } catch (Exception e) {

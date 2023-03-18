@@ -68,7 +68,6 @@ public class GeneralSettingActivity extends BaseActivity {
     private int disableInstantCameraRow;
     private int disableUndoRow;
     private int skipOpenLinkConfirmRow;
-    private int autoProxySwitchRow;
     private int tabsTitleTypeRow;
     private int openArchiveOnPullRow;
     private int hideAllTabRow;
@@ -166,11 +165,6 @@ public class GeneralSettingActivity extends BaseActivity {
             ConfigManager.toggleBoolean(Defines.skipOpenLinkConfirm);
             if (view instanceof TextCheckCell) {
                 ((TextCheckCell) view).setChecked(ConfigManager.getBooleanOrFalse(Defines.skipOpenLinkConfirm));
-            }
-        } else if (position == autoProxySwitchRow) {
-            ConfigManager.toggleBoolean(Defines.autoSwitchProxy);
-            if (view instanceof TextCheckCell) {
-                ((TextCheckCell) view).setChecked(ConfigManager.getBooleanOrFalse(Defines.autoSwitchProxy));
             }
         } else if (position == useSystemEmojiRow) {
             ConfigManager.toggleBoolean(Defines.useSystemEmoji);
@@ -345,7 +339,6 @@ public class GeneralSettingActivity extends BaseActivity {
         disableInstantCameraRow = rowCount++;
         disableUndoRow = rowCount++;
         skipOpenLinkConfirmRow = rowCount++;
-        autoProxySwitchRow = rowCount++;
         openArchiveOnPullRow = rowCount++;
         hideAllTabRow = rowCount++;
         tabsTitleTypeRow = rowCount++;
@@ -497,8 +490,6 @@ public class GeneralSettingActivity extends BaseActivity {
                         textCell.setTextAndCheck(LocaleController.getString("disableUndo", R.string.disableUndo), ConfigManager.getBooleanOrFalse(Defines.disableUndo), true);
                     } else if (position == skipOpenLinkConfirmRow) {
                         textCell.setTextAndCheck(LocaleController.getString("skipOpenLinkConfirm", R.string.skipOpenLinkConfirm), ConfigManager.getBooleanOrFalse(Defines.skipOpenLinkConfirm), true);
-                    } else if (position == autoProxySwitchRow) {
-                        textCell.setTextAndCheck(LocaleController.getString("autoProxySwitch", R.string.autoProxySwitch), ConfigManager.getBooleanOrFalse(Defines.autoSwitchProxy), true);
                     } else if (position == avatarAsDrawerBackgroundRow) {
                         textCell.setTextAndCheck(LocaleController.getString("AvatarAsBackground", R.string.AvatarAsBackground), ConfigManager.getBooleanOrFalse(Defines.avatarAsDrawerBackground), true);
                     } else if (position == avatarBackgroundBlurRow) {

@@ -54,7 +54,6 @@ public class Defines {
     public static final String disableUndo = "disableUndo";
     public static final String skipOpenLinkConfirm = "skipOpenLinkConfirm";
     public static final String maxRecentSticker = "maxRecentSticker";
-    public static final String autoSwitchProxy = "autoSwitchProxy";
     public static final String unreadBadgeOnBackButton = "unreadBadgeOnBackButton";
     public static final String disableSendTyping = "disableSendTyping";
     public static final String ignoreReactionMention = "ignoreReactionMention";
