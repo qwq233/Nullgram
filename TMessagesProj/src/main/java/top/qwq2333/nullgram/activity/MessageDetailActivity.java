@@ -217,18 +217,6 @@ public class MessageDetailActivity extends BaseActivity implements NotificationC
         return false;
     }
 
-    private void showNoForwards() {
-        if (getMessagesController().isChatNoForwards(toChat)) {
-            BulletinFactory.of(this).createErrorBulletin(toChat.broadcast ?
-                LocaleController.getString("ForwardsRestrictedInfoChannel", R.string.ForwardsRestrictedInfoChannel) :
-                LocaleController.getString("ForwardsRestrictedInfoGroup", R.string.ForwardsRestrictedInfoGroup)
-            ).show();
-        } else {
-            BulletinFactory.of(this).createErrorBulletin(
-                LocaleController.getString("ForwardsRestrictedInfoBot", R.string.ForwardsRestrictedInfoBot)).show();
-        }
-    }
-
     @Override
     public View createView(Context context) {
         View fragmentView = super.createView(context);
@@ -251,16 +239,12 @@ public class MessageDetailActivity extends BaseActivity implements NotificationC
             }
             presentFragment(new DatacenterActivity(dc));
         } else if (position == filePathRow) {
-            if (!noforwards) {
-                Intent intent = new Intent(Intent.ACTION_SEND);
-                var uri = FileProvider.getUriForFile(getParentActivity(), ApplicationLoader.getApplicationId() + ".provider", new File(filePath));
-                intent.setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-                intent.putExtra(Intent.EXTRA_STREAM, uri);
-                intent.setDataAndType(uri, messageObject.getMimeType());
-                startActivityForResult(Intent.createChooser(intent, LocaleController.getString("ShareFile", R.string.ShareFile)), 500);
-            } else {
-                showNoForwards();
-            }
+            Intent intent = new Intent(Intent.ACTION_SEND);
+            var uri = FileProvider.getUriForFile(getParentActivity(), ApplicationLoader.getApplicationId() + ".provider", new File(filePath));
+            intent.setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+            intent.putExtra(Intent.EXTRA_STREAM, uri);
+            intent.setDataAndType(uri, messageObject.getMimeType());
+            startActivityForResult(Intent.createChooser(intent, LocaleController.getString("ShareFile", R.string.ShareFile)), 500);
         } else if (position == channelRow || position == groupRow) {
             if (toChat != null) {
                 Bundle args = new Bundle();
@@ -368,20 +352,16 @@ public class MessageDetailActivity extends BaseActivity implements NotificationC
     @Override
     protected boolean onItemLongClick(View view, int position, float x, float y) {
         if (position != endRow) {
-            if (!noforwards || !(position == messageRow || position == captionRow || position == filePathRow)) {
-                CharSequence text;
-                if (view instanceof TextDetailSettingsCell) {
-                    TextDetailSettingsCell textCell = (TextDetailSettingsCell) view;
-                    text = textCell.getValueTextView().getText();
-                } else {
-                    TextDetailSimpleCell textCell = (TextDetailSimpleCell) view;
-                    text = textCell.getValueTextView().getText();
-                }
-                AndroidUtilities.addToClipboard(text);
-                BulletinFactory.of(this).createCopyBulletin(LocaleController.formatString("TextCopied", R.string.TextCopied)).show();
+            CharSequence text;
+            if (view instanceof TextDetailSettingsCell) {
+                TextDetailSettingsCell textCell = (TextDetailSettingsCell) view;
+                text = textCell.getValueTextView().getText();
             } else {
-                showNoForwards();
+                TextDetailSimpleCell textCell = (TextDetailSimpleCell) view;
+                text = textCell.getValueTextView().getText();
             }
+            AndroidUtilities.addToClipboard(text);
+            BulletinFactory.of(this).createCopyBulletin(LocaleController.formatString("TextCopied", R.string.TextCopied)).show();
         }
         return true;
     }
