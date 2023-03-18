@@ -215,9 +215,9 @@ public class ChatSettingActivity extends BaseActivity {
             arrayList.add(LocaleController.getString("saveMessages", R.string.saveMessages));
             types.add(Defines.doubleTabSaveMessages);
             arrayList.add(LocaleController.getString("Repeat", R.string.Repeat));
-            types.add(Defines.doubleTabTranslate);
-            arrayList.add(LocaleController.getString("TranslateMessage", R.string.TranslateMessage));
             types.add(Defines.doubleTabRepeat);
+            arrayList.add(LocaleController.getString("TranslateMessage", R.string.TranslateMessage));
+            types.add(Defines.doubleTabTranslate);
             PopupBuilder.show(arrayList, LocaleController.getString("customDoubleTap", R.string.customDoubleTap), types.indexOf(ConfigManager.getIntOrDefault(Defines.doubleTab,
                 Defines.doubleTabReaction)), getParentActivity(), view, i -> {
                 ConfigManager.putInt(Defines.doubleTab, types.get(i));
