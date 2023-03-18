@@ -1525,8 +1525,11 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
                     case Defines.doubleTabEdit:
                         return allowEdit;
                     case Defines.doubleTabTranslate:
-                        boolean allowTranslate = getMessagesController().getTranslateController().isDialogTranslatable(message.getDialogId()) && !getMessagesController().getTranslateController().isTranslateDialogHidden(message.getDialogId());
-                        return allowTranslate;
+                        MessageObject messageObject = getMessageUtils().getMessageForTranslate(selectedObject, selectedObjectGroup);
+                        if (messageObject != null) {
+                            return true;
+                        }
+                        return false;
                 }
             }
             return false;
@@ -24610,7 +24613,7 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
                         });
                         popupLayout.addView(new ActionBarPopupWindow.GapView(contentView.getContext(), themeDelegate), LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, 8));
                     }
-                    
+
                     FrameLayout sponsoredAbout = new FrameLayout(getParentActivity()) {
                         @Override
                         protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
