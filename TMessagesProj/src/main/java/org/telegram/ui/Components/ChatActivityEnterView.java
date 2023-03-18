@@ -7427,26 +7427,6 @@ public class ChatActivityEnterView extends BlurredFrameLayout implements Notific
     }
 
     public void updateGiftButton(boolean animated) {
-        boolean visible = !MessagesController.getInstance(currentAccount).premiumLocked && MessagesController.getInstance(currentAccount).giftAttachMenuIcon &&
-                MessagesController.getInstance(currentAccount).giftTextFieldIcon && getParentFragment() != null && getParentFragment().getCurrentUser() != null &&
-                !BuildVars.IS_BILLING_UNAVAILABLE && !getParentFragment().getCurrentUser().self && !getParentFragment().getCurrentUser().premium &&
-                getParentFragment().getCurrentUserInfo() != null && !getParentFragment().getCurrentUserInfo().premium_gifts.isEmpty() && !isInScheduleMode() &&
-                MessagesController.getInstance(currentAccount).getMainSettings().getBoolean("show_gift_for_" + parentFragment.getDialogId(), true);
-
-        if (!visible && giftButton == null) {
-            return;
-        }
-        createGiftButton();
-
-        AndroidUtilities.updateViewVisibilityAnimated(giftButton, visible, 1f, animated);
-        if (scheduledButton != null && scheduledButton.getVisibility() == View.VISIBLE) {
-            float tX = (visible ? -AndroidUtilities.dp(48) : 0) + AndroidUtilities.dp(botButton != null && botButton.getVisibility() == VISIBLE ? 48 : 0);
-            if (animated) {
-                scheduledButton.animate().translationX(tX).setDuration(150).start();
-            } else {
-                scheduledButton.setTranslationX(tX);
-            }
-        }
     }
 
     public void updateScheduleButton(boolean animated) {
