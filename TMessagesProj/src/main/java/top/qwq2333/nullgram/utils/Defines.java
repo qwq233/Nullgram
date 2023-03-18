@@ -87,6 +87,7 @@ public class Defines {
     public static final String quickToggleAnonymous = "quickToggleAnonymous";
     public static final String hideProxySponsorChannel = "hideProxySponsorChannel";
     public static final String hideAllTab = "hideAllTab";
+    public static final String alwaysSendWithoutSound = "alwaysSendWithoutSound";
 
     // Custom API
     public static final String customAPI = "customAPI";

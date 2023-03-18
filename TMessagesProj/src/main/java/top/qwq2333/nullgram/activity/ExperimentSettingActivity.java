@@ -46,6 +46,8 @@ public class ExperimentSettingActivity extends BaseActivity {
     private int fastSpeedUploadRow;
     private int modifyDownloadSpeedRow;
     private int premium2Row;
+    private int alwaysSendWithoutSoundRow;
+
 
     private int experiment2Row;
 
@@ -149,6 +151,11 @@ public class ExperimentSettingActivity extends BaseActivity {
                     ConfigManager.putInt(Defines.modifyDownloadSpeed, speeds[i]);
                     listAdapter.notifyItemChanged(modifyDownloadSpeedRow, PARTIAL);
                 });
+        }else if (position == alwaysSendWithoutSoundRow) {
+            ConfigManager.toggleBoolean(Defines.alwaysSendWithoutSound);
+            if (view instanceof TextCheckCell) {
+                ((TextCheckCell) view).setChecked(ConfigManager.getBooleanOrFalse(Defines.alwaysSendWithoutSound));
+            }
         }
 
     }
@@ -180,6 +187,7 @@ public class ExperimentSettingActivity extends BaseActivity {
         keepFormattingRow = rowCount++;
         enchantAudioRow = rowCount++;
         linkedUserRow = rowCount++;
+        alwaysSendWithoutSoundRow = rowCount++;
         if (ConfigManager.getBooleanOrFalse(Defines.linkedUser) && ConfigManager.getBooleanOrFalse(Defines.labelChannelUser)) {
             overrideChannelAliasRow = rowCount++;
         } else {
@@ -276,6 +284,8 @@ public class ExperimentSettingActivity extends BaseActivity {
                         textCell.setTextAndCheck(LocaleController.getString("hidePremiumStickerAnim", R.string.hidePremiumStickerAnim), ConfigManager.getBooleanOrFalse(Defines.hidePremiumStickerAnim), true);
                     } else if (position == fastSpeedUploadRow) {
                         textCell.setTextAndCheck(LocaleController.getString("fastSpeedUpload", R.string.fastSpeedUpload), ConfigManager.getBooleanOrFalse(Defines.fastSpeedUpload), true);
+                    } else if (position == alwaysSendWithoutSoundRow) {
+                        textCell.setTextAndCheck(LocaleController.getString("alwaysSendWithoutSound", R.string.alwaysSendWithoutSound), ConfigManager.getBooleanOrFalse(Defines.alwaysSendWithoutSound), true);
                     }
                     break;
                 }
