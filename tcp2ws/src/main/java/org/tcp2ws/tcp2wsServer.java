@@ -31,104 +31,72 @@ public class tcp2wsServer {
     public static Map<String, InetAddress[]> DoHCache = new HashMap();
 
     static {
-        mtpcdn.put(1, "pluto.nekoe.ga");
-        mtpcdn.put(2, "venus.nekoe.ga");
-        mtpcdn.put(3, "aurora.nekoe.ga");
-        mtpcdn.put(4, "vesta.nekoe.ga");
-        mtpcdn.put(5, "flora.nekoe.ga");
-        mtpcdn.put(17, "test_pluto.nekoe.ga");
-        mtpcdn.put(18, "test_venus.nekoe.ga");
-        mtpcdn.put(19, "test_aurora.nekoe.ga");
-        mtpipv6.put(1, "[2001:0b28:f23d:f001:0000:0000:0000:000d]");
-        mtpipv6.put(2, "[2001:067c:04e8:f002:0000:0000:0000:000b]");
-        mtpipv6.put(3, "[2001:0b28:f23d:f003:0000:0000:0000:000d]");
-        mtpipv6.put(4, "[2001:067c:04e8:f004:0000:0000:0000:000d]");
-        mtpipv6.put(5, "[2001:0b28:f23f:f005:0000:0000:0000:000d]");
-        mtpipv6.put(17, "[2001:b28:f23d:f001:0000:0000:0000:000e]");
-        mtpipv6.put(18, "[2001:67c:4e8:f002:0000:0000:0000:000e]");
-        mtpipv6.put(19, "[2001:b28:f23d:f003:0000:0000:0000:000e]");
-        cdn.put("149.154.175.50", "pluto.nekoe.ga");
-        cdn.put("149.154.167.51", "venus.nekoe.ga");
-        cdn.put("95.161.76.100", "venus.nekoe.ga");
-        cdn.put("149.154.175.100", "aurora.nekoe.ga");
-        cdn.put("149.154.167.91", "vesta.nekoe.ga");
-        cdn.put("149.154.171.5", "flora.nekoe.ga");
+        mtpcdn.put(1, "pluto.nekoe.eu.org");
+        mtpcdn.put(2, "venus.nekoe.eu.org");
+        mtpcdn.put(3, "aurora.nekoe.eu.org");
+        mtpcdn.put(4, "vesta.nekoe.eu.org");
+        mtpcdn.put(5, "flora.nekoe.eu.org");
+        mtpcdn.put(17, "test_pluto.nekoe.eu.org");
+        mtpcdn.put(18, "test_venus.nekoe.eu.org");
+        mtpcdn.put(19, "test_aurora.nekoe.eu.org");
+
+//media
+        cdn.put("149.154.175.50", "pluto.nekoe.eu.org");
+        cdn.put("149.154.167.51", "venus.nekoe.eu.org");
+        cdn.put("95.161.76.100", "venus.nekoe.eu.org");
+        cdn.put("149.154.175.100", "aurora.nekoe.eu.org");
+        cdn.put("149.154.167.91", "vesta.nekoe.eu.org");
+        cdn.put("149.154.171.5", "flora.nekoe.eu.org");
+
         try {
-            cdn.put(InetAddress.getByName("2001:b28:f23d:f001:0000:0000:0000:000a").getHostAddress(), "pluto.nekoe.ga");
-            cdn.put(InetAddress.getByName("2001:67c:4e8:f002:0000:0000:0000:000a").getHostAddress(), "venus.nekoe.ga");
-            cdn.put(InetAddress.getByName("2001:b28:f23d:f003:0000:0000:0000:000a").getHostAddress(), "aurora.nekoe.ga");
-            cdn.put(InetAddress.getByName("2001:67c:4e8:f004:0000:0000:0000:000a").getHostAddress(), "vesta.nekoe.ga");
-            cdn.put(InetAddress.getByName("2001:b28:f23f:f005:0000:0000:0000:000a").getHostAddress(), "flora.nekoe.ga");
+            cdn.put(InetAddress.getByName("2001:b28:f23d:f001:0000:0000:0000:000a").getHostAddress(), "pluto.nekoe.eu.org");
+            cdn.put(InetAddress.getByName("2001:67c:4e8:f002:0000:0000:0000:000a").getHostAddress(), "venus.nekoe.eu.org");
+            cdn.put(InetAddress.getByName("2001:b28:f23d:f003:0000:0000:0000:000a").getHostAddress(), "aurora.nekoe.eu.org");
+            cdn.put(InetAddress.getByName("2001:67c:4e8:f004:0000:0000:0000:000a").getHostAddress(), "vesta.nekoe.eu.org");
+            cdn.put(InetAddress.getByName("2001:b28:f23f:f005:0000:0000:0000:000a").getHostAddress(), "flora.nekoe.eu.org");
         } catch (UnknownHostException e) {
             e.printStackTrace();
         }
-        cdn.put("149.154.175.5", "pluto.nekoe.ga");
-        cdn.put("149.154.161.144", "venus.nekoe.ga");
-        cdn.put("149.154.167.15", "venus.nekoe.ga");
-        cdn.put("149.154.167.5", "venus.nekoe.ga");
-        cdn.put("149.154.167.6", "venus.nekoe.ga");
-        cdn.put("149.154.167.7", "venus.nekoe.ga");
-        cdn.put("91.108.4.", "vesta.nekoe.ga");
-        cdn.put("149.154.164.", "vesta.nekoe.ga");
-        cdn.put("149.154.165.", "vesta.nekoe.ga");
-        cdn.put("149.154.166.", "vesta.nekoe.ga");
-        cdn.put("149.154.167.8", "vesta.nekoe.ga");
-        cdn.put("149.154.167.9", "vesta.nekoe.ga");
-        cdn.put("91.108.56.", "flora.nekoe.ga");
-        cdn.put("111.62.91.", "venus.nekoe.ga");
+//proxy
+        cdn.put("149.154.175.5", "pluto.nekoe.eu.org");
+        cdn.put("149.154.161.144", "venus.nekoe.eu.org");
+        cdn.put("149.154.167.15", "venus.nekoe.eu.org");
+        cdn.put("149.154.167.5", "venus.nekoe.eu.org");
+        cdn.put("149.154.167.6", "venus.nekoe.eu.org");
+        cdn.put("149.154.167.7", "venus.nekoe.eu.org");
+        cdn.put("149.154.167.2", "venus.nekoe.eu.org");
+        cdn.put("91.108.4.", "vesta.nekoe.eu.org");
+        cdn.put("149.154.164.", "vesta.nekoe.eu.org");
+        cdn.put("149.154.165.", "vesta.nekoe.eu.org");
+        cdn.put("149.154.166.", "vesta.nekoe.eu.org");
+        cdn.put("149.154.167.8", "vesta.nekoe.eu.org");
+        cdn.put("149.154.167.9", "vesta.nekoe.eu.org");
+        cdn.put("91.108.56.", "flora.nekoe.eu.org");
+        cdn.put("111.62.91.", "venus.nekoe.eu.org");
+
         try {
-            cdn.put(InetAddress.getByName("2001:b28:f23d:f001:0000:0000:0000:000d").getHostAddress(), "pluto.nekoe.ga");
-            cdn.put(InetAddress.getByName("2001:67c:4e8:f002:0000:0000:0000:000d").getHostAddress(), "venus.nekoe.ga");
-            cdn.put(InetAddress.getByName("2001:b28:f23d:f003:0000:0000:0000:000d").getHostAddress(), "aurora.nekoe.ga");
-            cdn.put(InetAddress.getByName("2001:67c:4e8:f004:0000:0000:0000:000d").getHostAddress(), "vesta.nekoe.ga");
-            cdn.put(InetAddress.getByName("2001:b28:f23f:f005:0000:0000:0000:000d").getHostAddress(), "flora.nekoe.ga");
-        } catch (UnknownHostException e2) {
-            e2.printStackTrace();
+            cdn.put(InetAddress.getByName("2001:b28:f23d:f001:0000:0000:0000:000d").getHostAddress(), "pluto.nekoe.eu.org");
+            cdn.put(InetAddress.getByName("2001:67c:4e8:f002:0000:0000:0000:000d").getHostAddress(), "venus.nekoe.eu.org");
+            cdn.put(InetAddress.getByName("2001:b28:f23d:f003:0000:0000:0000:000d").getHostAddress(), "aurora.nekoe.eu.org");
+            cdn.put(InetAddress.getByName("2001:67c:4e8:f004:0000:0000:0000:000d").getHostAddress(), "vesta.nekoe.eu.org");
+            cdn.put(InetAddress.getByName("2001:b28:f23f:f005:0000:0000:0000:000d").getHostAddress(), "flora.nekoe.eu.org");
+        } catch (UnknownHostException e) {
+            e.printStackTrace();
         }
-        cdn.put("149.154.175.10", "test_pluto.nekoe.ga");
-        cdn.put("149.154.175.40", "test_pluto.nekoe.ga");
-        cdn.put("149.154.167.40", "test_venus.nekoe.ga");
-        cdn.put("149.154.175.117", "test_aurora.nekoe.ga");
+
+//test
+        cdn.put("149.154.175.10", "test_pluto.nekoe.eu.org");
+        cdn.put("149.154.175.40", "test_pluto.nekoe.eu.org");
+        cdn.put("149.154.167.40", "test_venus.nekoe.eu.org");
+        cdn.put("149.154.175.117", "test_aurora.nekoe.eu.org");
+
         try {
-            cdn.put(InetAddress.getByName("2001:b28:f23d:f001:0000:0000:0000:000e").getHostAddress(), "test_pluto.nekoe.ga");
-            cdn.put(InetAddress.getByName("2001:67c:4e8:f002:0000:0000:0000:000e").getHostAddress(), "test_venus.nekoe.ga");
-            cdn.put(InetAddress.getByName("2001:b28:f23d:f003:0000:0000:0000:000e").getHostAddress(), "test_aurora.nekoe.ga");
-        } catch (UnknownHostException e3) {
-            e3.printStackTrace();
+            cdn.put(InetAddress.getByName("2001:b28:f23d:f001:0000:0000:0000:000e").getHostAddress(), "test_pluto.nekoe.eu.org");
+            cdn.put(InetAddress.getByName("2001:67c:4e8:f002:0000:0000:0000:000e").getHostAddress(), "test_venus.nekoe.eu.org");
+            cdn.put(InetAddress.getByName("2001:b28:f23d:f003:0000:0000:0000:000e").getHostAddress(), "test_aurora.nekoe.eu.org");
+        } catch (UnknownHostException e) {
+            e.printStackTrace();
         }
-        ipv6.put("149.154.175.50", "[2001:0b28:f23d:f001:0000:0000:0000:000d]");
-        ipv6.put("149.154.167.51", "[2001:067c:04e8:f002:0000:0000:0000:000b]");
-        ipv6.put("95.161.76.100", "[2001:067c:04e8:f002:0000:0000:0000:000b]");
-        ipv6.put("149.154.175.100", "[2001:067c:04e8:f003:0000:0000:0000:000d]");
-        ipv6.put("149.154.167.91", "[2001:067c:04e8:f004:0000:0000:0000:000d]");
-        ipv6.put("149.154.171.5", "[2001:0b28:f23f:f005:0000:0000:0000:000d]");
-        try {
-            ipv6.put(InetAddress.getByName("2001:b28:f23d:f001:0000:0000:0000:000a").getHostAddress(), "[2001:0b28:f23d:f001:0000:0000:0000:000d]");
-            ipv6.put(InetAddress.getByName("2001:67c:4e8:f002:0000:0000:0000:000a").getHostAddress(), "[2001:067c:04e8:f002:0000:0000:0000:000b]");
-            ipv6.put(InetAddress.getByName("2001:b28:f23d:f003:0000:0000:0000:000a").getHostAddress(), "[2001:0b28:f23d:f003:0000:0000:0000:000d]");
-            ipv6.put(InetAddress.getByName("2001:67c:4e8:f004:0000:0000:0000:000a").getHostAddress(), "[2001:067c:04e8:f004:0000:0000:0000:000d]");
-            ipv6.put(InetAddress.getByName("2001:b28:f23f:f005:0000:0000:0000:000a").getHostAddress(), "[2001:0b28:f23f:f005:0000:0000:0000:000d]");
-        } catch (UnknownHostException e4) {
-            e4.printStackTrace();
-        }
-        ipv6.put("149.154.175.5", "[2001:0b28:f23d:f001:0000:0000:0000:000d]");
-        ipv6.put("149.154.161.144", "[2001:067c:04e8:f002:0000:0000:0000:000b]");
-        ipv6.put("149.154.167.15", "[2001:067c:04e8:f002:0000:0000:0000:000b]");
-        ipv6.put("149.154.167.5", "[2001:067c:04e8:f002:0000:0000:0000:000b]");
-        ipv6.put("149.154.167.6", "[2001:067c:04e8:f002:0000:0000:0000:000b]");
-        ipv6.put("149.154.167.7", "[2001:067c:04e8:f002:0000:0000:0000:000b]");
-        ipv6.put("91.108.4.", "[2001:067c:04e8:f004:0000:0000:0000:000d]");
-        ipv6.put("149.154.164.", "[2001:067c:04e8:f004:0000:0000:0000:000d]");
-        ipv6.put("149.154.165.", "[2001:067c:04e8:f004:0000:0000:0000:000d]");
-        ipv6.put("149.154.166.", "[2001:067c:04e8:f004:0000:0000:0000:000d]");
-        ipv6.put("149.154.167.8", "[2001:067c:04e8:f004:0000:0000:0000:000d]");
-        ipv6.put("149.154.167.9", "[2001:067c:04e8:f004:0000:0000:0000:000d]");
-        ipv6.put("91.108.56.", "[2001:0b28:f23f:f005:0000:0000:0000:000d]");
-        ipv6.put("111.62.91.", "[2001:067c:04e8:f002:0000:0000:0000:000b]");
-        ipv6.put("149.154.175.10", "[2001:b28:f23d:f001:0000:0000:0000:000e]");
-        ipv6.put("149.154.175.40", "[2001:b28:f23d:f001:0000:0000:0000:000e]");
-        ipv6.put("149.154.167.40", "[2001:67c:4e8:f002:0000:0000:0000:000e]");
-        ipv6.put("149.154.175.117", "[2001:b28:f23d:f003:0000:0000:0000:000e]");
     }
 
     public static void main(String[] args) {
