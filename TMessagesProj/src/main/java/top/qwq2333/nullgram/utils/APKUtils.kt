@@ -18,7 +18,6 @@
  */
 package top.qwq2333.nullgram.utils
 
-import android.Manifest
 import android.annotation.SuppressLint
 import android.app.Activity
 import android.app.PendingIntent
@@ -27,7 +26,6 @@ import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.content.pm.PackageInstaller
-import android.content.pm.PackageManager
 import android.os.Build
 import android.provider.Settings
 import android.text.TextUtils
@@ -35,34 +33,19 @@ import android.util.TypedValue
 import android.view.Gravity
 import android.widget.LinearLayout
 import android.widget.TextView
-import androidx.core.app.ActivityCompat
 import androidx.core.app.NotificationChannelCompat
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
-import org.telegram.messenger.AndroidUtilities
-import org.telegram.messenger.ApplicationLoader
-import org.telegram.messenger.FileLoader
-import org.telegram.messenger.LocaleController
-import org.telegram.messenger.R
-import org.telegram.messenger.UserConfig
-import org.telegram.messenger.Utilities
-import org.telegram.messenger.XiaomiUtilities
+import org.telegram.messenger.*
 import org.telegram.tgnet.TLRPC
 import org.telegram.ui.ActionBar.AlertDialog
 import org.telegram.ui.ActionBar.Theme
-import org.telegram.ui.Components.AlertsCreator
-import org.telegram.ui.Components.BulletinFactory
-import org.telegram.ui.Components.LayoutHelper
-import org.telegram.ui.Components.RLottieImageView
+import org.telegram.ui.Components.*
 import org.telegram.ui.LaunchActivity
-import java.io.File
-import java.io.FileInputStream
-import java.io.IOException
-import java.io.InputStream
-import java.io.OutputStream
+import java.io.*
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
 
@@ -204,7 +187,7 @@ object APKUtils {
     private class InstallReceiver(private val context: Context, private val packageName: String, private val onSuccess: Runnable) :
         BroadcastReceiver() {
         private val latch = CountDownLatch(1)
-        private lateinit var intent: Intent
+        private var intent: Intent? = null
 
         override fun onReceive(c: Context, i: Intent) {
             if (Intent.ACTION_PACKAGE_ADDED == i.action) {
@@ -222,7 +205,7 @@ object APKUtils {
 
                 PackageInstaller.STATUS_FAILURE, PackageInstaller.STATUS_FAILURE_BLOCKED, PackageInstaller.STATUS_FAILURE_CONFLICT,
                 PackageInstaller.STATUS_FAILURE_INCOMPATIBLE, PackageInstaller.STATUS_FAILURE_INVALID, PackageInstaller.STATUS_FAILURE_STORAGE -> {
-                    val id = intent.getIntExtra(PackageInstaller.EXTRA_SESSION_ID, 0)
+                    val id = i.getIntExtra(PackageInstaller.EXTRA_SESSION_ID, 0)
                     if (id > 0) {
                         val installer = context.packageManager.packageInstaller
                         val info = installer.getSessionInfo(id)
@@ -232,13 +215,7 @@ object APKUtils {
                     }
                     if (context is LaunchActivity) {
                         context.showBulletin { factory: BulletinFactory ->
-                            factory.createErrorBulletin(
-                                LocaleController.formatString(
-                                    "UpdateFailedToInstall",
-                                    R.string.UpdateFailedToInstall,
-                                    status
-                                )
-                            )
+                            factory.createErrorBulletin(LocaleController.formatString("UpdateFailedToInstall", R.string.UpdateFailedToInstall, status))
                         }
                     }
                     onSuccess.run()
@@ -258,11 +235,11 @@ object APKUtils {
             latch.countDown()
         }
 
-        suspend fun waitIntent(): Intent {
+        suspend fun waitIntent(): Intent? {
             withContext(Dispatchers.IO) {
                 latch.await(10, TimeUnit.SECONDS)
             }
-            return if (this::intent.isInitialized) intent else Intent()
+            return intent
         }
     }
 
