@@ -1525,11 +1525,11 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
                     case Defines.doubleTabEdit:
                         return allowEdit;
                     case Defines.doubleTabTranslate:
-                        MessageObject messageObject = getMessageUtils().getMessageForTranslate(selectedObject, selectedObjectGroup);
+                        MessageObject messageObject = getMessageUtils().getMessageForTranslate(message, messageGroup);
                         if (messageObject != null) {
                             return true;
                         }
-                        return false;
+                        break;
                 }
             }
             return false;
@@ -1591,7 +1591,8 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
                         processSelectedOption(OPTION_EDIT);
                         break;
                     case Defines.doubleTabTranslate:
-                        processSelectedOption(OPTION_TRANSLATE);
+                        var messageObject = getMessageUtils().getMessageForTranslate(selectedObject, selectedObjectGroup);
+                        translateOrResetMessage(messageObject, null);
                         break;
                 }
             }
