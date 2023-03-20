@@ -267,4 +267,12 @@
     <string name="DisableQuickSendMediaBottom">禁用快速发送媒体按钮</string>
     <string name="ProviderBaiduTranslate">百度翻译</string>
     <string name="alwaysSendWithoutSound">总是静音发送</string>
+    <string name="EditEnableMarkdown">启用Markdown</string>
+    <string name="EditDisableMarkdown">禁用Markdown</string>
+    <string name="Markdown">Markdown</string>
+    <string name="MarkdownParser">Markdown 解析器</string>
+    <string name="MarkdownParseLinks">链接解析</string>
+    <string name="MarkdownAbout">使用Markdown编辑消息中的文字：^1**粗体**^1，^2__斜体__^2，^3~~删除线~^3，^4`等宽\'^4，^5|打码||^5，^6文本^7链接^8。</string>
+    <string name="MarkdownAbout2">使用Markdown编辑消息中的文字：^1**粗体**^1，^2__斜体__^2，^3~~删除线~^3，^4`等宽\'^4，^5|打码||^5。</string>
+    <string name="MarkdownDisableByDefault">默认为禁用</string>
 </resources>
