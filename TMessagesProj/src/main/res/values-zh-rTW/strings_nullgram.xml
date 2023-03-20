@@ -212,7 +212,7 @@
     <string name="openArchiveOnPull">Open Archive On Pull</string>
     <string name="hideAllTab">Hide \"All Chats\" tab</string>
     <string name="disableStickersAutoReorder">Disable sticker packs auto-reorder</string>
-    <string name="Ban">Ban</string>
+    <string name="Ban">封鎖</string>
     <string name="autoDisableBuiltInProxy">Auto Disable Built-In Proxy</string>
     <string name="autoDisableBuiltInProxyDesc">It will automatically turn off the built-in proxy when Nullgram detected you turn on the VPN</string>
     <string name="NekogramWsDescription">Connect to Telegram through WebSocket via Cloudflare.\nProvided by Nekogram</string>
@@ -221,8 +221,8 @@
     <string name="WsLocalProxy">Local proxy</string>
     <string name="WsEnableDoh">Enable DoH</string>
     <string name="PublicProxy">Built-in Public Proxy</string>
-    <string name="SwitchBackend">Switch Backend</string>
-    <string name="UpdateInstalling">Installing update...</string>
+    <string name="SwitchBackend">切換伺服器</string>
+    <string name="UpdateInstalling">正在安裝更新…</string>
     <string name="UpdateInstallingRelaunch">The app will relaunch when the update completes.</string>
     <string name="UpdateInstallingNotification">A notification will be shown when the update completes.</string>
     <string name="NoUpdateAvailablePlay">Please check for update in Play Store.</string>
