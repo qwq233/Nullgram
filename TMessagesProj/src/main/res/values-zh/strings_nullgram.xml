@@ -43,7 +43,7 @@
     <string name="MessageDetails">详情</string>
     <string name="formatterDay12HSec">h:mm:ss a</string>
     <string name="formatterDay24HSec">HH:mm:ss</string>
-    <string name="DeleteDownloadedFile">Delete downloaded file</string>
+    <string name="DeleteDownloadedFile">删除已缓存的文件</string>
     <string name="Repeat">复读</string>
     <string name="saveMessages">保存信息</string>
     <string name="ViewHistory">查看历史记录</string>
@@ -66,7 +66,7 @@
     <string name="channelAlias">频道别名</string>
     <string name="channelAliasDetails">要求“标记Channel用户”启用</string>
     <string name="setChannelAliasName">设置别名</string>
-    <string name="AutoCheckUpdateOFF">OFF</string>
+    <string name="AutoCheckUpdateOFF">关闭</string>
     <string name="AutoCheckUpdateSwitch">自动更新</string>
     <string name="AutoCheckUpdateStable">正式版</string>
     <string name="AutoCheckUpdatePreview">预览版 (不稳定)</string>
@@ -151,7 +151,7 @@
     <string name="scrollableChatPreview">可滚动聊天预览框</string>
     <string name="disableVibration">禁用震动</string>
     <string name="DatacenterStatus">数据中心状态</string>
-    <string name="DatacenterStatusAbout">检查 Telegram 的 **datacenters** 状态。</string>
+    <string name="DatacenterStatusAbout">检查 Telegram 的 **数据中心** 状态。</string>
     <string name="DeleteAllFromSelfDone">您所有的消息已删除</string>
     <string name="setLinkedUser">设置链接用户</string>
     <string name="UserIDOrBotID">输入用户 ID 或 Bot ID</string>
@@ -245,7 +245,7 @@
     <string name="TranslatorTypePopup">弹出式对话框</string>
     <string name="TranslatorTypeExternal">使用外部应用</string>
     <string name="TranslatorType">类型</string>
-    <string name="TranslationProviderShort">供应商</string>
+    <string name="TranslationProviderShort">提供方</string>
     <string name="AutoTranslateAbout">自动翻译其他语言的消息。</string>
     <string name="AutoTranslate">自动翻译</string>
     <string name="TranslatorShowOriginal">含原始文本</string>
