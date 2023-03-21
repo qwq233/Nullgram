@@ -12,9 +12,9 @@ import androidx.core.text.HtmlCompat
 import androidx.core.util.Pair
 import io.ktor.http.HttpStatusCode
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.async
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import org.telegram.messenger.LocaleController
 import org.telegram.messenger.R
 import org.telegram.ui.ActionBar.AlertDialog
@@ -142,7 +142,6 @@ object TranslateHelper {
         } else language
     }
 
-    @OptIn(DelicateCoroutinesApi::class)
     @JvmStatic
     fun translate(obj: Any, from: String, onSuccess: (Any, String, String) -> Unit, onError: (Exception) -> Unit) {
         val translator = getCurrentProvider()
@@ -150,8 +149,10 @@ object TranslateHelper {
         if (!translator.supportLanguage(language)) {
             onError(UnsupportedTargetLanguageException())
         } else {
-            CoroutineScope(Dispatchers.IO).async {
-                val result = translator.translate(obj, from, language)
+            CoroutineScope(Dispatchers.Main).launch {
+                val result = withContext(Dispatchers.IO){
+                    translator.translate(obj, from, language)
+                }
                 if (result.error != null) {
                     if (result.error == HttpStatusCode.TooManyRequests) {
                         onError(TooManyRequestException())
