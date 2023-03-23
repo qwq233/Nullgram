@@ -229,7 +229,7 @@
     <string name="NoUpdateAvailablePlayDelay">Google Play商店的更新通常比直接的 APK 慢.</string>
     <string name="UpdateInstalledNotification">更新安装完成，点击启动应用。</string>
     <string name="UpdateFailedToInstall">安装更新失败： %d</string>
-    <string name="Translator">翻译后端</string>
+    <string name="Translator">翻译</string>
     <string name="ProviderGoogleTranslate">Google 翻译</string>
     <string name="ProviderTelegramTranslate">TELEOFFICIAL</string>
     <string name="ProviderMicrosoftTranslate">Microsoft 在线翻译</string>
@@ -245,10 +245,10 @@
     <string name="TranslatorTypePopup">弹出式对话框</string>
     <string name="TranslatorTypeExternal">使用外部应用</string>
     <string name="TranslatorType">类型</string>
-    <string name="TranslationProviderShort">提供方</string>
+    <string name="TranslationProviderShort">翻译源</string>
     <string name="AutoTranslateAbout">自动翻译其他语言的消息。</string>
     <string name="AutoTranslate">自动翻译</string>
-    <string name="TranslatorShowOriginal">含原始文本</string>
+    <string name="TranslatorShowOriginal">显示原文</string>
     <string name="NoTranslatorAppInstalled">没有可以处理翻译的外部应用，请安装一个来使用。</string>
     <string name="UndoTranslate">撤消翻译</string>
     <string name="TranslateFailed">翻译服务器故障</string>
