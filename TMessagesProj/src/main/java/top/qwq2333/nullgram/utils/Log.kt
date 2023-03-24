@@ -103,7 +103,7 @@ object Log {
      */
     @JvmStatic
     fun d(msg: String, throwable: Throwable) {
-        Log.i(TAG, msg, throwable)
+        Log.d(TAG, msg, throwable)
     }
 
     /**
