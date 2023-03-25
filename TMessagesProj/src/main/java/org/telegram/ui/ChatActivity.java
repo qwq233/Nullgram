@@ -94,7 +94,6 @@ import android.widget.LinearLayout;
 import android.widget.Space;
 import android.widget.TextView;
 import android.widget.Toast;
-
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.collection.LongSparseArray;
@@ -112,10 +111,29 @@ import androidx.recyclerview.widget.LinearSmoothScrollerCustom;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.viewpager.widget.PagerAdapter;
 import androidx.viewpager.widget.ViewPager;
-
 import com.google.android.exoplayer2.ui.AspectRatioFrameLayout;
 import com.google.zxing.common.detector.MathUtils;
-
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.FileWriter;
+import java.io.InputStream;
+import java.net.URLDecoder;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Calendar;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import kotlin.Unit;
 import org.telegram.PhoneFormat.PhoneFormat;
 import org.telegram.messenger.AccountInstance;
 import org.telegram.messenger.AndroidUtilities;
@@ -297,29 +315,6 @@ import org.telegram.ui.Components.spoilers.SpoilerEffect;
 import org.telegram.ui.Components.voip.CellFlickerDrawable;
 import org.telegram.ui.Components.voip.VoIPHelper;
 import org.telegram.ui.Delegates.ChatActivityMemberRequestsDelegate;
-
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.FileWriter;
-import java.io.InputStream;
-import java.net.URLDecoder;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Calendar;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicReference;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
-import kotlin.Unit;
 import top.qwq2333.nullgram.activity.MessageDetailActivity;
 import top.qwq2333.nullgram.config.ConfigManager;
 import top.qwq2333.nullgram.config.DialogConfig;
@@ -23451,6 +23446,7 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
                         }
                         if ((TranslateHelper.getCurrentStatus() != TranslateHelper.Status.External)) {
                             MessageObject messageObject = getMessageUtils().getMessageForTranslate(selectedObject, selectedObjectGroup);
+                            Log.i("messageObject translated " + messageObject.translated);
                             if (messageObject != null) {
                                 items.add(messageObject.translated && !messageObject.isVoiceTranscriptionOpen() ? LocaleController.getString("UndoTranslate", R.string.UndoTranslate) : LocaleController.getString("TranslateMessage", R.string.TranslateMessage));
                                 options.add(OPTION_TRANSLATE);
@@ -23831,6 +23827,7 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
                         }
                         if ((TranslateHelper.getCurrentStatus() != TranslateHelper.Status.External)) {
                             MessageObject messageObject = getMessageUtils().getMessageForTranslate(selectedObject, selectedObjectGroup);
+                            Log.i("messageObject translated " + messageObject.translated);
                             if (messageObject != null) {
                                 items.add(messageObject.translated && !messageObject.isVoiceTranscriptionOpen() ? LocaleController.getString("UndoTranslate", R.string.UndoTranslate) : LocaleController.getString("TranslateMessage", R.string.TranslateMessage));
                                 options.add(OPTION_TRANSLATE);
@@ -24603,9 +24600,7 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
                         cell.setVisibility(View.GONE);
                         translatorSettingsPopupWrapper.windowLayout.setVisibility(View.GONE);
                         if (!messageObject.translated && LanguageDetector.hasSupport()) {
-                            LanguageDetectorTimeout.detectLanguage(
-                                cell, getMessageUtils().getMessagePlainText(messageObject),
-                                (String lang) -> {
+                            LanguageDetectorTimeout.detectLanguage(cell, getMessageUtils().getMessagePlainText(messageObject), (String lang) -> {
                                     fromLang[0] = TranslateHelper.stripLanguageCode(lang);
                                     if (!TranslateHelper.isLanguageRestricted(lang) || (currentChat != null && (currentChat.has_link || ChatObject.isPublic(currentChat) || selectedObject.messageOwner.fwd_from != null)) && ("uk".equals(fromLang[0]) || "ru".equals(fromLang[0]))) {
                                         cell.setVisibility(View.VISIBLE);

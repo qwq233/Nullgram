@@ -2552,7 +2552,7 @@ public class MessageObject {
     }
 
     public boolean updateTranslation(boolean force) {
-        boolean replyUpdated = replyMessageObject != null && replyMessageObject.updateTranslation(force);
+/*        boolean replyUpdated = replyMessageObject != null && replyMessageObject.updateTranslation(force);
         if (
             TranslateController.isTranslatable(this) &&
             MessagesController.getInstance(currentAccount).getTranslateController().isTranslatingDialog(getDialogId()) &&
@@ -2573,11 +2573,12 @@ public class MessageObject {
             generateCaption();
             return replyUpdated || true;
         }
-        return replyUpdated || false;
+        return replyUpdated || false;*/
+        return true;
     }
 
     public void applyNewText() {
-        translated = false;
+//        translated = false;
         applyNewText(messageOwner.message);
     }
 
