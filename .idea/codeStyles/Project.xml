@@ -461,6 +461,7 @@
                   <XML_NAMESPACE>http://schemas.android.com/apk/res/android\n</XML_NAMESPACE>
                 </AND>
               </match>
+              <order>ANDROID_ATTRIBUTE_ORDER</order>
             </rule>
           </section>
           <section>
@@ -534,14 +535,6 @@
     </codeStyleSettings>
     <codeStyleSettings language="kotlin">
       <option name="CODE_STYLE_DEFAULTS" value="KOTLIN_OFFICIAL" />
-    </codeStyleSettings>
-    <codeStyleSettings language="protobuf">
-      <indentOptions>
-        <option name="INDENT_SIZE" value="2" />
-        <option name="CONTINUATION_INDENT_SIZE" value="2" />
-        <option name="TAB_SIZE" value="2" />
-      </indentOptions>
-      <option name="RIGHT_MARGIN" value="80" />
     </codeStyleSettings>
   </code_scheme>
 </component>
