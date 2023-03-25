@@ -29574,18 +29574,24 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
                 BottomSheet.Builder builder = new BottomSheet.Builder(getParentActivity(), false, themeDelegate);
                 builder.setTitle(button.text);
                 builder.setItems(new CharSequence[]{
-                    LocaleController.getString("Copy", R.string.Copy),
+                    LocaleController.getString("CopyTitle", R.string.CopyTitle),
                     button.data != null ? LocaleController.getString("CopyCallback", R.string.CopyCallback) : null,
+                    button.url != null ? LocaleController.getString("CopyLink", R.string.CopyLink) : null,
                     button.query != null ? LocaleController.getString("CopyInlineQuery", R.string.CopyInlineQuery) : null,
-                    button.user_id != 0 ? LocaleController.getString("CopyID", R.string.CopyID) : null}, (dialog, which) -> {
+                    button.user_id != 0 ? LocaleController.getString("CopyID", R.string.CopyID) : null,
+                    ConfigManager.getBooleanOrFalse(Defines.showHiddenSettings) && button.data != null ? LocaleController.getString("SendCallback", R.string.SendCallback) : null}, (dialog, which) -> {
                     if (which == 0) {
                         AndroidUtilities.addToClipboard(button.text);
                     } else if (which == 1) {
                         AndroidUtilities.addToClipboard(getMessageUtils().getTextOrBase64(button.data));
                     } else if (which == 2) {
-                        AndroidUtilities.addToClipboard(button.query);
+                        AndroidUtilities.addToClipboard(button.url);
                     } else if (which == 3) {
+                        AndroidUtilities.addToClipboard(button.query);
+                    } else if (which == 4) {
                         AndroidUtilities.addToClipboard(String.valueOf(button.user_id));
+                    } else if (which == 5) {
+                        getMessageUtils().showSendCallbackDialog(ChatActivity.this, themeDelegate, button.data, cell.getMessageObject());
                     }
                     createUndoView();
                     if (undoView == null) {
