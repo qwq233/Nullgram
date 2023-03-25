@@ -6955,10 +6955,12 @@ public class MediaDataController extends BaseController {
                 TLRPC.Document document = premiumPreviewStickers.get(i == 2 ? premiumPreviewStickers.size() - 1 : i);
                 if (MessageObject.isPremiumSticker(document)) {
                     ImageReceiver imageReceiver = new ImageReceiver();
+                    imageReceiver.setAllowLoadingOnAttachedOnly(false);
                     imageReceiver.setImage(ImageLocation.getForDocument(document), null, null, "webp", null, 1);
                     ImageLoader.getInstance().loadImageForImageReceiver(imageReceiver);
 
                     imageReceiver = new ImageReceiver();
+                    imageReceiver.setAllowLoadingOnAttachedOnly(false);
                     imageReceiver.setImage(ImageLocation.getForDocument(MessageObject.getPremiumStickerAnimation(document), document), null, null, null, "tgs", null, 1);
                     ImageLoader.getInstance().loadImageForImageReceiver(imageReceiver);
                 }

@@ -170,7 +170,7 @@ public class FilePathDatabase {
                                 // FileLog.d("get file path id=" + documentId + " dc=" + dc + " type=" + type + " path=" + res[0]);
                             }
                         }
-                    } catch (SQLiteException e) {
+                    } catch (Throwable e) {
                         FileLog.e(e);
                     } finally {
                         if (cursor != null) {
@@ -283,10 +283,11 @@ public class FilePathDatabase {
                     MessageObject messageObject = arrayListFinal.get(i);
                     messageObject.checkMediaExistance(false);
                 }
-            } catch (Exception e) {
-                e.printStackTrace();
+            } catch (Throwable e) {
+                FileLog.e(e);
+            } finally {
+                syncLatch.countDown();
             }
-            syncLatch.countDown();
         });
 
         try {
@@ -328,8 +329,9 @@ public class FilePathDatabase {
                 }
             } catch (Exception e) {
                 FileLog.e(e);
+            } finally {
+                syncLatch.countDown();
             }
-            syncLatch.countDown();
         });
 
         try {
@@ -340,7 +342,7 @@ public class FilePathDatabase {
         return res[0];
     }
 
-    public void saveFileDialogId(File file,FileMeta fileMeta) {
+    public void saveFileDialogId(File file, FileMeta fileMeta) {
         if (file == null || fileMeta == null) {
             return;
         }
@@ -413,7 +415,7 @@ public class FilePathDatabase {
                 for (int i = 0; i < filesToRemove.size(); i++) {
                     database.executeFast("DELETE FROM paths_by_dialog_id WHERE path = '" + shield(filesToRemove.get(i).file.getPath()) + "'").stepThis().dispose();
                 }
-            } catch (Exception e) {
+            } catch (Throwable e) {
                 FileLog.e(e);
             } finally {
                 database.commitTransaction();
@@ -439,10 +441,11 @@ public class FilePathDatabase {
                         list.add(keepMediaFiles.get(i));
                     }
                 }
-            } catch (Exception e) {
+            } catch (Throwable e) {
                 FileLog.e(e);
+            } finally {
+                syncLatch.countDown();
             }
-            syncLatch.countDown();
         });
         try {
             syncLatch.await();
