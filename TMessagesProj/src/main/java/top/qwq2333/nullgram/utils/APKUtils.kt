@@ -235,10 +235,8 @@ object APKUtils {
             latch.countDown()
         }
 
-        suspend fun waitIntent(): Intent? {
-            withContext(Dispatchers.IO) {
-                latch.await(10, TimeUnit.SECONDS)
-            }
+        fun waitIntent(): Intent? {
+            latch.await(10, TimeUnit.SECONDS)
             return intent
         }
     }

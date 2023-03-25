@@ -7643,11 +7643,17 @@ public class MessageObject {
         if (isSponsored() && ConfigManager.getBooleanOrFalse(Defines.blockSponsorAds))
             return true;
         if (ConfigManager.getBooleanOrFalse(Defines.ignoreBlockedUser)) {
-            if (messagesController.blockePeers.indexOfKey(getFromChatId()) >= 0 )
+            var chatFull = messagesController.getChatFull(getFromChatId());
+            if (chatFull != null && chatFull.blocked) {
                 return true;
+            }
+            if (messagesController.blockePeers.indexOfKey(getFromChatId()) >= 0) {
+                return true;
+            }
             if (messageOwner.fwd_from != null && messageOwner.fwd_from.from_id != null
-                && messagesController.blockePeers.indexOfKey(MessageObject.getPeerId(messageOwner.fwd_from.from_id)) >= 0 )
+                && messagesController.blockePeers.indexOfKey(MessageObject.getPeerId(messageOwner.fwd_from.from_id)) >= 0) {
                 return true;
+            }
         }
         return false;
     }

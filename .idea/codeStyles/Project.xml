@@ -5,6 +5,8 @@
         <option name="CONTINUATION_INDENT_SIZE" value="4" />
       </value>
     </option>
+    <option name="RIGHT_MARGIN" value="180" />
+    <option name="WRAP_WHEN_TYPING_REACHES_RIGHT_MARGIN" value="true" />
     <option name="KEEP_CONTROL_STATEMENT_IN_ONE_LINE" value="false" />
     <option name="KEEP_BLANK_LINES_BEFORE_RBRACE" value="0" />
     <option name="ALIGN_MULTILINE_PARAMETERS" value="false" />
@@ -110,6 +112,7 @@
       </indentOptions>
     </codeStyleSettings>
     <codeStyleSettings language="JAVA">
+      <option name="RIGHT_MARGIN" value="180" />
       <option name="KEEP_CONTROL_STATEMENT_IN_ONE_LINE" value="false" />
       <option name="KEEP_BLANK_LINES_IN_CODE" value="1" />
       <option name="BLANK_LINES_AFTER_CLASS_HEADER" value="1" />
@@ -132,6 +135,7 @@
       <option name="DOWHILE_BRACE_FORCE" value="3" />
       <option name="WHILE_BRACE_FORCE" value="3" />
       <option name="FOR_BRACE_FORCE" value="3" />
+      <option name="WRAP_ON_TYPING" value="1" />
     </codeStyleSettings>
     <codeStyleSettings language="JSON">
       <indentOptions>
@@ -535,6 +539,7 @@
     </codeStyleSettings>
     <codeStyleSettings language="kotlin">
       <option name="CODE_STYLE_DEFAULTS" value="KOTLIN_OFFICIAL" />
+      <option name="RIGHT_MARGIN" value="180" />
     </codeStyleSettings>
   </code_scheme>
 </component>
