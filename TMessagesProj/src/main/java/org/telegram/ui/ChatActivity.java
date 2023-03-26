@@ -1522,7 +1522,7 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
                     case Defines.doubleTabEdit:
                         return allowEdit;
                     case Defines.doubleTabTranslate:
-                        MessageObject messageObject = getMessageUtils().getMessageForTranslate(selectedObject, selectedObjectGroup);
+                        MessageObject messageObject = getMessageUtils().getMessageForTranslate(message, messageGroup);
                         if (messageObject != null) {
                             return true;
                         }
@@ -1588,7 +1588,22 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
                         processSelectedOption(OPTION_EDIT);
                         break;
                     case Defines.doubleTabTranslate:
-                        processSelectedOption(OPTION_TRANSLATE);
+                        if (!selectedObject.translated && LanguageDetector.hasSupport()) {
+                            final AtomicBoolean waitForLangDetection = new AtomicBoolean(false);
+                            final AtomicReference<Runnable> onLangDetectionDone = new AtomicReference(null);
+                            final String[] fromLang = {null};
+                            LanguageDetectorTimeout.detectLanguage(cell, getMessageUtils().getMessagePlainText(selectedObject), (String lang) -> {
+                                    fromLang[0] = TranslateHelper.stripLanguageCode(lang);
+                                    if (!TranslateHelper.isLanguageRestricted(lang)
+                                        || (currentChat != null && (currentChat.has_link || ChatObject.isPublic(currentChat) || selectedObject.messageOwner.fwd_from != null)) && (
+                                        "uk".equals(fromLang[0]) || "ru".equals(fromLang[0]))) {
+                                        translateOrResetMessage(selectedObject, fromLang[0]);
+                                    }
+                                }, null, waitForLangDetection, onLangDetectionDone
+                            );
+                        } else {
+                            translateOrResetMessage(selectedObject, null);
+                        }
                         break;
                 }
             }
