@@ -55,6 +55,7 @@ import java.util.function.Consumer;
 
 import top.qwq2333.nullgram.config.ConfigManager;
 import top.qwq2333.nullgram.utils.Defines;
+import top.qwq2333.nullgram.utils.Log;
 
 public class MessagesStorage extends BaseController {
 
@@ -674,6 +675,20 @@ public class MessagesStorage extends BaseController {
             databaseMigrationInProgress = true;
             NotificationCenter.getInstance(currentAccount).postNotificationName(NotificationCenter.onDatabaseMigration, true);
         });
+
+        try {
+            var result = database.queryFinalized("SELECT COUNT(*) FROM pragma_table_info('dialog_filter') WHERE name = 'emoticon';");
+            if (result.next()) {
+                var count = result.intValue(0);
+                Log.i("emoticon column count = " + count);
+                if (count == 0) {
+                    database.executeFast("ALTER TABLE dialog_filter ADD COLUMN emoticon TEXT").stepThis().dispose();
+                }
+            }
+            ConfigManager.putBoolean(Defines.hasUpdateDialogFilterDatabase, true);
+        } catch (Exception e) {
+            Log.e(e);
+        }
 
         int version = currentVersion;
         FileLog.d("MessagesStorage start db migration from " + version + " to " + LAST_DB_VERSION);
