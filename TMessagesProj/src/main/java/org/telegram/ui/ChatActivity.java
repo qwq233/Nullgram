@@ -23446,7 +23446,6 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
                         }
                         if ((TranslateHelper.getCurrentStatus() != TranslateHelper.Status.External)) {
                             MessageObject messageObject = getMessageUtils().getMessageForTranslate(selectedObject, selectedObjectGroup);
-                            Log.i("messageObject translated " + messageObject.translated);
                             if (messageObject != null) {
                                 items.add(messageObject.translated && !messageObject.isVoiceTranscriptionOpen() ? LocaleController.getString("UndoTranslate", R.string.UndoTranslate) : LocaleController.getString("TranslateMessage", R.string.TranslateMessage));
                                 options.add(OPTION_TRANSLATE);
@@ -23827,7 +23826,6 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
                         }
                         if ((TranslateHelper.getCurrentStatus() != TranslateHelper.Status.External)) {
                             MessageObject messageObject = getMessageUtils().getMessageForTranslate(selectedObject, selectedObjectGroup);
-                            Log.i("messageObject translated " + messageObject.translated);
                             if (messageObject != null) {
                                 items.add(messageObject.translated && !messageObject.isVoiceTranscriptionOpen() ? LocaleController.getString("UndoTranslate", R.string.UndoTranslate) : LocaleController.getString("TranslateMessage", R.string.TranslateMessage));
                                 options.add(OPTION_TRANSLATE);
