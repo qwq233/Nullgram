@@ -94,6 +94,14 @@ abstract class BaseTranslator {
         language
     }
 
+    private suspend fun doTranslateText(text: String, from: String, to: String): RequestResult {
+        return runCatching {
+            translateText(text, from, to)
+        }.getOrElse {
+            RequestResult(from, null, HttpStatusCode(500, it.message ?: ""))
+        }
+    }
+
     /**
      * translate
      *
@@ -113,7 +121,7 @@ abstract class BaseTranslator {
         val to = convertLanguageCode(to, false)
         when (source) {
             is String -> {
-                val result = translateText(source, from, to)
+                val result = doTranslateText(source, from, to)
                 return if (result.error == null) {
                     val translateResult = TranslateResult(from, result.result)
                     cache.put(Pair(source, to), translateResult)
@@ -136,7 +144,7 @@ abstract class BaseTranslator {
                 translatedPoll.quiz = source.quiz
 
                 // Translate question
-                val translatedQuestion = translateText(source.question, from, to)
+                val translatedQuestion = doTranslateText(source.question, from, to)
                 translatedPoll.question = if (translatedQuestion.error == null) {
                     if (TranslateHelper.showOriginal) {
                         """
@@ -154,7 +162,7 @@ abstract class BaseTranslator {
                 }
                 // Translate options
                 source.answers.forEach {
-                    val translatedAnswer = translateText(it.text, from, to)
+                    val translatedAnswer = doTranslateText(it.text, from, to)
                     val translatedPollAnswer = TLRPC.TL_pollAnswer()
                     translatedPollAnswer.text = if (translatedAnswer.error == null) {
                         if (TranslateHelper.showOriginal) {
