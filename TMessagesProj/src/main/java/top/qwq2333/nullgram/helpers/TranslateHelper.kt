@@ -150,7 +150,7 @@ object TranslateHelper {
             onError(UnsupportedTargetLanguageException())
         } else {
             CoroutineScope(Dispatchers.Main).launch {
-                val result = withContext(Dispatchers.IO){
+                val result = withContext(Dispatchers.IO) {
                     translator.translate(obj, from, language)
                 }
                 if (result.error != null) {

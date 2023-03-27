@@ -7,6 +7,8 @@ import io.ktor.client.statement.bodyAsText
 import io.ktor.http.ContentType
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.contentType
+import kotlinx.serialization.EncodeDefault
+import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
@@ -19,17 +21,19 @@ object LingoTranslator : BaseTranslator() {
     override fun getTargetLanguages(): List<String> = targetLanguages
 
     @Serializable
-    data class Request(
+    @OptIn(ExperimentalSerializationApi::class)
+    data class Request constructor(
         val source: String,
         val trans_type: String,
         val request_id: String = System.currentTimeMillis().toString(),
+        @EncodeDefault
         val detect: Boolean = true
     )
 
     @Serializable
     data class Response(
         val target: String?,
-        val error: String?
+        val error: String? = null
     )
 
     override suspend fun translateText(text: String, from: String, to: String): RequestResult {
@@ -43,7 +47,7 @@ object LingoTranslator : BaseTranslator() {
                 HttpStatusCode.OK -> {
                     Log.d(it.bodyAsText())
 
-                    Json.decodeFromString(Response.serializer(), it.bodyAsText()).let { response ->
+                    Json { ignoreUnknownKeys = true }.decodeFromString(Response.serializer(), it.bodyAsText()).let { response ->
                         if (response.error != null) {
                             return RequestResult(from, null, HttpStatusCode(HttpStatusCode.BadRequest.value, response.error))
                         }
