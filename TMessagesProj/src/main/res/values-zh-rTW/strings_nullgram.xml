@@ -2,17 +2,17 @@
 <resources>
     <string name="NullgramName">Nullgram</string>
     <string name="NullgramPushService">Nullgram 推送服務</string>
-    <string name="NullSettings">Null設定</string>
+    <string name="NullSettings">Nullgram 設定</string>
     <string name="OfficialChannel">官方頻道</string>
     <string name="Chat">聊天</string>
     <string name="Experiment">實驗性功能</string>
     <string name="OfficialSite">官方網站</string>
-    <string name="ViewSourceCode">查看原代碼</string>
+    <string name="ViewSourceCode">查閱源代碼</string>
     <string name="Categories">分類</string>
     <string name="About">關注Nullgram</string>
     <string name="OfficialChannelName">官方頻道名稱</string>
-    <string name="noAvailableUpdate">沒有更新，請稍候再試</string>
-    <string name="updateAvailable">現有版本更新</string>
+    <string name="noAvailableUpdate">無可用更新</string>
+    <string name="updateAvailable">新更新可用</string>
     <string name="variantsNotFound">未找到變數</string>
     <string name="skipUpdate">跳過更新</string>
     <string name="notNow">稍後</string>
@@ -36,8 +36,8 @@
     <string name="DeleteAllFromSelfAdmin">使用管理員權限</string>
     <string name="DeleteAllFromSelf">刪除自己的信息</string>
     <string name="DeleteAllFromSelfAlert">警告！這樣會 **刪除所有你的信息** 在這個對話的 **所有** 人的畫面上</string>
-    <string name="MutualContactDescription">此聯絡人是你們的共同好友</string>
-    <string name="MutualContact">共同聯絡人</string>
+    <string name="MutualContactDescription">此聯絡人為雙向聯絡人。</string>
+    <string name="MutualContact">雙向聯絡人</string>
     <string name="SelectBetween">選擇範圍</string>
     <string name="StickerSavedHint">貼圖已經儲存到你的手機相簿</string>
     <string name="MessageDetails">詳細資料</string>
