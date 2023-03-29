@@ -90,7 +90,7 @@ dependencies {
 
 
 dependencies {
-    val appCenterSdkVersion = "5.0.0"
+    val appCenterSdkVersion = "5.0.1"
     implementation("com.microsoft.appcenter:appcenter-analytics:${appCenterSdkVersion}")
     implementation("com.microsoft.appcenter:appcenter-crashes:${appCenterSdkVersion}")
 }
