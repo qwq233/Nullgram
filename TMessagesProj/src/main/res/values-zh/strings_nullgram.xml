@@ -231,7 +231,7 @@
     <string name="UpdateFailedToInstall">安装更新失败： %d</string>
     <string name="Translator">翻译</string>
     <string name="ProviderGoogleTranslate">谷歌翻译</string>
-    <string name="ProviderTelegramTranslate">TELEOFFICIAL</string>
+    <string name="ProviderTelegramTranslate">Telegram 翻译</string>
     <string name="ProviderMicrosoftTranslate">微软翻译</string>
     <string name="ProviderLingoTranslate">彩云小译</string>
     <string name="TranslationProvider">翻译引擎</string>
