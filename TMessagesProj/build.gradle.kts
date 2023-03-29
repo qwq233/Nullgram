@@ -76,7 +76,7 @@ dependencies {
     implementation("org.jetbrains.kotlin:kotlin-stdlib-common:${Version.kotlin}")
     implementation("org.jetbrains.kotlin:kotlin-stdlib:${Version.kotlin}")
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.5.0")
-    implementation("org.osmdroid:osmdroid-android:6.1.14")
+    implementation("org.osmdroid:osmdroid-android:6.1.15")
     implementation("com.android.billingclient:billing:5.1.0")
     implementation("com.google.guava:guava:31.1-android")
 
