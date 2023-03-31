@@ -132,6 +132,10 @@ public class LiteMode {
     }
 
     public static boolean isEnabled(int flag) {
+        if (flag == FLAG_CHAT_FORUM_TWOCOLUMN && AndroidUtilities.isTablet()) {
+            // always enabled for tablets
+            return true;
+        }
         return (getValue() & preprocessFlag(flag)) > 0;
     }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019-2022 qwq233 <qwq233@qwq2333.top>
+ * Copyright (C) 2019-2023 qwq233 <qwq233@qwq2333.top>
  * https://github.com/qwq233/Nullgram
  *
  * This program is free software; you can redistribute it and/or
