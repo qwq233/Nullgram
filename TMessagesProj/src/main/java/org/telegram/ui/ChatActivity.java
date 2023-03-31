@@ -27742,15 +27742,19 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
                             url1 = url1.substring(4);
                             tel = true;
                         }
-                        AndroidUtilities.addToClipboard(url1);
-                        createUndoView();
-                        if (undoView == null) {
-                            return;
-                        }
-                        if (mail) {
-                            undoView.showWithAction(0, UndoView.ACTION_EMAIL_COPIED, null);
-                        } else if (tel) {
-                            undoView.showWithAction(0, UndoView.ACTION_PHONE_COPIED, null);
+                        if (which == 2) {
+                            AndroidUtilities.addToClipboard(url1);
+                            createUndoView();
+                            if (undoView == null) {
+                                return;
+                            }
+                            if (mail) {
+                                undoView.showWithAction(0, UndoView.ACTION_EMAIL_COPIED, null);
+                            } else if (tel) {
+                                undoView.showWithAction(0, UndoView.ACTION_PHONE_COPIED, null);
+                            } else {
+                                undoView.showWithAction(0, UndoView.ACTION_LINK_COPIED, null);
+                            }
                         } else {
                             Intent shareIntent = new Intent(Intent.ACTION_SEND);
                             shareIntent.setType("text/plain");
