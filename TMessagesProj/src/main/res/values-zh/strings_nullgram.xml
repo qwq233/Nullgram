@@ -275,4 +275,9 @@
     <string name="MarkdownAbout">使用Markdown编辑消息中的文字：^1**粗体**^1，^2__斜体__^2，^3~~删除线~^3，^4`等宽\'^4，^5|打码||^5，^6文本^7链接^8。</string>
     <string name="MarkdownAbout2">使用Markdown编辑消息中的文字：^1**粗体**^1，^2__斜体__^2，^3~~删除线~^3，^4`等宽\'^4，^5|打码||^5。</string>
     <string name="MarkdownDisableByDefault">默认为禁用</string>
+    <string name="DatacenterStatusShort">Datacenter</string>
+    <string name="RegistrationDate">Registration date</string>
+    <string name="RegistrationDateNewer">Newer than %s</string>
+    <string name="RegistrationDateOlder">Older than %s</string>
+    <string name="RegistrationDateApproximately">Approximately %s</string>
 </resources>
