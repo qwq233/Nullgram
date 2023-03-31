@@ -276,4 +276,9 @@
     <string name="MarkdownAbout">Измените текст в сообщениях, используя разметку: ^1**жирный**^1, ^2__курсив__^2, ^3~~~Зачеркнутый~^3, ^4`моно`^4, ^5||скрытый||^5, ^6добавить^7ссылку^8.</string>
     <string name="MarkdownAbout2">Измените текст в сообщениях, используя разметку: ^1**жирный**^1, ^2__курсив__^2, ^3~~~Зачеркнутый~^3, ^4`моно`^4, ^5||скрытый||^5, ^6добавить^7ссылку.</string>
     <string name="MarkdownDisableByDefault">Отключить по умолчанию</string>
+    <string name="DatacenterStatusShort">Datacenter</string>
+    <string name="RegistrationDate">Registration date</string>
+    <string name="RegistrationDateNewer">Newer than %s</string>
+    <string name="RegistrationDateOlder">Older than %s</string>
+    <string name="RegistrationDateApproximately">Approximately %s</string>
 </resources>
