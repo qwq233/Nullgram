@@ -36,13 +36,10 @@ import android.view.ViewGroup;
 import android.view.inputmethod.EditorInfo;
 import android.widget.FrameLayout;
 import android.widget.TextView;
-
 import androidx.core.content.FileProvider;
-
 import com.google.zxing.EncodeHintType;
 import com.google.zxing.qrcode.QRCodeWriter;
 import com.google.zxing.qrcode.decoder.ErrorCorrectionLevel;
-
 import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.ApplicationLoader;
 import org.telegram.messenger.BaseController;
@@ -343,28 +340,7 @@ public class MessageUtils extends BaseController {
 
 
     public void saveStickerToGallery(Activity activity, MessageObject messageObject, Runnable callback) {
-        String path = messageObject.messageOwner.attachPath;
-        if (!TextUtils.isEmpty(path)) {
-            File temp = new File(path);
-            if (!temp.exists()) {
-                path = null;
-            }
-        }
-        if (TextUtils.isEmpty(path)) {
-            path = getFileLoader().getPathToMessage(messageObject.messageOwner).toString();
-            File temp = new File(path);
-            if (!temp.exists()) {
-                path = null;
-            }
-        }
-        if (TextUtils.isEmpty(path)) {
-            path = getFileLoader().getPathToAttach(messageObject.getDocument(), true).toString();
-            File temp = new File(path);
-            if (!temp.exists()) {
-                return;
-            }
-        }
-        saveStickerToGallery(activity, path, callback);
+        saveStickerToGallery(activity, getPathToMessage(messageObject), messageObject.isVideoSticker(), callback);
     }
 
     public static void saveStickerToGallery(Activity activity, TLRPC.Document document, Runnable callback) {
@@ -373,20 +349,23 @@ public class MessageUtils extends BaseController {
         if (!temp.exists()) {
             return;
         }
-        saveStickerToGallery(activity, path, callback);
+        saveStickerToGallery(activity, path, MessageObject.isVideoSticker(document), callback);
     }
 
-    private static void saveStickerToGallery(Activity activity, String path, Runnable callback) {
+    private static void saveStickerToGallery(Activity activity, String path, boolean video, Runnable callback) {
         Utilities.globalQueue.postRunnable(() -> {
             try {
-                Bitmap image = BitmapFactory.decodeFile(path);
-                if (image != null) {
-                    File file = new File(path.replace(".webp", ".png"));
-                    FileOutputStream stream = new FileOutputStream(file);
-                    image.compress(Bitmap.CompressFormat.PNG, 100, stream);
-                    stream.close();
-                    MediaController.saveFile(file.toString(), activity, 0, null, null);
-                    AndroidUtilities.runOnUIThread(callback);
+                if (video) {
+                    MediaController.saveFile(path, activity, 1, null, null, callback);
+                } else {
+                    Bitmap image = BitmapFactory.decodeFile(path);
+                    if (image != null) {
+                        File file = new File(path.replace(".webp", ".png"));
+                        FileOutputStream stream = new FileOutputStream(file);
+                        image.compress(Bitmap.CompressFormat.PNG, 100, stream);
+                        stream.close();
+                        MediaController.saveFile(file.toString(), activity, 0, null, null, callback);
+                    }
                 }
             } catch (Exception e) {
                 Log.e(e);
