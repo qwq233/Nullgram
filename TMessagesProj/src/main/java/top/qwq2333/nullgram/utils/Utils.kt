@@ -20,18 +20,30 @@
 package top.qwq2333.nullgram.utils
 
 import android.content.Context
+import android.graphics.Canvas
+import android.graphics.Path
 import android.graphics.Typeface
 import android.net.ConnectivityManager
 import android.net.Network
 import android.net.NetworkCapabilities
 import android.os.Build
 import android.util.Base64
+import android.view.View
+import org.telegram.messenger.AndroidUtilities
 import org.telegram.messenger.ApplicationLoader
 import org.telegram.messenger.LocaleController
 import org.telegram.messenger.MessageObject
 import org.telegram.messenger.NotificationCenter
+import org.telegram.messenger.R
 import org.telegram.messenger.SharedConfig
+import org.telegram.ui.ActionBar.ActionBarMenuItem
+import org.telegram.ui.ActionBar.ActionBarPopupWindow.ActionBarPopupWindowLayout
+import org.telegram.ui.ActionBar.BaseFragment
+import org.telegram.ui.Components.AlertsCreator
+import org.telegram.ui.Components.BulletinFactory
+import top.qwq2333.nullgram.activity.DatacenterActivity
 import top.qwq2333.nullgram.config.ConfigManager
+import top.qwq2333.nullgram.remote.NicegramController
 import java.io.BufferedReader
 import java.io.FileReader
 import java.net.URLEncoder
@@ -189,6 +201,71 @@ object Utils {
         val j4 = stickerSetId shr 32
         val j5 = stickerSetId and 0xFFFF_FFFFL
         return j4 + j5 - j5.toInt()
+    }
+
+    @JvmStatic
+    fun showIdPopup(fragment: BaseFragment, anchorView: View?, id: Long, dc: Int, user: Boolean, x: Float, y: Float) {
+        val context: Context = fragment.parentActivity
+        val popupLayout: ActionBarPopupWindowLayout = object : ActionBarPopupWindowLayout(context, R.drawable.popup_fixed_alert, fragment.resourceProvider) {
+            val path = Path()
+            override fun drawChild(canvas: Canvas, child: View, drawingTime: Long): Boolean {
+                canvas.save()
+                path.rewind()
+                AndroidUtilities.rectTmp[child.left.toFloat(), child.top.toFloat(), child.right.toFloat()] = child.bottom.toFloat()
+                path.addRoundRect(AndroidUtilities.rectTmp, AndroidUtilities.dp(6f).toFloat(), AndroidUtilities.dp(6f).toFloat(), Path.Direction.CW)
+                canvas.clipPath(path)
+                val draw = super.drawChild(canvas, child, drawingTime)
+                canvas.restore()
+                return draw
+            }
+        }
+        popupLayout.setFitItems(true)
+        val popupWindow = AlertsCreator.createSimplePopup(fragment, popupLayout, anchorView, x, y)
+        if (id != 0L) {
+            ActionBarMenuItem.addItem(popupLayout, R.drawable.msg_copy, LocaleController.getString("CopyID", R.string.CopyID), false, fragment.resourceProvider)
+                .setOnClickListener { v: View? ->
+                    popupWindow.dismiss()
+                    AndroidUtilities.addToClipboard(id.toString())
+                    BulletinFactory.of(fragment).createCopyBulletin(LocaleController.formatString("TextCopied", R.string.TextCopied)).show()
+                }
+        }
+        if (dc != 0) {
+            val subItem = ActionBarMenuItem.addItem(
+                popupLayout,
+                R.drawable.msg_satellite,
+                LocaleController.getString("DatacenterStatusShort", R.string.DatacenterStatusShort),
+                false,
+                fragment.resourceProvider
+            )
+            subItem.setSubtext(MessageUtils.formatDCString(dc))
+            subItem.setOnClickListener { v: View? ->
+                popupWindow.dismiss()
+                fragment.presentFragment(DatacenterActivity(dc))
+            }
+        }
+        if (id != 0L && user) {
+            val subItem = ActionBarMenuItem.addItem(
+                popupLayout,
+                R.drawable.msg_calendar,
+                LocaleController.getString("RegistrationDate", R.string.RegistrationDate),
+                false,
+                fragment.resourceProvider
+            )
+            subItem.setSubtext(LocaleController.getString("Loading", R.string.Loading))
+            NicegramController.getRegDate(id, {
+                if (it != null) {
+                    subItem.setSubtext(LocaleController.getString("ErrorOccurred", R.string.ErrorOccurred))
+                }
+            }) { dateType, date ->
+                when (dateType) {
+                    NicegramController.RegDateResponse.RegDateType.Approximately -> LocaleController.formatString("RegistrationDateApproximately", R.string.RegistrationDateApproximately, date)
+                    NicegramController.RegDateResponse.RegDateType.NewerThan -> LocaleController.formatString("RegistrationDateNewer", R.string.RegistrationDateNewer, date)
+                    NicegramController.RegDateResponse.RegDateType.OlderThan -> LocaleController.formatString("RegistrationDateOlder", R.string.RegistrationDateOlder, date)
+                    else -> date
+                }.let { subItem.setSubtext(it) }
+            }
+        }
+        popupLayout.setParentWindow(popupWindow)
     }
 
 }

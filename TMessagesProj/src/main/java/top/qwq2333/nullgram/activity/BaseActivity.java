@@ -164,14 +164,11 @@ public abstract class BaseActivity extends BaseFragment {
             var holder = listView.findViewHolderForAdapterPosition(position);
             var key = getKey();
             if (key != null && holder != null && listAdapter.isEnabled(holder) && rowMapReverse.containsKey(position)) {
-                showDialog(new AlertDialog.Builder(context)
-                    .setItems(
-                        new CharSequence[]{LocaleController.getString("CopyLink", R.string.CopyLink)},
-                        (dialogInterface, i) -> {
-                            AndroidUtilities.addToClipboard(String.format(Locale.getDefault(), "https://%s/nullgram/%s?r=%s", getMessagesController().linkPrefix, getKey(), rowMapReverse.get(position)));
-                            BulletinFactory.of(BaseActivity.this).createCopyLinkBulletin().show();
-                        })
-                    .create());
+                showDialog(new AlertDialog.Builder(context).setItems(new CharSequence[]{LocaleController.getString("CopyLink", R.string.CopyLink)}, (dialogInterface, i) -> {
+                    AndroidUtilities.addToClipboard(
+                        String.format(Locale.getDefault(), "https://%s/nullgram/%s?r=%s", getMessagesController().linkPrefix, getKey(), rowMapReverse.get(position)));
+                    BulletinFactory.of(BaseActivity.this).createCopyLinkBulletin().show();
+                }).create());
                 return true;
             }
             return false;
@@ -261,8 +258,8 @@ public abstract class BaseActivity extends BaseFragment {
         @Override
         public boolean isEnabled(RecyclerView.ViewHolder holder) {
             int type = holder.getItemViewType();
-            return type == 2 || type == 3 || type == 5 || type == 6 || type == 8 | type == 9 || type == 10
-                || type == 11 || type == 12;
+            return type == TYPE_SETTINGS || type == TYPE_CHECK || type == TYPE_NOTIFICATION_CHECK || type == TYPE_DETAIL_SETTINGS || type == TYPE_TEXT | type == TYPE_CHECKBOX
+                || type == TYPE_RADIO || type == TYPE_ACCOUNT;
         }
 
         @Override

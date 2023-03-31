@@ -25,9 +25,12 @@ import androidx.collection.LruCache
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.okhttp.OkHttp
 import io.ktor.client.plugins.Charsets
+import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.http.HttpStatusCode
+import io.ktor.serialization.kotlinx.json.json
 import io.ktor.utils.io.charsets.Charset
 import io.ktor.utils.io.charsets.Charsets
+import kotlinx.serialization.json.Json
 import org.telegram.messenger.LocaleController
 import org.telegram.messenger.R
 import org.telegram.tgnet.TLRPC
@@ -52,7 +55,12 @@ abstract class BaseTranslator {
      *
      * Charset: `UTF-8`
      */
-    val client = HttpClient(OkHttp) {
+    protected val client = HttpClient(OkHttp) {
+        install(ContentNegotiation) {
+            json(Json {
+                ignoreUnknownKeys = true
+            })
+        }
         // Ensure using UTF-8
         Charsets {
             register(Charsets.UTF_8)

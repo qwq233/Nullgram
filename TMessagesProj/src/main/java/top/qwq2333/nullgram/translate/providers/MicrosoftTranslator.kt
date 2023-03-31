@@ -96,7 +96,7 @@ object MicrosoftTranslator : BaseTranslator() {
             contentType(ContentType.Application.Json)
             header("X-Mt-Signature", key)
             header("User-Agent", "okhttp/4.5.0")
-            setBody(Json.encodeToString(listOf(Request(text))))
+            setBody(listOf(Request(text)))
 
         }.let {
             when (it.status) {

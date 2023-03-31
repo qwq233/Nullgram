@@ -80,10 +80,11 @@ dependencies {
     implementation("com.android.billingclient:billing:5.1.0")
     implementation("com.google.guava:guava:31.1-android")
 
-
     implementation("io.ktor:ktor-client-core:${Version.ktor}")
     implementation("io.ktor:ktor-client-okhttp:${Version.ktor}")
     implementation("io.ktor:ktor-client-encoding:${Version.ktor}")
+    implementation("io.ktor:ktor-client-content-negotiation:${Version.ktor}")
+    implementation("io.ktor:ktor-serialization-kotlinx-json:${Version.ktor}")
 
     implementation(project(":tcp2ws"))
 }

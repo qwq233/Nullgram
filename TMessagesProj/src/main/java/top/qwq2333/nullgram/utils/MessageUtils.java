@@ -84,6 +84,7 @@ import java.nio.charset.CharsetDecoder;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.concurrent.CountDownLatch;
 
 
@@ -451,6 +452,10 @@ public class MessageUtils extends BaseController {
             default:
                 return "Unknown";
         }
+    }
+
+    public static String formatDCString(int dc) {
+        return String.format(Locale.US, "DC%d %s, %s", dc, getDCName(dc), getDCLocation(dc));
     }
 
 

@@ -1711,9 +1711,6 @@ public class FileLoadOperation {
 
                     if (notLoadedBytesRanges != null) {
                         fileOutputStream.seek(requestInfo.offset);
-                        if (BuildVars.DEBUG_VERSION) {
-                            FileLog.d("save file part " + fileName + " offset=" + requestInfo.offset + " chunk_size=" + currentDownloadChunkSize + " isCdn=" + isCdn);
-                        }
                     }
                     FileChannel channel = fileOutputStream.getChannel();
                     channel.write(bytes.buffer);
@@ -1949,9 +1946,6 @@ public class FileLoadOperation {
                 parentObject = messageObject.messageOwner.media.webpage;
             }
         }
-        if (BuildVars.LOGS_ENABLED) {
-            FileLog.d("debug_loading: " + cacheFileFinal.getName() + " file reference expired ");
-        }
         FileRefController.getInstance(currentAccount).requestReference(parentObject, location, this, requestInfo);
     }
 
@@ -2128,9 +2122,6 @@ public class FileLoadOperation {
                 if (!requestInfos.contains(requestInfo)) {
                     return;
                 }
-                if (BuildVars.LOGS_ENABLED) {
-                    FileLog.d("debug_loading: " + cacheFileFinal.getName() + " time=" + (System.currentTimeMillis() - requestInfo.requestStartTime) + " dcId=" + datacenterId + " cdn=" + isCdn + " conType=" + connectionType + " reqId" + requestInfo.requestToken);
-                }
                 if (requestInfo == priorityRequestInfo) {
                     if (BuildVars.DEBUG_VERSION) {
                         FileLog.d("frame get request completed " + priorityRequestInfo.offset);
@@ -2241,9 +2232,6 @@ public class FileLoadOperation {
                     processRequestResult(requestInfo, error);
                 }
             }, null, null, flags, datacenterId, connectionType, isLast);
-            if (BuildVars.LOGS_ENABLED) {
-                FileLog.d("debug_loading: " + cacheFileFinal.getName() + " send reqId " + requestInfo.requestToken);
-            }
             requestsCount++;
         }
     }

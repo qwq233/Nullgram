@@ -662,9 +662,6 @@ public class FileRefController extends BaseController {
                 }
             }
             fileLoadOperation.requestingReference = false;
-            if (BuildVars.LOGS_ENABLED) {
-                FileLog.d("debug_loading: " + fileLoadOperation.getCacheFileFinal().getName() + " " + oldRef + " " + newRef + " reference updated resume download");
-            }
             fileLoadOperation.startDownloadRequest();
         }
         return true;
@@ -697,7 +694,6 @@ public class FileRefController extends BaseController {
             if (args[1] instanceof FileLoadOperation) {
                 FileLoadOperation fileLoadOperation = (FileLoadOperation) args[1];
                 fileLoadOperation.requestingReference = false;
-                FileLog.e("debug_loading: " + fileLoadOperation.getCacheFileFinal().getName() + "reference can't update: fail operation ");
                 fileLoadOperation.onFail(false, 0);
             }
         }
@@ -751,7 +747,6 @@ public class FileRefController extends BaseController {
             if (error != null && BuildVars.LOGS_ENABLED) {
                 if (requester.args[1] instanceof FileLoadOperation) {
                     FileLoadOperation operation = (FileLoadOperation) requester.args[1];
-                    FileLog.e("debug_loading: " + operation.getCacheFileFinal().getName() + " can't update file reference: " + error.code + " " + error.text);
                 }
 
             }

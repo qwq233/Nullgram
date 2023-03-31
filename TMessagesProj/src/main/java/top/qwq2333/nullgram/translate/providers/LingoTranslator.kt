@@ -19,6 +19,7 @@
 
 package top.qwq2333.nullgram.translate.providers
 
+import io.ktor.client.call.body
 import io.ktor.client.request.header
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
@@ -29,8 +30,6 @@ import io.ktor.http.contentType
 import kotlinx.serialization.EncodeDefault
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.Serializable
-import kotlinx.serialization.encodeToString
-import kotlinx.serialization.json.Json
 import top.qwq2333.nullgram.translate.BaseTranslator
 import top.qwq2333.nullgram.utils.Log
 
@@ -60,13 +59,11 @@ object LingoTranslator : BaseTranslator() {
             contentType(ContentType.Application.Json)
             header("User-Agent", "okhttp/3.12.3")
             header("X-Authorization", "token 9sdftiq37bnv410eon2l")
-            setBody(Json.encodeToString(Request(text, "auto2$to")))
+            setBody(Request(text, "auto2$to"))
         }.let {
             when (it.status) {
                 HttpStatusCode.OK -> {
-                    Log.d(it.bodyAsText())
-
-                    Json { ignoreUnknownKeys = true }.decodeFromString(Response.serializer(), it.bodyAsText()).let { response ->
+                    (it.body() as Response).let { response ->
                         if (response.error != null) {
                             return RequestResult(from, null, HttpStatusCode(HttpStatusCode.BadRequest.value, response.error))
                         }

@@ -7,3 +7,5 @@ TMessagesProj/.cxx
 local.properties
 TMessagesProj/src/main/res/drawable/icon.png
 service_account_credentials.json
+Tools/Utils.java
+test.py

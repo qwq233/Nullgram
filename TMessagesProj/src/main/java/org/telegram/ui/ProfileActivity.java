@@ -221,6 +221,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
@@ -234,13 +235,13 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
 import kotlin.Unit;
-import top.qwq2333.nullgram.activity.DatacenterActivity;
 import top.qwq2333.nullgram.activity.MainSettingActivity;
 import top.qwq2333.nullgram.config.ConfigManager;
 import top.qwq2333.nullgram.helpers.TranslateHelper;
 import top.qwq2333.nullgram.translate.LanguageDetectorTimeout;
 import top.qwq2333.nullgram.ui.AutoTranslatePopupWrapper;
 import top.qwq2333.nullgram.ui.BottomBuilder;
+import top.qwq2333.nullgram.ui.SimpleTextViewSwitcher;
 import top.qwq2333.nullgram.utils.AlertUtil;
 import top.qwq2333.nullgram.utils.Defines;
 import top.qwq2333.nullgram.utils.Log;
@@ -550,7 +551,7 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
     private boolean isQrItemVisible = true;
     private boolean hidePhone = false;
 
-    private SimpleTextView idTextView;
+    private SimpleTextViewSwitcher idTextView;
     PinchToZoomHelper pinchToZoomHelper;
 
     private View transitionOnlineText;
@@ -1373,6 +1374,7 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
                     invalidateIndicatorRect(prevPage != realPosition);
                     prevPage = realPosition;
                     updateAvatarItems();
+                    if (isPulledDown) updateIdText(true, true);
                 }
 
                 @Override
@@ -1389,6 +1391,7 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
                     invalidateIndicatorRect(false);
                     refreshVisibility(1f);
                     updateAvatarItems();
+                    if (isPulledDown) updateIdText(true, true);
                 }
             });
         }
@@ -2260,6 +2263,7 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
                             getMessagesStorage().clearUserPhoto(userId, photo.id);
                         }
                         if (avatarsViewPager.removePhotoAtIndex(position)) {
+                            updateIdText(false, true);
                             avatarsViewPager.setVisibility(View.GONE);
                             avatarImage.setForegroundAlpha(1f);
                             avatarContainer.setVisibility(View.VISIBLE);
@@ -4191,18 +4195,39 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
             onlineTextView[a].setFocusable(a == 0);
             avatarContainer2.addView(onlineTextView[a], LayoutHelper.createFrame(LayoutHelper.WRAP_CONTENT, LayoutHelper.WRAP_CONTENT, Gravity.LEFT | Gravity.TOP, 118 - (a == 1 || a == 2 || a == 3? 4 : 0), (a == 1 || a == 2 || a == 3 ? -2 : 0), (a == 0 ? rightMargin - (hasTitleExpanded ? 10 : 0) : 8) - (a == 1 || a == 2 || a == 3 ? 4 : 0), 0));
         }
-
-        idTextView = new SimpleTextView(context);
-        idTextView.setTextColor(Theme.getColor(Theme.key_avatar_subtitleInProfileBlue));
-        idTextView.setTextSize(14);
-        idTextView.setGravity(Gravity.LEFT);
-        idTextView.setAlpha(1.0f);
-        idTextView.setTag(1.0f);
-        idTextView.setVisibility(View.VISIBLE);
-        idTextView.setImportantForAccessibility(View.IMPORTANT_FOR_ACCESSIBILITY_NO);
-        avatarContainer2.addView(idTextView, LayoutHelper.createFrame(LayoutHelper.WRAP_CONTENT, LayoutHelper.WRAP_CONTENT, Gravity.LEFT | Gravity.TOP, 118, 0, 48, 0));
         checkPhotoDescriptionAlpha();
         avatarContainer2.addView(animatedStatusView);
+
+        idTextView = new SimpleTextViewSwitcher(context) {
+            @Override
+            public boolean performLongClick(float x, float y) {
+                long id = idTextView.getTag(R.id.id_copy) != null ? (long) idTextView.getTag(R.id.id_copy) : 0;
+                int dc = idTextView.getTag(R.id.id_dc) != null ? (int) idTextView.getTag(R.id.id_dc) : 0;
+                if (id != 0 || dc != 0) {
+                    Utils.showIdPopup(ProfileActivity.this, idTextView, id, dc, userId != 0, x, y);
+                    performHapticFeedback(HapticFeedbackConstants.LONG_PRESS);
+                    return true;
+                }
+                return false;
+            }
+        };
+        idTextView.setVisibility(View.VISIBLE);
+        idTextView.setFactory(() -> {
+            SimpleTextView view = new SimpleTextView(context);
+            view.setTextColor(getThemedColor(Theme.key_avatar_subtitleInProfileBlue));
+            view.setTextSize(14);
+            view.setGravity(Gravity.LEFT);
+            view.setPadding(AndroidUtilities.dp(4), AndroidUtilities.dp(2), AndroidUtilities.dp(4), AndroidUtilities.dp(2));
+            view.setImportantForAccessibility(View.IMPORTANT_FOR_ACCESSIBILITY_NO);
+            return view;
+        });
+        idTextView.setAlpha(1.0f);
+        idTextView.setTag(1.0f);
+        idTextView.setInAnimation(context, R.anim.alpha_in);
+        idTextView.setOutAnimation(context, R.anim.alpha_out);
+        idTextView.setLongClickable(true);
+        avatarContainer2.addView(idTextView, LayoutHelper.createFrame(LayoutHelper.WRAP_CONTENT, LayoutHelper.WRAP_CONTENT, Gravity.LEFT | Gravity.TOP, 118 - 4, -2, 4, 0));
+
 
         mediaCounterTextView = new AudioPlayerAlert.ClippingTextViewSwitcher(context) {
             @Override
@@ -4408,6 +4433,7 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
         actionBarBackgroundPaint.setColor(getThemedColor(Theme.key_listSelector));
         contentView.blurBehindViews.add(sharedMediaLayout);
         updateTtlIcon();
+        updateIdText(false, false);
         return fragmentView;
     }
 
@@ -5988,6 +6014,7 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
                             searchItem.setEnabled(false);
                         }
                         isPulledDown = true;
+                        updateIdText(true, true);
                         NotificationCenter.getGlobalInstance().postNotificationName(NotificationCenter.needCheckSystemBarColors, true);
                         overlaysView.setOverlaysVisible(true, durationFactor);
                         avatarsViewPagerIndicatorView.refreshVisibility(durationFactor);
@@ -6038,6 +6065,7 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
                 } else {
                     if (isPulledDown) {
                         isPulledDown = false;
+                        updateIdText(false, true);
                         NotificationCenter.getGlobalInstance().postNotificationName(NotificationCenter.needCheckSystemBarColors, true);
                         if (otherItem != null) {
                             otherItem.hideSubItem(gallery_menu_save);
@@ -8023,15 +8051,6 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
                 previousTransitionFragment.checkAndUpdateAvatar();
             }
             avatarImage.getImageReceiver().setVisible(!PhotoViewer.isShowingImage(photoBig), false);
-
-            id = userId;
-            int dc = user.photo != null && user.photo.dc_id != 0 ? user.photo.dc_id : UserObject.isUserSelf(user) ? getConnectionsManager().getCurrentDatacenterId() : 0;
-            if (dc != 0) {
-                idTextView.setText("ID: " + id + ", DC: " + dc);
-                idTextView.setOnClickListener(v -> presentFragment(new DatacenterActivity(dc)));
-            } else {
-                idTextView.setText("ID: " + id);
-            }
         } else if (chatId != 0) {
             TLRPC.Chat chat = getMessagesController().getChat(chatId);
             if (chat != null) {
@@ -8251,13 +8270,6 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
                 getFileLoader().loadFile(imageLocation, chat, null, FileLoader.PRIORITY_LOW, 1);
             }
             avatarImage.getImageReceiver().setVisible(!PhotoViewer.isShowingImage(photoBig), false);
-
-            if (ConfigManager.getBooleanOrFalse(Defines.showBotAPIID)) {
-                id = Utils.getBotIDFromUserID(chatId, ChatObject.isChannel(chat));
-            } else {
-                id = chatId;
-            }
-            idTextView.setText("ID: " + id);
         }
         if (id != 0) {
             long finalId = id;
@@ -11098,6 +11110,59 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
         private void put(int id, int position, SparseIntArray sparseIntArray) {
             if (position >= 0) {
                 sparseIntArray.put(position, id);
+            }
+        }
+    }
+
+    private void updateIdText(boolean showDate, boolean animated) {
+        if (!showDate && isPulledDown && !animated) {
+            return;
+        }
+        idTextView.setTag(R.id.id_dc, null);
+        idTextView.setTag(R.id.id_copy, null);
+        if (!showDate) {
+            long id;
+            if (userId != 0) {
+                id = userId;
+                TLRPC.User user = getMessagesController().getUser(userId);
+                int dc = user.photo != null && user.photo.dc_id != 0 ? user.photo.dc_id : UserObject.isUserSelf(user) ? getConnectionsManager().getCurrentDatacenterId() : 0;
+                if (dc != 0) {
+                    idTextView.setText("ID: " + id + ", DC: " + dc, animated);
+                    idTextView.setTag(R.id.id_dc, dc);
+                } else {
+                    idTextView.setText("ID: " + id, animated);
+                }
+            } else if (chatId != 0) {
+                TLRPC.Chat chat = getMessagesController().getChat(chatId);
+                if (ConfigManager.getBooleanOrFalse(Defines.showBotAPIID)) {
+                    if (ChatObject.isChannel(chat)) {
+                        id = -1000000000000L - chat.id;
+                    } else {
+                        id = - chat.id;
+                    }
+                } else {
+                    id = chatId;
+                }
+                idTextView.setText("ID: " + id, animated);
+            } else {
+                id = 0;
+            }
+            if (id != 0) {
+                idTextView.setTag(R.id.id_copy, id);
+            }
+        } else {
+            int position = avatarsViewPager.getRealPosition();
+            TLRPC.Photo avatar = avatarsViewPager.getPhoto(position);
+            if (avatar == null) {
+                return;
+            }
+            long date = (long) avatar.date * 1000;
+            if (date != 0) {
+                String dateString = LocaleController.formatString("formatDateAtTime", R.string.formatDateAtTime, LocaleController.getInstance().formatterYear.format(new Date(date)), LocaleController.getInstance().formatterDay.format(new Date(date))) + ", DC: " + avatar.dc_id;
+                idTextView.setText(dateString, animated);
+                idTextView.setTag(R.id.id_dc, avatar.dc_id);
+            } else {
+                idTextView.setText("", animated);
             }
         }
     }
