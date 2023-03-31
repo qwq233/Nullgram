@@ -275,4 +275,9 @@
     <string name="MarkdownAbout">Edit text in messages using markdown: ^1**bold**^1, ^2__italic__^2, ^3~~strikethrough~~^3, ^4`monospace`^4, ^5||spoiler||^5, ^6text^7url^8.</string>
     <string name="MarkdownAbout2">Edit text in messages using markdown: ^1**bold**^1, ^2__italic__^2, ^3~~strikethrough~~^3, ^4`monospace`^4, ^5||spoiler||^5.</string>
     <string name="MarkdownDisableByDefault">Disable by default</string>
+    <string name="DatacenterStatusShort">Datacenter</string>
+    <string name="RegistrationDate">Registration date</string>
+    <string name="RegistrationDateNewer">Newer than %s</string>
+    <string name="RegistrationDateOlder">Older than %s</string>
+    <string name="RegistrationDateApproximately">Approximately %s</string>
 </resources>
