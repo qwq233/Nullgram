@@ -3,7 +3,6 @@ package org.telegram.messenger;
 import android.os.SystemClock;
 import android.text.TextUtils;
 import android.util.Base64;
-import android.util.Log;
 import android.util.SparseBooleanArray;
 
 import androidx.annotation.IntDef;

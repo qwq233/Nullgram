@@ -3,8 +3,6 @@ package org.telegram.messenger;
 import android.content.Context;
 import android.content.SharedPreferences;
 
-import com.google.android.exoplayer2.util.Log;
-
 import org.telegram.tgnet.SerializedData;
 import org.telegram.tgnet.TLRPC;
 

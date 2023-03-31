@@ -7,7 +7,6 @@ import android.graphics.PorterDuff;
 import android.graphics.drawable.Drawable;
 import android.view.View;
 import android.view.accessibility.AccessibilityNodeInfo;
-import android.widget.CheckBox;
 
 import androidx.core.content.ContextCompat;
 

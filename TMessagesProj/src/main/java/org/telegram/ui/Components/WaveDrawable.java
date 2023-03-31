@@ -13,7 +13,6 @@ import android.view.animation.LinearInterpolator;
 
 import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.LiteMode;
-import org.telegram.messenger.SharedConfig;
 
 public class WaveDrawable {
 
