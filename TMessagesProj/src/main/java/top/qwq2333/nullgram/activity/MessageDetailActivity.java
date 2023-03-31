@@ -174,12 +174,6 @@ public class MessageDetailActivity extends BaseActivity implements NotificationC
                     if (stickerSet == null) {
                         continue;
                     }
-
-                    long j3 = stickerSet.id;
-                    long j4 = j3 >> 32;
-                    long j5 = j3 & 4294967295L;
-                    this.stickerSetOwner = (j4 + j5) - ((int) j5);
-
                     long owner = Utils.getOwnerFromStickerSetId(stickerSet.id);
                     if (!emojiSetOwners.contains(owner)) {
                         emojiSetOwners.add(owner);

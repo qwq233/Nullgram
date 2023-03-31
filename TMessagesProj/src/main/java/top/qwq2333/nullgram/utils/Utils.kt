@@ -175,6 +175,15 @@ object Utils {
         connectivityManager.registerDefaultNetworkCallback(networkCallback)
     }
 
+    /**
+     * Right shift 32 bits and perform AND operation with 0xFFFFFFFF to get the Sticker Set Owner ID.
+     *
+     * Example:
+     * ```
+     * 0011 1001 1001 0111 1101 1101 0100 1110 0000 0000 0000 0000 0000 0000 0000 0001 // 4150028908722388993 Sticker Set ID
+     * 0011 1001 1001 0111 1101 1101 0100 1110                                         // 966253902           Owner
+     * ```
+     */
     @JvmStatic
     fun getOwnerFromStickerSetId(stickerSetId: Long): Long {
         val j4 = stickerSetId shr 32

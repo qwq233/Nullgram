@@ -77,7 +77,7 @@ object MicrosoftTranslator : BaseTranslator() {
             uuid
         ).lowercase().toByteArray()
         val secretKeySpec =
-            SecretKeySpec(Base64.decode("oik6PdDdMnOXemTbwvMn9de/h9lFnfBaCWbGMMZqqoSaQaqUOqjVGm5NqsmjcBI1x+sS9ugjB55HEJWRiFXYFw", 3), "HmacSHA256")
+            SecretKeySpec(Base64.decode("oik6PdDdMnOXemTbwvMn9de/h9lFnfBaCWbGMMZqqoSaQaqUOqjVGm5NqsmjcBI1x+sS9ugjB55HEJWRiFXYFw", Base64.NO_PADDING or Base64.NO_WRAP), "HmacSHA256")
         val mac = Mac.getInstance("HmacSHA256")
         mac.init(secretKeySpec)
         val key = String.format(
