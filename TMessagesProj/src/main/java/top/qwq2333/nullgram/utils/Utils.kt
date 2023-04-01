@@ -31,6 +31,7 @@ import android.util.Base64
 import android.view.View
 import org.telegram.messenger.AndroidUtilities
 import org.telegram.messenger.ApplicationLoader
+import org.telegram.messenger.FileLog
 import org.telegram.messenger.LocaleController
 import org.telegram.messenger.MessageObject
 import org.telegram.messenger.NotificationCenter
@@ -45,13 +46,13 @@ import top.qwq2333.nullgram.activity.DatacenterActivity
 import top.qwq2333.nullgram.config.ConfigManager
 import top.qwq2333.nullgram.remote.NicegramController
 import java.io.BufferedReader
+import java.io.File
 import java.io.FileReader
 import java.net.URLEncoder
 import java.security.MessageDigest
 import java.security.NoSuchAlgorithmException
 import java.security.SecureRandom
-import java.util.regex.Matcher
-import java.util.regex.Pattern
+import java.util.Locale
 
 
 object Utils {
@@ -111,33 +112,53 @@ object Utils {
     @JvmStatic
     private var systemEmojiTypeface: Typeface? = null
 
-    @JvmStatic
-    fun getSystemEmojiTypeface(): Typeface? {
-        if (!loadSystemEmojiFailed && systemEmojiTypeface == null) {
-            try {
-                val p: Pattern = Pattern.compile(">(.*emoji.*)</font>", Pattern.CASE_INSENSITIVE)
-                val br = BufferedReader(FileReader("/system/etc/fonts.xml"))
-                var line: String?
+    private fun getSystemEmojiFontPath(): File? {
+        try {
+            BufferedReader(FileReader("/system/etc/fonts.xml")).use { br ->
+                var line: String
+                var ignored = false
                 while (br.readLine().also { line = it } != null) {
-                    val m: Matcher = p.matcher(line)
-                    if (m.find()) {
-                        systemEmojiTypeface = Typeface.createFromFile("/system/fonts/" + m.group(1))
-                        Log.d("emoji font file fonts.xml = " + m.group(1))
-                        break
+                    val trimmed = line.trim { it <= ' ' }
+                    if (trimmed.startsWith("<family") && trimmed.contains("ignore=\"true\"")) {
+                        ignored = true
+                    } else if (trimmed.startsWith("</family>")) {
+                        ignored = false
+                    } else if (trimmed.startsWith("<font") && !ignored) {
+                        val start = trimmed.indexOf(">")
+                        val end = trimmed.indexOf("<", 1)
+                        if (start > 0 && end > 0) {
+                            val font = trimmed.substring(start + 1, end)
+                            if (font.lowercase(Locale.getDefault()).contains("emoji")) {
+                                val file = File("/system/fonts/$font")
+                                if (file.exists()) {
+                                    FileLog.d("emoji font file fonts.xml = $font")
+                                    return file
+                                }
+                            }
+                        }
                     }
                 }
                 br.close()
-            } catch (e: Exception) {
-                Log.e(e)
+                val fileAOSP = File("/system/fonts/" + Defines.aospEmojiFont)
+                if (fileAOSP.exists()) {
+                    return fileAOSP
+                }
+            }
+        } catch (e: Exception) {
+            FileLog.e(e)
+        }
+        return null
+    }
+
+    @JvmStatic
+    fun getSystemEmojiTypeface(): Typeface? {
+        if (!loadSystemEmojiFailed && systemEmojiTypeface == null) {
+            val font: File? = getSystemEmojiFontPath()
+            if (font != null) {
+                systemEmojiTypeface = Typeface.createFromFile(font)
             }
             if (systemEmojiTypeface == null) {
-                try {
-                    systemEmojiTypeface = Typeface.createFromFile("/system/fonts/${Defines.aospEmojiFont}")
-                    Log.d("emoji font file = ${Defines.aospEmojiFont}")
-                } catch (e: Exception) {
-                    Log.e(e)
-                    loadSystemEmojiFailed = true
-                }
+                loadSystemEmojiFailed = true
             }
         }
         return systemEmojiTypeface
