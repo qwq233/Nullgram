@@ -49,8 +49,8 @@ jobs:
       - name: Set up ccache
         uses: hendrikmuhs/ccache-action@v1.2
         with:
-          key: ccache
-          restore-keys: ccache
+          key: ccache-stable
+          restore-keys: ccache-stable
       - name: Setup Android SDK Tools
         uses: android-actions/setup-android@v2
       - name: Prepare Environment

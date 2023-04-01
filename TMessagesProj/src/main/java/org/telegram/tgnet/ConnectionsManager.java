@@ -33,6 +33,7 @@ import org.telegram.messenger.Utilities;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.net.Inet4Address;
 import java.net.Inet6Address;
@@ -1152,6 +1153,8 @@ public class ConnectionsManager extends BaseController {
                     NativeByteBuffer buffer = new NativeByteBuffer(bytes.length);
                     buffer.writeBytes(bytes);
                     return buffer;
+                } catch (FileNotFoundException ignored) {
+                  // ignore this cuz it's normal if it doesn't have dns record
                 } catch (Throwable e) {
                     FileLog.e(e, false);
                 } finally {
