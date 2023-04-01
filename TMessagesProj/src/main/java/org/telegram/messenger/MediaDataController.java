@@ -1916,7 +1916,7 @@ public class MediaDataController extends BaseController {
     }
 
     public void loadFeaturedStickers(boolean emoji, boolean cache, boolean force) {
-        if (ConfigManager.getBooleanOrFalse(Defines.disableTrendingSticker) || getUserConfig().getCurrentUser().bot || loadingFeaturedStickers[emoji ? 1 : 0]) {
+        if (ConfigManager.getBooleanOrFalse(Defines.disableTrendingSticker) || (getUserConfig().getCurrentUser() != null && getUserConfig().getCurrentUser().bot) || loadingFeaturedStickers[emoji ? 1 : 0]) {
             return;
         }
         loadingFeaturedStickers[emoji ? 1 : 0] = true;
