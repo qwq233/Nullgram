@@ -176,11 +176,14 @@ public class LanguageSelectActivity extends BaseActivity {
                     BotWebViewVibrationEffect.APP_ERROR.vibrate();
                     return;
                 }
-                boolean remove = TranslateHelper.getRestrictedLanguages().contains(localeInfo.langCode);
+                var restrictedLanguages = TranslateHelper.getRestrictedLanguages();
+                boolean remove = restrictedLanguages.contains(localeInfo.langCode);
                 if (remove) {
-                    TranslateHelper.getRestrictedLanguages().removeIf(s -> s != null && s.equals(localeInfo.langCode));
+                    restrictedLanguages.removeIf(s -> s != null && s.equals(localeInfo.langCode));
+                    TranslateHelper.setRestrictedLanguages(restrictedLanguages);
                 } else {
-                    TranslateHelper.getRestrictedLanguages().add(localeInfo.langCode);
+                    restrictedLanguages.add(localeInfo.langCode);
+                    TranslateHelper.setRestrictedLanguages(restrictedLanguages);
                 }
                 cell.setChecked(!remove);
             } else {

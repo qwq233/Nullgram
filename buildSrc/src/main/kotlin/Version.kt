@@ -7,7 +7,7 @@ object Version {
     val ktor = "2.2.1"
 
     @JvmStatic
-    val JavaVersion = "17"
+    val JavaVersion = "11"
 
     @JvmStatic
     val officialVersionName = "9.5.7"

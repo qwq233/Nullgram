@@ -50,6 +50,7 @@ import top.qwq2333.nullgram.translate.providers.MicrosoftTranslator
 import top.qwq2333.nullgram.translate.providers.TelegramTranslator
 import top.qwq2333.nullgram.ui.PopupBuilder
 import top.qwq2333.nullgram.utils.Defines
+import top.qwq2333.nullgram.utils.Log
 import java.util.Locale
 
 object TranslateHelper {
@@ -63,6 +64,7 @@ object TranslateHelper {
     @JvmStatic
     var restrictedLanguages: HashSet<String> = ConfigManager.getStringSetOrDefault(Defines.restrictedLanguages, hashSetOf()) as HashSet<String>
         set(value) {
+            Log.i("TranslateHelper: set restrictedLanguages to $value")
             ConfigManager.putStringSet(Defines.restrictedLanguages, value)
             field = value
         }
