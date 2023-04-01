@@ -230,10 +230,10 @@
     <string name="UpdateInstalledNotification">更新安装完成，点击启动应用。</string>
     <string name="UpdateFailedToInstall">安装更新失败： %d</string>
     <string name="Translator">翻译</string>
-    <string name="ProviderGoogleTranslate">Google 翻译</string>
-    <string name="ProviderTelegramTranslate">TELEOFFICIAL</string>
-    <string name="ProviderMicrosoftTranslate">Microsoft 在线翻译</string>
-    <string name="ProviderLingoTranslate">Lingo 翻译</string>
+    <string name="ProviderGoogleTranslate">谷歌翻译</string>
+    <string name="ProviderTelegramTranslate">Telegram 翻译</string>
+    <string name="ProviderMicrosoftTranslate">微软翻译</string>
+    <string name="ProviderLingoTranslate">彩云小译</string>
     <string name="TranslationProvider">翻译引擎</string>
     <string name="TranslateApiUnsupported">此翻译引擎不支持您的语言</string>
     <string name="ResetLanguage">重置语言</string>
@@ -256,7 +256,7 @@
     <string name="SensitiveAbout">在您所有设备上显示公共频道中的敏感媒体内容。</string>
     <string name="InstallProhibitedPlay">在聊天中从 apk 文件安装应用程序在 Play Store 版本的应用程序不可用中。\n请手动保存它并从文件管理器安装。</string>
     <string name="TranslatorTypeInMessage">消息内</string>
-    <string name="SmsDisabled">由于TELEOFFICIAL的政策，任何第三个TELEOFFICIAL客户端目前都禁用了短信登录。\n我们对造成的任何不便表示歉意。</string>
+    <string name="SmsDisabled">由于TELEOFFICIAL的政策，任何第三方的TELEOFFICIAL客户端目前都禁用了短信登录。\n我们对造成的任何不便表示歉意。</string>
     <string name="DevicePerformanceAuto">默认</string>
     <string name="DevicePerformanceLow">低</string>
     <string name="DevicePerformanceMedium">中</string>
@@ -275,4 +275,9 @@
     <string name="MarkdownAbout">使用Markdown编辑消息中的文字：^1**粗体**^1，^2__斜体__^2，^3~~删除线~^3，^4`等宽\'^4，^5|打码||^5，^6文本^7链接^8。</string>
     <string name="MarkdownAbout2">使用Markdown编辑消息中的文字：^1**粗体**^1，^2__斜体__^2，^3~~删除线~^3，^4`等宽\'^4，^5|打码||^5。</string>
     <string name="MarkdownDisableByDefault">默认为禁用</string>
+    <string name="DatacenterStatusShort">Datacenter</string>
+    <string name="RegistrationDate">Registration date</string>
+    <string name="RegistrationDateNewer">Newer than %s</string>
+    <string name="RegistrationDateOlder">Older than %s</string>
+    <string name="RegistrationDateApproximately">Approximately %s</string>
 </resources>
