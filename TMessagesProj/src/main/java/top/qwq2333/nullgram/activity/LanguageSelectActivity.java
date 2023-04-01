@@ -31,6 +31,7 @@ import androidx.core.text.HtmlCompat;
 import androidx.recyclerview.widget.RecyclerView;
 
 import org.telegram.messenger.AndroidUtilities;
+import org.telegram.messenger.BotWebViewVibrationEffect;
 import org.telegram.messenger.LocaleController;
 import org.telegram.messenger.R;
 import org.telegram.ui.ActionBar.ActionBarMenu;
@@ -156,6 +157,9 @@ public class LanguageSelectActivity extends BaseActivity {
         if (view instanceof ShadowSectionCell || view instanceof HeaderCell) {
             return;
         }
+        if (view instanceof TextInfoPrivacyCell) {
+            return;
+        }
         boolean search = listView.getAdapter() == searchListViewAdapter;
         if (!search) position--;
         LocaleInfo localeInfo;
@@ -168,7 +172,8 @@ public class LanguageSelectActivity extends BaseActivity {
             if (currentType == TYPE_RESTRICTED) {
                 TextCheckbox2Cell cell = (TextCheckbox2Cell) view;
                 if (localeInfo.langCode.equals(getCurrentTargetLanguage())) {
-                    AndroidUtilities.shakeView(((TextCheckbox2Cell) view).checkbox);
+                    AndroidUtilities.shakeViewSpring(view);
+                    BotWebViewVibrationEffect.APP_ERROR.vibrate();
                     return;
                 }
                 boolean remove = TranslateHelper.getRestrictedLanguages().contains(localeInfo.langCode);
@@ -194,6 +199,7 @@ public class LanguageSelectActivity extends BaseActivity {
     protected String getKey() {
         return null;
     }
+
 
     @Override
     protected BaseListAdapter createAdapter(Context context) {
@@ -311,7 +317,7 @@ public class LanguageSelectActivity extends BaseActivity {
         }
 
         @Override
-        public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
+        public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position, boolean partial) {
             switch (holder.getItemViewType()) {
                 case TYPE_SHADOW: {
                     holder.itemView.setBackground(Theme.getThemedDrawable(mContext, R.drawable.greydivider_bottom, Theme.key_windowBackgroundGrayShadow));
@@ -326,7 +332,6 @@ public class LanguageSelectActivity extends BaseActivity {
                     TextInfoPrivacyCell cell = (TextInfoPrivacyCell) holder.itemView;
                     cell.setBackground(Theme.getThemedDrawable(mContext, R.drawable.greydivider_bottom, Theme.key_windowBackgroundGrayShadow));
                     cell.getTextView().setMovementMethod(null);
-                    cell.setText("miaŭ");
                     break;
                 }
                 case TYPE_CHECKBOX: {
@@ -377,7 +382,7 @@ public class LanguageSelectActivity extends BaseActivity {
                 return TYPE_HEADER;
             }
             if (i == (search ? searchResult : sortedLanguages).size()) {
-                return currentType == TYPE_RESTRICTED && !search ? TYPE_INFO_PRIVACY : TYPE_SHADOW;
+                return TYPE_SHADOW;
             }
             return currentType == TYPE_TARGET ? TYPE_RADIO : TYPE_CHECKBOX;
         }
