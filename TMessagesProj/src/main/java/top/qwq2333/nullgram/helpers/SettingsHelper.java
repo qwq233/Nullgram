@@ -40,7 +40,7 @@ public class SettingsHelper {
             return;
         }
         var segments = uri.getPathSegments();
-        if (segments.isEmpty() || segments.size() > 2 || !"nullsettings".equals(segments.get(0))) {
+        if (segments.isEmpty() || segments.size() > 2 || !"nullsetting".equals(segments.get(0))) {
             unknown.run();
             return;
         }

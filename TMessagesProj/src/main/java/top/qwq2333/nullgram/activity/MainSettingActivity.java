@@ -219,27 +219,27 @@ public class MainSettingActivity extends BaseActivity {
     protected void updateRows() {
         super.updateRows();
 
-        categoriesRow = rowCount++;
-        generalRow = rowCount++;
-        chatRow = rowCount++;
-        experimentRow = rowCount++;
+        categoriesRow = addRow();
+        generalRow = addRow("General");
+        chatRow = addRow("Chat");
+        experimentRow = addRow("Experiment");
 
         if (!PasscodeHelper.isSettingsHidden()) {
-            passcodeRow = rowCount++;
+            passcodeRow = addRow("Passcode");
         } else {
             passcodeRow = -1;
         }
 
-        categories2Row = rowCount++;
+        categories2Row = addRow();
 
-        aboutRow = rowCount++;
-        channelRow = rowCount++;
-        websiteRow = rowCount++;
-        sourceCodeRow = rowCount++;
-        licenseRow = rowCount++;
-        about2Row = rowCount++;
+        aboutRow = addRow();
+        channelRow = addRow();
+        websiteRow = addRow();
+        sourceCodeRow = addRow();
+        licenseRow = addRow();
+        about2Row = addRow();
 
-        updateRow = rowCount++;
+        updateRow = addRow();
 
         if (listAdapter != null) {
             listAdapter.notifyDataSetChanged();

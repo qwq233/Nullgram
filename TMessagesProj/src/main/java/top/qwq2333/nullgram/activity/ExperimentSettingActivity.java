@@ -194,34 +194,35 @@ public class ExperimentSettingActivity extends BaseActivity {
     protected void updateRows() {
         super.updateRows();
 
-        experimentRow = rowCount++;
+        experimentRow = addRow();
         if (ConfigManager.getBooleanOrFalse(Defines.showHiddenSettings)) {
-            blockSponsorAdsRow = rowCount++;
-            hideProxySponsorChannelRow = rowCount++;
-            disableSendTypingRow = rowCount++;
+            blockSponsorAdsRow = addRow("blockSponsorAds");
+            hideProxySponsorChannelRow = addRow("hideProxySponsorChannel");
+            disableSendTypingRow = addRow("disableSendTyping");
         }
-        disableFilteringRow = sensitiveCanChange ? rowCount++ : -1;
-        syntaxHighlightRow = rowCount++;
-        aliasChannelRow = rowCount++;
-        keepFormattingRow = rowCount++;
-        enchantAudioRow = rowCount++;
-        linkedUserRow = rowCount++;
-        alwaysSendWithoutSoundRow = rowCount++;
+        disableFilteringRow = sensitiveCanChange ? addRow("disableFiltering") : -1;
+        syntaxHighlightRow = addRow("syntaxHighlight");
+        aliasChannelRow = addRow("aliasChannel");
+        keepFormattingRow = addRow("keepFormatting");
+        enchantAudioRow = addRow("enchantAudio");
+        linkedUserRow = addRow("linkedUser");
+        alwaysSendWithoutSoundRow = addRow();
         if (ConfigManager.getBooleanOrFalse(Defines.linkedUser) && ConfigManager.getBooleanOrFalse(Defines.labelChannelUser)) {
-            overrideChannelAliasRow = rowCount++;
+            overrideChannelAliasRow = addRow("overrideChannelAlias");
         } else {
             overrideChannelAliasRow = -1;
         }
+        experiment2Row = addRow();
 
         if (ConfigManager.getBooleanOrFalse(Defines.showHiddenSettings)) {
-            premium2Row = rowCount++;
-            premiumRow = rowCount++;
-            hidePremiumStickerAnimRow = rowCount++;
-            fastSpeedUploadRow = rowCount++;
-            modifyDownloadSpeedRow = rowCount++;
+            premiumRow = addRow();
+            hidePremiumStickerAnimRow = addRow("hidePremiumStickerAnim");
+            fastSpeedUploadRow = addRow("fastSpeedUpload");
+            modifyDownloadSpeedRow = addRow("modifyDownloadSpeed");
+            premium2Row = addRow();
         }
 
-        experiment2Row = rowCount++;
+
 
         if (listAdapter != null) {
             listAdapter.notifyDataSetChanged();

@@ -374,44 +374,44 @@ public class ChatSettingActivity extends BaseActivity {
     protected void updateRows() {
         super.updateRows();
 
-        stickerSizeHeaderRow = rowCount++;
-        stickerSizeRow = rowCount++;
-        stickerSize2Row = rowCount++;
+        stickerSizeHeaderRow = addRow();
+        stickerSizeRow = addRow("stickerSize");
+        stickerSize2Row = addRow();
 
-        chatRow = rowCount++;
-        ignoreBlockedUserMessagesRow = rowCount++;
-        hideGroupStickerRow = rowCount++;
-        disablePremiumStickerRow = rowCount++;
-        messageMenuRow = rowCount++;
+        chatRow = addRow();
+        ignoreBlockedUserMessagesRow = addRow("ignoreBlockedUserMessages");
+        hideGroupStickerRow = addRow("hideGroupSticker");
+        disablePremiumStickerRow = addRow("disablePremiumSticker");
+        messageMenuRow = addRow();
         if (ConfigManager.getBooleanOrFalse(Defines.showHiddenSettings)) {
-            allowScreenshotOnNoForwardChatRow = rowCount++;
+            allowScreenshotOnNoForwardChatRow = addRow("allowScreenshotOnNoForwardChat");
         }
-        labelChannelUserRow = rowCount++;
-        displaySpoilerDirectlyRow = rowCount++;
-        disableJumpToNextChannelRow = rowCount++;
-        disableGreetingStickerRow = rowCount++;
-        disableTrendingStickerRow = rowCount++;
-        disablePreviewVideoSoundShortcutRow = rowCount++;
-        customDoubleClickTapRow = rowCount++;
-        confirmToSendMediaMessagesRow = rowCount++;
-        maxRecentStickerRow = rowCount++;
-        unreadBadgeOnBackButtonRow = rowCount++;
-        ignoreReactionMentionRow = rowCount++;
-        showForwardDateRow = rowCount++;
-        hideTimeForStickerRow = rowCount++;
-        showMessageIDRow = rowCount++;
-        quickToggleAnonymous = rowCount++;
-        hideQuickSendMediaBottomRow = rowCount++;
-        customQuickMessageRow = rowCount++;
-        scrollableChatPreviewRow = rowCount++;
-        showTabsOnForwardRow = rowCount++;
-        disableStickersAutoReorderRow = rowCount++;
-        chat2Row = rowCount++;
-        markdownRow = rowCount++;
-        markdownDisableRow = rowCount++;
-        markdownParserRow = rowCount++;
-        markdownParseLinksRow = ConfigManager.getBooleanOrFalse(Defines.newMarkdownParser) ? rowCount++ : -1;
-        markdown2Row = rowCount++;
+        labelChannelUserRow = addRow("labelChannelUser");
+        displaySpoilerDirectlyRow = addRow("displaySpoilerDirectly");
+        disableJumpToNextChannelRow = addRow("disableJumpToNextChannel");
+        disableGreetingStickerRow = addRow("disableGreetingSticker");
+        disableTrendingStickerRow = addRow("disableTrendingSticker");
+        disablePreviewVideoSoundShortcutRow = addRow("disablePreviewVideoSoundShortcut");
+        customDoubleClickTapRow = addRow("customDoubleClickTap");
+        confirmToSendMediaMessagesRow = addRow("confirmToSendMediaMessages");
+        maxRecentStickerRow = addRow("maxRecentSticker");
+        unreadBadgeOnBackButtonRow = addRow("unreadBadgeOnBackButton");
+        ignoreReactionMentionRow = addRow("ignoreReactionMention");
+        showForwardDateRow = addRow("showForwardDate");
+        hideTimeForStickerRow = addRow("hideTimeForSticker");
+        showMessageIDRow = addRow("showMessageID");
+        quickToggleAnonymous = addRow("quickToggleAnonymous");
+        hideQuickSendMediaBottomRow = addRow("hideQuickSendMediaBottom");
+        customQuickMessageRow = addRow("customQuickMessage");
+        scrollableChatPreviewRow = addRow("scrollableChatPreview");
+        showTabsOnForwardRow = addRow("showTabsOnForward");
+        disableStickersAutoReorderRow = addRow("disableStickersAutoReorder");
+        chat2Row = addRow();
+        markdownRow = addRow();
+        markdownDisableRow = addRow("markdownDisabled");
+        markdownParserRow = addRow("markdownParser");
+        markdownParseLinksRow = ConfigManager.getBooleanOrFalse(Defines.newMarkdownParser) ? addRow("markdownParseLinks") : -1;
+        markdown2Row = addRow();
 
         if (listAdapter != null) {
             listAdapter.notifyDataSetChanged();

@@ -320,28 +320,28 @@ public class GeneralSettingActivity extends BaseActivity {
     protected void updateRows() {
         super.updateRows();
 
-        drawerRow = rowCount++;
-        avatarAsDrawerBackgroundRow = rowCount++;
+        drawerRow = addRow();
+        avatarAsDrawerBackgroundRow = addRow("avatarAsDrawerBackground");
         if (ConfigManager.getBooleanOrFalse(Defines.avatarAsDrawerBackground)) {
-            avatarBackgroundBlurRow = rowCount++;
-            avatarBackgroundDarkenRow = rowCount++;
-            largeAvatarAsBackgroundRow = rowCount++;
+            avatarBackgroundBlurRow = addRow("avatarBackgroundBlur");
+            avatarBackgroundDarkenRow = addRow("avatarBackgroundDarken");
+            largeAvatarAsBackgroundRow = addRow("largeAvatarAsBackground");
         } else {
             avatarBackgroundBlurRow = -1;
             avatarBackgroundDarkenRow = -1;
             largeAvatarAsBackgroundRow = -1;
         }
-        hidePhoneRow = rowCount++;
-        drawer2Row = rowCount++;
+        hidePhoneRow = addRow("hidePhone");
+        drawer2Row = addRow();
 
-        translatorRow = rowCount++;
-        translatorTypeRow = rowCount++;
+        translatorRow = addRow();
+        translatorTypeRow = addRow("translatorType");
         if (TranslateHelper.getCurrentStatus() != TranslateHelper.Status.External) {
-            showOriginalRow = TranslateHelper.getCurrentStatus() == TranslateHelper.Status.InMessage ? rowCount++ : -1;
-            translationProviderRow = rowCount++;
-            translationTargetRow = rowCount++;
-            doNotTranslateRow = rowCount++;
-            autoTranslateRow = rowCount++;
+            showOriginalRow = TranslateHelper.getCurrentStatus() == TranslateHelper.Status.InMessage ? addRow("showOriginal") : -1;
+            translationProviderRow = addRow("translationProvider");
+            translationTargetRow = addRow("translationTarget");
+            doNotTranslateRow = addRow("doNotTranslate");
+            autoTranslateRow = addRow("autoTranslate");
         } else {
             showOriginalRow = -1;
             translationProviderRow = -1;
@@ -349,27 +349,27 @@ public class GeneralSettingActivity extends BaseActivity {
             doNotTranslateRow = -1;
             autoTranslateRow = -1;
         }
-        translator2Row = rowCount++;
+        translator2Row = addRow();
 
 
-        generalRow = rowCount++;
-        showBotAPIRow = rowCount++;
-        showExactNumberRow = rowCount++;
-        disableInstantCameraRow = rowCount++;
-        disableUndoRow = rowCount++;
-        skipOpenLinkConfirmRow = rowCount++;
-        openArchiveOnPullRow = rowCount++;
-        hideAllTabRow = rowCount++;
-        tabsTitleTypeRow = rowCount++;
-        general2Row = rowCount++;
+        generalRow = addRow();
+        showBotAPIRow = addRow("showBotAPI");
+        showExactNumberRow = addRow("showExactNumber");
+        disableInstantCameraRow = addRow("disableInstantCamera");
+        disableUndoRow = addRow("disableUndo");
+        skipOpenLinkConfirmRow = addRow("skipOpenLinkConfirm");
+        openArchiveOnPullRow = addRow("openArchiveOnPull");
+        hideAllTabRow = addRow("hideAllTab");
+        tabsTitleTypeRow = addRow("tabsTitleType");
+        general2Row = addRow();
 
-        devicesRow = rowCount++;
-        useSystemEmojiRow = rowCount++;
-        autoDisableBuiltInProxyRow = rowCount++;
-        disableVibrationRow = rowCount++;
-        overrideDevicePerformanceRow = rowCount++;
-        overrideDevicePerformanceDescRow = rowCount++;
-        devices2Row = rowCount++;
+        devicesRow = addRow();
+        useSystemEmojiRow = addRow("useSystemEmoji");
+        autoDisableBuiltInProxyRow = addRow("autoDisableBuiltInProxy");
+        disableVibrationRow = addRow("disableVibration");
+        overrideDevicePerformanceRow = addRow("overrideDevicePerformance");
+        overrideDevicePerformanceDescRow = addRow();
+        devices2Row = addRow();
 
         if (listAdapter != null) {
             listAdapter.notifyDataSetChanged();

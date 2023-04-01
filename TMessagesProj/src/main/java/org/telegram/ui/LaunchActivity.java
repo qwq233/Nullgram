@@ -2102,7 +2102,7 @@ public class LaunchActivity extends BasePermissionsActivity implements INavigati
                                                 }
                                             } else if (path.startsWith("addstickers/")) {
                                                 sticker = path.replace("addstickers/", "");
-                                            } else if (path.startsWith("nullsettings/")) {
+                                            } else if (path.startsWith("nullsetting/")) {
                                                 SettingsHelper.processDeepLink(data, fragment -> {
                                                     AndroidUtilities.runOnUIThread(() -> presentFragment(fragment, false, false));
                                                     if (AndroidUtilities.isTablet()) {
@@ -2527,7 +2527,7 @@ public class LaunchActivity extends BasePermissionsActivity implements INavigati
                                     } else if ((url.startsWith("tg:calllog") || url.startsWith("tg://calllog"))) {
                                         showCallLog = true;
                                     } else if (url.startsWith("tg:null") || url.startsWith("tg://null")) {
-                                        url = url.replace("tg:null", "tg://t.me/nullsettings").replace("tg://null", "tg://t.me/nullsettings");
+                                        url = url.replace("tg:null", "tg://t.me/nullsetting").replace("tg://null", "tg://t.me/nullsetting");
                                         data = Uri.parse(url);
                                         SettingsHelper.processDeepLink(data, fragment -> {
                                             AndroidUtilities.runOnUIThread(() -> presentFragment(fragment, false, false));
