@@ -1768,11 +1768,10 @@ public class LoginActivity extends BaseFragment {
                 params.putString("pattern", res.type.pattern);
                 setPage(VIEW_CODE_FLASH_CALL, animate, params, false);
             } else if (res.type instanceof TLRPC.TL_auth_sentCodeTypeSms || res.type instanceof TLRPC.TL_auth_sentCodeTypeFirebaseSms) {
-                AlertUtil.showSimpleAlert(getContext(),LocaleController.getString("SmsDisabled", R.string.SmsDisabled));
-/*                params.putInt("type", AUTH_TYPE_SMS);
+                params.putInt("type", AUTH_TYPE_SMS);
                 params.putInt("length", res.type.length);
                 params.putBoolean("firebase", res.type instanceof TLRPC.TL_auth_sentCodeTypeFirebaseSms);
-                setPage(VIEW_CODE_SMS, animate, params, false);*/
+                setPage(VIEW_CODE_SMS, animate, params, false);
             } else if (res.type instanceof TLRPC.TL_auth_sentCodeTypeFragmentSms) {
                 params.putInt("type", AUTH_TYPE_FRAGMENT_SMS);
                 params.putString("url", res.type.url);
