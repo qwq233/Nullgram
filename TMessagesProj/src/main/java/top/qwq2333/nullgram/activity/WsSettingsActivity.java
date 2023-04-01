@@ -121,7 +121,7 @@ public class WsSettingsActivity extends BaseActivity {
         enableTLSRow = rowCount++;
         localProxyRow = rowCount++;
         enableDoHRow = rowCount++;
-        switchBackendRow = rowCount++;
+        switchBackendRow = -1;
         descriptionRow = rowCount++;
     }
 

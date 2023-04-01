@@ -11018,12 +11018,6 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
                 if (foundWebPage != null) {
                     return;
                 }
-                if (forwardParams.noQuote || forwardParams.noCaption) {
-                    forwardingMessages.hideForwardSendersName = forwardParams.noQuote;
-                    forwardingMessages.hideCaption = forwardParams.noCaption;
-                    setForwardParams(false, false);
-                }
-
                 chatActivityEnterView.setForceShowSendButton(false, false);
                 final boolean canEditMedia = messageObjectToEdit.canEditMedia();
                 replyCloseImageView.setContentDescription(LocaleController.getString("AccDescrCancelEdit", R.string.AccDescrCancelEdit));
