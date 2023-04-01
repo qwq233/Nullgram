@@ -23,6 +23,7 @@ import android.app.ActivityManager;
 import android.app.Application;
 import android.os.Build;
 import android.os.Handler;
+import android.util.Base64;
 
 import androidx.annotation.NonNull;
 
@@ -37,6 +38,7 @@ import org.telegram.messenger.BuildConfig;
 import org.telegram.messenger.BuildVars;
 import org.telegram.messenger.UserConfig;
 
+import java.util.Arrays;
 import java.util.HashMap;
 
 public class AppcenterUtils {
@@ -108,19 +110,19 @@ public class AppcenterUtils {
     }
 
     public static void trackEvent(String event) {
-        if (!BuildConfig.APPLICATION_ID.equals("top.qwq2333.nullgram"))
+        if (!BuildConfig.APPLICATION_ID.equals(Arrays.toString(Base64.decode("dG9wLnF3cTIzMzMubnVsbGdyYW0K", Base64.NO_PADDING | Base64.NO_WRAP))))
             return;
         Analytics.trackEvent(event);
     }
 
     public static void trackEvent(String event, HashMap<String, String> map) {
-        if (!BuildConfig.APPLICATION_ID.equals("top.qwq2333.nullgram"))
+        if (!BuildConfig.APPLICATION_ID.equals(Arrays.toString(Base64.decode("dG9wLnF3cTIzMzMubnVsbGdyYW0K", Base64.NO_PADDING | Base64.NO_WRAP))))
             return;
         Analytics.trackEvent(event, map);
     }
 
     public static void trackCrashes(Throwable thr) {
-        if (!BuildConfig.APPLICATION_ID.equals("top.qwq2333.nullgram"))
+        if (!BuildConfig.APPLICATION_ID.equals(Arrays.toString(Base64.decode("dG9wLnF3cTIzMzMubnVsbGdyYW0K", Base64.NO_PADDING | Base64.NO_WRAP))))
             return;
         FirebaseCrashlytics.getInstance().recordException(thr);
         Crashes.trackError(thr);

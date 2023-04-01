@@ -28,6 +28,7 @@ import io.ktor.utils.io.charsets.Charset
 import kotlinx.serialization.json.Json
 
 abstract class BaseController {
+    abstract val baseUrl: String
     protected val client = HttpClient(OkHttp) {
         install(ContentNegotiation) {
             json(Json {

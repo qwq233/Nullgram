@@ -24,8 +24,10 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.pm.verify.domain.DomainVerificationManager;
 import android.content.pm.verify.domain.DomainVerificationUserState;
+import android.graphics.Color;
 import android.net.Uri;
 import android.os.Build;
+import android.provider.Settings;
 import android.util.TypedValue;
 import android.view.Gravity;
 import android.widget.FrameLayout;
@@ -125,7 +127,7 @@ public class AppLinkVerifyBottomSheet extends BottomSheet {
         title.setGravity(Gravity.START);
         title.setTextColor(Theme.getColor(Theme.key_dialogTextBlack));
         title.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 20);
-        title.setTypeface(AndroidUtilities.getTypeface("fonts/rmedium.ttf"));
+        title.setTypeface(AndroidUtilities.getTypeface(AndroidUtilities.TYPEFACE_ROBOTO_MEDIUM));
         title.setText(LocaleController.getString("AppLinkNotVerifiedTitle", R.string.AppLinkNotVerifiedTitle));
         linearLayout.addView(title, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT, 0, 21, 30, 21, 0));
 
@@ -140,7 +142,7 @@ public class AppLinkVerifyBottomSheet extends BottomSheet {
         buttonTextView.setPadding(AndroidUtilities.dp(34), 0, AndroidUtilities.dp(34), 0);
         buttonTextView.setGravity(Gravity.CENTER);
         buttonTextView.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 14);
-        buttonTextView.setTypeface(AndroidUtilities.getTypeface("fonts/rmedium.ttf"));
+        buttonTextView.setTypeface(AndroidUtilities.getTypeface(AndroidUtilities.TYPEFACE_ROBOTO_MEDIUM));
         buttonTextView.setText(LocaleController.getString("GoToSettings", R.string.GoToSettings));
 
         buttonTextView.setTextColor(Theme.getColor(Theme.key_featuredStickers_buttonText));
@@ -149,9 +151,21 @@ public class AppLinkVerifyBottomSheet extends BottomSheet {
         linearLayout.addView(buttonTextView, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, 48, 0, 16, 15, 16, 8));
 
         buttonTextView.setOnClickListener(view -> {
-            Intent intent = new Intent(android.provider.Settings.ACTION_APP_OPEN_BY_DEFAULT_SETTINGS,
-                Uri.parse("package:" + context.getPackageName()));
-            context.startActivity(intent);
+            try {
+                Intent intent = new Intent(android.provider.Settings.ACTION_APP_OPEN_BY_DEFAULT_SETTINGS,
+                    Uri.parse("package:" + context.getPackageName()));
+                context.startActivity(intent);
+            } catch (Throwable t) {
+                try {
+                    Intent intent = new Intent("android.intent.action.MAIN", Uri.parse("package:" + context.getPackageName()));
+                    intent.setClassName("com.android.settings", "com.android.settings.applications.InstalledAppOpenByDefaultActivity");
+                    context.startActivity(intent);
+                } catch (Throwable t2) {
+                    Intent intent = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS,
+                        Uri.parse("package:" + context.getPackageName()));
+                    context.startActivity(intent);
+                }
+            }
         });
 
         TextView textView = new TextView(context);
@@ -159,6 +173,7 @@ public class AppLinkVerifyBottomSheet extends BottomSheet {
         textView.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 14);
         textView.setText(LocaleController.getString("DontAskAgain", R.string.DontAskAgain));
         textView.setTextColor(Theme.getColor(Theme.key_featuredStickers_addButton));
+        textView.setBackground(Theme.createSimpleSelectorRoundRectDrawable(AndroidUtilities.dp(6), Color.TRANSPARENT, ColorUtils.setAlphaComponent(Theme.getColor(Theme.key_featuredStickers_addButton), 120)));
 
         linearLayout.addView(textView, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, 48, 0, 16, 0, 16, 0));
 

@@ -43,7 +43,7 @@ import kotlinx.serialization.encoding.Encoder
 import top.qwq2333.nullgram.utils.Log
 
 object NicegramController : BaseController() {
-    private val baseUrl = "https://restore-access.indream.app"
+    override val baseUrl = "https://restore-access.indream.app"
     private val lruCache = LruCache<Long, RegDateResponse>(100)
 
     @Serializable
