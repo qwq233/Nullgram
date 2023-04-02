@@ -1,5 +1,7 @@
 package org.tcp2ws;
 
+import static java.lang.String.format;
+
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -12,52 +14,55 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
 
-/* loaded from: org.tcp2ws.jar:org/tcp2ws/Utils.class */
 public final class Utils {
 
     @Nullable
     public static InetAddress calcInetAddress(byte Atype, byte[] addr) {
         try {
-            if (Atype == 1) {
+            if (Atype == 0x01)
                 return Inet4Address.getByAddress(Arrays.copyOf(addr, 4));
-            }
-            if (Atype == 4) {
+            else if (Atype == 0x04)
                 return Inet4Address.getByAddress(Arrays.copyOf(addr, 16));
-            }
-            return null;
         } catch (UnknownHostException e) {
             return null;
         }
+        return null;
     }
 
     public static int byte2int(byte b) {
-        return b < 0 ? 256 + b : b;
+        return (int) b < 0 ? 0x100 + (int) b : b;
     }
 
     public static int calcPort(byte Hi, byte Lo) {
-        return (byte2int(Hi) << 8) | byte2int(Lo);
+        return ((byte2int(Hi) << 8) | byte2int(Lo));
     }
 
     @NotNull
     public static String iP2Str(InetAddress IP) {
-        return IP == null ? "NA/NA" : String.format("%s/%s", IP.getHostName(), IP.getHostAddress());
+        return IP == null
+            ? "NA/NA"
+            : format("%s/%s", IP.getHostName(), IP.getHostAddress());
     }
 
     @NotNull
     public static String getSocketInfo(Socket sock) {
-        return sock == null ? "<NA/NA:0>" : String.format("<%s:%d>", iP2Str(sock.getInetAddress()), Integer.valueOf(sock.getPort()));
+        return sock == null
+            ? "<NA/NA:0>"
+            : format("<%s:%d>", Utils.iP2Str(sock.getInetAddress()), sock.getPort());
     }
 
     @NotNull
     public static String getSocketInfo(DatagramPacket DGP) {
-        return DGP == null ? "<NA/NA:0>" : String.format("<%s:%d>", iP2Str(DGP.getAddress()), Integer.valueOf(DGP.getPort()));
+        return DGP == null
+            ? "<NA/NA:0>"
+            : format("<%s:%d>", Utils.iP2Str(DGP.getAddress()), DGP.getPort());
     }
 
     public static byte[] reverse(byte[] arr) {
         for (int i = 0; i < arr.length / 2; i++) {
-            byte b = arr[i];
-            arr[i] = arr[(arr.length - i) - 1];
-            arr[(arr.length - i) - 1] = b;
+            int temp = arr[i];
+            arr[i] = arr[arr.length - i - 1];
+            arr[arr.length - i - 1] = (byte) temp;
         }
         return arr;
     }
@@ -82,8 +87,8 @@ public final class Utils {
             result[pos] = element;
             pos++;
         }
-        for (byte element2 : second) {
-            result[pos] = element2;
+        for (byte element : second) {
+            result[pos] = element;
             pos++;
         }
         return result;
@@ -93,10 +98,11 @@ public final class Utils {
         char[] HEX_ARRAY = "0123456789ABCDEF".toCharArray();
         char[] hexChars = new char[bytes.length * 2];
         for (int j = 0; j < bytes.length; j++) {
-            int v = bytes[j] & 255;
+            int v = bytes[j] & 0xFF;
             hexChars[j * 2] = HEX_ARRAY[v >>> 4];
-            hexChars[(j * 2) + 1] = HEX_ARRAY[v & 15];
+            hexChars[j * 2 + 1] = HEX_ARRAY[v & 0x0F];
         }
         System.out.println(hexChars);
     }
+
 }

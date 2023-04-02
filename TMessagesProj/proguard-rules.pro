@@ -92,9 +92,12 @@
   <init>(com.google.android.exoplayer2.upstream.DataSource$Factory);
 }
 
--keep class com.microsoft.appcenter.AppCenter {
+-keepclassmembernames class com.microsoft.appcenter.AppCenter {
     private com.microsoft.appcenter.channel.Channel mChannel;
     private android.os.Handler mHandler;
+}
+-keepclassmembers class * implements com.microsoft.appcenter.AppCenterService {
+    public static ** getInstance();
 }
 
 -keep class org.telegram.messenger.voip.* { *; }
@@ -106,6 +109,7 @@
 -keepclassmembernames class org.telegram.ui.* { <fields>; }
 -keepclassmembernames class org.telegram.ui.Cells.* { <fields>; }
 -keepclassmembernames class org.telegram.ui.Components.* { <fields>; }
+-keep class org.telegram.ui.Components.RLottieDrawable$LottieMetadata { <fields>; }
 -keep,allowshrinking,allowobfuscation class org.telegram.ui.Components.GroupCreateSpan {
     public void updateColors();
  }

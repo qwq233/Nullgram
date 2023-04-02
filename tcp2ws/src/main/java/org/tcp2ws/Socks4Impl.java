@@ -1,44 +1,49 @@
 package org.tcp2ws;
 
+import static org.tcp2ws.Utils.getSocketInfo;
+
 import com.neovisionaries.ws.client.WebSocketException;
-import com.neovisionaries.ws.client.WebSocketOpcode;
 
 import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
 import java.net.InetAddress;
 
-/* loaded from: org.tcp2ws.jar:org/tcp2ws/Socks4Impl.class */
 public class Socks4Impl {
+
     final ProxyHandler m_Parent;
-    byte socksCommand;
     final byte[] DST_Port = new byte[2];
     byte[] DST_Addr = new byte[4];
     byte SOCKS_Version = 0;
+    byte socksCommand;
+
+
+    //	private InetAddress m_ExtLocalIP = null;
     InetAddress m_ServerIP = null;
     int m_nServerPort = 0;
     InetAddress m_ClientIP = null;
     int m_nClientPort = 0;
 
-    /* JADX INFO: Access modifiers changed from: package-private */
-    public Socks4Impl(ProxyHandler Parent) {
-        this.m_Parent = Parent;
+    Socks4Impl(ProxyHandler Parent) {
+        m_Parent = Parent;
     }
 
     public byte getSuccessCode() {
-        return (byte) 90;
+        return 90;
     }
 
     public byte getFailCode() {
-        return (byte) 91;
+        return 91;
     }
 
     @NotNull
     public String commName(byte code) {
         switch (code) {
-            case 1:
+            case 0x01:
                 return "CONNECT";
-            case SocksConstants.SC_UDP /* 3 */:
+/*			case 0x02:
+				return "BIND";*/
+            case 0x03:
                 return "UDP Association";
             default:
                 return "Unknown Command";
@@ -48,25 +53,25 @@ public class Socks4Impl {
     @NotNull
     public String replyName(byte code) {
         switch (code) {
-            case WebSocketOpcode.CONTINUATION /* 0 */:
+            case 0:
                 return "SUCCESS";
             case 1:
                 return "General SOCKS Server failure";
             case 2:
                 return "Connection not allowed by ruleset";
-            case SocksConstants.SC_UDP /* 3 */:
+            case 3:
                 return "Network Unreachable";
-            case SocksConstants.SOCKS4_Version /* 4 */:
+            case 4:
                 return "HOST Unreachable";
-            case SocksConstants.SOCKS5_Version /* 5 */:
+            case 5:
                 return "Connection Refused";
             case 6:
                 return "TTL Expired";
             case 7:
                 return "Command not supported";
-            case WebSocketOpcode.CLOSE /* 8 */:
+            case 8:
                 return "Address Type not Supported";
-            case WebSocketOpcode.PING /* 9 */:
+            case 9:
                 return "to 0xFF UnAssigned";
             case 90:
                 return "Request GRANTED";
@@ -82,74 +87,95 @@ public class Socks4Impl {
     }
 
     public boolean isInvalidAddress(byte Atype) {
-        this.m_ServerIP = Utils.calcInetAddress(Atype, this.DST_Addr);
-        this.m_nServerPort = Utils.calcPort(this.DST_Port[0], this.DST_Port[1]);
-        this.m_ClientIP = this.m_Parent.m_ClientSocket.getInetAddress();
-        this.m_nClientPort = this.m_Parent.m_ClientSocket.getPort();
-        return this.m_ServerIP == null || this.m_nServerPort < 0;
+        m_ServerIP = Utils.calcInetAddress(Atype, DST_Addr);
+        m_nServerPort = Utils.calcPort(DST_Port[0], DST_Port[1]);
+
+        m_ClientIP = m_Parent.m_ClientSocket.getInetAddress();
+        m_nClientPort = m_Parent.m_ClientSocket.getPort();
+
+        return m_ServerIP == null || m_nServerPort < 0;
     }
 
-    /* JADX INFO: Access modifiers changed from: protected */
-    public byte getByte() {
+    protected byte getByte() {
         try {
-            return this.m_Parent.getByteFromClient();
+            return m_Parent.getByteFromClient();
         } catch (Exception e) {
-            return (byte) 0;
+            return 0;
         }
     }
 
     public void authenticate(byte SOCKS_Ver) throws Exception {
-        this.SOCKS_Version = SOCKS_Ver;
+        SOCKS_Version = SOCKS_Ver;
     }
 
     public void getClientCommand() throws Exception {
-        this.socksCommand = getByte();
-        this.DST_Port[0] = getByte();
-        this.DST_Port[1] = getByte();
+        // Version was get in method Authenticate()
+        socksCommand = getByte();
+
+        DST_Port[0] = getByte();
+        DST_Port[1] = getByte();
+
         for (int i = 0; i < 4; i++) {
-            this.DST_Addr[i] = getByte();
+            DST_Addr[i] = getByte();
         }
-        do {
-        } while (getByte() != 0);
-        if (this.socksCommand < 1 || this.socksCommand > 2) {
+
+        //noinspection StatementWithEmptyBody
+        while (getByte() != 0x00) {
+            // keep reading bytes
+        }
+
+        if ((socksCommand < SocksConstants.SC_CONNECT) || (socksCommand > SocksConstants.SC_BIND)) {
             refuseCommand((byte) 91);
-            throw new Exception("Socks 4 - Unsupported Command : " + commName(this.socksCommand));
-        } else if (isInvalidAddress((byte) 1)) {
-            refuseCommand((byte) 92);
-            throw new Exception("Socks 4 - Unknown Host/IP address '" + this.m_ServerIP.toString());
+            throw new Exception("Socks 4 - Unsupported Command : " + commName(socksCommand));
+        }
+
+        if (isInvalidAddress((byte) 0x01)) {  // Gets the IP Address
+            refuseCommand((byte) 92);    // Host Not Exists...
+            throw new Exception("Socks 4 - Unknown Host/IP address '" + m_ServerIP.toString());
         }
     }
 
     public void replyCommand(byte ReplyCode) {
-        byte[] REPLY = {0, ReplyCode, this.DST_Port[0], this.DST_Port[1], this.DST_Addr[0], this.DST_Addr[1], this.DST_Addr[2], this.DST_Addr[3]};
-        this.m_Parent.sendToClient(REPLY);
+
+        byte[] REPLY = new byte[8];
+        REPLY[0] = 0;
+        REPLY[1] = ReplyCode;
+        REPLY[2] = DST_Port[0];
+        REPLY[3] = DST_Port[1];
+        REPLY[4] = DST_Addr[0];
+        REPLY[5] = DST_Addr[1];
+        REPLY[6] = DST_Addr[2];
+        REPLY[7] = DST_Addr[3];
+
+        m_Parent.sendToClient(REPLY);
     }
 
-    /* JADX INFO: Access modifiers changed from: protected */
-    public void refuseCommand(byte errorCode) {
+    protected void refuseCommand(byte errorCode) {
         replyCommand(errorCode);
     }
 
     private String getCdn() {
-        String _server = this.m_ServerIP.getHostAddress();
+        String _server = m_ServerIP.getHostAddress();
         String server = null;
-        for (int i = 0; server == null && i <= 3; i++) {
-            server = (tcp2wsServer.transToIpv6 ? tcp2wsServer.ipv6 : tcp2wsServer.cdn).get(_server.substring(0, _server.length() - i));
-        }
+        for (int i = 0; server == null && i <= 3; i++)
+            server = (tcp2wsServer.cdn).get(_server.substring(0, _server.length() - i));
         return server != null ? server : _server;
     }
 
     public void connect() throws Exception {
+        //	Connect to the Remote Host
         try {
-            this.m_Parent.connectToServer(getCdn());
-            replyCommand(getSuccessCode());
+            m_Parent.connectToServer(getCdn());
+            //m_Parent.connectToServer(m_ServerIP.getHostAddress());
         } catch (IOException e) {
-            refuseCommand(getFailCode());
-            throw new Exception("Socks 4 - Can't connect to " + Utils.getSocketInfo((!tcp2wsServer.transToIpv6 || tcp2wsServer.forceWs) ? this.m_Parent.m_ServerSocket.getSocket() : this.m_Parent.m_ipv6ServerSocket));
+            refuseCommand(getFailCode()); // Connection Refused
+            throw new Exception("Socks 4 - Can't connect to " +
+                getSocketInfo(m_Parent.m_ServerSocket.getSocket()));
         }
+        replyCommand(getSuccessCode());
     }
 
     public void udp() throws IOException, WebSocketException {
-        refuseCommand((byte) 91);
+        refuseCommand((byte) 91);    // SOCKS4 don't support UDP
     }
 }

@@ -151,6 +151,12 @@ android {
             isMinifyEnabled = true
             isShrinkResources = true
             proguardFiles(File(projectDir, "proguard-rules.pro"))
+            optimization {
+                keepRules {
+                    ignoreExternalDependencies("com.microsoft.appcenter:appcenter")
+                }
+            }
+
             the<CrashlyticsExtension>().nativeSymbolUploadEnabled = true
             the<CrashlyticsExtension>().mappingFileUploadEnabled = true
         }

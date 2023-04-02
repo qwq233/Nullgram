@@ -1153,7 +1153,7 @@ public class ConnectionsManager extends BaseController {
                     NativeByteBuffer buffer = new NativeByteBuffer(bytes.length);
                     buffer.writeBytes(bytes);
                     return buffer;
-                } catch (FileNotFoundException ignored) {
+                } catch (FileNotFoundException | SocketTimeoutException ignored) {
                   // ignore this cuz it's normal if it doesn't have dns record
                 } catch (Throwable e) {
                     FileLog.e(e, false);

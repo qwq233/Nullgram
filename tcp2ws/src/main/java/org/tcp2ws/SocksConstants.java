@@ -1,14 +1,18 @@
 package org.tcp2ws;
 
-/* loaded from: org.tcp2ws.jar:org/tcp2ws/SocksConstants.class */
 public interface SocksConstants {
-    public static final int LISTEN_TIMEOUT = 200;
-    public static final int DEFAULT_SERVER_TIMEOUT = 200;
-    public static final int DEFAULT_BUF_SIZE = 40;
-    public static final int DEFAULT_PROXY_TIMEOUT = 10;
-    public static final byte SOCKS5_Version = 5;
-    public static final byte SOCKS4_Version = 4;
-    public static final byte SC_CONNECT = 1;
-    public static final byte SC_BIND = 2;
-    public static final byte SC_UDP = 3;
+
+    // refactor
+    int LISTEN_TIMEOUT = 200;
+    int DEFAULT_SERVER_TIMEOUT = 2;
+
+    int DEFAULT_BUF_SIZE = 40;
+    int DEFAULT_PROXY_TIMEOUT = 10;
+
+    byte SOCKS5_Version = 0x05;
+    byte SOCKS4_Version = 0x04;
+
+    byte SC_CONNECT = 0x01;
+    byte SC_BIND = 0x02;
+    byte SC_UDP = 0x03;
 }

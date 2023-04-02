@@ -35,6 +35,7 @@ import top.qwq2333.nullgram.utils.Defines;
 import top.qwq2333.nullgram.utils.Log;
 
 public class WebSocketHelper {
+
     public static final String NekogramPublicProxyServer = "ws.neko";
     public static final String NekogramXPublicProxyServer = "tehcneko.xyz";
     public static int backend = ConfigManager.getIntOrDefault(Defines.wsBuiltInProxyBackend, 0); // 0 -> Nekogram; 1 -> Nekogram X
@@ -87,7 +88,9 @@ public class WebSocketHelper {
         Log.d("ws reload config");
         if (tcp2wsServer != null) {
             try {
-                tcp2wsServer.setTls(false).setIfMTP(wsUseMTP).setIfDoH(wsUseDoH);
+                tcp2wsServer.setTls(wsEnableTLS)
+                    .setUserAgent(System.getProperty("http.agent") + " Nekogram/9.5.7 (3250; 0388a7dff306b39f39f57f9adcd3819ce8a679be)")
+                    .setConnHash("0388a7dff306b39f39f57f9adcd3819ce8a679be");
             } catch (Exception e) {
                 Log.e(e);
             }
@@ -107,11 +110,11 @@ public class WebSocketHelper {
                 socket.close();
             }
             if (!tcp2wsStarted) {
+                Log.i("useragent: " + System.getProperty("http.agent") + " Nekogram/9.5.7 (3250; 0388a7dff306b39f39f57f9adcd3819ce8a679be)");
                 tcp2wsServer = new tcp2wsServer()
-                    .setTgaMode(false)
-                    .setTls(false)
-                    .setIfMTP(wsUseMTP)
-                    .setIfDoH(wsUseDoH);
+                    .setTls(wsEnableTLS)
+                    .setUserAgent(System.getProperty("http.agent") + " Nekogram/9.5.7 (3250; 0388a7dff306b39f39f57f9adcd3819ce8a679be)")
+                    .setConnHash("0388a7dff306b39f39f57f9adcd3819ce8a679be");
                 tcp2wsServer.start(socksPort);
                 tcp2wsStarted = true;
                 var map = new HashMap<String, String>();
