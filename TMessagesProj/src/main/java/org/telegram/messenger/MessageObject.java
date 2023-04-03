@@ -4639,7 +4639,7 @@ public class MessageObject {
     private boolean captionTranslated;
 
     public void generateCaption() {
-        if (caption != null && translated == captionTranslated || isRoundVideo()) {
+        if (caption != null && false == captionTranslated || isRoundVideo()) {
             return;
         }
         String text = messageOwner.message;
@@ -4647,7 +4647,7 @@ public class MessageObject {
         if (hasExtendedMedia()) {
             text = messageOwner.message = messageOwner.media.description;
         }
-        if (captionTranslated = translated) {
+        if (captionTranslated = false) {
             text = messageOwner.translatedText.text;
             entities = messageOwner.translatedText.entities;
         }
