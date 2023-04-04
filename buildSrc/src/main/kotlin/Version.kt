@@ -1,7 +1,7 @@
 object Version {
 
     @JvmStatic
-    val kotlin = "1.8.10"
+    val kotlin = "1.8.20"
 
     @JvmStatic
     val ktor = "2.2.1"
