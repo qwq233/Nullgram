@@ -274,9 +274,7 @@ object Utils {
             )
             subItem.setSubtext(LocaleController.getString("Loading", R.string.Loading))
             NicegramController.getRegDate(id, {
-                if (it != null) {
-                    subItem.setSubtext(LocaleController.getString("ErrorOccurred", R.string.ErrorOccurred))
-                }
+                subItem.setSubtext(LocaleController.getString("ErrorOccurred", R.string.ErrorOccurred))
             }) { dateType, date ->
                 when (dateType) {
                     NicegramController.RegDateResponse.RegDateType.Approximately -> LocaleController.formatString("RegistrationDateApproximately", R.string.RegistrationDateApproximately, date)

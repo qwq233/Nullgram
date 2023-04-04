@@ -74,10 +74,10 @@ object NicegramController : BaseController() {
                 RegDateType.values().first { it.key == decoder.decodeString() }
             } catch (e: NoSuchElementException) {
                 Log.e("Unknown RegDateType: ${decoder.decodeString()}")
-                RegDateType.Approximately
+                throw IllegalStateException("Unknown RegDateType: ${decoder.decodeString()}")
             } catch (e: Exception) {
                 Log.e(e)
-                RegDateType.Approximately
+                throw e
             }
 
             override fun serialize(encoder: Encoder, value: RegDateType) {
