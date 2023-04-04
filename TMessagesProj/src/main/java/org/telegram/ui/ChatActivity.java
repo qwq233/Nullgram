@@ -23851,8 +23851,7 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
                             }
                         }
                         if (ConfigManager.getBooleanOrFalse(Defines.customQuickMessageEnabled)) {
-                            boolean allowCustomQuickMessage = chatMode != MODE_SCHEDULED;
-                            if (allowCustomQuickMessage) {
+                            if (allowChatActions) {
                                 items.add(ConfigManager.getStringOrDefault(Defines.customQuickMessageDisplayName, "NULL"));
                                 options.add(Defines.customQuickMessageRow);
                                 icons.add(R.drawable.msg_fave);
