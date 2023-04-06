@@ -231,6 +231,7 @@
     <string name="UpdateFailedToInstall">Failed to install update: %d</string>
     <string name="Translator">Translator</string>
     <string name="ProviderGoogleTranslate">Google Translate</string>
+    <string name="ProviderYandexTranslate">Yandex Translate</string>
     <string name="ProviderTelegramTranslate">TELEOFFICIAL</string>
     <string name="ProviderMicrosoftTranslate">Microsoft Translate</string>
     <string name="ProviderLingoTranslate">Lingo Translate</string>

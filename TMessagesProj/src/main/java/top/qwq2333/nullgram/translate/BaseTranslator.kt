@@ -35,6 +35,7 @@ import org.telegram.messenger.LocaleController
 import org.telegram.messenger.R
 import org.telegram.tgnet.TLRPC
 import top.qwq2333.nullgram.helpers.TranslateHelper
+import top.qwq2333.nullgram.utils.Log
 
 abstract class BaseTranslator {
     /**
@@ -125,6 +126,7 @@ abstract class BaseTranslator {
         return runCatching {
             translateText(text, from, to)
         }.getOrElse {
+            Log.w("Translate Error Occur: ", it)
             RequestResult(from, null, HttpStatusCode(500, it.message ?: ""))
         }
     }
