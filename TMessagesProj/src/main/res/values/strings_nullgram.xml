@@ -234,11 +234,16 @@
     <string name="ProviderYandexTranslate">Yandex Translate</string>
     <string name="ProviderTelegramTranslate">TELEOFFICIAL</string>
     <string name="ProviderMicrosoftTranslate">Microsoft Translate</string>
+    <string name="ProviderDeepLTranslate">DeepL Translate</string>
     <string name="ProviderLingoTranslate">Lingo Translate</string>
     <string name="TranslationProvider">Translation Provider</string>
     <string name="TranslateApiUnsupported">The translation provider you selected don\'t support your language.</string>
     <string name="ResetLanguage">Reset language</string>
     <string name="UseGoogleTranslate">Use Google</string>
+    <string name="DeepLFormality">Formality</string>
+    <string name="DeepLFormalityDefault">Default</string>
+    <string name="DeepLFormalityMore">More</string>
+    <string name="DeepLFormalityLess">Less</string>
     <string name="TranslationTarget">Target language</string>
     <string name="TranslationTargetApp">Follow App</string>
     <string name="BrokenMLKit">Option unavailable</string>

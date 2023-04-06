@@ -26,6 +26,7 @@ import io.ktor.client.HttpClient
 import io.ktor.client.engine.okhttp.OkHttp
 import io.ktor.client.plugins.Charsets
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
+import io.ktor.client.plugins.cookies.HttpCookies
 import io.ktor.http.HttpStatusCode
 import io.ktor.serialization.kotlinx.json.json
 import io.ktor.utils.io.charsets.Charset
@@ -62,6 +63,7 @@ abstract class BaseTranslator {
                 ignoreUnknownKeys = true
             })
         }
+        install(HttpCookies)
         // Ensure using UTF-8
         Charsets {
             register(Charsets.UTF_8)

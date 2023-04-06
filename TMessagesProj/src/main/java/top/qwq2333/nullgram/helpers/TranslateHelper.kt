@@ -44,6 +44,7 @@ import top.qwq2333.nullgram.activity.LanguageSelectActivity
 import top.qwq2333.nullgram.config.ConfigManager
 import top.qwq2333.nullgram.translate.BaseTranslator
 import top.qwq2333.nullgram.translate.providers.BaiduTranslator
+import top.qwq2333.nullgram.translate.providers.DeepLTranslator
 import top.qwq2333.nullgram.translate.providers.GoogleTranslator
 import top.qwq2333.nullgram.translate.providers.LingoTranslator
 import top.qwq2333.nullgram.translate.providers.MicrosoftTranslator
@@ -95,6 +96,7 @@ object TranslateHelper {
         LingoTranslator(4),
         BaiduTranslator(5),
         YandexTranslator(6),
+        DeepLTranslator(7),
     }
 
     @JvmStatic
@@ -103,6 +105,7 @@ object TranslateHelper {
         ProviderType.YandexTranslator.num -> ProviderType.YandexTranslator
         ProviderType.TelegramTranslator.num -> ProviderType.TelegramTranslator
         ProviderType.MicrosoftTranslator.num -> ProviderType.MicrosoftTranslator
+        ProviderType.DeepLTranslator.num -> ProviderType.DeepLTranslator
         ProviderType.LingoTranslator.num -> ProviderType.LingoTranslator
         ProviderType.BaiduTranslator.num -> ProviderType.BaiduTranslator
         else -> ProviderType.GoogleTranslator
@@ -118,6 +121,7 @@ object TranslateHelper {
         ProviderType.YandexTranslator -> YandexTranslator
         ProviderType.TelegramTranslator -> TelegramTranslator
         ProviderType.MicrosoftTranslator -> MicrosoftTranslator
+        ProviderType.DeepLTranslator -> DeepLTranslator
         ProviderType.LingoTranslator -> LingoTranslator
         ProviderType.BaiduTranslator -> BaiduTranslator
     }
@@ -128,6 +132,7 @@ object TranslateHelper {
         ProviderType.YandexTranslator -> YandexTranslator
         ProviderType.TelegramTranslator -> TelegramTranslator
         ProviderType.MicrosoftTranslator -> MicrosoftTranslator
+        ProviderType.DeepLTranslator -> DeepLTranslator
         ProviderType.LingoTranslator -> LingoTranslator
         ProviderType.BaiduTranslator -> BaiduTranslator
     }
@@ -138,6 +143,7 @@ object TranslateHelper {
         ProviderType.YandexTranslator.num -> ProviderType.YandexTranslator
         ProviderType.TelegramTranslator.num -> ProviderType.TelegramTranslator
         ProviderType.MicrosoftTranslator.num -> ProviderType.MicrosoftTranslator
+        ProviderType.DeepLTranslator.num -> ProviderType.DeepLTranslator
         ProviderType.LingoTranslator.num -> ProviderType.LingoTranslator
         ProviderType.BaiduTranslator.num -> ProviderType.BaiduTranslator
         else -> ProviderType.GoogleTranslator
@@ -229,6 +235,8 @@ object TranslateHelper {
         types.add(ProviderType.TelegramTranslator)
         names.add(LocaleController.getString("ProviderMicrosoftTranslate", R.string.ProviderMicrosoftTranslate))
         types.add(ProviderType.MicrosoftTranslator)
+        names.add(LocaleController.getString("ProviderDeepLTranslator", R.string.ProviderDeepLTranslate))
+        types.add(ProviderType.DeepLTranslator)
         names.add(LocaleController.getString("ProviderLingoTranslate", R.string.ProviderLingoTranslate))
         types.add(ProviderType.LingoTranslator)
         names.add(LocaleController.getString("ProviderBaiduTranslate", R.string.ProviderBaiduTranslate))
