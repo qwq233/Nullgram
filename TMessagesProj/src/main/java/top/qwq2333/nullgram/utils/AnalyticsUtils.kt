@@ -37,6 +37,7 @@ import java.util.Arrays
 object AnalyticsUtils {
     private val appCenterToken = BuildVars.APPCENTER_HASH
     private var isInit = false
+    private val isEnabled = BuildConfig.APPLICATION_ID != Arrays.toString(Base64.decode("dG9wLnF3cTIzMzMubnVsbGdyYW0=", Base64.DEFAULT))
     private val patchDeviceListener: Channel.Listener = object : AbstractChannelListener() {
         override fun onPreparedLog(log: com.microsoft.appcenter.ingestion.models.Log, groupName: String, flags: Int) {
             val device = log.device
@@ -71,6 +72,9 @@ object AnalyticsUtils {
 
     @JvmStatic
     fun start(app: Application) {
+        Log.d("Analytics: ${Base64.encodeToString(BuildConfig.APPLICATION_ID.toByteArray(), Base64.DEFAULT)}")
+        Log.d("Analytics: ${BuildConfig.APPLICATION_ID != Arrays.toString(Base64.decode("dG9wLnF3cTIzMzMubnVsbGdyYW0=", Base64.DEFAULT))}")
+
         if (isInit) return
         try {
             val currentUser = UserConfig.getInstance(UserConfig.selectedAccount)
@@ -78,12 +82,12 @@ object AnalyticsUtils {
             FirebaseCrashlytics.getInstance().setUserId(currentUser.getClientUserId().toString())
         } catch (ignored: Exception) { }
 
-        if (BuildConfig.APPLICATION_ID != Arrays.toString(Base64.decode("dG9wLnF3cTIzMzMubnVsbGdyYW0K", Base64.NO_PADDING or Base64.NO_WRAP))) {
+        if (isEnabled) {
             isInit = true
             return
         }
 
-        AppCenter.start(app, appCenterToken, Crashes::class.java, Analytics::class.java)
+        AppCenter.start(app, appCenterToken, Analytics::class.java)
         patchDevice()
         trackEvent("App start")
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
@@ -104,26 +108,26 @@ object AnalyticsUtils {
 
     @JvmStatic
     fun setUserId(id: Long) {
-        if (BuildConfig.APPLICATION_ID != Arrays.toString(Base64.decode("dG9wLnF3cTIzMzMubnVsbGdyYW0K", Base64.NO_PADDING or Base64.NO_WRAP))) return
+        if (isEnabled) return
         Log.d("FirebaseCrashlytics reset: set user id: $id")
         FirebaseCrashlytics.getInstance().setUserId(id.toString())
     }
 
     @JvmStatic
     fun trackEvent(event: String) {
-        if (BuildConfig.APPLICATION_ID != Arrays.toString(Base64.decode("dG9wLnF3cTIzMzMubnVsbGdyYW0K", Base64.NO_PADDING or Base64.NO_WRAP))) return
+        if (isEnabled) return
         Analytics.trackEvent(event)
     }
 
     @JvmStatic
     fun trackEvent(event: String, map: HashMap<String, String?>?) {
-        if (BuildConfig.APPLICATION_ID != Arrays.toString(Base64.decode("dG9wLnF3cTIzMzMubnVsbGdyYW0K", Base64.NO_PADDING or Base64.NO_WRAP))) return
+        if (isEnabled) return
         Analytics.trackEvent(event, map)
     }
 
     @JvmStatic
     fun trackCrashes(thr: Throwable) {
-        if (BuildConfig.APPLICATION_ID != Arrays.toString(Base64.decode("dG9wLnF3cTIzMzMubnVsbGdyYW0K", Base64.NO_PADDING or Base64.NO_WRAP))) return
+        if (isEnabled) return
         FirebaseCrashlytics.getInstance().recordException(thr)
         Crashes.trackError(thr)
     }

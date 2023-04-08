@@ -230,6 +230,7 @@ public class UserConfig extends BaseController {
                     }
 
                     if (currentUser != null) {
+                        AnalyticsUtils.setUserId(currentUser.id);
                         if (withFile) {
                             SerializedData data = new SerializedData();
                             currentUser.serializeToStream(data);
