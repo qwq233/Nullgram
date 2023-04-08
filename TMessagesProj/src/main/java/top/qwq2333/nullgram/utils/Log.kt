@@ -134,7 +134,7 @@ object Log {
     @JvmStatic
     fun e(msg: String, throwable: Throwable) {
         Log.e(TAG, msg, throwable)
-        AppcenterUtils.trackCrashes(throwable)
+        AnalyticsUtils.trackCrashes(throwable)
     }
 
     /**
@@ -178,6 +178,6 @@ object Log {
     @JvmStatic
     fun e(throwable: Throwable) {
         Log.e(TAG, "", throwable)
-        AppcenterUtils.trackCrashes(throwable)
+        AnalyticsUtils.trackCrashes(throwable)
     }
 }

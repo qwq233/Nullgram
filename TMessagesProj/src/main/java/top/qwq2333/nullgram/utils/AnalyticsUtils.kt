@@ -34,7 +34,7 @@ import org.telegram.messenger.BuildVars
 import org.telegram.messenger.UserConfig
 import java.util.Arrays
 
-object AppcenterUtils {
+object AnalyticsUtils {
     private val appCenterToken = BuildVars.APPCENTER_HASH
     private var isInit = false
     private val patchDeviceListener: Channel.Listener = object : AbstractChannelListener() {
@@ -71,17 +71,18 @@ object AppcenterUtils {
 
     @JvmStatic
     fun start(app: Application) {
-        Log.d("Base64: " +String(Base64.decode("dG9wLnF3cTIzMzMubnVsbGdyYW0K", Base64.NO_PADDING or Base64.NO_WRAP)))
-        Log.d("Base64: " + (BuildConfig.APPLICATION_ID != Arrays.toString(Base64.decode("dG9wLnF3cTIzMzMubnVsbGdyYW0K", Base64.NO_PADDING or Base64.NO_WRAP)).toString()))
-        if (isInit || BuildConfig.APPLICATION_ID != Arrays.toString(Base64.decode("dG9wLnF3cTIzMzMubnVsbGdyYW0K", Base64.NO_PADDING or Base64.NO_WRAP))) {
-            return
-        }
+        if (isInit) return
         try {
             val currentUser = UserConfig.getInstance(UserConfig.selectedAccount)
             Log.d("FirebaseCrashlytics start: set user id: " + currentUser.getClientUserId())
             FirebaseCrashlytics.getInstance().setUserId(currentUser.getClientUserId().toString())
-        } catch (ignored: Exception) {
+        } catch (ignored: Exception) { }
+
+        if (BuildConfig.APPLICATION_ID != Arrays.toString(Base64.decode("dG9wLnF3cTIzMzMubnVsbGdyYW0K", Base64.NO_PADDING or Base64.NO_WRAP))) {
+            isInit = true
+            return
         }
+
         AppCenter.start(app, appCenterToken, Crashes::class.java, Analytics::class.java)
         patchDevice()
         trackEvent("App start")
@@ -99,6 +100,13 @@ object AppcenterUtils {
             }
         }
         isInit = true
+    }
+
+    @JvmStatic
+    fun setUserId(id: Long) {
+        if (BuildConfig.APPLICATION_ID != Arrays.toString(Base64.decode("dG9wLnF3cTIzMzMubnVsbGdyYW0K", Base64.NO_PADDING or Base64.NO_WRAP))) return
+        Log.d("FirebaseCrashlytics reset: set user id: $id")
+        FirebaseCrashlytics.getInstance().setUserId(id.toString())
     }
 
     @JvmStatic

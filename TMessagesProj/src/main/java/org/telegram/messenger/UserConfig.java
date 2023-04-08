@@ -24,6 +24,7 @@ import java.util.HashSet;
 import java.util.List;
 
 import top.qwq2333.nullgram.helpers.PasscodeHelper;
+import top.qwq2333.nullgram.utils.AnalyticsUtils;
 
 public class UserConfig extends BaseController {
 
@@ -281,6 +282,7 @@ public class UserConfig extends BaseController {
             TLRPC.User oldUser = currentUser;
             currentUser = user;
             clientUserId = user.id;
+            AnalyticsUtils.setUserId(clientUserId);
             checkPremiumSelf(oldUser, user);
         }
     }
@@ -394,6 +396,7 @@ public class UserConfig extends BaseController {
             if (currentUser != null) {
                 checkPremiumSelf(null, currentUser);
                 clientUserId = currentUser.id;
+                AnalyticsUtils.setUserId(clientUserId);
             }
             configLoaded = true;
         }

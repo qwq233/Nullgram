@@ -193,7 +193,7 @@ import java.util.regex.Pattern;
 
 import top.qwq2333.nullgram.config.ConfigManager;
 import top.qwq2333.nullgram.utils.AlertUtil;
-import top.qwq2333.nullgram.utils.AppcenterUtils;
+import top.qwq2333.nullgram.utils.AnalyticsUtils;
 import top.qwq2333.nullgram.utils.Defines;
 
 public class AndroidUtilities {
@@ -2771,7 +2771,7 @@ public class AndroidUtilities {
     }*/
 
     public static void appCenterLog(Throwable e) {
-        AppcenterUtils.trackCrashes(e);
+        AnalyticsUtils.trackCrashes(e);
     }
 
     public static boolean shouldShowClipboardToast() {

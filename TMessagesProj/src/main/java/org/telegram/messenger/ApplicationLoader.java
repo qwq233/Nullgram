@@ -43,7 +43,7 @@ import org.telegram.ui.LauncherIconController;
 import java.io.File;
 import java.util.concurrent.CountDownLatch;
 
-import top.qwq2333.nullgram.utils.AppcenterUtils;
+import top.qwq2333.nullgram.utils.AnalyticsUtils;
 
 public class ApplicationLoader extends Application {
 
@@ -235,7 +235,7 @@ public class ApplicationLoader extends Application {
         ChatThemeController.init();
         BillingController.getInstance().startConnection();
 
-        AppcenterUtils.start(applicationLoaderInstance);
+        AnalyticsUtils.start(applicationLoaderInstance);
 
     }
 

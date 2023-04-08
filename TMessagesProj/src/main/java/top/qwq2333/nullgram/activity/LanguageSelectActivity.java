@@ -366,8 +366,8 @@ public class LanguageSelectActivity extends BaseActivity {
                         last = position == sortedLanguages.size() - 1;
                     }
                     if (localeInfo.langCode.equals("app")) {
-                        cell.setTextAndCheck(LocaleController.getString("TranslationTargetApp", R.string.TranslationTargetApp), TranslateHelper.getCurrentTargetLanguage().equals(localeInfo.langCode),
-                            !last);
+                        cell.setTextAndCheck(LocaleController.getString("TranslationTargetApp", R.string.TranslationTargetApp),
+                            TranslateHelper.getCurrentTargetLanguage().equals(localeInfo.langCode), !last);
                     } else {
                         cell.setTextAndValueAndCheck((String) localeInfo.name, (String) localeInfo.nameLocalized, TranslateHelper.getCurrentTargetLanguage().equals(localeInfo.langCode), false, !last);
                     }

@@ -30,7 +30,7 @@ import java.util.HashMap;
 import java.util.concurrent.atomic.AtomicReference;
 
 import top.qwq2333.nullgram.config.ConfigManager;
-import top.qwq2333.nullgram.utils.AppcenterUtils;
+import top.qwq2333.nullgram.utils.AnalyticsUtils;
 import top.qwq2333.nullgram.utils.Defines;
 import top.qwq2333.nullgram.utils.Log;
 
@@ -121,7 +121,7 @@ public class WebSocketHelper {
                 map.put("buildType", BuildConfig.BUILD_TYPE);
                 map.put("buildFlavor", BuildConfig.FLAVOR);
                 map.put("isPlay", String.valueOf(BuildConfig.isPlay));
-                AppcenterUtils.trackEvent("tcp2ws started", map);
+                AnalyticsUtils.trackEvent("tcp2ws started", map);
             }
             Log.d("tcp2ws started on port " + socksPort);
             Log.d("serverHost: " + serverHost);

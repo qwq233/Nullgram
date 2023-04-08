@@ -8,7 +8,6 @@ plugins {
     id("org.jetbrains.kotlin.android")
     id("com.google.gms.google-services")
     id("com.google.firebase.crashlytics")
-    id("com.google.firebase.firebase-perf")
     id("com.github.triplet.play") version "3.8.1"
     kotlin("plugin.serialization") version Version.kotlin
 }
@@ -40,7 +39,6 @@ fun setupPlay(stable: Boolean) {
 dependencies {
     implementation(platform("com.google.firebase:firebase-bom:30.2.0"))
     implementation("com.google.firebase:firebase-crashlytics-ktx")
-    implementation("com.google.firebase:firebase-perf-ktx")
 
     implementation("androidx.core:core-ktx:1.9.0")
     implementation("androidx.palette:palette-ktx:1.0.0")
