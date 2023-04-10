@@ -86,6 +86,7 @@ public class Defines {
     public static final String quickToggleAnonymous = "quickToggleAnonymous";
     public static final String hideProxySponsorChannel = "hideProxySponsorChannel";
     public static final String hideAllTab = "hideAllTab";
+    public static final String ignoreMutedCount = "ignoreMutedCount";
     public static final String alwaysSendWithoutSound = "alwaysSendWithoutSound";
     public static final String markdownDisabled = "markdownEnable";
     public static final String markdownParseLinks = "markdownParseLinks";

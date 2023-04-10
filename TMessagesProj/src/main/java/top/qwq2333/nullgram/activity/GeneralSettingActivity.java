@@ -93,6 +93,7 @@ public class GeneralSettingActivity extends BaseActivity {
     private int tabsTitleTypeRow;
     private int openArchiveOnPullRow;
     private int hideAllTabRow;
+    private int ignorMutedCountRow;
 
 
     private int devicesRow;
@@ -236,6 +237,11 @@ public class GeneralSettingActivity extends BaseActivity {
             ConfigManager.toggleBoolean(Defines.hideAllTab);
             if (view instanceof TextCheckCell) {
                 ((TextCheckCell) view).setChecked(ConfigManager.getBooleanOrFalse(Defines.hideAllTab));
+            }
+        } else if (position == ignorMutedCountRow) {
+            ConfigManager.toggleBoolean(Defines.ignoreMutedCount);
+            if (view instanceof TextCheckCell) {
+                ((TextCheckCell) view).setChecked(ConfigManager.getBooleanOrFalse(Defines.ignoreMutedCount));
             }
         } else if (position == autoDisableBuiltInProxyRow) {
             ConfigManager.toggleBoolean(Defines.autoDisableBuiltInProxy);
@@ -389,6 +395,7 @@ public class GeneralSettingActivity extends BaseActivity {
         skipOpenLinkConfirmRow = addRow("skipOpenLinkConfirm");
         openArchiveOnPullRow = addRow("openArchiveOnPull");
         hideAllTabRow = addRow("hideAllTab");
+        ignorMutedCountRow = addRow("ignoreMutedCount");
         tabsTitleTypeRow = addRow("tabsTitleType");
         general2Row = addRow();
 
@@ -569,6 +576,9 @@ public class GeneralSettingActivity extends BaseActivity {
                         textCell.setTextAndCheck(LocaleController.getString("openArchiveOnPull", R.string.openArchiveOnPull), ConfigManager.getBooleanOrFalse(Defines.openArchiveOnPull), true);
                     } else if (position == hideAllTabRow) {
                         textCell.setTextAndCheck(LocaleController.getString("hideAllTab", R.string.hideAllTab), ConfigManager.getBooleanOrFalse(Defines.hideAllTab), true);
+                    } else if (position == ignorMutedCountRow) {
+                        textCell.setTextAndCheck(LocaleController.getString("ignoreMutedCount", R.string.ignoreMutedCount),
+                            ConfigManager.getBooleanOrFalse(Defines.ignoreMutedCount), true);
                     } else if (position == autoDisableBuiltInProxyRow) {
                         textCell.setTextAndValueAndCheck(LocaleController.getString("autoDisableBuiltInProxy", R.string.autoDisableBuiltInProxy),
                             LocaleController.getString("autoDisableBuiltInProxyDesc", R.string.autoDisableBuiltInProxyDesc),
