@@ -26,6 +26,7 @@ import io.ktor.client.HttpClient
 import io.ktor.client.engine.okhttp.OkHttp
 import io.ktor.client.plugins.Charsets
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
+import io.ktor.client.plugins.cookies.HttpCookies
 import io.ktor.http.HttpStatusCode
 import io.ktor.serialization.kotlinx.json.json
 import io.ktor.utils.io.charsets.Charset
@@ -35,6 +36,7 @@ import org.telegram.messenger.LocaleController
 import org.telegram.messenger.R
 import org.telegram.tgnet.TLRPC
 import top.qwq2333.nullgram.helpers.TranslateHelper
+import top.qwq2333.nullgram.utils.Log
 
 abstract class BaseTranslator {
     /**
@@ -61,6 +63,7 @@ abstract class BaseTranslator {
                 ignoreUnknownKeys = true
             })
         }
+        install(HttpCookies)
         // Ensure using UTF-8
         Charsets {
             register(Charsets.UTF_8)
@@ -125,6 +128,7 @@ abstract class BaseTranslator {
         return runCatching {
             translateText(text, from, to)
         }.getOrElse {
+            Log.w("Translate Error Occur: ", it)
             RequestResult(from, null, HttpStatusCode(500, it.message ?: ""))
         }
     }

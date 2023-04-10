@@ -153,6 +153,7 @@ public class Defines {
     // Translate
     public static final String showOriginal = "showOriginal";
     public static final String translatorProvider = "translatorProvider";
+    public static final String deepLFormality = "deepLFormality";
     public static final String translatorStatus = "translatorStatus";
     public static final String targetLanguage = "targetLanguage";
     public static final String restrictedLanguages = "restrictedLanguages";

@@ -53,6 +53,8 @@ import java.util.Locale;
 import kotlin.Unit;
 import top.qwq2333.nullgram.config.ConfigManager;
 import top.qwq2333.nullgram.helpers.TranslateHelper;
+import top.qwq2333.nullgram.helpers.TranslateHelper.ProviderType;
+import top.qwq2333.nullgram.translate.providers.DeepLTranslator;
 import top.qwq2333.nullgram.ui.DrawerProfilePreviewCell;
 import top.qwq2333.nullgram.ui.PopupBuilder;
 import top.qwq2333.nullgram.utils.Defines;
@@ -74,6 +76,7 @@ public class GeneralSettingActivity extends BaseActivity {
 
     private int translatorRow;
     private int showOriginalRow;
+    private int deepLFormalityRow;
     private int translatorTypeRow;
     private int translationProviderRow;
     private int translationTargetRow;
@@ -240,12 +243,22 @@ public class GeneralSettingActivity extends BaseActivity {
                 ((TextCheckCell) view).setChecked(ConfigManager.getBooleanOrFalse(Defines.autoDisableBuiltInProxy));
             }
         } else if (position == translationProviderRow) {
+            final var oldProvider = TranslateHelper.getCurrentProviderType();
             TranslateHelper.showTranslationProviderSelector(getParentActivity(), view, null, param -> {
                 if (param) {
                     listAdapter.notifyItemChanged(translationProviderRow, PARTIAL);
                 } else {
                     listAdapter.notifyItemChanged(translationProviderRow, PARTIAL);
                     listAdapter.notifyItemChanged(translationTargetRow, PARTIAL);
+                }
+                if (!oldProvider.equals(TranslateHelper.getCurrentProviderType())) {
+                    if (oldProvider.equals(ProviderType.DeepLTranslator)) {
+                        listAdapter.notifyItemRemoved(deepLFormalityRow);
+                        updateRows();
+                    } else if (TranslateHelper.getCurrentProviderType().equals(ProviderType.DeepLTranslator)) {
+                        updateRows();
+                        listAdapter.notifyItemInserted(deepLFormalityRow);
+                    }
                 }
                 return Unit.INSTANCE;
             });
@@ -257,6 +270,20 @@ public class GeneralSettingActivity extends BaseActivity {
                 }
                 return Unit.INSTANCE;
             });
+        } else if (position == deepLFormalityRow) {
+            ArrayList<String> arrayList = new ArrayList<>();
+            ArrayList<Integer> types = new ArrayList<>();
+            arrayList.add(LocaleController.getString("DeepLFormalityDefault", R.string.DeepLFormalityDefault));
+            types.add(DeepLTranslator.FORMALITY_DEFAULT);
+            arrayList.add(LocaleController.getString("DeepLFormalityMore", R.string.DeepLFormalityMore));
+            types.add(DeepLTranslator.FORMALITY_MORE);
+            arrayList.add(LocaleController.getString("DeepLFormalityLess", R.string.DeepLFormalityLess));
+            types.add(DeepLTranslator.FORMALITY_LESS);
+            PopupBuilder.show(arrayList, LocaleController.getString("DeepLFormality", R.string.DeepLFormality),
+                types.indexOf(ConfigManager.getIntOrDefault(Defines.deepLFormality, 0)), getParentActivity(), view, i -> {
+                    ConfigManager.putInt(Defines.deepLFormality, types.get(i));
+                    listAdapter.notifyItemChanged(deepLFormalityRow, PARTIAL);
+                });
         } else if (position == translatorTypeRow) {
             var oldType = TranslateHelper.getCurrentStatus();
             TranslateHelper.showTranslatorTypeSelector(getParentActivity(), view, () -> {
@@ -339,6 +366,7 @@ public class GeneralSettingActivity extends BaseActivity {
         if (TranslateHelper.getCurrentStatus() != TranslateHelper.Status.External) {
             showOriginalRow = TranslateHelper.getCurrentStatus() == TranslateHelper.Status.InMessage ? addRow("showOriginal") : -1;
             translationProviderRow = addRow("translationProvider");
+            deepLFormalityRow = TranslateHelper.getCurrentProviderType().equals(ProviderType.DeepLTranslator) ? addRow("deepLFormality") : -1;
             translationTargetRow = addRow("translationTarget");
             doNotTranslateRow = addRow("doNotTranslate");
             autoTranslateRow = addRow("autoTranslate");
@@ -346,6 +374,7 @@ public class GeneralSettingActivity extends BaseActivity {
             showOriginalRow = -1;
             translationProviderRow = -1;
             translationTargetRow = -1;
+            deepLFormalityRow = -1;
             doNotTranslateRow = -1;
             autoTranslateRow = -1;
         }
@@ -462,6 +491,21 @@ public class GeneralSettingActivity extends BaseActivity {
                             }
                         }
                         textCell.setTextAndValue(LocaleController.getString("TranslationTarget", R.string.TranslationTarget), value, payload, true);
+                    } else if (position == deepLFormalityRow) {
+                        String value;
+                        switch (ConfigManager.getIntOrDefault(Defines.deepLFormality, 0)) {
+                            case DeepLTranslator.FORMALITY_DEFAULT:
+                            default:
+                                value = LocaleController.getString("DeepLFormalityDefault", R.string.DeepLFormalityDefault);
+                                break;
+                            case DeepLTranslator.FORMALITY_MORE:
+                                value = LocaleController.getString("DeepLFormalityMore", R.string.DeepLFormalityMore);
+                                break;
+                            case DeepLTranslator.FORMALITY_LESS:
+                                value = LocaleController.getString("DeepLFormalityLess", R.string.DeepLFormalityLess);
+                                break;
+                        }
+                        textCell.setTextAndValue(LocaleController.getString("DeepLFormality", R.string.DeepLFormality), value, payload, true);
                     } else if (position == translatorTypeRow) {
                         String value;
                         switch (TranslateHelper.getCurrentStatus()) {
@@ -622,8 +666,8 @@ public class GeneralSettingActivity extends BaseActivity {
         public int getItemViewType(int position) {
             if (position == general2Row || position == drawer2Row || position == translator2Row || position == devices2Row) {
                 return 1;
-            } else if (position == tabsTitleTypeRow || position == translationProviderRow || position == translationTargetRow || position == translatorTypeRow ||
-                position == doNotTranslateRow || position == overrideDevicePerformanceRow) {
+            } else if (position == tabsTitleTypeRow || position == translationProviderRow || position == deepLFormalityRow || position == translationTargetRow ||
+                position == translatorTypeRow || position == doNotTranslateRow || position == overrideDevicePerformanceRow) {
                 return 2;
             } else if (position == generalRow || position == translatorRow || position == devicesRow) {
                 return 4;
