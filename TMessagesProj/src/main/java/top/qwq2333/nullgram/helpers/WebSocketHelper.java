@@ -88,7 +88,8 @@ public class WebSocketHelper {
         Log.d("ws reload config");
         if (tcp2wsServer != null) {
             try {
-                tcp2wsServer.setTls(wsEnableTLS)
+                tcp2wsServer.setCdnDomain("nekoe.eu.org")
+                    .setTls(wsEnableTLS)
                     .setUserAgent(System.getProperty("http.agent") + " Nekogram/9.5.7 (3250; 0388a7dff306b39f39f57f9adcd3819ce8a679be)")
                     .setConnHash("0388a7dff306b39f39f57f9adcd3819ce8a679be");
             } catch (Exception e) {
@@ -111,7 +112,7 @@ public class WebSocketHelper {
             }
             if (!tcp2wsStarted) {
                 Log.i("useragent: " + System.getProperty("http.agent") + " Nekogram/9.5.7 (3250; 0388a7dff306b39f39f57f9adcd3819ce8a679be)");
-                tcp2wsServer = new tcp2wsServer()
+                tcp2wsServer = new tcp2wsServer().setCdnDomain("nekoe.eu.org")
                     .setTls(wsEnableTLS)
                     .setUserAgent(System.getProperty("http.agent") + " Nekogram/9.5.7 (3250; 0388a7dff306b39f39f57f9adcd3819ce8a679be)")
                     .setConnHash("0388a7dff306b39f39f57f9adcd3819ce8a679be");

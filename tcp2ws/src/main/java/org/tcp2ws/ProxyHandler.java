@@ -1,8 +1,3 @@
-//
-// Source code recreated from a .class file by IntelliJ IDEA
-// (powered by FernFlower decompiler)
-//
-
 package org.tcp2ws;
 
 import com.neovisionaries.ws.client.WebSocket;
@@ -18,37 +13,40 @@ import java.io.OutputStream;
 import java.net.Socket;
 import java.net.SocketException;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.Map;
 
 import javax.crypto.Cipher;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 
+@SuppressWarnings("SynchronizeOnNonFinalField")
 public class ProxyHandler implements Runnable {
+
     private InputStream m_ClientInput = null;
     private OutputStream m_ClientOutput = null;
-    private Object m_lock = this;
+
+    private Object m_lock;
+
     Socket m_ClientSocket;
     WebSocket m_ServerSocket = null;
-    byte[] m_Buffer = new byte[40];
-    static final byte[] emptyBytes = new byte[8];
+
+    byte[] m_Buffer = new byte[SocksConstants.DEFAULT_BUF_SIZE];
+    final static byte[] emptyBytes = new byte[8];
     String server;
+
     Cipher outgoingDecryptCipher;
+
     boolean isHandshake = false;
-    private static final Map<String, HashSet<WebSocket>> inactiveWs = new HashMap();
 
     public ProxyHandler(Socket clientSocket) {
-        this.m_ClientSocket = clientSocket;
-
+        m_lock = this;
+        m_ClientSocket = clientSocket;
         try {
-            this.m_ClientSocket.setSoTimeout(10);
-        } catch (SocketException var3) {
-            var3.printStackTrace();
+            m_ClientSocket.setSoTimeout(SocksConstants.DEFAULT_PROXY_TIMEOUT);
+        } catch (SocketException e) {
+            e.printStackTrace();
         }
-
     }
 
     public void setLock(Object lock) {
@@ -56,261 +54,252 @@ public class ProxyHandler implements Runnable {
     }
 
     public void run() {
-        this.setLock(this);
-        if (this.prepareClient()) {
-            this.processRelay();
-            this.close();
-        }
+        setLock(this);
 
+        if (prepareClient()) {
+            processRelay();
+            close();
+        }
     }
 
     public void close() {
         try {
-            if (this.m_ClientOutput != null) {
-                this.m_ClientOutput.flush();
-                this.m_ClientOutput.close();
+            if (m_ClientOutput != null) {
+                m_ClientOutput.flush();
+                m_ClientOutput.close();
             }
-        } catch (IOException var3) {
+        } catch (IOException e) {
+            // ignore
         }
 
         try {
-            if (this.m_ClientSocket != null) {
-                this.m_ClientSocket.close();
+            if (m_ClientSocket != null) {
+                m_ClientSocket.close();
             }
-        } catch (IOException var2) {
+        } catch (IOException e) {
+            // ignore
         }
 
-        if (this.m_ServerSocket != null && this.m_ServerSocket.isOpen()) {
-            ((HashSet)inactiveWs.get(this.server)).add(this.m_ServerSocket);
+        if (m_ServerSocket != null && m_ServerSocket.isOpen()) {
+            HashSet<WebSocket> set = tcp2wsServer.inactiveWs.get(server);
+            if (set != null) {
+                set.add(m_ServerSocket);
+            }
         }
 
-        this.m_ServerSocket = null;
-        this.m_ClientSocket = null;
+        m_ServerSocket = null;
+        m_ClientSocket = null;
     }
 
     public void sendToClient(byte[] buffer) {
-        this.sendToClient(buffer, buffer.length);
+        sendToClient(buffer, buffer.length);
     }
 
     public void sendToClient(byte[] buffer, int len) {
-        if (this.m_ClientOutput != null && len > 0 && len <= buffer.length) {
+        if (m_ClientOutput != null && len > 0 && len <= buffer.length) {
             try {
-                this.m_ClientOutput.write(buffer, 0, len);
-                this.m_ClientOutput.flush();
-            } catch (IOException var4) {
-                var4.printStackTrace();
+                m_ClientOutput.write(buffer, 0, len);
+                m_ClientOutput.flush();
+            } catch (IOException e) {
+                e.printStackTrace();
             }
         }
-
     }
 
     public void connectToServer(String server) throws IOException {
+
         if (server.equals("")) {
-            this.close();
-        } else {
-            this.server = server;
-            this.prepareServer();
+            close();
+            return;
         }
+        this.server = server;
+        prepareServer();
     }
 
     protected void prepareServer() throws IOException {
-        synchronized(this.m_lock) {
-            Iterator<WebSocket> iterator = ((HashSet)inactiveWs.get(this.server)).iterator();
-
-            while(iterator.hasNext()) {
-                WebSocket _m_ServerSocket = (WebSocket)iterator.next();
-                if (_m_ServerSocket.isOpen()) {
-                    this.m_ServerSocket = _m_ServerSocket;
-                    return;
+        synchronized (m_lock) {
+            HashSet<WebSocket> set = tcp2wsServer.inactiveWs.get(server);
+            if (set != null) {
+                Iterator<WebSocket> iterator = set.iterator();
+                while (iterator.hasNext()) {
+                    WebSocket _m_ServerSocket = iterator.next();
+                    if (_m_ServerSocket.isOpen()) {
+                        m_ServerSocket = _m_ServerSocket;
+                        return;
+                    } else {
+                        iterator.remove();
+                        _m_ServerSocket.sendClose();
+                    }
                 }
-
-                iterator.remove();
-                _m_ServerSocket.sendClose();
             }
-
             int count_520 = 0;
-
-            while(count_520 < 10) {
+            while (count_520 < 10) {
                 try {
-                    WebSocketFactory var10001 = (new WebSocketFactory()).setConnectionTimeout(5000);
-                    String var10002 = tcp2wsServer.tls ? "wss://" : "ws://";
-                    this.m_ServerSocket = var10001.createSocket(var10002 + this.server + "/api").addListener(new WebSocketAdapter() {
-                        public void onBinaryMessage(WebSocket websocket, byte[] binary) {
-                            ProxyHandler.this.sendToClient(binary);
-                        }
-
-                        public void onDisconnected(WebSocket websocket, WebSocketFrame serverCloseFrame, WebSocketFrame clientCloseFrame, boolean closedByServer) {
-                            if (closedByServer) {
-                                String var10001 = ProxyHandler.this.server;
-                                System.out.println(var10001 + "," + clientCloseFrame.getCloseCode() + clientCloseFrame.getCloseReason());
-                                ProxyHandler.this.m_ServerSocket.sendClose();
-                                ProxyHandler.this.close();
+                    m_ServerSocket = new WebSocketFactory()
+                        .setConnectionTimeout(5000)
+                        .createSocket((tcp2wsServer.tls ? "wss://" : "ws://") + server + "/api")
+                        .addListener(new WebSocketAdapter() {
+                            public void onBinaryMessage(WebSocket websocket, byte[] binary) {
+                                sendToClient(binary);
                             }
 
-                        }
-                    }).addExtension("permessage-deflate").addProtocol("binary").addHeader("User-Agent", tcp2wsServer.userAgent).addHeader("Conn-Hash", tcp2wsServer.connHash).connect();
+                            public void onDisconnected(WebSocket websocket, WebSocketFrame serverCloseFrame, WebSocketFrame clientCloseFrame, boolean closedByServer) {
+                                if (closedByServer) {
+                                    System.out.println(server + "," + clientCloseFrame.getCloseCode() + clientCloseFrame.getCloseReason());
+                                    m_ServerSocket.sendClose();
+                                    close();
+                                }
+                            }
+                        })
+                        .addExtension("permessage-deflate")
+                        .addProtocol("binary")
+                        .addHeader("User-Agent", tcp2wsServer.userAgent)
+                        .addHeader("Conn-Hash", tcp2wsServer.connHash)
+                        .connect();
                     break;
-                } catch (WebSocketException var6) {
-                    if (!var6.getMessage().contains("520")) {
-                        System.out.println(this.server);
-                        var6.printStackTrace();
+                } catch (WebSocketException e) {
+                    if (e.getMessage().contains("520"))
+                        count_520++;
+                    else {
+                        System.out.println(server);
+                        e.printStackTrace();
                         break;
                     }
-
-                    ++count_520;
                 }
             }
-
         }
     }
 
     public boolean prepareClient() {
-        if (this.m_ClientSocket == null) {
+        if (m_ClientSocket == null) return false;
+
+        try {
+            m_ClientInput = m_ClientSocket.getInputStream();
+            m_ClientOutput = m_ClientSocket.getOutputStream();
+            return true;
+        } catch (IOException e) {
             return false;
-        } else {
-            try {
-                this.m_ClientInput = this.m_ClientSocket.getInputStream();
-                this.m_ClientOutput = this.m_ClientSocket.getOutputStream();
-                return true;
-            } catch (IOException var2) {
-                return false;
-            }
         }
     }
 
     public void processRelay() {
         try {
-            byte SOCKS_Version = this.getByteFromClient();
-            Object comm;
+            byte SOCKS_Version = getByteFromClient();
+
+            Socks4Impl comm;
             switch (SOCKS_Version) {
-                case 4:
+                case SocksConstants.SOCKS4_Version:
                     comm = new Socks4Impl(this);
                     break;
-                case 5:
+                case SocksConstants.SOCKS5_Version:
                     comm = new Socks5Impl(this);
                     break;
                 default:
                     return;
             }
 
-            ((Socks4Impl)comm).authenticate(SOCKS_Version);
-            ((Socks4Impl)comm).getClientCommand();
-            switch (((Socks4Impl)comm).socksCommand) {
-                case 1:
-                    ((Socks4Impl)comm).connect();
-                    this.processHandshake();
-                    this.relay();
+            comm.authenticate(SOCKS_Version);
+            comm.getClientCommand();
+            switch (comm.socksCommand) {
+                case SocksConstants.SC_CONNECT:
+                    comm.connect();
+                    processHandshake();
+                    relay();
                     break;
-                case 2:
-                    this.relay();
-                    break;
-                case 3:
-                    ((Socks4Impl)comm).udp();
-            }
-        } catch (Exception var3) {
-            var3.printStackTrace();
-        }
 
+                case SocksConstants.SC_BIND:
+                    //comm.bind();
+                    relay();
+                    break;
+
+                case SocksConstants.SC_UDP:
+                    comm.udp();
+                    break;
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     public byte getByteFromClient() throws Exception {
-        while(true) {
-            if (this.m_ClientSocket != null) {
-                int b;
-                try {
-                    b = this.m_ClientInput.read();
-                } catch (InterruptedIOException var3) {
-                    Thread.yield();
-                    continue;
-                }
-
-                return (byte)b;
+        while (m_ClientSocket != null) {
+            int b;
+            try {
+                b = m_ClientInput.read();
+            } catch (InterruptedIOException e) {
+                Thread.yield();
+                continue;
             }
-
-            throw new Exception("Interrupted Reading GetByteFromClient()");
+            return (byte) b; // return loaded byte
         }
+        throw new Exception("Interrupted Reading GetByteFromClient()");
     }
 
     public void relay() {
-        if (this.m_ServerSocket != null) {
-            for(boolean isActive = true; isActive; Thread.yield()) {
-                int dlen = this.checkClientData();
-                if (dlen < 0) {
-                    isActive = false;
-                }
+        if (m_ServerSocket == null) return;
 
-                if (dlen > 0) {
-                    this.m_ServerSocket.sendBinary(Arrays.copyOf(this.m_Buffer, dlen));
-                }
+        boolean isActive = true;
+
+        while (isActive) {
+
+            //---> Check for client data <---
+
+            int dlen = checkClientData();
+
+            if (dlen < 0) {
+                isActive = false;
+            }
+            if (dlen > 0) {
+                m_ServerSocket.sendBinary(Arrays.copyOf(m_Buffer, dlen));
             }
 
+            Thread.yield();
         }
     }
 
     private void processHandshake() {
-        byte[] buffer = new byte[0];
-
-        int _dlen;
-        for(int dlen = 0; dlen < 105; dlen += _dlen) {
-            _dlen = this.checkClientData();
-            if (_dlen < 0) {
-                return;
-            }
-
-            buffer = Utils.concat(buffer, Arrays.copyOf(this.m_Buffer, _dlen));
+        byte[] buffer = new byte[]{};
+        for (int dlen = 0, _dlen; dlen < 105; dlen += _dlen) {
+            _dlen = checkClientData();
+            if (_dlen < 0) return;
+            buffer = Utils.concat(buffer, Arrays.copyOf(m_Buffer, _dlen));
         }
 
-        byte[] decrypted = new byte[0];
+        byte[] decrypted = new byte[]{};
 
         try {
-            this.outgoingDecryptCipher = Cipher.getInstance("AES/CTR/NoPadding");
-            this.outgoingDecryptCipher.init(2, new SecretKeySpec(Arrays.copyOfRange(buffer, 8, 40), "AES"), new IvParameterSpec(Arrays.copyOfRange(buffer, 40, 56)));
-            decrypted = this.outgoingDecryptCipher.update(buffer);
-        } catch (Exception var4) {
-            var4.printStackTrace();
+            outgoingDecryptCipher = Cipher.getInstance("AES/CTR/NoPadding");
+            outgoingDecryptCipher.init(Cipher.DECRYPT_MODE, new SecretKeySpec(Arrays.copyOfRange(buffer, 8, 40), "AES"), new IvParameterSpec(Arrays.copyOfRange(buffer, 40, 56)));
+            decrypted = outgoingDecryptCipher.update(buffer);
+        } catch (Exception e) {
+            e.printStackTrace();
         }
-
-        this.isHandshake = Arrays.equals(Arrays.copyOfRange(decrypted, 65, 73), emptyBytes);
-        this.m_ServerSocket.sendBinary(buffer);
+        isHandshake = Arrays.equals(Arrays.copyOfRange(decrypted, 65, 73), emptyBytes);
+        m_ServerSocket.sendBinary(buffer);
         Thread.yield();
     }
 
     public int checkClientData() {
-        synchronized(this.m_lock) {
-            if (this.m_ClientInput == null) {
+        synchronized (m_lock) {
+            //	The client side is not opened.
+            if (m_ClientInput == null) return -1;
+
+            int dlen;
+
+            try {
+                dlen = m_ClientInput.read(m_Buffer, 0, SocksConstants.DEFAULT_BUF_SIZE);
+            } catch (InterruptedIOException e) {
+                return 0;
+            } catch (IOException e) {
+                if (!(e.getMessage().contains("Socket Closed") | e.getMessage().contains("socket closed") | e.getMessage().contains("Connection reset")))
+                    e.printStackTrace();
+                close();    //	Close the server on this exception
                 return -1;
-            } else {
-                int dlen;
-                try {
-                    dlen = this.m_ClientInput.read(this.m_Buffer, 0, 40);
-                } catch (InterruptedIOException var5) {
-                    return 0;
-                } catch (IOException var6) {
-                    if (!(var6.getMessage().contains("Socket Closed") | var6.getMessage().contains("socket closed") | var6.getMessage().contains("Connection reset"))) {
-                        var6.printStackTrace();
-                    }
-
-                    this.close();
-                    return -1;
-                }
-
-                if (dlen < 0) {
-                    this.close();
-                }
-
-                return dlen;
             }
-        }
-    }
 
-    static {
-        inactiveWs.put((String)tcp2wsServer.mtpcdn.get(1), new HashSet());
-        inactiveWs.put((String)tcp2wsServer.mtpcdn.get(2), new HashSet());
-        inactiveWs.put((String)tcp2wsServer.mtpcdn.get(3), new HashSet());
-        inactiveWs.put((String)tcp2wsServer.mtpcdn.get(4), new HashSet());
-        inactiveWs.put((String)tcp2wsServer.mtpcdn.get(5), new HashSet());
-        inactiveWs.put((String)tcp2wsServer.mtpcdn.get(17), new HashSet());
-        inactiveWs.put((String)tcp2wsServer.mtpcdn.get(18), new HashSet());
-        inactiveWs.put((String)tcp2wsServer.mtpcdn.get(19), new HashSet());
+            if (dlen < 0) close();
+
+            return dlen;
+        }
     }
 }
