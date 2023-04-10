@@ -27,7 +27,7 @@
     <string name="InvalidAccessToken">Token akses tidak valid</string>
     <string name="QRLoginTitle">Login QR</string>
     <string name="QRLoginMessage">Pindai QRCode dengan perangkat lain untuk masuk.</string>
-    <string name="NullgramVersion">Nullgram %1$s\nBerdasarkan Telegram %2$s</string>
+    <string name="NullgramVersion">Nullgram %1$s\nBased on TELEOFFICIAL %2$s</string>
     <string name="RestrictionReason">Alasan pembatasan</string>
     <string name="showBotAPIID">Perlihatkan ID API Bot</string>
     <string name="hideGroupSticker">Sembunyikan Paket Stiker Grup</string>
@@ -113,7 +113,9 @@
     <string name="Number">Jumlah</string>
     <string name="autoProxySwitch">Proxy Auto Switch</string>
     <string name="ignoreReactionMention">Ignore Reaction Mention</string>
-    <string name="ignoreReactionMentionInfo">It will auto set unread reaction mentions as read.\nIt will also sync to other devices.\nNotification will be still shown because it\'s controlled by Telegram Server.</string>
+    <string name="ignoreReactionMentionInfo">It will auto set unread reaction mentions as read.\nIt will also sync to other devices.\nNotification will be still shown because it\'s
+        controlled by TELEOFFICIAL Server.
+    </string>
     <string name="StickerSize">Sticker Size</string>
     <string name="StickerSizeDialogMessageReplyTo">get me some anime stuff pls.</string>
     <string name="StickerSizeDialogMessage">wow cute girl!</string>
@@ -151,7 +153,7 @@
     <string name="scrollableChatPreview">Scrollable Chat Preview</string>
     <string name="disableVibration">Disable Vibration</string>
     <string name="DatacenterStatus">Datacenter status</string>
-    <string name="DatacenterStatusAbout">Check the status of Telegram\'s **datacenters**.</string>
+    <string name="DatacenterStatusAbout">Check the status of TELEOFFICIAL\'s **datacenters**.</string>
     <string name="DeleteAllFromSelfDone">All your messages have been deleted</string>
     <string name="setLinkedUser">Set Linked User</string>
     <string name="UserIDOrBotID">Enter User ID or Bot ID</string>
@@ -188,7 +190,7 @@
     <string name="fastSpeedUpload">Fasten upload speed</string>
     <string name="showTabsOnForward">Show Tabs On Forward</string>
     <string name="TabTitleType">Show on tabs</string>
-    <string name="TabTitleTypeTip">Icons are cloud-synced by Telegram.</string>
+    <string name="TabTitleTypeTip">Icons are cloud-synced by TELEOFFICIAL.</string>
     <string name="TabTitleTypeText">Titles</string>
     <string name="TabTitleTypeIcon">Icons</string>
     <string name="TabTitleTypeMix">Icons with titles</string>
@@ -211,15 +213,19 @@
     <string name="SwitchToPersonalAccount">Switch to personal account</string>
     <string name="openArchiveOnPull">Open Archive On Pull</string>
     <string name="hideAllTab">Hide \"All Chats\" tab</string>
+    <string name="ignoreMutedCount">Ignore Muted Count in tab</string>
     <string name="disableStickersAutoReorder">Disable sticker packs auto-reorder</string>
     <string name="Ban">Ban</string>
     <string name="autoDisableBuiltInProxy">Auto Disable Built-In Proxy</string>
     <string name="autoDisableBuiltInProxyDesc">It will automatically turn off the built-in proxy when Nullgram detected you turn on the VPN</string>
-    <string name="NekogramWsDescription">Connect to Telegram through WebSocket via Cloudflare.\nProvided by Nekogram</string>
+    <string name="NekogramWsDescription">Connect to TELEOFFICIAL through WebSocket via Cloudflare.\nProvided by Nekogram</string>
     <string name="NekogramXWsDescription">Provided by Nekogram X</string>
+    <string name="WsGetHelp">You can also deploy it easily by yourself!</string>
+    <string name="WsCustomDescription">Use custom domain to connect to TELEOFFICIAL through WebSocket via Cloudflare.</string>
     <string name="WsEnableTls">Enable TLS</string>
     <string name="WsLocalProxy">Local proxy</string>
     <string name="WsEnableDoh">Enable DoH</string>
+    <string name="WsProvider">Provider</string>
     <string name="PublicProxy">Built-in Public Proxy</string>
     <string name="SwitchBackend">Switch Backend</string>
     <string name="UpdateInstalling">Installing update...</string>
@@ -231,13 +237,19 @@
     <string name="UpdateFailedToInstall">Failed to install update: %d</string>
     <string name="Translator">Translator</string>
     <string name="ProviderGoogleTranslate">Google Translate</string>
-    <string name="ProviderTelegramTranslate">TELEOFFICIAL</string>
+    <string name="ProviderYandexTranslate">Yandex Translate</string>
+    <string name="ProviderTelegramTranslate">TELEOFFICIAL Translate</string>
     <string name="ProviderMicrosoftTranslate">Microsoft Translate</string>
+    <string name="ProviderDeepLTranslate">DeepL Translate</string>
     <string name="ProviderLingoTranslate">Lingo Translate</string>
     <string name="TranslationProvider">Translation Provider</string>
     <string name="TranslateApiUnsupported">The translation provider you selected don\'t support your language.</string>
     <string name="ResetLanguage">Reset language</string>
     <string name="UseGoogleTranslate">Use Google</string>
+    <string name="DeepLFormality">Formality</string>
+    <string name="DeepLFormalityDefault">Default</string>
+    <string name="DeepLFormalityMore">More</string>
+    <string name="DeepLFormalityLess">Less</string>
     <string name="TranslationTarget">Target language</string>
     <string name="TranslationTargetApp">Follow App</string>
     <string name="BrokenMLKit">Option unavailable</string>
@@ -280,4 +292,5 @@
     <string name="RegistrationDateNewer">Newer than %s</string>
     <string name="RegistrationDateOlder">Older than %s</string>
     <string name="RegistrationDateApproximately">Approximately %s</string>
+    <string name="LearnMore">Learn More</string>
 </resources>

@@ -27,7 +27,7 @@
     <string name="InvalidAccessToken">Token de acceso inválido</string>
     <string name="QRLoginTitle">Inicio de sesión con QR</string>
     <string name="QRLoginMessage">Escanea código QR con otro dispositivo para conectarte.</string>
-    <string name="NullgramVersion">Nullgram %1$s\n Basado en Telegram %2$s</string>
+    <string name="NullgramVersion">Nullgram %1$s\nBased on TELEOFFICIAL %2$s</string>
     <string name="RestrictionReason">Motivo de la restricción</string>
     <string name="showBotAPIID">Mostrar ID Bot API</string>
     <string name="hideGroupSticker">Ocultar pack de stickers de grupo</string>
@@ -113,7 +113,9 @@
     <string name="Number">Número</string>
     <string name="autoProxySwitch">Cambio automático de proxy</string>
     <string name="ignoreReactionMention">Ignorar mención de reacción</string>
-    <string name="ignoreReactionMentionInfo">Se auto establecerá la reacción no leída como leída.\nTambién se sincronizará con otros dispositivos.\nLa notificación seguirá mostrándose porque está controlada por el servidor de Telegram.</string>
+    <string name="ignoreReactionMentionInfo">It will auto set unread reaction mentions as read.\nIt will also sync to other devices.\nNotification will be still shown because it\'s
+        controlled by TELEOFFICIAL Server.
+    </string>
     <string name="StickerSize">Tamaño de sticker</string>
     <string name="StickerSizeDialogMessageReplyTo">pónganme algunas cosas de anime.</string>
     <string name="StickerSizeDialogMessage">¡Guau que linda chica!</string>
@@ -151,7 +153,7 @@
     <string name="scrollableChatPreview">Vista previa de chat desplazable</string>
     <string name="disableVibration">Desactivar vibración</string>
     <string name="DatacenterStatus">Estado del datacenter</string>
-    <string name="DatacenterStatusAbout">Compruebe el estado de los **datacenters** de Telegram.</string>
+    <string name="DatacenterStatusAbout">Check the status of TELEOFFICIAL\'s **datacenters**.</string>
     <string name="DeleteAllFromSelfDone">Todos tus mensajes han sido eliminados</string>
     <string name="setLinkedUser">Establecer usuario vinculado</string>
     <string name="UserIDOrBotID">Introducir ID de usuario o ID de bot</string>
@@ -188,7 +190,7 @@
     <string name="fastSpeedUpload">Velocidad de subida rápida</string>
     <string name="showTabsOnForward">Mostrar carpetas en el reenvío</string>
     <string name="TabTitleType">Mostrar en carpetas</string>
-    <string name="TabTitleTypeTip">Los iconos son sincronizados en la nube por Telegram.</string>
+    <string name="TabTitleTypeTip">Icons are cloud-synced by TELEOFFICIAL.</string>
     <string name="TabTitleTypeText">Títulos</string>
     <string name="TabTitleTypeIcon">Iconos</string>
     <string name="TabTitleTypeMix">Iconos con títulos</string>
@@ -211,15 +213,19 @@
     <string name="SwitchToPersonalAccount">Cambiar a cuenta personal</string>
     <string name="openArchiveOnPull">Abrir archivados al deslizar hacia abajo</string>
     <string name="hideAllTab">Ocultar pestaña \"Todos los chats\"</string>
+    <string name="ignoreMutedCount">Ignore Muted Count in tab</string>
     <string name="disableStickersAutoReorder">Desactivar order dinámico de packs de stickers</string>
     <string name="Ban">Ban</string>
     <string name="autoDisableBuiltInProxy">Deshabilitar automáticamente el proxy integrado</string>
     <string name="autoDisableBuiltInProxyDesc">Desactivará automáticamente el proxy integrado cuando Nullgram detecte que activa la VPN</string>
-    <string name="NekogramWsDescription">Conéctate a Telegram a través de WebSocket usando Cloudflare.\nProporcionado por Nekogram</string>
+    <string name="NekogramWsDescription">Connect to TELEOFFICIAL through WebSocket via Cloudflare.\nProvided by Nekogram</string>
     <string name="NekogramXWsDescription">Proporcionado por Nekogram X</string>
+    <string name="WsGetHelp">You can also deploy it easily by yourself!</string>
+    <string name="WsCustomDescription">Use custom domain to connect to TELEOFFICIAL through WebSocket via Cloudflare.</string>
     <string name="WsEnableTls">Activar TLS</string>
     <string name="WsLocalProxy">Proxy local</string>
     <string name="WsEnableDoh">Habilitar DoH</string>
+    <string name="WsProvider">Provider</string>
     <string name="PublicProxy">Proxy público integrado</string>
     <string name="SwitchBackend">Cambiar backend</string>
     <string name="UpdateInstalling">Instalando actualización...</string>
@@ -231,13 +237,19 @@
     <string name="UpdateFailedToInstall">Error al instalar la actualización: %d</string>
     <string name="Translator">Traductor</string>
     <string name="ProviderGoogleTranslate">Traductor de Google</string>
-    <string name="ProviderTelegramTranslate">TELEOFFICIAL</string>
+    <string name="ProviderYandexTranslate">Yandex Translate</string>
+    <string name="ProviderTelegramTranslate">TELEOFFICIAL Translate</string>
     <string name="ProviderMicrosoftTranslate">Traductor de Microsoft</string>
+    <string name="ProviderDeepLTranslate">DeepL Translate</string>
     <string name="ProviderLingoTranslate">Traductor Lingo</string>
     <string name="TranslationProvider">Proveedor de traducción</string>
     <string name="TranslateApiUnsupported">El motor de traducción seleccionado no soporta su idioma.</string>
     <string name="ResetLanguage">Restablecer idioma</string>
     <string name="UseGoogleTranslate">Usar Google</string>
+    <string name="DeepLFormality">Formality</string>
+    <string name="DeepLFormalityDefault">Default</string>
+    <string name="DeepLFormalityMore">More</string>
+    <string name="DeepLFormalityLess">Less</string>
     <string name="TranslationTarget">Idioma de destino</string>
     <string name="TranslationTargetApp">Seguir app</string>
     <string name="BrokenMLKit">Opción no disponible</string>
@@ -280,4 +292,5 @@
     <string name="RegistrationDateNewer">Newer than %s</string>
     <string name="RegistrationDateOlder">Older than %s</string>
     <string name="RegistrationDateApproximately">Approximately %s</string>
+    <string name="LearnMore">Learn More</string>
 </resources>

@@ -218,11 +218,14 @@
     <string name="autoDisableBuiltInProxyDesc">當Nullgram 檢測到您開啟VPN 時，它將自動關閉內建代理</string>
     <string name="NekogramWsDescription">透過 WebSocket 透過雲端連線到 TELEOFFICIAL 。\n由 Nekogram 提供</string>
     <string name="NekogramXWsDescription">由 Nekogram X 提供</string>
+    <string name="WsGetHelp">You can also deploy it easily by yourself!</string>
+    <string name="WsCustomDescription">Use custom domain to connect to TELEOFFICIAL through WebSocket via Cloudflare.</string>
     <string name="WsEnableTls">啟用 TLS</string>
     <string name="WsLocalProxy">本地代理</string>
     <string name="WsEnableDoh">啟用 DoH</string>
+    <string name="WsProvider">Provider</string>
     <string name="PublicProxy">內建公共代理</string>
-    <string name="SwitchBackend">切換後端</string>
+    <string name="SwitchBackend">切換伺服器</string>
     <string name="UpdateInstalling">安裝更新中...</string>
     <string name="UpdateInstallingRelaunch">更新完成後應用將重新啟動。</string>
     <string name="UpdateInstallingNotification">更新完成後將顯示通知。</string>
@@ -232,13 +235,19 @@
     <string name="UpdateFailedToInstall">安裝更新失敗： %d</string>
     <string name="Translator">翻譯</string>
     <string name="ProviderGoogleTranslate">谷歌翻譯</string>
+    <string name="ProviderYandexTranslate">Yandex Translate</string>
     <string name="ProviderTelegramTranslate">TELEOFFICIAL 翻譯</string>
     <string name="ProviderMicrosoftTranslate">微軟翻譯</string>
     <string name="ProviderLingoTranslate">彩雲小譯</string>
+    <string name="ProviderDeepLTranslate">DeepL Translate</string>
     <string name="TranslationProvider">翻譯引擎</string>
     <string name="TranslateApiUnsupported">此翻譯引擎不支援您的語言</string>
     <string name="ResetLanguage">重置語言</string>
     <string name="UseGoogleTranslate">Use Google</string>
+    <string name="DeepLFormality">Formality</string>
+    <string name="DeepLFormalityDefault">Default</string>
+    <string name="DeepLFormalityMore">More</string>
+    <string name="DeepLFormalityLess">Less</string>
     <string name="TranslationTarget">目標語言</string>
     <string name="TranslationTargetApp">跟隨應用</string>
     <string name="BrokenMLKit">選項不可用</string>
@@ -283,4 +292,5 @@
     <string name="RegistrationDateNewer">晚於 %s</string>
     <string name="RegistrationDateOlder">早於 %s</string>
     <string name="RegistrationDateApproximately">大概 %s</string>
+    <string name="LearnMore">Learn More</string>
 </resources>
