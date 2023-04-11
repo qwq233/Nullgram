@@ -146,9 +146,7 @@ public class Defines {
 
     // WebSocket Proxy
     public static final String wsEnableTLS = "wsEnableTLS";
-    public static final String wsUseMTP = "wsUseMTP";
-    public static final String wsUseDoH = "wsUseDoH";
-    public static final String wsServerHost = "serverHost";
+    public static final String wsServerHost = "wsServerHost";
     public static final String wsBuiltInProxyBackend = "wsBuiltInProxyBackend";
 
     // Translate

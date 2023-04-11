@@ -160,7 +160,7 @@ public class ProxyListActivity extends BaseFragment implements NotificationCente
             checkImageView.setContentDescription(LocaleController.getString("Edit", R.string.Edit));
             addView(checkImageView, LayoutHelper.createFrame(48, 48, (LocaleController.isRTL ? Gravity.LEFT : Gravity.RIGHT) | Gravity.TOP, 8, 8, 8, 0));
             checkImageView.setOnClickListener(v -> {
-                if (WebSocketHelper.NekogramPublicProxyServer.equals(currentInfo.address) || WebSocketHelper.NekogramXPublicProxyServer.equals(currentInfo.address)) {
+                if (WebSocketHelper.proxyServer.equals(currentInfo.address)) {
                     presentFragment(new WsSettingsActivity(currentInfo));
                 } else {
                     presentFragment(new ProxySettingsActivity(currentInfo));
@@ -182,7 +182,7 @@ public class ProxyListActivity extends BaseFragment implements NotificationCente
         }
 
         public void setProxy(SharedConfig.ProxyInfo proxyInfo) {
-            if (WebSocketHelper.NekogramPublicProxyServer.equals(proxyInfo.address) || WebSocketHelper.NekogramXPublicProxyServer.equals(proxyInfo.address)) {
+            if (WebSocketHelper.proxyServer.equals(proxyInfo.address)) {
                 textView.setText(LocaleController.getString("PublicProxy", R.string.PublicProxy));
             } else {
                 textView.setText(proxyInfo.address + ":" + proxyInfo.port);
@@ -572,7 +572,7 @@ public class ProxyListActivity extends BaseFragment implements NotificationCente
                         break;
                     case MENU_DELETE:
                         for (SharedConfig.ProxyInfo info : selectedItems) {
-                            if (info.address.equals(WebSocketHelper.NekogramPublicProxyServer) || info.address.equals(WebSocketHelper.NekogramXPublicProxyServer)) {
+                            if (info.address.equals(WebSocketHelper.proxyServer)) {
                                 break;
                             }
                         }
@@ -609,7 +609,7 @@ public class ProxyListActivity extends BaseFragment implements NotificationCente
                         break;
                     case MENU_SHARE:
                         for (SharedConfig.ProxyInfo info : selectedItems) {
-                            if (info.address.equals(WebSocketHelper.NekogramPublicProxyServer) || info.address.equals(WebSocketHelper.NekogramXPublicProxyServer)) {
+                            if (info.address.equals(WebSocketHelper.proxyServer)) {
                                 break;
                             }
                         }
@@ -911,7 +911,7 @@ public class ProxyListActivity extends BaseFragment implements NotificationCente
                 return;
             }
             SharedConfig.ProxyInfo info = proxyList.get(position - proxyStartRow);
-            if (info.address.equals(WebSocketHelper.NekogramPublicProxyServer) || info.address.equals(WebSocketHelper.NekogramXPublicProxyServer)) {
+            if (info.address.equals(WebSocketHelper.proxyServer)) {
                 return;
             }
 
@@ -1007,7 +1007,7 @@ public class ProxyListActivity extends BaseFragment implements NotificationCente
                     cell.setProxy(info);
                     cell.setChecked(SharedConfig.currentProxy == info);
                     cell.setItemSelected(selectedItems.contains(proxyList.get(position - proxyStartRow)), false);
-                    if (!info.address.equals(WebSocketHelper.NekogramPublicProxyServer) && !info.address.equals(WebSocketHelper.NekogramXPublicProxyServer)) {
+                    if (!info.address.equals(WebSocketHelper.proxyServer)) {
                         cell.setSelectionEnabled(!selectedItems.isEmpty(), false);
                     }
                     break;
@@ -1037,7 +1037,7 @@ public class ProxyListActivity extends BaseFragment implements NotificationCente
             if (holder.getItemViewType() == VIEW_TYPE_PROXY_DETAIL && !payloads.isEmpty()) {
                 TextDetailProxyCell cell = (TextDetailProxyCell) holder.itemView;
                 SharedConfig.ProxyInfo info = proxyList.get(position - proxyStartRow);
-                if (!info.address.equals(WebSocketHelper.NekogramPublicProxyServer) && !info.address.equals(WebSocketHelper.NekogramXPublicProxyServer)) {
+                if (!info.address.equals(WebSocketHelper.proxyServer)) {
                     if (payloads.contains(PAYLOAD_SELECTION_CHANGED)) {
                         cell.setItemSelected(selectedItems.contains(proxyList.get(position - proxyStartRow)), true);
                     }

@@ -218,9 +218,12 @@
     <string name="autoDisableBuiltInProxyDesc">It will automatically turn off the built-in proxy when Nullgram detected you turn on the VPN</string>
     <string name="NekogramWsDescription">Connect to Telegram through WebSocket via Cloudflare.\nProvided by Nekogram</string>
     <string name="NekogramXWsDescription">Provided by Nekogram X</string>
+    <string name="WsGetHelp">Get Help</string>
+    <string name="WsCustomDescription">Use custom domain to connect to Telegram through WebSocket via Cloudflare.</string>
     <string name="WsEnableTls">Enable TLS</string>
     <string name="WsLocalProxy">Local proxy</string>
     <string name="WsEnableDoh">Enable DoH</string>
+    <string name="WsProvider">Provider</string>
     <string name="PublicProxy">Built-in Public Proxy</string>
     <string name="SwitchBackend">Switch Backend</string>
     <string name="UpdateInstalling">Installing update...</string>
