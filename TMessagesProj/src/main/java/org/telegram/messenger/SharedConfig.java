@@ -355,7 +355,6 @@ public class SharedConfig {
             }
         }
 
-
         public JSONObject toJsonInternal() throws JSONException {
 
             JSONObject obj = new JSONObject();
@@ -1463,18 +1462,12 @@ public class SharedConfig {
             }
             data.cleanup();
         }
-        String currentBackend = WebSocketHelper.backend == 0 ? WebSocketHelper.NekogramPublicProxyServer : WebSocketHelper.NekogramXPublicProxyServer;
-        String previousBackend = WebSocketHelper.backend == 0 ? WebSocketHelper.NekogramXPublicProxyServer : WebSocketHelper.NekogramPublicProxyServer;
-        if (currentProxy == null && !TextUtils.isEmpty(proxyAddress) && !previousBackend.equals(proxyAddress)) {
+        if (currentProxy == null && !TextUtils.isEmpty(proxyAddress)) {
             ProxyInfo info = currentProxy = new ProxyInfo(proxyAddress, proxyPort, proxyUsername, proxyPassword, proxySecret);
             proxyList.add(0, info);
         }
-        if (!currentBackend.equals(proxyAddress) && !changedBackend) {
-            ProxyInfo info = new ProxyInfo(currentBackend, 6356, "", "", "");
-            proxyList.add(0, info);
-        }
-        if (changedBackend) {
-            ProxyInfo info = currentProxy = new ProxyInfo(currentBackend, 6356, "", "", "");
+        if (!WebSocketHelper.proxyServer.equals(proxyAddress)) {
+            ProxyInfo info = new ProxyInfo(WebSocketHelper.proxyServer, 6356, "", "", "");
             proxyList.add(0, info);
         }
     }
@@ -1496,10 +1489,10 @@ public class SharedConfig {
         serializedData.writeInt32(-1);
         serializedData.writeByte(PROXY_CURRENT_SCHEMA_VERSION);
         int count = infoToSerialize.size();
-        serializedData.writeInt32(count);
+        serializedData.writeInt32(count - 1);
         for (int a = count - 1; a >= 0; a--) {
             ProxyInfo info = infoToSerialize.get(a);
-            if (WebSocketHelper.NekogramPublicProxyServer.equals(info.address) || WebSocketHelper.NekogramXPublicProxyServer.equals(info.address)) {
+            if (WebSocketHelper.proxyServer.equals(info.address)) {
                 continue;
             }
             serializedData.writeString(info.address != null ? info.address : "");

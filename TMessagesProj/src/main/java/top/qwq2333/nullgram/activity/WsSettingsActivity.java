@@ -20,35 +20,43 @@
 package top.qwq2333.nullgram.activity;
 
 import android.content.Context;
+import android.util.TypedValue;
 import android.view.View;
+import android.view.inputmethod.EditorInfo;
+import android.widget.LinearLayout;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.LocaleController;
-import org.telegram.messenger.NotificationCenter;
 import org.telegram.messenger.R;
 import org.telegram.messenger.SharedConfig;
+import org.telegram.messenger.browser.Browser;
+import org.telegram.ui.ActionBar.AlertDialog;
 import org.telegram.ui.ActionBar.Theme;
 import org.telegram.ui.Cells.HeaderCell;
 import org.telegram.ui.Cells.TextCheckCell;
 import org.telegram.ui.Cells.TextInfoPrivacyCell;
 import org.telegram.ui.Cells.TextSettingsCell;
+import org.telegram.ui.Components.EditTextBoldCursor;
+import org.telegram.ui.Components.LayoutHelper;
 
-import java.util.ArrayList;
-
+import top.qwq2333.nullgram.config.ConfigManager;
 import top.qwq2333.nullgram.helpers.WebSocketHelper;
+import top.qwq2333.nullgram.helpers.WebSocketHelper.WsProvider;
 import top.qwq2333.nullgram.ui.PopupBuilder;
+import top.qwq2333.nullgram.utils.Defines;
+import top.qwq2333.nullgram.utils.Log;
 
 
 public class WsSettingsActivity extends BaseActivity {
 
-    private int descriptionRow;
     private int settingsRow;
+    private int providerRow;
     private int enableTLSRow;
-    private int localProxyRow;
-    private int enableDoHRow;
-    private int switchBackendRow;
+    private int descriptionRow;
+    private int customRow;
     private final SharedConfig.ProxyInfo currentProxyInfo;
 
     public WsSettingsActivity(SharedConfig.ProxyInfo proxyInfo) {
@@ -64,32 +72,71 @@ public class WsSettingsActivity extends BaseActivity {
                 ((TextCheckCell) view).setChecked(WebSocketHelper.wsEnableTLS);
             }
             WebSocketHelper.wsReloadConfig();
-        } else if (position == localProxyRow) {
-            ArrayList<String> arrayList = new ArrayList<>();
-            arrayList.add(LocaleController.getString("UseProxySocks5", R.string.UseProxySocks5));
-            arrayList.add(LocaleController.getString("UseProxyTelegram", R.string.UseProxyTelegram));
-            PopupBuilder.show(arrayList, LocaleController.getString("WsLocalProxy", R.string.WsLocalProxy), WebSocketHelper.wsUseMTP ? 1 : 0, getParentActivity(), view, i -> {
-                WebSocketHelper.setWsUseMTP(i == 1);
-                listAdapter.notifyItemChanged(localProxyRow);
-                WebSocketHelper.wsReloadConfig();
-            });
-        } else if (position == enableDoHRow) {
-            WebSocketHelper.toggleWsUseDoH();
-            if (view instanceof TextCheckCell) {
-                ((TextCheckCell) view).setChecked(WebSocketHelper.wsUseDoH);
-            }
-            WebSocketHelper.wsReloadConfig();
-        } else if (position == switchBackendRow) {
-            ArrayList<String> arrayList = new ArrayList<>();
-            arrayList.add("Nekogram");
-            arrayList.add("Nekogram X");
-            PopupBuilder.show(arrayList, LocaleController.getString("SwitchBackend", R.string.SwitchBackend),
-                WebSocketHelper.backend == 0 ? 0 : 1, getParentActivity(), view, i -> {
-                    WebSocketHelper.setBackend(i == 0 ? 0 : 1);
-                    listAdapter.notifyItemChanged(descriptionRow);
-                    listAdapter.notifyItemChanged(switchBackendRow);
-                    NotificationCenter.getGlobalInstance().postNotificationName(NotificationCenter.proxySettingsChanged);
+        } else if (position == providerRow) {
+            var providers = WebSocketHelper.getProviders();
+            var names = providers.first;
+            var types = providers.second;
+            PopupBuilder.show(names, LocaleController.getString("WsProvider", R.string.WsProvider),
+                types.indexOf(WebSocketHelper.getCurrentProvider()),
+                getParentActivity(), view,
+                i -> {
+                    if (types.get(i).equals(WsProvider.Custom)) {
+                        Context context = getParentActivity();
+                        AlertDialog.Builder builder = new AlertDialog.Builder(context, resourcesProvider);
+                        builder.setTitle(LocaleController.getString("WsProvider", R.string.WsProvider));
+
+                        LinearLayout ll = new LinearLayout(context);
+                        ll.setOrientation(LinearLayout.VERTICAL);
+
+                        final EditTextBoldCursor editText = new EditTextBoldCursor(context) {
+                            @Override
+                            protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+                                super.onMeasure(widthMeasureSpec, MeasureSpec.makeMeasureSpec(AndroidUtilities.dp(64), MeasureSpec.EXACTLY));
+                            }
+                        };
+                        editText.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 18);
+                        editText.setText("");
+                        editText.setTextColor(Theme.getColor(Theme.key_dialogTextBlack, resourcesProvider));
+                        editText.setHintText(LocaleController.getString("WsProvider", R.string.WsProvider));
+                        editText.setHeaderHintColor(Theme.getColor(Theme.key_windowBackgroundWhiteBlueHeader, resourcesProvider));
+                        editText.setSingleLine(true);
+                        editText.setFocusable(true);
+                        editText.setTransformHintToHeader(true);
+                        editText.setLineColors(Theme.getColor(Theme.key_windowBackgroundWhiteInputField, resourcesProvider),
+                            Theme.getColor(Theme.key_windowBackgroundWhiteInputFieldActivated, resourcesProvider),
+                            Theme.getColor(Theme.key_windowBackgroundWhiteRedText3, resourcesProvider));
+                        editText.setImeOptions(EditorInfo.IME_ACTION_DONE);
+                        editText.setBackground(null);
+                        editText.requestFocus();
+                        editText.setPadding(0, 0, 0, 0);
+                        ll.addView(editText, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, 36, 0, 24, 0, 24, 0));
+
+                        builder.setView(ll);
+                        builder.setPositiveButton(LocaleController.getString("OK", R.string.OK), (dialogInterface, i2) -> {
+                            ConfigManager.putString(Defines.wsServerHost, editText.getText().toString());
+                            WebSocketHelper.setCurrentProvider(types.get(i));
+                            WebSocketHelper.wsReloadConfig();
+                            listAdapter.notifyItemChanged(providerRow, PARTIAL);
+                            listAdapter.notifyItemChanged(descriptionRow);
+                        });
+                        builder.setNegativeButton(LocaleController.getString("Cancel", R.string.Cancel), null);
+
+                        AlertDialog alertDialog = builder.create();
+                        alertDialog.setOnShowListener(dialog -> {
+                            editText.requestFocus();
+                            AndroidUtilities.showKeyboard(editText);
+                        });
+                        showDialog(alertDialog);
+                        editText.setSelection(0, editText.getText().length());
+                    } else {
+                        WebSocketHelper.setCurrentProvider(types.get(i));
+                        WebSocketHelper.wsReloadConfig();
+                        listAdapter.notifyItemChanged(providerRow, PARTIAL);
+                        listAdapter.notifyItemChanged(descriptionRow);
+                    }
                 });
+        } else if (position == customRow) {
+            Browser.openUrl(getParentActivity(), "https://t.me/WSProxy/8");
         }
     }
 
@@ -118,11 +165,10 @@ public class WsSettingsActivity extends BaseActivity {
         rowCount = 0;
 
         settingsRow = rowCount++;
+        providerRow = rowCount++;
         enableTLSRow = rowCount++;
-        localProxyRow = -1;
-        enableDoHRow = -1;
-        switchBackendRow = -1;
         descriptionRow = rowCount++;
+        customRow = rowCount++;
     }
 
     @Override
@@ -137,17 +183,22 @@ public class WsSettingsActivity extends BaseActivity {
         }
 
         @Override
-        public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
+        public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position, boolean partial) {
             switch (holder.getItemViewType()) {
                 case TYPE_SETTINGS: {
                     TextSettingsCell textCell = (TextSettingsCell) holder.itemView;
                     textCell.setTextColor(Theme.getColor(Theme.key_windowBackgroundWhiteBlackText));
-                    if (position == localProxyRow) {
-                        String value = WebSocketHelper.wsUseMTP ? LocaleController.getString("UseProxyTelegram", R.string.UseProxyTelegram) : LocaleController.getString("UseProxySocks5", R.string.UseProxySocks5);
-                        textCell.setTextAndValue(LocaleController.getString("WsLocalProxy", R.string.WsLocalProxy), value, true, true);
-                    } else if (position == switchBackendRow) {
-                        String value = WebSocketHelper.backend == 0 ? "Nekogram" : "Nekogram X";
-                        textCell.setTextAndValue(LocaleController.getString("Switch Backend", R.string.SwitchBackend), value, true, true);
+                    if (position == providerRow) {
+                        String value;
+                        Log.d("isCustomProvider: " + WebSocketHelper.getCurrentProvider().equals(WsProvider.Custom));
+                        if (WebSocketHelper.getCurrentProvider().equals(WsProvider.Custom)) {
+                            value = WebSocketHelper.getCurrentProvider().getHost();
+                        } else {
+                            value = WebSocketHelper.getCurrentProvider().name();
+                        }
+                        textCell.setTextAndValue(LocaleController.getString("WsProvider", R.string.WsProvider), value, partial, true);
+                    } else if (position == customRow) {
+                        textCell.setTextAndValue(LocaleController.getString("WsGetHelp", R.string.WsGetHelp), "@WSProxy", true);
                     }
                     break;
                 }
@@ -155,8 +206,6 @@ public class WsSettingsActivity extends BaseActivity {
                     TextCheckCell textCell = (TextCheckCell) holder.itemView;
                     if (position == enableTLSRow) {
                         textCell.setTextAndCheck(LocaleController.getString("WsEnableTls", R.string.WsEnableTls), WebSocketHelper.wsEnableTLS, true);
-                    } else if (position == enableDoHRow) {
-                        textCell.setTextAndCheck(LocaleController.getString("WsEnableDoh", R.string.WsEnableDoh), WebSocketHelper.wsUseDoH, false);
                     }
                     break;
                 }
@@ -169,8 +218,13 @@ public class WsSettingsActivity extends BaseActivity {
                 }
                 case TYPE_INFO_PRIVACY: {
                     TextInfoPrivacyCell cell = (TextInfoPrivacyCell) holder.itemView;
-                    cell.setText(WebSocketHelper.backend == 0 ? LocaleController.getString("NekogramWsDescription",
-                        R.string.NekogramWsDescription) : LocaleController.getString("NekogramXWsDescription", R.string.NekogramXWsDescription));
+                    String value = null;
+                    if (WebSocketHelper.getCurrentProvider().equals(WsProvider.Nekogram)) {
+                        value = LocaleController.getString("NekogramWsDescription", R.string.NekogramWsDescription);
+                    } else if (WebSocketHelper.getCurrentProvider().equals(WsProvider.Custom)) {
+                        value = LocaleController.getString("WsCustomDescription", R.string.WsCustomDescription);
+                    }
+                    cell.setText(value);
                     cell.setBackground(Theme.getThemedDrawable(mContext, R.drawable.greydivider_bottom, Theme.key_windowBackgroundGrayShadow));
                     break;
                 }
@@ -183,9 +237,9 @@ public class WsSettingsActivity extends BaseActivity {
                 return TYPE_INFO_PRIVACY;
             } else if (position == settingsRow) {
                 return TYPE_HEADER;
-            } else if (position == enableTLSRow || position == enableDoHRow) {
+            } else if (position == enableTLSRow) {
                 return TYPE_CHECK;
-            } else if (position == localProxyRow || position == switchBackendRow) {
+            } else if (position == providerRow || position == customRow) {
                 return TYPE_SETTINGS;
             }
             return TYPE_SETTINGS;

@@ -447,9 +447,8 @@ public class ConnectionsManager extends BaseController {
 
         if (preferences.getBoolean("proxy_enabled", false) && !TextUtils.isEmpty(proxyAddress)) {
             Log.d("proxy address: " + proxyAddress);
-            if (WebSocketHelper.serverHost.get().equals(proxyAddress)) {
-                Log.d("using websocket proxy: " + WebSocketHelper.serverHost.get());
-                native_setProxySettings(currentAccount, "127.0.0.1", WebSocketHelper.getSocksPort(), "", "", WebSocketHelper.wsUseMTP ? "00000000000000000000000000000000" : "");
+            if (WebSocketHelper.proxyServer.equals(proxyAddress)) {
+                native_setProxySettings(currentAccount, "127.0.0.1", WebSocketHelper.getSocksPort(), "", "", "");
             } else {
                 native_setProxySettings(currentAccount, proxyAddress, proxyPort, proxyUsername, proxyPassword, proxySecret);
             }
@@ -546,10 +545,10 @@ public class ConnectionsManager extends BaseController {
         if (secret == null) {
             secret = "";
         }
-        if (address.equals(WebSocketHelper.serverHost.get())) {
+        if (address.equals(WebSocketHelper.proxyServer)) {
             address = "127.0.0.1";
             port = WebSocketHelper.getSocksPort();
-            secret = WebSocketHelper.wsUseMTP ? "00000000000000000000000000000000" : "";
+            secret = "";
         }
 
         return native_checkProxy(currentAccount, address, port, username, password, secret, requestTimeDelegate);
@@ -779,12 +778,11 @@ public class ConnectionsManager extends BaseController {
         if (secret == null) {
             secret = "";
         }
-        if (address.equals(WebSocketHelper.serverHost.get())) {
+        if (address.equals(WebSocketHelper.proxyServer)) {
             Log.d("using websocket proxy");
-            Log.d("ws server host: " + WebSocketHelper.serverHost.get());
             address = "127.0.0.1";
             port = WebSocketHelper.getSocksPort();
-            secret = WebSocketHelper.wsUseMTP ? "00000000000000000000000000000000" : "";
+            secret = "";
         }
 
 
