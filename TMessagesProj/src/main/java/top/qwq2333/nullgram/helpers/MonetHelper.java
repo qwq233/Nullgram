@@ -28,13 +28,13 @@ import android.os.PatternMatcher;
 
 import androidx.annotation.RequiresApi;
 
-import com.google.android.exoplayer2.util.Log;
-
 import org.telegram.messenger.ApplicationLoader;
 import org.telegram.messenger.R;
 import org.telegram.ui.ActionBar.Theme;
 
 import java.util.HashMap;
+
+import top.qwq2333.nullgram.utils.Log;
 
 @RequiresApi(api = Build.VERSION_CODES.S)
 public class MonetHelper {
@@ -158,6 +158,10 @@ public class MonetHelper {
     }
 
     public static void unregisterReceiver(Context context) {
-        overlayChangeReceiver.unregister(context);
+        try {
+            overlayChangeReceiver.unregister(context);
+        } catch (IllegalArgumentException e) {
+            Log.e(e);
+        }
     }
 }
