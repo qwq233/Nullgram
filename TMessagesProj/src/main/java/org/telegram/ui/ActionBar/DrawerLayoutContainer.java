@@ -566,7 +566,7 @@ public class DrawerLayoutContainer extends FrameLayout {
                     child.layout(-child.getMeasuredWidth(), lp.topMargin + getPaddingTop(), 0, lp.topMargin + child.getMeasuredHeight() + +getPaddingTop());
                 }
             } catch (Exception e) {
-                Log.e(e);
+                Log.w(e);
             }
         }
         inLayout = false;

@@ -161,7 +161,7 @@ public class MonetHelper {
         try {
             overlayChangeReceiver.unregister(context);
         } catch (IllegalArgumentException e) {
-            Log.e(e);
+            Log.w(e);
         }
     }
 }
