@@ -530,7 +530,7 @@ public class PremiumPreviewFragment extends BaseFragment implements Notification
 //                if (subscriptionTiers.isEmpty()) {
 //                    return;
 //                }
-               // }
+                // }
 
                 SubscriptionTier tier = selectedTierIndex < 0 || selectedTierIndex >= subscriptionTiers.size() ? null : subscriptionTiers.get(selectedTierIndex);
                 showDialog(new PremiumFeatureBottomSheet(PremiumPreviewFragment.this, cell.data.type, false, tier));
@@ -683,9 +683,9 @@ public class PremiumPreviewFragment extends BaseFragment implements Notification
                 if (selectedTier.subscriptionOption.bot_url == null) {
                     if (!TextUtils.isEmpty(fragment.getMessagesController().premiumBotUsername)) {
                         launchActivity.setNavigateToPremiumBot(true);
-                        launchActivity.onNewIntent(new Intent(Intent.ACTION_VIEW, Uri.parse("https://t.me/" + fragment.getMessagesController().premiumBotUsername + "?start=" + source)));
+                        launchActivity.onNewIntent(new Intent(Intent.ACTION_VIEW, Uri.parse("https://t.me/" + fragment.getMessagesController().premiumBotUsername + "?start=" + source)).putExtra("internal", true));
                     } else if (!TextUtils.isEmpty(fragment.getMessagesController().premiumInvoiceSlug)) {
-                        launchActivity.onNewIntent(new Intent(Intent.ACTION_VIEW, Uri.parse("https://t.me/$" + fragment.getMessagesController().premiumInvoiceSlug)));
+                        launchActivity.onNewIntent(new Intent(Intent.ACTION_VIEW, Uri.parse("https://t.me/$" + fragment.getMessagesController().premiumInvoiceSlug)).putExtra("internal", true));
                     }
                 } else {
                     Uri uri = Uri.parse(selectedTier.subscriptionOption.bot_url);
@@ -787,10 +787,10 @@ public class PremiumPreviewFragment extends BaseFragment implements Notification
                     AndroidUtilities.runOnUIThread(() -> {
                         if (response instanceof TLRPC.TL_boolTrue) {
                             BillingController.getInstance().launchBillingFlow(fragment.getParentActivity(), fragment.getAccountInstance(), purpose, Collections.singletonList(
-                                    BillingFlowParams.ProductDetailsParams.newBuilder()
-                                            .setProductDetails(BillingController.PREMIUM_PRODUCT_DETAILS)
-                                            .setOfferToken(selectedTier.getOfferDetails().getOfferToken())
-                                            .build()
+                                BillingFlowParams.ProductDetailsParams.newBuilder()
+                                    .setProductDetails(BillingController.PREMIUM_PRODUCT_DETAILS)
+                                    .setOfferToken(selectedTier.getOfferDetails().getOfferToken())
+                                    .build()
                             ), updateParams, false);
                         } else {
                             AlertsCreator.processError(fragment.getCurrentAccount(), error, fragment, req);
@@ -849,7 +849,7 @@ public class PremiumPreviewFragment extends BaseFragment implements Notification
                 return LocaleController.getString(R.string.Loading);
             }
             return LocaleController.formatString(UserConfig.getInstance(currentAccount).isPremium() ? tier.getMonths() == 12 ? R.string.UpgradePremiumPerYear : R.string.UpgradePremiumPerMonth :
-                    tier.getMonths() == 12 ? R.string.SubscribeToPremiumPerYear : R.string.SubscribeToPremium, tier.getMonths() == 12 ? tier.getFormattedPricePerYear() : tier.getFormattedPricePerMonth());
+                tier.getMonths() == 12 ? R.string.SubscribeToPremiumPerYear : R.string.SubscribeToPremium, tier.getMonths() == 12 ? tier.getFormattedPricePerYear() : tier.getFormattedPricePerMonth());
         }
     }
 
@@ -1022,7 +1022,7 @@ public class PremiumPreviewFragment extends BaseFragment implements Notification
                     }
 
                     SpannableString spannableString = new SpannableString(premiumPromo.status_text);
-                    MediaDataController.addTextStyleRuns(premiumPromo.status_entities, premiumPromo.status_text, spannableString);
+                    MediaDataController.addTextStyleRuns(premiumPromo.status_entities, premiumPromo.status_text, spannableString, -1);
                     byte t = 0;
                     for (TextStyleSpan span : spannableString.getSpans(0, spannableString.length(), TextStyleSpan.class)) {
                         TextStyleSpan.TextStyleRun run = span.getTextStyleRun();
@@ -1356,9 +1356,9 @@ public class PremiumPreviewFragment extends BaseFragment implements Notification
                 subscriptionTiers.clear();
                 currentSubscriptionTier = null;
             } else if (!BuildVars.useInvoiceBilling() && currentSubscriptionTier != null && !Objects.equals(BillingController.getInstance().getLastPremiumTransaction(),
-                    currentSubscriptionTier.subscriptionOption != null ? currentSubscriptionTier.subscriptionOption.transaction != null ?
-                            currentSubscriptionTier.subscriptionOption.transaction.replaceAll(TRANSACTION_PATTERN, "$1") : null : null) ||
-                                currentSubscriptionTier != null && currentSubscriptionTier.getMonths() == 12) {
+                currentSubscriptionTier.subscriptionOption != null ? currentSubscriptionTier.subscriptionOption.transaction != null ?
+                    currentSubscriptionTier.subscriptionOption.transaction.replaceAll(TRANSACTION_PATTERN, "$1") : null : null) ||
+                currentSubscriptionTier != null && currentSubscriptionTier.getMonths() == 12) {
                 subscriptionTiers.clear();
                 currentSubscriptionTier = null;
             }
@@ -1459,7 +1459,13 @@ public class PremiumPreviewFragment extends BaseFragment implements Notification
             animated = false;
         }
         if (BuildVars.IS_BILLING_UNAVAILABLE) {
-            premiumButtonView.setButton(getPremiumButtonText(currentAccount, subscriptionTiers.get(selectedTierIndex)), v -> buyPremium(this), animated);
+            String text;
+            if (subscriptionTiers.isEmpty()) {
+                text = LocaleController.getString(R.string.SubscribeToPremiumNotAvailable);
+            } else {
+                text = getPremiumButtonText(currentAccount, subscriptionTiers.get(selectedTierIndex));
+            }
+            premiumButtonView.setButton(text, v -> buyPremium(this), animated);
             return;
         }
         if (!BuildVars.useInvoiceBilling() && (!BillingController.getInstance().isReady() || subscriptionTiers.isEmpty() || selectedTierIndex >= subscriptionTiers.size() || subscriptionTiers.get(selectedTierIndex).googlePlayProductDetails == null)) {
@@ -1473,9 +1479,9 @@ public class PremiumPreviewFragment extends BaseFragment implements Notification
                 BillingFlowParams.SubscriptionUpdateParams updateParams = null;
                 if (currentSubscriptionTier != null && currentSubscriptionTier.subscriptionOption != null && currentSubscriptionTier.subscriptionOption.transaction != null) {
                     updateParams = BillingFlowParams.SubscriptionUpdateParams.newBuilder()
-                            .setOldPurchaseToken(BillingController.getInstance().getLastPremiumToken())
-                            .setReplaceProrationMode(BillingFlowParams.ProrationMode.IMMEDIATE_AND_CHARGE_FULL_PRICE)
-                            .build();
+                        .setOldPurchaseToken(BillingController.getInstance().getLastPremiumToken())
+                        .setReplaceProrationMode(BillingFlowParams.ProrationMode.IMMEDIATE_AND_CHARGE_FULL_PRICE)
+                        .build();
                 }
                 buyPremium(this, tier, "settings", true, updateParams);
             }, animated);
@@ -1511,9 +1517,9 @@ public class PremiumPreviewFragment extends BaseFragment implements Notification
     @Override
     public ArrayList<ThemeDescription> getThemeDescriptions() {
         return SimpleThemeDescription.createThemeDescriptions(this::updateColors,
-                Theme.key_premiumGradient1, Theme.key_premiumGradient2, Theme.key_premiumGradient3, Theme.key_premiumGradient4,
-                Theme.key_premiumGradientBackground1, Theme.key_premiumGradientBackground2, Theme.key_premiumGradientBackground3, Theme.key_premiumGradientBackground4,
-                Theme.key_premiumGradientBackgroundOverlay, Theme.key_premiumStartGradient1, Theme.key_premiumStartGradient2, Theme.key_premiumStartSmallStarsColor, Theme.key_premiumStartSmallStarsColor2
+            Theme.key_premiumGradient1, Theme.key_premiumGradient2, Theme.key_premiumGradient3, Theme.key_premiumGradient4,
+            Theme.key_premiumGradientBackground1, Theme.key_premiumGradientBackground2, Theme.key_premiumGradientBackground3, Theme.key_premiumGradientBackground4,
+            Theme.key_premiumGradientBackgroundOverlay, Theme.key_premiumStartGradient1, Theme.key_premiumStartGradient2, Theme.key_premiumStartSmallStarsColor, Theme.key_premiumStartSmallStarsColor2
         );
     }
 
