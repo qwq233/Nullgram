@@ -102,7 +102,7 @@ object Log {
      * @param msg 日志内容
      */
     @JvmStatic
-    fun d(msg: String, throwable: Throwable) {
+    fun d(msg: String, throwable: Throwable? = null) {
         Log.d(TAG, msg, throwable)
     }
 
@@ -112,7 +112,7 @@ object Log {
      * @param msg 日志内容
      */
     @JvmStatic
-    fun i(msg: String, throwable: Throwable) {
+    fun i(msg: String, throwable: Throwable? = null) {
         Log.i(TAG, msg, throwable)
     }
 
@@ -122,7 +122,7 @@ object Log {
      * @param msg 日志内容
      */
     @JvmStatic
-    fun w(msg: String, throwable: Throwable) {
+    fun w(msg: String, throwable: Throwable? = null) {
         Log.w(TAG, msg, throwable)
     }
 
@@ -132,9 +132,11 @@ object Log {
      * @param msg 日志内容
      */
     @JvmStatic
-    fun e(msg: String, throwable: Throwable) {
+    fun e(msg: String, throwable: Throwable? = null) {
         Log.e(TAG, msg, throwable)
-        AnalyticsUtils.trackCrashes(throwable)
+        if (throwable != null) {
+            AnalyticsUtils.trackCrashes(throwable)
+        }
     }
 
     /**
