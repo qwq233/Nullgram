@@ -156,7 +156,7 @@ public class Defines {
     public static final String deepLFormality = "deepLFormality";
     public static final String translatorStatus = "translatorStatus";
     public static final String targetLanguage = "targetLanguage";
-    public static final String restrictedLanguages = "restrictedLanguages";
+    public static final String restrictedLanguages = "restrictedLanguagesFix";
     public static final String autoTranslate = "autoTranslate";
 
     // Misc

@@ -47,6 +47,7 @@ import org.telegram.ui.Components.LayoutHelper;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 
@@ -177,13 +178,14 @@ public class LanguageSelectActivity extends BaseActivity {
                     return;
                 }
                 var restrictedLanguages = TranslateHelper.getRestrictedLanguages();
+                var newSelectedLanguages = new HashSet<>(restrictedLanguages);
                 boolean remove = restrictedLanguages.contains(localeInfo.langCode);
                 if (remove) {
-                    restrictedLanguages.removeIf(s -> s != null && s.equals(localeInfo.langCode));
-                    TranslateHelper.setRestrictedLanguages(restrictedLanguages);
+                    newSelectedLanguages.removeIf(s -> s != null && s.equals(localeInfo.langCode));
+                    TranslateHelper.setRestrictedLanguages(newSelectedLanguages);
                 } else {
-                    restrictedLanguages.add(localeInfo.langCode);
-                    TranslateHelper.setRestrictedLanguages(restrictedLanguages);
+                    newSelectedLanguages.add(localeInfo.langCode);
+                    TranslateHelper.setRestrictedLanguages(newSelectedLanguages);
                 }
                 cell.setChecked(!remove);
             } else {
