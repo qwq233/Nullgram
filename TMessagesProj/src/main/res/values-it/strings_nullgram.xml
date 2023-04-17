@@ -211,6 +211,7 @@
     <string name="SwitchToPersonalAccount">Passa al tuo account</string>
     <string name="openArchiveOnPull">Apri archivio su pull</string>
     <string name="hideAllTab">Nascondi scheda \"Tutte le chat\"</string>
+    <string name="ignoreMutedCount">Ignore Muted Count in tab</string>
     <string name="disableStickersAutoReorder">Disattiva autoriordino stickerpack</string>
     <string name="Ban">Ban</string>
     <string name="autoDisableBuiltInProxy">Disattiva automaticamente proxy integrato</string>
