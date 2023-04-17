@@ -211,6 +211,7 @@
     <string name="SwitchToPersonalAccount">切换到个人账户</string>
     <string name="openArchiveOnPull">下拉打开已归档对话</string>
     <string name="hideAllTab">隐藏“全部对话”栏</string>
+    <string name="ignoreMutedCount">忽略文件夹标签中静音的未读计数</string>
     <string name="disableStickersAutoReorder">禁用贴纸自动重新排列</string>
     <string name="Ban">封禁</string>
     <string name="autoDisableBuiltInProxy">自动关闭内置代理</string>
