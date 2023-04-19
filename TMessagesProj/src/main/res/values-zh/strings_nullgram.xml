@@ -26,7 +26,7 @@
     <string name="BotToken">API密钥</string>
     <string name="InvalidAccessToken">无效访问令牌</string>
     <string name="QRLoginTitle">二维码 登入</string>
-    <string name="QRLoginMessage">用另一个设备扫描二维码登录。</string>
+    <string name="QRLoginMessage">用其他设备扫描二维码登录。</string>
     <string name="NullgramVersion">Nullgram %1$s\n基于 TELEOFFICIAL %2$s</string>
     <string name="RestrictionReason">限制原因</string>
     <string name="showBotAPIID">显示Bot API ID</string>
@@ -184,7 +184,7 @@
     <string name="PhotoCopied">图片已复制</string>
     <string name="CopyPhoto">复制图片</string>
     <string name="hidePremiumStickerAnim">隐藏会员贴图动画</string>
-    <string name="premium">Premium</string>
+    <string name="premium">会员</string>
     <string name="fastSpeedUpload">更快的上传速度</string>
     <string name="showTabsOnForward">转发时显示标签</string>
     <string name="TabTitleType">显示在标签页</string>
@@ -276,9 +276,9 @@
     <string name="MarkdownAbout">使用Markdown编辑消息中的文字：^1**粗体**^1，^2__斜体__^2，^3~~删除线~^3，^4`等宽\'^4，^5|打码||^5，^6文本^7链接^8。</string>
     <string name="MarkdownAbout2">使用Markdown编辑消息中的文字：^1**粗体**^1，^2__斜体__^2，^3~~删除线~^3，^4`等宽\'^4，^5|打码||^5。</string>
     <string name="MarkdownDisableByDefault">默认为禁用</string>
-    <string name="DatacenterStatusShort">Datacenter</string>
-    <string name="RegistrationDate">Registration date</string>
-    <string name="RegistrationDateNewer">Newer than %s</string>
-    <string name="RegistrationDateOlder">Older than %s</string>
-    <string name="RegistrationDateApproximately">Approximately %s</string>
+    <string name="DatacenterStatusShort">数据中心</string>
+    <string name="RegistrationDate">注册日期</string>
+    <string name="RegistrationDateNewer">晚于 %s</string>
+    <string name="RegistrationDateOlder">早于 %s</string>
+    <string name="RegistrationDateApproximately">大概 %s</string>
 </resources>
