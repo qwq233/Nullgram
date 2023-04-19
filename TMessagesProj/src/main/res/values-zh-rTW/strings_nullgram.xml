@@ -27,7 +27,7 @@
     <string name="InvalidAccessToken">無效訪問令牌</string>
     <string name="QRLoginTitle">二維碼登入</string>
     <string name="QRLoginMessage">用其他裝置掃描二維碼登入。</string>
-    <string name="NullgramVersion">Nullgram %1$s\n是基於官方版本Telegram所開發 %2$s</string>
+    <string name="NullgramVersion">Nullgram %1$s\n是基於官方版本 TELEOFFICIAL 所開發 %2$s</string>
     <string name="RestrictionReason">限制原因</string>
     <string name="showBotAPIID">顯示機器人API ID</string>
     <string name="hideGroupSticker">隱藏群組貼圖</string>
@@ -113,7 +113,7 @@
     <string name="Number">Number</string>
     <string name="autoProxySwitch">代理自動切換</string>
     <string name="ignoreReactionMention">忽略反應提示</string>
-    <string name="ignoreReactionMentionInfo">It will auto set unread reaction mentions as read.\nIt will also sync to other devices.\nNotification will be still shown because it\'s controlled by Telegram Server.</string>
+    <string name="ignoreReactionMentionInfo">它会自動將未讀反應提及設定為已讀。\n已讀会同步到其他裝置。\n通知仍將被顯示，因為它由 TELEOFFICIAL 伺服器控制。</string>
     <string name="StickerSize">Sticker Size</string>
     <string name="StickerSizeDialogMessageReplyTo">get me some anime stuff pls.</string>
     <string name="StickerSizeDialogMessage">wow cute girl!</string>
@@ -151,7 +151,7 @@
     <string name="scrollableChatPreview">Scrollable Chat Preview</string>
     <string name="disableVibration">Disable Vibration</string>
     <string name="DatacenterStatus">Datacenter status</string>
-    <string name="DatacenterStatusAbout">Check the status of Telegram\'s **datacenters**.</string>
+    <string name="DatacenterStatusAbout">檢查 TELEOFFICIAL 的 **資料中心** 狀態。</string>
     <string name="DeleteAllFromSelfDone">您所有的訊息已刪除</string>
     <string name="setLinkedUser">设置链接用户</string>
     <string name="UserIDOrBotID">Enter User ID or Bot ID</string>
@@ -188,7 +188,7 @@
     <string name="fastSpeedUpload">Fasten upload speed</string>
     <string name="showTabsOnForward">在转发时显示標籤</string>
     <string name="TabTitleType">顯示在標籤頁</string>
-    <string name="TabTitleTypeTip">Icons are cloud-synced by Telegram.</string>
+    <string name="TabTitleTypeTip">图标与 TELEOFFICIAL 云同步。</string>
     <string name="TabTitleTypeText">標題</string>
     <string name="TabTitleTypeIcon">圖標</string>
     <string name="TabTitleTypeMix">Icons with titles</string>
@@ -215,7 +215,7 @@
     <string name="Ban">封鎖</string>
     <string name="autoDisableBuiltInProxy">Auto Disable Built-In Proxy</string>
     <string name="autoDisableBuiltInProxyDesc">It will automatically turn off the built-in proxy when Nullgram detected you turn on the VPN</string>
-    <string name="NekogramWsDescription">Connect to Telegram through WebSocket via Cloudflare.\nProvided by Nekogram</string>
+    <string name="NekogramWsDescription">透過 WebSocket 透過雲端連線到 TELEOFFICIAL 。\n由 Nekogram 提供</string>
     <string name="NekogramXWsDescription">Provided by Nekogram X</string>
     <string name="WsEnableTls">Enable TLS</string>
     <string name="WsLocalProxy">Local proxy</string>
