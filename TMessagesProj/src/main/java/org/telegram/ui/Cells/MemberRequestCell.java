@@ -92,7 +92,7 @@ public class MemberRequestCell extends FrameLayout {
 
         float dismissButtonWidth = dismissButton.getPaint().measureText(dismissButton.getText().toString()) + btnPadding * 2;
         TextView banButton = new TextView(getContext());
-        banButton.setBackground(Theme.AdaptiveRipple.filledRect(Theme.key_dialogTextRed, 4));
+        banButton.setBackground(Theme.AdaptiveRipple.filledRect(Theme.key_text_RedRegular, 4));
         banButton.setGravity((LocaleController.isRTL ? Gravity.RIGHT : Gravity.LEFT) | Gravity.CENTER_VERTICAL);
         banButton.setMaxLines(1);
         banButton.setPadding(btnPadding, 0, btnPadding, 0);
@@ -124,7 +124,9 @@ public class MemberRequestCell extends FrameLayout {
         avatarImageView.setForUserOrChat(user, avatarDrawable);
         nameTextView.setText(UserObject.getUserName(user));
         String dateText = LocaleController.formatDateAudio(importer.date, false);
-        if (importer.approved_by == 0) {
+        if (importer.via_chatlist) {
+            statusTextView.setText(LocaleController.getString("JoinedViaFolder", R.string.JoinedViaFolder));
+        } else if (importer.approved_by == 0) {
             statusTextView.setText(LocaleController.formatString("RequestedToJoinAt", R.string.RequestedToJoinAt, dateText));
         } else {
             TLRPC.User approvedByUser = users.get(importer.approved_by);

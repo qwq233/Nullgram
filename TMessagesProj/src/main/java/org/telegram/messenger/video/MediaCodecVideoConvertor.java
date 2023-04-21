@@ -15,6 +15,7 @@ import org.telegram.messenger.Utilities;
 import org.telegram.messenger.VideoEditedInfo;
 
 import java.io.File;
+import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 
@@ -76,6 +77,7 @@ public class MediaCodecVideoConvertor {
                                          MediaController.CropState cropState,
                                          boolean isRound) {
 
+        FileLog.d("convertVideoInternal original=" + originalWidth + "x" + originalHeight + "  result=" + resultWidth + "x" + resultHeight + " " + avatarStartTime);
         long time = System.currentTimeMillis();
         boolean error = false;
         boolean repeatWithIncreasedTimeout = false;

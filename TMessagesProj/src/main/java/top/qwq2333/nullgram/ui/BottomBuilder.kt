@@ -360,7 +360,7 @@ class BottomBuilder(val ctx: Context) {
             }
 
             if (red) {
-                setColors("key_dialogTextRed2", "key_dialogTextRed2")
+                setColors("key_text_RedRegular2", "key_text_RedRegular2")
             }
 
             this@BottomBuilder.rootView.addView(
