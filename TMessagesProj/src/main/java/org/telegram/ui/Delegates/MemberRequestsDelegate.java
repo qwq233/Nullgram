@@ -771,7 +771,7 @@ public class MemberRequestsDelegate implements MemberRequestCell.OnClickListener
             popupLayout.addView(sendMsgCell);
 
             ActionBarMenuSubItem dismissCell = new ActionBarMenuSubItem(context, false, true);
-            dismissCell.setColors(Theme.getColor(Theme.key_dialogTextRed, resourcesProvider), Theme.getColor(Theme.key_dialogRedIcon, resourcesProvider));
+            dismissCell.setColors(Theme.getColor(Theme.key_text_RedBold, resourcesProvider), Theme.getColor(Theme.key_text_RedRegular, resourcesProvider));
             dismissCell.setSelectorColor(Theme.getColor(Theme.key_dialogButtonSelector, resourcesProvider));
             dismissCell.setTextAndIcon(LocaleController.getString("DismissRequest", R.string.DismissRequest), R.drawable.msg_remove);
             dismissCell.setOnClickListener((v) -> {
@@ -783,7 +783,7 @@ public class MemberRequestsDelegate implements MemberRequestCell.OnClickListener
             popupLayout.addView(dismissCell);
 
             ActionBarMenuSubItem banCell = new ActionBarMenuSubItem(context, false, true);
-            banCell.setColors(Theme.getColor(Theme.key_dialogTextRed, resourcesProvider), Theme.getColor(Theme.key_dialogRedIcon, resourcesProvider));
+            banCell.setColors(Theme.getColor(Theme.key_text_RedRegular, resourcesProvider), Theme.getColor(Theme.key_text_RedRegular, resourcesProvider));
             banCell.setSelectorColor(Theme.getColor(Theme.key_dialogButtonSelector, resourcesProvider));
             banCell.setTextAndIcon(LocaleController.getString("Ban", R.string.Ban), R.drawable.group_ban_empty);
             banCell.setOnClickListener((v) -> {

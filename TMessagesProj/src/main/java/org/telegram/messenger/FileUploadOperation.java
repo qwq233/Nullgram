@@ -531,10 +531,14 @@ public class FileUploadOperation {
         } else {
             connectionType = ConnectionsManager.ConnectionTypeUpload | ((requestNumFinal % 4) << 16);
         }
-
-        int requestToken = ConnectionsManager.getInstance(currentAccount).sendRequest(finalRequest, (response, error) -> {
+        long time = System.currentTimeMillis();
+        int[] requestToken = new int[1];
+        requestToken[0] = ConnectionsManager.getInstance(currentAccount).sendRequest(finalRequest, (response, error) -> {
             if (currentOperationGuid != operationGuid) {
                 return;
+            }
+            if (BuildVars.LOGS_ENABLED) {
+                FileLog.d("debug_uploading: " + " response reqId " + requestToken[0] + " time" + uploadingFilePath);
             }
             int networkType = response != null ? response.networkType : ApplicationLoader.getCurrentNetworkType();
             if (currentType == ConnectionsManager.FileTypeAudio) {
@@ -656,6 +660,9 @@ public class FileUploadOperation {
                 startUploadRequest();
             }
         }), forceSmallFile ? ConnectionsManager.RequestFlagCanCompress : 0, ConnectionsManager.DEFAULT_DATACENTER_ID, connectionType, true);
-        requestTokens.put(requestNumFinal, requestToken);
+        if (BuildVars.LOGS_ENABLED) {
+            FileLog.d("debug_uploading: " + " send reqId " + requestToken + " " + uploadingFilePath);
+        }
+        requestTokens.put(requestNumFinal, requestToken[0]);
     }
 }

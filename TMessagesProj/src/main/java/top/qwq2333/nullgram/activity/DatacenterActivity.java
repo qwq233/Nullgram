@@ -452,7 +452,7 @@ public class DatacenterActivity extends BaseActivity implements NotificationCent
             } else if (currentInfo.available) {
                 if (currentInfo.ping >= 1000) {
                     valueTextView.setText(String.format("%s, %s", LocaleController.getString("SpeedSlow", R.string.SpeedSlow), LocaleController.formatString("Ping", R.string.Ping, currentInfo.ping)));
-                    colorKey = Theme.key_windowBackgroundWhiteRedText4;
+                    colorKey = Theme.key_text_RedRegular;
                 } else if (currentInfo.ping != 0) {
                     valueTextView.setText(String.format("%s, %s", LocaleController.getString("Available", R.string.Available), LocaleController.formatString("Ping", R.string.Ping, currentInfo.ping)));
                     colorKey = Theme.key_windowBackgroundWhiteGreenText;
@@ -462,7 +462,7 @@ public class DatacenterActivity extends BaseActivity implements NotificationCent
                 }
             } else {
                 valueTextView.setText(LocaleController.getString("Unavailable", R.string.Unavailable));
-                colorKey = Theme.key_windowBackgroundWhiteRedText4;
+                colorKey = Theme.key_text_RedRegular;
             }
             valueTextView.setTag(colorKey);
             valueTextView.setTextColor(Theme.getColor(colorKey));

@@ -445,6 +445,16 @@ public class PushListenerController {
                                     messageText = getReactedText(loc_key, args);
                                 } else {
                                     switch (loc_key) {
+                                        case "MESSAGE_SAME_WALLPAPER": {
+                                            messageText = LocaleController.formatString("ActionSetSameWallpaperForThisChat", R.string.ActionSetSameWallpaperForThisChat, args[0]);
+                                            message1 = LocaleController.getString("WallpaperSameNotification", R.string.WallpaperSameNotification);
+                                            break;
+                                        }
+                                        case "MESSAGE_WALLPAPER": {
+                                            messageText = LocaleController.formatString("ActionSetWallpaperForThisChat", R.string.ActionSetWallpaperForThisChat, args[0]);
+                                            message1 = LocaleController.getString("WallpaperNotification", R.string.WallpaperNotification);
+                                            break;
+                                        }
                                         case "MESSAGE_RECURRING_PAY": {
                                             messageText = LocaleController.formatString("NotificationMessageRecurringPay", R.string.NotificationMessageRecurringPay, args[0], args[1]);
                                             message1 = LocaleController.getString("PaymentInvoice", R.string.PaymentInvoice);
