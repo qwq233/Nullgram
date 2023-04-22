@@ -27,7 +27,7 @@
     <string name="InvalidAccessToken">无效访问令牌</string>
     <string name="QRLoginTitle">二维码 登入</string>
     <string name="QRLoginMessage">用另一个设备扫描二维码登录。</string>
-    <string name="NullgramVersion">Nullgram %1$s\n基于 Telegram %2$s</string>
+    <string name="NullgramVersion">Nullgram %1$s\nBased on TELEOFFICIAL %2$s</string>
     <string name="RestrictionReason">限制原因</string>
     <string name="showBotAPIID">显示Bot API ID</string>
     <string name="hideGroupSticker">隐藏群组贴纸包</string>
@@ -113,7 +113,9 @@
     <string name="Number">Number</string>
     <string name="autoProxySwitch">代理自动切换</string>
     <string name="ignoreReactionMention">忽略反应提示</string>
-    <string name="ignoreReactionMentionInfo">它将自动将未读反应提及设置为已读。\n它还将同步到其他设备。\n通知仍将被显示，因为它由 Telegram 服务器控制。</string>
+    <string name="ignoreReactionMentionInfo">It will auto set unread reaction mentions as read.\nIt will also sync to other devices.\nNotification will be still shown because it\'s
+        controlled by TELEOFFICIAL Server.
+    </string>
     <string name="StickerSize">贴纸大小</string>
     <string name="StickerSizeDialogMessageReplyTo">给我一些很不错的东西。</string>
     <string name="StickerSizeDialogMessage">wow 真可爱</string>
@@ -151,7 +153,7 @@
     <string name="scrollableChatPreview">可滚动聊天预览框</string>
     <string name="disableVibration">禁用震动</string>
     <string name="DatacenterStatus">数据中心状态</string>
-    <string name="DatacenterStatusAbout">检查 Telegram 的 **数据中心** 状态。</string>
+    <string name="DatacenterStatusAbout">Check the status of TELEOFFICIAL\'s **datacenters**.</string>
     <string name="DeleteAllFromSelfDone">您所有的消息已删除</string>
     <string name="setLinkedUser">设置链接用户</string>
     <string name="UserIDOrBotID">输入用户 ID 或 Bot ID</string>
@@ -188,7 +190,7 @@
     <string name="fastSpeedUpload">更快的上传速度</string>
     <string name="showTabsOnForward">转发时显示标签</string>
     <string name="TabTitleType">显示在标签页</string>
-    <string name="TabTitleTypeTip">图标与Telegram云同步</string>
+    <string name="TabTitleTypeTip">Icons are cloud-synced by TELEOFFICIAL.</string>
     <string name="TabTitleTypeText">标题</string>
     <string name="TabTitleTypeIcon">图标</string>
     <string name="TabTitleTypeMix">带标题的图标</string>
@@ -216,11 +218,14 @@
     <string name="Ban">封禁</string>
     <string name="autoDisableBuiltInProxy">自动关闭内置代理</string>
     <string name="autoDisableBuiltInProxyDesc">当Nullgram 检测到您打开VPN 时，它将自动关闭内置代理</string>
-    <string name="NekogramWsDescription">通过 WebSocket 通过云端连接到 Telegram 。\n由 Nekogram 提供</string>
+    <string name="NekogramWsDescription">Connect to TELEOFFICIAL through WebSocket via Cloudflare.\nProvided by Nekogram</string>
     <string name="NekogramXWsDescription">由 Nekogram X 提供</string>
+    <string name="WsGetHelp">You can also deploy it easily by yourself!</string>
+    <string name="WsCustomDescription">Use custom domain to connect to TELEOFFICIAL through WebSocket via Cloudflare.</string>
     <string name="WsEnableTls">启用 TLS</string>
     <string name="WsLocalProxy">本地代理</string>
     <string name="WsEnableDoh">启用 DoH</string>
+    <string name="WsProvider">Provider</string>
     <string name="PublicProxy">内置公共代理</string>
     <string name="SwitchBackend">切换后端</string>
     <string name="UpdateInstalling">安装更新中...</string>
@@ -233,7 +238,7 @@
     <string name="Translator">翻译</string>
     <string name="ProviderGoogleTranslate">谷歌翻译</string>
     <string name="ProviderYandexTranslate">Yandex Translate</string>
-    <string name="ProviderTelegramTranslate">Telegram 翻译</string>
+    <string name="ProviderTelegramTranslate">TELEOFFICIAL Translate</string>
     <string name="ProviderMicrosoftTranslate">微软翻译</string>
     <string name="ProviderDeepLTranslate">DeepL Translate</string>
     <string name="ProviderLingoTranslate">彩云小译</string>
@@ -287,4 +292,5 @@
     <string name="RegistrationDateNewer">Newer than %s</string>
     <string name="RegistrationDateOlder">Older than %s</string>
     <string name="RegistrationDateApproximately">Approximately %s</string>
+    <string name="LearnMore">Learn More</string>
 </resources>
