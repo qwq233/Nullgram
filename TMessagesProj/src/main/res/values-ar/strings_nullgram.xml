@@ -27,7 +27,7 @@
     <string name="InvalidAccessToken">تصريح الدخول غير صالح</string>
     <string name="QRLoginTitle">تسجل دخول بواسطة مسح رمز QR</string>
     <string name="QRLoginMessage">قم بمسح QRCode باستخدام جهاز آخر لتسجيل الدخول.</string>
-    <string name="NullgramVersion">نولجرام %1$s\nمبني على تيليجرام %2$s</string>
+    <string name="NullgramVersion">Nullgram %1$s\nBased on TELEOFFICIAL %2$s</string>
     <string name="RestrictionReason">سبب التقييد</string>
     <string name="showBotAPIID">عرض API ID للبوت</string>
     <string name="hideGroupSticker">إخفاء حزمة ملصقات المجموعات</string>
@@ -115,7 +115,9 @@
     <string name="Number">الرقم</string>
     <string name="autoProxySwitch">التبديل التلقائي للوكيل</string>
     <string name="ignoreReactionMention">تجاهل الإشارة على ردة الفعل</string>
-    <string name="ignoreReactionMentionInfo">سيتم تعيين التفاعلات الغير مقروءة تلقائيًا.\nسيتم مزامنة أيضًا مع أجهزة أخرى.\nسيتم عرض الإشعارات لأنها خاضعة لسيطرة خادم تيليجرام.</string>
+    <string name="ignoreReactionMentionInfo">It will auto set unread reaction mentions as read.\nIt will also sync to other devices.\nNotification will be still shown because it\'s
+        controlled by TELEOFFICIAL Server.
+    </string>
     <string name="StickerSize">حجم الملصقات</string>
     <string name="StickerSizeDialogMessageReplyTo">أرسل بعض أشياء عن الأنمي لو سمحت.</string>
     <string name="StickerSizeDialogMessage">واو، فتاة لطيفة 🥰!</string>
@@ -153,7 +155,7 @@
     <string name="scrollableChatPreview">الضغط المطول لعرض المحادثة</string>
     <string name="disableVibration">تعطيل الاهتزاز</string>
     <string name="DatacenterStatus">حالة إدخال البيانات</string>
-    <string name="DatacenterStatusAbout">تحقق من حالة **مراكز البيانات**في تيليجرام.</string>
+    <string name="DatacenterStatusAbout">Check the status of TELEOFFICIAL\'s **datacenters**.</string>
     <string name="DeleteAllFromSelfDone">لقد تم حذف جميع رسائلك</string>
     <string name="setLinkedUser">تعيين مستخدم مرتبط</string>
     <string name="UserIDOrBotID">أدخل معرف المستخدم أو معرف البوت</string>
@@ -190,7 +192,7 @@
     <string name="fastSpeedUpload">سرعة الرفع السريع</string>
     <string name="showTabsOnForward">إظهار علامات التبويب عند أعادة التوجيه</string>
     <string name="TabTitleType">إظهار على علامات التبويب</string>
-    <string name="TabTitleTypeTip">الأيقونات مزامنة سحابية بواسطة Telegram.</string>
+    <string name="TabTitleTypeTip">Icons are cloud-synced by TELEOFFICIAL.</string>
     <string name="TabTitleTypeText">العناوين</string>
     <string name="TabTitleTypeIcon">الأيقونات</string>
     <string name="TabTitleTypeMix">العناوين والأيقونات</string>
@@ -218,11 +220,14 @@
     <string name="Ban">Ban</string>
     <string name="autoDisableBuiltInProxy">Auto Disable Built-In Proxy</string>
     <string name="autoDisableBuiltInProxyDesc">It will automatically turn off the built-in proxy when Nullgram detected you turn on the VPN</string>
-    <string name="NekogramWsDescription">Connect to Telegram through WebSocket via Cloudflare.\nProvided by Nekogram</string>
+    <string name="NekogramWsDescription">Connect to TELEOFFICIAL through WebSocket via Cloudflare.\nProvided by Nekogram</string>
     <string name="NekogramXWsDescription">Provided by Nekogram X</string>
+    <string name="WsGetHelp">You can also deploy it easily by yourself!</string>
+    <string name="WsCustomDescription">Use custom domain to connect to TELEOFFICIAL through WebSocket via Cloudflare.</string>
     <string name="WsEnableTls">Enable TLS</string>
     <string name="WsLocalProxy">Local proxy</string>
     <string name="WsEnableDoh">Enable DoH</string>
+    <string name="WsProvider">Provider</string>
     <string name="PublicProxy">Built-in Public Proxy</string>
     <string name="SwitchBackend">Switch Backend</string>
     <string name="UpdateInstalling">Installing update...</string>
@@ -235,7 +240,7 @@
     <string name="Translator">Translator</string>
     <string name="ProviderGoogleTranslate">Google Translate</string>
     <string name="ProviderYandexTranslate">Yandex Translate</string>
-    <string name="ProviderTelegramTranslate">TELEOFFICIAL</string>
+    <string name="ProviderTelegramTranslate">TELEOFFICIAL Translate</string>
     <string name="ProviderMicrosoftTranslate">Microsoft Translate</string>
     <string name="ProviderDeepLTranslate">DeepL Translate</string>
     <string name="ProviderLingoTranslate">Lingo Translate</string>
@@ -289,4 +294,5 @@
     <string name="RegistrationDateNewer">Newer than %s</string>
     <string name="RegistrationDateOlder">Older than %s</string>
     <string name="RegistrationDateApproximately">Approximately %s</string>
+    <string name="LearnMore">Learn More</string>
 </resources>
