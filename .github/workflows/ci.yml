@@ -45,7 +45,7 @@ jobs:
             ~/.gradle/buildOutputCleanup/cache.properties
           key: gradle-builds-${{ github.sha }}
           restore-keys: |
-            gradle-builds
+            gradle-builds-stable
       - name: Set up ccache
         uses: hendrikmuhs/ccache-action@v1.2
         with:
@@ -82,7 +82,7 @@ jobs:
           cat > service_account_credentials.json << EOF
           ${{ secrets.ANDROID_PUBLISHER_CREDENTIALS }}"
           EOF
-          ./gradlew TMessagesProj:assembleRelease
+          ./gradlew TMessagesProj:assembleArm64Release TMessagesProj:assembleArm32Release TMessagesProj:assembleX86Release TMessagesProj:assembleX86_64Release
           echo "APK_FILE=$(find TMessagesProj/build/outputs/apk -name '*arm64*.apk')" >> $GITHUB_ENV
           echo "APK_FILE_ARMV7=$(find TMessagesProj/build/outputs/apk -name '*arm32*.apk')" >> $GITHUB_ENV
           echo "APK_FILE_X86=$(find TMessagesProj/build/outputs/apk -name '*x86.apk')" >> $GITHUB_ENV
