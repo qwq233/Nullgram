@@ -785,7 +785,7 @@ public class MemberRequestsDelegate implements MemberRequestCell.OnClickListener
             ActionBarMenuSubItem banCell = new ActionBarMenuSubItem(context, false, true);
             banCell.setColors(Theme.getColor(Theme.key_text_RedRegular, resourcesProvider), Theme.getColor(Theme.key_text_RedRegular, resourcesProvider));
             banCell.setSelectorColor(Theme.getColor(Theme.key_dialogButtonSelector, resourcesProvider));
-            banCell.setTextAndIcon(LocaleController.getString("Ban", R.string.Ban), R.drawable.group_ban_empty);
+            banCell.setTextAndIcon(LocaleController.getString("Ban", R.string.Ban), R.drawable.msg_disable);
             banCell.setOnClickListener((v) -> {
                 if (importer != null) {
                     onBanClicked(importer);
