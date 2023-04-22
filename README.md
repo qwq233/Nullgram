@@ -18,7 +18,7 @@ In the name of Nullgram, the purpose is to express that there is no such bad thi
 ### I want to add new feature
 Great!
 
-Make sure you fully understand [the Development Document](.github/CONTRIBUTING.md).
+Make sure you fully understand [the Development Document](./docs/CONTRIBUTING.md).
 If you haven't read it.**THEN GO READ IT.**
 
 Then just create a new pull request and I should be review in a couple of days.
@@ -36,14 +36,12 @@ If you experience a crash, you can use logcat to catch the log (TAG:  `Nullgram`
 
 ### Compilation Guide
 
-**Note**: In order to support [reproducible builds](https://core.telegram.org/reproducible-builds), this repo contains dummy release.keystore,  google-services.json and filled variables inside BuildVars.java. Before publishing your own APKs please make sure to replace all these files with your own.
-
 You will require Android Studio 3.4, Android NDK rev. 20 and Android SDK 8.1
 
 1. Download the Telegram source code from https://github.com/qwq233/Nullgram
 2. Copy your release.keystore into TMessagesProj/config
 3. Fill out RELEASE_KEY_PASSWORD, RELEASE_KEY_ALIAS, RELEASE_STORE_PASSWORD in gradle.properties to access your  release.keystore
-4.  Go to https://console.firebase.google.com/, create two android apps with application IDs `top.qwq2333.nullgram` and `top.qwq2333.nullgram.beta`, turn on firebase messaging and download google-services.json, which should be copied to the same folder as TMessagesProj.
+4.  Go to https://console.firebase.google.com/, create two android apps with application IDs `top.qwq2333.nullgram`, turn on firebase messaging and download google-services.json, which should be copied to the same folder as TMessagesProj.
 5. Open the project in the Studio (note that it should be opened, NOT imported).
 6. Fill out values in TMessagesProj/src/main/java/org/telegram/messenger/BuildVars.java – there’s a link for each of the variables showing where and which data to obtain.
 7. You are ready to compile Telegram.

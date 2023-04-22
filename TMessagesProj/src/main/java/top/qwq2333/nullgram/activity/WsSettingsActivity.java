@@ -33,12 +33,15 @@ import org.telegram.messenger.LocaleController;
 import org.telegram.messenger.R;
 import org.telegram.messenger.SharedConfig;
 import org.telegram.messenger.browser.Browser;
+import org.telegram.ui.ActionBar.ActionBarMenu;
+import org.telegram.ui.ActionBar.ActionBarMenuItem;
 import org.telegram.ui.ActionBar.AlertDialog;
 import org.telegram.ui.ActionBar.Theme;
 import org.telegram.ui.Cells.HeaderCell;
 import org.telegram.ui.Cells.TextCheckCell;
 import org.telegram.ui.Cells.TextInfoPrivacyCell;
 import org.telegram.ui.Cells.TextSettingsCell;
+import org.telegram.ui.Components.BulletinFactory;
 import org.telegram.ui.Components.EditTextBoldCursor;
 import org.telegram.ui.Components.LayoutHelper;
 
@@ -56,7 +59,7 @@ public class WsSettingsActivity extends BaseActivity {
     private int providerRow;
     private int enableTLSRow;
     private int descriptionRow;
-    private int customRow;
+    private ActionBarMenuItem helpItem;
     private final SharedConfig.ProxyInfo currentProxyInfo;
 
     public WsSettingsActivity(SharedConfig.ProxyInfo proxyInfo) {
@@ -104,7 +107,7 @@ public class WsSettingsActivity extends BaseActivity {
                         editText.setTransformHintToHeader(true);
                         editText.setLineColors(Theme.getColor(Theme.key_windowBackgroundWhiteInputField, resourcesProvider),
                             Theme.getColor(Theme.key_windowBackgroundWhiteInputFieldActivated, resourcesProvider),
-                            Theme.getColor(Theme.key_windowBackgroundWhiteRedText3, resourcesProvider));
+                            Theme.getColor(Theme.key_text_RedRegular, resourcesProvider));
                         editText.setImeOptions(EditorInfo.IME_ACTION_DONE);
                         editText.setBackground(null);
                         editText.requestFocus();
@@ -135,8 +138,6 @@ public class WsSettingsActivity extends BaseActivity {
                         listAdapter.notifyItemChanged(descriptionRow);
                     }
                 });
-        } else if (position == customRow) {
-            Browser.openUrl(getParentActivity(), "https://t.me/WSProxy/8");
         }
     }
 
@@ -161,6 +162,25 @@ public class WsSettingsActivity extends BaseActivity {
     }
 
     @Override
+    public View createView(Context context) {
+        View view = super.createView(context);
+
+        ActionBarMenu menu = actionBar.createMenu();
+        helpItem = menu.addItem(0, R.drawable.msg_emoji_question);
+        helpItem.setContentDescription(LocaleController.getString("WsGetHelp", R.string.WsGetHelp));
+        helpItem.setVisibility(View.VISIBLE);
+        helpItem.setTag(null);
+        helpItem.setOnClickListener(v -> {
+            BulletinFactory bulletinFactory = BulletinFactory.of(this);
+            bulletinFactory.createSimpleBulletin(R.raw.fire_on, LocaleController.getString("WsGetHelp", R.string.WsGetHelp),
+                LocaleController.getString("LearnMore", R.string.LearnMore), () -> Browser.openUrl(getParentActivity(),
+                    "https://github.com/qwq233/Nullgram/blob/master/docs/wsproxy/README.md")).show();
+        });
+
+        return view;
+    }
+
+    @Override
     protected void updateRows() {
         rowCount = 0;
 
@@ -168,7 +188,6 @@ public class WsSettingsActivity extends BaseActivity {
         providerRow = rowCount++;
         enableTLSRow = rowCount++;
         descriptionRow = rowCount++;
-        customRow = rowCount++;
     }
 
     @Override
@@ -197,8 +216,6 @@ public class WsSettingsActivity extends BaseActivity {
                             value = WebSocketHelper.getCurrentProvider().name();
                         }
                         textCell.setTextAndValue(LocaleController.getString("WsProvider", R.string.WsProvider), value, partial, true);
-                    } else if (position == customRow) {
-                        textCell.setTextAndValue(LocaleController.getString("WsGetHelp", R.string.WsGetHelp), "@WSProxy", true);
                     }
                     break;
                 }
@@ -239,7 +256,7 @@ public class WsSettingsActivity extends BaseActivity {
                 return TYPE_HEADER;
             } else if (position == enableTLSRow) {
                 return TYPE_CHECK;
-            } else if (position == providerRow || position == customRow) {
+            } else if (position == providerRow) {
                 return TYPE_SETTINGS;
             }
             return TYPE_SETTINGS;
