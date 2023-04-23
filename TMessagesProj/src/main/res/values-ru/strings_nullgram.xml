@@ -114,9 +114,7 @@
     <string name="Number">Число</string>
     <string name="autoProxySwitch">Автопереключение прокси</string>
     <string name="ignoreReactionMention">Игнорировать упоминание реакцией</string>
-    <string name="ignoreReactionMentionInfo">It will auto set unread reaction mentions as read.\nIt will also sync to other devices.\nNotification will be still shown because it\'s
-        controlled by TELEOFFICIAL Server.
-    </string>
+    <string name="ignoreReactionMentionInfo">It will auto set unread reaction mentions as read.\nIt will also sync to other devices.\nNotification will be still shown because it\'s controlled by TELEOFFICIAL Server.</string>
     <string name="StickerSize">Размер стикеров</string>
     <string name="StickerSizeDialogMessageReplyTo">дай мне аниме девочку, пожалуйста.</string>
     <string name="StickerSizeDialogMessage">ого, милашка!</string>

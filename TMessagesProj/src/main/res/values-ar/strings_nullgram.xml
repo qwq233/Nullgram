@@ -115,9 +115,7 @@
     <string name="Number">الرقم</string>
     <string name="autoProxySwitch">التبديل التلقائي للوكيل</string>
     <string name="ignoreReactionMention">تجاهل الإشارة على ردة الفعل</string>
-    <string name="ignoreReactionMentionInfo">It will auto set unread reaction mentions as read.\nIt will also sync to other devices.\nNotification will be still shown because it\'s
-        controlled by TELEOFFICIAL Server.
-    </string>
+    <string name="ignoreReactionMentionInfo">It will auto set unread reaction mentions as read.\nIt will also sync to other devices.\nNotification will be still shown because it\'s controlled by TELEOFFICIAL Server.</string>
     <string name="StickerSize">حجم الملصقات</string>
     <string name="StickerSizeDialogMessageReplyTo">أرسل بعض أشياء عن الأنمي لو سمحت.</string>
     <string name="StickerSizeDialogMessage">واو، فتاة لطيفة 🥰!</string>

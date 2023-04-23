@@ -113,9 +113,7 @@
     <string name="Number">Número</string>
     <string name="autoProxySwitch">Troca de Proxy</string>
     <string name="ignoreReactionMention">Ignorar menção de Reação</string>
-    <string name="ignoreReactionMentionInfo">It will auto set unread reaction mentions as read.\nIt will also sync to other devices.\nNotification will be still shown because it\'s
-        controlled by TELEOFFICIAL Server.
-    </string>
+    <string name="ignoreReactionMentionInfo">It will auto set unread reaction mentions as read.\nIt will also sync to other devices.\nNotification will be still shown because it\'s controlled by TELEOFFICIAL Server.</string>
     <string name="StickerSize">Tamanho do sticker</string>
     <string name="StickerSizeDialogMessageReplyTo">Traga-me algo de anime, por favor.</string>
     <string name="StickerSizeDialogMessage">Wow! Que garota mais fofa!</string>

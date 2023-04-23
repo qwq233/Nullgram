@@ -113,9 +113,7 @@
     <string name="Number">Numara</string>
     <string name="autoProxySwitch">Proxy Otomatik Geçişi</string>
     <string name="ignoreReactionMention">Tepki Sözünü Yoksay</string>
-    <string name="ignoreReactionMentionInfo">It will auto set unread reaction mentions as read.\nIt will also sync to other devices.\nNotification will be still shown because it\'s
-        controlled by TELEOFFICIAL Server.
-    </string>
+    <string name="ignoreReactionMentionInfo">It will auto set unread reaction mentions as read.\nIt will also sync to other devices.\nNotification will be still shown because it\'s controlled by TELEOFFICIAL Server.</string>
     <string name="StickerSize">çıkartma boyutu</string>
     <string name="StickerSizeDialogMessageReplyTo">bana biraz anime malzemesi getir lütfen.</string>
     <string name="StickerSizeDialogMessage">vay tatlı kız!</string>

@@ -272,9 +272,7 @@
     <string name="DevicePerformanceMedium">中</string>
     <string name="DevicePerformanceHigh">高</string>
     <string name="OverrideDevicePerformance">覆蓋效能檢測</string>
-    <string name="OverrideDevicePerformanceDesc">覆蓋 TELEOFFICIAL
-        的裝置效能檢測。\n低模式將盡可能減少動畫效果和其他東西，這可能有助於節省前臺執行時的耗電。\n高模式可能會大幅增加功耗和效能負擔並導致卡頓。
-    </string>
+    <string name="OverrideDevicePerformanceDesc">覆蓋 TELEOFFICIAL 的裝置效能檢測。\n低模式將盡可能減少動畫效果和其他東西，這可能有助於節省前臺執行時的耗電。\n高模式可能會大幅增加功耗和效能負擔並導致卡頓。</string>
     <string name="JumpToBeginning">回到頂部</string>
     <string name="DisableQuickSendMediaBottom">禁用快速傳送媒體按鈕</string>
     <string name="ProviderBaiduTranslate">百度翻譯</string>
