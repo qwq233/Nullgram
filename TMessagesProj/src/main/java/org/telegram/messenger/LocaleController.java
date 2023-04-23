@@ -1283,6 +1283,13 @@ public class LocaleController {
                 }
             }
 
+            if (value.contains("Telegram")) {
+                value = value.replace("Telegram", "Nullgram");
+            }
+            if (value.contains("TELEOFFICIAL")) {
+                value = value.replace("TELEOFFICIAL", "Telegram");
+            }
+
             if (getInstance().currentLocale != null) {
                 return String.format(getInstance().currentLocale, value, args);
             } else {
