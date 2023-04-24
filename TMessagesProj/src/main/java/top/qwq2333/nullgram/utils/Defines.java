@@ -86,6 +86,7 @@ public class Defines {
     public static final String quickToggleAnonymous = "quickToggleAnonymous";
     public static final String hideProxySponsorChannel = "hideProxySponsorChannel";
     public static final String hideAllTab = "hideAllTab";
+    public static final String ignoreMutedCount = "ignoreMutedCount";
     public static final String alwaysSendWithoutSound = "alwaysSendWithoutSound";
     public static final String markdownDisabled = "markdownEnable";
     public static final String markdownParseLinks = "markdownParseLinks";
@@ -145,9 +146,7 @@ public class Defines {
 
     // WebSocket Proxy
     public static final String wsEnableTLS = "wsEnableTLS";
-    public static final String wsUseMTP = "wsUseMTP";
-    public static final String wsUseDoH = "wsUseDoH";
-    public static final String wsServerHost = "serverHost";
+    public static final String wsServerHost = "wsServerHost";
     public static final String wsBuiltInProxyBackend = "wsBuiltInProxyBackend";
 
     // Translate
@@ -156,7 +155,7 @@ public class Defines {
     public static final String deepLFormality = "deepLFormality";
     public static final String translatorStatus = "translatorStatus";
     public static final String targetLanguage = "targetLanguage";
-    public static final String restrictedLanguages = "restrictedLanguages";
+    public static final String restrictedLanguages = "restrictedLanguagesFix";
     public static final String autoTranslate = "autoTranslate";
 
     // Misc

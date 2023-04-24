@@ -216,8 +216,9 @@ object TranslateHelper {
             val language = if (it.contains("-")) {
                 it.substring(0, it.indexOf("_"))
             } else it
-            if (it == language) {
+            if (lang == language) {
                 restricted = true
+                return@forEach
             }
         }
         return restricted

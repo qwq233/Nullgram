@@ -26,6 +26,7 @@ import org.telegram.messenger.time.FastDateFormat;
 import org.telegram.tgnet.ConnectionsManager;
 import org.telegram.tgnet.TLObject;
 import org.telegram.tgnet.TLRPC;
+import org.telegram.ui.RestrictedLanguagesSelectActivity;
 import org.xmlpull.v1.XmlPullParser;
 
 import java.io.BufferedWriter;
@@ -1072,6 +1073,7 @@ public class LocaleController {
                 } else {
                     NotificationCenter.getGlobalInstance().postNotificationName(NotificationCenter.reloadInterface);
                 }
+                RestrictedLanguagesSelectActivity.invalidateRestrictedLanguages();
                 if (onDone != null) {
                     onDone.run();
                 }
@@ -1279,6 +1281,13 @@ public class LocaleController {
                         }
                     }
                 }
+            }
+
+            if (value.contains("Telegram")) {
+                value = value.replace("Telegram", "Nullgram");
+            }
+            if (value.contains("TELEOFFICIAL")) {
+                value = value.replace("TELEOFFICIAL", "Telegram");
             }
 
             if (getInstance().currentLocale != null) {
@@ -2407,6 +2416,8 @@ public class LocaleController {
                         config.locale = currentLocale;
                         ApplicationLoader.applicationContext.getResources().updateConfiguration(config, ApplicationLoader.applicationContext.getResources().getDisplayMetrics());
                         changingConfiguration = false;
+
+                        RestrictedLanguagesSelectActivity.invalidateRestrictedLanguages();
                     } else {
                         FileLog.d("saveRemoteLocaleStrings: currentLocaleInfo != localeInfo, do nothing");
                     }

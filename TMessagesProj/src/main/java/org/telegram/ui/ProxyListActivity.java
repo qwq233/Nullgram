@@ -160,7 +160,7 @@ public class ProxyListActivity extends BaseFragment implements NotificationCente
             checkImageView.setContentDescription(LocaleController.getString("Edit", R.string.Edit));
             addView(checkImageView, LayoutHelper.createFrame(48, 48, (LocaleController.isRTL ? Gravity.LEFT : Gravity.RIGHT) | Gravity.TOP, 8, 8, 8, 0));
             checkImageView.setOnClickListener(v -> {
-                if (WebSocketHelper.NekogramPublicProxyServer.equals(currentInfo.address) || WebSocketHelper.NekogramXPublicProxyServer.equals(currentInfo.address)) {
+                if (WebSocketHelper.proxyServer.equals(currentInfo.address)) {
                     presentFragment(new WsSettingsActivity(currentInfo));
                 } else {
                     presentFragment(new ProxySettingsActivity(currentInfo));
@@ -182,7 +182,7 @@ public class ProxyListActivity extends BaseFragment implements NotificationCente
         }
 
         public void setProxy(SharedConfig.ProxyInfo proxyInfo) {
-            if (WebSocketHelper.NekogramPublicProxyServer.equals(proxyInfo.address) || WebSocketHelper.NekogramXPublicProxyServer.equals(proxyInfo.address)) {
+            if (WebSocketHelper.proxyServer.equals(proxyInfo.address)) {
                 textView.setText(LocaleController.getString("PublicProxy", R.string.PublicProxy));
             } else {
                 textView.setText(proxyInfo.address + ":" + proxyInfo.port);
@@ -220,7 +220,7 @@ public class ProxyListActivity extends BaseFragment implements NotificationCente
                     colorKey = Theme.key_windowBackgroundWhiteGreenText;
                 } else {
                     valueTextView.setText(LocaleController.getString("Unavailable", R.string.Unavailable));
-                    colorKey = Theme.key_windowBackgroundWhiteRedText4;
+                    colorKey = Theme.key_text_RedRegular;
                 }
             }
             color = Theme.getColor(colorKey);
@@ -536,7 +536,7 @@ public class ProxyListActivity extends BaseFragment implements NotificationCente
                 showDialog(dialog);
                 TextView button = (TextView) dialog.getButton(DialogInterface.BUTTON_POSITIVE);
                 if (button != null) {
-                    button.setTextColor(Theme.getColor(Theme.key_dialogTextRed));
+                    button.setTextColor(Theme.getColor(Theme.key_text_RedBold));
                 }
             }
         });
@@ -572,7 +572,7 @@ public class ProxyListActivity extends BaseFragment implements NotificationCente
                         break;
                     case MENU_DELETE:
                         for (SharedConfig.ProxyInfo info : selectedItems) {
-                            if (info.address.equals(WebSocketHelper.NekogramPublicProxyServer) || info.address.equals(WebSocketHelper.NekogramXPublicProxyServer)) {
+                            if (info.address.equals(WebSocketHelper.proxyServer)) {
                                 break;
                             }
                         }
@@ -604,12 +604,12 @@ public class ProxyListActivity extends BaseFragment implements NotificationCente
                         showDialog(dialog);
                         TextView button = (TextView) dialog.getButton(DialogInterface.BUTTON_POSITIVE);
                         if (button != null) {
-                            button.setTextColor(Theme.getColor(Theme.key_dialogTextRed));
+                            button.setTextColor(Theme.getColor(Theme.key_text_RedBold));
                         }
                         break;
                     case MENU_SHARE:
                         for (SharedConfig.ProxyInfo info : selectedItems) {
-                            if (info.address.equals(WebSocketHelper.NekogramPublicProxyServer) || info.address.equals(WebSocketHelper.NekogramXPublicProxyServer)) {
+                            if (info.address.equals(WebSocketHelper.proxyServer)) {
                                 break;
                             }
                         }
@@ -911,7 +911,7 @@ public class ProxyListActivity extends BaseFragment implements NotificationCente
                 return;
             }
             SharedConfig.ProxyInfo info = proxyList.get(position - proxyStartRow);
-            if (info.address.equals(WebSocketHelper.NekogramPublicProxyServer) || info.address.equals(WebSocketHelper.NekogramXPublicProxyServer)) {
+            if (info.address.equals(WebSocketHelper.proxyServer)) {
                 return;
             }
 
@@ -967,7 +967,7 @@ public class ProxyListActivity extends BaseFragment implements NotificationCente
                     if (position == proxyAddRow) {
                         textCell.setText(LocaleController.getString("AddProxy", R.string.AddProxy), deleteAllRow != -1);
                     } else if (position == deleteAllRow) {
-                        textCell.setTextColor(Theme.getColor(Theme.key_windowBackgroundWhiteRedText4));
+                        textCell.setTextColor(Theme.getColor(Theme.key_text_RedRegular));
                         textCell.setText(LocaleController.getString(R.string.DeleteAllProxies), false);
                     }
                     break;
@@ -1007,7 +1007,7 @@ public class ProxyListActivity extends BaseFragment implements NotificationCente
                     cell.setProxy(info);
                     cell.setChecked(SharedConfig.currentProxy == info);
                     cell.setItemSelected(selectedItems.contains(proxyList.get(position - proxyStartRow)), false);
-                    if (!info.address.equals(WebSocketHelper.NekogramPublicProxyServer) && !info.address.equals(WebSocketHelper.NekogramXPublicProxyServer)) {
+                    if (!info.address.equals(WebSocketHelper.proxyServer)) {
                         cell.setSelectionEnabled(!selectedItems.isEmpty(), false);
                     }
                     break;
@@ -1037,7 +1037,7 @@ public class ProxyListActivity extends BaseFragment implements NotificationCente
             if (holder.getItemViewType() == VIEW_TYPE_PROXY_DETAIL && !payloads.isEmpty()) {
                 TextDetailProxyCell cell = (TextDetailProxyCell) holder.itemView;
                 SharedConfig.ProxyInfo info = proxyList.get(position - proxyStartRow);
-                if (!info.address.equals(WebSocketHelper.NekogramPublicProxyServer) && !info.address.equals(WebSocketHelper.NekogramXPublicProxyServer)) {
+                if (!info.address.equals(WebSocketHelper.proxyServer)) {
                     if (payloads.contains(PAYLOAD_SELECTION_CHANGED)) {
                         cell.setItemSelected(selectedItems.contains(proxyList.get(position - proxyStartRow)), true);
                     }
@@ -1194,7 +1194,7 @@ public class ProxyListActivity extends BaseFragment implements NotificationCente
         themeDescriptions.add(new ThemeDescription(listView, ThemeDescription.FLAG_TEXTCOLOR | ThemeDescription.FLAG_CHECKTAG | ThemeDescription.FLAG_IMAGECOLOR, new Class[]{TextDetailProxyCell.class}, new String[]{"valueTextView"}, null, null, null, Theme.key_windowBackgroundWhiteBlueText6));
         themeDescriptions.add(new ThemeDescription(listView, ThemeDescription.FLAG_TEXTCOLOR | ThemeDescription.FLAG_CHECKTAG | ThemeDescription.FLAG_IMAGECOLOR, new Class[]{TextDetailProxyCell.class}, new String[]{"valueTextView"}, null, null, null, Theme.key_windowBackgroundWhiteGrayText2));
         themeDescriptions.add(new ThemeDescription(listView, ThemeDescription.FLAG_TEXTCOLOR | ThemeDescription.FLAG_CHECKTAG | ThemeDescription.FLAG_IMAGECOLOR, new Class[]{TextDetailProxyCell.class}, new String[]{"valueTextView"}, null, null, null, Theme.key_windowBackgroundWhiteGreenText));
-        themeDescriptions.add(new ThemeDescription(listView, ThemeDescription.FLAG_TEXTCOLOR | ThemeDescription.FLAG_CHECKTAG | ThemeDescription.FLAG_IMAGECOLOR, new Class[]{TextDetailProxyCell.class}, new String[]{"valueTextView"}, null, null, null, Theme.key_windowBackgroundWhiteRedText4));
+        themeDescriptions.add(new ThemeDescription(listView, ThemeDescription.FLAG_TEXTCOLOR | ThemeDescription.FLAG_CHECKTAG | ThemeDescription.FLAG_IMAGECOLOR, new Class[]{TextDetailProxyCell.class}, new String[]{"valueTextView"}, null, null, null, Theme.key_text_RedRegular));
         themeDescriptions.add(new ThemeDescription(listView, ThemeDescription.FLAG_IMAGECOLOR, new Class[]{TextDetailProxyCell.class}, new String[]{"checkImageView"}, null, null, null, Theme.key_windowBackgroundWhiteGrayText3));
 
         themeDescriptions.add(new ThemeDescription(listView, 0, new Class[]{HeaderCell.class}, new String[]{"textView"}, null, null, null, Theme.key_windowBackgroundWhiteBlueHeader));

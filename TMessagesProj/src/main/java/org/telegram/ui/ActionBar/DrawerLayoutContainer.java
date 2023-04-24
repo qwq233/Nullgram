@@ -41,16 +41,17 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import org.telegram.messenger.AndroidUtilities;
-import org.telegram.messenger.BuildVars;
-import org.telegram.messenger.FileLog;
 import org.telegram.messenger.R;
 import org.telegram.messenger.Utilities;
+
+import top.qwq2333.nullgram.utils.Log;
 
 public class DrawerLayoutContainer extends FrameLayout {
 
     private static final int MIN_DRAWER_MARGIN = 64;
 
     private FrameLayout drawerLayout;
+    private View drawerListView;
     private INavigationLayout parentActionBarLayout;
 
     private boolean maybeStartTracking;
@@ -174,13 +175,18 @@ public class DrawerLayoutContainer extends FrameLayout {
         return 0;
     }
 
-    public void setDrawerLayout(FrameLayout layout) {
+    public void setDrawerLayout(FrameLayout layout, View drawerListView) {
         drawerLayout = layout;
+        this.drawerListView = drawerListView;
         addView(drawerLayout);
         drawerLayout.setVisibility(INVISIBLE);
+        drawerListView.setVisibility(GONE);
         if (Build.VERSION.SDK_INT >= 21) {
             drawerLayout.setFitsSystemWindows(true);
         }
+        AndroidUtilities.runOnUIThread(() -> {
+            drawerListView.setVisibility(View.VISIBLE);
+        }, 2500);
     }
 
     public void moveDrawerByX(float dx) {
@@ -199,6 +205,9 @@ public class DrawerLayoutContainer extends FrameLayout {
             drawerPosition = 0;
         }
         drawerLayout.setTranslationX(drawerPosition);
+        if (drawerPosition > 0 && drawerListView != null && drawerListView.getVisibility() != View.VISIBLE) {
+            drawerListView.setVisibility(View.VISIBLE);
+        }
 
         final int newVisibility = drawerPosition > 0 ? VISIBLE : INVISIBLE;
         if (drawerLayout.getVisibility() != newVisibility) {
@@ -559,22 +568,14 @@ public class DrawerLayoutContainer extends FrameLayout {
 
             final LayoutParams lp = (LayoutParams) child.getLayoutParams();
 
-            if (BuildVars.DEBUG_VERSION) {
+            try {
                 if (drawerLayout != child) {
                     child.layout(lp.leftMargin, lp.topMargin + getPaddingTop(), lp.leftMargin + child.getMeasuredWidth(), lp.topMargin + child.getMeasuredHeight() + getPaddingTop());
                 } else {
                     child.layout(-child.getMeasuredWidth(), lp.topMargin + getPaddingTop(), 0, lp.topMargin + child.getMeasuredHeight() + +getPaddingTop());
                 }
-            } else {
-                try {
-                    if (drawerLayout != child) {
-                        child.layout(lp.leftMargin, lp.topMargin + getPaddingTop(), lp.leftMargin + child.getMeasuredWidth(), lp.topMargin + child.getMeasuredHeight() + getPaddingTop());
-                    } else {
-                        child.layout(-child.getMeasuredWidth(), lp.topMargin + getPaddingTop(), 0, lp.topMargin + child.getMeasuredHeight() + +getPaddingTop());
-                    }
-                } catch (Exception e) {
-                    FileLog.e(e);
-                }
+            } catch (Exception e) {
+                Log.w(e);
             }
         }
         inLayout = false;
