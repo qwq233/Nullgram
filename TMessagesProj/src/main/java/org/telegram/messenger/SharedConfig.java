@@ -52,6 +52,7 @@ import top.qwq2333.nullgram.config.ConfigManager;
 import top.qwq2333.nullgram.helpers.WebSocketHelper;
 import top.qwq2333.nullgram.utils.AlertUtil;
 import top.qwq2333.nullgram.utils.Defines;
+import top.qwq2333.nullgram.utils.Log;
 import top.qwq2333.nullgram.utils.StringUtils;
 import top.qwq2333.nullgram.utils.UIUtil;
 
@@ -1424,12 +1425,20 @@ public class SharedConfig {
                     count = data.readInt32(false);
 
                     for (int i = 0; i < count; i++) {
-                        ProxyInfo info = new ProxyInfo(
-                                data.readString(false),
+                        ProxyInfo info = null;
+                        try {
+                            info = new ProxyInfo(
+                                data.readString(true),
                                 data.readInt32(false),
                                 data.readString(false),
                                 data.readString(false),
                                 data.readString(false));
+                        } catch (RuntimeException e) {
+                            // Compatible with versions between 9.5.7 and 9.5.8
+                            Log.e("Failed to load proxy info, skipping", e);
+                            saveProxyList();
+                            continue;
+                        }
 
                         info.ping = data.readInt64(false);
                         info.availableCheckTime = data.readInt64(false);
