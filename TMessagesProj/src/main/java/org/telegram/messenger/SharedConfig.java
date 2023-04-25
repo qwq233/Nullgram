@@ -1472,9 +1472,6 @@ public class SharedConfig {
         }
     }
 
-    /**
-    * DO NOT EDIT THIS METHOD WITHOUT ANY TEST AND NOTICE
-    */
     public static void saveProxyList() {
         List<ProxyInfo> infoToSerialize = new ArrayList<>(proxyList);
         Collections.sort(infoToSerialize, (o1, o2) -> {
@@ -1492,7 +1489,7 @@ public class SharedConfig {
         serializedData.writeInt32(-1);
         serializedData.writeByte(PROXY_CURRENT_SCHEMA_VERSION);
         int count = infoToSerialize.size();
-        serializedData.writeInt32(count);
+        serializedData.writeInt32(count - 1);
         for (int a = count - 1; a >= 0; a--) {
             ProxyInfo info = infoToSerialize.get(a);
             if (WebSocketHelper.proxyServer.equals(info.address)) {
@@ -1508,7 +1505,7 @@ public class SharedConfig {
             serializedData.writeInt64(info.availableCheckTime);
         }
         SharedPreferences preferences = ApplicationLoader.applicationContext.getSharedPreferences("mainconfig", Activity.MODE_PRIVATE);
-        preferences.edit().putString("proxy_list", Base64.encodeToString(serializedData.toByteArray(), Base64.NO_WRAP)).commit();
+        preferences.edit().putString("proxy_list", Base64.encodeToString(serializedData.toByteArray(), Base64.NO_WRAP)).apply();
         serializedData.cleanup();
     }
 
