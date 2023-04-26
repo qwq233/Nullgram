@@ -239,7 +239,7 @@
     <string name="ProviderYandexTranslate">Яндекс переводчик</string>
     <string name="ProviderTelegramTranslate">TELEOFFICIAL Translate</string>
     <string name="ProviderMicrosoftTranslate">Microsoft Translate</string>
-    <string name="ProviderDeepLTranslate">DeepL</string>
+    <string name="ProviderDeepLTranslate">DeepL </string>
     <string name="ProviderLingoTranslate">Lingo Translate</string>
     <string name="TranslationProvider">Поставщик переводов</string>
     <string name="TranslateApiUnsupported">Переводчик, который Вы выбрали, не поддерживает Ваш язык.</string>
