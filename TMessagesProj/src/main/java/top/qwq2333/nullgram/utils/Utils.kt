@@ -205,7 +205,10 @@ object Utils {
                 }
             }
 
-        connectivityManager.registerDefaultNetworkCallback(networkCallback)
+        try {
+            connectivityManager.registerDefaultNetworkCallback(networkCallback)
+        } catch (ignored: Exception) {
+        }
     }
 
     /**
