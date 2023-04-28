@@ -32,6 +32,7 @@ import android.util.Base64;
 import android.util.Pair;
 import android.util.TypedValue;
 import android.view.Gravity;
+import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.EditorInfo;
 import android.widget.FrameLayout;
@@ -65,6 +66,7 @@ import org.telegram.tgnet.TLRPC;
 import org.telegram.ui.ActionBar.AlertDialog;
 import org.telegram.ui.ActionBar.BaseFragment;
 import org.telegram.ui.ActionBar.Theme;
+import org.telegram.ui.Cells.ChatMessageCell;
 import org.telegram.ui.Cells.CheckBoxCell;
 import org.telegram.ui.ChatActivity;
 import org.telegram.ui.Components.AlertsCreator;
@@ -86,6 +88,10 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicReference;
+
+import top.qwq2333.nullgram.helpers.QrHelper;
 
 
 public class MessageUtils extends BaseController {
@@ -752,6 +758,41 @@ public class MessageUtils extends BaseController {
             req.peer = new TLRPC.TL_inputPeerEmpty();
             getConnectionsManager().sendRequest(req, requestDelegate, ConnectionsManager.RequestFlagFailOnServerErrors);
         }
+    }
+
+    public static void readQrFromMessage(View parent, MessageObject selectedObject, MessageObject.GroupedMessages selectedObjectGroup, ViewGroup viewGroup, Utilities.Callback<ArrayList<QrHelper.QrResult>> callback, AtomicBoolean waitForQr, AtomicReference<Runnable> onQrDetectionDone) {
+        waitForQr.set(true);
+        Utilities.globalQueue.postRunnable(() -> {
+            ArrayList<QrHelper.QrResult> qrResults = new ArrayList<>();
+            ArrayList<MessageObject> messageObjects = new ArrayList<>();
+            if (selectedObjectGroup != null) {
+                messageObjects.addAll(selectedObjectGroup.messages);
+            } else {
+                messageObjects.add(selectedObject);
+            }
+            for (int i = 0; i < viewGroup.getChildCount(); i++) {
+                View child = viewGroup.getChildAt(i);
+                if (child instanceof ChatMessageCell) {
+                    var cell = (ChatMessageCell) child;
+                    if (messageObjects.contains(cell.getMessageObject())) {
+                        qrResults.addAll(QrHelper.readQr(cell.getPhotoImage().getBitmap()));
+                    }
+                }
+            }
+            AndroidUtilities.runOnUIThread(() -> {
+                callback.run(qrResults);
+                waitForQr.set(false);
+                if (onQrDetectionDone.get() != null) {
+                    onQrDetectionDone.get().run();
+                    onQrDetectionDone.set(null);
+                }
+            });
+        });
+        parent.postDelayed(() -> {
+            if (onQrDetectionDone.get() != null) {
+                onQrDetectionDone.getAndSet(null).run();
+            }
+        }, 250);
     }
 
 

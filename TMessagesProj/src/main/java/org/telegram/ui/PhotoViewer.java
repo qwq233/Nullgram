@@ -265,6 +265,7 @@ import java.util.Objects;
 
 import kotlin.Unit;
 import top.qwq2333.nullgram.config.ConfigManager;
+import top.qwq2333.nullgram.helpers.QrHelper;
 import top.qwq2333.nullgram.helpers.TranslateHelper;
 import top.qwq2333.nullgram.utils.Defines;
 import top.qwq2333.nullgram.utils.Log;
@@ -759,6 +760,7 @@ public class PhotoViewer implements NotificationCenter.NotificationCenterDelegat
     private ActionBarMenuItem pipItem;
     private ActionBarMenuItem masksItem;
     private ActionBarMenuItem shareItem;
+    private ActionBarMenuSubItem qrItem;
     private ActionBarMenuSubItem translateItem;
     private AlertDialog progressDialog;
     private LinearLayout itemsLayout;
@@ -1759,6 +1761,7 @@ public class PhotoViewer implements NotificationCenter.NotificationCenterDelegat
     private final static int gallery_menu_edit_avatar = 17;
     private final static int gallery_menu_share2 = 18;
     private final static int gallery_menu_speed = 19;
+    private final static int gallery_menu_qr = 84;
     private final static int gallery_menu_translate = 91;
 
     private final static int gallery_menu_paint = 20;
@@ -5285,6 +5288,8 @@ public class PhotoViewer implements NotificationCenter.NotificationCenterDelegat
                     placeProvider.openPhotoForEdit(f.getAbsolutePath(), thumb, isVideo);
                 } else if (id == gallery_menu_translate) {
                     translateCaption();
+                } else if (id == gallery_menu_qr) {
+                    QrHelper.showQrDialog(parentFragment, resourcesProvider, qrResults, true);
                 }
             }
 
@@ -5369,6 +5374,8 @@ public class PhotoViewer implements NotificationCenter.NotificationCenterDelegat
         menuItem.addSubItem(gallery_menu_cancel_loading, R.drawable.msg_cancel, LocaleController.getString("StopDownload", R.string.StopDownload)).setColors(0xfffafafa, 0xfffafafa);
         translateItem = menuItem.addSubItem(gallery_menu_translate, R.drawable.msg_translate, LocaleController.getString("TranslateMessage", R.string.TranslateMessage));
         translateItem.setColors(0xfffafafa, 0xfffafafa);
+        qrItem = menuItem.addSubItem(gallery_menu_qr, R.drawable.msg_qrcode, LocaleController.getString("QrCode", R.string.QrCode));
+        qrItem.setColors(0xfffafafa, 0xfffafafa);
 
         menuItem.redrawPopup(0xf9222222);
         setMenuItemIcon(false, true);
@@ -6601,6 +6608,7 @@ public class PhotoViewer implements NotificationCenter.NotificationCenterDelegat
                     containerView.requestLayout();
                 }
                 detectFaces();
+                detectQr();
             }
             if (imageReceiver == centerImage && set && placeProvider != null && placeProvider.scaleToFill() && !ignoreDidSetImage && sendPhotoType != SELECT_TYPE_AVATAR) {
                 if (!wasLayout) {
@@ -13000,6 +13008,7 @@ public class PhotoViewer implements NotificationCenter.NotificationCenterDelegat
             }
         }
         detectFaces();
+        detectQr();
     }
 
     private void setCurrentCaption(MessageObject messageObject, final CharSequence _caption, boolean animated) {
@@ -18156,6 +18165,42 @@ public class PhotoViewer implements NotificationCenter.NotificationCenterDelegat
             }
             TranslateHelper.handleTranslationError(parentActivity, e, () -> translateCaption(), resourcesProvider);
             return Unit.INSTANCE;
+        });
+    }
+
+    ArrayList<QrHelper.QrResult> qrResults;
+    private void detectQr() {
+        menuItem.hideSubItem(gallery_menu_qr);
+        Utilities.globalQueue.postRunnable(() -> {
+            Bitmap bitmap = centerImage.getBitmap();
+            if (bitmap == null) {
+                return;
+            }
+            ArrayList<QrHelper.QrResult> qrResults = new ArrayList<>(QrHelper.readQr(bitmap));
+            AndroidUtilities.runOnUIThread(() -> {
+                if (menuItem == null || qrItem == null) {
+                    return;
+                }
+                PhotoViewer.this.qrResults = qrResults;
+                if (qrResults.size() == 1) {
+                    menuItem.showSubItem(gallery_menu_qr);
+                    var text = qrResults.get(0).text;
+                    var username = Browser.extractUsername(text);
+                    if (username != null) {
+                        qrItem.setSubtext("@" + username);
+                    } else if (text.startsWith("http://") || text.startsWith("https://")) {
+                        Uri uri = Uri.parse(qrResults.get(0).text);
+                        qrItem.setSubtext(uri.getHost());
+                    } else {
+                        qrItem.setSubtext(null);
+                    }
+                } else if (!qrResults.isEmpty()) {
+                    menuItem.showSubItem(gallery_menu_qr);
+                    qrItem.setSubtext(null);
+                } else {
+                    menuItem.hideSubItem(gallery_menu_qr);
+                }
+            });
         });
     }
 

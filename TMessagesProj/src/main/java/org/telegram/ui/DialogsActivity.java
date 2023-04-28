@@ -209,6 +209,7 @@ import kotlin.Unit;
 import top.qwq2333.nullgram.config.ConfigManager;
 import top.qwq2333.nullgram.config.ForwardContext;
 import top.qwq2333.nullgram.helpers.PasscodeHelper;
+import top.qwq2333.nullgram.helpers.QrHelper;
 import top.qwq2333.nullgram.ui.AppLinkVerifyBottomSheet;
 import top.qwq2333.nullgram.ui.BottomBuilder;
 import top.qwq2333.nullgram.ui.SendOptionsMenuLayout;
@@ -300,6 +301,7 @@ public class DialogsActivity extends BaseFragment implements NotificationCenter.
     private FiltersView filtersView;
     private ActionBarMenuItem passcodeItem;
     private ActionBarMenuItem downloadsItem;
+    private ActionBarMenuItem qrItem;
     private boolean passcodeItemVisible;
     private boolean downloadsItemVisible;
     private ActionBarMenuItem proxyItem;
@@ -2596,21 +2598,17 @@ public class DialogsActivity extends BaseFragment implements NotificationCenter.
                 if (!isSpeedItemCreated) {
                     isSpeedItemCreated = true;
                     FrameLayout searchContainer = (FrameLayout) searchItem.getSearchClearButton().getParent();
-                    speedItem = new ActionBarMenuItem(context, menu, Theme.getColor(Theme.key_actionBarActionModeDefaultSelector), Theme.getColor(Theme.key_actionBarActionModeDefaultIcon));
-                    speedItem.setIcon(R.drawable.avd_speed);
-                    speedItem.getIconView().setColorFilter(new PorterDuffColorFilter(Theme.getColor(Theme.key_actionBarActionModeDefaultIcon), PorterDuff.Mode.SRC_IN));
-                    speedItem.setTranslationX(AndroidUtilities.dp(32));
-                    speedItem.setAlpha(0f);
-                    speedItem.setOnClickListener(v -> showDialog(new PremiumFeatureBottomSheet(DialogsActivity.this, PremiumPreviewFragment.PREMIUM_FEATURE_DOWNLOAD_SPEED, true)));
-                    speedItem.setClickable(false);
-                    speedItem.setFixBackground(true);
+                    qrItem = new ActionBarMenuItem(context, menu, Theme.getColor(Theme.key_actionBarDefaultSelector), Theme.getColor(Theme.key_actionBarDefaultIcon));
+                    qrItem.setIcon(R.drawable.ic_line_scan);
+                    qrItem.setTranslationX(AndroidUtilities.dp(32));
+                    qrItem.setOnClickListener(v -> QrHelper.openCameraScanActivity(DialogsActivity.this));
+                    qrItem.setFixBackground(true);
+                    qrItem.setContentDescription(LocaleController.getString("AuthAnotherClientScan", R.string.AuthAnotherClientScan));
                     FrameLayout.LayoutParams speedParams = new FrameLayout.LayoutParams(AndroidUtilities.dp(42), ViewGroup.LayoutParams.MATCH_PARENT);
                     speedParams.leftMargin = speedParams.rightMargin = AndroidUtilities.dp(14 + 24);
                     speedParams.gravity = Gravity.RIGHT;
-                    searchContainer.addView(speedItem, speedParams);
-                    searchItem.setSearchAdditionalButton(speedItem);
-
-                    updateSpeedItem(searchViewPager.getCurrentPosition() == 2);
+                    searchContainer.addView(qrItem, speedParams);
+                    searchItem.setSearchAdditionalButton(qrItem);
                 }
             }
 
@@ -5887,6 +5885,16 @@ public class DialogsActivity extends BaseFragment implements NotificationCenter.
                 }
                 searchTabsView = null;
             }
+            if (qrItem != null) {
+                if (whiteActionBar) {
+                    qrItem.setBackground(Theme.createSelectorDrawable(Theme.getColor(Theme.key_actionBarActionModeDefaultSelector), 1));
+                    qrItem.setIconColor(Theme.getColor(Theme.key_actionBarActionModeDefaultIcon));
+                } else {
+                    qrItem.setBackground(Theme.createSelectorDrawable(Theme.getColor(Theme.key_actionBarDefaultSelector), 1));
+                    qrItem.setIconColor(Theme.getColor(Theme.key_actionBarDefaultIcon));
+                }
+            }
+
 
             EditTextBoldCursor editText = searchItem.getSearchField();
             if (whiteActionBar) {
