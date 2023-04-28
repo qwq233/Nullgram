@@ -95,13 +95,13 @@ public class ApplicationLoader extends Application {
 
     public static IMapsProvider getMapsProvider() {
         if (mapsProvider == null) {
-            mapsProvider = applicationLoaderInstance.onCreateMapsProvider();
+            mapsProvider = new OSMDroidMapsProvider();
         }
         return mapsProvider;
     }
 
     protected IMapsProvider onCreateMapsProvider() {
-        return new GoogleMapsProvider();
+        return new OSMDroidMapsProvider();
     }
 
     public static PushListenerController.IPushListenerServiceProvider getPushProvider() {

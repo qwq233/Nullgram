@@ -29,7 +29,6 @@ import android.text.SpannableStringBuilder;
 import android.text.StaticLayout;
 import android.text.TextPaint;
 import android.text.TextUtils;
-import android.util.Log;
 import android.util.Property;
 import android.util.SparseIntArray;
 import android.view.HapticFeedbackConstants;
@@ -276,12 +275,12 @@ public class FilterTabsView extends FrameLayout {
                 );
                 canvas.rotate(1.4f * s, getMeasuredWidth() / 2f, getMeasuredHeight() / 2f);
             }
-            String key;
-            String animateToKey;
-            String otherKey;
-            String animateToOtherKey;
-            String unreadKey;
-            String unreadOtherKey;
+            int key;
+            int animateToKey;
+            int otherKey;
+            int animateToOtherKey;
+            int unreadKey;
+            int unreadOtherKey;
             int id1;
             int id2;
             if (manualScrollingToId != -1) {
@@ -306,7 +305,7 @@ public class FilterTabsView extends FrameLayout {
                 unreadKey = Theme.key_chats_tabUnreadUnactiveBackground;
                 unreadOtherKey = Theme.key_chats_tabUnreadActiveBackground;
             }
-            if (animateToKey == null) {
+            if (animateToKey < 0) {
                 if ((animatingIndicator || manualScrollingToId != -1) && (currentTab.id == id1 || currentTab.id == id2)) {
                     textPaint.setColor(ColorUtils.blendARGB(Theme.getColor(otherKey), Theme.getColor(key), animatingIndicatorProgress));
                 } else {
@@ -448,7 +447,7 @@ public class FilterTabsView extends FrameLayout {
             }
 
             if (animateCounterEnter || counterText != null || showRemove && (isEditing || editingStartAnimationProgress != 0)) {
-                if (aBackgroundColorKey == null) {
+                if (aBackgroundColorKey < 0) {
                     textCounterPaint.setColor(Theme.getColor(backgroundColorKey));
                 } else {
                     int color1 = Theme.getColor(backgroundColorKey);
@@ -582,7 +581,7 @@ public class FilterTabsView extends FrameLayout {
                 }
                 progressToLocked = Utilities.clamp(progressToLocked, 1f, 0);
                 int unactiveColor = Theme.getColor(unactiveTextColorKey);
-                if (aUnactiveTextColorKey != null) {
+                if (aUnactiveTextColorKey >= 0) {
                     unactiveColor = ColorUtils.blendARGB(unactiveColor, Theme.getColor(aUnactiveTextColorKey), animationValue);
                 }
                 if (lockDrawableColor != unactiveColor) {
@@ -842,15 +841,15 @@ public class FilterTabsView extends FrameLayout {
     private int scrollingToChild = -1;
     private GradientDrawable selectorDrawable;
 
-    private String tabLineColorKey = Theme.key_actionBarTabLine;
-    private String activeTextColorKey = Theme.key_actionBarTabActiveText;
-    private String unactiveTextColorKey = Theme.key_actionBarTabUnactiveText;
-    private String selectorColorKey = Theme.key_actionBarTabSelector;
-    private String backgroundColorKey = Theme.key_actionBarDefault;
-    private String aTabLineColorKey;
-    private String aActiveTextColorKey;
-    private String aUnactiveTextColorKey;
-    private String aBackgroundColorKey;
+    private int tabLineColorKey = Theme.key_actionBarTabLine;
+    private int activeTextColorKey = Theme.key_actionBarTabActiveText;
+    private int unactiveTextColorKey = Theme.key_actionBarTabUnactiveText;
+    private int selectorColorKey = Theme.key_actionBarTabSelector;
+    private int backgroundColorKey = Theme.key_actionBarDefault;
+    private int aTabLineColorKey = -1;
+    private int aActiveTextColorKey = -1;
+    private int aUnactiveTextColorKey = -1;
+    private int aBackgroundColorKey = -1;
 
     private int prevLayoutWidth;
 
@@ -1289,7 +1288,7 @@ public class FilterTabsView extends FrameLayout {
         adapter.notifyDataSetChanged();
     }
 
-    public void animateColorsTo(String line, String active, String unactive, String selector, String background) {
+    public void animateColorsTo(int line, int active, int unactive, int selector, int background) {
         if (colorChangeAnimator != null) {
             colorChangeAnimator.cancel();
         }
@@ -1310,10 +1309,10 @@ public class FilterTabsView extends FrameLayout {
                 backgroundColorKey = aBackgroundColorKey;
                 activeTextColorKey = aActiveTextColorKey;
                 unactiveTextColorKey = aUnactiveTextColorKey;
-                aTabLineColorKey = null;
-                aActiveTextColorKey = null;
-                aUnactiveTextColorKey = null;
-                aBackgroundColorKey = null;
+                aTabLineColorKey = -1;
+                aActiveTextColorKey = -1;
+                aUnactiveTextColorKey = -1;
+                aBackgroundColorKey = -1;
             }
         });
         colorChangeAnimator.start();
@@ -1327,7 +1326,7 @@ public class FilterTabsView extends FrameLayout {
         return positionToId.get(0, 0);
     }
 
-    public String getSelectorColorKey() {
+    public int getSelectorColorKey() {
         return selectorColorKey;
     }
 

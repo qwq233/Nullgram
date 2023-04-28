@@ -6,6 +6,7 @@ import android.content.SharedPreferences;
 
 import org.telegram.tgnet.ConnectionsManager;
 import org.telegram.tgnet.TLRPC;
+import org.telegram.ui.NotificationsSoundActivity;
 
 public class NotificationsSettingsFacade {
 
@@ -203,6 +204,22 @@ public class NotificationsSettingsFacade {
             }
         }
 
+        if (settings instanceof TLRPC.TL_notificationSoundLocal) {
+            TLRPC.TL_notificationSoundLocal localSound = (TLRPC.TL_notificationSoundLocal) settings;
+            if ("Default".equalsIgnoreCase(localSound.data)) {
+                settings = new TLRPC.TL_notificationSoundDefault();
+            } else if ("NoSound".equalsIgnoreCase(localSound.data)) {
+                settings = new TLRPC.TL_notificationSoundNone();
+            } else {
+                String path = NotificationsSoundActivity.findRingtonePathByName(localSound.title);
+                if (path == null) {
+                    settings = new TLRPC.TL_notificationSoundDefault();
+                } else {
+                    localSound.data = path;
+                }
+            }
+        }
+
         if (settings instanceof TLRPC.TL_notificationSoundDefault) {
             editor.putString(soundPref, "Default");
             editor.putString(soundPathPref, "Default");
@@ -219,7 +236,7 @@ public class NotificationsSettingsFacade {
         } else if (settings instanceof TLRPC.TL_notificationSoundRingtone) {
             TLRPC.TL_notificationSoundRingtone soundRingtone = (TLRPC.TL_notificationSoundRingtone) settings;
             editor.putLong(soundDocPref, soundRingtone.id);
-            MediaDataController.getInstance(currentAccount).checkRingtones();
+            MediaDataController.getInstance(currentAccount).checkRingtones(true);
             if (serverUpdate && dialogId != 0) {
                 editor.putBoolean("custom_" + dialogId, true);
             }

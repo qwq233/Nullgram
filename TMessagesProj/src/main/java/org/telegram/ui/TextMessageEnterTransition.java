@@ -29,9 +29,9 @@ import androidx.core.graphics.ColorUtils;
 import androidx.recyclerview.widget.ChatListItemAnimator;
 
 import org.telegram.messenger.AndroidUtilities;
+import org.telegram.messenger.AnimationNotificationsLocker;
 import org.telegram.messenger.Emoji;
 import org.telegram.messenger.MessageObject;
-import org.telegram.messenger.NotificationCenter;
 import org.telegram.messenger.SharedConfig;
 import org.telegram.messenger.UserConfig;
 import org.telegram.tgnet.TLRPC;
@@ -95,7 +95,7 @@ public class TextMessageEnterTransition implements MessageEnterTransitionContain
     private float scaleFrom;
 
     private final int currentAccount;
-    private int animationIndex = -1;
+    private AnimationNotificationsLocker notificationsLocker = new AnimationNotificationsLocker();
     MessageObject.TextLayoutBlock textLayoutBlock;
     Drawable fromMessageDrawable;
     ChatActivityEnterView enterView;
@@ -375,12 +375,12 @@ public class TextMessageEnterTransition implements MessageEnterTransitionContain
         animator.setDuration(ChatListItemAnimator.DEFAULT_DURATION);
 
         container.addTransition(this);
-        animationIndex = NotificationCenter.getInstance(currentAccount).setAnimationInProgress(animationIndex, null);
+        notificationsLocker.lock();
 
         animator.addListener(new AnimatorListenerAdapter() {
             @Override
             public void onAnimationEnd(Animator animation) {
-                NotificationCenter.getInstance(currentAccount).onAnimationFinish(animationIndex);
+                notificationsLocker.unlock();
                 container.removeTransition(TextMessageEnterTransition.this);
                 messageView.setEnterTransitionInProgress(false);
                 messageView.getTransitionParams().lastDrawingBackgroundRect.set(messageView.getBackgroundDrawableLeft(), messageView.getBackgroundDrawableTop(), messageView.getBackgroundDrawableRight(), messageView.getBackgroundDrawableBottom());
@@ -742,8 +742,7 @@ public class TextMessageEnterTransition implements MessageEnterTransitionContain
         }
     }
 
-    private int getThemedColor(String key) {
-        Integer color = resourcesProvider != null ? resourcesProvider.getColor(key) : null;
-        return color != null ? color : Theme.getColor(key);
+    private int getThemedColor(int key) {
+        return Theme.getColor(key, resourcesProvider);
     }
 }

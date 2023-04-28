@@ -1,7 +1,5 @@
 package org.telegram.ui.Components;
 
-import static org.telegram.messenger.AndroidUtilities.lerp;
-
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.ObjectAnimator;
@@ -60,9 +58,9 @@ public class CheckBoxBase {
 
     private boolean isChecked;
 
-    private String checkColorKey = Theme.key_checkboxCheck;
-    private String backgroundColorKey = Theme.key_chat_serviceBackground;
-    private String background2ColorKey = Theme.key_chat_serviceBackground;
+    private int checkColorKey = Theme.key_checkboxCheck;
+    private int backgroundColorKey = Theme.key_chat_serviceBackground;
+    private int background2ColorKey = Theme.key_chat_serviceBackground;
 
     private boolean useDefaultCheck;
 
@@ -216,7 +214,7 @@ public class CheckBoxBase {
         checkAnimator.start();
     }
 
-    public void setColor(String background, String background2, String check) {
+    public void setColor(int background, int background2, int check) {
         backgroundColorKey = background;
         background2ColorKey = background2;
         checkColorKey = check;
@@ -283,7 +281,7 @@ public class CheckBoxBase {
         int cx = bounds.centerX();
         int cy = bounds.centerY();
 
-        if (backgroundColorKey != null) {
+        if (backgroundColorKey >= 0) {
             if (drawUnchecked) {
                 if (backgroundType == 12 || backgroundType == 13) {
                     paint.setColor(getThemedColor(backgroundColorKey));
@@ -299,7 +297,7 @@ public class CheckBoxBase {
                     backgroundPaint.setColor(getThemedColor(checkColorKey));
                 }
             } else {
-                backgroundPaint.setColor(AndroidUtilities.getOffsetColor(0x00ffffff, getThemedColor(background2ColorKey != null ? background2ColorKey : checkColorKey), progress, backgroundAlpha));
+                backgroundPaint.setColor(AndroidUtilities.getOffsetColor(0x00ffffff, getThemedColor(background2ColorKey >= 0 ? background2ColorKey : checkColorKey), progress, backgroundAlpha));
             }
         } else {
             if (drawUnchecked) {
@@ -310,7 +308,7 @@ public class CheckBoxBase {
                     backgroundPaint.setColor(AndroidUtilities.getOffsetColor(0xffffffff, getThemedColor(checkColorKey), progress, backgroundAlpha));
                 }
             } else {
-                backgroundPaint.setColor(AndroidUtilities.getOffsetColor(0x00ffffff, getThemedColor(background2ColorKey != null ? background2ColorKey : checkColorKey), progress, backgroundAlpha));
+                backgroundPaint.setColor(AndroidUtilities.getOffsetColor(0x00ffffff, getThemedColor(background2ColorKey >= 0 ? background2ColorKey : checkColorKey), progress, backgroundAlpha));
             }
         }
 
@@ -383,7 +381,7 @@ public class CheckBoxBase {
 
             if (backgroundType == 9) {
                 paint.setColor(getThemedColor(background2ColorKey));
-            } else if (backgroundType == 11 || backgroundType == 6 || backgroundType == 7 || backgroundType == 10 || !drawUnchecked && backgroundColorKey != null || backgroundType == 14) {
+            } else if (backgroundType == 11 || backgroundType == 6 || backgroundType == 7 || backgroundType == 10 || !drawUnchecked && backgroundColorKey >= 0 || backgroundType == 14) {
                 paint.setColor(getThemedColor(backgroundColorKey));
             } else {
                 paint.setColor(getThemedColor(enabled ? Theme.key_checkbox : Theme.key_checkboxDisabled));
@@ -393,7 +391,7 @@ public class CheckBoxBase {
             } else if (alpha < 1) {
                 paint.setColor(ColorUtils.blendARGB(backgroundPaint.getColor(), paint.getColor(), alpha));
             }
-            if (!useDefaultCheck && checkColorKey != null) {
+            if (!useDefaultCheck && checkColorKey >= 0) {
                 checkPaint.setColor(getThemedColor(checkColorKey));
             } else {
                 checkPaint.setColor(getThemedColor(Theme.key_checkboxCheck));
@@ -489,8 +487,7 @@ public class CheckBoxBase {
         this.circlePaintProvider = circlePaintProvider;
     }
 
-    private int getThemedColor(String key) {
-        Integer color = resourcesProvider != null ? resourcesProvider.getColor(key) : null;
-        return color != null ? color : Theme.getColor(key);
+    private int getThemedColor(int key) {
+        return Theme.getColor(key, resourcesProvider);
     }
 }

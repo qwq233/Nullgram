@@ -136,6 +136,8 @@ public class MessagesController extends BaseController implements NotificationCe
     private LongSparseIntArray pendingUnreadCounter = new LongSparseIntArray();
     private int lastPrintingStringCount;
     private SparseArray<ChatlistUpdatesStat> chatlistFoldersUpdates = new SparseArray<>();
+    public int largeQueueMaxActiveOperations = 2;
+    public int smallQueueMaxActiveOperations = 5;
 
     class ChatlistUpdatesStat {
         public ChatlistUpdatesStat() {
@@ -1061,9 +1063,9 @@ public class MessagesController extends BaseController implements NotificationCe
     }
 
     private DialogFilter sortingDialogFilter;
-    private Comparator<TLRPC.Dialog> dialogDateComparator = (dialog1, dialog2) -> {
-        int pinnedNum1 = sortingDialogFilter.pinnedDialogs.get(dialog1.id, Integer.MIN_VALUE);
-        int pinnedNum2 = sortingDialogFilter.pinnedDialogs.get(dialog2.id, Integer.MIN_VALUE);
+    private final Comparator<TLRPC.Dialog> dialogDateComparator = (dialog1, dialog2) -> {
+        int pinnedNum1 = sortingDialogFilter == null ? Integer.MIN_VALUE : sortingDialogFilter.pinnedDialogs.get(dialog1.id, Integer.MIN_VALUE);
+        int pinnedNum2 = sortingDialogFilter == null ? Integer.MIN_VALUE : sortingDialogFilter.pinnedDialogs.get(dialog2.id, Integer.MIN_VALUE);
         if (dialog1 instanceof TLRPC.TL_dialogFolder && !(dialog2 instanceof TLRPC.TL_dialogFolder)) {
             return -1;
         } else if (!(dialog1 instanceof TLRPC.TL_dialogFolder) && dialog2 instanceof TLRPC.TL_dialogFolder) {
@@ -1091,6 +1093,13 @@ public class MessagesController extends BaseController implements NotificationCe
         }
         return 0;
     };
+
+    public void sortDialogsList(ArrayList<TLRPC.Dialog> dialogs) {
+        if (dialogs == null) {
+            return;
+        }
+        Collections.sort(dialogs, dialogComparator);
+    }
 
     private Comparator<TLRPC.Dialog> dialogComparator = (dialog1, dialog2) -> {
         if (dialog1 instanceof TLRPC.TL_dialogFolder && !(dialog2 instanceof TLRPC.TL_dialogFolder)) {
@@ -1318,6 +1327,8 @@ public class MessagesController extends BaseController implements NotificationCe
         giftAttachMenuIcon = mainPreferences.getBoolean("giftAttachMenuIcon", false);
         giftTextFieldIcon = mainPreferences.getBoolean("giftTextFieldIcon", false);
         checkResetLangpack = mainPreferences.getInt("checkResetLangpack", 0);
+        smallQueueMaxActiveOperations = mainPreferences.getInt("smallQueueMaxActiveOperations", 5);
+        largeQueueMaxActiveOperations = mainPreferences.getInt("largeQueueMaxActiveOperations", 2);
         boolean isTest = ConnectionsManager.native_isTestBackend(currentAccount) != 0;
         chatlistInvitesLimitDefault = mainPreferences.getInt("chatlistInvitesLimitDefault", 3);
         chatlistInvitesLimitPremium = mainPreferences.getInt("chatlistInvitesLimitPremium",  isTest ? 5 : 20);
@@ -1627,7 +1638,7 @@ public class MessagesController extends BaseController implements NotificationCe
                     new_dialogMessage.put(dialogId, arrayList);
                 }
             }
-            getFileLoader().checkMediaExistance(newMessages);
+            //getFileLoader().checkMediaExistance(newMessages);
 
             for (int a = 0; a < pinnedDialogs.dialogs.size(); a++) {
                 TLRPC.Dialog d = pinnedDialogs.dialogs.get(a);
@@ -2093,6 +2104,20 @@ public class MessagesController extends BaseController implements NotificationCe
         for (int a = 0, N = object.value.size(); a < N; a++) {
             TLRPC.TL_jsonObjectValue value = object.value.get(a);
             switch (value.key) {
+                case "large_queue_max_active_operations_count": {
+                    if (value.value instanceof TLRPC.TL_jsonNumber) {
+                        largeQueueMaxActiveOperations = (int) ((TLRPC.TL_jsonNumber) value.value).value;
+                        editor.putInt("largeQueueMaxActiveOperations", largeQueueMaxActiveOperations);
+                    }
+                    break;
+                }
+                case "small_queue_max_active_operations_count": {
+                    if (value.value instanceof TLRPC.TL_jsonNumber) {
+                        smallQueueMaxActiveOperations = (int) ((TLRPC.TL_jsonNumber) value.value).value;
+                        editor.putInt("smallQueueMaxActiveOperations", smallQueueMaxActiveOperations);
+                    }
+                    break;
+                }
                 case "premium_gift_text_field_icon": {
                     if (value.value instanceof TLRPC.TL_jsonBool) {
                         if (giftTextFieldIcon != ((TLRPC.TL_jsonBool) value.value).value) {
@@ -2350,17 +2375,6 @@ public class MessagesController extends BaseController implements NotificationCe
                         autologinDomains = newDomains;
                         editor.putStringSet("autologinDomains", autologinDomains);
                         changed = true;
-                    }
-                    break;
-                }
-                case "autologin_token": {
-                    if (value.value instanceof TLRPC.TL_jsonString) {
-                        TLRPC.TL_jsonString string = (TLRPC.TL_jsonString) value.value;
-                        if (!string.value.equals(autologinToken)) {
-                            autologinToken = string.value;
-                            editor.putString("autologinToken", autologinToken);
-                            changed = true;
-                        }
                     }
                     break;
                 }
@@ -3361,6 +3375,7 @@ public class MessagesController extends BaseController implements NotificationCe
             editor.putInt("webFileDatacenterId", webFileDatacenterId);
             editor.putString("suggestedLangCode", suggestedLangCode);
             editor.putBoolean("forceTryIpV6", forceTryIpV6);
+            editor.putString("autologinToken", autologinToken = config.autologin_token);
             editor.commit();
 
             getConnectionsManager().setForceTryIpV6(forceTryIpV6);
@@ -9386,7 +9401,7 @@ public class MessagesController extends BaseController implements NotificationCe
                 arrayList.add(messageObject);
                 new_dialogMessage.put(did, arrayList);
             }
-            getFileLoader().checkMediaExistance(newMessages);
+           // getFileLoader().checkMediaExistance(newMessages);
 
             if (!fromCache && !migrate && dialogsLoadOffset[UserConfig.i_dialogsLoadOffsetId] != -1 && loadType == 0) {
                 int totalDialogsLoadCount = getUserConfig().getTotalDialogsCount(folderId);
@@ -11205,9 +11220,9 @@ public class MessagesController extends BaseController implements NotificationCe
         final ArrayList<TLRPC.User> userRestrictedPrivacy = new ArrayList<>();
         processed[0] = 0;
         final Runnable showUserRestrictedPrivacyAlert = () -> {
-            AndroidUtilities.runOnUIThread(() ->{
+            AndroidUtilities.runOnUIThread(() -> {
                 BaseFragment lastFragment = LaunchActivity.getLastFragment();
-                if (lastFragment != null && lastFragment.getParentActivity() != null) {
+                if (lastFragment != null && lastFragment.getParentActivity() != null && !lastFragment.getParentActivity().isFinishing()) {
 //                    if (ChatObject.canUserDoAdminAction(currentChat, ChatObject.ACTION_INVITE)) {
                         LimitReachedBottomSheet restricterdUsersBottomSheet = new LimitReachedBottomSheet(lastFragment, lastFragment.getParentActivity(), LimitReachedBottomSheet.TYPE_ADD_MEMBERS_RESTRICTED, currentAccount);
                         restricterdUsersBottomSheet.setRestrictedUsers(currentChat, userRestrictedPrivacy);
@@ -12898,7 +12913,7 @@ public class MessagesController extends BaseController implements NotificationCe
                     arrayList.add(messageObject);
                     new_dialogMessage.put(did, arrayList);
                 }
-                getFileLoader().checkMediaExistance(newMessages);
+                //getFileLoader().checkMediaExistance(newMessages);
                 boolean firstIsFolder = !newPinnedDialogs.isEmpty() && newPinnedDialogs.get(0) instanceof TLRPC.TL_dialogFolder;
                 for (int a = 0, N = newPinnedDialogs.size(); a < N; a++) {
                     TLRPC.Dialog d = newPinnedDialogs.get(a);
@@ -15868,7 +15883,7 @@ public class MessagesController extends BaseController implements NotificationCe
                         TLRPC.TL_updatePendingJoinRequests update = (TLRPC.TL_updatePendingJoinRequests) baseUpdate;
                         getMemberRequestsController().onPendingRequestsUpdated(update);
                     } else if (baseUpdate instanceof TLRPC.TL_updateSavedRingtones) {
-                        getMediaDataController().ringtoneDataStore.loadUserRingtones();
+                        getMediaDataController().ringtoneDataStore.loadUserRingtones(true);
                     } else if (baseUpdate instanceof TLRPC.TL_updateTranscribeAudio) {
                         FileLog.e("Received legacy TL_updateTranscribeAudio update");
                     } else if (baseUpdate instanceof TLRPC.TL_updateTranscribedAudio) {
@@ -17018,7 +17033,7 @@ public class MessagesController extends BaseController implements NotificationCe
         } catch (Exception e) {}
     }
 
-    private boolean canAddToForward(TLRPC.Dialog d) {
+    public boolean canAddToForward(TLRPC.Dialog d) {
         if (d == null) {
             return false;
         }
@@ -17031,7 +17046,6 @@ public class MessagesController extends BaseController implements NotificationCe
             if (chat != null && chat.megagroup) {
                 canAddToForward = !chat.gigagroup || ChatObject.hasAdminRights(chat);
             } else {
-                dialogsChannelsOnly.add(d);
                 canAddToForward = ChatObject.hasAdminRights(chat) && ChatObject.canPost(chat);
             }
         }

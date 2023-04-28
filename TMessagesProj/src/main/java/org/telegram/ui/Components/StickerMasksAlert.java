@@ -308,7 +308,7 @@ public class StickerMasksAlert extends BottomSheet implements NotificationCenter
 
     public StickerMasksAlert(Context context, boolean isVideo, Theme.ResourcesProvider resourcesProvider) {
         super(context, true, resourcesProvider);
-        behindKeyboardColorKey = null;
+        behindKeyboardColorKey = -1;
         behindKeyboardColor = 0xff252525;
         useLightStatusBar = false;
         fixNavigationBar(0xff252525);
@@ -1376,10 +1376,12 @@ public class StickerMasksAlert extends BottomSheet implements NotificationCenter
             View view = null;
             switch (viewType) {
                 case -1:
-                    view = new ImageViewEmoji(context);
+                    ImageViewEmoji imageViewEmoji = new ImageViewEmoji(context);
+                    imageViewEmoji.getImageReceiver().setLayerNum(playingImagesLayerNum);
+                    view = imageViewEmoji;
                     break;
                 case 0:
-                    view = new StickerEmojiCell(context, false) {
+                    StickerEmojiCell stickerEmojiCell = new StickerEmojiCell(context, false) {
                         public void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
                             if (currentType == MediaDataController.TYPE_EMOJIPACKS) {
                                 super.onMeasure(widthMeasureSpec, widthMeasureSpec);
@@ -1388,6 +1390,8 @@ public class StickerMasksAlert extends BottomSheet implements NotificationCenter
                             }
                         }
                     };
+                    stickerEmojiCell.getImageView().setLayerNum(playingImagesLayerNum);
+                    view = stickerEmojiCell;
                     break;
                 case 1:
                     view = new EmptyCell(context);
@@ -1902,10 +1906,12 @@ public class StickerMasksAlert extends BottomSheet implements NotificationCenter
             View view = null;
             switch (viewType) {
                 case -1:
-                    view = new ImageViewEmoji(context);
+                    ImageViewEmoji imageViewEmoji = new ImageViewEmoji(context);
+                    imageViewEmoji.getImageReceiver().setLayerNum(playingImagesLayerNum);
+                    view = imageViewEmoji;
                     break;
                 case 0:
-                    view = new StickerEmojiCell(context, false) {
+                    StickerEmojiCell cell = new StickerEmojiCell(context, false) {
                         public void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
                             if (currentType == MediaDataController.TYPE_EMOJIPACKS) {
                                 super.onMeasure(widthMeasureSpec, widthMeasureSpec);
@@ -1914,6 +1920,8 @@ public class StickerMasksAlert extends BottomSheet implements NotificationCenter
                             }
                         }
                     };
+                    cell.getImageView().setLayerNum(playingImagesLayerNum);
+                    view = cell;
                     break;
                 case 1:
                     view = new EmptyCell(context);
@@ -2105,5 +2113,11 @@ public class StickerMasksAlert extends BottomSheet implements NotificationCenter
             }
             super.notifyDataSetChanged();
         }
+    }
+
+    @Override
+    public void setImageReceiverNumLevel(int playingImages, int onShowing) {
+        super.setImageReceiverNumLevel(playingImages, onShowing);
+        stickersTab.setImageReceiversLayerNum(playingImages);
     }
 }

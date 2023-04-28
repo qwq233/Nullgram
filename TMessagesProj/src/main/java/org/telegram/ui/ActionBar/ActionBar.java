@@ -143,6 +143,8 @@ public class ActionBar extends FrameLayout {
     private CharSequence subtitle;
     private boolean drawBackButton;
     private boolean attached;
+    private boolean resumed;
+    private boolean attachState;
 
     private View.OnTouchListener interceptTouchEventListener;
     private final Theme.ResourcesProvider resourcesProvider;
@@ -1421,7 +1423,14 @@ public class ActionBar extends FrameLayout {
         }
     }
 
+    public void onResume() {
+        resumed = true;
+        updateAttachState();
+    }
+
     protected void onPause() {
+        resumed = false;
+        updateAttachState();
         if (menu != null) {
             menu.hideAllPopupMenus();
         }
@@ -1706,7 +1715,7 @@ public class ActionBar extends FrameLayout {
     protected void onAttachedToWindow() {
         super.onAttachedToWindow();
         attached = true;
-        ellipsizeSpanAnimator.onAttachedToWindow();
+        updateAttachState();
         if (SharedConfig.noStatusBar && actionModeVisible) {
             if (ColorUtils.calculateLuminance(actionModeColor) < 0.7f) {
                 AndroidUtilities.setLightStatusBar(((Activity) getContext()).getWindow(), false);
@@ -1723,7 +1732,7 @@ public class ActionBar extends FrameLayout {
     protected void onDetachedFromWindow() {
         super.onDetachedFromWindow();
         attached = false;
-        ellipsizeSpanAnimator.onDetachedFromWindow();
+        updateAttachState();
         if (SharedConfig.noStatusBar && actionModeVisible) {
             if (actionBarColor == 0) {
                 NotificationCenter.getGlobalInstance().postNotificationName(NotificationCenter.needCheckSystemBarColors);
@@ -1740,6 +1749,18 @@ public class ActionBar extends FrameLayout {
         }
     }
 
+    private void updateAttachState() {
+        boolean attachState = attached && resumed;
+        if (this.attachState != attachState) {
+            this.attachState = attachState;
+            if (attachState) {
+                ellipsizeSpanAnimator.onAttachedToWindow();
+            } else {
+                ellipsizeSpanAnimator.onDetachedFromWindow();
+            }
+        }
+    }
+
     public ActionBarMenu getActionMode() {
         return actionMode;
     }
@@ -1749,7 +1770,7 @@ public class ActionBar extends FrameLayout {
     }
 
     public void beginDelayedTransition() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT && !LocaleController.isRTL) {
             TransitionSet transitionSet = new TransitionSet();
             transitionSet.setOrdering(TransitionSet.ORDERING_TOGETHER);
             transitionSet.addTransition(new Fade());
@@ -1814,12 +1835,8 @@ public class ActionBar extends FrameLayout {
         }
     }
 
-    private int getThemedColor(String key) {
-        Integer color = resourcesProvider != null ? resourcesProvider.getColor(key) : null;
-        if (color == null) {
-            color = parentFragment != null ? parentFragment.getThemedColor(key) : null;
-        }
-        return color != null ? color : Theme.getColor(key);
+    private int getThemedColor(int key) {
+        return Theme.getColor(key, resourcesProvider);
     }
 
     public void setDrawBlurBackground(SizeNotifierFrameLayout contentView) {

@@ -4527,8 +4527,8 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
         mediaCounterTextView.setTranslationY(onlineTextViewY);
         final Object onlineTextViewTag = onlineTextView[1].getTag();
         int statusColor;
-        if (onlineTextViewTag instanceof String) {
-            statusColor = getThemedColor((String) onlineTextViewTag);
+        if (onlineTextViewTag instanceof Integer) {
+            statusColor = getThemedColor((Integer) onlineTextViewTag);
         } else {
             statusColor = getThemedColor(Theme.key_avatar_subtitleInProfileBlue);
         }
@@ -5038,36 +5038,32 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
                 username = username1;
             } else if (chatId != 0) {
                 final TLRPC.Chat chat = getMessagesController().getChat(chatId);
-                if (chat == null || !ChatObject.isPublic(chat)) {
+                if (chat == null || topicId == 0 && !ChatObject.isPublic(chat)) {
                     return false;
                 }
-                username = chat.username;
+                username = ChatObject.getPublicUsername(chat);
             } else {
                 return false;
             }
-            AlertDialog.Builder builder = new AlertDialog.Builder(getParentActivity());
-            builder.setItems(new CharSequence[]{LocaleController.getString("Copy", R.string.Copy)}, (dialogInterface, i) -> {
-                if (i == 0) {
-                    try {
-                        android.content.ClipboardManager clipboard = (android.content.ClipboardManager) ApplicationLoader.applicationContext.getSystemService(Context.CLIPBOARD_SERVICE);
-                        String text;
-                        if (userId != 0) {
-                            text = "@" + username;
-                            BulletinFactory.of(this).createCopyBulletin(LocaleController.getString("UsernameCopied", R.string.UsernameCopied)).show();
-                        } else {
-                            text = "https://" + MessagesController.getInstance(UserConfig.selectedAccount).linkPrefix + "/" + username;
-                            BulletinFactory.of(this).createCopyBulletin(LocaleController.getString("LinkCopied", R.string.LinkCopied)).show();
-                        }
-                        android.content.ClipData clip = android.content.ClipData.newPlainText("label", text);
-                        clipboard.setPrimaryClip(clip);
-
-                    } catch (Exception e) {
-                        Log.e(e);
-                    }
+            if (userId == 0) {
+                TLRPC.Chat chat = getMessagesController().getChat(chatId);
+                String link;
+                if (ChatObject.isPublic(chat)) {
+                    link = "https://" + getMessagesController().linkPrefix + "/" + ChatObject.getPublicUsername(chat) + (topicId != 0 ? "/" + topicId : "");
+                } else {
+                    link = "https://" + getMessagesController().linkPrefix + "/c/" + chat.id + (topicId != 0 ? "/" + topicId : "");
                 }
-            });
-            showDialog(builder.create());
-            return true;
+                showDialog(new ShareAlert(getParentActivity(), null, link, false, link, false) {
+                    @Override
+                    protected void onSend(LongSparseArray<TLRPC.Dialog> dids, int count, TLRPC.TL_forumTopic topic) {
+                        AndroidUtilities.runOnUIThread(() -> {
+                            BulletinFactory.createInviteSentBulletin(getParentActivity(), contentView, dids.size(), dids.size() == 1 ? dids.valueAt(0).id : 0, count,
+                                getThemedColor(Theme.key_undo_background), getThemedColor(Theme.key_undo_infoColor)).show();
+                        }, 250);
+                    }
+                });
+                return true;
+            }
         } else if (position == restrictionReasonRow) {
             ArrayList<TLRPC.TL_restrictionReason> reasons = new ArrayList<>();
             if (userId != 0) {
@@ -7513,9 +7509,7 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
             }
         } else if (isTopic) {
             infoHeaderRow = rowCount++;
-            if (ChatObject.isPublic(currentChat)) {
-                usernameRow = rowCount++;
-            }
+            usernameRow = rowCount++;
             notificationsSimpleRow = rowCount++;
             infoSectionRow = rowCount++;
             if (hasMedia) {
@@ -7840,7 +7834,7 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
                 isOnline[0] = false;
                 newString2 = LocaleController.formatUserStatus(currentAccount, user, isOnline, shortStatus ? new boolean[1] : null);
                 if (onlineTextView[1] != null && !mediaHeaderVisible) {
-                    String key = isOnline[0] ? Theme.key_profile_status : Theme.key_avatar_subtitleInProfileBlue;
+                    int key = isOnline[0] ? Theme.key_profile_status : Theme.key_avatar_subtitleInProfileBlue;
                     onlineTextView[1].setTag(key);
                     if (!isPulledDown) {
                         onlineTextView[1].setTextColor(getThemedColor(key));
@@ -8529,7 +8523,7 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
         return resourcesProvider;
     }
 
-    public int getThemedColor(String key) {
+    public int getThemedColor(int key) {
         return Theme.getColor(key, resourcesProvider);
     }
 
@@ -9367,15 +9361,7 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
                 case VIEW_TYPE_TEXT_DETAIL_MULTILINE:
                 case VIEW_TYPE_TEXT_DETAIL:
                     TextDetailCell detailCell = (TextDetailCell) holder.itemView;
-                    if (position == usernameRow) {
-                        Drawable drawable = ContextCompat.getDrawable(detailCell.getContext(), R.drawable.msg_qr_mini);
-                        drawable.setColorFilter(new PorterDuffColorFilter(getThemedColor(Theme.key_switch2TrackChecked), PorterDuff.Mode.MULTIPLY));
-                        detailCell.setImage(drawable, LocaleController.getString("GetQRCode", R.string.GetQRCode));
-                        detailCell.setImageClickListener(ProfileActivity.this::onTextDetailCellImageClicked);
-                    } else {
-                        detailCell.setImage(null);
-                        detailCell.setImageClickListener(null);
-                    }
+                    boolean containsQr = false;
                     if (position == phoneRow) {
                         String text;
                         TLRPC.User user = getMessagesController().getUser(userId);
@@ -9395,10 +9381,8 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
                     } else if (position == usernameRow) {
                         String text, username = null;
                         CharSequence value;
-                        boolean isUser = false;
                         ArrayList<TLRPC.TL_username> usernames = new ArrayList<>();
                         if (userId != 0) {
-                            isUser = true;
                             final TLRPC.User user = getMessagesController().getUser(userId);
                             if (user != null) {
                                 usernames.addAll(user.usernames);
@@ -9407,36 +9391,40 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
                                 username = user.username;
                             }
                             usernames = user == null ? new ArrayList<>() : new ArrayList<>(user.usernames);
-                            value = LocaleController.getString("Username", R.string.Username);
-                        } else if (currentChat != null) {
-                            TLRPC.Chat chat = getMessagesController().getChat(chatId);
-                            username = chat.username;
-                            usernames.addAll(chat.usernames);
-                            value = LocaleController.getString("InviteLink", R.string.InviteLink);
-                        } else {
-                            text = "";
-                            value = "";
-                            usernames = new ArrayList<>();
-                        }
-                        if (TextUtils.isEmpty(username) && usernames != null) {
-                            for (int i = 0; i < usernames.size(); ++i) {
-                                TLRPC.TL_username u = usernames.get(i);
-                                if (u != null && u.active && !TextUtils.isEmpty(u.username)) {
-                                    username = u.username;
-                                    break;
+                            if (TextUtils.isEmpty(username) && usernames != null) {
+                                for (int i = 0; i < usernames.size(); ++i) {
+                                    TLRPC.TL_username u = usernames.get(i);
+                                    if (u != null && u.active && !TextUtils.isEmpty(u.username)) {
+                                        username = u.username;
+                                        break;
+                                    }
                                 }
                             }
-                        }
-                        if (isUser) {
+                            value = LocaleController.getString("Username", R.string.Username);
                             if (username != null) {
                                 text = "@" + username;
                             } else {
                                 text = "—";
                             }
+                            containsQr = true;
+                        } else if (currentChat != null) {
+                            TLRPC.Chat chat = getMessagesController().getChat(chatId);
+                            username = ChatObject.getPublicUsername(chat);
+                            usernames.addAll(chat.usernames);
+                            if (ChatObject.isPublic(chat)) {
+                                containsQr = true;
+                                text = getMessagesController().linkPrefix + "/" + username + (topicId != 0 ? "/" + topicId : "");
+                                value = LocaleController.getString("InviteLink", R.string.InviteLink);
+                            } else {
+                                text = getMessagesController().linkPrefix + "/c/" + chat.id + (topicId != 0 ? "/" + topicId : "");
+                                value = LocaleController.getString("InviteLinkPrivate", R.string.InviteLinkPrivate);
+                            }
                         } else {
-                            text = getLink(username, topicId);
+                            text = "";
+                            value = "";
+                            usernames = new ArrayList<>();
                         }
-                        detailCell.setTextAndValue(text, alsoUsernamesString(username, usernames, value), false);
+                        detailCell.setTextAndValue(text, alsoUsernamesString(username, usernames, value), isTopic);
                     } else if (position == restrictionReasonRow) {
                         ArrayList<TLRPC.TL_restrictionReason> reasons = new ArrayList<>();
                         if (userId != 0) {
@@ -9526,6 +9514,15 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
                         detailCell.setTextAndValue(text, value, true);
                         detailCell.setContentDescriptionValueFirst(true);
                     }
+                    if (containsQr) {
+                        Drawable drawable = ContextCompat.getDrawable(detailCell.getContext(), R.drawable.msg_qr_mini);
+                        drawable.setColorFilter(new PorterDuffColorFilter(getThemedColor(Theme.key_switch2TrackChecked), PorterDuff.Mode.MULTIPLY));
+                        detailCell.setImage(drawable, LocaleController.getString("GetQRCode", R.string.GetQRCode));
+                        detailCell.setImageClickListener(ProfileActivity.this::onTextDetailCellImageClicked);
+                    } else {
+                        detailCell.setImage(null);
+                        detailCell.setImageClickListener(null);
+                    }
                     detailCell.setTag(position);
                     break;
                 case VIEW_TYPE_ABOUT_LINK:
@@ -9569,14 +9566,14 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
                         textCell.setTextAndValue(LocaleController.getString("MessageLifetime", R.string.MessageLifetime), value, false,false);
                     } else if (position == unblockRow) {
                         textCell.setText(LocaleController.getString("Unblock", R.string.Unblock), false);
-                        textCell.setColors(null, Theme.key_text_RedRegular);
+                        textCell.setColors(-1, Theme.key_text_RedRegular);
                     } else if (position == settingsKeyRow) {
                         IdenticonDrawable identiconDrawable = new IdenticonDrawable();
                         TLRPC.EncryptedChat encryptedChat = getMessagesController().getEncryptedChat(DialogObject.getEncryptedChatId(dialogId));
                         identiconDrawable.setEncryptedChat(encryptedChat);
                         textCell.setTextAndValueDrawable(LocaleController.getString("EncryptionKey", R.string.EncryptionKey), identiconDrawable, false);
                     } else if (position == joinRow) {
-                        textCell.setColors(null, Theme.key_windowBackgroundWhiteBlueText2);
+                        textCell.setColors(-1, Theme.key_windowBackgroundWhiteBlueText2);
                         if (currentChat.megagroup) {
                             textCell.setText(LocaleController.getString("ProfileJoinGroup", R.string.ProfileJoinGroup), false);
                         } else {
@@ -9619,7 +9616,7 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
                         textCell.setText(LocaleController.getString("SendMessageLocation", R.string.SendMessageLocation), true);
                     } else if (position == addToContactsRow) {
                         textCell.setText(LocaleController.getString(R.string.AddToContacts), false);
-                        textCell.setColors(null, Theme.key_windowBackgroundWhiteBlackText);
+                        textCell.setColors(-1, Theme.key_windowBackgroundWhiteBlackText);
                     } else if (position == reportReactionRow) {
                         TLRPC.Chat chat = getMessagesController().getChat(-reportReactionFromDialogId);
                         if (chat != null && ChatObject.canBlockUsers(chat)) {
@@ -9628,11 +9625,11 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
                             textCell.setText(LocaleController.getString("ReportReaction", R.string.ReportReaction), false);
                         }
 
-                        textCell.setColors(null, Theme.key_text_RedRegular);
-                        textCell.setColors(null, Theme.key_text_RedRegular);
+                        textCell.setColors(-1, Theme.key_text_RedRegular);
+                        textCell.setColors(-1, Theme.key_text_RedRegular);
                     } else if (position == reportRow) {
                         textCell.setText(LocaleController.getString("ReportUserLocation", R.string.ReportUserLocation), false);
-                        textCell.setColors(null, Theme.key_text_RedRegular);
+                        textCell.setColors(-1, Theme.key_text_RedRegular);
                     } else if (position == nullRow) {
                         textCell.setTextAndIcon(LocaleController.getString("NullSettings", R.string.NullSettings), R.drawable.msg_settings, false);
                     } else if (position == languageRow) {
@@ -10796,8 +10793,8 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
                 if (onlineTextView[1] != null) {
                     final Object onlineTextViewTag = onlineTextView[1].getTag();
                     for (int i = 0; i < 2; i++) {
-                        if (onlineTextViewTag instanceof String) {
-                            onlineTextView[i + 1].setTextColor(getThemedColor((String) onlineTextViewTag));
+                        if (onlineTextViewTag instanceof Integer) {
+                            onlineTextView[i + 1].setTextColor(getThemedColor((Integer) onlineTextViewTag));
                         } else {
                             onlineTextView[i + 1].setTextColor(getThemedColor(Theme.key_avatar_subtitleInProfileBlue));
                         }

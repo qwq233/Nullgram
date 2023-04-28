@@ -54,6 +54,8 @@ import java.util.HashMap;
 
 public class ScrollSlidingTabStrip extends HorizontalScrollView {
 
+    private int imageReceiversPlayingNum = 1;
+
     public interface ScrollSlidingTabStripDelegate {
         void onPageSelected(int page);
     }
@@ -342,7 +344,7 @@ public class ScrollSlidingTabStrip extends HorizontalScrollView {
             avatarDrawable.setInfo(chat);
 
             BackupImageView imageView = stickerTabView.imageView;
-            imageView.setLayerNum(1);
+            imageView.setLayerNum(imageReceiversPlayingNum);
             imageView.setForUserOrChat(chat, avatarDrawable);
             imageView.setAspectFit(true);
 
@@ -400,6 +402,7 @@ public class ScrollSlidingTabStrip extends HorizontalScrollView {
 
             tabsContainer.addView(tab, position);
         }
+        tab.imageView.setLayerNum(imageReceiversPlayingNum);
         tab.isChatSticker = false;
         tab.setTag(thumb);
         tab.setTag(R.id.index_tag, position);
@@ -1057,8 +1060,12 @@ public class ScrollSlidingTabStrip extends HorizontalScrollView {
         dragEnabled = enabled;
     }
 
-    private int getThemedColor(String key) {
-        Integer color = resourcesProvider != null ? resourcesProvider.getColor(key) : null;
-        return color != null ? color : Theme.getColor(key);
+    private int getThemedColor(int key) {
+        return Theme.getColor(key, resourcesProvider);
+    }
+
+
+    public void setImageReceiversLayerNum(int playingImages) {
+        imageReceiversPlayingNum = playingImages;
     }
 }
