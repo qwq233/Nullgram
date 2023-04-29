@@ -1452,8 +1452,8 @@ public class FilterTabsView extends FrameLayout {
         if (!tabs.isEmpty()) {
             int width = MeasureSpec.getSize(widthMeasureSpec) - AndroidUtilities.dp(7) - AndroidUtilities.dp(7);
             int trueTabsWidth;
-            if(!ConfigManager.getBooleanOrFalse(Defines.hideAllTab)) {
-                Tab firstTab = findDefaultTab();
+            Tab firstTab = findDefaultTab();
+            if (!ConfigManager.getBooleanOrFalse(Defines.hideAllTab) && firstTab != null) {
                 firstTab.setTitle(LocaleController.getString("FilterAllChats", R.string.FilterAllChats));
                 int tabWith = firstTab.getWidth(false);
                 firstTab.setTitle(allTabsWidth > width ? LocaleController.getString("FilterAllChatsShort", R.string.FilterAllChatsShort) : LocaleController.getString("FilterAllChats", R.string.FilterAllChats));
