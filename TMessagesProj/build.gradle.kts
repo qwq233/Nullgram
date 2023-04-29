@@ -37,29 +37,29 @@ fun setupPlay(stable: Boolean) {
 }
 
 dependencies {
-    implementation(platform("com.google.firebase:firebase-bom:30.2.0"))
+    implementation(platform("com.google.firebase:firebase-bom:31.5.0"))
     implementation("com.google.firebase:firebase-crashlytics-ktx")
 
-    implementation("androidx.core:core-ktx:1.9.0")
+    implementation("androidx.core:core-ktx:1.10.0")
     implementation("androidx.palette:palette-ktx:1.0.0")
-    implementation("androidx.exifinterface:exifinterface:1.3.5")
+    implementation("androidx.exifinterface:exifinterface:1.3.6")
     implementation("androidx.dynamicanimation:dynamicanimation:1.0.0")
     implementation("androidx.multidex:multidex:2.0.1")
     implementation("androidx.interpolator:interpolator:1.0.0")
     implementation("androidx.sharetarget:sharetarget:1.2.0")
 
     compileOnly("org.checkerframework:checker-compat-qual:2.5.5")
-    implementation("com.google.firebase:firebase-messaging:23.1.0")
-    implementation("com.google.firebase:firebase-config:21.1.2")
-    implementation("com.google.firebase:firebase-datatransport:18.1.7")
+    implementation("com.google.firebase:firebase-messaging:23.1.2")
+    implementation("com.google.firebase:firebase-config:21.3.0")
+    implementation("com.google.firebase:firebase-datatransport:18.1.8")
     implementation("com.google.firebase:firebase-appindexing:20.0.0")
-    implementation("com.google.android.gms:play-services-auth:20.3.0")
+    implementation("com.google.android.gms:play-services-auth:20.5.0")
     implementation("com.google.android.gms:play-services-vision:20.1.3")
-    implementation("com.google.android.gms:play-services-wearable:17.1.0")
-    implementation("com.google.android.gms:play-services-location:20.0.0")
+    implementation("com.google.android.gms:play-services-wearable:18.0.0")
+    implementation("com.google.android.gms:play-services-location:21.0.1")
     implementation("com.google.android.gms:play-services-wallet:19.1.0")
 //    implementation("com.google.android.gms:play-services-safetynet:18.0.1")
-    implementation("com.googlecode.mp4parser:isoparser:1.0.6")
+    implementation("com.googlecode.mp4parser:isoparser:1.0.6") // DO NOT UPDATE THIS DEPENDENCY
     implementation("com.stripe:stripe-android:2.0.2")
     implementation("com.google.mlkit:language-id:17.0.4")
     implementation(files("libs/libgsaverification-client.aar"))
@@ -77,7 +77,7 @@ dependencies {
     implementation("org.jetbrains.kotlin:kotlin-stdlib:${Version.kotlin}")
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.5.0")
     implementation("org.osmdroid:osmdroid-android:6.1.16")
-    implementation("com.android.billingclient:billing:5.1.0")
+    implementation("com.android.billingclient:billing:5.2.0")
     implementation("com.google.guava:guava:31.1-android")
 
     implementation("io.ktor:ktor-client-core:${Version.ktor}")
@@ -98,6 +98,7 @@ dependencies {
 
 android {
     defaultConfig.applicationId = "top.qwq2333.nullgram"
+    namespace = "top.qwq2333.nullgram"
 
     sourceSets.getByName("main") {
         java.srcDir("src/main/java")

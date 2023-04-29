@@ -371,7 +371,7 @@ public class LanguageSelectActivity extends BaseActivity {
                         cell.setTextAndCheck(LocaleController.getString("TranslationTargetApp", R.string.TranslationTargetApp),
                             TranslateHelper.getCurrentTargetLanguage().equals(localeInfo.langCode), !last);
                     } else {
-                        cell.setTextAndValueAndCheck((String) localeInfo.name, (String) localeInfo.nameLocalized, TranslateHelper.getCurrentTargetLanguage().equals(localeInfo.langCode), false, !last);
+                        cell.setTextAndValueAndCheck(localeInfo.name, localeInfo.nameLocalized, TranslateHelper.getCurrentTargetLanguage().equals(localeInfo.langCode), false, !last);
                     }
                     break;
                 }
