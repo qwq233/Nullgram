@@ -685,7 +685,7 @@ public class ChatEditActivity extends BaseFragment implements ImageUpdater.Image
         } else {
             nameTextView.setHint(LocaleController.getString("GroupName", R.string.GroupName));
         }
-        nameTextView.setEnabled(currentChat != null || ChatObject.canChangeChatInfo(currentChat));
+        nameTextView.setEnabled(currentChat == null || ChatObject.canChangeChatInfo(currentChat));
         nameTextView.setFocusable(nameTextView.isEnabled());
         nameTextView.getEditText().addTextChangedListener(new TextWatcher() {
             @Override
@@ -991,7 +991,7 @@ public class ChatEditActivity extends BaseFragment implements ImageUpdater.Image
         if (currentChat != null) {
             blockCell = new TextCell(context);
             blockCell.setBackground(Theme.getSelectorDrawable(false));
-            blockCell.setVisibility(ChatObject.isChannel(currentChat) || currentChat.creator || ChatObject.hasAdminRights(currentChat) && ChatObject.canChangeChatInfo(currentChat) ? View.VISIBLE : View.GONE);
+            //blockCell.setVisibility(ChatObject.isChannel(currentChat) || currentChat.creator || ChatObject.hasAdminRights(currentChat) && ChatObject.canChangeChatInfo(currentChat) ? View.VISIBLE : View.GONE);
             blockCell.setOnClickListener(v -> {
                 Bundle args = new Bundle();
                 args.putLong("chat_id", chatId);
@@ -1129,10 +1129,10 @@ public class ChatEditActivity extends BaseFragment implements ImageUpdater.Image
         }
 
         if (currentChat != null) {
-            if (!ChatObject.hasAdminRights(currentChat)) {
+            /*if (!ChatObject.hasAdminRights(currentChat)) {
                 infoContainer.setVisibility(View.GONE);
                 settingsTopSectionCell.setVisibility(View.GONE);
-            }
+            }*/
 
             if (stickersCell == null) {
                 infoSectionCell = new ShadowSectionCell(context);
@@ -1197,8 +1197,6 @@ public class ChatEditActivity extends BaseFragment implements ImageUpdater.Image
             deleteInfoCell = new ShadowSectionCell(context);
             deleteInfoCell.setBackground(Theme.getThemedDrawableByKey(context, R.drawable.greydivider_bottom, Theme.key_windowBackgroundGrayShadow));
             linearLayout1.addView(deleteInfoCell, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT));
-        } else if (stickersInfoCell == null) {
-            infoSectionCell.setBackground(Theme.getThemedDrawable(context, R.drawable.greydivider_bottom, Theme.key_windowBackgroundGrayShadow));
         }
 
         if (stickersInfoCell != null) {
@@ -1442,13 +1440,13 @@ public class ChatEditActivity extends BaseFragment implements ImageUpdater.Image
         if (userId != 0) {
             String about = userInfo != null && userInfo.about != null ? userInfo.about : "";
             if (nameTextView != null && !currentUser.first_name.equals(nameTextView.getText().toString()) ||
-                    descriptionTextView != null && !about.equals(descriptionTextView.getText().toString())) {
+                descriptionTextView != null && !about.equals(descriptionTextView.getText().toString())) {
                 showDialog(new AlertDialog.Builder(getParentActivity())
-                        .setTitle(LocaleController.getString("UserRestrictionsApplyChanges", R.string.UserRestrictionsApplyChanges))
-                        .setMessage(LocaleController.getString(R.string.BotSettingsChangedAlert))
-                        .setPositiveButton(LocaleController.getString("ApplyTheme", R.string.ApplyTheme), (dialogInterface, i) -> processDone())
-                        .setNegativeButton(LocaleController.getString("PassportDiscard", R.string.PassportDiscard), (dialog, which) -> finishFragment())
-                        .create());
+                    .setTitle(LocaleController.getString("UserRestrictionsApplyChanges", R.string.UserRestrictionsApplyChanges))
+                    .setMessage(LocaleController.getString(R.string.BotSettingsChangedAlert))
+                    .setPositiveButton(LocaleController.getString("ApplyTheme", R.string.ApplyTheme), (dialogInterface, i) -> processDone())
+                    .setNegativeButton(LocaleController.getString("PassportDiscard", R.string.PassportDiscard), (dialog, which) -> finishFragment())
+                    .create());
                 return false;
             }
             return true;
@@ -1456,9 +1454,9 @@ public class ChatEditActivity extends BaseFragment implements ImageUpdater.Image
 
         String about = info != null && info.about != null ? info.about : "";
         if (info != null && ChatObject.isChannel(currentChat) && info.hidden_prehistory != historyHidden ||
-                nameTextView != null && !currentChat.title.equals(nameTextView.getText().toString()) ||
-                descriptionTextView != null && !about.equals(descriptionTextView.getText().toString()) ||
-                signMessages != currentChat.signatures || forum != currentChat.forum) {
+            nameTextView != null && !currentChat.title.equals(nameTextView.getText().toString()) ||
+            descriptionTextView != null && !about.equals(descriptionTextView.getText().toString()) ||
+            signMessages != currentChat.signatures || forum != currentChat.forum) {
             AlertDialog.Builder builder = new AlertDialog.Builder(getParentActivity());
             builder.setTitle(LocaleController.getString("UserRestrictionsApplyChanges", R.string.UserRestrictionsApplyChanges));
             if (isChannel) {
@@ -1515,7 +1513,7 @@ public class ChatEditActivity extends BaseFragment implements ImageUpdater.Image
             }
             TLRPC.TL_channels_channelParticipants res = (TLRPC.TL_channels_channelParticipants) response;
             realAdminCount = res.count;
-            adminCell.setTextAndValueAndIcon(LocaleController.getString("ChannelAdministrators", R.string.ChannelAdministrators), String.format("%d", res.count), R.drawable.msg_admin_add, true);
+            adminCell.setTextAndValueAndIcon(LocaleController.getString("ChannelAdministrators", R.string.ChannelAdministrators), String.format("%d", res.count), R.drawable.msg_admins, true);
         }));
         getConnectionsManager().bindRequestToGuid(reqId, classGuid);
     }
@@ -1749,7 +1747,7 @@ public class ChatEditActivity extends BaseFragment implements ImageUpdater.Image
         }
 
         if (logCell != null) {
-            logCell.setVisibility(!currentChat.megagroup || currentChat.gigagroup || info != null ? View.VISIBLE : View.GONE);
+            logCell.setVisibility(ChatObject.hasAdminRights(currentChat) && (!currentChat.megagroup || currentChat.gigagroup || info != null && info.participants_count > 200) ? View.VISIBLE : View.GONE);
         }
 
         if (linkedCell != null) {
@@ -1901,7 +1899,7 @@ public class ChatEditActivity extends BaseFragment implements ImageUpdater.Image
                 }
                 adminCell.setTextAndIcon(LocaleController.getString("ChannelAdministrators", R.string.ChannelAdministrators), R.drawable.msg_admins, true);
             }
-            reactionsCell.setVisibility(ChatObject.canChangeChatInfo(currentChat) ? View.VISIBLE : View.GONE);
+            reactionsCell.setVisibility(ChatObject.hasAdminRights(currentChat) && ChatObject.canChangeChatInfo(currentChat) ? View.VISIBLE : View.GONE);
             updateReactionsCell(animated);
             if (info == null || !ChatObject.canUserDoAdminAction(currentChat, ChatObject.ACTION_INVITE) || (!isPrivate && currentChat.creator)) {
                 inviteLinksCell.setVisibility(View.GONE);
@@ -2010,7 +2008,7 @@ public class ChatEditActivity extends BaseFragment implements ImageUpdater.Image
             }
             int reacts = Math.min(getMediaDataController().getEnabledReactionsList().size(), count);
             finalString = reacts == 0 ? LocaleController.getString("ReactionsOff", R.string.ReactionsOff) :
-                    LocaleController.formatString("ReactionsCount", R.string.ReactionsCount, reacts, getMediaDataController().getEnabledReactionsList().size());
+                LocaleController.formatString("ReactionsCount", R.string.ReactionsCount, reacts, getMediaDataController().getEnabledReactionsList().size());
         } else {
             finalString = LocaleController.getString("ReactionsAll", R.string.ReactionsAll);
         }

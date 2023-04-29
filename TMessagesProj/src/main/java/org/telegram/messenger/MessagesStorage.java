@@ -1348,9 +1348,8 @@ public class MessagesStorage extends BaseController {
                 state5 = null;
                 state6 = null;
                 database.commitTransaction();
-                database.executeFast("PRAGMA journal_size_limit = 0").stepThis().dispose();
+                database.executeFast("PRAGMA journal_size_limit = 10485760").stepThis().dispose();
                 database.executeFast("VACUUM").stepThis().dispose();
-                database.executeFast("PRAGMA journal_size_limit = -1").stepThis().dispose();
 
                 getMessagesController().getTopicsController().databaseCleared();
             } catch (Exception e) {
