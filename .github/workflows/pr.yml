@@ -36,15 +36,8 @@ jobs:
           distribution: 'temurin'
           java-version: '17'
           cache: 'gradle'
-      - name: Cache Gradle Build
-        uses: actions/cache@v3
-        with:
-          path: |
-            ~/.gradle/caches/build-cache-*
-            ~/.gradle/buildOutputCleanup/cache.properties
-          key: gradle-builds-${{ github.sha }}
-          restore-keys: |
-            gradle-builds
+      - name: Setup Gradle
+        uses: gradle/gradle-build-action@v2
       - name: Set up ccache
         uses: hendrikmuhs/ccache-action@v1.2
         with:
@@ -73,8 +66,9 @@ jobs:
             df -h
             
             sudo apt-get install bison gcc make curl ninja-build ccache -y
-            echo "y" | sudo ${ANDROID_HOME}/tools/bin/sdkmanager --install "ndk;21.4.7075529" --sdk_root=${ANDROID_SDK_ROOT} &> /dev/null
-            ln -s  ${ANDROID_HOME}/cmake/3.18.1/bin/ninja /opt/hostedtoolcache/cmake/3.22.1/x64/cmake-3.22.1-linux-x86_64/bin/
+            echo "y" | sudo ${ANDROID_HOME}/tools/bin/sdkmanager --install "ndk;23.2.8568313" --sdk_root=${ANDROID_SDK_ROOT} &> /dev/null
+            echo "sdk.dir=${ANDROID_HOME}" >> local.properties
+            echo "ndk.dir=${ANDROID_HOME}/ndk/23.2.8568313" >> local.properties
       - name: Debug Build
         run: |
           sed '/signingConfig =/d' TMessagesProj/build.gradle.kts > TMessagesProj/build.gradle.kts.tmp

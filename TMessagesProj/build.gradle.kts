@@ -233,8 +233,6 @@ android {
 
         }
     }
-
-    dependenciesInfo.includeInApk = false
 }
 
 

@@ -24,6 +24,8 @@ ${CMAKE_HOME_DIRECTORY}/ffmpeg/${ANDROID_ABI}/libvpx.a,
 ${CMAKE_HOME_DIRECTORY}/boringssl/lib/libssl_${ANDROID_ABI}.a,
 ${CMAKE_HOME_DIRECTORY}/boringssl/lib/libcrypto_${ANDROID_ABI}.a")
 
+add_compile_options(-Bsymbolic)
+
 if (${ANDROID_ABI} STREQUAL "armeabi-v7a" OR ${ANDROID_ABI} STREQUAL "arm64-v8a")
     enable_language(ASM)
 else()
