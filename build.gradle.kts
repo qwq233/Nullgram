@@ -5,7 +5,7 @@ plugins {
     id("com.android.application") version "8.0.0" apply false
     id("com.android.library") version "8.0.0" apply false
     id("com.google.gms.google-services") version "4.3.13" apply false
-    id("com.google.firebase.crashlytics") version "2.9.4" apply false
+    id("com.google.firebase.crashlytics") version "2.9.5" apply false
     id("org.jetbrains.kotlin.android") version Version.kotlin apply false
     kotlin("plugin.serialization") version Version.kotlin apply false
 }
@@ -43,8 +43,8 @@ fun Project.configureBaseExtension() {
         }
 
         compileOptions {
-            sourceCompatibility = JavaVersion.VERSION_17
-            targetCompatibility = JavaVersion.VERSION_17
+            sourceCompatibility = JavaVersion.VERSION_11
+            targetCompatibility = JavaVersion.VERSION_11
             isCoreLibraryDesugaringEnabled = true
         }
 

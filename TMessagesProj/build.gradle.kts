@@ -98,7 +98,7 @@ dependencies {
 
 android {
     defaultConfig.applicationId = "top.qwq2333.nullgram"
-    namespace = "top.qwq2333.nullgram"
+    namespace = "org.telegram.messenger"
 
     sourceSets.getByName("main") {
         java.srcDir("src/main/java")
