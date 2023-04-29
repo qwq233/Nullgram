@@ -165,16 +165,19 @@ object APKUtils {
         dialog!!.setCancelable(false)
         dialog!!.show()
         CoroutineScope(Dispatchers.Main).launch {
-            val receiver = register(context) {
-                if (dialog != null) {
-                    dialog!!.dismiss()
-                    dialog = null
+            try {
+                val receiver = register(context) {
+                    if (dialog != null) {
+                        dialog!!.dismiss()
+                        dialog = null
+                    }
                 }
-            }
-            installApk(context, apk)
-            runBlocking {
-                val intent = receiver.waitIntent()
-                context.startActivity(intent)
+                installApk(context, apk)
+                runBlocking {
+                    val intent = receiver.waitIntent()
+                    context.startActivity(intent)
+                }
+            } catch (ignore: Exception) {
             }
         }
     }
