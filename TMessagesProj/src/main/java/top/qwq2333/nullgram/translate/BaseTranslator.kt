@@ -61,6 +61,7 @@ abstract class BaseTranslator {
         install(ContentNegotiation) {
             json(Json {
                 ignoreUnknownKeys = true
+                encodeDefaults = true
             })
         }
         install(HttpCookies)

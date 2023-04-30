@@ -27,7 +27,6 @@ import io.ktor.client.statement.bodyAsText
 import io.ktor.http.ContentType
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.contentType
-import kotlinx.serialization.EncodeDefault
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.Serializable
 import top.qwq2333.nullgram.translate.BaseTranslator
@@ -44,7 +43,6 @@ object LingoTranslator : BaseTranslator() {
         val source: String,
         val trans_type: String,
         val request_id: String = System.currentTimeMillis().toString(),
-        @EncodeDefault
         val detect: Boolean = true
     )
 
