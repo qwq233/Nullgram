@@ -19,12 +19,9 @@
 
 package top.qwq2333.nullgram.activity;
 
-import android.Manifest;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
-import android.content.pm.PackageManager;
-import android.os.Build;
 import android.text.format.DateFormat;
 import android.view.View;
 
@@ -63,6 +60,7 @@ import top.qwq2333.nullgram.utils.Defines;
 import top.qwq2333.nullgram.utils.FileUtils;
 import top.qwq2333.nullgram.utils.JsonUtils;
 import top.qwq2333.nullgram.utils.Log;
+import top.qwq2333.nullgram.utils.PermissionUtils;
 import top.qwq2333.nullgram.utils.ShareUtil;
 
 @SuppressLint("NotifyDataSetChanged")
@@ -174,9 +172,8 @@ public class MainSettingActivity extends BaseActivity {
                     backupSettings();
                 } else if (id == import_settings) {
                     try {
-                        if (Build.VERSION.SDK_INT >= 23 && getParentActivity().checkSelfPermission(Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
-                            getParentActivity().requestPermissions(new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, 4);
-                            return;
+                        if (!PermissionUtils.isStoragePermissionGranted()) {
+                            PermissionUtils.requestStoragePermission(getParentActivity());
                         }
                     } catch (Throwable ignore) {
                     }
