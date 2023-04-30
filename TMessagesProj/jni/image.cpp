@@ -649,58 +649,6 @@ JNIEXPORT void Java_org_telegram_messenger_Utilities_unpinBitmap(JNIEnv *env, jc
     AndroidBitmap_unlockPixels(env, bitmap);
 }
 
-/*JNIEXPORT jboolean Java_org_telegram_messenger_Utilities_loadWebpImage(JNIEnv *env, jclass clazz, jobject outputBitmap, jobject buffer, jint len, jobject options, jboolean unpin) {
-    if (!buffer) {
-        env->ThrowNew(jclass_NullPointerException, "Input buffer can not be null");
-        return 0;
-    }
-
-    jbyte *inputBuffer = (jbyte *) env->GetDirectBufferAddress(buffer);
-
-    int32_t bitmapWidth = 0;
-    int32_t bitmapHeight = 0;
-    if (!WebPGetInfo((uint8_t *)inputBuffer, len, &bitmapWidth, &bitmapHeight)) {
-        env->ThrowNew(jclass_RuntimeException, "Invalid WebP format");
-        return 0;
-    }
-
-    if (options && env->GetBooleanField(options, jclass_Options_inJustDecodeBounds) == JNI_TRUE) {
-        env->SetIntField(options, jclass_Options_outWidth, bitmapWidth);
-        env->SetIntField(options, jclass_Options_outHeight, bitmapHeight);
-        return 1;
-    }
-
-    if (!outputBitmap) {
-        env->ThrowNew(jclass_NullPointerException, "output bitmap can not be null");
-        return 0;
-    }
-
-    AndroidBitmapInfo bitmapInfo;
-    if (AndroidBitmap_getInfo(env, outputBitmap, &bitmapInfo) != ANDROID_BITMAP_RESUT_SUCCESS) {
-        env->ThrowNew(jclass_RuntimeException, "Failed to get Bitmap information");
-        return 0;
-    }
-
-    void *bitmapPixels = nullptr;
-    if (AndroidBitmap_lockPixels(env, outputBitmap, &bitmapPixels) != ANDROID_BITMAP_RESUT_SUCCESS) {
-        env->ThrowNew(jclass_RuntimeException, "Failed to lock Bitmap pixels");
-        return 0;
-    }
-
-    if (!WebPDecodeRGBAInto((uint8_t *) inputBuffer, len, (uint8_t *) bitmapPixels, bitmapInfo.height * bitmapInfo.stride, bitmapInfo.stride)) {
-        AndroidBitmap_unlockPixels(env, outputBitmap);
-        env->ThrowNew(jclass_RuntimeException, "Failed to decode webp image");
-        return 0;
-    }
-
-    if (unpin && AndroidBitmap_unlockPixels(env, outputBitmap) != ANDROID_BITMAP_RESUT_SUCCESS) {
-        env->ThrowNew(jclass_RuntimeException, "Failed to unlock Bitmap pixels");
-        return 0;
-    }
-
-    return 1;
-}*/
-
 #define SQUARE(i) ((i)*(i))
 
 inline static void zeroClearInt(int *p, size_t count) {

@@ -35,7 +35,6 @@ import android.view.View;
 import android.view.inputmethod.EditorInfo;
 
 import androidx.annotation.RequiresApi;
-import androidx.exifinterface.media.ExifInterface;
 
 import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.ApplicationLoader;
@@ -46,7 +45,6 @@ import org.telegram.messenger.FileLog;
 import org.telegram.messenger.LocaleController;
 import org.telegram.messenger.MediaController;
 import org.telegram.messenger.UserConfig;
-import org.telegram.messenger.Utilities;
 import org.telegram.messenger.VideoEditedInfo;
 import org.telegram.ui.Components.AnimatedEmojiDrawable;
 import org.telegram.ui.Components.AnimatedEmojiSpan;
@@ -689,9 +687,7 @@ public class TextureRenderer {
                                 ByteBuffer buffer = file.getChannel().map(FileChannel.MapMode.READ_ONLY, 0, path.length());
                                 BitmapFactory.Options bmOptions = new BitmapFactory.Options();
                                 bmOptions.inJustDecodeBounds = true;
-                                Utilities.loadWebpImage(null, buffer, buffer.limit(), bmOptions, true);
                                 entity.bitmap = Bitmaps.createBitmap(bmOptions.outWidth, bmOptions.outHeight, Bitmap.Config.ARGB_8888);
-                                Utilities.loadWebpImage(entity.bitmap, buffer, buffer.limit(), null, true);
                                 file.close();
                             }
                             if (entity.bitmap != null) {
