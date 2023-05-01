@@ -694,11 +694,11 @@ public class MessagesStorage extends BaseController {
             if (result.next()) {
                 final var count = result.intValue(0);
                 Log.i("emoticon column count = " + count);
-                result.dispose();
                 if (count == 0) {
                     database.executeFast("ALTER TABLE dialog_filter ADD COLUMN emoticon TEXT").stepThis().dispose();
                 }
             }
+            result.dispose();
             ConfigManager.putBoolean(Defines.hasUpdateDialogFilterDatabase, true);
         } catch (Exception e) {
             Log.e(e);
