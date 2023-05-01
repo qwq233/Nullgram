@@ -692,8 +692,9 @@ public class MessagesStorage extends BaseController {
         try {
             var result = database.queryFinalized("SELECT COUNT(*) FROM pragma_table_info('dialog_filter') WHERE name = 'emoticon';");
             if (result.next()) {
-                var count = result.intValue(0);
+                final var count = result.intValue(0);
                 Log.i("emoticon column count = " + count);
+                result.dispose();
                 if (count == 0) {
                     database.executeFast("ALTER TABLE dialog_filter ADD COLUMN emoticon TEXT").stepThis().dispose();
                 }
