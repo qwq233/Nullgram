@@ -28,6 +28,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.LocaleController;
 import org.telegram.messenger.R;
+import org.telegram.messenger.UserConfig;
 import org.telegram.tgnet.TLRPC;
 import org.telegram.ui.ActionBar.AlertDialog;
 import org.telegram.ui.ActionBar.Theme;
@@ -59,6 +60,7 @@ public class ExperimentSettingActivity extends BaseActivity {
     private int enchantAudioRow;
     private int linkedUserRow;
     private int overrideChannelAliasRow;
+    private int showRPCErrorRow;
 
     private int premiumRow;
     private int hidePremiumStickerAnimRow;
@@ -170,10 +172,15 @@ public class ExperimentSettingActivity extends BaseActivity {
                     ConfigManager.putInt(Defines.modifyDownloadSpeed, speeds[i]);
                     listAdapter.notifyItemChanged(modifyDownloadSpeedRow, PARTIAL);
                 });
-        }else if (position == alwaysSendWithoutSoundRow) {
+        } else if (position == alwaysSendWithoutSoundRow) {
             ConfigManager.toggleBoolean(Defines.alwaysSendWithoutSound);
             if (view instanceof TextCheckCell) {
                 ((TextCheckCell) view).setChecked(ConfigManager.getBooleanOrFalse(Defines.alwaysSendWithoutSound));
+            }
+        } else if (position == showRPCErrorRow) {
+            ConfigManager.toggleBoolean(Defines.showRPCError);
+            if (view instanceof TextCheckCell) {
+                ((TextCheckCell) view).setChecked(ConfigManager.getBooleanOrFalse(Defines.showRPCError));
             }
         }
 
@@ -212,6 +219,8 @@ public class ExperimentSettingActivity extends BaseActivity {
         } else {
             overrideChannelAliasRow = -1;
         }
+        var user = UserConfig.getInstance(currentAccount).getCurrentUser();
+        showRPCErrorRow = user != null && user.developer() ? addRow("showRPCError") : -1;
         experiment2Row = addRow();
 
         if (ConfigManager.getBooleanOrFalse(Defines.showHiddenSettings)) {
@@ -221,8 +230,6 @@ public class ExperimentSettingActivity extends BaseActivity {
             modifyDownloadSpeedRow = addRow("modifyDownloadSpeed");
             premium2Row = addRow();
         }
-
-
 
         if (listAdapter != null) {
             listAdapter.notifyDataSetChanged();
@@ -266,7 +273,8 @@ public class ExperimentSettingActivity extends BaseActivity {
                     TextSettingsCell textCell = (TextSettingsCell) holder.itemView;
                     textCell.setTextColor(Theme.getColor(Theme.key_windowBackgroundWhiteBlackText));
                     if (position == modifyDownloadSpeedRow) {
-                        textCell.setTextAndValue(LocaleController.getString("modifyDownloadSpeed", R.string.modifyDownloadSpeed), ConfigManager.getIntOrDefault(Defines.modifyDownloadSpeed, 128) + " Kb/block", payload, false);
+                        textCell.setTextAndValue(LocaleController.getString("modifyDownloadSpeed", R.string.modifyDownloadSpeed),
+                            ConfigManager.getIntOrDefault(Defines.modifyDownloadSpeed, 128) + " Kb/block", payload, false);
                     }
                     break;
                 }
@@ -274,25 +282,35 @@ public class ExperimentSettingActivity extends BaseActivity {
                     TextCheckCell textCell = (TextCheckCell) holder.itemView;
                     textCell.setEnabled(true, null);
                     if (position == blockSponsorAdsRow) {
-                        textCell.setTextAndCheck(LocaleController.getString("blockSponsorAds", R.string.blockSponsorAds), ConfigManager.getBooleanOrFalse(Defines.blockSponsorAds), true);
+                        textCell.setTextAndCheck(LocaleController.getString("blockSponsorAds", R.string.blockSponsorAds), ConfigManager.getBooleanOrFalse(Defines.blockSponsorAds),
+                            true);
                     } else if (position == hideProxySponsorChannelRow) {
-                        textCell.setTextAndCheck(LocaleController.getString("hideProxySponsorChannel", R.string.hideProxySponsorChannel), ConfigManager.getBooleanOrFalse(Defines.hideProxySponsorChannel), true);
+                        textCell.setTextAndCheck(LocaleController.getString("hideProxySponsorChannel", R.string.hideProxySponsorChannel),
+                            ConfigManager.getBooleanOrFalse(Defines.hideProxySponsorChannel), true);
                     } else if (position == disableSendTypingRow) {
-                        textCell.setTextAndCheck(LocaleController.getString("disableSendTyping", R.string.disableSendTyping), ConfigManager.getBooleanOrFalse(Defines.disableSendTyping), true);
+                        textCell.setTextAndCheck(LocaleController.getString("disableSendTyping", R.string.disableSendTyping),
+                            ConfigManager.getBooleanOrFalse(Defines.disableSendTyping), true);
                     } else if (position == syntaxHighlightRow) {
-                        textCell.setTextAndValueAndCheck(LocaleController.getString("codeSyntaxHighlight", R.string.codeSyntaxHighlight), LocaleController.getString("codeSyntaxHighlightDetails", R.string.codeSyntaxHighlightDetails), ConfigManager.getBooleanOrFalse(Defines.codeSyntaxHighlight), true, true);
+                        textCell.setTextAndValueAndCheck(LocaleController.getString("codeSyntaxHighlight", R.string.codeSyntaxHighlight),
+                            LocaleController.getString("codeSyntaxHighlightDetails", R.string.codeSyntaxHighlightDetails),
+                            ConfigManager.getBooleanOrFalse(Defines.codeSyntaxHighlight), true, true);
                     }
                     if (position == disableFilteringRow) {
-                        textCell.setTextAndValueAndCheck(LocaleController.getString("SensitiveDisableFiltering", R.string.SensitiveDisableFiltering), LocaleController.getString("SensitiveAbout", R.string.SensitiveAbout), sensitiveEnabled, true, true);
+                        textCell.setTextAndValueAndCheck(LocaleController.getString("SensitiveDisableFiltering", R.string.SensitiveDisableFiltering),
+                            LocaleController.getString("SensitiveAbout", R.string.SensitiveAbout), sensitiveEnabled, true, true);
                         textCell.setEnabled(sensitiveCanChange, null);
                     } else if (position == aliasChannelRow) {
-                        textCell.setTextAndValueAndCheck(LocaleController.getString("channelAlias", R.string.channelAlias), LocaleController.getString("channelAliasDetails", R.string.channelAliasDetails), ConfigManager.getBooleanOrFalse(Defines.channelAlias), true, true);
+                        textCell.setTextAndValueAndCheck(LocaleController.getString("channelAlias", R.string.channelAlias),
+                            LocaleController.getString("channelAliasDetails", R.string.channelAliasDetails), ConfigManager.getBooleanOrFalse(Defines.channelAlias), true, true);
                     } else if (position == keepFormattingRow) {
-                        textCell.setTextAndCheck(LocaleController.getString("keepFormatting", R.string.keepFormatting), ConfigManager.getBooleanOrFalse(Defines.keepCopyFormatting), true);
+                        textCell.setTextAndCheck(LocaleController.getString("keepFormatting", R.string.keepFormatting), ConfigManager.getBooleanOrFalse(Defines.keepCopyFormatting),
+                            true);
                     } else if (position == enchantAudioRow) {
-                        textCell.setTextAndValueAndCheck(LocaleController.getString("enchantAudioRow", R.string.enchantAudio), LocaleController.getString("enchantAudioDetails", R.string.enchantAudioDetails), ConfigManager.getBooleanOrFalse(Defines.enchantAudio), true, true);
+                        textCell.setTextAndValueAndCheck(LocaleController.getString("enchantAudioRow", R.string.enchantAudio),
+                            LocaleController.getString("enchantAudioDetails", R.string.enchantAudioDetails), ConfigManager.getBooleanOrFalse(Defines.enchantAudio), true, true);
                     } else if (position == linkedUserRow) {
-                        textCell.setTextAndValueAndCheck(LocaleController.getString("linkUser", R.string.linkUser), LocaleController.getString("linkUserDetails", R.string.linkUserDetails), ConfigManager.getBooleanOrFalse(Defines.linkedUser), true, true);
+                        textCell.setTextAndValueAndCheck(LocaleController.getString("linkUser", R.string.linkUser),
+                            LocaleController.getString("linkUserDetails", R.string.linkUserDetails), ConfigManager.getBooleanOrFalse(Defines.linkedUser), true, true);
                     } else if (position == overrideChannelAliasRow) {
                         textCell.setTextAndValueAndCheck(
                             ConfigManager.getBooleanOrFalse(Defines.channelAlias) ?
@@ -301,11 +319,16 @@ public class ExperimentSettingActivity extends BaseActivity {
                             LocaleController.getString("overrideChannelAliasDetails", R.string.overrideChannelAliasDetails),
                             ConfigManager.getBooleanOrFalse(Defines.overrideChannelAlias), true, true);
                     } else if (position == hidePremiumStickerAnimRow) {
-                        textCell.setTextAndCheck(LocaleController.getString("hidePremiumStickerAnim", R.string.hidePremiumStickerAnim), ConfigManager.getBooleanOrFalse(Defines.hidePremiumStickerAnim), true);
+                        textCell.setTextAndCheck(LocaleController.getString("hidePremiumStickerAnim", R.string.hidePremiumStickerAnim),
+                            ConfigManager.getBooleanOrFalse(Defines.hidePremiumStickerAnim), true);
                     } else if (position == fastSpeedUploadRow) {
-                        textCell.setTextAndCheck(LocaleController.getString("fastSpeedUpload", R.string.fastSpeedUpload), ConfigManager.getBooleanOrFalse(Defines.fastSpeedUpload), true);
+                        textCell.setTextAndCheck(LocaleController.getString("fastSpeedUpload", R.string.fastSpeedUpload), ConfigManager.getBooleanOrFalse(Defines.fastSpeedUpload),
+                            true);
                     } else if (position == alwaysSendWithoutSoundRow) {
-                        textCell.setTextAndCheck(LocaleController.getString("alwaysSendWithoutSound", R.string.alwaysSendWithoutSound), ConfigManager.getBooleanOrFalse(Defines.alwaysSendWithoutSound), true);
+                        textCell.setTextAndCheck(LocaleController.getString("alwaysSendWithoutSound", R.string.alwaysSendWithoutSound),
+                            ConfigManager.getBooleanOrFalse(Defines.alwaysSendWithoutSound), true);
+                    } else if (position == showRPCErrorRow) {
+                        textCell.setTextAndCheck(LocaleController.getString("showRPCError", R.string.showRPCError), ConfigManager.getBooleanOrFalse(Defines.showRPCError), true);
                     }
                     break;
                 }

@@ -60,8 +60,12 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import javax.net.ssl.SSLException;
 
+import top.qwq2333.nullgram.config.ConfigManager;
 import top.qwq2333.nullgram.helpers.WebSocketHelper;
+import top.qwq2333.nullgram.utils.DatabaseUtils;
+import top.qwq2333.nullgram.utils.Defines;
 import top.qwq2333.nullgram.utils.Log;
+import top.qwq2333.nullgram.utils.Utils;
 
 @SuppressWarnings("JavaJniMissingFunction")
 public class ConnectionsManager extends BaseController {
@@ -316,7 +320,22 @@ public class ConnectionsManager extends BaseController {
 
     private void sendRequestInternal(TLObject object, RequestDelegate onComplete, RequestDelegateTimestamp onCompleteTimestamp, QuickAckDelegate onQuickAck, WriteToSocketDelegate onWriteToSocket, int flags, int datacenterId, int connetionType, boolean immediate, int requestToken) {
         if (BuildVars.LOGS_ENABLED) {
-            // FileLog.d("send request " + object + " with token = " + requestToken);
+            FileLog.d("send request " + object + " with token = " + requestToken);
+        }
+        var user = getUserConfig().getCurrentUser();
+        if (user != null && user.bot && DatabaseUtils.isUserOnlyMethod(object)) {
+            FileLog.d("skip send request " + object + " user only method");
+            Utilities.stageQueue.postRunnable(() -> {
+                var error = new TLRPC.TL_error();
+                error.code = 400;
+                error.text = "BOT_METHOD_INVALID";
+                if (onComplete != null) {
+                    onComplete.run(null, error);
+                } else if (onCompleteTimestamp != null) {
+                    onCompleteTimestamp.run(null, error, getCurrentTime());
+                }
+            });
+            return;
         }
         try {
             NativeByteBuffer buffer = new NativeByteBuffer(object.getObjectSize());
@@ -352,6 +371,9 @@ public class ConnectionsManager extends BaseController {
                         if (BuildVars.LOGS_ENABLED) {
                             FileLog.e(object + " got error " + error.code + " " + error.text);
                         }
+                        if (ConfigManager.getBooleanOrFalse(Defines.showRPCError)) {
+                            Utils.showErrorToast(object, errorText);
+                        }
                     }
                     if (BuildVars.DEBUG_PRIVATE_VERSION && !getUserConfig().isClientActivated() && error != null && error.code == 400 && Objects.equals(error.text, "CONNECTION_NOT_INITED")) {
                         if (BuildVars.LOGS_ENABLED) {
@@ -367,7 +389,6 @@ public class ConnectionsManager extends BaseController {
                     if (BuildVars.LOGS_ENABLED) {
                         // FileLog.d("java received " + resp + " error = " + error);
                     }
-                    FileLog.dumpResponseAndRequest(object, resp, error, requestMsgId, finalStartRequestTime, requestToken);
                     final TLObject finalResponse = resp;
                     final TLRPC.TL_error finalError = error;
                     Utilities.stageQueue.postRunnable(() -> {

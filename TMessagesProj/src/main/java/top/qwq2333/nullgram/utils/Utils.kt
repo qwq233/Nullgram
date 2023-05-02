@@ -29,6 +29,7 @@ import android.net.NetworkCapabilities
 import android.os.Build
 import android.util.Base64
 import android.view.View
+import android.widget.Toast
 import org.telegram.messenger.AndroidUtilities
 import org.telegram.messenger.ApplicationLoader
 import org.telegram.messenger.FileLog
@@ -37,6 +38,7 @@ import org.telegram.messenger.MessageObject
 import org.telegram.messenger.NotificationCenter
 import org.telegram.messenger.R
 import org.telegram.messenger.SharedConfig
+import org.telegram.tgnet.TLObject
 import org.telegram.ui.ActionBar.ActionBarMenuItem
 import org.telegram.ui.ActionBar.ActionBarPopupWindow.ActionBarPopupWindowLayout
 import org.telegram.ui.ActionBar.BaseFragment
@@ -288,6 +290,16 @@ object Utils {
             }
         }
         popupLayout.setParentWindow(popupWindow)
+    }
+
+    @JvmStatic
+    fun showErrorToast(method: TLObject, text: String) {
+        if (text == "FILE_REFERENCE_EXPIRED") {
+            return
+        }
+        AndroidUtilities.runOnUIThread {
+            Toast.makeText(ApplicationLoader.applicationContext, "${DatabaseUtils.getMethodName(method)}: $text", Toast.LENGTH_SHORT).show()
+        }
     }
 
 }

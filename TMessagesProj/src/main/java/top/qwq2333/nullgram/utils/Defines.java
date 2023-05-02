@@ -91,6 +91,7 @@ public class Defines {
     public static final String markdownDisabled = "markdownEnable";
     public static final String markdownParseLinks = "markdownParseLinks";
     public static final String newMarkdownParser = "newMarkdownParser";
+    public static final String showRPCError = "showRPCError";
 
     // Custom API
     public static final String customAPI = "customAPI";

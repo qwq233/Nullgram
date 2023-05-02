@@ -291,4 +291,5 @@
     <string name="RegistrationDateOlder">Older than %s</string>
     <string name="RegistrationDateApproximately">Approximately %s</string>
     <string name="LearnMore">Learn More</string>
+  <string name="showRPCError">Show RPC Error</string>
 </resources>
