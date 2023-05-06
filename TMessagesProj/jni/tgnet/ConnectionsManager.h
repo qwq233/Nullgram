@@ -69,7 +69,7 @@ public:
     void setLangCode(std::string langCode);
     void setRegId(std::string regId);
     void setSystemLangCode(std::string langCode);
-    void updateDcSettings(uint32_t datacenterId, bool workaround);
+    void updateDcSettings(uint32_t datacenterId, bool workaround, bool ifLoadingTryAgain);
     void setPushConnectionEnabled(bool value);
     void applyDnsConfig(NativeByteBuffer *buffer, std::string phone, int32_t date);
     int64_t checkProxy(std::string address,
@@ -157,6 +157,8 @@ private:
     bool sendingPushPing = false;
     bool sendingPing = false;
     bool updatingDcSettings = false;
+    bool updatingDcSettingsAgain = false;
+    uint32_t updatingDcSettingsAgainDcNum = 0;
     bool updatingDcSettingsWorkaround = false;
     int32_t disconnectTimeoutAmount = 0;
     bool requestingSecondAddressByTlsHashMismatch = false;

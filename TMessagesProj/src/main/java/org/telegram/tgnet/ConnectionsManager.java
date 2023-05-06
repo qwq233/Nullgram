@@ -320,7 +320,7 @@ public class ConnectionsManager extends BaseController {
 
     private void sendRequestInternal(TLObject object, RequestDelegate onComplete, RequestDelegateTimestamp onCompleteTimestamp, QuickAckDelegate onQuickAck, WriteToSocketDelegate onWriteToSocket, int flags, int datacenterId, int connetionType, boolean immediate, int requestToken) {
         if (BuildVars.LOGS_ENABLED) {
-            FileLog.d("send request " + object + " with token = " + requestToken);
+//            FileLog.d("send request " + object + " with token = " + requestToken);
         }
         var user = getUserConfig().getCurrentUser();
         if (user != null && user.bot && DatabaseUtils.isUserOnlyMethod(object)) {
