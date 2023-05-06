@@ -12280,14 +12280,13 @@ public class PhotoViewer implements NotificationCenter.NotificationCenterDelegat
             }
             if (isEmbedVideo || newMessageObject.messageOwner.ttl != 0 && newMessageObject.messageOwner.ttl < 60 * 60 || noforwards) {
                 allowShare = false;
-                menuItem.hideSubItem(gallery_menu_save);
                 menuItem.hideSubItem(gallery_menu_share);
                 setItemVisible(editItem, false, animated);
             } else {
                 allowShare = true;
-                menuItem.showSubItem(gallery_menu_save);
                 menuItem.showSubItem(gallery_menu_share);
             }
+            menuItem.showSubItem(gallery_menu_save);
             groupedPhotosListView.fillList();
         } else if (!secureDocuments.isEmpty()) {
             allowShare = false;
