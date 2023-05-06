@@ -246,7 +246,6 @@ import top.qwq2333.nullgram.ui.BottomBuilder;
 import top.qwq2333.nullgram.ui.SimpleTextViewSwitcher;
 import top.qwq2333.nullgram.utils.AlertUtil;
 import top.qwq2333.nullgram.utils.Defines;
-import top.qwq2333.nullgram.utils.Log;
 import top.qwq2333.nullgram.utils.NumberUtils;
 import top.qwq2333.nullgram.utils.StringUtils;
 import top.qwq2333.nullgram.utils.Utils;
@@ -5062,8 +5061,18 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
                         }, 250);
                     }
                 });
-                return true;
+            } else {
+                try {
+                    android.content.ClipboardManager clipboard = (android.content.ClipboardManager) ApplicationLoader.applicationContext.getSystemService(Context.CLIPBOARD_SERVICE);
+                    String text = "@" + username;
+                    BulletinFactory.of(this).createCopyBulletin(LocaleController.getString("UsernameCopied", R.string.UsernameCopied), resourcesProvider).show();
+                    android.content.ClipData clip = android.content.ClipData.newPlainText("label", text);
+                    clipboard.setPrimaryClip(clip);
+                } catch (Exception e) {
+                    Log.e(e);
+                }
             }
+            return true;
         } else if (position == restrictionReasonRow) {
             ArrayList<TLRPC.TL_restrictionReason> reasons = new ArrayList<>();
             if (userId != 0) {
