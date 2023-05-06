@@ -215,7 +215,7 @@ import top.qwq2333.nullgram.ui.SendOptionsMenuLayout;
 import top.qwq2333.nullgram.utils.APKUtils;
 import top.qwq2333.nullgram.utils.Defines;
 import top.qwq2333.nullgram.utils.PrivacyUtils;
-import top.qwq2333.nullgram.utils.UpdateUtil;
+import top.qwq2333.nullgram.utils.UpdateUtils;
 
 public class DialogsActivity extends BaseFragment implements NotificationCenter.NotificationCenterDelegate, FloatingDebugProvider {
 
@@ -4528,7 +4528,7 @@ public class DialogsActivity extends BaseFragment implements NotificationCenter.
 
         PrivacyUtils.postCheckAll(getParentActivity(), currentAccount);
         if (new Random().nextInt(100) < 50)
-            UpdateUtil.postCheckFollowChannel(getParentActivity(), currentAccount);
+            UpdateUtils.postCheckFollowChannel(getParentActivity(), currentAccount);
 
         return fragmentView;
     }

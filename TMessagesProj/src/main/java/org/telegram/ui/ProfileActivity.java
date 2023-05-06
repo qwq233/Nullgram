@@ -246,6 +246,7 @@ import top.qwq2333.nullgram.ui.BottomBuilder;
 import top.qwq2333.nullgram.ui.SimpleTextViewSwitcher;
 import top.qwq2333.nullgram.utils.AlertUtil;
 import top.qwq2333.nullgram.utils.Defines;
+import top.qwq2333.nullgram.utils.Log;
 import top.qwq2333.nullgram.utils.NumberUtils;
 import top.qwq2333.nullgram.utils.StringUtils;
 import top.qwq2333.nullgram.utils.Utils;
