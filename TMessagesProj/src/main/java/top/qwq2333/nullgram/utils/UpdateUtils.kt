@@ -157,12 +157,16 @@ object UpdateUtils {
                         }
 
                     }.sortedByDescending { it.versionCode }
+                    for (i in metas.indices) {
+                        Log.i("checkUpdate", "$i ${metas[i].versionName} ${metas[i].versionCode}")
+                    }
                     for (meta in metas) {
                         if (meta.versionCode <= localVersionCode) {
                             Log.i("checkUpdate", "versionCode <= localVersionCode , ignore.")
                             break
                         }
                         targetMetadata = meta
+                        break
                     }
 
                     if (targetMetadata != null) {
@@ -253,9 +257,6 @@ object UpdateUtils {
                         return@sendRequest
                     }
                     val res = resp as TLRPC.messages_Messages
-                    var targetUpdate: TLRPC.TL_help_appUpdate? = null
-                    Log.d("checkUpdate", "Retrieve update messages, size: ${res.messages.size}")
-                    val target = "${BuildConfig.FLAVOR}.apk"
                     for (msg in res.messages) {
                         if (msg.media == null) {
                             Log.i("checkUpdate", "res.messages.get(i).media == null")
