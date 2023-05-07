@@ -13,10 +13,10 @@
     <string name="OfficialChannelName">NullgramClient</string>
     <string name="noAvailableUpdate">هیچ به روز رسانی ای موجود نیست</string>
     <string name="updateAvailable">بروزرسانی جدید در دسترس است</string>
-    <string name="variantsNotFound">Release variants fail to match automatically.\nPlease download manually from GitHub.</string>
+    <string name="variantsNotFound">همخوانی نسخه دیگر به صورت خودکار ناموفق بود.\nلطفا به صورت دستی از گیتهاب دانلود کنید.</string>
     <string name="skipUpdate">نادیده بگیر</string>
     <string name="notNow">الان نه</string>
-    <string name="updateConfirm">UPDATE</string>
+    <string name="updateConfirm">به روز رسانی</string>
     <string name="CheckUpdate">بررسی بروزرسانی ها</string>
     <string name="CheckingUpdate">بررسی برای بروز رسانی برنامه ها …</string>
     <string name="LastUpdateNever">Never checked since install.</string>
