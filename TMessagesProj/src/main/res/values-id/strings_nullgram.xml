@@ -247,10 +247,10 @@
     <string name="DeepLFormality">Formalitas</string>
     <string name="DeepLFormalityDefault">Bawaan</string>
     <string name="DeepLFormalityMore">Lainnya</string>
-    <string name="DeepLFormalityLess">Less</string>
-    <string name="TranslationTarget">Target language</string>
-    <string name="TranslationTargetApp">Follow App</string>
-    <string name="BrokenMLKit">Option unavailable</string>
+    <string name="DeepLFormalityLess">Lebih Sedikit</string>
+    <string name="TranslationTarget">Target bahasa</string>
+    <string name="TranslationTargetApp">Ikuti Aplikasi</string>
+    <string name="BrokenMLKit">Opsi tidak tersedia</string>
     <string name="BrokenMLKitDetail">Google MLKit language identifier is somehow broken on this device.</string>
     <string name="TranslatorTypePopup">Popup dialog</string>
     <string name="TranslatorTypeExternal">External App</string>
