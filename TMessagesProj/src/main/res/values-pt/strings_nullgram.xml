@@ -133,11 +133,11 @@
     <string name="showForwardDate">Show date of forwarded message</string>
     <string name="enchantAudio">Enchant Audio Quality</string>
     <string name="enchantAudioDetails">This feature is supported by Android\'s audio system.\nWe do not guarantee major changes in sound quality.</string>
-    <string name="AvatarAsBackground">Profile picture as background</string>
-    <string name="BlurAvatarBackground">Blur profile picture</string>
-    <string name="DarkenAvatarBackground">Darken profile picture</string>
-    <string name="hideTimeForSticker">Hide Time For Sticker</string>
-    <string name="showMessageID">Show Message ID</string>
+    <string name="AvatarAsBackground">Imagem do perfil como plano de fundo</string>
+    <string name="BlurAvatarBackground">Imagem do perfil desfocado</string>
+    <string name="DarkenAvatarBackground">Escurecer imagem de perfil</string>
+    <string name="hideTimeForSticker">Ocultar Hora Do Adesivo</string>
+    <string name="showMessageID">Mostrar ID da Mensagem</string>
     <string name="hideQuickSendMediaBottom">Hide Quick Send Media Bottom</string>
     <string name="largeAvatarAsBackground">Large Avatar As Background</string>
     <string name="useSystemEmoji">Use System Emoji</string>
