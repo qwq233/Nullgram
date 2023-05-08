@@ -63,7 +63,7 @@ dependencies {
     implementation("com.stripe:stripe-android:2.0.2")
     implementation("com.google.mlkit:language-id:17.0.4")
     implementation(files("libs/libgsaverification-client.aar"))
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.6.4")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.0")
     implementation("com.google.code.gson:gson:2.10.1")
     implementation("com.jakewharton:process-phoenix:2.1.2")
     // https://mvnrepository.com/artifact/de.psdev.licensesdialog/licensesdialog
