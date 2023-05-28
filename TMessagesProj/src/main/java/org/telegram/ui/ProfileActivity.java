@@ -344,6 +344,7 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
     private ActionBarMenuItem animatingItem;
     private ActionBarMenuItem callItem;
     private ActionBarMenuItem videoCallItem;
+    private ActionBarMenuItem eventLogItem;
     private ActionBarMenuItem editItem;
     private ActionBarMenuItem otherItem;
     private ActionBarMenuItem searchItem;
@@ -2873,6 +2874,8 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
             callItem = menu.addItem(call_item, R.drawable.ic_call);
             callItem.setContentDescription(LocaleController.getString("Call", R.string.Call));
         }
+        eventLogItem = menu.addItem(event_log, R.drawable.msg_log);
+        eventLogItem.setContentDescription(LocaleController.getString("EventLog", R.string.EventLog));
         editItem = menu.addItem(edit_channel, R.drawable.group_edit_profile);
         editItem.setContentDescription(LocaleController.getString("Edit", R.string.Edit));
         otherItem = menu.addItem(10, R.drawable.ic_ab_other, resourcesProvider);
@@ -8374,6 +8377,9 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
             return;
         }
         Context context = actionBar.getContext();
+        if (eventLogItem != null) {
+            eventLogItem.setVisibility(View.GONE);
+        }
         otherItem.removeAllSubItems();
         animatingItem = null;
 
@@ -8482,6 +8488,9 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
                     callItemVisible = call != null;
                 }
                 if (chat.megagroup) {
+                    if (eventLogItem != null) {
+                        eventLogItem.setVisibility(View.VISIBLE);
+                    }
                     if (chatInfo == null || !chatInfo.participants_hidden || ChatObject.hasAdminRights(chat)) {
                         canSearchMembers = true;
                         otherItem.addSubItem(search_members, R.drawable.msg_search, LocaleController.getString("SearchMembers", R.string.SearchMembers));
