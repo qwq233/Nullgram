@@ -46,6 +46,13 @@ You will require Android Studio 3.4, Android NDK rev. 20 and Android SDK 8.1
 6. Fill out values in TMessagesProj/src/main/java/org/telegram/messenger/BuildVars.java – there’s a link for each of the variables showing where and which data to obtain.
 7. You are ready to compile Telegram.
 
+## Sponsor
+
+Thanks to Jetbrains for allocating free open-source licences for IDEs and CloudFlare for OSS sponsorship
+
+[<img src="docs/jetbrains-variant-3.png" width="200"/>](https://jb.gg/OpenSource)
+[<img src="docs/CF_logomark.svg" width="200"/>](https://www.cloudflare.com/)
+
 
 [^1]: https://telegra.ph/%E6%9C%89%E5%85%B3-Nekogram-Lite-%E7%9A%84%E6%95%85%E4%BA%8B-04-09
 
