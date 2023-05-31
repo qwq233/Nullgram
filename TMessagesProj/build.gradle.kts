@@ -78,7 +78,7 @@ dependencies {
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.5.0")
     implementation("org.osmdroid:osmdroid-android:6.1.16")
     implementation("com.android.billingclient:billing:5.2.0")
-    implementation("com.google.guava:guava:31.1-android")
+    implementation("com.google.guava:guava:32.0.0-android")
 
     implementation("io.ktor:ktor-client-core:${Version.ktor}")
     implementation("io.ktor:ktor-client-okhttp:${Version.ktor}")
