@@ -1,7 +1,5 @@
 package org.telegram.ui;
 
-import static android.content.Context.AUDIO_SERVICE;
-
 import android.Manifest;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
@@ -33,7 +31,6 @@ import android.graphics.Shader;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.GradientDrawable;
-import android.media.AudioManager;
 import android.media.projection.MediaProjectionManager;
 import android.os.Build;
 import android.os.Bundle;
@@ -1175,7 +1172,7 @@ public class GroupCallActivity extends BottomSheet implements NotificationCenter
                             } catch (Exception ignore) {}
                             if (DialogObject.isUserDialog(justJoinedId)) {
                                 TLRPC.User user = accountInstance.getMessagesController().getUser(justJoinedId);
-                                if (user != null && (call.call.participants_count < 250 || UserObject.isContact(user) || user.verified || hasInDialogs)) {
+                                if (user != null && (call.call.participants_count < 250 || UserObject.isContact(user) || user.verifiedExtended() || hasInDialogs)) {
                                     getUndoView().showWithAction(0, UndoView.ACTION_VOIP_USER_JOINED, user, currentChat, null, null);
                                 }
                             } else {

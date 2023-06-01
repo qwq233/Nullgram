@@ -3041,7 +3041,7 @@ public class SendMessagesHelper extends BaseController implements NotificationCe
                             return;
                         }
                         TLRPC.User user = getMessagesController().getUser(uid);
-                        boolean verified = user != null && user.verified;
+                        boolean verified = user != null && user.verifiedExtended();
                         if (button instanceof TLRPC.TL_keyboardButtonGame) {
                             TLRPC.TL_game game = messageObject.messageOwner.media instanceof TLRPC.TL_messageMediaGame ? messageObject.messageOwner.media.game : null;
                             if (game == null) {
