@@ -4902,7 +4902,13 @@ public class MediaController implements AudioManager.OnAudioFocusChangeListener,
             }
             if (messageObject.getId() != 0) {
                 try {
-                    ApplicationLoader.applicationContext.startService(intent);
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+
+                    } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                        ApplicationLoader.applicationContext.startForegroundService(intent);
+                    } else {
+                        ApplicationLoader.applicationContext.startService(intent);
+                    }
                 } catch (Throwable e) {
                     FileLog.e(e);
                 }
