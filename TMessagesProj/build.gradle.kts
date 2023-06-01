@@ -37,10 +37,10 @@ fun setupPlay(stable: Boolean) {
 }
 
 dependencies {
-    implementation(platform("com.google.firebase:firebase-bom:31.5.0"))
+    implementation(platform("com.google.firebase:firebase-bom:32.1.0"))
     implementation("com.google.firebase:firebase-crashlytics-ktx")
 
-    implementation("androidx.core:core-ktx:1.10.0")
+    implementation("androidx.core:core-ktx:1.10.1")
     implementation("androidx.palette:palette-ktx:1.0.0")
     implementation("androidx.exifinterface:exifinterface:1.3.6")
     implementation("androidx.dynamicanimation:dynamicanimation:1.0.0")
@@ -50,7 +50,7 @@ dependencies {
 
     compileOnly("org.checkerframework:checker-compat-qual:2.5.5")
     implementation("com.google.firebase:firebase-messaging:23.1.2")
-    implementation("com.google.firebase:firebase-config:21.3.0")
+    implementation("com.google.firebase:firebase-config:21.4.0")
     implementation("com.google.firebase:firebase-datatransport:18.1.8")
     implementation("com.google.firebase:firebase-appindexing:20.0.0")
     implementation("com.google.android.gms:play-services-auth:20.5.0")
@@ -60,10 +60,10 @@ dependencies {
     implementation("com.google.android.gms:play-services-wallet:19.1.0")
 //    implementation("com.google.android.gms:play-services-safetynet:18.0.1")
     implementation("com.googlecode.mp4parser:isoparser:1.0.6") // DO NOT UPDATE THIS DEPENDENCY
-    implementation("com.stripe:stripe-android:2.0.2")
+    implementation("com.stripe:stripe-android:20.25.4")
     implementation("com.google.mlkit:language-id:17.0.4")
     implementation(files("libs/libgsaverification-client.aar"))
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.0")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.1")
     implementation("com.google.code.gson:gson:2.10.1")
     implementation("com.jakewharton:process-phoenix:2.1.2")
     // https://mvnrepository.com/artifact/de.psdev.licensesdialog/licensesdialog
@@ -75,10 +75,10 @@ dependencies {
     coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.0.3")
     implementation("org.jetbrains.kotlin:kotlin-stdlib-common:${Version.kotlin}")
     implementation("org.jetbrains.kotlin:kotlin-stdlib:${Version.kotlin}")
-    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.5.0")
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.5.1")
     implementation("org.osmdroid:osmdroid-android:6.1.16")
-    implementation("com.android.billingclient:billing:5.2.0")
-    implementation("com.google.guava:guava:31.1-android")
+    implementation("com.android.billingclient:billing:6.0.0")
+    implementation("com.google.guava:guava:32.0.0-jre")
 
     implementation("io.ktor:ktor-client-core:${Version.ktor}")
     implementation("io.ktor:ktor-client-okhttp:${Version.ktor}")
