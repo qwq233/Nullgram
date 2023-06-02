@@ -1177,7 +1177,7 @@ public class GroupCallActivity extends BottomSheet implements NotificationCenter
                                 }
                             } else {
                                 TLRPC.Chat chat = accountInstance.getMessagesController().getChat(-justJoinedId);
-                                if (chat != null && (call.call.participants_count < 250 || !ChatObject.isNotInChat(chat) || chat.verified || hasInDialogs)) {
+                                if (chat != null && (call.call.participants_count < 250 || !ChatObject.isNotInChat(chat) || chat.verifiedExtended() || hasInDialogs)) {
                                     getUndoView().showWithAction(0, UndoView.ACTION_VOIP_USER_JOINED, chat, currentChat, null, null);
                                 }
                             }

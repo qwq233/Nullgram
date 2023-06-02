@@ -164,16 +164,17 @@ abstract class BaseTranslator {
             }
 
             is TLRPC.Poll -> {
-                val translatedPoll: TLRPC.TL_poll = TLRPC.TL_poll()
-                // Keep original information
-                translatedPoll.close_date = source.close_date
-                translatedPoll.close_period = source.close_period
-                translatedPoll.closed = source.closed
-                translatedPoll.flags = source.flags
-                translatedPoll.id = source.id
-                translatedPoll.multiple_choice = source.multiple_choice
-                translatedPoll.public_voters = source.public_voters
-                translatedPoll.quiz = source.quiz
+                val translatedPoll: TLRPC.TL_poll = TLRPC.TL_poll().apply {
+                    // Keep original information
+                    close_date = source.close_date
+                    close_period = source.close_period
+                    closed = source.closed
+                    flags = source.flags
+                    id = source.id
+                    multiple_choice = source.multiple_choice
+                    public_voters = source.public_voters
+                    quiz = source.quiz
+                }
 
                 // Translate question
                 val translatedQuestion = doTranslateText(source.question, from, to)

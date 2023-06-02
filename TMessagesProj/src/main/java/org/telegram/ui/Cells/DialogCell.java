@@ -1103,7 +1103,7 @@ public class DialogCell extends BaseCell {
                             drawScam = 2;
                             Theme.dialogs_fakeDrawable.checkText();
                         } else {
-                            drawVerified = !forbidVerified && chat.verified;
+                            drawVerified = !forbidVerified && chat.verifiedExtended();
                         }
                     } else if (user != null) {
                         if (user.scam) {

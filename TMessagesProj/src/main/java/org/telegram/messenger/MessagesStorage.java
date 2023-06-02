@@ -9334,7 +9334,7 @@ public class MessagesStorage extends BaseController {
                                 oldChat.title = chat.title;
                                 oldChat.photo = chat.photo;
                                 oldChat.broadcast = chat.broadcast;
-                                oldChat.verified = chat.verified;
+                                oldChat.verified = chat.verifiedExtended();
                                 oldChat.megagroup = chat.megagroup;
                                 oldChat.call_not_empty = chat.call_not_empty;
                                 oldChat.call_active = chat.call_active;
