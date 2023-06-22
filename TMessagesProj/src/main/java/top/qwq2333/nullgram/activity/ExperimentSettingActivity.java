@@ -35,6 +35,7 @@ import org.telegram.ui.ActionBar.Theme;
 import org.telegram.ui.Cells.HeaderCell;
 import org.telegram.ui.Cells.NotificationsCheckCell;
 import org.telegram.ui.Cells.TextCheckCell;
+import org.telegram.ui.Cells.TextInfoPrivacyCell;
 import org.telegram.ui.Cells.TextSettingsCell;
 import org.telegram.ui.Components.AlertsCreator;
 
@@ -44,6 +45,7 @@ import top.qwq2333.nullgram.config.ConfigManager;
 import top.qwq2333.nullgram.ui.PopupBuilder;
 import top.qwq2333.nullgram.utils.Defines;
 import top.qwq2333.nullgram.utils.Log;
+import ws.vinta.pangu.Pangu;
 
 @SuppressLint("NotifyDataSetChanged")
 public class ExperimentSettingActivity extends BaseActivity {
@@ -62,6 +64,12 @@ public class ExperimentSettingActivity extends BaseActivity {
     private int overrideChannelAliasRow;
     private int showRPCErrorRow;
 
+    private int panguRow;
+    private int enablePanguOnSendingRow;
+    private int enablePanguOnReceivingRow;
+    private int pangu2Row;
+    private int pangu3Row;
+
     private int premiumRow;
     private int hidePremiumStickerAnimRow;
     private int fastSpeedUploadRow;
@@ -74,6 +82,8 @@ public class ExperimentSettingActivity extends BaseActivity {
 
     private boolean sensitiveEnabled;
     private final boolean sensitiveCanChange;
+
+    private final Pangu pangu = new Pangu();
 
     public ExperimentSettingActivity(boolean sensitiveEnabled, boolean sensitiveCanChange) {
         this.sensitiveEnabled = sensitiveEnabled;
@@ -182,6 +192,16 @@ public class ExperimentSettingActivity extends BaseActivity {
             if (view instanceof TextCheckCell) {
                 ((TextCheckCell) view).setChecked(ConfigManager.getBooleanOrFalse(Defines.showRPCError));
             }
+        } else if (position == enablePanguOnSendingRow) {
+            ConfigManager.toggleBoolean(Defines.enablePanguOnSending);
+            if (view instanceof TextCheckCell) {
+                ((TextCheckCell) view).setChecked(ConfigManager.getBooleanOrFalse(Defines.enablePanguOnSending));
+            }
+        } else if (position == enablePanguOnReceivingRow) {
+            ConfigManager.toggleBoolean(Defines.enablePanguOnReceiving);
+            if (view instanceof TextCheckCell) {
+                ((TextCheckCell) view).setChecked(ConfigManager.getBooleanOrFalse(Defines.enablePanguOnReceiving));
+            }
         }
 
     }
@@ -223,6 +243,12 @@ public class ExperimentSettingActivity extends BaseActivity {
         showRPCErrorRow = user != null && user.developer() ? addRow("showRPCError") : -1;
         experiment2Row = addRow();
 
+        panguRow = addRow();
+        enablePanguOnSendingRow = addRow("enablePanguOnSending");
+        enablePanguOnReceivingRow = /*addRow("enablePanguOnReceiving")*/ -1; //todo: not finished
+        pangu3Row = addRow();
+        pangu2Row = addRow();
+
         if (ConfigManager.getBooleanOrFalse(Defines.showHiddenSettings)) {
             premiumRow = addRow();
             hidePremiumStickerAnimRow = addRow("hidePremiumStickerAnim");
@@ -261,7 +287,7 @@ public class ExperimentSettingActivity extends BaseActivity {
         @Override
         public void onBindViewHolder(RecyclerView.ViewHolder holder, int position, boolean payload) {
             switch (holder.getItemViewType()) {
-                case 1: {
+                case TYPE_SHADOW: {
                     if (position == experiment2Row) {
                         holder.itemView.setBackground(Theme.getThemedDrawable(mContext, R.drawable.greydivider_bottom, Theme.key_windowBackgroundGrayShadow));
                     } else {
@@ -269,7 +295,7 @@ public class ExperimentSettingActivity extends BaseActivity {
                     }
                     break;
                 }
-                case 2: {
+                case TYPE_SETTINGS: {
                     TextSettingsCell textCell = (TextSettingsCell) holder.itemView;
                     textCell.setTextColor(Theme.getColor(Theme.key_windowBackgroundWhiteBlackText));
                     if (position == modifyDownloadSpeedRow) {
@@ -278,7 +304,7 @@ public class ExperimentSettingActivity extends BaseActivity {
                     }
                     break;
                 }
-                case 3: {
+                case TYPE_CHECK: {
                     TextCheckCell textCell = (TextCheckCell) holder.itemView;
                     textCell.setEnabled(true, null);
                     if (position == blockSponsorAdsRow) {
@@ -329,20 +355,36 @@ public class ExperimentSettingActivity extends BaseActivity {
                             ConfigManager.getBooleanOrFalse(Defines.alwaysSendWithoutSound), true);
                     } else if (position == showRPCErrorRow) {
                         textCell.setTextAndCheck(LocaleController.getString("showRPCError", R.string.showRPCError), ConfigManager.getBooleanOrFalse(Defines.showRPCError), true);
+                    } else if (position == enablePanguOnSendingRow) {
+                        textCell.setTextAndCheck(LocaleController.getString("enablePanguOnSending", R.string.enablePanguOnSending), ConfigManager.getBooleanOrFalse(Defines.enablePanguOnSending),
+                            true);
+                    } else if (position == enablePanguOnReceivingRow) {
+                        textCell.setTextAndCheck(LocaleController.getString("enablePanguOnReceiving", R.string.enablePanguOnReceiving), ConfigManager.getBooleanOrFalse(Defines.enablePanguOnReceiving), true);
                     }
                     break;
                 }
-                case 4: {
+                case TYPE_HEADER: {
                     HeaderCell headerCell = (HeaderCell) holder.itemView;
                     if (position == experimentRow) {
                         headerCell.setText(LocaleController.getString("Experiment", R.string.Experiment));
                     } else if (position == premiumRow) {
                         headerCell.setText(LocaleController.getString("Premium", R.string.premium));
+                    } else if (position == panguRow) {
+                        headerCell.setText(LocaleController.getString("pangu", R.string.pangu));
                     }
                     break;
                 }
-                case 5: {
+                case TYPE_NOTIFICATION_CHECK: {
                     NotificationsCheckCell textCell = (NotificationsCheckCell) holder.itemView;
+                    break;
+                }
+                case TYPE_INFO_PRIVACY: {
+                    TextInfoPrivacyCell cell = (TextInfoPrivacyCell) holder.itemView;
+                    if (position == pangu3Row) {
+                        cell.getTextView().setMovementMethod(null);
+                        cell.setBackground(Theme.getThemedDrawable(mContext, R.drawable.greydivider_bottom, Theme.key_windowBackgroundGrayShadow));
+                        cell.setText(LocaleController.getString("panguInfo", R.string.panguInfo));
+                    }
                     break;
                 }
             }
@@ -350,14 +392,16 @@ public class ExperimentSettingActivity extends BaseActivity {
 
         @Override
         public int getItemViewType(int position) {
-            if (position == experiment2Row || position == premium2Row) {
-                return 1;
+            if (position == experiment2Row || position == premium2Row || position == pangu2Row) {
+                return TYPE_SHADOW;
             } else if (position == modifyDownloadSpeedRow) {
-                return 2;
-            } else if (position == experimentRow || position == premiumRow) {
-                return 4;
+                return TYPE_SETTINGS;
+            } else if (position == experimentRow || position == premiumRow || position == panguRow) {
+                return TYPE_HEADER;
+            } else if (position == pangu3Row) {
+                return TYPE_INFO_PRIVACY;
             }
-            return 3;
+            return TYPE_CHECK;
         }
     }
 }

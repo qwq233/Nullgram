@@ -85,6 +85,7 @@ dependencies {
     implementation("io.ktor:ktor-client-encoding:${Version.ktor}")
     implementation("io.ktor:ktor-client-content-negotiation:${Version.ktor}")
     implementation("io.ktor:ktor-serialization-kotlinx-json:${Version.ktor}")
+    implementation("ws.vinta:pangu:1.1.0")
 
     implementation(project(":tcp2ws"))
 }

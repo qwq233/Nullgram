@@ -92,6 +92,8 @@ public class Defines {
     public static final String markdownParseLinks = "markdownParseLinks";
     public static final String newMarkdownParser = "newMarkdownParser";
     public static final String showRPCError = "showRPCError";
+    public static final String enablePanguOnSending = "enablePanguOnSending";
+    public static final String enablePanguOnReceiving = "enablePanguOnReceiving";
 
     // Custom API
     public static final String customAPI = "customAPI";
