@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="NullgramName">Nullgram</string>
     <string name="NullgramPushService">Serviço de Push Nullgram</string>
     <string name="NullSettings">Configurações do Nullgram</string>
     <string name="OfficialChannel">Canal oficial</string>
@@ -128,7 +127,7 @@
     <string name="CallbackData">Dados do retorno de chamadas</string>
     <string name="TestBackend">Testar o processo</string>
     <string name="notAllowedWhenChannelAliasIsEnabled">Você não pode desativá-lo quando o Apelido de Canal está habilitado!</string>
-    <string name="unreadBadgeOnBackButton">Emblema Não Lido no Botão Voltar</string>
+    <string name="unreadBadgeOnBackButton">Emblema não lido no botão Voltar</string>
     <string name="keepFormatting">Manter formatação de texto ao copiar</string>
     <string name="showForwardDate">Exibir data da mensagem encaminhada</string>
     <string name="enchantAudio">Alta Qualidade de Áudio</string>
@@ -292,4 +291,7 @@
     <string name="RegistrationDateApproximately">Aproximadamente</string>
     <string name="LearnMore">Saiba Mais</string>
     <string name="showRPCError">Exibir erro RPC</string>
+    <string name="enablePanguOnReceiving">Enable Pangu on receiving</string>
+    <string name="enablePanguOnSending">Enable Pangu on sending</string>
+    <string name="panguInfo">Paranoid text spacing for good readability, to automatically insert whitespace between CJK (Chinese, Japanese, Korean), half-width English, digit and symbol characters.</string>
 </resources>
