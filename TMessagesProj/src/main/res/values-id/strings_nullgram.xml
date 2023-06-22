@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="NullgramName">Nullgram</string>
     <string name="NullgramPushService">Layanan Push Nullgram</string>
     <string name="NullSettings">Pengaturan Nullgram</string>
     <string name="OfficialChannel">Channel Resmi</string>
@@ -292,4 +291,7 @@
     <string name="RegistrationDateApproximately">Sekitar %s</string>
     <string name="LearnMore">Pelajari Selengkapnya</string>
     <string name="showRPCError">Tampilkan kesalahan RPC</string>
+    <string name="enablePanguOnReceiving">Enable Pangu on receiving</string>
+    <string name="enablePanguOnSending">Enable Pangu on sending</string>
+    <string name="panguInfo">Paranoid text spacing for good readability, to automatically insert whitespace between CJK (Chinese, Japanese, Korean), half-width English, digit and symbol characters.</string>
 </resources>
