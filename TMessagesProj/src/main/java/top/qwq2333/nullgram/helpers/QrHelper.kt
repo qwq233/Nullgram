@@ -343,16 +343,15 @@ object QrHelper {
         return newBitmap
     }
 
-    fun createThresholdMatrix(threshold: Int): ColorMatrix {
-        return ColorMatrix(
-            floatArrayOf(
-                85f, 85f, 85f, 0f, -255f * threshold,
-                85f, 85f, 85f, 0f, -255f * threshold,
-                85f, 85f, 85f, 0f, -255f * threshold,
-                0f, 0f, 0f, 1f, 0f
-            )
+    @JvmStatic
+    fun createThresholdMatrix(threshold: Int = 90) = ColorMatrix(
+        floatArrayOf(
+            85f, 85f, 85f, 0f, -255f * threshold,
+            85f, 85f, 85f, 0f, -255f * threshold,
+            85f, 85f, 85f, 0f, -255f * threshold,
+            0f, 0f, 0f, 1f, 0f
         )
-    }
+    )
 
     class QrResult {
         @JvmField

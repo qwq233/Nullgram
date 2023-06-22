@@ -94,6 +94,7 @@ public class Defines {
     public static final String showRPCError = "showRPCError";
     public static final String enablePanguOnSending = "enablePanguOnSending";
     public static final String enablePanguOnReceiving = "enablePanguOnReceiving";
+    public static final String showExactTime = "showExactTime";
 
     // Custom API
     public static final String customAPI = "customAPI";

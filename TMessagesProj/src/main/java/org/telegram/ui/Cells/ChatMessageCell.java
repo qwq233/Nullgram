@@ -365,10 +365,7 @@ public class ChatMessageCell extends BaseCell implements SeekBar.SeekBarDelegate
             return false;
         }
         float y = getY() + reactionsLayoutInBubble.y;
-        if (y > clipTop && y + reactionsLayoutInBubble.height - AndroidUtilities.dp(16) < clipBottom) {
-            return true;
-        }
-        return false;
+        return y > clipTop && y + reactionsLayoutInBubble.height - AndroidUtilities.dp(16) < clipBottom;
     }
 
     public void markReactionsAsRead() {
@@ -717,9 +714,9 @@ public class ChatMessageCell extends BaseCell implements SeekBar.SeekBarDelegate
     private final RadialProgress2 radialProgress;
     private final RadialProgress2 videoRadialProgress;
     private boolean drawRadialCheckBackground;
-    private ImageReceiver photoImage;
-    private ImageReceiver blurredPhotoImage;
-    private AvatarDrawable contactAvatarDrawable;
+    private final ImageReceiver photoImage;
+    private final ImageReceiver blurredPhotoImage;
+    private final AvatarDrawable contactAvatarDrawable;
     private Drawable locationLoadingThumb;
 
     private boolean disallowLongPress;
@@ -797,12 +794,12 @@ public class ChatMessageCell extends BaseCell implements SeekBar.SeekBarDelegate
     private boolean instantPressed;
     private boolean instantButtonPressed;
     private float instantButtonPressProgress;
-    private Drawable[] selectorDrawable = new Drawable[2];
-    private int[] selectorDrawableMaskType = new int[2];
-    private RectF instantButtonRect = new RectF();
+    private final Drawable[] selectorDrawable = new Drawable[2];
+    private final int[] selectorDrawableMaskType = new int[2];
+    private final RectF instantButtonRect = new RectF();
     private LoadingDrawable instantButtonLoading;
     private ValueAnimator instantButtonPressAnimator;
-    private int[] pressedState = new int[]{android.R.attr.state_enabled, android.R.attr.state_pressed};
+    private final int[] pressedState = new int[]{android.R.attr.state_enabled, android.R.attr.state_pressed};
     private float animatingLoadingProgressProgress;
     CharSequence accessibilityText;
     private boolean accessibilityTextUnread, accessibilityTextContentUnread;
@@ -877,12 +874,12 @@ public class ChatMessageCell extends BaseCell implements SeekBar.SeekBarDelegate
 
     private AnimatedEmojiSpan pressedEmoji;
     private LinkSpanDrawable pressedLink;
-    private LinkSpanDrawable.LinkCollector links = new LinkSpanDrawable.LinkCollector(this);
+    private final LinkSpanDrawable.LinkCollector links = new LinkSpanDrawable.LinkCollector(this);
     private int pressedLinkType;
     private boolean linkPreviewPressed;
     private boolean gamePreviewPressed;
-    private ArrayList<LinkPath> urlPathCache = new ArrayList<>();
-    private ArrayList<LinkPath> urlPathSelection = new ArrayList<>();
+    private final ArrayList<LinkPath> urlPathCache = new ArrayList<>();
+    private final ArrayList<LinkPath> urlPathSelection = new ArrayList<>();
     private CharacterStyle highlightPathSpan;
     private LinkPath highlightPath;
     private long highlightPathStart;
@@ -891,7 +888,8 @@ public class ChatMessageCell extends BaseCell implements SeekBar.SeekBarDelegate
     class LoadingDrawableLocation {
         LoadingDrawable drawable;
         int blockNum;
-    };
+    }
+
     private ArrayList<LoadingDrawableLocation> progressLoadingLinkDrawables;
     private CharacterStyle progressLoadingLink;
 
@@ -899,9 +897,9 @@ public class ChatMessageCell extends BaseCell implements SeekBar.SeekBarDelegate
     private static final float[] radii = new float[8];
 
     private boolean useSeekBarWaveform;
-    private SeekBar seekBar;
-    private SeekBarWaveform seekBarWaveform;
-    private SeekBarAccessibilityDelegate seekBarAccessibilityDelegate;
+    private final SeekBar seekBar;
+    private final SeekBarWaveform seekBarWaveform;
+    private final SeekBarAccessibilityDelegate seekBarAccessibilityDelegate;
     private int seekBarX;
     private int seekBarY;
 
@@ -967,11 +965,11 @@ public class ChatMessageCell extends BaseCell implements SeekBar.SeekBarDelegate
 
     private boolean autoPlayingMedia;
 
-    private ArrayList<BotButton> botButtons = new ArrayList<>();
-    private Path botButtonPath = new Path();
-    private float[] botButtonRadii = new float[8];
-    private HashMap<String, BotButton> botButtonsByData = new HashMap<>();
-    private HashMap<String, BotButton> botButtonsByPosition = new HashMap<>();
+    private final ArrayList<BotButton> botButtons = new ArrayList<>();
+    private final Path botButtonPath = new Path();
+    private final float[] botButtonRadii = new float[8];
+    private final HashMap<String, BotButton> botButtonsByData = new HashMap<>();
+    private final HashMap<String, BotButton> botButtonsByPosition = new HashMap<>();
     private String botButtonsLayout;
     private int widthForButtons;
     private int pressedBotButton;
@@ -1122,7 +1120,7 @@ public class ChatMessageCell extends BaseCell implements SeekBar.SeekBarDelegate
     private float forwardNameX;
     private int forwardNameY;
     private int forwardHeight;
-    private float[] forwardNameOffsetX = new float[2];
+    private final float[] forwardNameOffsetX = new float[2];
 
     private float drawTimeX;
     private float drawTimeY;
@@ -1136,23 +1134,23 @@ public class ChatMessageCell extends BaseCell implements SeekBar.SeekBarDelegate
     private Paint drillHolePaint;
     private Path drillHolePath;
 
-    private Path mediaSpoilerPath = new Path();
-    private float[] mediaSpoilerRadii = new float[8];
-    private SpoilerEffect mediaSpoilerEffect = new SpoilerEffect();
+    private final Path mediaSpoilerPath = new Path();
+    private final float[] mediaSpoilerRadii = new float[8];
+    private final SpoilerEffect mediaSpoilerEffect = new SpoilerEffect();
     private float mediaSpoilerRevealProgress;
     private float mediaSpoilerRevealX;
     private float mediaSpoilerRevealY;
     private float mediaSpoilerRevealMaxRadius;
 
-    private float unlockAlpha = 1f;
+    private final float unlockAlpha = 1f;
     private float unlockX;
     private float unlockY;
     private StaticLayout unlockLayout;
     private int unlockTextWidth;
     private String currentUnlockString;
-    private SpoilerEffect unlockSpoilerEffect = new SpoilerEffect();
-    private Path unlockSpoilerPath = new Path();
-    private float[] unlockSpoilerRadii = new float[8];
+    private final SpoilerEffect unlockSpoilerEffect = new SpoilerEffect();
+    private final Path unlockSpoilerPath = new Path();
+    private final float[] unlockSpoilerRadii = new float[8];
 
     private StaticLayout viewsLayout;
     private int viewsTextWidth;
@@ -1220,12 +1218,12 @@ public class ChatMessageCell extends BaseCell implements SeekBar.SeekBarDelegate
     private boolean photoImageOutOfBounds;
 
     private boolean wouldBeInPip;
-    private AnimatedFloat roundVideoPlayPipFloat = new AnimatedFloat(this, 200, CubicBezierInterpolator.EASE_OUT);
+    private final AnimatedFloat roundVideoPlayPipFloat = new AnimatedFloat(this, 200, CubicBezierInterpolator.EASE_OUT);
     private Paint roundVideoPipPaint;
 
     private FlagSecureReason flagSecure;
 
-    private Runnable diceFinishCallback = new Runnable() {
+    private final Runnable diceFinishCallback = new Runnable() {
         @Override
         public void run() {
             if (delegate != null) {
@@ -1293,11 +1291,11 @@ public class ChatMessageCell extends BaseCell implements SeekBar.SeekBarDelegate
 
     // Public for enter transition
     public List<SpoilerEffect> replySpoilers = new ArrayList<>();
-    private Stack<SpoilerEffect> replySpoilersPool = new Stack<>();
-    private List<SpoilerEffect> captionSpoilers = new ArrayList<>();
-    private Stack<SpoilerEffect> captionSpoilersPool = new Stack<>();
-    private AtomicReference<Layout> captionPatchedSpoilersLayout = new AtomicReference<>();
-    private Path sPath = new Path();
+    private final Stack<SpoilerEffect> replySpoilersPool = new Stack<>();
+    private final List<SpoilerEffect> captionSpoilers = new ArrayList<>();
+    private final Stack<SpoilerEffect> captionSpoilersPool = new Stack<>();
+    private final AtomicReference<Layout> captionPatchedSpoilersLayout = new AtomicReference<>();
+    private final Path sPath = new Path();
     public boolean isBlurred;
 
     public ChatMessageCell(Context context) {
@@ -1536,10 +1534,7 @@ public class ChatMessageCell extends BaseCell implements SeekBar.SeekBarDelegate
                             link = buffer.getSpans(off, off, AnimatedEmojiSpan.class);
                             isMono = false;
                         }
-                        boolean ignore = false;
-                        if (link.length == 0 || link[0] instanceof URLSpanBotCommand && !URLSpanBotCommand.enabled) {
-                            ignore = true;
-                        }
+                        boolean ignore = link.length == 0 || link[0] instanceof URLSpanBotCommand && !URLSpanBotCommand.enabled;
                         if (!ignore && !AndroidUtilities.isAccessibilityScreenReaderEnabled()) {
                             if (event.getAction() == MotionEvent.ACTION_DOWN) {
                                 if (link[0] instanceof AnimatedEmojiSpan) {
@@ -1665,10 +1660,7 @@ public class ChatMessageCell extends BaseCell implements SeekBar.SeekBarDelegate
                             if (link == null || link.length == 0) {
                                 link = buffer.getSpans(off, off, AnimatedEmojiSpan.class);
                             }
-                            boolean ignore = false;
-                            if (link.length == 0 || link[0] instanceof URLSpanBotCommand && !URLSpanBotCommand.enabled) {
-                                ignore = true;
-                            }
+                            boolean ignore = link.length == 0 || link[0] instanceof URLSpanBotCommand && !URLSpanBotCommand.enabled;
                             if (!ignore && !AndroidUtilities.isAccessibilityScreenReaderEnabled()) {
                                 if (link[0] instanceof AnimatedEmojiSpan) {
                                     resetPressedLink(3);
@@ -1745,10 +1737,7 @@ public class ChatMessageCell extends BaseCell implements SeekBar.SeekBarDelegate
                     if (left <= x && left + descriptionLayout.getLineWidth(line) >= x) {
                         Spannable buffer = (Spannable) currentMessageObject.linkDescription;
                         ClickableSpan[] link = buffer.getSpans(off, off, ClickableSpan.class);
-                        boolean ignore = false;
-                        if (link.length == 0 || link[0] instanceof URLSpanBotCommand && !URLSpanBotCommand.enabled) {
-                            ignore = true;
-                        }
+                        boolean ignore = link.length == 0 || link[0] instanceof URLSpanBotCommand && !URLSpanBotCommand.enabled;
                         if (!ignore && !AndroidUtilities.isAccessibilityScreenReaderEnabled()) {
                             if (pressedLink == null || pressedLink.getSpan() != link[0]) {
                                 links.removeLink(pressedLink);
@@ -1834,10 +1823,7 @@ public class ChatMessageCell extends BaseCell implements SeekBar.SeekBarDelegate
                             if (left <= checkX && left + descriptionLayout.getLineWidth(line) >= checkX) {
                                 Spannable buffer = (Spannable) currentMessageObject.linkDescription;
                                 ClickableSpan[] link = buffer.getSpans(off, off, ClickableSpan.class);
-                                boolean ignore = false;
-                                if (link.length == 0 || link[0] instanceof URLSpanBotCommand && !URLSpanBotCommand.enabled) {
-                                    ignore = true;
-                                }
+                                boolean ignore = link.length == 0 || link[0] instanceof URLSpanBotCommand && !URLSpanBotCommand.enabled;
                                 if (!ignore && !AndroidUtilities.isAccessibilityScreenReaderEnabled()) {
                                     if (pressedLink == null || pressedLink.getSpan() != link[0]) {
                                         links.removeLink(pressedLink);
@@ -3733,7 +3719,8 @@ public class ChatMessageCell extends BaseCell implements SeekBar.SeekBarDelegate
 
                 int offset = 268435456;
                 double rad = offset / Math.PI;
-                double y = Math.round(offset - rad * Math.log((1 + Math.sin(lat * Math.PI / 180.0)) / (1 - Math.sin(lat * Math.PI / 180.0))) / 2) - (AndroidUtilities.dp(10.3f) << (21 - 15));
+                double y = Math.round(offset - rad * Math.log((1 + Math.sin(lat * Math.PI / 180.0)) / (1 - Math.sin(lat * Math.PI / 180.0))) / 2) - (
+                    (long) AndroidUtilities.dp(10.3f) << (21 - 15));
                 lat = (Math.PI / 2.0 - 2 * Math.atan(Math.exp((y - offset) / rad))) * 180.0 / Math.PI;
                 url = AndroidUtilities.formapMapUrl(currentAccount, lat, lon, (int) (photoWidth / AndroidUtilities.density), (int) (photoHeight / AndroidUtilities.density), false, 15, provider);
             } else if (!TextUtils.isEmpty(object.messageOwner.media.title)) {
@@ -5044,7 +5031,7 @@ public class ChatMessageCell extends BaseCell implements SeekBar.SeekBarDelegate
                                 totalHeight += AndroidUtilities.dp(2);
                             }
                             int restLines = 0;
-                            boolean allowAllLines = site_name != null && site_name.toLowerCase().equals("twitter");
+                            boolean allowAllLines = site_name != null && site_name.equalsIgnoreCase("twitter");
                             boolean isRTL = AndroidUtilities.isRTL(messageObject.linkDescription);
                             if (restLinesCount == 3 && !isSmallImage) {
                                 descriptionLayout = StaticLayoutEx.createStaticLayout(
@@ -7158,10 +7145,8 @@ public class ChatMessageCell extends BaseCell implements SeekBar.SeekBarDelegate
                         }
                     }
 
-                    boolean noSize = false;
-                    if (messageObject.type == MessageObject.TYPE_VIDEO || messageObject.type == MessageObject.TYPE_GIF || messageObject.type == MessageObject.TYPE_ROUND_VIDEO) {
-                        noSize = true;
-                    }
+                    boolean noSize =
+                        messageObject.type == MessageObject.TYPE_VIDEO || messageObject.type == MessageObject.TYPE_GIF || messageObject.type == MessageObject.TYPE_ROUND_VIDEO;
                     if (currentPhotoObject != null && !noSize && currentPhotoObject.size == 0) {
                         currentPhotoObject.size = -1;
                     }
@@ -9613,10 +9598,7 @@ public class ChatMessageCell extends BaseCell implements SeekBar.SeekBarDelegate
                 if (delegate == null || delegate.getPinchToZoomHelper() == null || !delegate.getPinchToZoomHelper().isInOverlayModeFor(this)) {
                     float top = getY() + photoImage.getImageY();
                     float bottom = top + photoImage.getImageHeight();
-                    photoImageOutOfBounds = false;
-                    if ((parentBoundsTop != 0 || parentBoundsBottom != 0) && (bottom < parentBoundsTop || top > parentBoundsBottom)) {
-                        photoImageOutOfBounds = true;
-                    }
+                    photoImageOutOfBounds = (parentBoundsTop != 0 || parentBoundsBottom != 0) && (bottom < parentBoundsTop || top > parentBoundsBottom);
                     if (!photoImageOutOfBounds || drawForBlur) {
                         photoImage.setSkipUpdateFrame(drawForBlur);
                         if (flipImage) {
@@ -12281,9 +12263,19 @@ public class ChatMessageCell extends BaseCell implements SeekBar.SeekBarDelegate
         } else if (currentMessageObject.scheduled && currentMessageObject.messageOwner.date == 0x7FFFFFFE) {
             timeString = "";
         } else if (edited) {
-            timeString = LocaleController.getString("EditedMessage", R.string.EditedMessage) + " " + LocaleController.getInstance().formatterDay.format((long) (messageObject.messageOwner.date) * 1000);
+            String time;
+            if (ConfigManager.getBooleanOrFalse(Defines.showExactTime)) {
+                time = LocaleController.getInstance().formatterDayWithSeconds.format((long) (messageObject.messageOwner.date) * 1000);
+            } else {
+                time = LocaleController.getInstance().formatterDay.format((long) (messageObject.messageOwner.date) * 1000);
+            }
+            timeString = LocaleController.getString("EditedMessage", R.string.EditedMessage) + " " + time;
         } else {
-            timeString = LocaleController.getInstance().formatterDay.format((long) (messageObject.messageOwner.date) * 1000);
+            if (ConfigManager.getBooleanOrFalse(Defines.showExactTime)) {
+                timeString = LocaleController.getInstance().formatterDayWithSeconds.format((long) (messageObject.messageOwner.date) * 1000);
+            } else {
+                timeString = LocaleController.getInstance().formatterDay.format((long) (messageObject.messageOwner.date) * 1000);
+            }
         }
         if (ConfigManager.getBooleanOrFalse(Defines.showMessageID) && currentMessageObject.messageOwner != null && currentMessageObject.isSent())
             timeString = timeString + " | " + messageObject.messageOwner.id;
@@ -17546,7 +17538,7 @@ public class ChatMessageCell extends BaseCell implements SeekBar.SeekBarDelegate
         }
         if (buttonState == -1 && currentMessageObject.needDrawBluredPreview() && !MediaController.getInstance().isPlayingMessage(currentMessageObject) && photoImage.getVisible() && currentMessageObject.messageOwner.destroyTime != 0) {
             if (!currentMessageObject.isOutOwner()) {
-                long msTime = System.currentTimeMillis() + ConnectionsManager.getInstance(currentAccount).getTimeDifference() * 1000;
+                long msTime = System.currentTimeMillis() + ConnectionsManager.getInstance(currentAccount).getTimeDifference() * 1000L;
                 float progress = Math.max(0, (long) currentMessageObject.messageOwner.destroyTime * 1000 - msTime) / (currentMessageObject.messageOwner.ttl * 1000.0f);
                 Theme.chat_deleteProgressPaint.setAlpha((int) (255 * controlsAlpha));
                 canvas.drawArc(deleteProgressRect, -90, -360 * progress, true, Theme.chat_deleteProgressPaint);
@@ -18072,12 +18064,12 @@ public class ChatMessageCell extends BaseCell implements SeekBar.SeekBarDelegate
         public static final int POLL_HINT = 495;
         public static final int FORWARD = 494;
         public static final int TRANSCRIBE = 493;
-        private Path linkPath = new Path();
-        private RectF rectF = new RectF();
-        private Rect rect = new Rect();
+        private final Path linkPath = new Path();
+        private final RectF rectF = new RectF();
+        private final Rect rect = new Rect();
 
         private class ProfileSpan extends ClickableSpan {
-            private TLRPC.User user;
+            private final TLRPC.User user;
 
             public ProfileSpan(TLRPC.User user) {
                 this.user = user;
