@@ -3363,6 +3363,11 @@ public class SendMessagesHelper extends BaseController implements NotificationCe
         if (message == null && caption == null) {
             caption = "";
         }
+        if (message != null && ConfigManager.getBooleanOrFalse(Defines.enablePanguOnSending)) {
+            var pair = StringUtils.spacingText(message, entities);
+            message = pair.getFirst();
+            entities = pair.getSecond();
+        }
 
         String originalPath = null;
         if (params != null && params.containsKey("originalPath")) {
@@ -3552,13 +3557,7 @@ public class SendMessagesHelper extends BaseController implements NotificationCe
                         } else {
                             type = 0;
                         }
-                        if (ConfigManager.getBooleanOrFalse(Defines.enablePanguOnSending)) {
-                            var pair = StringUtils.spacingText(message, entities);
-                            newMsg.message = pair.getFirst();
-                            entities = pair.getSecond();
-                        } else {
-                            newMsg.message = message;
-                        }
+                        newMsg.message = message;
                     }
                 } else if (poll != null) {
                     if (encryptedChat != null) {

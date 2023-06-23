@@ -118,7 +118,7 @@ object StringUtils {
             }
             var (start, targetLength) = 0 to 0
             var isFinished = false
-            for (i in panguText.indices) {
+            for (i in it.offset until panguText.length) {
                 if (i < start) continue
                 if (isFinished) break
                 for (j in start until panguText.length) {
