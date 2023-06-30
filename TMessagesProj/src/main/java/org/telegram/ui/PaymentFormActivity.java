@@ -3853,7 +3853,7 @@ public class PaymentFormActivity extends BaseFragment implements NotificationCen
             validateRequest.invoice = inputInvoice;
         }
         validateRequest.save = true;
-        validateRequest.info = paymentForm.saved_info;
+        validateRequest.info = paymentForm.saved_info != null ? paymentForm.saved_info : new TLRPC.TL_paymentRequestedInfo();
 
         TLObject req = validateRequest;
         ConnectionsManager.getInstance(currentAccount).sendRequest(req, (response, error) -> {

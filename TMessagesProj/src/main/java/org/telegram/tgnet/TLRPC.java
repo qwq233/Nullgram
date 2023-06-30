@@ -59646,13 +59646,6 @@ public class TLRPC {
             flags = save ? (flags | 1) : (flags &~ 1);
             stream.writeInt32(flags);
             invoice.serializeToStream(stream);
-
-            // In some strange cases it might be null and cause tons of problems.
-            // This is a temporary fix solution and needs to be checked later.
-            if (info == null) {
-                info = new TL_paymentRequestedInfo();
-            }
-
             info.serializeToStream(stream);
         }
     }
