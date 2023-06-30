@@ -163,7 +163,7 @@ public class FilterTabsView extends FrameLayout {
         private int textHeight;
         private int tabWidth;
         private int currentPosition;
-        private RectF rect = new RectF();
+        private final RectF rect = new RectF();
         private String currentText;
         private StaticLayout textLayout;
         private int textOffsetX;
@@ -413,7 +413,9 @@ public class FilterTabsView extends FrameLayout {
                     icon = getResources().getDrawable(FolderIconHelper.getTabIcon(currentTab.emoticon)).mutate();
                     icon.setBounds(bounds);
                 }
-                icon.setTint(textPaint.getColor());
+                if (icon != null) {
+                    icon.setTint(textPaint.getColor());
+                }
                 iconX = (int) ((getMeasuredWidth() - tabWidth) / 2f);
                 if (animateIconX) {
                     iconX = (int) (iconX * changeProgress + animateFromIconX * (1f - changeProgress));
@@ -441,7 +443,9 @@ public class FilterTabsView extends FrameLayout {
                 } else {
                     canvas.save();
                     canvas.translate(iconX, iconY);
-                    icon.draw(canvas);
+                    if (icon != null) {
+                        icon.draw(canvas);
+                    }
                     canvas.restore();
                 }
             }
@@ -802,12 +806,12 @@ public class FilterTabsView extends FrameLayout {
         }
     }
 
-    private TextPaint textPaint = new TextPaint(Paint.ANTI_ALIAS_FLAG);
-    private TextPaint textCounterPaint = new TextPaint(Paint.ANTI_ALIAS_FLAG);
-    private Paint deletePaint = new TextPaint(Paint.ANTI_ALIAS_FLAG);
-    private Paint counterPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+    private final TextPaint textPaint = new TextPaint(Paint.ANTI_ALIAS_FLAG);
+    private final TextPaint textCounterPaint = new TextPaint(Paint.ANTI_ALIAS_FLAG);
+    private final Paint deletePaint = new TextPaint(Paint.ANTI_ALIAS_FLAG);
+    private final Paint counterPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
 
-    private ArrayList<Tab> tabs = new ArrayList<>();
+    private final ArrayList<Tab> tabs = new ArrayList<>();
 
     private boolean isEditing;
     private long lastEditingAnimationTime;
@@ -821,9 +825,9 @@ public class FilterTabsView extends FrameLayout {
 
     private boolean ignoreLayout;
 
-    private RecyclerListView listView;
-    private LinearLayoutManager layoutManager;
-    private ListAdapter adapter;
+    private final RecyclerListView listView;
+    private final LinearLayoutManager layoutManager;
+    private final ListAdapter adapter;
 
     private FilterTabsViewDelegate delegate;
 
@@ -839,7 +843,7 @@ public class FilterTabsView extends FrameLayout {
     private int manualScrollingToId = -1;
 
     private int scrollingToChild = -1;
-    private GradientDrawable selectorDrawable;
+    private final GradientDrawable selectorDrawable;
 
     private int tabLineColorKey = Theme.key_actionBarTabLine;
     private int activeTextColorKey = Theme.key_actionBarTabActiveText;
@@ -855,13 +859,13 @@ public class FilterTabsView extends FrameLayout {
 
     private boolean invalidated;
 
-    private CubicBezierInterpolator interpolator = CubicBezierInterpolator.EASE_OUT_QUINT;
+    private final CubicBezierInterpolator interpolator = CubicBezierInterpolator.EASE_OUT_QUINT;
 
-    private SparseIntArray positionToId = new SparseIntArray(5);
-    private SparseIntArray positionToStableId = new SparseIntArray(5);
-    private SparseIntArray idToPosition = new SparseIntArray(5);
-    private SparseIntArray positionToWidth = new SparseIntArray(5);
-    private SparseIntArray positionToX = new SparseIntArray(5);
+    private final SparseIntArray positionToId = new SparseIntArray(5);
+    private final SparseIntArray positionToStableId = new SparseIntArray(5);
+    private final SparseIntArray idToPosition = new SparseIntArray(5);
+    private final SparseIntArray positionToWidth = new SparseIntArray(5);
+    private final SparseIntArray positionToX = new SparseIntArray(5);
 
     private boolean animationRunning;
     private long lastAnimationTime;
@@ -872,7 +876,7 @@ public class FilterTabsView extends FrameLayout {
     private Drawable lockDrawable;
     private int lockDrawableColor;
 
-    private Runnable animationRunnable = new Runnable() {
+    private final Runnable animationRunnable = new Runnable() {
         @Override
         public void run() {
             if (!animatingIndicator) {
@@ -1667,7 +1671,7 @@ public class FilterTabsView extends FrameLayout {
 
     private class ListAdapter extends RecyclerListView.SelectionAdapter {
 
-        private Context mContext;
+        private final Context mContext;
 
         public ListAdapter(Context context) {
             mContext = context;
@@ -1844,7 +1848,7 @@ public class FilterTabsView extends FrameLayout {
             return true;
         }
 
-        private Runnable resetDefaultPosition = () ->  {
+        private final Runnable resetDefaultPosition = () ->  {
             if (UserConfig.getInstance(UserConfig.selectedAccount).isPremium()) {
                 return;
             }
