@@ -489,16 +489,8 @@ public class TLRPC {
 
         public void serializeToStream(AbstractSerializedData stream) {
             stream.writeInt32(constructor);
-            if (send_photos && send_videos && send_roundvideos && send_audios && send_voices && send_docs) {
-                send_media = true;
-            } else {
-                send_media = false;
-            }
-            if (send_plain && send_media) {
-                send_messages = true;
-            } else {
-                send_messages = false;
-            }
+            send_media = send_photos && send_videos && send_roundvideos && send_audios && send_voices && send_docs;
+            send_messages = send_plain && send_media;
             flags = view_messages ? (flags | 1) : (flags &~ 1);
             flags = send_messages ? (flags | 2) : (flags &~ 2);
             flags = send_media ? (flags | 4) : (flags &~ 4);
@@ -47843,10 +47835,8 @@ public class TLRPC {
 
         public static ReactionCount TLdeserialize(AbstractSerializedData stream, int constructor, boolean exception) {
             ReactionCount result = null;
-            switch (constructor) {
-                case 0xa3d1cb80:
-                    result = new TL_reactionCount();
-                    break;
+            if (constructor == 0xa3d1cb80) {
+                result = new TL_reactionCount();
             }
             if (result == null && exception) {
                 throw new RuntimeException(String.format("can't parse magic %x in ReactionCount", constructor));
@@ -51714,7 +51704,7 @@ public class TLRPC {
             if (this instanceof TL_reactionEmpty && other instanceof TL_reactionEmpty)
                 return true;
             if (this instanceof TL_reactionEmoji && other instanceof TL_reactionEmoji)
-                return ((TL_reactionEmoji) this).emoticon == ((TL_reactionEmoji) other).emoticon;;
+                return ((TL_reactionEmoji) this).emoticon == ((TL_reactionEmoji) other).emoticon;
             if (this instanceof TL_reactionCustomEmoji && other instanceof TL_reactionCustomEmoji)
                 return ((TL_reactionCustomEmoji) this).document_id == ((TL_reactionCustomEmoji) other).document_id;
             return false;
@@ -59656,6 +59646,13 @@ public class TLRPC {
             flags = save ? (flags | 1) : (flags &~ 1);
             stream.writeInt32(flags);
             invoice.serializeToStream(stream);
+
+            // In some strange cases it might be null and cause tons of problems.
+            // This is a temporary fix solution and needs to be checked later.
+            if (info == null) {
+                info = new TL_paymentRequestedInfo();
+            }
+
             info.serializeToStream(stream);
         }
     }

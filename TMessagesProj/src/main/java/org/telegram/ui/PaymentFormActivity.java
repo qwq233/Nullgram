@@ -145,6 +145,7 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
@@ -158,11 +159,11 @@ import java.util.Scanner;
 
 public class PaymentFormActivity extends BaseFragment implements NotificationCenter.NotificationCenterDelegate {
     private final static List<String> WEBVIEW_PROTOCOLS = Arrays.asList(
-            "http",
-            "https"
+        "http",
+        "https"
     );
     private final static List<String> BLACKLISTED_PROTOCOLS = Collections.singletonList(
-            "tg"
+        "tg"
     );
 
     private final static int STEP_SHIPPING_INFORMATION = 0,
@@ -202,10 +203,10 @@ public class PaymentFormActivity extends BaseFragment implements NotificationCen
     private final static int FIELD_ENTERPASSWORDEMAIL = 2;
     private final static int FIELDS_COUNT_PASSWORD = 3;
 
-    private ArrayList<String> countriesArray = new ArrayList<>();
-    private HashMap<String, String> countriesMap = new HashMap<>();
-    private HashMap<String, String> codesMap = new HashMap<>();
-    private HashMap<String, String> phoneFormatMap = new HashMap<>();
+    private final ArrayList<String> countriesArray = new ArrayList<>();
+    private final HashMap<String, String> countriesMap = new HashMap<>();
+    private final HashMap<String, String> codesMap = new HashMap<>();
+    private final HashMap<String, String> phoneFormatMap = new HashMap<>();
 
     private PaymentsClient paymentsClient;
 
@@ -224,12 +225,12 @@ public class PaymentFormActivity extends BaseFragment implements NotificationCen
     private boolean swipeBackEnabled = true;
 
     private TextView textView;
-    private HeaderCell[] headerCell = new HeaderCell[3];
-    private ArrayList<View> dividers = new ArrayList<>();
-    private ShadowSectionCell[] sectionCell = new ShadowSectionCell[3];
+    private final HeaderCell[] headerCell = new HeaderCell[3];
+    private final ArrayList<View> dividers = new ArrayList<>();
+    private final ShadowSectionCell[] sectionCell = new ShadowSectionCell[3];
     private TextCheckCell checkCell1;
-    private TextInfoPrivacyCell[] bottomCell = new TextInfoPrivacyCell[3];
-    private TextSettingsCell[] settingsCell = new TextSettingsCell[2];
+    private final TextInfoPrivacyCell[] bottomCell = new TextInfoPrivacyCell[3];
+    private final TextSettingsCell[] settingsCell = new TextSettingsCell[2];
     private FrameLayout googlePayContainer;
     private FrameLayout googlePayButton;
     private LinearLayout linearLayout2;
@@ -243,7 +244,7 @@ public class PaymentFormActivity extends BaseFragment implements NotificationCen
     private RecurrentPaymentsAcceptCell recurrentAcceptCell;
     private BottomFrameLayout bottomLayout;
     private PaymentInfoCell paymentInfoCell;
-    private TextDetailSettingsCell[] detailSettingsCell = new TextDetailSettingsCell[7];
+    private final TextDetailSettingsCell[] detailSettingsCell = new TextDetailSettingsCell[7];
 
     private boolean isAcceptTermsChecked;
 
@@ -457,7 +458,7 @@ public class PaymentFormActivity extends BaseFragment implements NotificationCen
     private void setDelegate(PaymentFormActivityDelegate paymentFormActivityDelegate) {
         delegate = paymentFormActivityDelegate;
     }
-    
+
     public void setResourcesProvider(Theme.ResourcesProvider provider) {
         resourcesProvider = provider;
     }
@@ -1330,19 +1331,19 @@ public class PaymentFormActivity extends BaseFragment implements NotificationCen
                             public final String[] PREFIXES_15 = {"34", "37"};
                             public final String[] PREFIXES_14 = {"300", "301", "302", "303", "304", "305", "309", "36", "38", "39"};
                             public final String[] PREFIXES_16 = {
-                                    "2221", "2222", "2223", "2224", "2225", "2226", "2227", "2228", "2229",
-                                    "2200", "2201", "2202", "2203", "2204",
-                                    "8600", "9860",
-                                    "223", "224", "225", "226", "227", "228", "229",
-                                    "23", "24", "25", "26",
-                                    "270", "271", "2720",
-                                    "50", "51", "52", "53", "54", "55",
+                                "2221", "2222", "2223", "2224", "2225", "2226", "2227", "2228", "2229",
+                                "2200", "2201", "2202", "2203", "2204",
+                                "8600", "9860",
+                                "223", "224", "225", "226", "227", "228", "229",
+                                "23", "24", "25", "26",
+                                "270", "271", "2720",
+                                "50", "51", "52", "53", "54", "55",
 
-                                    "4",
+                                "4",
 
-                                    "60", "62", "64", "65",
+                                "60", "62", "64", "65",
 
-                                    "35"
+                                "35"
                             };
 
                             public static final int MAX_LENGTH_STANDARD = 16;
@@ -1867,7 +1868,7 @@ public class PaymentFormActivity extends BaseFragment implements NotificationCen
                     private int enteredCharacterStart;
                     private boolean lastDotEntered;
 
-                    char[] commas = new char[]{',', '.', '٫', '、', '\u2E41', '︐', '︑', '﹐', '﹑', '，', '､', 'ʻ'};
+                    final char[] commas = new char[]{',', '.', '٫', '、', '\u2E41', '︐', '︑', '﹐', '﹑', '，', '､', 'ʻ'};
 
                     private int indexOfComma(String text) {
                         for (int a = 0; a < commas.length; a++) {
@@ -2265,9 +2266,9 @@ public class PaymentFormActivity extends BaseFragment implements NotificationCen
                     }
                     final boolean savedInfoMissing = (
                         paymentForm.invoice.shipping_address_requested && (paymentForm.saved_info == null || paymentForm.saved_info.shipping_address == null) ||
-                        paymentForm.invoice.email_requested && (paymentForm.saved_info == null || paymentForm.saved_info.email == null) ||
-                        paymentForm.invoice.name_requested && (paymentForm.saved_info == null || paymentForm.saved_info.name == null) ||
-                        paymentForm.invoice.phone_requested && (paymentForm.saved_info == null || paymentForm.saved_info.phone == null)
+                            paymentForm.invoice.email_requested && (paymentForm.saved_info == null || paymentForm.saved_info.email == null) ||
+                            paymentForm.invoice.name_requested && (paymentForm.saved_info == null || paymentForm.saved_info.name == null) ||
+                            paymentForm.invoice.phone_requested && (paymentForm.saved_info == null || paymentForm.saved_info.phone == null)
                     );
 
                     if (isCheckoutPreview && !savedInfoMissing && validateRequest == null) {
@@ -2399,10 +2400,10 @@ public class PaymentFormActivity extends BaseFragment implements NotificationCen
                                     }
                                 } catch (ActivityNotFoundException e) {
                                     new AlertDialog.Builder(context)
-                                            .setTitle(currentBotName)
-                                            .setMessage(LocaleController.getString(R.string.PaymentAppNotFoundForDeeplink))
-                                            .setPositiveButton(LocaleController.getString(R.string.OK), null)
-                                            .show();
+                                        .setTitle(currentBotName)
+                                        .setMessage(LocaleController.getString(R.string.PaymentAppNotFoundForDeeplink))
+                                        .setPositiveButton(LocaleController.getString(R.string.OK), null)
+                                        .show();
                                 }
                                 return true;
                             }
@@ -2642,7 +2643,7 @@ public class PaymentFormActivity extends BaseFragment implements NotificationCen
 
     private void showChoosePaymentMethod(Runnable callback) {
         BottomSheet.Builder builder = new BottomSheet.Builder(getParentActivity())
-                .setTitle(LocaleController.getString("PaymentCheckoutMethod", R.string.PaymentCheckoutMethod), true);
+            .setTitle(LocaleController.getString("PaymentCheckoutMethod", R.string.PaymentCheckoutMethod), true);
         List<CharSequence> titles = new ArrayList<>();
         List<Integer> icons = new ArrayList<>();
         if (savedCredentialsCard != null) {
@@ -2994,15 +2995,15 @@ public class PaymentFormActivity extends BaseFragment implements NotificationCen
 
     private JSONObject getBaseCardPaymentMethod() throws JSONException {
         List<String> SUPPORTED_NETWORKS = Arrays.asList(
-                "AMEX",
-                "DISCOVER",
-                "JCB",
-                "MASTERCARD",
-                "VISA");
+            "AMEX",
+            "DISCOVER",
+            "JCB",
+            "MASTERCARD",
+            "VISA");
 
         List<String> SUPPORTED_METHODS = Arrays.asList(
-                "PAN_ONLY",
-                "CRYPTOGRAM_3DS");
+            "PAN_ONLY",
+            "CRYPTOGRAM_3DS");
 
         JSONObject cardPaymentMethod = new JSONObject();
         cardPaymentMethod.put("type", "CARD");
@@ -3020,7 +3021,7 @@ public class PaymentFormActivity extends BaseFragment implements NotificationCen
         try {
             JSONObject isReadyToPayRequest = getBaseRequest();
             isReadyToPayRequest.put(
-                    "allowedPaymentMethods", new JSONArray().put(getBaseCardPaymentMethod()));
+                "allowedPaymentMethods", new JSONArray().put(getBaseCardPaymentMethod()));
 
             return Optional.of(isReadyToPayRequest);
         } catch (JSONException e) {
@@ -3033,9 +3034,9 @@ public class PaymentFormActivity extends BaseFragment implements NotificationCen
             return;
         }
         Wallet.WalletOptions walletOptions = new Wallet.WalletOptions.Builder()
-                .setEnvironment(paymentForm.invoice.test ? WalletConstants.ENVIRONMENT_TEST : WalletConstants.ENVIRONMENT_PRODUCTION)
-                .setTheme(WalletConstants.THEME_LIGHT)
-                .build();
+            .setEnvironment(paymentForm.invoice.test ? WalletConstants.ENVIRONMENT_TEST : WalletConstants.ENVIRONMENT_PRODUCTION)
+            .setTheme(WalletConstants.THEME_LIGHT)
+            .build();
         paymentsClient = Wallet.getPaymentsClient(context, walletOptions);
 
         final Optional<JSONObject> isReadyToPayJson = getIsReadyToPayRequest();
@@ -3049,15 +3050,15 @@ public class PaymentFormActivity extends BaseFragment implements NotificationCen
 
         Task<Boolean> task = paymentsClient.isReadyToPay(request);
         task.addOnCompleteListener(getParentActivity(),
-                task1 -> {
-                    if (task1.isSuccessful()) {
-                        if (googlePayContainer != null) {
-                            googlePayContainer.setVisibility(View.VISIBLE);
-                        }
-                    } else {
-                        FileLog.e("isReadyToPay failed", task1.getException());
+            task1 -> {
+                if (task1.isSuccessful()) {
+                    if (googlePayContainer != null) {
+                        googlePayContainer.setVisibility(View.VISIBLE);
                     }
-                });
+                } else {
+                    FileLog.e("isReadyToPay failed", task1.getException());
+                }
+            });
     }
 
     private String getTotalPriceString(ArrayList<TLRPC.TL_labeledPrice> prices) {
@@ -3688,15 +3689,15 @@ public class PaymentFormActivity extends BaseFragment implements NotificationCen
             year = null;
         }
         Card card = new Card(
-                inputFields[FIELD_CARD].getText().toString(),
-                month,
-                year,
-                inputFields[FIELD_CVV].getText().toString(),
-                inputFields[FIELD_CARDNAME].getText().toString(),
-                null, null, null, null,
-                inputFields[FIELD_CARD_POSTCODE].getText().toString(),
-                inputFields[FIELD_CARD_COUNTRY].getText().toString(),
-                null);
+            inputFields[FIELD_CARD].getText().toString(),
+            month,
+            year,
+            inputFields[FIELD_CVV].getText().toString(),
+            inputFields[FIELD_CARDNAME].getText().toString(),
+            null, null, null, null,
+            inputFields[FIELD_CARD_POSTCODE].getText().toString(),
+            inputFields[FIELD_CARD_COUNTRY].getText().toString(),
+            null);
         cardName = card.getBrand() + " *" + card.getLast4();
         if (!card.validateNumber()) {
             shakeField(FIELD_CARD);
@@ -3722,31 +3723,31 @@ public class PaymentFormActivity extends BaseFragment implements NotificationCen
             if ("stripe".equals(paymentForm.native_provider)) {
                 Stripe stripe = new Stripe(providerApiKey);
                 stripe.createToken(card, new TokenCallback() {
-                            public void onSuccess(Token token) {
-                                if (canceled) {
-                                    return;
-                                }
-                                paymentJson = String.format(Locale.US, "{\"type\":\"%1$s\", \"id\":\"%2$s\"}", token.getType(), token.getId());
-                                AndroidUtilities.runOnUIThread(() -> {
-                                    goToNextStep();
-                                    showEditDoneProgress(true, false);
-                                    setDonePressed(false);
-                                });
+                        public void onSuccess(Token token) {
+                            if (canceled) {
+                                return;
                             }
-
-                            public void onError(Exception error) {
-                                if (canceled) {
-                                    return;
-                                }
+                            paymentJson = String.format(Locale.US, "{\"type\":\"%1$s\", \"id\":\"%2$s\"}", token.getType(), token.getId());
+                            AndroidUtilities.runOnUIThread(() -> {
+                                goToNextStep();
                                 showEditDoneProgress(true, false);
                                 setDonePressed(false);
-                                if (error instanceof APIConnectionException || error instanceof APIException) {
-                                    AlertsCreator.showSimpleToast(PaymentFormActivity.this, LocaleController.getString("PaymentConnectionFailed", R.string.PaymentConnectionFailed));
-                                } else {
-                                    AlertsCreator.showSimpleToast(PaymentFormActivity.this, error.getMessage());
-                                }
+                            });
+                        }
+
+                        public void onError(Exception error) {
+                            if (canceled) {
+                                return;
+                            }
+                            showEditDoneProgress(true, false);
+                            setDonePressed(false);
+                            if (error instanceof APIConnectionException || error instanceof APIException) {
+                                AlertsCreator.showSimpleToast(PaymentFormActivity.this, LocaleController.getString("PaymentConnectionFailed", R.string.PaymentConnectionFailed));
+                            } else {
+                                AlertsCreator.showSimpleToast(PaymentFormActivity.this, error.getMessage());
                             }
                         }
+                    }
                 );
             } else if ("smartglocal".equals(paymentForm.native_provider)) {
                 AsyncTask<Object, Object, String> task = new AsyncTask<Object, Object, String>() {
@@ -3778,7 +3779,7 @@ public class PaymentFormActivity extends BaseFragment implements NotificationCen
                             conn.setRequestProperty("X-PUBLIC-TOKEN", providerApiKey);
 
                             try (OutputStream output = conn.getOutputStream()) {
-                                output.write(jsonObject.toString().getBytes("UTF-8"));
+                                output.write(jsonObject.toString().getBytes(StandardCharsets.UTF_8));
                             }
 
                             int code = conn.getResponseCode();
@@ -3829,8 +3830,8 @@ public class PaymentFormActivity extends BaseFragment implements NotificationCen
 
     private static String getResponseBody(InputStream responseStream) throws IOException {
         String rBody = new Scanner(responseStream, "UTF-8")
-                .useDelimiter("\\A")
-                .next();
+            .useDelimiter("\\A")
+            .next();
         responseStream.close();
         return rBody;
     }
@@ -4244,30 +4245,30 @@ public class PaymentFormActivity extends BaseFragment implements NotificationCen
                 progressView.setVisibility(View.VISIBLE);
                 doneItem.setEnabled(false);
                 doneItemAnimation.playTogether(
-                        ObjectAnimator.ofFloat(doneItem.getContentView(), View.SCALE_X, 0.1f),
-                        ObjectAnimator.ofFloat(doneItem.getContentView(), View.SCALE_Y, 0.1f),
-                        ObjectAnimator.ofFloat(doneItem.getContentView(), View.ALPHA, 0.0f),
-                        ObjectAnimator.ofFloat(progressView, View.SCALE_X, 1.0f),
-                        ObjectAnimator.ofFloat(progressView, View.SCALE_Y, 1.0f),
-                        ObjectAnimator.ofFloat(progressView, View.ALPHA, 1.0f));
+                    ObjectAnimator.ofFloat(doneItem.getContentView(), View.SCALE_X, 0.1f),
+                    ObjectAnimator.ofFloat(doneItem.getContentView(), View.SCALE_Y, 0.1f),
+                    ObjectAnimator.ofFloat(doneItem.getContentView(), View.ALPHA, 0.0f),
+                    ObjectAnimator.ofFloat(progressView, View.SCALE_X, 1.0f),
+                    ObjectAnimator.ofFloat(progressView, View.SCALE_Y, 1.0f),
+                    ObjectAnimator.ofFloat(progressView, View.ALPHA, 1.0f));
             } else {
                 if (webView != null) {
                     doneItemAnimation.playTogether(
-                            ObjectAnimator.ofFloat(progressView, View.SCALE_X, 0.1f),
-                            ObjectAnimator.ofFloat(progressView, View.SCALE_Y, 0.1f),
-                            ObjectAnimator.ofFloat(progressView, View.ALPHA, 0.0f));
+                        ObjectAnimator.ofFloat(progressView, View.SCALE_X, 0.1f),
+                        ObjectAnimator.ofFloat(progressView, View.SCALE_Y, 0.1f),
+                        ObjectAnimator.ofFloat(progressView, View.ALPHA, 0.0f));
                 } else {
                     doneItem.getContentView().setVisibility(View.VISIBLE);
                     doneItem.setEnabled(true);
                     doneItemAnimation.playTogether(
-                            ObjectAnimator.ofFloat(progressView, View.SCALE_X, 0.1f),
-                            ObjectAnimator.ofFloat(progressView, View.SCALE_Y, 0.1f),
-                            ObjectAnimator.ofFloat(progressView, View.ALPHA, 0.0f));
+                        ObjectAnimator.ofFloat(progressView, View.SCALE_X, 0.1f),
+                        ObjectAnimator.ofFloat(progressView, View.SCALE_Y, 0.1f),
+                        ObjectAnimator.ofFloat(progressView, View.ALPHA, 0.0f));
 
                     if (!isFinishing()) {
                         doneItemAnimation.playTogether(ObjectAnimator.ofFloat(doneItem.getContentView(), View.SCALE_X, 1.0f),
-                                ObjectAnimator.ofFloat(doneItem.getContentView(), View.SCALE_Y, 1.0f),
-                                ObjectAnimator.ofFloat(doneItem.getContentView(), View.ALPHA, 1.0f));
+                            ObjectAnimator.ofFloat(doneItem.getContentView(), View.SCALE_Y, 1.0f),
+                            ObjectAnimator.ofFloat(doneItem.getContentView(), View.ALPHA, 1.0f));
                     }
                 }
             }
@@ -4298,22 +4299,22 @@ public class PaymentFormActivity extends BaseFragment implements NotificationCen
                 progressViewButton.setVisibility(View.VISIBLE);
                 bottomLayout.setEnabled(false);
                 doneItemAnimation.playTogether(
-                        ObjectAnimator.ofFloat(payTextView, View.SCALE_X, 0.1f),
-                        ObjectAnimator.ofFloat(payTextView, View.SCALE_Y, 0.1f),
-                        ObjectAnimator.ofFloat(payTextView, View.ALPHA, 0.0f),
-                        ObjectAnimator.ofFloat(progressViewButton, View.SCALE_X, 1.0f),
-                        ObjectAnimator.ofFloat(progressViewButton, View.SCALE_Y, 1.0f),
-                        ObjectAnimator.ofFloat(progressViewButton, View.ALPHA, 1.0f));
+                    ObjectAnimator.ofFloat(payTextView, View.SCALE_X, 0.1f),
+                    ObjectAnimator.ofFloat(payTextView, View.SCALE_Y, 0.1f),
+                    ObjectAnimator.ofFloat(payTextView, View.ALPHA, 0.0f),
+                    ObjectAnimator.ofFloat(progressViewButton, View.SCALE_X, 1.0f),
+                    ObjectAnimator.ofFloat(progressViewButton, View.SCALE_Y, 1.0f),
+                    ObjectAnimator.ofFloat(progressViewButton, View.ALPHA, 1.0f));
             } else {
                 payTextView.setVisibility(View.VISIBLE);
                 bottomLayout.setEnabled(true);
                 doneItemAnimation.playTogether(
-                        ObjectAnimator.ofFloat(progressViewButton, View.SCALE_X, 0.1f),
-                        ObjectAnimator.ofFloat(progressViewButton, View.SCALE_Y, 0.1f),
-                        ObjectAnimator.ofFloat(progressViewButton, View.ALPHA, 0.0f),
-                        ObjectAnimator.ofFloat(payTextView, View.SCALE_X, 1.0f),
-                        ObjectAnimator.ofFloat(payTextView, View.SCALE_Y, 1.0f),
-                        ObjectAnimator.ofFloat(payTextView, View.ALPHA, 1.0f));
+                    ObjectAnimator.ofFloat(progressViewButton, View.SCALE_X, 0.1f),
+                    ObjectAnimator.ofFloat(progressViewButton, View.SCALE_Y, 0.1f),
+                    ObjectAnimator.ofFloat(progressViewButton, View.ALPHA, 0.0f),
+                    ObjectAnimator.ofFloat(payTextView, View.SCALE_X, 1.0f),
+                    ObjectAnimator.ofFloat(payTextView, View.SCALE_Y, 1.0f),
+                    ObjectAnimator.ofFloat(payTextView, View.ALPHA, 1.0f));
 
             }
             doneItemAnimation.addListener(new AnimatorListenerAdapter() {
@@ -4509,9 +4510,9 @@ public class PaymentFormActivity extends BaseFragment implements NotificationCen
                 return;
             }
             springAnimation = new SpringAnimation(new FloatValueHolder(progress * 100f))
-                    .setSpring(new SpringForce(to * 100f)
-                            .setStiffness(checked ? 500f : 650f)
-                            .setDampingRatio(SpringForce.DAMPING_RATIO_NO_BOUNCY));
+                .setSpring(new SpringForce(to * 100f)
+                    .setStiffness(checked ? 500f : 650f)
+                    .setDampingRatio(SpringForce.DAMPING_RATIO_NO_BOUNCY));
             springAnimation.addUpdateListener((animation, value, velocity) -> {
                 progress = value / 100f;
                 if (payTextView != null) {
