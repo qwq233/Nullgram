@@ -2,6 +2,8 @@
 
 import com.android.build.gradle.internal.cxx.configure.gradleLocalProperties
 import com.google.firebase.crashlytics.buildtools.gradle.CrashlyticsExtension
+import java.text.SimpleDateFormat
+import java.util.Date
 
 plugins {
     id("com.android.application")
@@ -53,11 +55,11 @@ dependencies {
     implementation("com.google.firebase:firebase-config:21.4.0")
     implementation("com.google.firebase:firebase-datatransport:18.1.8")
     implementation("com.google.firebase:firebase-appindexing:20.0.0")
-    implementation("com.google.android.gms:play-services-auth:20.5.0")
+    implementation("com.google.android.gms:play-services-auth:20.6.0")
     implementation("com.google.android.gms:play-services-vision:20.1.3")
     implementation("com.google.android.gms:play-services-wearable:18.0.0")
     implementation("com.google.android.gms:play-services-location:21.0.1")
-    implementation("com.google.android.gms:play-services-wallet:19.1.0")
+    implementation("com.google.android.gms:play-services-wallet:19.2.0")
 //    implementation("com.google.android.gms:play-services-safetynet:18.0.1")
     implementation("com.googlecode.mp4parser:isoparser:1.0.6") // DO NOT UPDATE THIS DEPENDENCY
     implementation(files("libs/stripe.aar"))
@@ -182,6 +184,8 @@ android {
                 )
             }
         }
+
+        buildConfigField("String", "BUILD_TIME", "\"${SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(Date())}\"")
     }
 
     flavorDimensions += "abi"

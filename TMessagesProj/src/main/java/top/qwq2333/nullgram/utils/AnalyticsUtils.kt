@@ -24,6 +24,7 @@ import android.os.Build
 import android.os.Handler
 import android.util.Base64
 import com.google.firebase.crashlytics.FirebaseCrashlytics
+import com.google.firebase.crashlytics.ktx.setCustomKeys
 import com.microsoft.appcenter.AppCenter
 import com.microsoft.appcenter.analytics.Analytics
 import com.microsoft.appcenter.channel.AbstractChannelListener
@@ -79,7 +80,11 @@ object AnalyticsUtils {
         try {
             val currentUser = UserConfig.getInstance(UserConfig.selectedAccount)
             Log.d("FirebaseCrashlytics start: set user id: " + currentUser.getClientUserId())
-            FirebaseCrashlytics.getInstance().setUserId(currentUser.getClientUserId().toString())
+            val crashlytics = FirebaseCrashlytics.getInstance()
+            crashlytics.setUserId(currentUser.getClientUserId().toString())
+            crashlytics.setCustomKeys {
+                key("Build Time", BuildConfig.BUILD_TIME)
+            }
         } catch (ignored: Exception) { }
 
         if (isEnabled) {
