@@ -262,8 +262,8 @@ public class VoIPFragment implements VoIPService.StateListener, NotificationCent
         instance = fragment;
         VoIPWindowView windowView = new VoIPWindowView(activity, !transitionFromPip) {
 
-            private Path clipPath = new Path();
-            private RectF rectF = new RectF();
+            private final Path clipPath = new Path();
+            private final RectF rectF = new RectF();
 
             @Override
             public boolean dispatchKeyEvent(KeyEvent event) {
@@ -705,7 +705,7 @@ public class VoIPFragment implements VoIPService.StateListener, NotificationCent
         frameLayout.setFitsSystemWindows(true);
         callingUserPhotoView = new BackupImageView(context) {
 
-            int blackoutColor = ColorUtils.setAlphaComponent(Color.BLACK, (int) (255 * 0.3f));
+            final int blackoutColor = ColorUtils.setAlphaComponent(Color.BLACK, (int) (255 * 0.3f));
 
             @Override
             protected void onDraw(Canvas canvas) {
@@ -1026,10 +1026,7 @@ public class VoIPFragment implements VoIPService.StateListener, NotificationCent
         if (pointerId1 == ev.getPointerId(0) && pointerId2 == ev.getPointerId(1)) {
             return true;
         }
-        if (pointerId1 == ev.getPointerId(1) && pointerId2 == ev.getPointerId(0)) {
-            return true;
-        }
-        return false;
+        return pointerId1 == ev.getPointerId(1) && pointerId2 == ev.getPointerId(0);
     }
 
     private VoIPTextureView getFullscreenTextureView() {
@@ -1049,7 +1046,7 @@ public class VoIPFragment implements VoIPService.StateListener, NotificationCent
             float fromTranslateY = pinchTranslationY;
             zoomBackAnimator.addUpdateListener(valueAnimator -> {
                 float v = (float) valueAnimator.getAnimatedValue();
-                pinchScale = fromScale * v + 1f * (1f - v);
+                pinchScale = fromScale * v + (1f - v);
                 pinchTranslationX = fromTranslateX * v;
                 pinchTranslationY = fromTranslateY * v;
                 fragmentView.invalidate();
@@ -1414,12 +1411,8 @@ public class VoIPFragment implements VoIPService.StateListener, NotificationCent
                 lockOnScreen = true;
                 statusLayoutOffset = AndroidUtilities.dp(24);
                 acceptDeclineView.setRetryMod(false);
-                if (service != null && service.privateCall.video) {
-                    if (currentUserIsVideo && callingUser.photo != null) {
-                        showCallingAvatarMini = true;
-                    } else {
-                        showCallingAvatarMini = false;
-                    }
+                if (service != null && service.privateCall != null && service.privateCall.video) {
+                    showCallingAvatarMini = currentUserIsVideo && callingUser.photo != null;
                     statusTextView.setText(LocaleController.getString("VoipInVideoCallBranding", R.string.VoipInVideoCallBranding), true, animated);
                     acceptDeclineView.setTranslationY(-AndroidUtilities.dp(60));
                 } else {
