@@ -112,7 +112,7 @@ object StringUtils {
         val panguEntities = arrayListOf<TLRPC.MessageEntity>()
         entities.forEach {
             val char = mutableListOf<Char>().also { list ->
-                for (i in it.offset until it.offset + it.length) {
+                for (i in it.offset until (it.offset + it.length).coerceAtMost(text.length)) {
                     list.add(text[i])
                 }
             }
