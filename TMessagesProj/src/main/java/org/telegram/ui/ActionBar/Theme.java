@@ -173,25 +173,25 @@ public class Theme {
 
         private Shader gradientShader;
         private int currentBackgroundHeight;
-        private Paint paint = new Paint(Paint.ANTI_ALIAS_FLAG);
-        private Paint selectedPaint;
+        private final Paint paint = new Paint(Paint.ANTI_ALIAS_FLAG);
+        private final Paint selectedPaint;
         private int currentColor;
         private int currentGradientColor1;
         private int currentGradientColor2;
         private int currentGradientColor3;
         private boolean currentAnimateGradient;
 
-        private RectF rect = new RectF();
-        private Matrix matrix = new Matrix();
-        private int currentType;
+        private final RectF rect = new RectF();
+        private final Matrix matrix = new Matrix();
+        private final int currentType;
         public boolean isSelected;
-        private Path path;
+        private final Path path;
 
         public Path getPath() {
             return path;
         }
 
-        private Rect backupRect = new Rect();
+        private final Rect backupRect = new Rect();
 
         private ResourcesProvider resourcesProvider;
         private final boolean isOut;
@@ -204,19 +204,19 @@ public class Theme {
 
         public static MotionBackgroundDrawable[] motionBackground = new MotionBackgroundDrawable[3];
 
-        private int[] currentShadowDrawableRadius = new int[]{-1, -1, -1, -1};
-        private Bitmap[] shadowDrawableBitmap = new Bitmap[4];
-        private Drawable[] shadowDrawable = new Drawable[4];
-        private int[] shadowDrawableColor = new int[]{0xffffffff, 0xffffffff, 0xffffffff, 0xffffffff};
+        private final int[] currentShadowDrawableRadius = new int[]{-1, -1, -1, -1};
+        private final Bitmap[] shadowDrawableBitmap = new Bitmap[4];
+        private final Drawable[] shadowDrawable = new Drawable[4];
+        private final int[] shadowDrawableColor = new int[]{0xffffffff, 0xffffffff, 0xffffffff, 0xffffffff};
 
-        private int[][] currentBackgroundDrawableRadius = new int[][]{
+        private final int[][] currentBackgroundDrawableRadius = new int[][]{
                 {-1, -1, -1, -1},
                 {-1, -1, -1, -1},
                 {-1, -1, -1, -1},
                 {-1, -1, -1, -1}
         };
-        private Drawable[][] backgroundDrawable = new Drawable[4][4];
-        private int[][] backgroundDrawableColor = new int[][]{
+        private final Drawable[][] backgroundDrawable = new Drawable[4][4];
+        private final int[][] backgroundDrawableColor = new int[][]{
                 {0xffffffff, 0xffffffff, 0xffffffff, 0xffffffff},
                 {0xffffffff, 0xffffffff, 0xffffffff, 0xffffffff},
                 {0xffffffff, 0xffffffff, 0xffffffff, 0xffffffff},
@@ -922,11 +922,7 @@ public class Theme {
             }
             if (gradientShader == null) {
                 Drawable background = getBackgroundDrawable();
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
-                    if (background.getAlpha() != alpha) {
-                        background.setAlpha(alpha);
-                    }
-                } else {
+                if (background != null && background.getAlpha() != alpha) {
                     background.setAlpha(alpha);
                 }
             }
@@ -994,7 +990,7 @@ public class Theme {
             public ArrayList<ThemeAccent> accents = new ArrayList<>();
         }
 
-        private int account = UserConfig.selectedAccount;
+        private final int account = UserConfig.selectedAccount;
         private HashMap<String, LoadingPattern> watingForLoad;
         private static PatternsLoader loader;
 
@@ -1679,7 +1675,7 @@ public class Theme {
             return !isMyMessagesGradientColorsNear;
         }
 
-        private float[] tempHSV = new float[3];
+        private final float[] tempHSV = new float[3];
         private int setHue(int color, int hueFromColor) {
             Color.colorToHSV(hueFromColor, tempHSV);
             float hue = tempHSV[0];
@@ -1828,7 +1824,7 @@ public class Theme {
                 }
                 wallpaperLink = "https://attheme.org?slug=" + patternSlug + "&intensity=" + (int) (patternIntensity * 100) + "&bg_color=" + color;
                 if (modes.length() > 0) {
-                    wallpaperLink += "&mode=" + modes.toString();
+                    wallpaperLink += "&mode=" + modes;
                 }
             }
 
@@ -2424,7 +2420,7 @@ public class Theme {
                 if (object.has("info")) {
                     try {
                         SerializedData serializedData = new SerializedData(Utilities.hexToBytes(object.getString("info")));
-                        themeInfo.info = (TLRPC.TL_theme) TLRPC.Theme.TLdeserialize(serializedData, serializedData.readInt32(true), true);
+                        themeInfo.info = TLRPC.Theme.TLdeserialize(serializedData, serializedData.readInt32(true), true);
                     } catch (Throwable e) {
                         FileLog.e(e);
                     }
@@ -2910,14 +2906,14 @@ public class Theme {
     private static long lastThemeSwitchTime;
     private static boolean switchDayRunnableScheduled;
     private static boolean switchNightRunnableScheduled;
-    private static Runnable switchDayBrightnessRunnable = new Runnable() {
+    private static final Runnable switchDayBrightnessRunnable = new Runnable() {
         @Override
         public void run() {
             switchDayRunnableScheduled = false;
             applyDayNightThemeMaybe(false);
         }
     };
-    private static Runnable switchNightBrightnessRunnable = new Runnable() {
+    private static final Runnable switchNightBrightnessRunnable = new Runnable() {
         @Override
         public void run() {
             switchNightRunnableScheduled = false;
@@ -2938,21 +2934,21 @@ public class Theme {
     public static double autoNightLocationLatitude = 10000;
     public static double autoNightLocationLongitude = 10000;
 
-    private static Paint maskPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+    private static final Paint maskPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
 
     private static int loadingCurrentTheme;
     private static int lastLoadingCurrentThemeTime;
-    private static boolean[] loadingRemoteThemes = new boolean[UserConfig.MAX_ACCOUNT_COUNT];
-    private static int[] lastLoadingThemesTime = new int[UserConfig.MAX_ACCOUNT_COUNT];
-    private static long[] remoteThemesHash = new long[UserConfig.MAX_ACCOUNT_COUNT];
+    private static final boolean[] loadingRemoteThemes = new boolean[UserConfig.MAX_ACCOUNT_COUNT];
+    private static final int[] lastLoadingThemesTime = new int[UserConfig.MAX_ACCOUNT_COUNT];
+    private static final long[] remoteThemesHash = new long[UserConfig.MAX_ACCOUNT_COUNT];
 
     public static ArrayList<ThemeInfo> themes;
-    private static ArrayList<ThemeInfo> otherThemes;
-    private static HashMap<String, ThemeInfo> themesDict;
+    private static final ArrayList<ThemeInfo> otherThemes;
+    private static final HashMap<String, ThemeInfo> themesDict;
     private static ThemeInfo currentTheme;
     private static ThemeInfo currentNightTheme;
     private static ThemeInfo currentDayTheme;
-    private static ThemeInfo defaultTheme;
+    private static final ThemeInfo defaultTheme;
     private static ThemeInfo previousTheme;
     private static boolean changingWallpaper;
     private static boolean hasPreviousTheme;
@@ -3137,7 +3133,7 @@ public class Theme {
     public static MessageDrawable chat_msgInMediaSelectedDrawable;
     public static MessageDrawable chat_msgOutMediaDrawable;
     public static MessageDrawable chat_msgOutMediaSelectedDrawable;
-    private static StatusDrawable[] chat_status_drawables = new StatusDrawable[6];
+    private static final StatusDrawable[] chat_status_drawables = new StatusDrawable[6];
     public static PorterDuffColorFilter chat_animatedEmojiTextColorFilter;
 
     public static PathAnimator playPauseAnimator;
@@ -4103,19 +4099,19 @@ public class Theme {
     private static final HashMap<String, Paint> defaultChatPaints = new HashMap<>();
     private static final HashMap<String, Integer> defaultChatPaintColors = new HashMap<>();
 
-    private static int[] defaultColors;
-    private static SparseIntArray fallbackKeys = new SparseIntArray();
-    private static HashSet<Integer> themeAccentExclusionKeys = new HashSet<>();
+    private static final int[] defaultColors;
+    private static final SparseIntArray fallbackKeys = new SparseIntArray();
+    private static final HashSet<Integer> themeAccentExclusionKeys = new HashSet<>();
     private static SparseIntArray currentColorsNoAccent;
     private static SparseIntArray currentColors;
     private static SparseIntArray animatingColors;
     private static boolean shouldDrawGradientIcons;
 
-    private static ThreadLocal<float[]> hsvTemp1Local = new ThreadLocal<>();
-    private static ThreadLocal<float[]> hsvTemp2Local = new ThreadLocal<>();
-    private static ThreadLocal<float[]> hsvTemp3Local = new ThreadLocal<>();
-    private static ThreadLocal<float[]> hsvTemp4Local = new ThreadLocal<>();
-    private static ThreadLocal<float[]> hsvTemp5Local = new ThreadLocal<>();
+    private static final ThreadLocal<float[]> hsvTemp1Local = new ThreadLocal<>();
+    private static final ThreadLocal<float[]> hsvTemp2Local = new ThreadLocal<>();
+    private static final ThreadLocal<float[]> hsvTemp3Local = new ThreadLocal<>();
+    private static final ThreadLocal<float[]> hsvTemp4Local = new ThreadLocal<>();
+    private static final ThreadLocal<float[]> hsvTemp5Local = new ThreadLocal<>();
 
     private static FragmentContextViewWavesDrawable fragmentContextViewWavesDrawable;
     private static RoundVideoProgressShadow roundPlayDrawable;
@@ -4711,7 +4707,7 @@ public class Theme {
                                     if (version >= 5) {
                                         if (data.readBool(true)) {
                                             accent.account = data.readInt32(true);
-                                            accent.info = (TLRPC.TL_theme) TLRPC.Theme.TLdeserialize(data, data.readInt32(true), true);
+                                            accent.info = TLRPC.Theme.TLdeserialize(data, data.readInt32(true), true);
                                         }
                                     }
                                     if (accent.info != null) {
@@ -5064,11 +5060,7 @@ public class Theme {
             int dayOfMonth = calendar.get(Calendar.DAY_OF_MONTH);
             int minutes = calendar.get(Calendar.MINUTE);
             int hour = calendar.get(Calendar.HOUR_OF_DAY);
-            if (monthOfYear == 0 && dayOfMonth == 1 && hour <= 23) {
-                canStartHolidayAnimation = true;
-            } else {
-                canStartHolidayAnimation = false;
-            }
+            canStartHolidayAnimation = monthOfYear == 0 && dayOfMonth == 1 && hour <= 23;
             if (dialogs_holidayDrawable == null) {
                 if (monthOfYear == 11 && dayOfMonth >= (BuildVars.DEBUG_PRIVATE_VERSION ? 29 : 31) && dayOfMonth <= 31 || monthOfYear == 0 && dayOfMonth == 1) {
                     dialogs_holidayDrawable = ApplicationLoader.applicationContext.getResources().getDrawable(R.drawable.newyear);
@@ -5245,7 +5237,7 @@ public class Theme {
     public static Drawable createServiceDrawable(int rad, View view, View containerView, Paint backgroundPaint) {
         return new Drawable() {
 
-            private RectF rect = new RectF();
+            private final RectF rect = new RectF();
 
             @Override
             public void draw(@NonNull Canvas canvas) {
@@ -5768,16 +5760,16 @@ public class Theme {
         private static class CircleDrawable extends Drawable {
 
             private static Paint maskPaint;
-            private Paint paint;
-            private float radius;
+            private final Paint paint;
+            private final float radius;
 
             public CircleDrawable(float radius) {
                 this.radius = radius;
-                if (this.maskPaint == null) {
-                    this.maskPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
-                    this.maskPaint.setColor(0xffffffff);
+                if (maskPaint == null) {
+                    maskPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+                    maskPaint.setColor(0xffffffff);
                 }
-                this.paint = this.maskPaint;
+                this.paint = maskPaint;
             }
 
             public CircleDrawable(float radius, int paintColor) {
@@ -5853,8 +5845,8 @@ public class Theme {
     }
 
     public static class RippleRadMaskDrawable extends Drawable {
-        private Path path = new Path();
-        private float[] radii = new float[8];
+        private final Path path = new Path();
+        private final float[] radii = new float[8];
         boolean invalidatePath = true;
 
         public RippleRadMaskDrawable(float top, float bottom) {
@@ -6860,7 +6852,7 @@ public class Theme {
     }
 
     private static final float MAXIMUM_LUX_BREAKPOINT = 500.0f;
-    private static SensorEventListener ambientSensorListener = new SensorEventListener() {
+    private static final SensorEventListener ambientSensorListener = new SensorEventListener() {
         @Override
         public void onSensorChanged(SensorEvent event) {
             float lux = event.values[0];
@@ -7144,7 +7136,7 @@ public class Theme {
             wallpaperLink = "https://attheme.org?slug=" + wallpaperInfo.slug + "&intensity=" + (int) (wallpaperInfo.intensity * 100) + "&bg_color=" + color;
         }
         if (modes.length() > 0) {
-            wallpaperLink += "&mode=" + modes.toString();
+            wallpaperLink += "&mode=" + modes;
         }
         return wallpaperLink;
     }
@@ -7995,7 +7987,6 @@ public class Theme {
                             if ((idx = line.indexOf('=')) != -1) {
                                 String key = line.substring(0, idx);
                                 String param = line.substring(idx + 1).trim();
-                                ;
                                 int value;
                                 if (param.length() > 0 && param.charAt(0) == '#') {
                                     try {
@@ -8967,7 +8958,7 @@ public class Theme {
         return serviceBitmapShader != null;
     }
 
-    private static int[] viewPos = new int[2];
+    private static final int[] viewPos = new int[2];
 
     public static void applyServiceShaderMatrixForView(View view, View background) {
         applyServiceShaderMatrixForView(view, background, null);
@@ -10268,9 +10259,7 @@ public class Theme {
             if (accent.parentTheme.getKey().equals("Day") && accent.id == 9) {
                 return true;
             }
-            if ((accent.parentTheme.getKey().equals("Night") || accent.parentTheme.getKey().equals("Dark Blue")) && accent.id == 0) {
-                return true;
-            }
+            return (accent.parentTheme.getKey().equals("Night") || accent.parentTheme.getKey().equals("Dark Blue")) && accent.id == 0;
         }
         return false;
     }
