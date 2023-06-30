@@ -2,6 +2,7 @@ package org.telegram.messenger;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.Point;
 import android.location.Location;
@@ -81,7 +82,7 @@ public class GoogleMapsProvider implements IMapsProvider {
     }
 
     @Override
-    public IMarkerOptions onCreateMarkerOptions() {
+    public IMarkerOptions onCreateMarkerOptions(IMapView imapView) {
         return new GoogleMarkerOptions();
     }
 
@@ -289,12 +290,12 @@ public class GoogleMapsProvider implements IMapsProvider {
             }
 
             @Override
-            public void setIcon(Bitmap bitmap) {
+            public void setIcon(Resources resources, Bitmap bitmap) {
                 marker.setIcon(BitmapDescriptorFactory.fromBitmap(bitmap));
             }
 
             @Override
-            public void setIcon(int resId) {
+            public void setIcon(Resources resources, int resId) {
                 marker.setIcon(BitmapDescriptorFactory.fromResource(resId));
             }
 
@@ -447,13 +448,13 @@ public class GoogleMapsProvider implements IMapsProvider {
         }
 
         @Override
-        public IMarkerOptions icon(Bitmap bitmap) {
+        public IMarkerOptions icon(Resources resources, Bitmap bitmap) {
             markerOptions.icon(BitmapDescriptorFactory.fromBitmap(bitmap));
             return this;
         }
 
         @Override
-        public IMarkerOptions icon(int resId) {
+        public IMarkerOptions icon(Resources resources, int resId) {
             markerOptions.icon(BitmapDescriptorFactory.fromResource(resId));
             return this;
         }
@@ -573,7 +574,11 @@ public class GoogleMapsProvider implements IMapsProvider {
 
         @Override
         public void getMapAsync(Consumer<IMap> callback) {
-            mapView.getMapAsync(googleMap -> callback.accept(new GoogleMapImpl(googleMap)));
+/*            mapView.getMapAsync(googleMap -> {
+                if (NekoConfig.fixDriftingForGoogleMaps())
+                    googleMap.setLocationSource(new NekoLocationSource(mapView.getContext()));
+                callback.accept(new GoogleMapImpl(googleMap));
+            });*/
         }
 
         @Override

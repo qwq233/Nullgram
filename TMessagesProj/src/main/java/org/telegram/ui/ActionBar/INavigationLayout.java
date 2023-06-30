@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.Canvas;
 import android.graphics.drawable.Drawable;
+import android.util.SparseIntArray;
 import android.view.Menu;
 import android.view.View;
 import android.view.ViewGroup;
@@ -16,7 +17,6 @@ import androidx.core.util.Supplier;
 import org.telegram.ui.Components.BackButtonMenu;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 
 public interface INavigationLayout {
@@ -381,29 +381,34 @@ public interface INavigationLayout {
     }
 
     class StartColorsProvider implements Theme.ResourcesProvider {
-        HashMap<String, Integer> colors = new HashMap<>();
-        String[] keysToSave = new String[]{
-            Theme.key_chat_outBubble,
-            Theme.key_chat_outBubbleGradient1,
-            Theme.key_chat_outBubbleGradient2,
-            Theme.key_chat_outBubbleGradient3,
-            Theme.key_chat_outBubbleGradientAnimated,
-            Theme.key_chat_outBubbleShadow
+        SparseIntArray colors = new SparseIntArray();
+        int[] keysToSave = new int[] {
+                Theme.key_chat_outBubble,
+                Theme.key_chat_outBubbleGradient1,
+                Theme.key_chat_outBubbleGradient2,
+                Theme.key_chat_outBubbleGradient3,
+                Theme.key_chat_outBubbleGradientAnimated,
+                Theme.key_chat_outBubbleShadow
         };
 
         @Override
-        public Integer getColor(String key) {
+        public int getColor(int key) {
             return colors.get(key);
         }
 
         @Override
-        public Integer getCurrentColor(String key) {
+        public boolean contains(int key) {
+            return colors.indexOfKey(key) >= 0;
+        }
+
+        @Override
+        public int getCurrentColor(int key) {
             return colors.get(key);
         }
 
         public void saveColors(Theme.ResourcesProvider fragmentResourceProvider) {
             colors.clear();
-            for (String key : keysToSave) {
+            for (int key : keysToSave) {
                 colors.put(key, fragmentResourceProvider.getCurrentColor(key));
             }
         }

@@ -5,7 +5,6 @@ import android.animation.AnimatorListenerAdapter;
 import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
 import android.animation.ValueAnimator;
-import android.annotation.TargetApi;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
@@ -13,16 +12,12 @@ import android.content.pm.ActivityInfo;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
-import android.graphics.ColorMatrix;
-import android.graphics.ColorMatrixColorFilter;
-import android.graphics.ImageFormat;
 import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.Point;
 import android.graphics.RectF;
 import android.graphics.Typeface;
 import android.graphics.drawable.ShapeDrawable;
-import android.net.Uri;
 import android.os.Build;
 import android.os.Handler;
 import android.os.HandlerThread;
@@ -33,7 +28,6 @@ import android.text.SpannableStringBuilder;
 import android.text.Spanned;
 import android.text.TextUtils;
 import android.text.style.ClickableSpan;
-import android.util.SparseArray;
 import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.MotionEvent;
@@ -48,16 +42,8 @@ import androidx.dynamicanimation.animation.FloatValueHolder;
 import androidx.dynamicanimation.animation.SpringAnimation;
 import androidx.dynamicanimation.animation.SpringForce;
 
-import com.google.android.gms.vision.Frame;
 import com.google.android.gms.vision.barcode.Barcode;
 import com.google.android.gms.vision.barcode.BarcodeDetector;
-import com.google.zxing.BinaryBitmap;
-import com.google.zxing.LuminanceSource;
-import com.google.zxing.PlanarYUVLuminanceSource;
-import com.google.zxing.RGBLuminanceSource;
-import com.google.zxing.Result;
-import com.google.zxing.ResultPoint;
-import com.google.zxing.common.GlobalHistogramBinarizer;
 import com.google.zxing.qrcode.QRCodeReader;
 
 import org.telegram.messenger.AndroidUtilities;
@@ -65,11 +51,12 @@ import org.telegram.messenger.ApplicationLoader;
 import org.telegram.messenger.FileLog;
 import org.telegram.messenger.ImageLoader;
 import org.telegram.messenger.LocaleController;
+import org.telegram.messenger.MediaController;
 import org.telegram.messenger.MrzRecognizer;
 import org.telegram.messenger.R;
-import org.telegram.messenger.SendMessagesHelper;
 import org.telegram.messenger.SharedConfig;
 import org.telegram.messenger.Utilities;
+import org.telegram.messenger.browser.Browser;
 import org.telegram.messenger.camera.CameraController;
 import org.telegram.messenger.camera.CameraSession;
 import org.telegram.messenger.camera.CameraView;
@@ -81,6 +68,7 @@ import org.telegram.ui.ActionBar.INavigationLayout;
 import org.telegram.ui.ActionBar.Theme;
 import org.telegram.ui.ActionBar.ThemeDescription;
 import org.telegram.ui.Components.AnimationProperties;
+import org.telegram.ui.Components.ChatAttachAlert;
 import org.telegram.ui.Components.CubicBezierInterpolator;
 import org.telegram.ui.Components.LayoutHelper;
 import org.telegram.ui.Components.LinkPath;
@@ -88,12 +76,12 @@ import org.telegram.ui.Components.LinkSpanDrawable;
 import org.telegram.ui.Components.TypefaceSpan;
 import org.telegram.ui.Components.URLSpanNoUnderline;
 
-import java.nio.ByteBuffer;
 import java.util.ArrayList;
+import java.util.HashMap;
 
+import top.qwq2333.nullgram.helpers.QrHelper;
 import top.qwq2333.nullgram.utils.PermissionUtils;
 
-@TargetApi(18)
 public class CameraScanActivity extends BaseFragment {
 
     private TextView titleTextView;
@@ -408,7 +396,7 @@ public class CameraScanActivity extends BaseFragment {
                     canvas.drawRect(x, y, x + sizex, y + sizey, paint);
 
                     final int lineWidth = AndroidUtilities.lerp(0, AndroidUtilities.dp(4), Math.min(1, qrAppearingValue * 20f)),
-                              halfLineWidth = lineWidth / 2;
+                        halfLineWidth = lineWidth / 2;
                     final int lineLength = AndroidUtilities.lerp(Math.min(sizex, sizey), AndroidUtilities.dp(20), Math.min(1.2f, (float) Math.pow(qrAppearingValue, 1.8f)));
 
                     cornerPaint.setAlpha((int) (255 * Math.min(1, qrAppearingValue)));
@@ -642,7 +630,7 @@ public class CameraScanActivity extends BaseFragment {
                 galleryButton = new ImageView(context);
                 galleryButton.setScaleType(ImageView.ScaleType.CENTER);
                 galleryButton.setImageResource(R.drawable.qr_gallery);
-                galleryButton.setBackgroundDrawable(Theme.createSelectorDrawableFromDrawables(Theme.createCircleDrawable(AndroidUtilities.dp(60), 0x22ffffff), Theme.createCircleDrawable(AndroidUtilities.dp(60), 0x44ffffff)));
+                galleryButton.setBackground(Theme.AdaptiveRipple.filledCircle(Theme.createCircleDrawable(AndroidUtilities.dp(60), 0x22ffffff)));
                 viewGroup.addView(galleryButton);
                 galleryButton.setOnClickListener(currentImage -> {
                     if (getParentActivity() == null) {
@@ -654,51 +642,49 @@ public class CameraScanActivity extends BaseFragment {
                             return;
                         }
                     }
-                    PhotoAlbumPickerActivity fragment = new PhotoAlbumPickerActivity(PhotoAlbumPickerActivity.SELECT_TYPE_QR, false, false, null);
-                    fragment.setMaxSelectedPhotos(1, false);
-                    fragment.setAllowSearchImages(false);
-                    fragment.setDelegate(new PhotoAlbumPickerActivity.PhotoAlbumPickerActivityDelegate() {
-                        @Override
-                        public void didSelectPhotos(ArrayList<SendMessagesHelper.SendingMediaInfo> photos, boolean notify, int scheduleDate) {
-                            try {
-                                if (!photos.isEmpty()) {
-                                    SendMessagesHelper.SendingMediaInfo info = photos.get(0);
-                                    if (info.path != null) {
-                                        Point screenSize = AndroidUtilities.getRealScreenSize();
-                                        Bitmap bitmap = ImageLoader.loadBitmap(info.path, null, screenSize.x, screenSize.y, true);
-                                        QrResult res = tryReadQr(null, null, 0, 0, 0, bitmap);
-                                        if (res != null) {
-                                            if (delegate != null) {
-                                                delegate.didFindQr(res.text);
-                                            }
-                                            removeSelfFromStack();
+                    ChatAttachAlert chatAttachAlert = new ChatAttachAlert(getParentActivity(), this, true, false, false, null);
+                    chatAttachAlert.drawNavigationBar = true;
+                    chatAttachAlert.setupPhotoPicker(LocaleController.getString("ChoosePhoto", R.string.ChoosePhoto));
+                    chatAttachAlert.setDelegate((button, arg, notify, scheduleDate, forceDocument) -> {
+                        try {
+                            HashMap<Object, Object> photos = chatAttachAlert.getPhotoLayout().getSelectedPhotos();
+                            if (!photos.isEmpty()) {
+                                MediaController.PhotoEntry entry = (MediaController.PhotoEntry) photos.values().iterator().next();
+                                String path;
+                                if (entry.imagePath != null) {
+                                    path = entry.imagePath;
+                                } else {
+                                    path = entry.path;
+                                }
+                                if (path != null) {
+                                    Point screenSize = AndroidUtilities.getRealScreenSize();
+                                    Bitmap bitmap = ImageLoader.loadBitmap(path, null, screenSize.x, screenSize.y, true);
+                                    QrResult res = tryReadQr(null, null, 0, 0, 0, bitmap);
+                                    if (res != null) {
+                                        if (delegate != null) {
+                                            delegate.didFindQr(res.text);
                                         }
+                                        removeSelfFromStack();
+                                        chatAttachAlert.dismissInternal();
                                     }
                                 }
-                            } catch (Throwable e) {
-                                FileLog.e(e);
                             }
-                        }
-
-                        @Override
-                        public void startPhotoSelectActivity() {
-                            try {
-                                Intent photoPickerIntent = new Intent(Intent.ACTION_PICK);
-                                photoPickerIntent.setType("image/*");
-                                getParentActivity().startActivityForResult(photoPickerIntent, 11);
-                            } catch (Exception e) {
-                                FileLog.e(e);
-                            }
+                        } catch (Throwable e) {
+                            FileLog.e(e);
                         }
                     });
-                    presentFragment(fragment);
+                    chatAttachAlert.setMaxSelectedPhotos(1, false);
+                    chatAttachAlert.init();
+                    chatAttachAlert.getPhotoLayout().loadGalleryPhotos();
+                    chatAttachAlert.show();
                 });
             }
 
             flashButton = new ImageView(context);
             flashButton.setScaleType(ImageView.ScaleType.CENTER);
             flashButton.setImageResource(R.drawable.qr_flashlight);
-            flashButton.setBackgroundDrawable(Theme.createCircleDrawable(AndroidUtilities.dp(60), 0x22ffffff));
+            ShapeDrawable shapeDrawable = Theme.createCircleDrawable(AndroidUtilities.dp(60), 0x22ffffff);
+            flashButton.setBackground(Theme.AdaptiveRipple.filledCircle(shapeDrawable));
             viewGroup.addView(flashButton);
             flashButton.setOnClickListener(currentImage -> {
                 if (cameraView == null) {
@@ -706,7 +692,6 @@ public class CameraScanActivity extends BaseFragment {
                 }
                 CameraSession session = cameraView.getCameraSession();
                 if (session != null) {
-                    ShapeDrawable shapeDrawable = (ShapeDrawable) flashButton.getBackground();
                     if (flashAnimator != null) {
                         flashAnimator.cancel();
                         flashAnimator = null;
@@ -766,6 +751,7 @@ public class CameraScanActivity extends BaseFragment {
             if (currentType == TYPE_QR_WEB_BOT) {
                 descriptionText.setAlpha(1f - recognizedT);
             }
+            if (galleryButton != null) galleryButton.setAlpha(1f - recognizedT);
             flashButton.setAlpha(1f - recognizedT);
             backShadowAlpha = .5f + recognizedT * .25f;
             fragmentView.invalidate();
@@ -1023,9 +1009,9 @@ public class CameraScanActivity extends BaseFragment {
                 }
 
                 if (( // finish because...
-                      (recognizeIndex == 0 && res != null && res.bounds == null && !qrLoading) || // first recognition doesn't have bounds
-                      (SystemClock.elapsedRealtime() - recognizedStart > 1000 && !qrLoading) // got more than 1 second and nothing is loading
-                    ) && recognizedText != null) {
+                    (recognizeIndex == 0 && res != null && res.bounds == null && !qrLoading) || // first recognition doesn't have bounds
+                        (SystemClock.elapsedRealtime() - recognizedStart > 1000 && !qrLoading) // got more than 1 second and nothing is loading
+                ) && recognizedText != null) {
                     if (cameraView != null && cameraView.getCameraSession() != null && currentType != TYPE_QR_WEB_BOT) {
                         CameraController.getInstance().stopPreview(cameraView.getCameraSession());
                     }
@@ -1074,52 +1060,6 @@ public class CameraScanActivity extends BaseFragment {
         }
     }
 
-    private Bitmap invert(Bitmap bitmap) {
-        int height = bitmap.getHeight();
-        int width = bitmap.getWidth();
-
-        Bitmap newBitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
-        Canvas canvas = new Canvas(newBitmap);
-        Paint paint = new Paint();
-
-        ColorMatrix matrixGrayscale = new ColorMatrix();
-        matrixGrayscale.setSaturation(0);
-        ColorMatrix matrixInvert = new ColorMatrix();
-        matrixInvert.set(new float[] {
-            -1.0f, 0.0f, 0.0f, 0.0f, 255.0f,
-            0.0f, -1.0f, 0.0f, 0.0f, 255.0f,
-            0.0f, 0.0f, -1.0f, 0.0f, 255.0f,
-            0.0f, 0.0f, 0.0f, 1.0f, 0.0f
-        });
-        matrixInvert.preConcat(matrixGrayscale);
-        paint.setColorFilter(new ColorMatrixColorFilter(matrixInvert));
-        canvas.drawBitmap(bitmap, 0, 0, paint);
-        return newBitmap;
-    }
-
-    private Bitmap monochrome(Bitmap bitmap, int threshold) {
-        int height = bitmap.getHeight();
-        int width = bitmap.getWidth();
-
-        Bitmap newBitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
-        Canvas canvas = new Canvas(newBitmap);
-        Paint paint = new Paint();
-
-        paint.setColorFilter(new ColorMatrixColorFilter(createThresholdMatrix(threshold)));
-        canvas.drawBitmap(bitmap, 0, 0, paint);
-
-        return newBitmap;
-    }
-    public static ColorMatrix createThresholdMatrix(int threshold) {
-        ColorMatrix matrix = new ColorMatrix(new float[] {
-            85.f, 85.f, 85.f, 0.f, -255.f * threshold,
-            85.f, 85.f, 85.f, 0.f, -255.f * threshold,
-            85.f, 85.f, 85.f, 0.f, -255.f * threshold,
-            0f, 0f, 0f, 1f, 0f
-        });
-        return matrix;
-    }
-
     private class QrResult {
         String text;
         RectF bounds;
@@ -1127,142 +1067,22 @@ public class CameraScanActivity extends BaseFragment {
 
     private QrResult tryReadQr(byte[] data, Size size, int x, int y, int side, Bitmap bitmap) {
         try {
-            String text;
-            RectF bounds = new RectF();
-            int width = 1, height = 1;
-            if (visionQrReader != null && visionQrReader.isOperational()) {
-                Frame frame;
-                if (bitmap != null) {
-                    frame = new Frame.Builder().setBitmap(bitmap).build();
-                    width = bitmap.getWidth();
-                    height = bitmap.getHeight();
-                } else {
-                    frame = new Frame.Builder().setImageData(ByteBuffer.wrap(data), size.getWidth(), size.getHeight(), ImageFormat.NV21).build();
-                    width = size.getWidth();
-                    height = size.getWidth();
-                }
-                SparseArray<Barcode> codes = visionQrReader.detect(frame);
-                if (codes != null && codes.size() > 0) {
-                    Barcode code = codes.valueAt(0);
-                    text = code.rawValue;
-                    if (code.cornerPoints == null || code.cornerPoints.length == 0) {
-                        bounds = null;
-                    } else {
-//                        bounds.set(code.getBoundingBox());
-                        float minX = Float.MAX_VALUE,
-                              maxX = Float.MIN_VALUE,
-                              minY = Float.MAX_VALUE,
-                              maxY = Float.MIN_VALUE;
-                        for (Point point : code.cornerPoints) {
-                            minX = Math.min(minX, point.x);
-                            maxX = Math.max(maxX, point.x);
-                            minY = Math.min(minY, point.y);
-                            maxY = Math.max(maxY, point.y);
-                        }
-                        bounds.set(minX, minY, maxX, maxY);
-                    }
-                } else if (bitmap != null) {
-                    Bitmap inverted = invert(bitmap);
-                    bitmap.recycle();
-                    frame = new Frame.Builder().setBitmap(inverted).build();
-                    width = inverted.getWidth();
-                    height = inverted.getHeight();
-                    codes = visionQrReader.detect(frame);
-                    if (codes != null && codes.size() > 0) {
-                        Barcode code = codes.valueAt(0);
-                        text = code.rawValue;
-                        if (code.cornerPoints == null || code.cornerPoints.length == 0) {
-                            bounds = null;
-                        } else {
-                            float minX = Float.MAX_VALUE,
-                                    maxX = Float.MIN_VALUE,
-                                    minY = Float.MAX_VALUE,
-                                    maxY = Float.MIN_VALUE;
-                            for (Point point : code.cornerPoints) {
-                                minX = Math.min(minX, point.x);
-                                maxX = Math.max(maxX, point.x);
-                                minY = Math.min(minY, point.y);
-                                maxY = Math.max(maxY, point.y);
-                            }
-                            bounds.set(minX, minY, maxX, maxY);
-                        }
-                    } else {
-                        Bitmap monochrome = monochrome(inverted, 90);
-                        inverted.recycle();
-                        frame = new Frame.Builder().setBitmap(monochrome).build();
-                        width = inverted.getWidth();
-                        height = inverted.getHeight();
-                        codes = visionQrReader.detect(frame);
-                        if (codes != null && codes.size() > 0) {
-                            Barcode code = codes.valueAt(0);
-                            text = code.rawValue;
-                            if (code.cornerPoints == null || code.cornerPoints.length == 0) {
-                                bounds = null;
-                            } else {
-                                float minX = Float.MAX_VALUE,
-                                        maxX = Float.MIN_VALUE,
-                                        minY = Float.MAX_VALUE,
-                                        maxY = Float.MIN_VALUE;
-                                for (Point point : code.cornerPoints) {
-                                    minX = Math.min(minX, point.x);
-                                    maxX = Math.max(maxX, point.x);
-                                    minY = Math.min(minY, point.y);
-                                    maxY = Math.max(maxY, point.y);
-                                }
-                                bounds.set(minX, minY, maxX, maxY);
-                            }
-                        } else {
-                            text = null;
-                        }
-                    }
-                } else {
-                    text = null;
-                }
-            } else if (qrReader != null) {
-                LuminanceSource source;
-                if (bitmap != null) {
-                    int[] intArray = new int[bitmap.getWidth() * bitmap.getHeight()];
-                    bitmap.getPixels(intArray, 0, bitmap.getWidth(), 0, 0, bitmap.getWidth(), bitmap.getHeight());
-                    source = new RGBLuminanceSource(bitmap.getWidth(), bitmap.getHeight(), intArray);
-                    width = bitmap.getWidth();
-                    height = bitmap.getWidth();
-                } else {
-                    source = new PlanarYUVLuminanceSource(data, size.getWidth(), size.getHeight(), x, y, side, side, false);
-                    width = size.getWidth();
-                    height = size.getHeight();
-                }
-
-                Result result = qrReader.decode(new BinaryBitmap(new GlobalHistogramBinarizer(source)));
-                if (result == null) {
-                    onNoQrFound();
-                    return null;
-                }
-                text = result.getText();
-                if (result.getResultPoints() == null || result.getResultPoints().length == 0) {
-                    bounds = null;
-                } else {
-                    float minX = Float.MAX_VALUE,
-                          maxX = Float.MIN_VALUE,
-                          minY = Float.MAX_VALUE,
-                          maxY = Float.MIN_VALUE;
-                    for (ResultPoint point : result.getResultPoints()) {
-                        minX = Math.min(minX, point.getX());
-                        maxX = Math.max(maxX, point.getX());
-                        minY = Math.min(minY, point.getY());
-                        maxY = Math.max(maxY, point.getY());
-                    }
-                    bounds.set(minX, minY, maxX, maxY);
-                }
-            } else {
-                text = null;
+            ArrayList<QrHelper.QrResult> result = QrHelper.readQr(bitmap);
+            if (result.isEmpty()) {
+                onNoQrFound();
+                return null;
             }
+            String text = result.get(0).text;
+            bounds = result.get(0).bounds;
             if (TextUtils.isEmpty(text)) {
                 onNoQrFound();
                 return null;
             }
-            if (needGalleryButton) {
-                Uri uri = Uri.parse(text);
-                String path = uri.getPath().replace("/", "");
+            if (currentType == TYPE_QR) {
+                if (!Browser.isInternalUrl(text, null)) {
+                    onNoQrFound();
+                    return null;
+                }
             } else {
                 if (!text.startsWith("tg://login?token=") && currentType != TYPE_QR_WEB_BOT) {
                     onNoQrFound();
@@ -1270,15 +1090,6 @@ public class CameraScanActivity extends BaseFragment {
                 }
             }
             QrResult qrResult = new QrResult();
-            if (bounds != null) {
-                int paddingx = AndroidUtilities.dp(25),
-                    paddingy = AndroidUtilities.dp(15);
-                bounds.set(bounds.left - paddingx, bounds.top - paddingy, bounds.right + paddingx, bounds.bottom + paddingy);
-                bounds.set(
-                    bounds.left / (float) width, bounds.top / (float) height,
-                    bounds.right / (float) width, bounds.bottom / (float) height
-                );
-            }
             qrResult.bounds = bounds;
             qrResult.text = text;
             return qrResult;

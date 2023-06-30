@@ -76,9 +76,9 @@ public class LocaleController {
     public FastDateFormat formatterMonthYear;
     public FastDateFormat[] formatterScheduleSend = new FastDateFormat[15];
 
-    private static HashMap<Integer, String> resourcesCacheMap = new HashMap<>();
+    private static final HashMap<Integer, String> resourcesCacheMap = new HashMap<>();
 
-    private HashMap<String, PluralRules> allRules = new HashMap<>();
+    private final HashMap<String, PluralRules> allRules = new HashMap<>();
 
     private Locale currentLocale;
     private Locale systemDefaultLocale;
@@ -1225,7 +1225,7 @@ public class LocaleController {
             }
             String param = getInstance().stringForQuantity(getInstance().currentPluralRules.quantityForNumber(plural));
             param = key + "_" + param;
-            StringBuilder stringBuilder = new StringBuilder(String.format(Locale.US, "%d", plural));
+            StringBuilder stringBuilder = new StringBuilder(String.format("%d", plural));
             for (int a = stringBuilder.length() - 3; a > 0; a -= 3) {
                 stringBuilder.insert(a, symbol);
             }
@@ -2155,7 +2155,8 @@ public class LocaleController {
             } else {
                 int dayDiff = dateDay - day;
                 if (dayDiff == 0 || dayDiff == -1 && System.currentTimeMillis() - date < 60 * 60 * 8 * 1000) {
-                    return getInstance().formatterDay.format(new Date(date));
+                    return ConfigManager.getBooleanOrFalse(Defines.showExactTime) ?
+                        getInstance().formatterDayWithSeconds.format(new Date(date)) : getInstance().formatterDay.format(new Date(date));
                 } else if (dayDiff > -7 && dayDiff <= -1) {
                     return getInstance().formatterWeek.format(new Date(date));
                 } else {

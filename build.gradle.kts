@@ -2,11 +2,11 @@
 @file:Suppress("UnstableApiUsage")
 
 plugins {
-    id("com.android.application") version "7.3.1" apply false
-    id("com.android.library") version "7.3.1" apply false
-    id("com.google.gms.google-services") version "4.3.13" apply false
-    id("com.google.firebase.crashlytics") version "2.9.4" apply false
-    id("org.jetbrains.kotlin.android") version Version.kotlin apply false
+    id("com.android.application") version "8.0.2" apply false
+    id("com.android.library") version "8.0.2" apply false
+    id("com.google.gms.google-services") version "4.3.15" apply false
+    id("com.google.firebase.crashlytics") version "2.9.5" apply false
+    kotlin("android") version Version.kotlin apply false
     kotlin("plugin.serialization") version Version.kotlin apply false
 }
 
@@ -26,8 +26,8 @@ val verName = if (Version.isStable) {
 val androidTargetSdkVersion by extra(33)
 val androidMinSdkVersion by extra(24)
 val androidCompileSdkVersion by extra(33)
-val androidBuildToolsVersion by extra("33.0.0")
-val androidCompileNdkVersion = "21.4.7075529"
+val androidBuildToolsVersion by extra("33.0.2")
+val androidCompileNdkVersion = "23.2.8568313"
 
 fun Project.configureBaseExtension() {
     extensions.findByType(com.android.build.gradle.BaseExtension::class)?.run {

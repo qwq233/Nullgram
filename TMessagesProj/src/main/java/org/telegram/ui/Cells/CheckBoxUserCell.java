@@ -84,7 +84,7 @@ public class CheckBoxUserCell extends FrameLayout {
         } else {
             textView.setText("");
         }
-        textView.setRightDrawable(user != null && user.verified ? getVerifiedDrawable() : null);
+        textView.setRightDrawable(user != null && user.verifiedExtended() ? getVerifiedDrawable() : null);
         checkBox.setChecked(checked, false);
         avatarDrawable.setInfo(user);
         imageView.setForUserOrChat(user, avatarDrawable);

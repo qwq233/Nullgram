@@ -200,13 +200,14 @@ import java.util.function.Consumer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import kotlin.Unit;
 import top.qwq2333.nullgram.config.ConfigManager;
 import top.qwq2333.nullgram.helpers.MonetHelper;
 import top.qwq2333.nullgram.helpers.SettingsHelper;
-import top.qwq2333.nullgram.helpers.UpdateHelper;
 import top.qwq2333.nullgram.utils.APKUtils;
 import top.qwq2333.nullgram.utils.Defines;
 import top.qwq2333.nullgram.utils.Log;
+import top.qwq2333.nullgram.utils.UpdateUtils;
 import top.qwq2333.nullgram.utils.Utils;
 
 public class LaunchActivity extends BasePermissionsActivity implements INavigationLayout.INavigationLayoutDelegate, NotificationCenter.NotificationCenterDelegate, DialogsActivity.DialogsActivityDelegate {
@@ -4999,39 +5000,42 @@ public class LaunchActivity extends BasePermissionsActivity implements INavigati
         ConfigManager.putLong(Defines.lastCheckUpdateTime, System.currentTimeMillis());
         Log.d("checking update");
         final int accountNum = currentAccount;
-        UpdateHelper.checkUpdate((res, error) -> AndroidUtilities.runOnUIThread(() -> {
-            if (res != null) {
-                Log.d("checkUpdate: res is not null");
-                SharedConfig.setNewAppVersionAvailable(res);
-                if (res.can_not_skip) {
-                    showUpdateActivity(accountNum, res, false);
-                } else {
-                    drawerLayoutAdapter.notifyDataSetChanged();
-                    try {
-                        (new UpdateAppAlertDialog(LaunchActivity.this, res, accountNum)).show();
-                    } catch (Exception e) {
-                        Log.e(e);
-                    }
-                }
-            } else {
-                Log.d("checkUpdate: res is null");
-                if (force) {
-                    if (!error) {
-                        if (!BuildConfig.isPlay) {
-                            showBulletin(factory -> factory.createErrorBulletin(LocaleController.getString("VersionUpdateNoUpdate", R.string.VersionUpdateNoUpdate)));
-                        } else {
-                            showBulletin(factory -> factory.createSimpleBulletin(R.raw.chats_infotip, LocaleController.getString("NoUpdateAvailablePlay", R.string.NoUpdateAvailablePlay), LocaleController.getString("NoUpdateAvailablePlayDelay", R.string.NoUpdateAvailablePlayDelay)));
-                        }
+        UpdateUtils.checkUpdate((res, error) -> {
+            AndroidUtilities.runOnUIThread(() -> {
+                if (res != null) {
+                    Log.d("checkUpdate: res is not null");
+                    SharedConfig.setNewAppVersionAvailable(res);
+                    if (res.can_not_skip) {
+                        showUpdateActivity(accountNum, res, false);
                     } else {
-                        AlertsCreator.createSimpleAlert(this, LocaleController.getString("ErrorOccurred", R.string.ErrorOccurred) + "\n" + error).show();
+                        drawerLayoutAdapter.notifyDataSetChanged();
+                        try {
+                            (new UpdateAppAlertDialog(LaunchActivity.this, res, accountNum)).show();
+                        } catch (Exception e) {
+                            Log.e(e);
+                        }
                     }
+                } else {
+                    Log.d("checkUpdate: res is null");
+                    if (force) {
+                        if (!error) {
+                            if (!BuildConfig.isPlay) {
+                                showBulletin(factory -> factory.createErrorBulletin(LocaleController.getString("VersionUpdateNoUpdate", R.string.VersionUpdateNoUpdate)));
+                            } else {
+                                showBulletin(factory -> factory.createSimpleBulletin(R.raw.chats_infotip, LocaleController.getString("NoUpdateAvailablePlay", R.string.NoUpdateAvailablePlay), LocaleController.getString("NoUpdateAvailablePlayDelay", R.string.NoUpdateAvailablePlayDelay)));
+                            }
+                        } else {
+                            AlertsCreator.createSimpleAlert(this, LocaleController.getString("ErrorOccurred", R.string.ErrorOccurred) + "\n" + error).show();
+                        }
+                    }
+                    SharedConfig.setNewAppVersionAvailable(null);
+                    drawerLayoutAdapter.notifyDataSetChanged();
                 }
-                SharedConfig.setNewAppVersionAvailable(null);
-                drawerLayoutAdapter.notifyDataSetChanged();
-            }
-            NotificationCenter.getGlobalInstance()
-                .postNotificationName(NotificationCenter.appUpdateAvailable);
-        }));
+                NotificationCenter.getGlobalInstance()
+                    .postNotificationName(NotificationCenter.appUpdateAvailable);
+            });
+            return Unit.INSTANCE;
+        });
     }
 
     public AlertDialog showAlertDialog(AlertDialog.Builder builder) {
@@ -7229,8 +7233,8 @@ public class LaunchActivity extends BasePermissionsActivity implements INavigati
             }
         } else {
             boolean allow = true; // TODO: Make it a flag inside fragment itself, maybe BaseFragment#isDrawerOpenAllowed()?
-            if (fragment instanceof LoginActivity || fragment instanceof IntroActivity) {
-                if (mainFragmentsStack.size() == 0 || mainFragmentsStack.get(0) instanceof IntroActivity) {
+            if (fragment instanceof LoginActivity || fragment instanceof IntroActivity || fragment instanceof ProxyListActivity || fragment instanceof ProxySettingsActivity) {
+                if (mainFragmentsStack.size() == 0 || mainFragmentsStack.get(0) instanceof IntroActivity || mainFragmentsStack.get(0) instanceof LoginActivity) {
                     allow = false;
                 }
             } else if (fragment instanceof CountrySelectActivity) {
@@ -7246,7 +7250,7 @@ public class LaunchActivity extends BasePermissionsActivity implements INavigati
     @Override
     public boolean needAddFragmentToStack(BaseFragment fragment, INavigationLayout layout) {
         if (AndroidUtilities.isTablet()) {
-            drawerLayoutContainer.setAllowOpenDrawer(!(fragment instanceof LoginActivity || fragment instanceof IntroActivity || fragment instanceof CountrySelectActivity) && layersActionBarLayout.getView().getVisibility() != View.VISIBLE, true);
+            drawerLayoutContainer.setAllowOpenDrawer(!(fragment instanceof LoginActivity || fragment instanceof IntroActivity || fragment instanceof CountrySelectActivity || fragment instanceof ProxyListActivity || fragment instanceof ProxySettingsActivity) && layersActionBarLayout.getView().getVisibility() != View.VISIBLE, true);
             if (fragment instanceof DialogsActivity) {
                 DialogsActivity dialogsActivity = (DialogsActivity) fragment;
                 if (dialogsActivity.isMainDialogList() && layout != actionBarLayout) {
@@ -7312,7 +7316,7 @@ public class LaunchActivity extends BasePermissionsActivity implements INavigati
             }
         } else {
             boolean allow = true;
-            if (fragment instanceof LoginActivity || fragment instanceof IntroActivity) {
+            if (fragment instanceof LoginActivity || fragment instanceof IntroActivity || fragment instanceof ProxyListActivity || fragment instanceof ProxySettingsActivity) {
                 if (mainFragmentsStack.size() == 0 || mainFragmentsStack.get(0) instanceof IntroActivity) {
                     allow = false;
                 }

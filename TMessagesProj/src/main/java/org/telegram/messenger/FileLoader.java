@@ -203,8 +203,8 @@ public class FileLoader extends BaseController {
         super(instance);
         filePathDatabase = new FilePathDatabase(instance);
         for (int i = 0; i < smallFilesQueue.length; i++)  {
-            smallFilesQueue[i] = new FileLoaderPriorityQueue("smallFilesQueue dc" + (i + 1), 5);
-            largeFilesQueue[i] = new FileLoaderPriorityQueue("largeFilesQueue dc" + (i + 1), 1);
+            smallFilesQueue[i] = new FileLoaderPriorityQueue(instance, "smallFilesQueue dc" + (i + 1), FileLoaderPriorityQueue.TYPE_SMALL);
+            largeFilesQueue[i] = new FileLoaderPriorityQueue(instance, "largeFilesQueue dc" + (i + 1), FileLoaderPriorityQueue.TYPE_LARGE);
         }
         dumpFilesQueue();
     }
@@ -318,6 +318,10 @@ public class FileLoader extends BaseController {
     }
 
     public void checkUploadNewDataAvailable(final String location, final boolean encrypted, final long newAvailableSize, final long finalSize) {
+        checkUploadNewDataAvailable(location, encrypted, newAvailableSize, finalSize, null);
+    }
+
+    public void checkUploadNewDataAvailable(final String location, final boolean encrypted, final long newAvailableSize, final long finalSize, final Float progress) {
         fileLoaderQueue.postRunnable(() -> {
             FileUploadOperation operation;
             if (encrypted) {
@@ -326,7 +330,7 @@ public class FileLoader extends BaseController {
                 operation = uploadOperationPaths.get(location);
             }
             if (operation != null) {
-                operation.checkNewDataAvailable(newAvailableSize, finalSize);
+                operation.checkNewDataAvailable(newAvailableSize, finalSize, progress);
             } else if (finalSize != 0) {
                 uploadSizes.put(location, finalSize);
             }
@@ -801,11 +805,8 @@ public class FileLoader extends BaseController {
             public void didPreFinishLoading(FileLoadOperation operation, File finalFile) {
                 FileLoaderPriorityQueue queue = operation.getQueue();
                 fileLoaderQueue.postRunnable(() -> {
-                    FileLoadOperation currentOperation = loadOperationPaths.get(fileName);
-                    if (currentOperation != null) {
-                        currentOperation.preFinished = true;
-                        queue.checkLoadingOperations();
-                    }
+                    operation.preFinished = true;
+                    queue.checkLoadingOperations();
                 });
             }
 
@@ -832,13 +833,13 @@ public class FileLoader extends BaseController {
                     }
                 }
 
-                checkDownloadQueue(operation.getQueue(), fileName, 100);
+                checkDownloadQueue(operation, operation.getQueue(), 100);
             }
 
             @Override
             public void didFailedLoadingFile(FileLoadOperation operation, int reason) {
                 loadOperationPathsUI.remove(fileName);
-                checkDownloadQueue(operation.getQueue(), fileName);
+                checkDownloadQueue(operation, operation.getQueue());
                 if (delegate != null) {
                     delegate.fileDidFailedLoad(fileName, reason);
                 }
@@ -871,7 +872,9 @@ public class FileLoader extends BaseController {
 
         loadOperationPaths.put(finalFileName, operation);
         operation.setPriority(priority);
-        operation.setStream(stream, streamPriority, streamOffset);
+        if (stream != null) {
+            operation.setStream(stream, streamPriority, streamOffset);
+        }
 
         loaderQueue.add(operation);
         loaderQueue.checkLoadingOperations();
@@ -984,15 +987,16 @@ public class FileLoader extends BaseController {
         return result[0];
     }
 
-    private void checkDownloadQueue(FileLoaderPriorityQueue queue, String fileName) {
-        checkDownloadQueue(queue, fileName, 0);
+    private void checkDownloadQueue(FileLoadOperation operation, FileLoaderPriorityQueue queue) {
+        checkDownloadQueue(operation, queue, 0);
     }
 
-    private void checkDownloadQueue(FileLoaderPriorityQueue queue, String fileName, long delay) {
+    private void checkDownloadQueue(FileLoadOperation operation, FileLoaderPriorityQueue queue, long delay) {
         fileLoaderQueue.postRunnable(() -> {
-            FileLoadOperation operation = loadOperationPaths.remove(fileName);
-            queue.remove(operation);
-            queue.checkLoadingOperations();
+            if (queue.remove(operation)) {
+                loadOperationPaths.remove(operation.getFileName());
+                queue.checkLoadingOperations();
+            }
         }, delay);
     }
 

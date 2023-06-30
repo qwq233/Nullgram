@@ -492,6 +492,7 @@ public class VideoScreenPreview extends FrameLayout implements PagerHeaderView, 
             helloParticlesDrawable.recycle();
             helloParticlesDrawable = null;
         }
+        stopVideoPlayer();
     }
 
     @Override

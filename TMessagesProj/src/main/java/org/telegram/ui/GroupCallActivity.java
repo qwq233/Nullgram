@@ -1,7 +1,5 @@
 package org.telegram.ui;
 
-import static android.content.Context.AUDIO_SERVICE;
-
 import android.Manifest;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
@@ -33,7 +31,6 @@ import android.graphics.Shader;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.GradientDrawable;
-import android.media.AudioManager;
 import android.media.projection.MediaProjectionManager;
 import android.os.Build;
 import android.os.Bundle;
@@ -96,6 +93,7 @@ import org.telegram.messenger.Utilities;
 import org.telegram.messenger.support.LongSparseIntArray;
 import org.telegram.messenger.voip.Instance;
 import org.telegram.messenger.voip.VoIPService;
+import org.telegram.messenger.voip.VoipAudioManager;
 import org.telegram.tgnet.ConnectionsManager;
 import org.telegram.tgnet.TLObject;
 import org.telegram.tgnet.TLRPC;
@@ -158,6 +156,7 @@ import java.util.Calendar;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Locale;
+import java.util.concurrent.CountDownLatch;
 
 public class GroupCallActivity extends BottomSheet implements NotificationCenter.NotificationCenterDelegate, VoIPService.StateListener {
 
@@ -1173,12 +1172,12 @@ public class GroupCallActivity extends BottomSheet implements NotificationCenter
                             } catch (Exception ignore) {}
                             if (DialogObject.isUserDialog(justJoinedId)) {
                                 TLRPC.User user = accountInstance.getMessagesController().getUser(justJoinedId);
-                                if (user != null && (call.call.participants_count < 250 || UserObject.isContact(user) || user.verified || hasInDialogs)) {
+                                if (user != null && (call.call.participants_count < 250 || UserObject.isContact(user) || user.verifiedExtended() || hasInDialogs)) {
                                     getUndoView().showWithAction(0, UndoView.ACTION_VOIP_USER_JOINED, user, currentChat, null, null);
                                 }
                             } else {
                                 TLRPC.Chat chat = accountInstance.getMessagesController().getChat(-justJoinedId);
-                                if (chat != null && (call.call.participants_count < 250 || !ChatObject.isNotInChat(chat) || chat.verified || hasInDialogs)) {
+                                if (chat != null && (call.call.participants_count < 250 || !ChatObject.isNotInChat(chat) || chat.verifiedExtended() || hasInDialogs)) {
                                     getUndoView().showWithAction(0, UndoView.ACTION_VOIP_USER_JOINED, chat, currentChat, null, null);
                                 }
                             }
@@ -1721,6 +1720,7 @@ public class GroupCallActivity extends BottomSheet implements NotificationCenter
 
     private GroupCallActivity(Context context, AccountInstance account, ChatObject.Call groupCall, TLRPC.Chat chat, TLRPC.InputPeer schedulePeer, boolean scheduleHasFewPeers, String scheduledHash) {
         super(context, false);
+        setOpenNoDelay(true);
         this.accountInstance = account;
         this.call = groupCall;
         this.schedulePeer = schedulePeer;
@@ -1740,6 +1740,14 @@ public class GroupCallActivity extends BottomSheet implements NotificationCenter
 
             @Override
             public void onOpenAnimationEnd() {
+                VoIPService voipService = VoIPService.getSharedInstance();
+                if (voipService != null) {
+                    CountDownLatch latch = voipService.getGroupCallBottomSheetLatch();
+                    if (latch != null) {
+                        latch.countDown();
+                    }
+                }
+
                 if (muteButtonState == MUTE_BUTTON_STATE_SET_REMINDER) {
                     showReminderHint();
                 }
@@ -1756,7 +1764,7 @@ public class GroupCallActivity extends BottomSheet implements NotificationCenter
             getWindow().setNavigationBarColor(0xff000000);
         }
         scrollNavBar = true;
-        navBarColorKey = null;
+        navBarColorKey = -1;
 
         scrimPaint = new Paint() {
             @Override
@@ -4409,8 +4417,8 @@ public class GroupCallActivity extends BottomSheet implements NotificationCenter
                     soundItem.setIcon(VoIPService.getSharedInstance().isHeadsetPlugged() ? R.drawable.msg_voice_headphones : R.drawable.msg_voice_phone);
                     soundItem.setSubtext(VoIPService.getSharedInstance().isHeadsetPlugged() ? LocaleController.getString("VoipAudioRoutingHeadset", R.string.VoipAudioRoutingHeadset) : LocaleController.getString("VoipAudioRoutingPhone", R.string.VoipAudioRoutingPhone));
                 } else if (rout == VoIPService.AUDIO_ROUTE_SPEAKER) {
-                    AudioManager am = (AudioManager) context.getSystemService(AUDIO_SERVICE);
-                    if (am.isSpeakerphoneOn()) {
+                    VoipAudioManager vam = VoipAudioManager.get();
+                    if (vam.isSpeakerphoneOn()) {
                         soundItem.setIcon(R.drawable.msg_voice_speaker);
                         soundItem.setSubtext(LocaleController.getString("VoipAudioRoutingSpeaker", R.string.VoipAudioRoutingSpeaker));
                     } else {
@@ -7145,7 +7153,7 @@ public class GroupCallActivity extends BottomSheet implements NotificationCenter
     }
 
     private boolean showMenuForCell(View rendererCell) {
-        if (itemAnimator.isRunning()) {
+        if (itemAnimator.isRunning() || getContext() == null) {
             return false;
         }
         if (avatarPriviewTransitionInProgress || avatarsPreviewShowed) {
@@ -7211,6 +7219,9 @@ public class GroupCallActivity extends BottomSheet implements NotificationCenter
 
         boolean showWithAvatarPreview = !isLandscapeMode && !isTabletMode && !AndroidUtilities.isInMultiwindow;
         TLRPC.TL_groupCallParticipant participant = view.getParticipant();
+        if (participant == null) {
+            return false;
+        }
 
         Rect rect = new Rect();
 
@@ -7957,12 +7968,12 @@ public class GroupCallActivity extends BottomSheet implements NotificationCenter
             int type = holder.getItemViewType();
             if (type == VIEW_TYPE_PARTICIPANT) {
                 GroupCallUserCell cell = (GroupCallUserCell) holder.itemView;
-                String key = actionBar.getTag() != null ? Theme.key_voipgroup_mutedIcon : Theme.key_voipgroup_mutedIconUnscrolled;
+                int key = actionBar.getTag() != null ? Theme.key_voipgroup_mutedIcon : Theme.key_voipgroup_mutedIconUnscrolled;
                 cell.setGrayIconColor(key, Theme.getColor(key));
                 cell.setDrawDivider(holder.getAdapterPosition() != getItemCount() - 2);
             } else if (type == VIEW_TYPE_CALL_INVITED) {
                 GroupCallInvitedCell cell = (GroupCallInvitedCell) holder.itemView;
-                String key = actionBar.getTag() != null ? Theme.key_voipgroup_mutedIcon : Theme.key_voipgroup_mutedIconUnscrolled;
+                int key = actionBar.getTag() != null ? Theme.key_voipgroup_mutedIcon : Theme.key_voipgroup_mutedIconUnscrolled;
                 cell.setGrayIconColor(key, Theme.getColor(key));
                 cell.setDrawDivider(holder.getAdapterPosition() != getItemCount() - 2);
             }

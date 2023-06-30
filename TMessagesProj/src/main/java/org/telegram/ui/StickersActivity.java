@@ -71,7 +71,6 @@ import org.telegram.ui.Components.Bulletin;
 import org.telegram.ui.Components.BulletinFactory;
 import org.telegram.ui.Components.CubicBezierInterpolator;
 import org.telegram.ui.Components.EmojiPacksAlert;
-import org.telegram.ui.Components.EmojiView;
 import org.telegram.ui.Components.ItemOptions;
 import org.telegram.ui.Components.LayoutHelper;
 import org.telegram.ui.Components.NumberTextView;
@@ -296,9 +295,7 @@ public class StickersActivity extends BaseFragment implements NotificationCenter
         selectedCountTextView.setOnTouchListener((v, event) -> true);
 
         shareMenuItem = actionMode.addItemWithWidth(MENU_SHARE, R.drawable.msg_share, AndroidUtilities.dp(54));
-        if (currentType != MediaDataController.TYPE_EMOJIPACKS) {
-            archiveMenuItem = actionMode.addItemWithWidth(MENU_ARCHIVE, R.drawable.msg_archive, AndroidUtilities.dp(54));
-        }
+        archiveMenuItem = actionMode.addItemWithWidth(MENU_ARCHIVE, R.drawable.msg_archive, AndroidUtilities.dp(54));
         deleteMenuItem = actionMode.addItemWithWidth(MENU_DELETE, R.drawable.msg_delete, AndroidUtilities.dp(54));
 
         ArrayList<TLRPC.TL_messages_stickerSet> sets;
@@ -661,15 +658,7 @@ public class StickersActivity extends BaseFragment implements NotificationCenter
 
         loopRow = -1;
         loopInfoRow = -1;
-
-        if (currentType == MediaDataController.TYPE_EMOJIPACKS) {
-            suggestAnimatedEmojiRow = rowCount++;
-            suggestAnimatedEmojiInfoRow = rowCount++;
-        } else {
-            playEmojiInKeyboardRow = -1;
-            suggestAnimatedEmojiRow = -1;
-            suggestAnimatedEmojiInfoRow = -1;
-        }
+        archivedRow = -1;
 
         if (currentType == MediaDataController.TYPE_IMAGE) {
             featuredRow = rowCount++;
@@ -688,7 +677,7 @@ public class StickersActivity extends BaseFragment implements NotificationCenter
             masksRow = -1;
             emojiPacksRow = -1;
 
-            if (mediaDataController.getArchivedStickersCount(currentType) != 0 && currentType != MediaDataController.TYPE_EMOJIPACKS) {
+            if (mediaDataController.getArchivedStickersCount(currentType) != 0) {
                 boolean inserted = archivedRow == -1;
 
                 archivedRow = rowCount++;
@@ -708,6 +697,14 @@ public class StickersActivity extends BaseFragment implements NotificationCenter
                     listAdapter.notifyItemRangeRemoved(oldArchivedRow, oldArchivedInfoRow != -1 ? 2 : 1);
                 }
             }
+        }
+
+        if (currentType == MediaDataController.TYPE_EMOJIPACKS) {
+            suggestAnimatedEmojiRow = rowCount++;
+            suggestAnimatedEmojiInfoRow = rowCount++;
+        } else {
+            suggestAnimatedEmojiRow = -1;
+            suggestAnimatedEmojiInfoRow = -1;
         }
 
         if (currentType == MediaDataController.TYPE_IMAGE) {
@@ -1212,7 +1209,7 @@ public class StickersActivity extends BaseFragment implements NotificationCenter
                 }
                 case TYPE_SHADOW:
                     if (position == stickersShadowRow) {
-                        holder.itemView.setBackground(Theme.getThemedDrawable(mContext, R.drawable.greydivider_bottom, Theme.key_windowBackgroundGrayShadow));
+                        holder.itemView.setBackground(Theme.getThemedDrawableByKey(mContext, R.drawable.greydivider_bottom, Theme.key_windowBackgroundGrayShadow));
                     }
                     break;
                 case TYPE_SWITCH:
@@ -1373,7 +1370,7 @@ public class StickersActivity extends BaseFragment implements NotificationCenter
                     break;
                 case TYPE_INFO:
                     view = new TextInfoPrivacyCell(mContext);
-                    view.setBackground(Theme.getThemedDrawable(mContext, R.drawable.greydivider_bottom, Theme.key_windowBackgroundGrayShadow));
+                    view.setBackground(Theme.getThemedDrawableByKey(mContext, R.drawable.greydivider_bottom, Theme.key_windowBackgroundGrayShadow));
                     break;
                 case TYPE_TEXT_AND_VALUE:
                     view = new TextCell(mContext);

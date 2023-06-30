@@ -28,12 +28,14 @@ import androidx.recyclerview.widget.RecyclerView;
 import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.LocaleController;
 import org.telegram.messenger.R;
+import org.telegram.messenger.UserConfig;
 import org.telegram.tgnet.TLRPC;
 import org.telegram.ui.ActionBar.AlertDialog;
 import org.telegram.ui.ActionBar.Theme;
 import org.telegram.ui.Cells.HeaderCell;
 import org.telegram.ui.Cells.NotificationsCheckCell;
 import org.telegram.ui.Cells.TextCheckCell;
+import org.telegram.ui.Cells.TextInfoPrivacyCell;
 import org.telegram.ui.Cells.TextSettingsCell;
 import org.telegram.ui.Components.AlertsCreator;
 
@@ -43,6 +45,7 @@ import top.qwq2333.nullgram.config.ConfigManager;
 import top.qwq2333.nullgram.ui.PopupBuilder;
 import top.qwq2333.nullgram.utils.Defines;
 import top.qwq2333.nullgram.utils.Log;
+import ws.vinta.pangu.Pangu;
 
 @SuppressLint("NotifyDataSetChanged")
 public class ExperimentSettingActivity extends BaseActivity {
@@ -59,6 +62,13 @@ public class ExperimentSettingActivity extends BaseActivity {
     private int enchantAudioRow;
     private int linkedUserRow;
     private int overrideChannelAliasRow;
+    private int showRPCErrorRow;
+
+    private int panguRow;
+    private int enablePanguOnSendingRow;
+    private int enablePanguOnReceivingRow;
+    private int pangu2Row;
+    private int pangu3Row;
 
     private int premiumRow;
     private int hidePremiumStickerAnimRow;
@@ -72,6 +82,8 @@ public class ExperimentSettingActivity extends BaseActivity {
 
     private boolean sensitiveEnabled;
     private final boolean sensitiveCanChange;
+
+    private final Pangu pangu = new Pangu();
 
     public ExperimentSettingActivity(boolean sensitiveEnabled, boolean sensitiveCanChange) {
         this.sensitiveEnabled = sensitiveEnabled;
@@ -170,10 +182,25 @@ public class ExperimentSettingActivity extends BaseActivity {
                     ConfigManager.putInt(Defines.modifyDownloadSpeed, speeds[i]);
                     listAdapter.notifyItemChanged(modifyDownloadSpeedRow, PARTIAL);
                 });
-        }else if (position == alwaysSendWithoutSoundRow) {
+        } else if (position == alwaysSendWithoutSoundRow) {
             ConfigManager.toggleBoolean(Defines.alwaysSendWithoutSound);
             if (view instanceof TextCheckCell) {
                 ((TextCheckCell) view).setChecked(ConfigManager.getBooleanOrFalse(Defines.alwaysSendWithoutSound));
+            }
+        } else if (position == showRPCErrorRow) {
+            ConfigManager.toggleBoolean(Defines.showRPCError);
+            if (view instanceof TextCheckCell) {
+                ((TextCheckCell) view).setChecked(ConfigManager.getBooleanOrFalse(Defines.showRPCError));
+            }
+        } else if (position == enablePanguOnSendingRow) {
+            ConfigManager.toggleBoolean(Defines.enablePanguOnSending);
+            if (view instanceof TextCheckCell) {
+                ((TextCheckCell) view).setChecked(ConfigManager.getBooleanOrFalse(Defines.enablePanguOnSending));
+            }
+        } else if (position == enablePanguOnReceivingRow) {
+            ConfigManager.toggleBoolean(Defines.enablePanguOnReceiving);
+            if (view instanceof TextCheckCell) {
+                ((TextCheckCell) view).setChecked(ConfigManager.getBooleanOrFalse(Defines.enablePanguOnReceiving));
             }
         }
 
@@ -212,7 +239,15 @@ public class ExperimentSettingActivity extends BaseActivity {
         } else {
             overrideChannelAliasRow = -1;
         }
+        var user = UserConfig.getInstance(currentAccount).getCurrentUser();
+        showRPCErrorRow = user != null && user.developer() ? addRow("showRPCError") : -1;
         experiment2Row = addRow();
+
+        panguRow = addRow();
+        enablePanguOnSendingRow = addRow("enablePanguOnSending");
+        enablePanguOnReceivingRow = /*addRow("enablePanguOnReceiving")*/ -1; //todo: not finished
+        pangu3Row = addRow();
+        pangu2Row = addRow();
 
         if (ConfigManager.getBooleanOrFalse(Defines.showHiddenSettings)) {
             premiumRow = addRow();
@@ -221,8 +256,6 @@ public class ExperimentSettingActivity extends BaseActivity {
             modifyDownloadSpeedRow = addRow("modifyDownloadSpeed");
             premium2Row = addRow();
         }
-
-
 
         if (listAdapter != null) {
             listAdapter.notifyDataSetChanged();
@@ -254,7 +287,7 @@ public class ExperimentSettingActivity extends BaseActivity {
         @Override
         public void onBindViewHolder(RecyclerView.ViewHolder holder, int position, boolean payload) {
             switch (holder.getItemViewType()) {
-                case 1: {
+                case TYPE_SHADOW: {
                     if (position == experiment2Row) {
                         holder.itemView.setBackground(Theme.getThemedDrawable(mContext, R.drawable.greydivider_bottom, Theme.key_windowBackgroundGrayShadow));
                     } else {
@@ -262,37 +295,48 @@ public class ExperimentSettingActivity extends BaseActivity {
                     }
                     break;
                 }
-                case 2: {
+                case TYPE_SETTINGS: {
                     TextSettingsCell textCell = (TextSettingsCell) holder.itemView;
                     textCell.setTextColor(Theme.getColor(Theme.key_windowBackgroundWhiteBlackText));
                     if (position == modifyDownloadSpeedRow) {
-                        textCell.setTextAndValue(LocaleController.getString("modifyDownloadSpeed", R.string.modifyDownloadSpeed), ConfigManager.getIntOrDefault(Defines.modifyDownloadSpeed, 128) + " Kb/block", payload, false);
+                        textCell.setTextAndValue(LocaleController.getString("modifyDownloadSpeed", R.string.modifyDownloadSpeed),
+                            ConfigManager.getIntOrDefault(Defines.modifyDownloadSpeed, 128) + " Kb/block", payload, false);
                     }
                     break;
                 }
-                case 3: {
+                case TYPE_CHECK: {
                     TextCheckCell textCell = (TextCheckCell) holder.itemView;
                     textCell.setEnabled(true, null);
                     if (position == blockSponsorAdsRow) {
-                        textCell.setTextAndCheck(LocaleController.getString("blockSponsorAds", R.string.blockSponsorAds), ConfigManager.getBooleanOrFalse(Defines.blockSponsorAds), true);
+                        textCell.setTextAndCheck(LocaleController.getString("blockSponsorAds", R.string.blockSponsorAds), ConfigManager.getBooleanOrFalse(Defines.blockSponsorAds),
+                            true);
                     } else if (position == hideProxySponsorChannelRow) {
-                        textCell.setTextAndCheck(LocaleController.getString("hideProxySponsorChannel", R.string.hideProxySponsorChannel), ConfigManager.getBooleanOrFalse(Defines.hideProxySponsorChannel), true);
+                        textCell.setTextAndCheck(LocaleController.getString("hideProxySponsorChannel", R.string.hideProxySponsorChannel),
+                            ConfigManager.getBooleanOrFalse(Defines.hideProxySponsorChannel), true);
                     } else if (position == disableSendTypingRow) {
-                        textCell.setTextAndCheck(LocaleController.getString("disableSendTyping", R.string.disableSendTyping), ConfigManager.getBooleanOrFalse(Defines.disableSendTyping), true);
+                        textCell.setTextAndCheck(LocaleController.getString("disableSendTyping", R.string.disableSendTyping),
+                            ConfigManager.getBooleanOrFalse(Defines.disableSendTyping), true);
                     } else if (position == syntaxHighlightRow) {
-                        textCell.setTextAndValueAndCheck(LocaleController.getString("codeSyntaxHighlight", R.string.codeSyntaxHighlight), LocaleController.getString("codeSyntaxHighlightDetails", R.string.codeSyntaxHighlightDetails), ConfigManager.getBooleanOrFalse(Defines.codeSyntaxHighlight), true, true);
+                        textCell.setTextAndValueAndCheck(LocaleController.getString("codeSyntaxHighlight", R.string.codeSyntaxHighlight),
+                            LocaleController.getString("codeSyntaxHighlightDetails", R.string.codeSyntaxHighlightDetails),
+                            ConfigManager.getBooleanOrFalse(Defines.codeSyntaxHighlight), true, true);
                     }
                     if (position == disableFilteringRow) {
-                        textCell.setTextAndValueAndCheck(LocaleController.getString("SensitiveDisableFiltering", R.string.SensitiveDisableFiltering), LocaleController.getString("SensitiveAbout", R.string.SensitiveAbout), sensitiveEnabled, true, true);
+                        textCell.setTextAndValueAndCheck(LocaleController.getString("SensitiveDisableFiltering", R.string.SensitiveDisableFiltering),
+                            LocaleController.getString("SensitiveAbout", R.string.SensitiveAbout), sensitiveEnabled, true, true);
                         textCell.setEnabled(sensitiveCanChange, null);
                     } else if (position == aliasChannelRow) {
-                        textCell.setTextAndValueAndCheck(LocaleController.getString("channelAlias", R.string.channelAlias), LocaleController.getString("channelAliasDetails", R.string.channelAliasDetails), ConfigManager.getBooleanOrFalse(Defines.channelAlias), true, true);
+                        textCell.setTextAndValueAndCheck(LocaleController.getString("channelAlias", R.string.channelAlias),
+                            LocaleController.getString("channelAliasDetails", R.string.channelAliasDetails), ConfigManager.getBooleanOrFalse(Defines.channelAlias), true, true);
                     } else if (position == keepFormattingRow) {
-                        textCell.setTextAndCheck(LocaleController.getString("keepFormatting", R.string.keepFormatting), ConfigManager.getBooleanOrFalse(Defines.keepCopyFormatting), true);
+                        textCell.setTextAndCheck(LocaleController.getString("keepFormatting", R.string.keepFormatting), ConfigManager.getBooleanOrFalse(Defines.keepCopyFormatting),
+                            true);
                     } else if (position == enchantAudioRow) {
-                        textCell.setTextAndValueAndCheck(LocaleController.getString("enchantAudioRow", R.string.enchantAudio), LocaleController.getString("enchantAudioDetails", R.string.enchantAudioDetails), ConfigManager.getBooleanOrFalse(Defines.enchantAudio), true, true);
+                        textCell.setTextAndValueAndCheck(LocaleController.getString("enchantAudioRow", R.string.enchantAudio),
+                            LocaleController.getString("enchantAudioDetails", R.string.enchantAudioDetails), ConfigManager.getBooleanOrFalse(Defines.enchantAudio), true, true);
                     } else if (position == linkedUserRow) {
-                        textCell.setTextAndValueAndCheck(LocaleController.getString("linkUser", R.string.linkUser), LocaleController.getString("linkUserDetails", R.string.linkUserDetails), ConfigManager.getBooleanOrFalse(Defines.linkedUser), true, true);
+                        textCell.setTextAndValueAndCheck(LocaleController.getString("linkUser", R.string.linkUser),
+                            LocaleController.getString("linkUserDetails", R.string.linkUserDetails), ConfigManager.getBooleanOrFalse(Defines.linkedUser), true, true);
                     } else if (position == overrideChannelAliasRow) {
                         textCell.setTextAndValueAndCheck(
                             ConfigManager.getBooleanOrFalse(Defines.channelAlias) ?
@@ -301,25 +345,46 @@ public class ExperimentSettingActivity extends BaseActivity {
                             LocaleController.getString("overrideChannelAliasDetails", R.string.overrideChannelAliasDetails),
                             ConfigManager.getBooleanOrFalse(Defines.overrideChannelAlias), true, true);
                     } else if (position == hidePremiumStickerAnimRow) {
-                        textCell.setTextAndCheck(LocaleController.getString("hidePremiumStickerAnim", R.string.hidePremiumStickerAnim), ConfigManager.getBooleanOrFalse(Defines.hidePremiumStickerAnim), true);
+                        textCell.setTextAndCheck(LocaleController.getString("hidePremiumStickerAnim", R.string.hidePremiumStickerAnim),
+                            ConfigManager.getBooleanOrFalse(Defines.hidePremiumStickerAnim), true);
                     } else if (position == fastSpeedUploadRow) {
-                        textCell.setTextAndCheck(LocaleController.getString("fastSpeedUpload", R.string.fastSpeedUpload), ConfigManager.getBooleanOrFalse(Defines.fastSpeedUpload), true);
+                        textCell.setTextAndCheck(LocaleController.getString("fastSpeedUpload", R.string.fastSpeedUpload), ConfigManager.getBooleanOrFalse(Defines.fastSpeedUpload),
+                            true);
                     } else if (position == alwaysSendWithoutSoundRow) {
-                        textCell.setTextAndCheck(LocaleController.getString("alwaysSendWithoutSound", R.string.alwaysSendWithoutSound), ConfigManager.getBooleanOrFalse(Defines.alwaysSendWithoutSound), true);
+                        textCell.setTextAndCheck(LocaleController.getString("alwaysSendWithoutSound", R.string.alwaysSendWithoutSound),
+                            ConfigManager.getBooleanOrFalse(Defines.alwaysSendWithoutSound), true);
+                    } else if (position == showRPCErrorRow) {
+                        textCell.setTextAndCheck(LocaleController.getString("showRPCError", R.string.showRPCError), ConfigManager.getBooleanOrFalse(Defines.showRPCError), true);
+                    } else if (position == enablePanguOnSendingRow) {
+                        textCell.setTextAndCheck(LocaleController.getString("enablePanguOnSending", R.string.enablePanguOnSending), ConfigManager.getBooleanOrFalse(Defines.enablePanguOnSending),
+                            true);
+                    } else if (position == enablePanguOnReceivingRow) {
+                        textCell.setTextAndCheck(LocaleController.getString("enablePanguOnReceiving", R.string.enablePanguOnReceiving), ConfigManager.getBooleanOrFalse(Defines.enablePanguOnReceiving), true);
                     }
                     break;
                 }
-                case 4: {
+                case TYPE_HEADER: {
                     HeaderCell headerCell = (HeaderCell) holder.itemView;
                     if (position == experimentRow) {
                         headerCell.setText(LocaleController.getString("Experiment", R.string.Experiment));
                     } else if (position == premiumRow) {
                         headerCell.setText(LocaleController.getString("Premium", R.string.premium));
+                    } else if (position == panguRow) {
+                        headerCell.setText(LocaleController.getString("pangu", R.string.pangu));
                     }
                     break;
                 }
-                case 5: {
+                case TYPE_NOTIFICATION_CHECK: {
                     NotificationsCheckCell textCell = (NotificationsCheckCell) holder.itemView;
+                    break;
+                }
+                case TYPE_INFO_PRIVACY: {
+                    TextInfoPrivacyCell cell = (TextInfoPrivacyCell) holder.itemView;
+                    if (position == pangu3Row) {
+                        cell.getTextView().setMovementMethod(null);
+                        cell.setBackground(Theme.getThemedDrawable(mContext, R.drawable.greydivider_bottom, Theme.key_windowBackgroundGrayShadow));
+                        cell.setText(LocaleController.getString("panguInfo", R.string.panguInfo));
+                    }
                     break;
                 }
             }
@@ -327,14 +392,16 @@ public class ExperimentSettingActivity extends BaseActivity {
 
         @Override
         public int getItemViewType(int position) {
-            if (position == experiment2Row || position == premium2Row) {
-                return 1;
+            if (position == experiment2Row || position == premium2Row || position == pangu2Row) {
+                return TYPE_SHADOW;
             } else if (position == modifyDownloadSpeedRow) {
-                return 2;
-            } else if (position == experimentRow || position == premiumRow) {
-                return 4;
+                return TYPE_SETTINGS;
+            } else if (position == experimentRow || position == premiumRow || position == panguRow) {
+                return TYPE_HEADER;
+            } else if (position == pangu3Row) {
+                return TYPE_INFO_PRIVACY;
             }
-            return 3;
+            return TYPE_CHECK;
         }
     }
 }

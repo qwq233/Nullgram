@@ -248,21 +248,13 @@ object TranslateHelper {
 
     @JvmStatic
     fun showTranslationProviderSelector(
-        context: Context,
-        view: View?,
-        resourcesProvider: ResourcesProvider? = null,
-        result: (param: Boolean) -> Unit
+        context: Context, view: View?, resourcesProvider: ResourcesProvider? = null, result: (param: Boolean) -> Unit
     ) {
         val providers = getProviders()
         val names = providers.first
         val types = providers.second
         PopupBuilder.show(
-            names,
-            LocaleController.getString("TranslationProvider", R.string.TranslationProvider),
-            types.indexOf(currentProviderType),
-            context,
-            view,
-            resourcesProvider
+            names, LocaleController.getString("TranslationProvider", R.string.TranslationProvider), types.indexOf(currentProviderType), context, view, resourcesProvider
         ) { i ->
             val translator: BaseTranslator = getProvider(types[i])
             val targetLanguage = translator.getTargetLanguage(currentTargetLanguage)
@@ -270,8 +262,7 @@ object TranslateHelper {
                 currentProviderType = types[i]
                 result(true)
             } else {
-                val builder = AlertDialog.Builder(context, resourcesProvider)
-                    .setMessage(LocaleController.getString("TranslateApiUnsupported", R.string.TranslateApiUnsupported))
+                val builder = AlertDialog.Builder(context, resourcesProvider).setMessage(LocaleController.getString("TranslateApiUnsupported", R.string.TranslateApiUnsupported))
                 if ("app" == currentTargetLanguage) {
                     builder.setPositiveButton(LocaleController.getString("UseGoogleTranslate", R.string.UseGoogleTranslate)) { _: DialogInterface?, _: Int ->
                         currentProviderType = ProviderType.GoogleTranslator
@@ -294,17 +285,11 @@ object TranslateHelper {
 
     }
 
-    @JvmStatic
-    fun showTranslationTargetSelector(
-        fragment: BaseFragment, view: View?, callback: () -> Unit
-    ) {
-        showTranslationTargetSelector(fragment, view, true, null, callback)
-    }
-
 
     @JvmStatic
+    @JvmOverloads
     fun showTranslationTargetSelector(
-        fragment: BaseFragment, view: View?, whiteActionBar: Boolean, resourcesProvider: ResourcesProvider? = null, callback: () -> Unit
+        fragment: BaseFragment, view: View?, whiteActionBar: Boolean = true, resourcesProvider: ResourcesProvider? = null, callback: () -> Unit
     ) {
         if (getCurrentProvider().getTargetLanguages().size <= 30) {
             val targetLanguages = ArrayList<String>(getCurrentProvider().getTargetLanguages())
@@ -336,11 +321,7 @@ object TranslateHelper {
     }
 
     @JvmStatic
-    fun showTranslatorTypeSelector(context: Context?, view: View?, callback: () -> Unit) {
-        showTranslatorTypeSelector(context, view, null, callback)
-    }
-
-    @JvmStatic
+    @JvmOverloads
     fun showTranslatorTypeSelector(context: Context?, view: View?, resourcesProvider: ResourcesProvider? = null, callback: () -> Unit) {
         val arrayList = arrayListOf<String>()
         val types = arrayListOf<Status>()
@@ -351,11 +332,7 @@ object TranslateHelper {
         arrayList.add(LocaleController.getString("TranslatorTypeExternal", R.string.TranslatorTypeExternal))
         types.add(Status.External)
         PopupBuilder.show(
-            arrayList,
-            LocaleController.getString("TranslatorType", R.string.TranslatorType),
-            types.indexOf(currentStatus),
-            context,
-            view
+            arrayList, LocaleController.getString("TranslatorType", R.string.TranslatorType), types.indexOf(currentStatus), context, view, resourcesProvider
         ) { i ->
             currentStatus = types[i]
             callback.invoke()
@@ -364,11 +341,7 @@ object TranslateHelper {
 
     @JvmStatic
     fun showTranslateDialog(
-        context: Context,
-        query: String,
-        fragment: BaseFragment?,
-        sourceLanguage: String?,
-        onLinkPress: ((URLSpan) -> Boolean)?
+        context: Context, query: String, fragment: BaseFragment?, sourceLanguage: String?, onLinkPress: ((URLSpan) -> Boolean)?
     ) {
         if (currentStatus == Status.External) {
             startExternalTranslator(context, query)
@@ -384,10 +357,8 @@ object TranslateHelper {
         try {
             context.startActivity(intent)
         } catch (e: ActivityNotFoundException) {
-            AlertDialog.Builder(context)
-                .setTitle(LocaleController.getString("AppName", R.string.AppName))
-                .setMessage(LocaleController.getString("NoTranslatorAppInstalled", R.string.NoTranslatorAppInstalled))
-                .show()
+            AlertDialog.Builder(context).setTitle(LocaleController.getString("AppName", R.string.AppName))
+                .setMessage(LocaleController.getString("NoTranslatorAppInstalled", R.string.NoTranslatorAppInstalled)).show()
         }
     }
 

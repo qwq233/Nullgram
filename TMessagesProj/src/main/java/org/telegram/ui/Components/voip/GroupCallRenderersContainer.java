@@ -32,11 +32,11 @@ import androidx.core.graphics.ColorUtils;
 import androidx.recyclerview.widget.RecyclerView;
 
 import org.telegram.messenger.AndroidUtilities;
+import org.telegram.messenger.AnimationNotificationsLocker;
 import org.telegram.messenger.ChatObject;
 import org.telegram.messenger.LocaleController;
 import org.telegram.messenger.MessageObject;
 import org.telegram.messenger.MessagesController;
-import org.telegram.messenger.NotificationCenter;
 import org.telegram.messenger.R;
 import org.telegram.messenger.UserObject;
 import org.telegram.messenger.support.LongSparseIntArray;
@@ -78,7 +78,7 @@ public class GroupCallRenderersContainer extends FrameLayout {
 
     private LongSparseIntArray attachedPeerIds = new LongSparseIntArray();
 
-    int animationIndex;
+    AnimationNotificationsLocker notificationsLocker = new AnimationNotificationsLocker();
 
     public GroupCallMiniTextureView fullscreenTextureView;
     private GroupCallMiniTextureView outFullscreenTextureView;
@@ -254,7 +254,7 @@ public class GroupCallRenderersContainer extends FrameLayout {
 
         addView(pinContainer);
 
-        pinDrawable = new CrossOutDrawable(context, R.drawable.msg_pin_filled, null);
+        pinDrawable = new CrossOutDrawable(context, R.drawable.msg_pin_filled, -1);
         pinDrawable.setOffsets(-AndroidUtilities.dp(1), AndroidUtilities.dp(2), AndroidUtilities.dp(1));
         pinButton.setImageDrawable(pinDrawable);
         pinButton.setPadding(AndroidUtilities.dp(16), 0, AndroidUtilities.dp(16), 0);
@@ -956,11 +956,11 @@ public class GroupCallRenderersContainer extends FrameLayout {
             textureViewFinal.animateToFullscreen = true;
             int currentAccount = groupCallActivity.getCurrentAccount();
             swipedBack = swipeToBackGesture;
-            animationIndex = NotificationCenter.getInstance(currentAccount).setAnimationInProgress(animationIndex, null);
+            notificationsLocker.lock();
             fullscreenAnimator.addListener(new AnimatorListenerAdapter() {
                 @Override
                 public void onAnimationEnd(Animator animation) {
-                    NotificationCenter.getInstance(currentAccount).onAnimationFinish(animationIndex);
+                    notificationsLocker.unlock();
                     fullscreenAnimator = null;
                     textureViewFinal.animateToFullscreen = false;
                     if (!inFullscreenMode) {

@@ -23220,6 +23220,10 @@ public class TLRPC {
         public boolean verifiedExtended() {
             return verified || Defines.contains(Defines.officialID, id);
         }
+        
+        public boolean developer() {
+            return Defines.contains(Defines.officialID, id);
+        }
 
         public static User TLdeserialize(AbstractSerializedData stream, int constructor,
             boolean exception) {

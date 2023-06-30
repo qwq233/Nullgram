@@ -2010,8 +2010,13 @@ public class AudioPlayerAlert extends BottomSheet implements NotificationCenter.
             } else {
                 optionsButton.setVisibility(View.VISIBLE);
             }
-            optionsButton.showSubItem(5);
-            if (MessagesController.getInstance(currentAccount).isChatNoForwards(messageObject.getChatId())) {
+            final long dialogId = messageObject.getDialogId();
+            final boolean noforwards = (
+                dialogId < 0 && MessagesController.getInstance(currentAccount).isChatNoForwards(-dialogId) ||
+                MessagesController.getInstance(currentAccount).isChatNoForwards(messageObject.getChatId()) ||
+                messageObject.messageOwner.noforwards
+            );
+            if (noforwards) {
                 optionsButton.hideSubItem(1);
                 optionsButton.hideSubItem(2);
                 optionsButton.setAdditionalYOffset(-AndroidUtilities.dp(16));
@@ -2302,7 +2307,7 @@ public class AudioPlayerAlert extends BottomSheet implements NotificationCenter.
             EditTextBoldCursor editText = searchItem.getSearchField();
             editText.setCursorColor(getThemedColor(Theme.key_player_actionBarTitle));
 
-            repeatButton.setIconColor(getThemedColor((String) repeatButton.getTag()));
+            repeatButton.setIconColor(getThemedColor((Integer) repeatButton.getTag()));
             Theme.setSelectorDrawableColor(repeatButton.getBackground(), getThemedColor(Theme.key_listSelector), true);
 
             optionsButton.setIconColor(getThemedColor(Theme.key_player_button));

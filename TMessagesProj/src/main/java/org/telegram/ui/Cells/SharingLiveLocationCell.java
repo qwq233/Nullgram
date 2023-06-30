@@ -19,10 +19,10 @@ import android.text.TextUtils;
 import android.view.Gravity;
 import android.widget.FrameLayout;
 
-import org.osmdroid.util.GeoPoint;
 import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.ContactsController;
 import org.telegram.messenger.DialogObject;
+import org.telegram.messenger.IMapsProvider;
 import org.telegram.messenger.LocaleController;
 import org.telegram.messenger.LocationController;
 import org.telegram.messenger.MessageObject;
@@ -75,7 +75,7 @@ public class SharingLiveLocationCell extends FrameLayout {
 
         nameTextView = new SimpleTextView(context);
         nameTextView.setTextSize(16);
-        nameTextView.setTextColor(getThemedColor(Theme.key_windowBackgroundWhiteBlackText));
+        nameTextView.setTextColor(Theme.key_windowBackgroundWhiteBlackText);
         nameTextView.setTypeface(AndroidUtilities.getTypeface("fonts/rmedium.ttf"));
         nameTextView.setGravity(LocaleController.isRTL ? Gravity.RIGHT : Gravity.LEFT);
 
@@ -85,7 +85,7 @@ public class SharingLiveLocationCell extends FrameLayout {
 
             distanceTextView = new SimpleTextView(context);
             distanceTextView.setTextSize(14);
-            distanceTextView.setTextColor(getThemedColor(Theme.key_windowBackgroundWhiteGrayText3));
+            distanceTextView.setTextColor(Theme.key_windowBackgroundWhiteGrayText3);
             distanceTextView.setGravity(LocaleController.isRTL ? Gravity.RIGHT : Gravity.LEFT);
 
             addView(distanceTextView, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, 20, Gravity.TOP | (LocaleController.isRTL ? Gravity.RIGHT : Gravity.LEFT), LocaleController.isRTL ? padding : 73, 37, LocaleController.isRTL ? 73 : padding, 0));
@@ -156,8 +156,8 @@ public class SharingLiveLocationCell extends FrameLayout {
             name = messageObject.messageOwner.media.title;
 
             Drawable drawable = getResources().getDrawable(R.drawable.pin);
-            drawable.setColorFilter(new PorterDuffColorFilter(getThemedColor(Theme.key_location_sendLocationIcon), PorterDuff.Mode.MULTIPLY));
-            int color = getThemedColor(Theme.key_location_placeLocationBackground);
+            drawable.setColorFilter(new PorterDuffColorFilter(Theme.key_location_sendLocationIcon, PorterDuff.Mode.SRC_IN));
+            int color = Theme.key_location_placeLocationBackground;
             Drawable circle = Theme.createSimpleSelectorCircleDrawable(AndroidUtilities.dp(42), color, color);
             CombinedDrawable combinedDrawable = new CombinedDrawable(circle, drawable);
             combinedDrawable.setCustomSize(AndroidUtilities.dp(42), AndroidUtilities.dp(42));
@@ -222,9 +222,9 @@ public class SharingLiveLocationCell extends FrameLayout {
             }
         }
 
-        GeoPoint position = info.marker.getPosition();
-        location.setLatitude(position.getLatitude());
-        location.setLongitude(position.getLongitude());
+        IMapsProvider.LatLng position = info.marker.getPosition();
+        location.setLatitude(position.latitude);
+        location.setLongitude(position.longitude);
 
         String time = LocaleController.formatLocationUpdateDate(info.object.edit_date != 0 ? info.object.edit_date : info.object.date);
         if (userLocation != null) {
@@ -282,9 +282,9 @@ public class SharingLiveLocationCell extends FrameLayout {
 
         int color;
         if (distanceTextView == null) {
-            color = getThemedColor(Theme.key_dialog_liveLocationProgress);
+            color = Theme.key_dialog_liveLocationProgress;
         } else {
-            color = getThemedColor(Theme.key_location_liveLocationProgress);
+            color = Theme.key_location_liveLocationProgress;
         }
         Theme.chat_radialProgress2Paint.setColor(color);
         Theme.chat_livePaint.setColor(color);
@@ -296,10 +296,5 @@ public class SharingLiveLocationCell extends FrameLayout {
         float size = Theme.chat_livePaint.measureText(text);
 
         canvas.drawText(text, rect.centerX() - size / 2, AndroidUtilities.dp(distanceTextView != null ? 37 : 31), Theme.chat_livePaint);
-    }
-
-    private int getThemedColor(String key) {
-        Integer color = resourcesProvider != null ? resourcesProvider.getColor(key) : null;
-        return color != null ? color : Theme.getColor(key);
     }
 }

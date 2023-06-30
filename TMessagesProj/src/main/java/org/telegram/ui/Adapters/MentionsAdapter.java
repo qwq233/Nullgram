@@ -1098,10 +1098,14 @@ public class MentionsAdapter extends RecyclerListView.SelectionAdapter implement
             }
         }
         if (foundType == -1) {
+            contextMedia = false;
+            searchResultBotContext = null;
             delegate.needChangePanelVisibility(false);
             return;
         }
         if (foundType == 0) {
+            contextMedia = false;
+            searchResultBotContext = null;
             final ArrayList<Long> users = new ArrayList<>();
             for (int a = 0; a < Math.min(100, messageObjects.size()); a++) {
                 long from_id = messageObjects.get(a).getFromChatId();
@@ -1334,6 +1338,8 @@ public class MentionsAdapter extends RecyclerListView.SelectionAdapter implement
             searchResultCommandsHelp = null;
             searchResultCommandsUsers = null;
             searchResultSuggestions = null;
+            contextMedia = false;
+            searchResultBotContext = null;
             notifyDataSetChanged();
             delegate.needChangePanelVisibility(!searchResultHashtags.isEmpty());
         } else if (foundType == 2) {
@@ -1360,6 +1366,8 @@ public class MentionsAdapter extends RecyclerListView.SelectionAdapter implement
             searchResultCommands = newResult;
             searchResultCommandsHelp = newResultHelp;
             searchResultCommandsUsers = newResultUsers;
+            contextMedia = false;
+            searchResultBotContext = null;
             notifyDataSetChanged();
             delegate.needChangePanelVisibility(!newResult.isEmpty());
         } else if (foundType == 3) {
@@ -1711,8 +1719,7 @@ public class MentionsAdapter extends RecyclerListView.SelectionAdapter implement
         }
     }
 
-    private int getThemedColor(String key) {
-        Integer color = resourcesProvider != null ? resourcesProvider.getColor(key) : null;
-        return color != null ? color : Theme.getColor(key);
+    private int getThemedColor(int key) {
+        return Theme.getColor(key, resourcesProvider);
     }
 }

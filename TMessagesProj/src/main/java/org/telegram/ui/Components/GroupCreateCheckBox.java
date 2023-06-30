@@ -43,9 +43,9 @@ public class GroupCreateCheckBox extends View {
     private int innerRadDiff;
     private float checkScale = 1.0f;
 
-    private String backgroundKey = Theme.key_checkboxCheck;
-    private String checkKey = Theme.key_checkboxCheck;
-    private String innerKey = Theme.key_checkbox;
+    private int backgroundKey = Theme.key_checkboxCheck;
+    private int checkKey = Theme.key_checkboxCheck;
+    private int innerKey = Theme.key_checkbox;
 
 
     private final static float progressBounceDiff = 0.2f;
@@ -75,7 +75,7 @@ public class GroupCreateCheckBox extends View {
         updateColors();
     }
 
-    public void setColorKeysOverrides(String check, String inner, String back) {
+    public void setColorKeysOverrides(int check, int inner, int back) {
         checkKey = check;
         innerKey = inner;
         backgroundKey = back;

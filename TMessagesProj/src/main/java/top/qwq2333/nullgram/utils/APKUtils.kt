@@ -36,6 +36,9 @@ import android.widget.TextView
 import androidx.core.app.NotificationChannelCompat
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import org.telegram.messenger.AndroidUtilities
 import org.telegram.messenger.ApplicationLoader
@@ -43,7 +46,6 @@ import org.telegram.messenger.FileLoader
 import org.telegram.messenger.LocaleController
 import org.telegram.messenger.R
 import org.telegram.messenger.UserConfig
-import org.telegram.messenger.Utilities
 import org.telegram.messenger.XiaomiUtilities
 import org.telegram.tgnet.TLRPC
 import org.telegram.ui.ActionBar.AlertDialog
@@ -162,17 +164,20 @@ object APKUtils {
         dialog!!.setCanceledOnTouchOutside(false)
         dialog!!.setCancelable(false)
         dialog!!.show()
-        Utilities.globalQueue.postRunnable {
-            val receiver = register(context) {
-                if (dialog != null) {
-                    dialog!!.dismiss()
-                    dialog = null
+        CoroutineScope(Dispatchers.Main).launch {
+            try {
+                val receiver = register(context) {
+                    if (dialog != null) {
+                        dialog!!.dismiss()
+                        dialog = null
+                    }
                 }
-            }
-            installApk(context, apk)
-            runBlocking {
-                val intent = receiver.waitIntent()
-                context.startActivity(intent)
+                installApk(context, apk)
+                runBlocking {
+                    val intent = receiver.waitIntent()
+                    context.startActivity(intent)
+                }
+            } catch (ignore: Exception) {
             }
         }
     }

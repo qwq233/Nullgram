@@ -31,7 +31,6 @@ import android.graphics.Path;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffColorFilter;
 import android.graphics.Rect;
-import android.graphics.RectF;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.LayerDrawable;
 import android.graphics.drawable.RippleDrawable;
@@ -51,22 +50,18 @@ import android.util.SparseIntArray;
 import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.HapticFeedbackConstants;
-import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.VelocityTracker;
 import android.view.View;
 import android.view.ViewConfiguration;
 import android.view.ViewGroup;
 import android.view.ViewOutlineProvider;
-import android.view.ViewTreeObserver;
-import android.view.WindowManager;
 import android.view.accessibility.AccessibilityNodeInfo;
 import android.view.animation.OvershootInterpolator;
 import android.view.inputmethod.EditorInfo;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.PopupWindow;
 import android.widget.TextView;
 
 import androidx.annotation.IntDef;
@@ -134,7 +129,6 @@ import org.telegram.ui.StickersActivity;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
-import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -3958,11 +3952,16 @@ public class EmojiView extends FrameLayout implements
     private void updateBottomTabContainerPosition() {
         View parent = (View) getParent();
         if (parent != null) {
-            float y = getY() - parent.getHeight();
+            float y = getY() ;
             if (getLayoutParams().height > 0) {
                 y += getLayoutParams().height;
             } else {
                 y += getMeasuredHeight();
+            }
+            if (!AndroidUtilities.isInMultiwindow && (fragment == null || !fragment.isInBubbleMode())) {
+                y -= parent.getHeight();
+            } else {
+                y -= AndroidUtilities.dp(1);
             }
             if (bottomTabContainer.getTop() - y < 0) {
                 y = 0;
@@ -5845,10 +5844,12 @@ public class EmojiView extends FrameLayout implements
         }
     }
 
-    private int getThemedColor(String key) {
-        Integer color = resourcesProvider != null ? resourcesProvider.getColor(key) : null;
-        return color != null ? color : Theme.getColor(key);
+    private int getThemedColor(int key) {
+    if (resourcesProvider != null) {
+        return resourcesProvider.getColor(key);
     }
+    return Theme.getColor(key);
+}
 
     private class TrendingAdapter extends RecyclerListView.SelectionAdapter {
 

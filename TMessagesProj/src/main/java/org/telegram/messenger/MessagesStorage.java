@@ -692,12 +692,13 @@ public class MessagesStorage extends BaseController {
         try {
             var result = database.queryFinalized("SELECT COUNT(*) FROM pragma_table_info('dialog_filter') WHERE name = 'emoticon';");
             if (result.next()) {
-                var count = result.intValue(0);
+                final var count = result.intValue(0);
                 Log.i("emoticon column count = " + count);
                 if (count == 0) {
                     database.executeFast("ALTER TABLE dialog_filter ADD COLUMN emoticon TEXT").stepThis().dispose();
                 }
             }
+            result.dispose();
             ConfigManager.putBoolean(Defines.hasUpdateDialogFilterDatabase, true);
         } catch (Exception e) {
             Log.e(e);
@@ -1348,9 +1349,8 @@ public class MessagesStorage extends BaseController {
                 state5 = null;
                 state6 = null;
                 database.commitTransaction();
-                database.executeFast("PRAGMA journal_size_limit = 0").stepThis().dispose();
+                database.executeFast("PRAGMA journal_size_limit = 10485760").stepThis().dispose();
                 database.executeFast("VACUUM").stepThis().dispose();
-                database.executeFast("PRAGMA journal_size_limit = -1").stepThis().dispose();
 
                 getMessagesController().getTopicsController().databaseCleared();
             } catch (Exception e) {
@@ -9334,7 +9334,7 @@ public class MessagesStorage extends BaseController {
                                 oldChat.title = chat.title;
                                 oldChat.photo = chat.photo;
                                 oldChat.broadcast = chat.broadcast;
-                                oldChat.verified = chat.verified;
+                                oldChat.verified = chat.verifiedExtended();
                                 oldChat.megagroup = chat.megagroup;
                                 oldChat.call_not_empty = chat.call_not_empty;
                                 oldChat.call_active = chat.call_active;
@@ -13912,7 +13912,7 @@ public class MessagesStorage extends BaseController {
             }
             if (message.media instanceof TLRPC.TL_messageMediaPoll) {
                 TLRPC.TL_messageMediaPoll messageMediaPoll = (TLRPC.TL_messageMediaPoll) message.media;
-                if (!messageMediaPoll.results.recent_voters.isEmpty()) {
+                if (messageMediaPoll.results != null && messageMediaPoll.results.recent_voters != null && !messageMediaPoll.results.recent_voters.isEmpty()) {
                     usersToLoad.addAll(messageMediaPoll.results.recent_voters);
                 }
             }

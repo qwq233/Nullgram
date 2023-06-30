@@ -28,13 +28,13 @@ import android.os.Build;
 import android.text.Layout;
 import android.text.SpannableString;
 import android.text.Spanned;
+import android.util.Pair;
 import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.View;
 import android.view.inputmethod.EditorInfo;
 
 import androidx.annotation.RequiresApi;
-import androidx.exifinterface.media.ExifInterface;
 
 import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.ApplicationLoader;
@@ -45,7 +45,6 @@ import org.telegram.messenger.FileLog;
 import org.telegram.messenger.LocaleController;
 import org.telegram.messenger.MediaController;
 import org.telegram.messenger.UserConfig;
-import org.telegram.messenger.Utilities;
 import org.telegram.messenger.VideoEditedInfo;
 import org.telegram.ui.Components.AnimatedEmojiDrawable;
 import org.telegram.ui.Components.AnimatedEmojiSpan;
@@ -615,26 +614,12 @@ public class TextureRenderer {
             try {
                 for (int a = 0; a < paintTexture.length; a++) {
                     String path;
-                    int angle = 0;
+                    int angle = 0, invert = 0;
                     if (a == 0 && imagePath != null) {
                         path = imagePath;
-                        try {
-                            ExifInterface exif = new ExifInterface(path);
-                            int orientation = exif.getAttributeInt(ExifInterface.TAG_ORIENTATION, 1);
-                            switch (orientation) {
-                                case ExifInterface.ORIENTATION_ROTATE_90:
-                                    angle = 90;
-                                    break;
-                                case ExifInterface.ORIENTATION_ROTATE_180:
-                                    angle = 180;
-                                    break;
-                                case ExifInterface.ORIENTATION_ROTATE_270:
-                                    angle = 270;
-                                    break;
-                            }
-                        } catch (Throwable ignore) {
-
-                        }
+                        Pair<Integer, Integer> orientation = AndroidUtilities.getImageOrientation(path);
+                        angle = orientation.first;
+                        invert = orientation.second;
                     } else {
                         path = paintPath;
                     }
@@ -653,7 +638,7 @@ public class TextureRenderer {
 
                             android.graphics.Matrix matrix = new android.graphics.Matrix();
                             matrix.postTranslate(-bitmap.getWidth() / 2, -bitmap.getHeight() / 2);
-                            matrix.postScale(1.0f / scale, 1.0f / scale);
+                            matrix.postScale((invert == 1 ? -1.0f : 1.0f) / scale, (invert == 2 ? -1.0f : 1.0f) / scale);
                             matrix.postRotate(angle);
                             matrix.postTranslate(newBitmap.getWidth() / 2, newBitmap.getHeight() / 2);
                             canvas.drawBitmap(bitmap, matrix, new Paint(Paint.FILTER_BITMAP_FLAG));
@@ -702,9 +687,7 @@ public class TextureRenderer {
                                 ByteBuffer buffer = file.getChannel().map(FileChannel.MapMode.READ_ONLY, 0, path.length());
                                 BitmapFactory.Options bmOptions = new BitmapFactory.Options();
                                 bmOptions.inJustDecodeBounds = true;
-                                Utilities.loadWebpImage(null, buffer, buffer.limit(), bmOptions, true);
                                 entity.bitmap = Bitmaps.createBitmap(bmOptions.outWidth, bmOptions.outHeight, Bitmap.Config.ARGB_8888);
-                                Utilities.loadWebpImage(entity.bitmap, buffer, buffer.limit(), null, true);
                                 file.close();
                             }
                             if (entity.bitmap != null) {
