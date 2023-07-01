@@ -113,7 +113,7 @@
     <string name="Number">Число</string>
     <string name="autoProxySwitch">Автопереключение прокси</string>
     <string name="ignoreReactionMention">Игнорировать упоминание реакцией</string>
-    <string name="ignoreReactionMentionInfo">Это автоматически пометит непрочитанные упоминания реакцией как прочитанные.\nКроме того, они будет синхронизироваться с другими устройства.\nУведомление будет показано, потому что оно зависит от Telegram.</string>
+    <string name="ignoreReactionMentionInfo">Это автоматически пометит непрочитанные упоминания реакцией как прочитанные.\nКроме того, они будут синхронизироваться с другими устройства.\nУведомление будет показано, потому что оно зависит от Telegram.</string>
     <string name="StickerSize">Размер стикеров</string>
     <string name="StickerSizeDialogMessageReplyTo">дай мне аниме девочку, пожалуйста.</string>
     <string name="StickerSizeDialogMessage">ого, милашка!</string>
@@ -151,7 +151,7 @@
     <string name="scrollableChatPreview">Прокручиваемый предпросмотр чатов</string>
     <string name="disableVibration">Отключить вибрацию</string>
     <string name="DatacenterStatus">Статус дата-центра</string>
-    <string name="DatacenterStatusAbout">Проверьте состояние **датацентров** TELEOFFICAL.</string>
+    <string name="DatacenterStatusAbout">Проверьте состояние **дата-центров** TELEOFFICAL.</string>
     <string name="DeleteAllFromSelfDone">Все ваши сообщения были удалены</string>
     <string name="setLinkedUser">Выбрать связанного пользователя</string>
     <string name="UserIDOrBotID">Введите ID пользователя или ID бота</string>
