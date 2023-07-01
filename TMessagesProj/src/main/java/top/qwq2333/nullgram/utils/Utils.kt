@@ -441,6 +441,11 @@ object Utils {
             offset = targetOffset
             length = targetLength
         }
+        is TLRPC.TL_inputMessageEntityMentionName -> TLRPC.TL_inputMessageEntityMentionName().apply {
+            user_id = entity.user_id
+            offset = targetOffset
+            length = targetLength
+        }
         else -> throw NullPointerException("Unknown entity type: ${entity::class.java.simpleName}")
     }
 
