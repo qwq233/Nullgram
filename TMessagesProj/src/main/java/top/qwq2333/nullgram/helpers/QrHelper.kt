@@ -328,7 +328,11 @@ object QrHelper {
         )
         matrixInvert.preConcat(matrixGrayscale)
         paint.colorFilter = ColorMatrixColorFilter(matrixInvert)
-        canvas.drawBitmap(bitmap, 0f, 0f, paint)
+        try {
+            canvas.drawBitmap(bitmap, 0f, 0f, paint)
+        } catch (e: Exception) {
+            Log.e(e)
+        }
         return newBitmap
     }
 
