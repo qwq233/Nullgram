@@ -22,7 +22,7 @@ import org.telegram.tgnet.TLRPC
 import ws.vinta.pangu.Pangu
 
 object StringUtils {
-    val pangu = Pangu()
+    private val pangu = Pangu()
 
     /**
      *

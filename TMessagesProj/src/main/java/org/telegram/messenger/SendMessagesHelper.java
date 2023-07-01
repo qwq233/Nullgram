@@ -56,6 +56,7 @@ import org.telegram.tgnet.RequestDelegate;
 import org.telegram.tgnet.SerializedData;
 import org.telegram.tgnet.TLObject;
 import org.telegram.tgnet.TLRPC;
+import org.telegram.tgnet.TLRPC.MessageEntity;
 import org.telegram.ui.ActionBar.AlertDialog;
 import org.telegram.ui.ActionBar.BaseFragment;
 import org.telegram.ui.ActionBar.Theme;
@@ -89,6 +90,7 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
+import kotlin.Pair;
 import top.qwq2333.nullgram.config.ConfigManager;
 import top.qwq2333.nullgram.utils.Defines;
 import top.qwq2333.nullgram.utils.StringUtils;
@@ -211,7 +213,7 @@ public class SendMessagesHelper extends BaseController implements NotificationCe
                     double coef = 0.01;
                     estimatedUploadSpeed = coef * uploadSpeed + (1 - coef) * estimatedUploadSpeed;
                 }
-                timeUntilFinish = (int) ((totalSize - uploadedSize) * 1000 / (double) estimatedUploadSpeed);
+                timeUntilFinish = (int) ((totalSize - uploadedSize) * 1000 / estimatedUploadSpeed);
                 lastUploadSize = uploadedSize;
                 lastUploadTime = newTime;
             }
@@ -396,7 +398,7 @@ public class SendMessagesHelper extends BaseController implements NotificationCe
                     double coef = 0.01;
                     estimatedUploadSpeed = coef * uploadSpeed + (1 - coef) * estimatedUploadSpeed;
                 }
-                timeUntilFinish = (int) ((totalSize - uploadedSize) * 1000 / (double) estimatedUploadSpeed);
+                timeUntilFinish = (int) ((totalSize - uploadedSize) * 1000 / estimatedUploadSpeed);
                 lastUploadSize = uploadedSize;
                 lastUploadTime = newTime;
             }
@@ -2938,7 +2940,7 @@ public class SendMessagesHelper extends BaseController implements NotificationCe
             if (response != null) {
                 if (response instanceof TLRPC.TL_urlAuthResultRequest) {
                     TLRPC.TL_urlAuthResultRequest res = (TLRPC.TL_urlAuthResultRequest) response;
-                    parentFragment.showRequestUrlAlert(res, (TLRPC.TL_messages_requestUrlAuth) req, url, ask);
+                    parentFragment.showRequestUrlAlert(res, req, url, ask);
                 } else if (response instanceof TLRPC.TL_urlAuthResultAccepted) {
                     TLRPC.TL_urlAuthResultAccepted res = (TLRPC.TL_urlAuthResultAccepted) response;
                     AlertsCreator.showOpenUrlAlert(parentFragment, res.url, false, false);
@@ -3363,11 +3365,6 @@ public class SendMessagesHelper extends BaseController implements NotificationCe
         if (message == null && caption == null) {
             caption = "";
         }
-        if (message != null && ConfigManager.getBooleanOrFalse(Defines.enablePanguOnSending)) {
-            var pair = StringUtils.spacingText(message, entities);
-            message = pair.getFirst();
-            entities = pair.getSecond();
-        }
 
         String originalPath = null;
         if (params != null && params.containsKey("originalPath")) {
@@ -3424,13 +3421,7 @@ public class SendMessagesHelper extends BaseController implements NotificationCe
                         if (retryMessageObject.messageOwner.media instanceof TLRPC.TL_messageMediaGame) {
                             //game = retryMessageObject.messageOwner.media.game;
                         } else {
-                            if (newMsg.message != null && ConfigManager.getBooleanOrFalse(Defines.enablePanguOnSending)) {
-                                var pair = StringUtils.spacingText(newMsg.message, entities);
-                                message = pair.getFirst();
-                                entities = pair.getSecond();
-                            } else {
-                                message = newMsg.message;
-                            }
+                            message = newMsg.message;
                         }
                         type = 0;
                     } else if (retryMessageObject.type == MessageObject.TYPE_GEO) {
@@ -3439,13 +3430,7 @@ public class SendMessagesHelper extends BaseController implements NotificationCe
                     } else if (retryMessageObject.type == MessageObject.TYPE_PHOTO) {
                         photo = (TLRPC.TL_photo) newMsg.media.photo;
                         if (retryMessageObject.messageOwner.message != null) {
-                            if (retryMessageObject.messageOwner.message != null && ConfigManager.getBooleanOrFalse(Defines.enablePanguOnSending)) {
-                                var pair = StringUtils.spacingText(retryMessageObject.messageOwner.message, entities);
-                                caption = pair.getFirst();
-                                entities = pair.getSecond();
-                            } else {
-                                caption = retryMessageObject.messageOwner.message;
-                            }
+                            caption = retryMessageObject.messageOwner.message;
                         }
                         type = 2;
                     } else if (
@@ -3456,13 +3441,7 @@ public class SendMessagesHelper extends BaseController implements NotificationCe
                         type = 3;
                         document = (TLRPC.TL_document) newMsg.media.document;
                         if (retryMessageObject.messageOwner.message != null) {
-                            if (ConfigManager.getBooleanOrFalse(Defines.enablePanguOnSending)) {
-                                var pair = StringUtils.spacingText(retryMessageObject.messageOwner.message, entities);
-                                caption = pair.getFirst();
-                                entities = pair.getSecond();
-                            } else {
-                                caption = retryMessageObject.messageOwner.message;
-                            }
+                            caption = retryMessageObject.messageOwner.message;
                         }
                     } else if (retryMessageObject.type == MessageObject.TYPE_CONTACT) {
                         user = new TLRPC.TL_userRequest_old2();
@@ -3486,25 +3465,13 @@ public class SendMessagesHelper extends BaseController implements NotificationCe
                         document = (TLRPC.TL_document) newMsg.media.document;
                         type = 7;
                         if (retryMessageObject.messageOwner.message != null) {
-                            if (ConfigManager.getBooleanOrFalse(Defines.enablePanguOnSending)) {
-                                var pair = StringUtils.spacingText(retryMessageObject.messageOwner.message, entities);
-                                caption = pair.getFirst();
-                                entities = pair.getSecond();
-                            } else {
-                                caption = retryMessageObject.messageOwner.message;
-                            }
+                            caption = retryMessageObject.messageOwner.message;
                         }
                     } else if (retryMessageObject.type == MessageObject.TYPE_VOICE) {
                         document = (TLRPC.TL_document) newMsg.media.document;
                         type = 8;
                         if (retryMessageObject.messageOwner.message != null) {
-                            if (ConfigManager.getBooleanOrFalse(Defines.enablePanguOnSending)) {
-                                var pair = StringUtils.spacingText(retryMessageObject.messageOwner.message, entities);
-                                caption = pair.getFirst();
-                                entities = pair.getSecond();
-                            } else {
-                                caption = retryMessageObject.messageOwner.message;
-                            }
+                            caption = retryMessageObject.messageOwner.message;
                         }
                     } else if (retryMessageObject.type == MessageObject.TYPE_POLL) {
                         poll = (TLRPC.TL_messageMediaPoll) newMsg.media;
@@ -3742,13 +3709,7 @@ public class SendMessagesHelper extends BaseController implements NotificationCe
                     newMsg.flags |= TLRPC.MESSAGE_FLAG_HAS_ENTITIES;
                 }
                 if (caption != null) {
-                    if (ConfigManager.getBooleanOrFalse(Defines.enablePanguOnSending)) {
-                        var pair = StringUtils.spacingText(caption, entities);
-                        newMsg.message = pair.getFirst();
-                        entities = pair.getSecond();
-                    } else {
-                        newMsg.message = caption;
-                    }
+                    newMsg.message = caption;
                 } else if (newMsg.message == null) {
                     newMsg.message = "";
                 }
@@ -3924,6 +3885,22 @@ public class SendMessagesHelper extends BaseController implements NotificationCe
                     newMsg.flags |= 131072;
                 }
                 isFinalGroupMedia = params.get("final") != null;
+            }
+
+            if (ConfigManager.getBooleanOrFalse(Defines.enablePanguOnSending)) {
+                Pair<String, ArrayList<MessageEntity>> pair;
+                if (caption != null) {
+                    pair = StringUtils.spacingText(caption, entities);
+                    caption = pair.getFirst();
+                } else {
+                    pair = StringUtils.spacingText(message, entities);
+                    message = pair.getFirst();
+                }
+                entities = pair.getSecond();
+
+                pair = StringUtils.spacingText(newMsg.message, newMsg.entities);
+                newMsg.message = pair.getFirst();
+                newMsg.entities = pair.getSecond();
             }
 
             MessageObject reply = replyToMsg;
