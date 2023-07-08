@@ -76,7 +76,7 @@ object AnalyticsUtils {
         Log.d("Analytics: ${Base64.encodeToString(BuildConfig.APPLICATION_ID.toByteArray(), Base64.DEFAULT)}")
         Log.d("Analytics: ${BuildConfig.APPLICATION_ID != Arrays.toString(Base64.decode("dG9wLnF3cTIzMzMubnVsbGdyYW0=", Base64.DEFAULT))}")
 
-        if (isInit) return
+        if (isInit && UserConfig.getActivatedAccountsCount() < 1) return // stop analytics if no user login
         try {
             val currentUser = UserConfig.getInstance(UserConfig.selectedAccount)
             Log.d("FirebaseCrashlytics start: set user id: " + currentUser.getClientUserId())
@@ -84,6 +84,13 @@ object AnalyticsUtils {
             crashlytics.setUserId(currentUser.getClientUserId().toString())
             crashlytics.setCustomKeys {
                 key("Build Time", BuildConfig.BUILD_TIME)
+
+                for (i in 0 ..  UserConfig.MAX_ACCOUNT_COUNT) {
+                    UserConfig.getInstance(i).let {
+                        if (!it.isClientActivated) return@let
+                        key("User $i", it.getClientUserId().toString())
+                    }
+                }
             }
         } catch (ignored: Exception) { }
 
