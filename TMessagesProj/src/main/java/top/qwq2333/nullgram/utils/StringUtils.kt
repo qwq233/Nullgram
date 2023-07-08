@@ -131,7 +131,7 @@ object StringUtils {
                             break
                         }
                     } else {
-                        if (text[j] == panguText[j]) continue
+                        if (text.length >= j && text[j] == panguText[j]) continue
                         if (panguText[j+1] != char[0] && start != 0) continue
                         panguEntities.add(Utils.generateMessageEntity(it, start, targetLength))
                         start = j + 1

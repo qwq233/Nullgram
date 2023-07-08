@@ -7,10 +7,10 @@ import java.util.Date
 
 plugins {
     id("com.android.application")
-    id("org.jetbrains.kotlin.android")
     id("com.google.gms.google-services")
     id("com.google.firebase.crashlytics")
-    id("com.github.triplet.play") version "3.8.4"
+    id("com.github.triplet.play") version "3.8.3"
+    kotlin("android")
     kotlin("plugin.serialization") version Version.kotlin
 }
 
@@ -88,13 +88,14 @@ dependencies {
     implementation("io.ktor:ktor-client-content-negotiation:${Version.ktor}")
     implementation("io.ktor:ktor-serialization-kotlinx-json:${Version.ktor}")
     implementation("ws.vinta:pangu:1.1.0")
+    implementation("com.mikepenz:aboutlibraries:10.7.0")
 
     implementation(project(":tcp2ws"))
 }
 
 
 dependencies {
-    val appCenterSdkVersion = "5.0.2"
+    val appCenterSdkVersion = "5.0.1"
     implementation("com.microsoft.appcenter:appcenter-analytics:${appCenterSdkVersion}")
     implementation("com.microsoft.appcenter:appcenter-crashes:${appCenterSdkVersion}")
 }
