@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="NullgramName">Nullgram</string>
     <string name="NullgramPushService">Nullgram Push Service</string>
     <string name="NullSettings">Nullgram sozlamalari</string>
     <string name="OfficialChannel">Rasmiy kanal</string>
@@ -291,4 +290,12 @@
     <string name="RegistrationDateOlder">Older than %s</string>
     <string name="RegistrationDateApproximately">Approximately %s</string>
     <string name="LearnMore">Learn More</string>
+    <string name="showRPCError">Show RPC Error</string>
+    <string name="enablePanguOnReceiving">Enable Pangu on receiving</string>
+    <string name="enablePanguOnSending">Enable Pangu on sending</string>
+    <string name="panguInfo">Paranoid text spacing for good readability, to automatically insert whitespace between CJK (Chinese, Japanese, Korean), half-width English, digit and symbol characters.</string>
+    <string name="showExactTime">Display time in seconds</string>
+    <string name="keepOnlineStatusAs">Keep online status as</string>
+    <string name="Offline">Offline</string>
+    <string name="Special">Special</string>
 </resources>

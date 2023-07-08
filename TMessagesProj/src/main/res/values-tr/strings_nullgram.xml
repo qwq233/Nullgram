@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="NullgramName">Nullgram</string>
     <string name="NullgramPushService">Nullgram Bildirim Hizmeti</string>
     <string name="NullSettings">Nullgram Ayarları</string>
     <string name="OfficialChannel">Resmi Kanal</string>
@@ -27,7 +26,7 @@
     <string name="InvalidAccessToken">Erişim anahtarı geçersiz</string>
     <string name="QRLoginTitle">QR Girişi</string>
     <string name="QRLoginMessage">Başka bir cihazda oturum açmak için QR Codunuzu tarayın.</string>
-    <string name="NullgramVersion">Nullgram %1$s\nBased on TELEOFFICIAL %2$s</string>
+    <string name="NullgramVersion">Nullgram %1$s\nTelegram\'a Dayalı %2$s</string>
     <string name="RestrictionReason">Kısıtlama nedeni</string>
     <string name="showBotAPIID">Bot API Kimliğini Göster</string>
     <string name="hideGroupSticker">Grup Stickerlarını Gizle</string>
@@ -113,7 +112,7 @@
     <string name="Number">Numara</string>
     <string name="autoProxySwitch">Proxy Otomatik Geçişi</string>
     <string name="ignoreReactionMention">Tepki Sözünü Yoksay</string>
-    <string name="ignoreReactionMentionInfo">It will auto set unread reaction mentions as read.\nIt will also sync to other devices.\nNotification will be still shown because it\'s controlled by TELEOFFICIAL Server.</string>
+    <string name="ignoreReactionMentionInfo">Okunmamış reaksiyon sözlerini otomatik olarak okundu olarak ayarlayacaktır.\nDiğer cihazlarla da senkronize olacaktır.\nTelegram Sunucusu tarafından kontrol edildiği için bildirim gösterilmeye devam edecektir.</string>
     <string name="StickerSize">çıkartma boyutu</string>
     <string name="StickerSizeDialogMessageReplyTo">bana biraz anime malzemesi getir lütfen.</string>
     <string name="StickerSizeDialogMessage">vay tatlı kız!</string>
@@ -142,8 +141,8 @@
     <string name="largeAvatarAsBackground">Arka Plan Olarak Büyük Avatar</string>
     <string name="useSystemEmoji">Sistem emoji stilini kullan</string>
     <string name="Command">Komut</string>
-    <string name="setCustomQuickMessage">Set Custom Quick Message</string>
-    <string name="emptyInput">You can\'t input nothing here</string>
+    <string name="setCustomQuickMessage">Özel Hızlı Mesaj Ayarla</string>
+    <string name="emptyInput">Buraya hiçbir şey giremezsiniz</string>
     <string name="numberInvalid"><![CDATA[Number should be >20 and 150<]]></string>
     <string name="notANumber">You must input a number!</string>
     <string name="notACommand">You must input a string!</string>
@@ -291,4 +290,12 @@
     <string name="RegistrationDateOlder">Older than %s</string>
     <string name="RegistrationDateApproximately">Approximately %s</string>
     <string name="LearnMore">Learn More</string>
+    <string name="showRPCError">Show RPC Error</string>
+    <string name="enablePanguOnReceiving">Enable Pangu on receiving</string>
+    <string name="enablePanguOnSending">Enable Pangu on sending</string>
+    <string name="panguInfo">Paranoid text spacing for good readability, to automatically insert whitespace between CJK (Chinese, Japanese, Korean), half-width English, digit and symbol characters.</string>
+    <string name="showExactTime">Display time in seconds</string>
+    <string name="keepOnlineStatusAs">Keep online status as</string>
+    <string name="Offline">Offline</string>
+    <string name="Special">Special</string>
 </resources>

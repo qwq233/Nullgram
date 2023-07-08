@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="NullgramName">Nullgram</string>
     <string name="NullgramPushService">Servizio notifiche push Nullgram</string>
     <string name="NullSettings">Impostazioni Nullgram</string>
     <string name="OfficialChannel">Canale ufficiale</string>
@@ -27,7 +26,7 @@
     <string name="InvalidAccessToken">Token d\'accesso non valido</string>
     <string name="QRLoginTitle">Accesso con QR</string>
     <string name="QRLoginMessage">Scansiona il QR con un altro dispositivo per accedere.</string>
-    <string name="NullgramVersion">Nullgram %1$s\nBased on TELEOFFICIAL %2$s</string>
+    <string name="NullgramVersion">Nullgram %1$s\nBasato su TELEOFFICIAL %2$s</string>
     <string name="RestrictionReason">Motivo della restrizione</string>
     <string name="showBotAPIID">Mostra bot API ID</string>
     <string name="hideGroupSticker">Nascondi stickerpack di gruppo</string>
@@ -113,7 +112,7 @@
     <string name="Number">Numero</string>
     <string name="autoProxySwitch">Cambio Automatico Proxy</string>
     <string name="ignoreReactionMention">Ignora notifica reazioni</string>
-    <string name="ignoreReactionMentionInfo">It will auto set unread reaction mentions as read.\nIt will also sync to other devices.\nNotification will be still shown because it\'s controlled by TELEOFFICIAL Server.</string>
+    <string name="ignoreReactionMentionInfo">Marchia automaticamente le reazioni come lette.\nViene sincronizzato negli altri dispositivi.\nVedrai comunque la notifica perché arriva dai server TELEOFFICIAL.</string>
     <string name="StickerSize">Dimensione sticker</string>
     <string name="StickerSizeDialogMessageReplyTo">mandami qualche sticker carino grz</string>
     <string name="StickerSizeDialogMessage">wow che carina!</string>
@@ -151,7 +150,7 @@
     <string name="scrollableChatPreview">Anteprima chat scrollabile</string>
     <string name="disableVibration">Disattiva vibrazione</string>
     <string name="DatacenterStatus">Stato datacenter</string>
-    <string name="DatacenterStatusAbout">Check the status of TELEOFFICIAL\'s **datacenters**.</string>
+    <string name="DatacenterStatusAbout">Controlla lo stato dei **datacenter** TELEOFFICIAL.</string>
     <string name="DeleteAllFromSelfDone">Tutti i tuoi messaggi sono stati eliminati</string>
     <string name="setLinkedUser">Imposta utente collegato</string>
     <string name="UserIDOrBotID">Inserisci ID utente o bot</string>
@@ -188,7 +187,7 @@
     <string name="fastSpeedUpload">Accelera upload</string>
     <string name="showTabsOnForward">Mostra tab su inoltro</string>
     <string name="TabTitleType">Mostra nelle tab</string>
-    <string name="TabTitleTypeTip">Icons are cloud-synced by TELEOFFICIAL.</string>
+    <string name="TabTitleTypeTip">Le icone sono sincronizzate nel cloud da TELEOFFICIAL.</string>
     <string name="TabTitleTypeText">Titoli</string>
     <string name="TabTitleTypeIcon">Icone</string>
     <string name="TabTitleTypeMix">Icone e titoli</string>
@@ -216,14 +215,14 @@
     <string name="Ban">Ban</string>
     <string name="autoDisableBuiltInProxy">Disattiva automaticamente proxy integrato</string>
     <string name="autoDisableBuiltInProxyDesc">Disattiverà automaticamente il proxy integrato in Nullgram non appena riconoscerà la VPN</string>
-    <string name="NekogramWsDescription">Connect to TELEOFFICIAL through WebSocket via Cloudflare.\nProvided by Nekogram</string>
+    <string name="NekogramWsDescription">Collegati a TELEOFFICIAL attraverso WebSocket su Cloudflare.\nFornito da Nekogram</string>
     <string name="NekogramXWsDescription">Fornito da Nekogram X</string>
-    <string name="WsGetHelp">You can also deploy it easily by yourself!</string>
-    <string name="WsCustomDescription">Use custom domain to connect to TELEOFFICIAL through WebSocket via Cloudflare.</string>
+    <string name="WsGetHelp">Puoi installartelo facilmente anche da te!</string>
+    <string name="WsCustomDescription">Usa un dominio custom per collegarti a TELEOFFICIAL attraverso WebSocket su Cloudflare.</string>
     <string name="WsEnableTls">Abilita TLS</string>
     <string name="WsLocalProxy">Proxy locale</string>
     <string name="WsEnableDoh">Abilita DNS over HTTP</string>
-    <string name="WsProvider">Provider</string>
+    <string name="WsProvider">Fornitore</string>
     <string name="PublicProxy">Proxy pubblico integrato</string>
     <string name="SwitchBackend">Cambia backend</string>
     <string name="UpdateInstalling">Installazione aggiornamento...</string>
@@ -236,7 +235,7 @@
     <string name="Translator">Traduttore</string>
     <string name="ProviderGoogleTranslate">Google Translate</string>
     <string name="ProviderYandexTranslate">Yandex Translate</string>
-    <string name="ProviderTelegramTranslate">TELEOFFICIAL Translate</string>
+    <string name="ProviderTelegramTranslate">Traduttore TELEOFFICIAL</string>
     <string name="ProviderMicrosoftTranslate">Microsoft Translate</string>
     <string name="ProviderDeepLTranslate">DeepL Translate</string>
     <string name="ProviderLingoTranslate">Lingo Translate</string>
@@ -290,5 +289,13 @@
     <string name="RegistrationDateNewer">Più recente del %s</string>
     <string name="RegistrationDateOlder">Più vecchio del %s</string>
     <string name="RegistrationDateApproximately">Approssimativamente al %s</string>
-    <string name="LearnMore">Learn More</string>
+    <string name="LearnMore">Per saperne di più</string>
+    <string name="showRPCError">Vedi errori RPC</string>
+    <string name="enablePanguOnReceiving">Enable Pangu on receiving</string>
+    <string name="enablePanguOnSending">Enable Pangu on sending</string>
+    <string name="panguInfo">Paranoid text spacing for good readability, to automatically insert whitespace between CJK (Chinese, Japanese, Korean), half-width English, digit and symbol characters.</string>
+    <string name="showExactTime">Display time in seconds</string>
+    <string name="keepOnlineStatusAs">Keep online status as</string>
+    <string name="Offline">Offline</string>
+    <string name="Special">Special</string>
 </resources>
