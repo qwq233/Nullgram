@@ -35,25 +35,14 @@ object PopupBuilder {
     private var mPopupWindow: SimpleMenuPopupWindow? = null
 
     @JvmStatic
+    @JvmOverloads
     fun show(
         entries: ArrayList<out CharSequence?>,
         title: String?,
         checkedIndex: Int,
         context: Context?,
         itemView: View?,
-        listener: SimpleMenuPopupWindow.OnItemClickListener
-    ) {
-        show(entries, title, checkedIndex, context, itemView, null, listener)
-    }
-
-    @JvmStatic
-    fun show(
-        entries: ArrayList<out CharSequence?>,
-        title: String?,
-        checkedIndex: Int,
-        context: Context?,
-        itemView: View?,
-        resourcesProvider: Theme.ResourcesProvider?,
+        resourcesProvider: Theme.ResourcesProvider? = null,
         listener: SimpleMenuPopupWindow.OnItemClickListener
     ) {
         if (itemView == null) {

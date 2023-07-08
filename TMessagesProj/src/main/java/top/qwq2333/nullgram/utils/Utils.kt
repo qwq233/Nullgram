@@ -304,7 +304,7 @@ object Utils {
     }
 
     @JvmStatic
-    fun generateMessageEntity(entity: TLRPC.MessageEntity, targetOffset: Int, targetLength: Int): TLRPC.MessageEntity =         when(entity) {
+    fun generateMessageEntity(entity: TLRPC.MessageEntity, targetOffset: Int, targetLength: Int): TLRPC.MessageEntity = when(entity) {
         is TLRPC.TL_messageEntityTextUrl -> TLRPC.TL_messageEntityTextUrl().apply {
             url = entity.url
             language = entity.language

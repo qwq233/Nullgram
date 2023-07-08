@@ -94,17 +94,17 @@ import top.qwq2333.nullgram.utils.Defines;
 public class MessagesController extends BaseController implements NotificationCenter.NotificationCenterDelegate {
 
     public int lastKnownSessionsCount;
-    private ConcurrentHashMap<Long, TLRPC.Chat> chats = new ConcurrentHashMap<>(100, 1.0f, 2);
-    private ConcurrentHashMap<Integer, TLRPC.EncryptedChat> encryptedChats = new ConcurrentHashMap<>(10, 1.0f, 2);
-    private ConcurrentHashMap<Long, TLRPC.User> users = new ConcurrentHashMap<>(100, 1.0f, 2);
-    private ConcurrentHashMap<String, TLObject> objectsByUsernames = new ConcurrentHashMap<>(100, 1.0f, 2);
+    private final ConcurrentHashMap<Long, TLRPC.Chat> chats = new ConcurrentHashMap<>(100, 1.0f, 2);
+    private final ConcurrentHashMap<Integer, TLRPC.EncryptedChat> encryptedChats = new ConcurrentHashMap<>(10, 1.0f, 2);
+    private final ConcurrentHashMap<Long, TLRPC.User> users = new ConcurrentHashMap<>(100, 1.0f, 2);
+    private final ConcurrentHashMap<String, TLObject> objectsByUsernames = new ConcurrentHashMap<>(100, 1.0f, 2);
     public static int stableIdPointer = 100;
 
-    private HashMap<Long, TLRPC.Chat> activeVoiceChatsMap = new HashMap<>();
+    private final HashMap<Long, TLRPC.Chat> activeVoiceChatsMap = new HashMap<>();
 
-    private ArrayList<Long> joiningToChannels = new ArrayList<>();
+    private final ArrayList<Long> joiningToChannels = new ArrayList<>();
 
-    private LongSparseArray<TLRPC.TL_chatInviteExported> exportedChats = new LongSparseArray<>();
+    private final LongSparseArray<TLRPC.TL_chatInviteExported> exportedChats = new LongSparseArray<>();
 
     public ArrayList<TLRPC.RecentMeUrl> hintDialogs = new ArrayList<>();
     public SparseArray<ArrayList<TLRPC.Dialog>> dialogsByFolder = new SparseArray<>();
@@ -133,9 +133,9 @@ public class MessagesController extends BaseController implements NotificationCe
     public LongSparseArray<SparseArray<Integer>> printingStringsTypes = new LongSparseArray<>();
     public LongSparseArray<SparseArray<Boolean>>[] sendingTypings = new LongSparseArray[12];
     public ConcurrentHashMap<Long, Integer> onlinePrivacy = new ConcurrentHashMap<>(20, 1.0f, 2);
-    private LongSparseIntArray pendingUnreadCounter = new LongSparseIntArray();
+    private final LongSparseIntArray pendingUnreadCounter = new LongSparseIntArray();
     private int lastPrintingStringCount;
-    private SparseArray<ChatlistUpdatesStat> chatlistFoldersUpdates = new SparseArray<>();
+    private final SparseArray<ChatlistUpdatesStat> chatlistFoldersUpdates = new SparseArray<>();
     public int largeQueueMaxActiveOperations = 2;
     public int smallQueueMaxActiveOperations = 5;
 
@@ -154,29 +154,29 @@ public class MessagesController extends BaseController implements NotificationCe
 
     private boolean dialogsInTransaction;
 
-    private LongSparseArray<Boolean> loadingPeerSettings = new LongSparseArray<>();
+    private final LongSparseArray<Boolean> loadingPeerSettings = new LongSparseArray<>();
 
-    private ArrayList<Long> createdDialogIds = new ArrayList<>();
-    private ArrayList<Long> createdScheduledDialogIds = new ArrayList<>();
-    private ArrayList<Long> createdDialogMainThreadIds = new ArrayList<>();
-    private ArrayList<Long> visibleDialogMainThreadIds = new ArrayList<>();
-    private ArrayList<Long> visibleScheduledDialogMainThreadIds = new ArrayList<>();
+    private final ArrayList<Long> createdDialogIds = new ArrayList<>();
+    private final ArrayList<Long> createdScheduledDialogIds = new ArrayList<>();
+    private final ArrayList<Long> createdDialogMainThreadIds = new ArrayList<>();
+    private final ArrayList<Long> visibleDialogMainThreadIds = new ArrayList<>();
+    private final ArrayList<Long> visibleScheduledDialogMainThreadIds = new ArrayList<>();
 
-    private LongSparseIntArray shortPollChannels = new LongSparseIntArray();
-    private LongSparseArray<ArrayList<Integer>> needShortPollChannels = new LongSparseArray<>();
-    private LongSparseIntArray shortPollOnlines = new LongSparseIntArray();
-    private LongSparseArray<ArrayList<Integer>> needShortPollOnlines = new LongSparseArray<>();
+    private final LongSparseIntArray shortPollChannels = new LongSparseIntArray();
+    private final LongSparseArray<ArrayList<Integer>> needShortPollChannels = new LongSparseArray<>();
+    private final LongSparseIntArray shortPollOnlines = new LongSparseIntArray();
+    private final LongSparseArray<ArrayList<Integer>> needShortPollOnlines = new LongSparseArray<>();
 
-    private LongSparseArray<TLRPC.Dialog> deletingDialogs = new LongSparseArray<>();
-    private LongSparseArray<TLRPC.Dialog> clearingHistoryDialogs = new LongSparseArray<>();
+    private final LongSparseArray<TLRPC.Dialog> deletingDialogs = new LongSparseArray<>();
+    private final LongSparseArray<TLRPC.Dialog> clearingHistoryDialogs = new LongSparseArray<>();
 
     public boolean loadingBlockedPeers = false;
     public LongSparseIntArray blockePeers = new LongSparseIntArray();
     public int totalBlockedCount = -1;
     public boolean blockedEndReached;
 
-    private LongSparseArray<ArrayList<Integer>> channelViewsToSend = new LongSparseArray<>();
-    private LongSparseArray<SparseArray<MessageObject>> pollsToCheck = new LongSparseArray<>();
+    private final LongSparseArray<ArrayList<Integer>> channelViewsToSend = new LongSparseArray<>();
+    private final LongSparseArray<SparseArray<MessageObject>> pollsToCheck = new LongSparseArray<>();
     private int pollsToCheckSize;
     private long lastViewsCheckTime;
     public SparseIntArray premiumFeaturesTypesToPosition = new SparseIntArray();
@@ -190,55 +190,55 @@ public class MessagesController extends BaseController implements NotificationCe
     public boolean dialogFiltersLoaded;
     public ArrayList<TLRPC.TL_dialogFilterSuggested> suggestedFilters = new ArrayList<>();
 
-    private LongSparseArray<ArrayList<TLRPC.Updates>> updatesQueueChannels = new LongSparseArray<>();
-    private LongSparseLongArray updatesStartWaitTimeChannels = new LongSparseLongArray();
-    private LongSparseIntArray channelsPts = new LongSparseIntArray();
-    private LongSparseArray<Boolean> gettingDifferenceChannels = new LongSparseArray<>();
-    private LongSparseArray<Boolean> gettingChatInviters = new LongSparseArray<>();
+    private final LongSparseArray<ArrayList<TLRPC.Updates>> updatesQueueChannels = new LongSparseArray<>();
+    private final LongSparseLongArray updatesStartWaitTimeChannels = new LongSparseLongArray();
+    private final LongSparseIntArray channelsPts = new LongSparseIntArray();
+    private final LongSparseArray<Boolean> gettingDifferenceChannels = new LongSparseArray<>();
+    private final LongSparseArray<Boolean> gettingChatInviters = new LongSparseArray<>();
 
-    private LongSparseArray<Boolean> gettingUnknownChannels = new LongSparseArray<>();
-    private LongSparseArray<Boolean> gettingUnknownDialogs = new LongSparseArray<>();
-    private LongSparseArray<Boolean> checkingLastMessagesDialogs = new LongSparseArray<>();
+    private final LongSparseArray<Boolean> gettingUnknownChannels = new LongSparseArray<>();
+    private final LongSparseArray<Boolean> gettingUnknownDialogs = new LongSparseArray<>();
+    private final LongSparseArray<Boolean> checkingLastMessagesDialogs = new LongSparseArray<>();
 
-    private ArrayList<TLRPC.Updates> updatesQueueSeq = new ArrayList<>();
-    private ArrayList<TLRPC.Updates> updatesQueuePts = new ArrayList<>();
-    private ArrayList<TLRPC.Updates> updatesQueueQts = new ArrayList<>();
+    private final ArrayList<TLRPC.Updates> updatesQueueSeq = new ArrayList<>();
+    private final ArrayList<TLRPC.Updates> updatesQueuePts = new ArrayList<>();
+    private final ArrayList<TLRPC.Updates> updatesQueueQts = new ArrayList<>();
     private long updatesStartWaitTimeSeq;
     private long updatesStartWaitTimePts;
     private long updatesStartWaitTimeQts;
-    private LongSparseArray<TLRPC.UserFull> fullUsers = new LongSparseArray<>();
-    private LongSparseArray<TLRPC.ChatFull> fullChats = new LongSparseArray<>();
-    private LongSparseArray<ChatObject.Call> groupCalls = new LongSparseArray<>();
-    private LongSparseArray<ChatObject.Call> groupCallsByChatId = new LongSparseArray<>();
-    private HashSet<Long> loadingFullUsers = new HashSet<>();
-    private LongSparseLongArray loadedFullUsers = new LongSparseLongArray();
-    private HashSet<Long> loadingFullChats = new HashSet<>();
-    private HashSet<Long> loadingGroupCalls = new HashSet<>();
-    private HashSet<Long> loadingFullParticipants = new HashSet<>();
-    private HashSet<Long> loadedFullParticipants = new HashSet<>();
+    private final LongSparseArray<TLRPC.UserFull> fullUsers = new LongSparseArray<>();
+    private final LongSparseArray<TLRPC.ChatFull> fullChats = new LongSparseArray<>();
+    private final LongSparseArray<ChatObject.Call> groupCalls = new LongSparseArray<>();
+    private final LongSparseArray<ChatObject.Call> groupCallsByChatId = new LongSparseArray<>();
+    private final HashSet<Long> loadingFullUsers = new HashSet<>();
+    private final LongSparseLongArray loadedFullUsers = new LongSparseLongArray();
+    private final HashSet<Long> loadingFullChats = new HashSet<>();
+    private final HashSet<Long> loadingGroupCalls = new HashSet<>();
+    private final HashSet<Long> loadingFullParticipants = new HashSet<>();
+    private final HashSet<Long> loadedFullParticipants = new HashSet<>();
     public LongSparseLongArray loadedFullChats = new LongSparseLongArray();
-    private LongSparseArray<LongSparseArray<TLRPC.ChannelParticipant>> channelAdmins = new LongSparseArray<>();
-    private LongSparseIntArray loadingChannelAdmins = new LongSparseIntArray();
+    private final LongSparseArray<LongSparseArray<TLRPC.ChannelParticipant>> channelAdmins = new LongSparseArray<>();
+    private final LongSparseIntArray loadingChannelAdmins = new LongSparseIntArray();
 
-    private SparseIntArray migratedChats = new SparseIntArray();
+    private final SparseIntArray migratedChats = new SparseIntArray();
 
-    private LongSparseArray<SponsoredMessagesInfo> sponsoredMessages = new LongSparseArray<>();
-    private LongSparseArray<SendAsPeersInfo> sendAsPeers = new LongSparseArray<>();
+    private final LongSparseArray<SponsoredMessagesInfo> sponsoredMessages = new LongSparseArray<>();
+    private final LongSparseArray<SendAsPeersInfo> sendAsPeers = new LongSparseArray<>();
 
-    private HashMap<String, ArrayList<MessageObject>> reloadingWebpages = new HashMap<>();
-    private LongSparseArray<ArrayList<MessageObject>> reloadingWebpagesPending = new LongSparseArray<>();
-    private HashMap<String, ArrayList<MessageObject>> reloadingScheduledWebpages = new HashMap<>();
-    private LongSparseArray<ArrayList<MessageObject>> reloadingScheduledWebpagesPending = new LongSparseArray<>();
+    private final HashMap<String, ArrayList<MessageObject>> reloadingWebpages = new HashMap<>();
+    private final LongSparseArray<ArrayList<MessageObject>> reloadingWebpagesPending = new LongSparseArray<>();
+    private final HashMap<String, ArrayList<MessageObject>> reloadingScheduledWebpages = new HashMap<>();
+    private final LongSparseArray<ArrayList<MessageObject>> reloadingScheduledWebpagesPending = new LongSparseArray<>();
 
-    private LongSparseArray<Long> lastScheduledServerQueryTime = new LongSparseArray<>();
-    private LongSparseArray<Long> lastServerQueryTime = new LongSparseArray<>();
+    private final LongSparseArray<Long> lastScheduledServerQueryTime = new LongSparseArray<>();
+    private final LongSparseArray<Long> lastServerQueryTime = new LongSparseArray<>();
 
-    private LongSparseArray<ArrayList<Integer>> reloadingMessages = new LongSparseArray<>();
+    private final LongSparseArray<ArrayList<Integer>> reloadingMessages = new LongSparseArray<>();
 
-    private ArrayList<ReadTask> readTasks = new ArrayList<>();
-    private LongSparseArray<ReadTask> readTasksMap = new LongSparseArray<>();
-    private ArrayList<ReadTask> repliesReadTasks = new ArrayList<>();
-    private HashMap<String, ReadTask> threadsReadTasksMap = new HashMap<>();
+    private final ArrayList<ReadTask> readTasks = new ArrayList<>();
+    private final LongSparseArray<ReadTask> readTasksMap = new LongSparseArray<>();
+    private final ArrayList<ReadTask> repliesReadTasks = new ArrayList<>();
+    private final HashMap<String, ReadTask> threadsReadTasksMap = new HashMap<>();
 
     private boolean gettingNewDeleteTask;
     private int currentDeletingTaskTime;
@@ -247,10 +247,10 @@ public class MessagesController extends BaseController implements NotificationCe
     private Runnable currentDeleteTaskRunnable;
 
     public boolean dialogsLoaded;
-    private SparseIntArray nextDialogsCacheOffset = new SparseIntArray();
-    private SparseBooleanArray loadingDialogs = new SparseBooleanArray();
-    private SparseBooleanArray dialogsEndReached = new SparseBooleanArray();
-    private SparseBooleanArray serverDialogsEndReached = new SparseBooleanArray();
+    private final SparseIntArray nextDialogsCacheOffset = new SparseIntArray();
+    private final SparseBooleanArray loadingDialogs = new SparseBooleanArray();
+    private final SparseBooleanArray dialogsEndReached = new SparseBooleanArray();
+    private final SparseBooleanArray serverDialogsEndReached = new SparseBooleanArray();
 
     private boolean loadingUnreadDialogs;
     private boolean migratingDialogs;
@@ -263,7 +263,7 @@ public class MessagesController extends BaseController implements NotificationCe
     private boolean resetingDialogs;
     private TLRPC.TL_messages_peerDialogs resetDialogsPinned;
     private TLRPC.messages_Dialogs resetDialogsAll;
-    private SparseIntArray loadingPinnedDialogs = new SparseIntArray();
+    private final SparseIntArray loadingPinnedDialogs = new SparseIntArray();
 
     public ArrayList<FaqSearchResult> faqSearchArray = new ArrayList<>();
     public TLRPC.WebPage faqWebPage;
@@ -290,10 +290,10 @@ public class MessagesController extends BaseController implements NotificationCe
     public boolean suggestContacts = true;
 
     private volatile static long lastThemeCheckTime;
-    private Runnable themeCheckRunnable = Theme::checkAutoNightThemeConditions;
+    private final Runnable themeCheckRunnable = Theme::checkAutoNightThemeConditions;
 
     private volatile static long lastPasswordCheckTime;
-    private Runnable passwordCheckRunnable = () -> getUserConfig().checkSavedPassword();
+    private final Runnable passwordCheckRunnable = () -> getUserConfig().checkSavedPassword();
 
     private long lastStatusUpdateTime;
     private int statusRequest;
@@ -301,7 +301,7 @@ public class MessagesController extends BaseController implements NotificationCe
     private boolean offlineSent;
     private String uploadingAvatar;
 
-    private HashMap<String, Object> uploadingThemes = new HashMap<>();
+    private final HashMap<String, Object> uploadingThemes = new HashMap<>();
 
     public String uploadingWallpaper;
     public Theme.OverrideWallpaperInfo uploadingWallpaperInfo;
@@ -316,7 +316,7 @@ public class MessagesController extends BaseController implements NotificationCe
     }
 
     private boolean loadingAppConfig;
-    private Fetcher<Integer, TLRPC.TL_help_appConfig> appConfigFetcher = new Fetcher<Integer, TLRPC.TL_help_appConfig>() {
+    private final Fetcher<Integer, TLRPC.TL_help_appConfig> appConfigFetcher = new Fetcher<Integer, TLRPC.TL_help_appConfig>() {
         @Override
         protected void getRemote(int currentAccount, Integer arguments, long hash, Utilities.Callback3<Boolean, TLRPC.TL_help_appConfig, Long> onResult) {
             TLRPC.TL_help_getAppConfig req = new TLRPC.TL_help_getAppConfig();
@@ -504,9 +504,9 @@ public class MessagesController extends BaseController implements NotificationCe
     public String premiumBotUsername;
     public String premiumInvoiceSlug;
 
-    private SharedPreferences notificationsPreferences;
-    private SharedPreferences mainPreferences;
-    private SharedPreferences emojiPreferences;
+    private final SharedPreferences notificationsPreferences;
+    private final SharedPreferences mainPreferences;
+    private final SharedPreferences emojiPreferences;
 
     public volatile boolean ignoreSetOnline;
     public boolean premiumLocked;
@@ -518,10 +518,10 @@ public class MessagesController extends BaseController implements NotificationCe
 
     private long recentEmojiStatusUpdateRunnableTimeout, recentEmojiStatusUpdateRunnableTime;
     private Runnable recentEmojiStatusUpdateRunnable;
-    private LongSparseArray<Integer> emojiStatusUntilValues = new LongSparseArray<>();
-    private TopicsController topicsController;
-    private CacheByChatsController cacheByChatsController;
-    private TranslateController translateController;
+    private final LongSparseArray<Integer> emojiStatusUntilValues = new LongSparseArray<>();
+    private final TopicsController topicsController;
+    private final CacheByChatsController cacheByChatsController;
+    private final TranslateController translateController;
     public boolean uploadMarkupVideo;
     public boolean giftAttachMenuIcon;
     public boolean giftTextFieldIcon;
@@ -1001,31 +1001,21 @@ public class MessagesController extends BaseController implements NotificationCe
                 if (user != null) {
                     if (!user.bot) {
                         if (user.self || user.contact || contactsController.isContact(dialogId)) {
-                            if ((flags & DIALOG_FILTER_FLAG_CONTACTS) != 0) {
-                                return true;
-                            }
+                            return (flags & DIALOG_FILTER_FLAG_CONTACTS) != 0;
                         } else {
-                            if ((flags & DIALOG_FILTER_FLAG_NON_CONTACTS) != 0) {
-                                return true;
-                            }
+                            return (flags & DIALOG_FILTER_FLAG_NON_CONTACTS) != 0;
                         }
                     } else {
-                        if ((flags & DIALOG_FILTER_FLAG_BOTS) != 0) {
-                            return true;
-                        }
+                        return (flags & DIALOG_FILTER_FLAG_BOTS) != 0;
                     }
                 }
             } else if (dialogId < 0) {
                 TLRPC.Chat chat = messagesController.getChat(-dialogId);
                 if (chat != null) {
                     if (ChatObject.isChannel(chat) && !chat.megagroup) {
-                        if ((flags & DIALOG_FILTER_FLAG_CHANNELS) != 0) {
-                            return true;
-                        }
+                        return (flags & DIALOG_FILTER_FLAG_CHANNELS) != 0;
                     } else {
-                        if ((flags & DIALOG_FILTER_FLAG_GROUPS) != 0) {
-                            return true;
-                        }
+                        return (flags & DIALOG_FILTER_FLAG_GROUPS) != 0;
                     }
                 }
             }
@@ -1101,7 +1091,7 @@ public class MessagesController extends BaseController implements NotificationCe
         Collections.sort(dialogs, dialogComparator);
     }
 
-    private Comparator<TLRPC.Dialog> dialogComparator = (dialog1, dialog2) -> {
+    private final Comparator<TLRPC.Dialog> dialogComparator = (dialog1, dialog2) -> {
         if (dialog1 instanceof TLRPC.TL_dialogFolder && !(dialog2 instanceof TLRPC.TL_dialogFolder)) {
             return -1;
         } else if (!(dialog1 instanceof TLRPC.TL_dialogFolder) && dialog2 instanceof TLRPC.TL_dialogFolder) {
@@ -1130,7 +1120,7 @@ public class MessagesController extends BaseController implements NotificationCe
         return 0;
     };
 
-    private Comparator<TLRPC.Update> updatesComparator = (lhs, rhs) -> {
+    private final Comparator<TLRPC.Update> updatesComparator = (lhs, rhs) -> {
         int ltype = getUpdateType(lhs);
         int rtype = getUpdateType(rhs);
         if (ltype != rtype) {
@@ -1151,7 +1141,7 @@ public class MessagesController extends BaseController implements NotificationCe
         return 0;
     };
 
-    private static volatile MessagesController[] Instance = new MessagesController[UserConfig.MAX_ACCOUNT_COUNT];
+    private static final MessagesController[] Instance = new MessagesController[UserConfig.MAX_ACCOUNT_COUNT];
     private static final Object[] lockObjects = new Object[UserConfig.MAX_ACCOUNT_COUNT];
     static {
         for (int i = 0; i < UserConfig.MAX_ACCOUNT_COUNT; i++) {
@@ -4316,9 +4306,7 @@ public class MessagesController extends BaseController implements NotificationCe
                     getUserConfig().saveConfig(true);
                 }
                 getUserNameResolver().update(oldUser, user);
-                if (oldUser != null && user.status != null && oldUser.status != null && user.status.expires != oldUser.status.expires) {
-                    return true;
-                }
+                return oldUser != null && user.status != null && oldUser.status != null && user.status.expires != oldUser.status.expires;
             } else if (oldUser == null) {
                 users.put(user.id, user);
             } else if (oldUser.min) {
@@ -6922,7 +6910,9 @@ public class MessagesController extends BaseController implements NotificationCe
         checkReadTasks();
 
         if (getUserConfig().isClientActivated()) {
-            if (!ignoreSetOnline && getConnectionsManager().getPauseTime() == 0 && ApplicationLoader.isScreenOn && !ApplicationLoader.mainInterfacePausedStageQueue) {
+            var keepOnlineStatusAs = ConfigManager.getIntOrDefault(Defines.keepOnlineStatusAs, 0);
+            if (keepOnlineStatusAs == 1 ||
+                (!ignoreSetOnline && getConnectionsManager().getPauseTime() == 0 && ApplicationLoader.isScreenOn && !ApplicationLoader.mainInterfacePausedStageQueue)) {
                 if (ApplicationLoader.mainInterfacePausedStageQueueTime != 0 && Math.abs(ApplicationLoader.mainInterfacePausedStageQueueTime - System.currentTimeMillis()) > 1000) {
                     if (statusSettingState != 1 && (lastStatusUpdateTime == 0 || Math.abs(System.currentTimeMillis() - lastStatusUpdateTime) >= 55000 || offlineSent)) {
                         statusSettingState = 1;
@@ -6947,7 +6937,7 @@ public class MessagesController extends BaseController implements NotificationCe
                         });
                     }
                 }
-            } else if (statusSettingState != 2 && !offlineSent && Math.abs(System.currentTimeMillis() - getConnectionsManager().getPauseTime()) >= 2000) {
+            } else if ((keepOnlineStatusAs == 2 && !offlineSent) || (statusSettingState != 2 && !offlineSent && Math.abs(System.currentTimeMillis() - getConnectionsManager().getPauseTime()) >= 2000)) {
                 statusSettingState = 2;
                 if (statusRequest != 0) {
                     getConnectionsManager().cancelRequest(statusRequest, true);
@@ -7099,7 +7089,7 @@ public class MessagesController extends BaseController implements NotificationCe
                             }
                         }
                         if (minExpireTime < 5) {
-                            lastViewsCheckTime = Math.min(lastViewsCheckTime, System.currentTimeMillis() - (5 - minExpireTime) * 1000);
+                            lastViewsCheckTime = Math.min(lastViewsCheckTime, System.currentTimeMillis() - (5 - minExpireTime) * 1000L);
                         }
                         if (array.size() == 0) {
                             pollsToCheck.remove(pollsToCheck.keyAt(a));
@@ -7703,7 +7693,7 @@ public class MessagesController extends BaseController implements NotificationCe
                             if (arr.size() > 2) {
                                 String plural = LocaleController.getPluralString("AndMoreTypingGroup", arr.size() - 2);
                                 try {
-                                    text = String.format(plural, label.toString(), arr.size() - 2);
+                                    text = String.format(plural, label, arr.size() - 2);
                                 } catch (Exception e) {
                                     text = "LOC_ERR: AndMoreTypingGroup";
                                 }
@@ -9180,7 +9170,8 @@ public class MessagesController extends BaseController implements NotificationCe
                             dids.append(dialog.id);
                             dialogHashMap.put(dialog.id, dialog);
                         }
-                        SQLiteCursor cursor = getMessagesStorage().getDatabase().queryFinalized(String.format(Locale.US, "SELECT did, folder_id FROM dialogs WHERE did IN (%s)", dids.toString()));
+                        SQLiteCursor cursor = getMessagesStorage().getDatabase().queryFinalized(String.format(Locale.US, "SELECT did, folder_id FROM dialogs WHERE did IN (%s)",
+                            dids));
                         while (cursor.next()) {
                             long did = cursor.longValue(0);
                             int folder_id = cursor.intValue(1);
@@ -9306,9 +9297,9 @@ public class MessagesController extends BaseController implements NotificationCe
         });
     }
 
-    private int DIALOGS_LOAD_TYPE_CACHE = 1;
-    private int DIALOGS_LOAD_TYPE_CHANNEL = 2;
-    private int DIALOGS_LOAD_TYPE_UNKNOWN = 3;
+    private final int DIALOGS_LOAD_TYPE_CACHE = 1;
+    private final int DIALOGS_LOAD_TYPE_CHANNEL = 2;
+    private final int DIALOGS_LOAD_TYPE_UNKNOWN = 3;
 
     public void processLoadedDialogs(final TLRPC.messages_Dialogs dialogsRes, ArrayList<TLRPC.EncryptedChat> encChats, ArrayList<TLRPC.UserFull> fullUsers, int folderId, int offset, int count, int loadType, boolean resetEnd, boolean migrate, boolean fromCache) {
         Utilities.stageQueue.postRunnable(() -> {
@@ -10389,7 +10380,7 @@ public class MessagesController extends BaseController implements NotificationCe
         if (hasExpiredPolls) {
             lastViewsCheckTime = 0;
         } else if (minExpireTime < 5) {
-            lastViewsCheckTime = Math.min(lastViewsCheckTime, System.currentTimeMillis() - (5 - minExpireTime) * 1000);
+            lastViewsCheckTime = Math.min(lastViewsCheckTime, System.currentTimeMillis() - (5 - minExpireTime) * 1000L);
         }
     }
 
@@ -11211,7 +11202,7 @@ public class MessagesController extends BaseController implements NotificationCe
 
     public interface ErrorDelegate {
         // if returns true, a delegate allows to show default alert
-        public boolean run(TLRPC.TL_error error);
+        boolean run(TLRPC.TL_error error);
     }
 
     public void addUsersToChat(TLRPC.Chat currentChat, BaseFragment baseFragment, ArrayList<TLRPC.User> users, int fwdCount, Consumer<TLRPC.User> onAddUser, Consumer<TLRPC.User> onRestricted, Runnable onComplete) {
@@ -16433,7 +16424,6 @@ public class MessagesController extends BaseController implements NotificationCe
             for (int i = 0; i < unreadReactions.size(); i++) {
                 markReactionsAsRead(unreadReactions.keyAt(i), topicId);
             }
-            return;
         }
     }
 
@@ -16464,9 +16454,7 @@ public class MessagesController extends BaseController implements NotificationCe
             return true;
         } else if (mute_type == 3) {
             int mute_until = notificationsPreferences.getInt("notifyuntil_" + NotificationsController.getSharedPrefKey(dialogId, topicId), 0);
-            if (mute_until >= getConnectionsManager().getCurrentTime()) {
-                return true;
-            }
+            return mute_until >= getConnectionsManager().getCurrentTime();
         }
         return false;
     }
@@ -16729,9 +16717,7 @@ public class MessagesController extends BaseController implements NotificationCe
                     }
                 }
             }
-            if (changed) {
-                return true;
-            }
+            return changed;
         }
         return false;
     }

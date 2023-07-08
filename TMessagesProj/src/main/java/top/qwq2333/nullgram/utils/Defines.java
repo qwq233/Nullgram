@@ -95,6 +95,10 @@ public class Defines {
     public static final String enablePanguOnSending = "enablePanguOnSending";
     public static final String enablePanguOnReceiving = "enablePanguOnReceiving";
     public static final String showExactTime = "showExactTime";
+    /**
+     * 0 default 1 online 2 offline
+     */
+    public static final String keepOnlineStatusAs = "keepOnlineStatusAs";
 
     // Custom API
     public static final String customAPI = "customAPI";
