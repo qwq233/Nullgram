@@ -44,6 +44,8 @@ import com.google.zxing.EncodeHintType;
 import com.google.zxing.qrcode.QRCodeWriter;
 import com.google.zxing.qrcode.decoder.ErrorCorrectionLevel;
 
+import org.telegram.SQLite.SQLiteCursor;
+import org.telegram.SQLite.SQLiteException;
 import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.ApplicationLoader;
 import org.telegram.messenger.BaseController;
@@ -61,6 +63,7 @@ import org.telegram.messenger.R;
 import org.telegram.messenger.UserConfig;
 import org.telegram.messenger.Utilities;
 import org.telegram.tgnet.ConnectionsManager;
+import org.telegram.tgnet.NativeByteBuffer;
 import org.telegram.tgnet.RequestDelegate;
 import org.telegram.tgnet.TLRPC;
 import org.telegram.ui.ActionBar.AlertDialog;
@@ -793,6 +796,42 @@ public class MessageUtils extends BaseController {
                 onQrDetectionDone.getAndSet(null).run();
             }
         }, 250);
+    }
+
+    public MessageObject getLastMessageFromUnblockUser(long dialogId) {
+        SQLiteCursor cursor;
+        MessageObject resp = null;
+        try {
+            cursor = getMessagesStorage().getDatabase()
+                .queryFinalized(String.format(Locale.US, "SELECT data,send_state,mid,date FROM messages WHERE uid = %d ORDER BY date DESC LIMIT %d,%d", dialogId, 0, 10));
+            while (cursor.next()) {
+                NativeByteBuffer data = cursor.byteBufferValue(0);
+                if (data == null) {
+                    continue;
+                }
+                TLRPC.Message message = TLRPC.Message.TLdeserialize(data, data.readInt32(false), false);
+                data.reuse();
+                if (getMessagesController().blockePeers.indexOfKey(message.from_id.user_id) < 0) {
+                    resp = new MessageObject(currentAccount, message, true, true);
+                    message.send_state = cursor.intValue(1);
+                    message.id = cursor.intValue(2);
+                    message.date = cursor.intValue(3);
+                    message.dialog_id = dialogId;
+                    if (getMessagesController().getUser(resp.getSenderId()) == null) {
+                        TLRPC.User user = getMessagesStorage().getUser(resp.getSenderId());
+                        if (user != null) {
+                            getMessagesController().putUser(user, true);
+                        }
+                    }
+                    break;
+                }
+            }
+            cursor.dispose();
+        } catch (SQLiteException sqLiteException) {
+            Log.e("SQLiteException when read last message from unblocked user", sqLiteException);
+            return null;
+        }
+        return resp;
     }
 
 

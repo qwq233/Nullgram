@@ -87,6 +87,7 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CountDownLatch;
+import java.util.stream.Collectors;
 
 import top.qwq2333.nullgram.config.ConfigManager;
 import top.qwq2333.nullgram.utils.Defines;
@@ -532,6 +533,8 @@ public class MessagesController extends BaseController implements NotificationCe
     public int chatlistJoinedLimitPremium;
 
     public int checkResetLangpack;
+
+    public LongSparseArray<MessageObject> dialogMessageFromUnblocked = new LongSparseArray<>();
 
     public void getNextReactionMention(long dialogId, int topicId, int count, Consumer<Integer> callback) {
         final MessagesStorage messagesStorage = getMessagesStorage();
@@ -5723,6 +5726,9 @@ public class MessagesController extends BaseController implements NotificationCe
                 }
                 loadingBlockedPeers = false;
                 getNotificationCenter().postNotificationName(NotificationCenter.blockedUsersDidLoad);
+                if (!reset && !blockedEndReached && ConfigManager.getBooleanOrFalse(Defines.ignoreBlockedUser)) {
+                    getBlockedPeers(false);
+                }
             }
         }));
     }
@@ -7561,6 +7567,11 @@ public class MessagesController extends BaseController implements NotificationCe
                 newStrings.put(key, newPrintingStrings);
                 newTypes.put(key, newPrintingStringsTypes);
 
+                if (ConfigManager.getBooleanOrFalse(Defines.ignoreBlockedUser)) {
+                    arr = arr.stream().filter(it -> getMessagesController().blockePeers.indexOfKey(it.userId) == -1).collect(Collectors.toCollection(ArrayList::new));
+                }
+                if (arr.isEmpty()) continue;
+
                 int type = 0;
                 CharSequence text = null;
                 if (key > 0 || isEncryptedChat || arr.size() == 1) {
@@ -9368,6 +9379,9 @@ public class MessagesController extends BaseController implements NotificationCe
             ArrayList<MessageObject> newMessages = new ArrayList<>();
             for (int a = 0; a < dialogsRes.messages.size(); a++) {
                 TLRPC.Message message = dialogsRes.messages.get(a);
+                if (ConfigManager.getBooleanOrFalse(Defines.ignoreBlockedUser) && getMessagesController().blockePeers.indexOfKey(message.peer_id.user_id) >= 0) {
+                    continue;
+                }
                 if (lastMessage == null || message.date < lastMessage.date) {
                     lastMessage = message;
                 }
@@ -16919,6 +16933,14 @@ public class MessagesController extends BaseController implements NotificationCe
                         arrayList.add(msg);
                     }
                 }
+
+                if (ConfigManager.getBooleanOrFalse(Defines.ignoreBlockedUser) && blockePeers.indexOfKey(lastMessage.getSenderId()) >= 0) {
+                    ArrayList<MessageObject> preMsg = dialogMessage.get(dialogId);
+                    if (preMsg.size() > 0 && blockePeers.indexOfKey(preMsg.get(0).getSenderId()) < 0) {
+                        dialogMessageFromUnblocked.put(dialogId, preMsg.get(0));
+                    }
+                }
+
                 dialogMessage.put(dialogId, arrayList);
                 getTranslateController().checkDialogMessage(dialogId);
                 if (lastMessage.messageOwner.peer_id.channel_id == 0) {
