@@ -116,7 +116,7 @@ object StringUtils {
                     list.add(text[i])
                 }
             }
-            var (start, targetLength) = 0 to 0
+            var (start, targetLength) = it.offset to 0
             var isFinished = false
             for (i in it.offset until panguText.length) {
                 if (i < start) continue
