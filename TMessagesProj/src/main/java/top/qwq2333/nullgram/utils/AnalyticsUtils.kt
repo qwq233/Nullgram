@@ -86,7 +86,7 @@ object AnalyticsUtils {
                 key("Build Time", BuildConfig.BUILD_TIME)
 
                 for (i in 0 ..  UserConfig.MAX_ACCOUNT_COUNT) {
-                    UserConfig.getInstance(i).let {
+                    UserConfig.getInstance(i)?.let {
                         if (!it.isClientActivated) return@let
                         key("User $i", it.getClientUserId().toString())
                     }
