@@ -176,7 +176,7 @@
 -repackageclasses
 -allowaccessmodification
 -overloadaggressively
--keepattributes SourceDir,SourceFile,LineNumberTable,LocalVariableTable
+-keepattributes SourceFile,LineNumberTable,LocalVariableTable
 -obfuscationdictionary          proguard-dic.txt
 -classobfuscationdictionary     proguard-dic.txt
 -packageobfuscationdictionary   proguard-dic.txt
