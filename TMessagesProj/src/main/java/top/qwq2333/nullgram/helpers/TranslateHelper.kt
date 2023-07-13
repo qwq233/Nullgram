@@ -64,7 +64,7 @@ object TranslateHelper {
         }
 
     @JvmStatic
-    var restrictedLanguages: HashSet<String> = ConfigManager.getStringSetOrDefault(Defines.restrictedLanguages, hashSetOf()) as HashSet<String>
+    var restrictedLanguages: java.util.HashSet<String> = ConfigManager.getStringSetOrDefault(Defines.restrictedLanguages, java.util.HashSet()) as java.util.HashSet<String>
         set(value) {
             Log.i("TranslateHelper: set restrictedLanguages to $value")
             ConfigManager.putStringSet(Defines.restrictedLanguages, value)
