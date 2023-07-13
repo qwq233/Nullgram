@@ -49,7 +49,7 @@ jobs:
       - name: Prepare Environment
         run: |
             echo "Removing large packages"
-            sudo apt-get remove -y '^dotnet-.*' aspnetcore-targeting-pack-6.0
+            sudo apt-get remove -y '^dotnet-.*' aspnetcore-targeting-pack-6.0 aspnetcore-targeting-pack-7.0
             sudo apt-get remove -y '^llvm-.*'
             sudo apt-get remove -y 'php.*'
             sudo apt-get remove -y '^mongodb-.*'
@@ -145,7 +145,7 @@ jobs:
       - name: Prepare Environment
         run: |
             echo "Removing large packages"
-            sudo apt-get remove -y '^dotnet-.*' aspnetcore-targeting-pack-6.0
+            sudo apt-get remove -y '^dotnet-.*' aspnetcore-targeting-pack-6.0 aspnetcore-targeting-pack-7.0
             sudo apt-get remove -y '^llvm-.*'
             sudo apt-get remove -y 'php.*'
             sudo apt-get remove -y '^mongodb-.*'
