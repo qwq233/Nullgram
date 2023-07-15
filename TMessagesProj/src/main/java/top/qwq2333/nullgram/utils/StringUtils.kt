@@ -141,11 +141,6 @@ object StringUtils {
                 }
             }
         }
-        try {
-            throw Exception("pangu test")
-        } catch (e: Exception) {
-            Log.e(e)
-        }
         return Pair(panguText, panguEntities)
     }
 }
