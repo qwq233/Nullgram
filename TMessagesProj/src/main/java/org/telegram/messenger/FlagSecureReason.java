@@ -5,6 +5,9 @@ import android.view.WindowManager;
 
 import java.util.HashMap;
 
+import top.qwq2333.nullgram.config.ConfigManager;
+import top.qwq2333.nullgram.utils.Defines;
+
 public class FlagSecureReason {
 
     private static HashMap<Window, Integer> currentSecureReasons;
@@ -60,6 +63,10 @@ public class FlagSecureReason {
     }
 
     private static void updateWindowSecure(Window window) {
+        if (ConfigManager.getBooleanOrFalse(Defines.allowScreenshotOnNoForwardChat)) {
+            return;
+        }
+
         if (window == null) {
             return;
         }
