@@ -20,6 +20,7 @@ package top.qwq2333.nullgram.utils
 
 import org.telegram.tgnet.TLRPC
 import ws.vinta.pangu.Pangu
+import kotlin.math.ceil
 
 object StringUtils {
     private val pangu = Pangu()
@@ -98,7 +99,7 @@ object StringUtils {
     fun ellipsis(text: String, length: Int): String {
         // The letters [iIl1] are slim enough to only count as half a character.
         var length = length
-        length += Math.ceil(text.replace("[^iIl]".toRegex(), "").length / 2.0).toInt()
+        length += ceil(text.replace("[^iIl]".toRegex(), "").length / 2.0).toInt()
         return if (text.length > length) {
             text.substring(0, length - 3) + "..."
         } else text
@@ -133,7 +134,7 @@ object StringUtils {
                             break
                         }
                     } else {
-                        if ((text.length >= j && panguText.length >= j) && text[j] == panguText[j]) continue
+                        if ((text.lastIndex >= j && panguText.lastIndex >= j+1) && text[j] == panguText[j]) continue
                         if (panguText[j+1] != char[0] && start != 0) continue
                         it.offset = start
                         it.length = targetLength

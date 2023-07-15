@@ -1302,8 +1302,7 @@ public class ChatMessageCell extends BaseCell implements SeekBar.SeekBarDelegate
         this(context, false, null);
     }
 
-    public ChatMessageCell(Context context, boolean canDrawBackgroundInParent,
-                           Theme.ResourcesProvider resourcesProvider) {
+    public ChatMessageCell(Context context, boolean canDrawBackgroundInParent, Theme.ResourcesProvider resourcesProvider) {
         super(context);
         this.resourcesProvider = resourcesProvider;
         this.canDrawBackgroundInParent = canDrawBackgroundInParent;
