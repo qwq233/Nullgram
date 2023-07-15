@@ -131,7 +131,7 @@ object StringUtils {
                             break
                         }
                     } else {
-                        if (text.length >= j && text[j] == panguText[j]) continue
+                        if ((text.length >= j && panguText.length >= j) && text[j] == panguText[j]) continue
                         if (panguText[j+1] != char[0] && start != 0) continue
                         panguEntities.add(Utils.generateMessageEntity(it, start, targetLength))
                         start = j + 1
@@ -140,6 +140,11 @@ object StringUtils {
                     }
                 }
             }
+        }
+        try {
+            throw Exception("pangu test")
+        } catch (e: Exception) {
+            Log.e(e)
         }
         return Pair(panguText, panguEntities)
     }

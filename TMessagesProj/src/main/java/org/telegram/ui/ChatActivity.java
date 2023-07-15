@@ -32351,9 +32351,7 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
             var messageObject = getMessageUtils().getMessageForRepeat(selectedObject, selectedObjectGroup);
             if (messageObject != null) {
                 if (messageObject.isAnyKindOfSticker() && !messageObject.isAnimatedEmojiStickers() && !messageObject.isAnimatedEmoji() && !messageObject.isDice()) {
-                    getSendMessagesHelper().sendSticker(
-                        selectedObject.getDocument(), null, dialog_id, threadMessageObject,
-                        threadMessageObject, null, null, true, 0, false);
+                    getSendMessagesHelper().sendSticker(selectedObject.getDocument(), null, dialog_id, threadMessageObject, threadMessageObject, null, null, true, 0, false);
                     return true;
                 } else {
                     var message = messageObject.messageOwner.message;
@@ -32375,10 +32373,7 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
                         } else {
                             entities = null;
                         }
-                        getSendMessagesHelper().sendMessage(
-                            message, dialog_id, threadMessageObject,
-                            threadMessageObject, null, false, entities,
-                            null, null, true, 0, null, false);
+                        getSendMessagesHelper().sendMessage(message, dialog_id, threadMessageObject, threadMessageObject, null, false, entities, null, null, true, 0, null, false);
                         return true;
                     }
                 }

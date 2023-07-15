@@ -1757,7 +1757,7 @@ public class SendMessagesHelper extends BaseController implements NotificationCe
 
                         var messageText = msgObj.messageText.toString();
                         var entities = msgObj.messageOwner.entities;
-                        if (ConfigManager.getBooleanOrFalse(Defines.enablePanguOnSending)) {
+                        if (!msgObj.isForwarded() && ConfigManager.getBooleanOrFalse(Defines.enablePanguOnSending)) {
                             var pair = StringUtils.spacingText(messageText, msgObj.messageOwner.entities);
                             messageText = pair.getFirst();
                             entities = pair.getSecond();
@@ -1921,7 +1921,7 @@ public class SendMessagesHelper extends BaseController implements NotificationCe
                     newMsg.message = "";
                 }
 
-                if (ConfigManager.getBooleanOrFalse(Defines.enablePanguOnSending)) {
+                if (!((newMsg.params.containsKey("fwd_id") || newMsg.params.containsKey("fwd_peer")) || msgObj.isForwarded() || MessageObject.isForwardedMessage(newMsg)) && ConfigManager.getBooleanOrFalse(Defines.enablePanguOnSending)) {
                     var pair = StringUtils.spacingText(newMsg.message, msgObj.messageOwner.entities);
                     newMsg.message = pair.getFirst();
                     newMsg.entities = pair.getSecond();
@@ -3887,7 +3887,7 @@ public class SendMessagesHelper extends BaseController implements NotificationCe
                 isFinalGroupMedia = params.get("final") != null;
             }
 
-            if (ConfigManager.getBooleanOrFalse(Defines.enablePanguOnSending)) {
+            if (!((params != null && params.containsKey("fwd_id")) || MessageObject.isForwardedMessage(newMsg)) && ConfigManager.getBooleanOrFalse(Defines.enablePanguOnSending)) {
                 Pair<String, ArrayList<MessageEntity>> pair;
                 if (caption != null) {
                     pair = StringUtils.spacingText(caption, entities);
