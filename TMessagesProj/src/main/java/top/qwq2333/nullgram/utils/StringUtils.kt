@@ -126,14 +126,18 @@ object StringUtils {
                         char.removeAt(0)
                         targetLength++
                         if (char.isEmpty()) {
-                            panguEntities.add(Utils.generateMessageEntity(it, start, targetLength))
+                            it.offset = start
+                            it.length = targetLength
+                            panguEntities.add(it)
                             isFinished = true
                             break
                         }
                     } else {
                         if ((text.length >= j && panguText.length >= j) && text[j] == panguText[j]) continue
                         if (panguText[j+1] != char[0] && start != 0) continue
-                        panguEntities.add(Utils.generateMessageEntity(it, start, targetLength))
+                        it.offset = start
+                        it.length = targetLength
+                        panguEntities.add(it)
                         start = j + 1
                         targetLength = 0
                         break
