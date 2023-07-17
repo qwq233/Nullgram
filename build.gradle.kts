@@ -45,7 +45,6 @@ fun Project.configureBaseExtension() {
         compileOptions {
             sourceCompatibility = Version.java
             targetCompatibility = Version.java
-            isCoreLibraryDesugaringEnabled = true
         }
 
         packagingOptions.jniLibs.useLegacyPackaging = false
