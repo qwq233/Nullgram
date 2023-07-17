@@ -34,5 +34,5 @@ gradleEnterprise {
 rootProject.name = "Nullgram"
 include(
     ":TMessagesProj",
-    ":tcp2ws",
+    ":libs:tcp2ws",
 )

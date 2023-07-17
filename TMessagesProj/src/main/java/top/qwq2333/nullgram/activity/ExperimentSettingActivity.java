@@ -263,7 +263,7 @@ public class ExperimentSettingActivity extends BaseActivity {
 
         panguRow = addRow();
         enablePanguOnSendingRow = addRow("enablePanguOnSending");
-        enablePanguOnReceivingRow = /*addRow("enablePanguOnReceiving")*/ -1; //todo: not finished
+        enablePanguOnReceivingRow = addRow("enablePanguOnReceiving");
         pangu3Row = addRow();
         pangu2Row = addRow();
 

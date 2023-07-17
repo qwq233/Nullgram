@@ -90,7 +90,7 @@ dependencies {
     implementation("ws.vinta:pangu:1.1.0")
     implementation("com.mikepenz:aboutlibraries:10.7.0")
 
-    implementation(project(":tcp2ws"))
+    implementation(project(":libs:tcp2ws"))
 }
 
 
