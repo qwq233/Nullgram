@@ -116,6 +116,8 @@ object StringUtils {
                 for (i in it.offset until (it.offset + it.length).coerceAtMost(text.length)) {
                     list.add(text[i])
                 }
+            }.also {list ->
+                if (list.isEmpty()) return@forEach
             }
             var (start, targetLength) = it.offset to 0
             var isFinished = false
@@ -134,8 +136,9 @@ object StringUtils {
                             break
                         }
                     } else {
-                        if ((text.lastIndex >= j && panguText.lastIndex >= j+1) && text[j] == panguText[j]) continue
-                        if (panguText[j+1] != char[0] && start != 0) continue
+                        if ((text.lastIndex >= j && panguText.lastIndex >= j ) && text[j] == panguText[j]) continue
+                        if (panguText.lastIndex >= j+1 && panguText[j+1] != char[0] && start != 0) continue
+
                         it.offset = start
                         it.length = targetLength
                         panguEntities.add(it)

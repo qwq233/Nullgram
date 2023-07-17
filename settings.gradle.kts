@@ -35,4 +35,5 @@ rootProject.name = "Nullgram"
 include(
     ":TMessagesProj",
     ":libs:tcp2ws",
+    ":libs:pangu"
 )

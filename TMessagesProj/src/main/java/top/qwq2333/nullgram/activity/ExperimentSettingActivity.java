@@ -45,7 +45,6 @@ import top.qwq2333.nullgram.config.ConfigManager;
 import top.qwq2333.nullgram.ui.PopupBuilder;
 import top.qwq2333.nullgram.utils.Defines;
 import top.qwq2333.nullgram.utils.Log;
-import ws.vinta.pangu.Pangu;
 
 @SuppressLint("NotifyDataSetChanged")
 public class ExperimentSettingActivity extends BaseActivity {
@@ -86,8 +85,6 @@ public class ExperimentSettingActivity extends BaseActivity {
 
     private boolean sensitiveEnabled;
     private final boolean sensitiveCanChange;
-
-    private final Pangu pangu = new Pangu();
 
     public ExperimentSettingActivity(boolean sensitiveEnabled, boolean sensitiveCanChange) {
         this.sensitiveEnabled = sensitiveEnabled;
@@ -263,7 +260,8 @@ public class ExperimentSettingActivity extends BaseActivity {
 
         panguRow = addRow();
         enablePanguOnSendingRow = addRow("enablePanguOnSending");
-        enablePanguOnReceivingRow = addRow("enablePanguOnReceiving");
+        enablePanguOnReceivingRow = -1;
+//        enablePanguOnReceivingRow = addRow("enablePanguOnReceiving");
         pangu3Row = addRow();
         pangu2Row = addRow();
 

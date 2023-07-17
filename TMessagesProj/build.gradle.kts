@@ -39,7 +39,7 @@ fun setupPlay(stable: Boolean) {
 }
 
 dependencies {
-    implementation(platform("com.google.firebase:firebase-bom:32.1.0"))
+    implementation(platform("com.google.firebase:firebase-bom:32.2.0"))
     implementation("com.google.firebase:firebase-crashlytics-ktx")
 
     implementation("androidx.core:core-ktx:1.10.1")
@@ -51,8 +51,8 @@ dependencies {
     implementation("androidx.sharetarget:sharetarget:1.2.0")
 
     compileOnly("org.checkerframework:checker-compat-qual:2.5.5")
-    implementation("com.google.firebase:firebase-messaging:23.1.2")
-    implementation("com.google.firebase:firebase-config:21.4.0")
+    implementation("com.google.firebase:firebase-messaging:23.2.0")
+    implementation("com.google.firebase:firebase-config:21.4.1")
     implementation("com.google.firebase:firebase-datatransport:18.1.8")
     implementation("com.google.firebase:firebase-appindexing:20.0.0")
     implementation("com.google.android.gms:play-services-auth:20.6.0")
@@ -65,7 +65,7 @@ dependencies {
     implementation(files("libs/stripe.aar"))
     implementation("com.google.mlkit:language-id:17.0.4")
     implementation(files("libs/libgsaverification-client.aar"))
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.1")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.2")
     implementation("com.google.code.gson:gson:2.10.1")
     implementation("com.jakewharton:process-phoenix:2.1.2")
     // https://mvnrepository.com/artifact/de.psdev.licensesdialog/licensesdialog
@@ -79,7 +79,7 @@ dependencies {
     implementation("org.jetbrains.kotlin:kotlin-stdlib:${Version.kotlin}")
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.5.1")
     implementation("org.osmdroid:osmdroid-android:6.1.16")
-    implementation("com.android.billingclient:billing:6.0.0")
+    implementation("com.android.billingclient:billing:6.0.1")
     implementation("com.google.guava:guava:32.0.0-jre")
 
     implementation("io.ktor:ktor-client-core:${Version.ktor}")
@@ -87,15 +87,14 @@ dependencies {
     implementation("io.ktor:ktor-client-encoding:${Version.ktor}")
     implementation("io.ktor:ktor-client-content-negotiation:${Version.ktor}")
     implementation("io.ktor:ktor-serialization-kotlinx-json:${Version.ktor}")
-    implementation("ws.vinta:pangu:1.1.0")
-    implementation("com.mikepenz:aboutlibraries:10.7.0")
 
     implementation(project(":libs:tcp2ws"))
+    implementation(project(":libs:pangu"))
 }
 
 
 dependencies {
-    val appCenterSdkVersion = "5.0.1"
+    val appCenterSdkVersion = "5.0.2"
     implementation("com.microsoft.appcenter:appcenter-analytics:${appCenterSdkVersion}")
     implementation("com.microsoft.appcenter:appcenter-crashes:${appCenterSdkVersion}")
 }
