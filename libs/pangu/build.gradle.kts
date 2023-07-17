@@ -9,10 +9,10 @@ dependencies {
 }
 
 java {
-    targetCompatibility = JavaVersion.VERSION_11
-    sourceCompatibility = JavaVersion.VERSION_11
+    targetCompatibility = Version.java
+    sourceCompatibility = Version.java
 }
 
 kotlin {
-    jvmToolchain(11)
+    jvmToolchain(Version.java.toString().toInt())
 }

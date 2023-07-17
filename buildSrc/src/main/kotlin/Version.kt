@@ -1,3 +1,5 @@
+import org.gradle.api.JavaVersion
+
 object Version {
 
     @JvmStatic
@@ -7,7 +9,7 @@ object Version {
     val ktor = "2.3.2"
 
     @JvmStatic
-    val JavaVersion = "11"
+    val java = JavaVersion.VERSION_17
 
     @JvmStatic
     val officialVersionName = "9.6.6"

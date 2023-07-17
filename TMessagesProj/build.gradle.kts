@@ -121,12 +121,12 @@ android {
         )
     }
 
-    packagingOptions {
+    packaging {
         resources.excludes += "**"
     }
 
-    kotlinOptions {
-        jvmTarget = Version.JavaVersion
+    kotlin {
+        jvmToolchain(Version.java.toString().toInt())
     }
 
     var keystorePwd: String? = null

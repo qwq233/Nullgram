@@ -69,9 +69,6 @@ class Pangu {
             "((\\S+)#)" +
                 "([\\p{InHiragana}\\p{InKatakana}\\p{InBopomofo}\\p{InCJKCompatibilityIdeographs}\\p{InCJKUnifiedIdeographs}])"
         )
-        private val URL_PATTERN = Pattern.compile(
-            "(\\b((https?|ftp)://|(www|ftp)\\.)?[a-z0-9-]+(\\.[a-z0-9-]+)+([/?][^\\s]*)?\\b)"
-        )
     }
 
     private fun processUrl(text: String): Triple<String?, String, String?> = Pattern.compile("://").matcher(text).let { matcher ->
@@ -95,7 +92,7 @@ class Pangu {
         var suffixOffset = text.lastIndex
         val suffix: String = StringBuilder().apply {
             arrayListOf<Char>().apply {
-                for (i in matcher.end() until  text.length) {
+                for (i in matcher.end() until text.length) {
                     val c = text[i]
                     if (c.isWhitespace()) {
                         suffixOffset = i
@@ -130,7 +127,7 @@ class Pangu {
         if (text.contains("://")) {
             val (first, url, last) = processUrl(text)
             var result = String()
-            if (first != null)  {
+            if (first != null) {
                 result += spacingText(first)
             }
             result += url
