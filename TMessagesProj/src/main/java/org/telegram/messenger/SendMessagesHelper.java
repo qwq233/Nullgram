@@ -3898,7 +3898,6 @@ public class SendMessagesHelper extends BaseController implements NotificationCe
                 }
                 entities = pair.getSecond();
 
-                pair = StringUtils.spacingText(newMsg.message, newMsg.entities);
                 newMsg.message = pair.getFirst();
                 newMsg.entities = pair.getSecond();
             }

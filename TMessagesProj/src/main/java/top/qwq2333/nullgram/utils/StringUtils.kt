@@ -96,6 +96,7 @@ object StringUtils {
      * @return Return a string with a maximum length of `length` characters.
      */
     @JvmStatic
+    @Suppress("NAME_SHADOWING")
     fun ellipsis(text: String, length: Int): String {
         // The letters [iIl1] are slim enough to only count as half a character.
         var length = length
@@ -111,41 +112,38 @@ object StringUtils {
 
         val panguText = pangu.spacingText(text)
         val panguEntities = arrayListOf<TLRPC.MessageEntity>()
+
+        if (panguText.length == text.length) return Pair(panguText, entities) // processed or unnecessary
+
         entities.forEach {
+
             val char = mutableListOf<Char>().also { list ->
-                for (i in it.offset until (it.offset + it.length).coerceAtMost(text.length)) {
+                for (i in it.offset until it.offset + it.length) {
                     list.add(text[i])
                 }
-            }.also {list ->
+            }.also { list ->
                 if (list.isEmpty()) return@forEach
             }
-            var (start, targetLength) = it.offset to 0
-            var isFinished = false
-            for (i in it.offset until panguText.length) {
-                if (i < start) continue
-                if (isFinished) break
-                for (j in start until panguText.length) {
-                    if (panguText[j] == char[0]) {
-                        char.removeAt(0)
-                        targetLength++
-                        if (char.isEmpty()) {
-                            it.offset = start
-                            it.length = targetLength
-                            panguEntities.add(it)
-                            isFinished = true
-                            break
-                        }
-                    } else {
-                        if ((text.lastIndex >= j && panguText.lastIndex >= j ) && text[j] == panguText[j]) continue
-                        if (panguText.lastIndex >= j+1 && panguText[j+1] != char[0] && start != 0) continue
 
-                        it.offset = start
-                        it.length = targetLength
-                        panguEntities.add(it)
-                        start = j + 1
-                        targetLength = 0
-                        break
+            var length = 0
+            var start = it.offset
+            var matched = false // matched first character
+            for (i in it.offset until panguText.length) {
+                if (start > i) continue
+                if (panguText[i] == char[0]) { // match
+                    char.removeAt(0)
+                    if (!matched) {
+                        start = i
+                        matched = true
                     }
+                }
+                if (matched) length++
+                if (char.isEmpty()) { // empty processing list
+                    panguEntities.add(it.apply {
+                        it.offset = start
+                        it.length = length
+                    })
+                    break
                 }
             }
         }

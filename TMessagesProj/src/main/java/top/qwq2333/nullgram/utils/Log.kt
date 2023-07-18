@@ -147,12 +147,23 @@ object Log {
      * @param throwable 异常
      */
     @JvmStatic
-    fun crash(throwable: Throwable?) {
+    @JvmOverloads
+    fun crash(throwable: Throwable? = null) {
         if (throwable != null) {
             throw throwable
         } else {
             throw NullPointerException("manual crash")
         }
+    }
+
+    /**
+     * DEBUG ONLY
+     */
+    @JvmStatic
+    fun throwException() = try {
+        throw NullPointerException("manual crash")
+    } catch (e: Exception) {
+        w(e)
     }
 
     /**

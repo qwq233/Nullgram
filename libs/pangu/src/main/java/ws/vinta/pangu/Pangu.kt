@@ -1,5 +1,6 @@
 /*
  * Created by Vinta Chen on 2014/11/05.
+ * Modified by qwq233 on 2023/07/17
  */
 package ws.vinta.pangu
 
@@ -18,6 +19,7 @@ import java.util.regex.Pattern
  * love and writing need some space in good time.
  *
  * @author Vinta Chen
+ * @author qwq233
  * @since 1.0.0
  */
 class Pangu {
@@ -71,7 +73,7 @@ class Pangu {
         )
     }
 
-    private fun processUrl(text: String): Triple<String?, String, String?> = Pattern.compile("://").matcher(text).let { matcher ->
+    private fun processUrl(text: String) = Pattern.compile("://").matcher(text).let { matcher ->
         if (!matcher.find()) {
             throw NullPointerException("No URL found in text")
         }
@@ -117,10 +119,7 @@ class Pangu {
      * @param text  the string you want to process, must not be `null`.
      * @return a comfortable and readable version of `text` for paranoiac.
      */
-    fun spacingText(text: String?): String {
-        if (text.isNullOrEmpty()) {
-            return text ?: throw NullPointerException("text == null")
-        }
+    fun spacingText(text: String): String {
         var text: String = text
 
         // URL
@@ -175,7 +174,7 @@ class Pangu {
     }
 
     private fun log(text: String) {
-        println("panguTrace $text")
+        println("panguTrace: $text")
     }
 
 }
