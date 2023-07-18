@@ -26,13 +26,11 @@ import android.graphics.Typeface
 import android.net.ConnectivityManager
 import android.net.Network
 import android.net.NetworkCapabilities
-import android.os.Build
 import android.util.Base64
 import android.view.View
 import android.widget.Toast
 import org.telegram.messenger.AndroidUtilities
 import org.telegram.messenger.ApplicationLoader
-import org.telegram.messenger.FileLog
 import org.telegram.messenger.LocaleController
 import org.telegram.messenger.MessageObject
 import org.telegram.messenger.NotificationCenter
@@ -133,7 +131,7 @@ object Utils {
                             if (font.lowercase(Locale.getDefault()).contains("emoji")) {
                                 val file = File("/system/fonts/$font")
                                 if (file.exists()) {
-                                    FileLog.d("emoji font file fonts.xml = $font")
+                                    Log.d("emoji font file fonts.xml = $font")
                                     return file
                                 }
                             }
@@ -147,7 +145,7 @@ object Utils {
                 }
             }
         } catch (e: Exception) {
-            FileLog.e(e)
+            Log.e(e)
         }
         return null
     }
@@ -168,9 +166,6 @@ object Utils {
 
     @JvmStatic
     fun isVPNEnabled(): Boolean {
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
-            return false
-        }
         runCatching {
             val connectivityManager = ApplicationLoader.applicationContext.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
             val network = connectivityManager.activeNetwork
@@ -249,7 +244,7 @@ object Utils {
         val popupWindow = AlertsCreator.createSimplePopup(fragment, popupLayout, anchorView, x, y)
         if (id != 0L) {
             ActionBarMenuItem.addItem(popupLayout, R.drawable.msg_copy, LocaleController.getString("CopyID", R.string.CopyID), false, fragment.resourceProvider)
-                .setOnClickListener { v: View? ->
+                .setOnClickListener {
                     popupWindow.dismiss()
                     AndroidUtilities.addToClipboard(id.toString())
                     BulletinFactory.of(fragment).createCopyBulletin(LocaleController.formatString("TextCopied", R.string.TextCopied)).show()
@@ -264,7 +259,7 @@ object Utils {
                 fragment.resourceProvider
             )
             subItem.setSubtext(MessageUtils.formatDCString(dc))
-            subItem.setOnClickListener { v: View? ->
+            subItem.setOnClickListener {
                 popupWindow.dismiss()
                 fragment.presentFragment(DatacenterActivity(dc))
             }

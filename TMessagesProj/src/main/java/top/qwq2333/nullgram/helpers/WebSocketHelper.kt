@@ -21,15 +21,12 @@ package top.qwq2333.nullgram.helpers
 import androidx.core.util.Pair
 import org.tcp2ws.tcp2wsServer
 import org.telegram.messenger.BuildConfig
-import org.telegram.messenger.FileLog
 import org.telegram.messenger.LocaleController
 import org.telegram.messenger.R
 import top.qwq2333.nullgram.config.ConfigManager
 import top.qwq2333.nullgram.utils.AnalyticsUtils.trackEvent
 import top.qwq2333.nullgram.utils.Defines
-import top.qwq2333.nullgram.utils.Log.d
-import top.qwq2333.nullgram.utils.Log.e
-import top.qwq2333.nullgram.utils.Log.i
+import top.qwq2333.nullgram.utils.Log
 import java.net.ServerSocket
 
 object WebSocketHelper {
@@ -88,15 +85,15 @@ object WebSocketHelper {
 
     @JvmStatic
     fun wsReloadConfig() {
-        d("ws reload config: ${currentProvider.host} tls: $wsEnableTLS")
+        Log.d("ws reload config: ${currentProvider.host} tls: $wsEnableTLS")
         if (tcp2wsServer != null) {
             try {
                 tcp2wsServer!!.setCdnDomain(currentProvider.host)
                     .setTls(wsEnableTLS)
-                    .setUserAgent(System.getProperty("http.agent") + " " + userAgent)
+                    .setUserAgent((System.getProperty("http.agent") ?: "") + " " + userAgent)
                     .setConnHash(connHash)
             } catch (e: Exception) {
-                e(e)
+                Log.e(e)
             }
         }
     }
@@ -113,10 +110,10 @@ object WebSocketHelper {
                 socket.close()
             }
             if (!tcp2wsStarted) {
-                i("useragent: ${System.getProperty("http.agent")} $userAgent")
+                Log.i("useragent: ${System.getProperty("http.agent")} $userAgent")
                 tcp2wsServer = tcp2wsServer().setCdnDomain(currentProvider.host)
                     .setTls(wsEnableTLS)
-                    .setUserAgent(System.getProperty("http.agent") + " " + userAgent)
+                    .setUserAgent((System.getProperty("http.agent") ?: "") + " " + userAgent)
                     .setConnHash(connHash)
                 tcp2wsServer!!.start(socksPort)
                 tcp2wsStarted = true
@@ -126,11 +123,11 @@ object WebSocketHelper {
                 map["isPlay"] = BuildConfig.isPlay.toString()
                 trackEvent("tcp2ws started", map)
             }
-            d("tcp2ws started on port " + socksPort)
-            d("serverHost: " + currentProvider.host + " tls: " + wsEnableTLS)
+            Log.d("tcp2ws started on port " + socksPort)
+            Log.d("serverHost: " + currentProvider.host + " tls: " + wsEnableTLS)
             socksPort
         } catch (e: Exception) {
-            FileLog.e(e)
+            Log.e(e)
             if (port != -1) {
                 getSocksPort(-1)
             } else {
