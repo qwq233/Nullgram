@@ -3806,7 +3806,7 @@ public class MediaDataController extends BaseController {
             } else {
                 return MEDIA_FILE;
             }
-        } else if (!message.entities.isEmpty()) {
+        } else if (message.entities != null && !message.entities.isEmpty()) {
             for (int a = 0; a < message.entities.size(); a++) {
                 TLRPC.MessageEntity entity = message.entities.get(a);
                 if (entity instanceof TLRPC.TL_messageEntityUrl || entity instanceof TLRPC.TL_messageEntityTextUrl || entity instanceof TLRPC.TL_messageEntityEmail) {
