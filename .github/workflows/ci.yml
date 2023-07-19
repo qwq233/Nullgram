@@ -1,7 +1,5 @@
 name: Build CI
 
-runs-on: self-hosted
-
 on:
   push:
     branches:
