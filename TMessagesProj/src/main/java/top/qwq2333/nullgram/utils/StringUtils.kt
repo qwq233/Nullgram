@@ -109,6 +109,7 @@ object StringUtils {
     @JvmStatic
     fun spacingText(text: String, entities: ArrayList<TLRPC.MessageEntity>?): Pair<String, ArrayList<TLRPC.MessageEntity>?> {
         if (entities.isNullOrEmpty()) return Pair(pangu.spacingText(text), entities)
+        if (text.startsWith("/")) return Pair(text, entities) // command
 
         val panguText = pangu.spacingText(text)
         val panguEntities = arrayListOf<TLRPC.MessageEntity>()
