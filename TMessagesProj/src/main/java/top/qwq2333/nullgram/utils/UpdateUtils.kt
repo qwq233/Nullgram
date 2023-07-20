@@ -231,6 +231,7 @@ object UpdateUtils {
     @JvmStatic
     fun checkUpdate(callback: (TLRPC.TL_help_appUpdate?, Boolean) -> Unit) {
         if (BuildConfig.isPlay) return
+        if (!UserConfig.getInstance(UserConfig.selectedAccount).isClientActivated) return
         val (apksChannelID, apksChannelName) = when (ConfigManager.getIntOrDefault(Defines.updateChannel, -1)) {
             Defines.stableChannel -> stableChannelAPKsID to stableChannelAPKsName
             Defines.ciChannel -> previewChannelAPKsID to previewChannelAPKsName
