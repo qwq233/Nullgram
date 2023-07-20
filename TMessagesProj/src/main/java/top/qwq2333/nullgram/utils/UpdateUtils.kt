@@ -120,9 +120,9 @@ object UpdateUtils {
             limit = maxReadCount
         }.let { req ->
             val sendReq = Runnable {
-                accountInstance.connectionsManager.sendRequest(req) { resp: TLObject, error: TLRPC.TL_error? ->
-                    if (error != null) {
-                        Log.e("checkUpdate", "Error when retrieving update metadata from channel ${error.text}")
+                accountInstance.connectionsManager.sendRequest(req) { resp: TLObject?, error: TLRPC.TL_error? ->
+                    if (error != null || resp == null) {
+                        Log.e("checkUpdate", "Error when retrieving update metadata from channel ${error?.text}")
                         callback.invoke(null, true)
                         return@sendRequest
                     }
@@ -196,9 +196,9 @@ object UpdateUtils {
                 TLRPC.TL_contacts_resolveUsername().apply {
                     username = metadataChannelName
                 }.let { req2 ->
-                    accountInstance.connectionsManager.sendRequest(req2) { resp: TLObject, error: TLRPC.TL_error? ->
-                        if (error != null) {
-                            Log.e("checkUpdate", "Error when retrieving update metadata from channel ${error.text}")
+                    accountInstance.connectionsManager.sendRequest(req2) { resp: TLObject?, error: TLRPC.TL_error? ->
+                        if (error != null || resp == null) {
+                            Log.e("checkUpdate", "Error when retrieving update metadata from channel ${error?.text}")
                             callback.invoke(null, true)
                             return@sendRequest
                         }
@@ -251,9 +251,9 @@ object UpdateUtils {
             }
 
             val sendReq = Runnable {
-                accountInstance.connectionsManager.sendRequest(req) { resp: TLObject, error: TLRPC.TL_error? ->
-                    if (error != null) {
-                        Log.e("checkUpdate", "Error when retrieving update from channel ${error.text}")
+                accountInstance.connectionsManager.sendRequest(req) { resp: TLObject?, error: TLRPC.TL_error? ->
+                    if (error != null || resp == null) {
+                        Log.e("checkUpdate", "Error when retrieving update metadata from channel ${error?.text}")
                         callback.invoke(null, true)
                         return@sendRequest
                     }
@@ -291,9 +291,9 @@ object UpdateUtils {
                 TLRPC.TL_contacts_resolveUsername().apply {
                     username = apksChannelName
                 }.let { req2 ->
-                    accountInstance.connectionsManager.sendRequest(req2) { resp: TLObject, error: TLRPC.TL_error? ->
-                        if (error != null) {
-                            Log.e("checkUpdate", "Error when retrieving update from channel ${error.text}")
+                    accountInstance.connectionsManager.sendRequest(req2) { resp: TLObject?, error: TLRPC.TL_error? ->
+                        if (error != null || resp == null) {
+                            Log.e("checkUpdate", "Error when retrieving update metadata from channel ${error?.text}")
                             callback.invoke(null, true)
                             return@sendRequest
                         }
