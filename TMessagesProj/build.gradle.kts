@@ -1,5 +1,7 @@
 @file:Suppress("UnstableApiUsage")
 
+import com.android.build.api.variant.BuildConfigField
+import com.android.build.api.variant.FilterConfiguration.FilterType.*
 import com.android.build.gradle.internal.cxx.configure.gradleLocalProperties
 import com.google.firebase.crashlytics.buildtools.gradle.CrashlyticsExtension
 import java.text.SimpleDateFormat
@@ -167,6 +169,12 @@ android {
         getByName("debug") {
             signingConfig = signingConfigs.getByName("release")
             isDefault = true
+            isDebuggable = true
+            isJniDebuggable = true
+        }
+
+        create("play") {
+            initWith(getByName("release"))
         }
     }
 
@@ -175,11 +183,7 @@ android {
             cmake {
                 version = "3.22.1"
                 arguments += listOf(
-                    "-DANDROID_STL=c++_static",
-                    "-DANDROID_PLATFORM=android-21",
-                    "-DCMAKE_C_COMPILER_LAUNCHER=ccache",
-                    "-DCMAKE_CXX_COMPILER_LAUNCHER=ccache",
-                    "-DNDK_CCACHE=ccache"
+                    "-DANDROID_STL=c++_static", "-DANDROID_PLATFORM=android-21", "-DCMAKE_C_COMPILER_LAUNCHER=ccache", "-DCMAKE_CXX_COMPILER_LAUNCHER=ccache", "-DNDK_CCACHE=ccache"
                 )
             }
         }
@@ -187,58 +191,64 @@ android {
         buildConfigField("String", "BUILD_TIME", "\"${SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(Date())}\"")
     }
 
-    flavorDimensions += "abi"
-    productFlavors {
-        create("arm64") {
-            isDefault = true
-            dimension = "abi"
-            buildConfigField("boolean", "isPlay", "false")
-            ndk {
-                abiFilters.add("arm64-v8a")
-            }
-        }
-        create("arm32") {
-            dimension = "abi"
-            buildConfigField("boolean", "isPlay", "false")
-            ndk {
-                abiFilters.add("armeabi-v7a")
-            }
-        }
-        create("x86") {
-            dimension = "abi"
-            buildConfigField("boolean", "isPlay", "false")
-            ndk {
-                abiFilters.add("x86")
-            }
-        }
-        create("x86_64") {
-            dimension = "abi"
-            buildConfigField("boolean", "isPlay", "false")
-            ndk {
-                abiFilters.add("x86_64")
-            }
-        }
-
-        create("play") {
-            dimension = "abi"
-            buildConfigField("boolean", "isPlay", "true")
-            ndk {
-                abiFilters.addAll(listOf("armeabi-v7a", "arm64-v8a", "x86", "x86_64"))
-            }
+    splits {
+        abi {
+            isEnable = true
+            reset()
+            include("armeabi-v7a", "arm64-v8a", "x86", "x86_64")
         }
     }
 
-    applicationVariants.all {
-        val outputFileName =
-            "Nullgram-${defaultConfig.versionName}-${productFlavors.first().name}.apk"
-        outputs.all {
-            val output = this as? com.android.build.gradle.internal.api.BaseVariantOutputImpl
-            output?.outputFileName = outputFileName
+    androidComponents {
+        onVariants { variant ->
+            val abiName = mapOf("armeabi-v7a" to "arm32", "arm64-v8a" to "arm64", "x86" to "x86", "x86_64" to "x86_64")
+            variant.buildConfigFields.put("isPlay", BuildConfigField("boolean", variant.name == "play", null))
+            variant.outputs.forEach { output ->
+                val abi = output.filters.find { it.filterType == ABI }?.identifier
+                variant.buildConfigFields.put(
+                    "FLAVOR", BuildConfigField(
+                        "String", "\"${abiName[abi]}\"",
+                        "this is just a compatibility solution and we are not using flavorProduct anymore"
+                    )
+                )
+
+                val task = project.tasks.register<MoveApk>("copy${variant.name}${abiName[abi]}")
+                val request = variant.artifacts.use(task)
+                    .wiredWithDirectories(MoveApk::apkFolder, MoveApk::outFolder)
+                    .toTransformMany(com.android.build.api.artifact.SingleArtifact.APK)
+
+                task.configure {
+                    this.transformationRequest.set(request)
+                    transformer.set {
+                        File(projectDir, "build/outputs/apk/${variant.name}/Nullgram-${defaultConfig.versionName}-${abiName[abi]}.apk")
+                    }
+                }
+            }
 
         }
     }
+
+
 }
-
 
 tasks.register<ReplaceIcon>("replaceIcon") {}
 tasks.getByName("preBuild").dependsOn(tasks.getByName("replaceIcon"))
+
+abstract class MoveApk : DefaultTask() {
+    @get:Internal
+    abstract val transformer: Property<(input: com.android.build.api.variant.BuiltArtifact) -> File>
+
+    @get:InputDirectory
+    abstract val apkFolder: DirectoryProperty
+
+    @get:OutputDirectory
+    abstract val outFolder: DirectoryProperty
+
+    @get:Internal
+    abstract val transformationRequest: Property<com.android.build.api.artifact.ArtifactTransformationRequest<MoveApk>>
+
+    @TaskAction
+    fun taskAction() = transformationRequest.get().submit(this) { builtArtifact ->
+        File(builtArtifact.outputFile).copyTo(transformer.get()(builtArtifact), true)
+    }
+}
