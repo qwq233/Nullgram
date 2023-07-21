@@ -7958,7 +7958,9 @@ public class ChatActivityEnterView extends BlurredFrameLayout implements Notific
 
         }
 
-        boolean isVisible = defPeer != null && (delegate.getSendAsPeers() == null || delegate.getSendAsPeers().peers.size() > 1) &&
+        var currentChat = parentFragment.getMessagesController().getChat(-dialog_id);
+        boolean isVisible = ((currentChat != null && currentChat.creator) || UserConfig.getInstance(currentAccount).isPremium())
+            && defPeer != null && (delegate.getSendAsPeers() == null || delegate.getSendAsPeers().peers.size() > 1) &&
             !isEditingMessage() && !isRecordingAudioVideo() && (recordedAudioPanel == null || recordedAudioPanel.getVisibility() != View.VISIBLE);
         if (isVisible) {
             createSenderSelectView();
