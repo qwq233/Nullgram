@@ -195,8 +195,7 @@ object Utils {
                     if ((SharedConfig.proxyEnabled && vpn) || (!SharedConfig.proxyEnabled && !vpn)) {
                         SharedConfig.setProxyEnable(!vpn)
                         UIUtil.runOnUIThread {
-                            NotificationCenter.getGlobalInstance()
-                                .postNotificationName(NotificationCenter.proxySettingsChanged)
+                            NotificationCenter.getGlobalInstance().postNotificationName(NotificationCenter.proxySettingsChanged)
                         }
                     }
                 }
@@ -300,3 +299,9 @@ object Utils {
 }
 
 fun String.encodeUrl(): String = URLEncoder.encode(this, "UTF-8")
+fun String.isNumber(): Boolean = try {
+    this.toLong()
+    true
+} catch (e: NumberFormatException) {
+    false
+}

@@ -186,8 +186,8 @@ import top.qwq2333.nullgram.ui.EditTextAutoFill;
 import top.qwq2333.nullgram.utils.AlertUtil;
 import top.qwq2333.nullgram.utils.Defines;
 import top.qwq2333.nullgram.utils.Log;
-import top.qwq2333.nullgram.utils.NumberUtils;
 import top.qwq2333.nullgram.utils.StringUtils;
+import top.qwq2333.nullgram.utils.UtilsKt;
 
 @SuppressLint("HardwareIds")
 public class LoginActivity extends BaseFragment implements NotificationCenter.NotificationCenterDelegate {
@@ -2469,7 +2469,7 @@ public class LoginActivity extends BaseFragment implements NotificationCenter.No
                         inputs[0] = builder.addEditText("App Id");
                         inputs[0].setInputType(InputType.TYPE_CLASS_NUMBER);
                         if (ConfigManager.getIntOrDefault(Defines.customAppId, 0) != 0) {
-                            inputs[0].setText(ConfigManager.getIntOrDefault(Defines.customAppId, 0) + "");
+                            inputs[0].setText(ConfigManager.getIntOrDefault(Defines.customAppId, 0));
                         }
                         inputs[0].addTextChangedListener(new TextWatcher() {
                             @Override
@@ -2480,10 +2480,10 @@ public class LoginActivity extends BaseFragment implements NotificationCenter.No
                             public void onTextChanged(CharSequence s, int start, int before, int count) {
                                 if (StringUtils.isBlank(s.toString())) {
                                     ConfigManager.putInt(Defines.customAppId, 0);
-                                } else if (!NumberUtils.isInteger(s.toString())) {
+                                } else if (!UtilsKt.isNumber(s.toString())) {
                                     inputs[0].setText("0");
                                 } else {
-                                    ConfigManager.putInt(Defines.customAppId, NumberUtils.parseInt(s.toString()));
+                                    ConfigManager.putInt(Defines.customAppId,  Integer.parseInt(s.toString()));
                                 }
                             }
 

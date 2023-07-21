@@ -74,8 +74,8 @@ import top.qwq2333.nullgram.ui.PopupBuilder;
 import top.qwq2333.nullgram.ui.StickerSizePreviewMessagesCell;
 import top.qwq2333.nullgram.utils.AlertUtil;
 import top.qwq2333.nullgram.utils.Defines;
-import top.qwq2333.nullgram.utils.NumberUtils;
 import top.qwq2333.nullgram.utils.StringUtils;
+import top.qwq2333.nullgram.utils.UtilsKt;
 
 @SuppressLint("NotifyDataSetChanged")
 public class ChatSettingActivity extends BaseActivity {
@@ -763,7 +763,7 @@ public class ChatSettingActivity extends BaseActivity {
             if (editText.getText().toString().trim().equals("")) {
                 ConfigManager.putInt(Defines.maxRecentSticker, 20);
             } else {
-                if (!NumberUtils.isInteger(editText.getText().toString())) {
+                if (!UtilsKt.isNumber(editText.getText().toString())) {
                     AndroidUtilities.shakeView(view);
                     AlertUtil.showToast(LocaleController.getString("notANumber", R.string.notANumber));
                 } else {

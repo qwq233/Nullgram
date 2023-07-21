@@ -48,6 +48,9 @@ object PermissionUtils {
     }
 
     @JvmStatic
+    fun isPhoneCallStatePermissionGranted(): Boolean = isPermissionGranted(Manifest.permission.READ_PHONE_STATE)
+
+    @JvmStatic
     fun requestImagesAndVideoPermission(activity: Activity?) {
         requestImagesAndVideoPermission(
             activity, BasePermissionsActivity.REQUEST_CODE_EXTERNAL_STORAGE
@@ -117,6 +120,9 @@ object PermissionUtils {
             )
         }
     }
+
+    @JvmStatic
+    fun requestPhoneCallStatePermission(activity: Activity?) = requestPermissions(activity, BasePermissionsActivity.REQUEST_CODE_CALLS, Manifest.permission.READ_PHONE_STATE)
 
     @JvmStatic
     fun requestPermissions(activity: Activity?, requestCode: Int, vararg permissions: String?) {

@@ -477,50 +477,28 @@ public class SharedConfig {
     public static boolean proxyEnabled;
 
     public static void setProxyEnable(boolean enable) {
-
         proxyEnabled = enable;
-
         SharedPreferences preferences = MessagesController.getGlobalMainSettings();
-
         preferences.edit().putBoolean("proxy_enabled", enable).commit();
-
         ProxyInfo info = currentProxy;
-
         if (info == null) {
-
             info = new ProxyInfo();
-
         }
-
         ProxyInfo finalInfo = info;
-
         UIUtil.runOnIoDispatcher(() -> {
-
             try {
-
                 if (enable && finalInfo instanceof ExternalSocks5Proxy) {
-
                     ((ExternalSocks5Proxy) finalInfo).start();
-
                 } else if (!enable && finalInfo instanceof ExternalSocks5Proxy) {
-
                     ((ExternalSocks5Proxy) finalInfo).stop();
-
                 }
-
             } catch (Exception e) {
-
                 FileLog.e(e);
                 AlertUtil.showToast(e);
-
                 return;
-
             }
-
             ConnectionsManager.setProxySettings(enable, finalInfo.address, finalInfo.port, finalInfo.username, finalInfo.password, finalInfo.secret);
-
             UIUtil.runOnUIThread(() -> NotificationCenter.getGlobalInstance().postNotificationName(NotificationCenter.proxySettingsChanged));
-
         });
 
     }

@@ -64,23 +64,6 @@ import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
 
 object APKUtils {
-    /**
-     * 挂起当前线程
-     *
-     * @param millis 挂起的毫秒数
-     * @return 被中断返回false，否则true
-     */
-    @JvmStatic
-    fun sleep(millis: Long): Boolean {
-        if (millis > 0) {
-            try {
-                Thread.sleep(millis)
-            } catch (e: InterruptedException) {
-                return false
-            }
-        }
-        return true
-    }
 
     @SuppressLint("StaticFieldLeak")
     private var dialog: AlertDialog? = null
