@@ -119,6 +119,10 @@ public class DrawerActionCell extends FrameLayout {
         }
     }
 
+    public ImageView getImageView() {
+        return imageView;
+    }
+
     @Override
     public void onInitializeAccessibilityNodeInfo(AccessibilityNodeInfo info) {
         super.onInitializeAccessibilityNodeInfo(info);

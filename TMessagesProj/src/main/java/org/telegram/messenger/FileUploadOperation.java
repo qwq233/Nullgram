@@ -677,7 +677,7 @@ public class FileUploadOperation {
             }
         }), forceSmallFile ? ConnectionsManager.RequestFlagCanCompress : 0, ConnectionsManager.DEFAULT_DATACENTER_ID, connectionType, true);
         if (BuildVars.LOGS_ENABLED) {
-            FileLog.d("debug_uploading: " + " send reqId " + requestToken + " " + uploadingFilePath);
+            FileLog.d("debug_uploading: " + " send reqId " + requestToken[0] + " " + uploadingFilePath);
         }
         requestTokens.put(requestNumFinal, requestToken[0]);
     }

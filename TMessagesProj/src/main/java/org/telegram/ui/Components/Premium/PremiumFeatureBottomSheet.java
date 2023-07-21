@@ -38,6 +38,7 @@ import org.telegram.ui.ChatActivity;
 import org.telegram.ui.Components.BottomPagesView;
 import org.telegram.ui.Components.LayoutHelper;
 import org.telegram.ui.Components.RLottieDrawable;
+import org.telegram.ui.LaunchActivity;
 import org.telegram.ui.PremiumPreviewFragment;
 
 import java.util.ArrayList;
@@ -307,8 +308,15 @@ public class PremiumFeatureBottomSheet extends BottomSheet implements Notificati
                     ((ChatActivity) fragment).chatAttachAlert.dismiss(true);
                 }
             }
-            if (fragment != null && fragment.getVisibleDialog() != null) {
-                fragment.getVisibleDialog().dismiss();
+            BaseFragment mainFragment = LaunchActivity.getLastFragment();
+            for (int i = 0; i < 2; i++) {
+                BaseFragment currentFragment = i == 0 ? fragment : mainFragment;
+                if (currentFragment != null && currentFragment.storyViewer != null && currentFragment.storyViewer.isShown()) {
+                    currentFragment.storyViewer.dismissVisibleDialogs();
+                }
+                if (currentFragment != null && currentFragment.getVisibleDialog() != null) {
+                    currentFragment.getVisibleDialog().dismiss();
+                }
             }
             if ((onlySelectedType || forceAbout) && fragment != null) {
                 fragment.presentFragment(new PremiumPreviewFragment(PremiumPreviewFragment.featureTypeToServerString(featureData.type)));

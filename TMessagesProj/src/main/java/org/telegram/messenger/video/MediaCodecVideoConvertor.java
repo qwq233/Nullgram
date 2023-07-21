@@ -7,14 +7,21 @@ import android.media.MediaExtractor;
 import android.media.MediaFormat;
 import android.os.Build;
 
+import androidx.annotation.NonNull;
+
 import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.BuildVars;
 import org.telegram.messenger.FileLog;
 import org.telegram.messenger.MediaController;
+import org.telegram.messenger.R;
+import org.telegram.messenger.SharedConfig;
 import org.telegram.messenger.Utilities;
 import org.telegram.messenger.VideoEditedInfo;
+import org.telegram.ui.Components.RLottieDrawable;
+import org.telegram.ui.Stories.recorder.StoryEntry;
 
 import java.io.File;
+import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 
@@ -36,6 +43,7 @@ public class MediaCodecVideoConvertor {
 
     private static final int MEDIACODEC_TIMEOUT_DEFAULT = 2500;
     private static final int MEDIACODEC_TIMEOUT_INCREASED = 22000;
+    private String outputMimeType;
 
     public boolean convertVideo(String videoPath, File cacheFile,
                                 int rotationValue, boolean isSecret,
@@ -50,10 +58,13 @@ public class MediaCodecVideoConvertor {
                                 boolean isPhoto,
                                 MediaController.CropState cropState,
                                 boolean isRound,
-                                MediaController.VideoConvertorListener callback) {
+                                MediaController.VideoConvertorListener callback,
+                                Integer gradientTopColor, Integer gradientBottomColor,
+                                boolean muted, boolean isStory, StoryEntry.HDRInfo hdrInfo,
+                                ArrayList<StoryEntry.Part> parts) {
         this.callback = callback;
         return convertVideoInternal(videoPath, cacheFile, rotationValue, isSecret, originalWidth, originalHeight,
-                resultWidth, resultHeight, framerate, bitrate, originalBitrate, startTime, endTime, avatarStartTime, duration, needCompress, false, savedFilterState, paintPath, mediaEntities, isPhoto, cropState, isRound);
+                resultWidth, resultHeight, framerate, bitrate, originalBitrate, startTime, endTime, avatarStartTime, duration, needCompress, false, savedFilterState, paintPath, mediaEntities, isPhoto, cropState, isRound, gradientTopColor, gradientBottomColor, muted, isStory, hdrInfo, parts, 0);
     }
 
     public long getLastFrameTimestamp() {
@@ -74,7 +85,11 @@ public class MediaCodecVideoConvertor {
                                          ArrayList<VideoEditedInfo.MediaEntity> mediaEntities,
                                          boolean isPhoto,
                                          MediaController.CropState cropState,
-                                         boolean isRound) {
+                                         boolean isRound,
+                                         Integer gradientTopColor, Integer gradientBottomColor, boolean muted, boolean isStory,
+                                         StoryEntry.HDRInfo hdrInfo,
+                                         ArrayList<StoryEntry.Part> parts,
+                                         int triesCount) {
 
         FileLog.d("convertVideoInternal original=" + originalWidth + "x" + originalHeight + "  result=" + resultWidth + "x" + resultHeight + " " + avatarStartTime);
         long time = System.currentTimeMillis();
@@ -84,19 +99,24 @@ public class MediaCodecVideoConvertor {
         int videoTrackIndex = -5;
         String selectedEncoderName = null;
 
+        boolean shouldUseHevc = isStory;
+        outputMimeType = shouldUseHevc ? "video/hevc" : "video/avc";
+
+        boolean canBeBrokenEncoder = false;
+        MediaCodec encoder = null;
+        MediaCodec decoder = null;
+        InputSurface inputSurface = null;
+        OutputSurface outputSurface = null;
         try {
             MediaCodec.BufferInfo info = new MediaCodec.BufferInfo();
             Mp4Movie movie = new Mp4Movie();
             movie.setCacheFile(cacheFile);
             movie.setRotation(0);
             movie.setSize(resultWidth, resultHeight);
-            mediaMuxer = new MP4Builder().createMovie(movie, isSecret);
+
 
             long currentPts = 0;
             float durationS = duration / 1000f;
-            MediaCodec encoder = null;
-            InputSurface inputSurface = null;
-            OutputSurface outputSurface = null;
             int prependHeaderSize = 0;
             endPresentationTime = duration * 1000;
             checkConversionCanceled();
@@ -119,32 +139,37 @@ public class MediaCodecVideoConvertor {
                         bitrate = 921600;
                     }
 
-                    if (resultWidth % 16 != 0) {
-                        if (BuildVars.LOGS_ENABLED) {
-                            FileLog.d("changing width from " + resultWidth + " to " + Math.round(resultWidth / 16.0f) * 16);
+                    if (cropState == null || cropState.useMatrix == null) {
+                        if (resultWidth % 16 != 0) {
+                            if (BuildVars.LOGS_ENABLED) {
+                                FileLog.d("changing width from " + resultWidth + " to " + Math.round(resultWidth / 16.0f) * 16);
+                            }
+                            resultWidth = Math.round(resultWidth / 16.0f) * 16;
                         }
-                        resultWidth = Math.round(resultWidth / 16.0f) * 16;
-                    }
-                    if (resultHeight % 16 != 0) {
-                        if (BuildVars.LOGS_ENABLED) {
-                            FileLog.d("changing height from " + resultHeight + " to " + Math.round(resultHeight / 16.0f) * 16);
+                        if (resultHeight % 16 != 0) {
+                            if (BuildVars.LOGS_ENABLED) {
+                                FileLog.d("changing height from " + resultHeight + " to " + Math.round(resultHeight / 16.0f) * 16);
+                            }
+                            resultHeight = Math.round(resultHeight / 16.0f) * 16;
                         }
-                        resultHeight = Math.round(resultHeight / 16.0f) * 16;
                     }
 
                     if (BuildVars.LOGS_ENABLED) {
                         FileLog.d("create photo encoder " + resultWidth + " " + resultHeight + " duration = " + duration);
                     }
 
-                    MediaFormat outputFormat = MediaFormat.createVideoFormat(MediaController.VIDEO_MIME_TYPE, resultWidth, resultHeight);
+                    if (encoder == null) {
+                        encoder = createEncoderForMimeType();
+                    }
+
+                    MediaFormat outputFormat = MediaFormat.createVideoFormat(outputMimeType, resultWidth, resultHeight);
                     outputFormat.setInteger(MediaFormat.KEY_COLOR_FORMAT, MediaCodecInfo.CodecCapabilities.COLOR_FormatSurface);
                     outputFormat.setInteger(MediaFormat.KEY_BIT_RATE, bitrate);
                     outputFormat.setInteger(MediaFormat.KEY_FRAME_RATE, 30);
                     outputFormat.setInteger(MediaFormat.KEY_I_FRAME_INTERVAL, 1);
 
-                    encoder = MediaCodec.createEncoderByType(MediaController.VIDEO_MIME_TYPE);
-
                     selectedEncoderName = encoder.getName();
+                    canBeBrokenEncoder = "c2.qti.avc.encoder".equalsIgnoreCase(selectedEncoderName);
                     FileLog.d("selected encoder " + selectedEncoderName);
 
                     encoder.configure(outputFormat, null, null, MediaCodec.CONFIGURE_FLAG_ENCODE);
@@ -152,7 +177,7 @@ public class MediaCodecVideoConvertor {
                     inputSurface.makeCurrent();
                     encoder.start();
 
-                    outputSurface = new OutputSurface(savedFilterState, videoPath, paintPath, mediaEntities, null, resultWidth, resultHeight, originalWidth, originalHeight, rotationValue, framerate, true);
+                    outputSurface = new OutputSurface(savedFilterState, videoPath, paintPath, mediaEntities, cropState != null && cropState.useMatrix != null ? cropState : null, resultWidth, resultHeight, originalWidth, originalHeight, rotationValue, framerate, true, gradientTopColor, gradientBottomColor, null, parts);
 
                     ByteBuffer[] encoderOutputBuffers = null;
                     ByteBuffer[] encoderInputBuffers = null;
@@ -164,6 +189,7 @@ public class MediaCodecVideoConvertor {
 
                     checkConversionCanceled();
 
+                    mediaMuxer = new MP4Builder().createMovie(movie, isSecret, outputMimeType.equals("video/hevc"));
                     while (!outputDone) {
                         checkConversionCanceled();
 
@@ -188,7 +214,7 @@ public class MediaCodecVideoConvertor {
                                     if (newFormat.containsKey(MediaFormat.KEY_PREPEND_HEADER_TO_SYNC_FRAMES) && newFormat.getInteger(MediaFormat.KEY_PREPEND_HEADER_TO_SYNC_FRAMES) == 1) {
                                         ByteBuffer spsBuff = newFormat.getByteBuffer("csd-0");
                                         ByteBuffer ppsBuff = newFormat.getByteBuffer("csd-1");
-                                        prependHeaderSize = spsBuff.limit() + ppsBuff.limit();
+                                        prependHeaderSize = (spsBuff == null ? 0 : spsBuff.limit()) + (ppsBuff == null ? 0 : ppsBuff.limit());
                                     }
                                 }
                             } else if (encoderStatus < 0) {
@@ -210,31 +236,22 @@ public class MediaCodecVideoConvertor {
                                             info.size -= prependHeaderSize;
                                         }
                                         if (firstEncode && (info.flags & MediaCodec.BUFFER_FLAG_KEY_FRAME) != 0) {
-                                            if (info.size > 100) {
-                                                encodedData.position(info.offset);
-                                                byte[] temp = new byte[100];
-                                                encodedData.get(temp);
-                                                int nalCount = 0;
-                                                for (int a = 0; a < temp.length - 4; a++) {
-                                                    if (temp[a] == 0 && temp[a + 1] == 0 && temp[a + 2] == 0 && temp[a + 3] == 1) {
-                                                        nalCount++;
-                                                        if (nalCount > 1) {
-                                                            info.offset += a;
-                                                            info.size -= a;
-                                                            break;
-                                                        }
-                                                    }
-                                                }
-                                            }
+                                            cutOfNalData(outputMimeType, encodedData, info);
                                             firstEncode = false;
                                         }
                                         long availableSize = mediaMuxer.writeSampleData(videoTrackIndex, encodedData, info, true);
                                         if (availableSize != 0) {
                                             if (callback != null) {
-                                                callback.didWriteData(availableSize, (currentPts / 1000f) / durationS);
+                                                if (info.presentationTimeUs > currentPts) {
+                                                    currentPts = info.presentationTimeUs;
+                                                }
+                                                callback.didWriteData(availableSize, (currentPts / 1000f / 1000f) / durationS);
                                             }
                                         }
                                     } else if (videoTrackIndex == -5) {
+                                        if (outputMimeType.equals("video/hevc")) {
+                                            throw new RuntimeException("unsupported!!");
+                                        }
                                         byte[] csd = new byte[info.size];
                                         encodedData.limit(info.offset + info.size);
                                         encodedData.position(info.offset);
@@ -255,7 +272,7 @@ public class MediaCodecVideoConvertor {
                                             }
                                         }
 
-                                        MediaFormat newFormat = MediaFormat.createVideoFormat(MediaController.VIDEO_MIME_TYPE, resultWidth, resultHeight);
+                                        MediaFormat newFormat = MediaFormat.createVideoFormat(outputMimeType, resultWidth, resultHeight);
                                         if (sps != null && pps != null) {
                                             newFormat.setByteBuffer("csd-0", sps);
                                             newFormat.setByteBuffer("csd-1", pps);
@@ -299,13 +316,16 @@ public class MediaCodecVideoConvertor {
 
                 if (outputSurface != null) {
                     outputSurface.release();
+                    outputSurface = null;
                 }
                 if (inputSurface != null) {
                     inputSurface.release();
+                    inputSurface = null;
                 }
                 if (encoder != null) {
                     encoder.stop();
                     encoder.release();
+                    encoder = null;
                 }
                 checkConversionCanceled();
             } else {
@@ -313,7 +333,7 @@ public class MediaCodecVideoConvertor {
                 extractor.setDataSource(videoPath);
 
                 int videoIndex = MediaController.findTrack(extractor, false);
-                int audioIndex = bitrate != -1 ? MediaController.findTrack(extractor, true) : -1;
+                int audioIndex = bitrate != -1 && !muted ? MediaController.findTrack(extractor, true) : -1;
                 boolean needConvertVideo = false;
                 if (videoIndex >= 0 && !extractor.getTrackFormat(videoIndex).getString(MediaFormat.KEY_MIME).equals(MediaController.VIDEO_MIME_TYPE)) {
                     needConvertVideo = true;
@@ -326,7 +346,6 @@ public class MediaCodecVideoConvertor {
                     long lastFramePts = -1;
 
                     if (videoIndex >= 0) {
-                        MediaCodec decoder = null;
 
                         try {
                             long videoTime = -1;
@@ -383,7 +402,7 @@ public class MediaCodecVideoConvertor {
 
                             int w;
                             int h;
-                            if (cropState != null) {
+                            if (cropState != null && cropState.useMatrix == null) {
                                 if (rotationValue == 90 || rotationValue == 270) {
                                     w = cropState.transformHeight;
                                     h = cropState.transformWidth;
@@ -403,14 +422,15 @@ public class MediaCodecVideoConvertor {
 
                                 }
                             }
+
                             if (encoder == null) {
-                                encoder = MediaCodec.createEncoderByType(MediaController.VIDEO_MIME_TYPE);
+                                encoder = createEncoderForMimeType();
                             }
 
                             if (BuildVars.LOGS_ENABLED) {
                                 FileLog.d("create encoder with w = " + w + " h = " + h + " bitrate = " + bitrate);
                             }
-                            MediaFormat outputFormat = MediaFormat.createVideoFormat(MediaController.VIDEO_MIME_TYPE, w, h);
+                            MediaFormat outputFormat = MediaFormat.createVideoFormat(outputMimeType, w, h);
                             outputFormat.setInteger(MediaFormat.KEY_COLOR_FORMAT, MediaCodecInfo.CodecCapabilities.COLOR_FormatSurface);
                             outputFormat.setInteger(MediaFormat.KEY_BIT_RATE, bitrate);
                             if (isAvatar && Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
@@ -421,21 +441,27 @@ public class MediaCodecVideoConvertor {
                             outputFormat.setInteger(MediaFormat.KEY_FRAME_RATE, framerate);
                             outputFormat.setInteger(MediaFormat.KEY_I_FRAME_INTERVAL, 1);
 
-                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-                                // support HDR
-                                if (videoFormat.containsKey(MediaFormat.KEY_COLOR_TRANSFER)) {
-                                    outputFormat.setInteger(MediaFormat.KEY_COLOR_TRANSFER, videoFormat.getInteger(MediaFormat.KEY_COLOR_TRANSFER));
-                                }
-                                if (videoFormat.containsKey(MediaFormat.KEY_COLOR_STANDARD)) {
-                                    outputFormat.setInteger(MediaFormat.KEY_COLOR_STANDARD, videoFormat.getInteger(MediaFormat.KEY_COLOR_STANDARD));
-                                }
-                                if (videoFormat.containsKey(MediaFormat.KEY_COLOR_RANGE)) {
-                                    outputFormat.setInteger(MediaFormat.KEY_COLOR_RANGE, videoFormat.getInteger(MediaFormat.KEY_COLOR_RANGE));
-                                }
-                                if (videoFormat.containsKey(MediaFormat.KEY_HDR_STATIC_INFO)) {
-                                    outputFormat.setByteBuffer(MediaFormat.KEY_HDR_STATIC_INFO, videoFormat.getByteBuffer(MediaFormat.KEY_HDR_STATIC_INFO));
-                                }
-                            }
+//                            boolean hasHDR = false;
+//                            int hdrType = 0;
+//                            int colorTransfer = 0, colorStandard = 0, colorRange = 0;
+//                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+//                                if (videoFormat.containsKey(MediaFormat.KEY_COLOR_TRANSFER)) {
+//                                    colorTransfer = videoFormat.getInteger(MediaFormat.KEY_COLOR_TRANSFER);
+//                                }
+//                                if (videoFormat.containsKey(MediaFormat.KEY_COLOR_STANDARD)) {
+//                                    colorStandard = videoFormat.getInteger(MediaFormat.KEY_COLOR_STANDARD);
+//                                }
+//                                if (videoFormat.containsKey(MediaFormat.KEY_COLOR_RANGE)) {
+//                                    colorRange = videoFormat.getInteger(MediaFormat.KEY_COLOR_RANGE);
+//                                }
+//                                if (videoFormat.containsKey(MediaFormat.KEY_HDR_STATIC_INFO)) {
+//                                    ByteBuffer bytes = videoFormat.getByteBuffer(MediaFormat.KEY_HDR_STATIC_INFO);
+//                                }
+//                                if ((colorTransfer == MediaFormat.COLOR_TRANSFER_ST2084 || colorTransfer == MediaFormat.COLOR_TRANSFER_HLG) && colorStandard == MediaFormat.COLOR_STANDARD_BT2020) {
+//                                    hasHDR = true;
+//                                    hdrType = colorTransfer == MediaFormat.COLOR_TRANSFER_HLG ? 1 : 2;
+//                                }
+//                            }
 
                             if (Build.VERSION.SDK_INT < 23 && Math.min(h, w) <= 480 && !isAvatar) {
                                 if (bitrate > 921600) {
@@ -445,17 +471,28 @@ public class MediaCodecVideoConvertor {
                             }
 
                             selectedEncoderName = encoder.getName();
+                            canBeBrokenEncoder = "c2.qti.avc.encoder".equalsIgnoreCase(selectedEncoderName);
                             FileLog.d("selected encoder " + selectedEncoderName);
                             encoder.configure(outputFormat, null, null, MediaCodec.CONFIGURE_FLAG_ENCODE);
                             inputSurface = new InputSurface(encoder.createInputSurface());
                             inputSurface.makeCurrent();
                             encoder.start();
 
-                            decoder = MediaCodec.createDecoderByType(videoFormat.getString(MediaFormat.KEY_MIME));
-                            outputSurface = new OutputSurface(savedFilterState, null, paintPath, mediaEntities, cropState, resultWidth, resultHeight, originalWidth, originalHeight, rotationValue, framerate, false);
-                            if (!isRound && Math.max(resultHeight, resultHeight) / (float) Math.max(originalHeight, originalWidth) < 0.9f) {
-                                outputSurface.changeFragmentShader(createFragmentShader(originalWidth, originalHeight, resultWidth, resultHeight, true), createFragmentShader(originalWidth, originalHeight, resultWidth, resultHeight, false));
+                            outputSurface = new OutputSurface(savedFilterState, null, paintPath, mediaEntities, cropState, resultWidth, resultHeight, originalWidth, originalHeight, rotationValue, framerate, false, gradientTopColor, gradientBottomColor, hdrInfo, parts);
+                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N && hdrInfo != null && hdrInfo.getHDRType() != 0 && outputSurface.supportsEXTYUV()) {
+                                outputSurface.changeFragmentShader(
+                                    hdrFragmentShader(originalWidth, originalHeight, resultWidth, resultHeight, true, hdrInfo),
+                                    hdrFragmentShader(originalWidth, originalHeight, resultWidth, resultHeight, false, hdrInfo),
+                                    true
+                                );
+                            } else if (!isRound && Math.max(resultHeight, resultHeight) / (float) Math.max(originalHeight, originalWidth) < 0.9f) {
+                                outputSurface.changeFragmentShader(
+                                    createFragmentShader(originalWidth, originalHeight, resultWidth, resultHeight, true, isStory ? 0 : 3),
+                                    createFragmentShader(originalWidth, originalHeight, resultWidth, resultHeight, false, isStory ? 0 : 3),
+                                    false
+                                );
                             }
+                            decoder = getDecoderByFormat(videoFormat);
                             decoder.configure(videoFormat, outputSurface.getSurface(), null, 0);
                             decoder.start();
 
@@ -468,6 +505,7 @@ public class MediaCodecVideoConvertor {
                             }
 
                             int maxBufferSize = 0;
+                            mediaMuxer = new MP4Builder().createMovie(movie, isSecret, outputMimeType.equals("video/hevc"));
                             if (audioIndex >= 0) {
                                 MediaFormat audioFormat = extractor.getTrackFormat(audioIndex);
                                 copyAudioBuffer = audioFormat.getString(MediaFormat.KEY_MIME).equals(MediaController.AUIDO_MIME_TYPE) || audioFormat.getString(MediaFormat.KEY_MIME).equals("audio/mpeg");
@@ -519,6 +557,7 @@ public class MediaCodecVideoConvertor {
                             boolean firstEncode = true;
 
                             checkConversionCanceled();
+
 
                             while (!outputDone || (!copyAudioBuffer && !audioEncoderDone)) {
                                 checkConversionCanceled();
@@ -611,7 +650,7 @@ public class MediaCodecVideoConvertor {
                                             if (newFormat.containsKey(MediaFormat.KEY_PREPEND_HEADER_TO_SYNC_FRAMES) && newFormat.getInteger(MediaFormat.KEY_PREPEND_HEADER_TO_SYNC_FRAMES) == 1) {
                                                 ByteBuffer spsBuff = newFormat.getByteBuffer("csd-0");
                                                 ByteBuffer ppsBuff = newFormat.getByteBuffer("csd-1");
-                                                prependHeaderSize = spsBuff.limit() + ppsBuff.limit();
+                                                prependHeaderSize = (spsBuff == null ? 0 : spsBuff.limit()) + (ppsBuff == null ? 0 : ppsBuff.limit());
                                             }
                                         }
                                     } else if (encoderStatus < 0) {
@@ -633,22 +672,7 @@ public class MediaCodecVideoConvertor {
                                                     info.size -= prependHeaderSize;
                                                 }
                                                 if (firstEncode && (info.flags & MediaCodec.BUFFER_FLAG_KEY_FRAME) != 0) {
-                                                    if (info.size > 100) {
-                                                        encodedData.position(info.offset);
-                                                        byte[] temp = new byte[100];
-                                                        encodedData.get(temp);
-                                                        int nalCount = 0;
-                                                        for (int a = 0; a < temp.length - 4; a++) {
-                                                            if (temp[a] == 0 && temp[a + 1] == 0 && temp[a + 2] == 0 && temp[a + 3] == 1) {
-                                                                nalCount++;
-                                                                if (nalCount > 1) {
-                                                                    info.offset += a;
-                                                                    info.size -= a;
-                                                                    break;
-                                                                }
-                                                            }
-                                                        }
-                                                    }
+                                                    cutOfNalData(outputMimeType, encodedData, info);
                                                     firstEncode = false;
                                                 }
                                                 long availableSize = mediaMuxer.writeSampleData(videoTrackIndex, encodedData, info, true);
@@ -681,7 +705,7 @@ public class MediaCodecVideoConvertor {
                                                     }
                                                 }
 
-                                                MediaFormat newFormat = MediaFormat.createVideoFormat(MediaController.VIDEO_MIME_TYPE, w, h);
+                                                MediaFormat newFormat = MediaFormat.createVideoFormat(outputMimeType, w, h);
                                                 if (sps != null && pps != null) {
                                                     newFormat.setByteBuffer("csd-0", sps);
                                                     newFormat.setByteBuffer("csd-1", pps);
@@ -707,6 +731,7 @@ public class MediaCodecVideoConvertor {
                                             if (BuildVars.LOGS_ENABLED) {
                                                 FileLog.d("newFormat = " + newFormat);
                                             }
+                                            // TODO: apply hdr static info here
                                         } else if (decoderStatus < 0) {
                                             throw new RuntimeException("unexpected result from decoder.dequeueOutputBuffer: " + decoderStatus);
                                         } else {
@@ -809,20 +834,24 @@ public class MediaCodecVideoConvertor {
                     }
                     if (outputSurface != null) {
                         outputSurface.release();
+                        outputSurface = null;
                     }
                     if (inputSurface != null) {
                         inputSurface.release();
+                        inputSurface = null;
                     }
                     if (encoder != null) {
                         encoder.stop();
                         encoder.release();
+                        encoder = null;
                     }
                     if (audioRecoder != null) {
                         audioRecoder.release();
                     }
                     checkConversionCanceled();
                 } else {
-                    readAndWriteTracks(extractor, mediaMuxer, info, startTime, endTime, duration, cacheFile, bitrate != -1);
+                    mediaMuxer = new MP4Builder().createMovie(movie, isSecret, false);
+                    readAndWriteTracks(extractor, mediaMuxer, info, startTime, endTime, duration, cacheFile, bitrate != -1 && !muted);
                 }
             }
         } catch (Throwable e) {
@@ -841,6 +870,30 @@ public class MediaCodecVideoConvertor {
                     FileLog.e(e);
                 }
             }
+            if (encoder != null) {
+                try {
+                    encoder.release();
+                } catch (Exception ignore) {}
+                encoder = null;
+            }
+            if (decoder != null) {
+                try {
+                    decoder.release();
+                } catch (Exception ignore) {}
+                decoder = null;
+            }
+            if (outputSurface != null) {
+                try {
+                    outputSurface.release();
+                } catch (Exception ignore) {}
+                outputSurface = null;
+            }
+            if (inputSurface != null) {
+                try {
+                    inputSurface.release();
+                } catch (Exception ignore) {}
+                inputSurface = null;
+            }
         }
 
         if (repeatWithIncreasedTimeout) {
@@ -848,7 +901,15 @@ public class MediaCodecVideoConvertor {
                     originalWidth, originalHeight,
                     resultWidth, resultHeight, framerate, bitrate, originalBitrate, startTime, endTime, avatarStartTime, duration,
                     needCompress, true, savedFilterState, paintPath, mediaEntities,
-                    isPhoto, cropState, isRound);
+                    isPhoto, cropState, isRound, gradientTopColor, gradientBottomColor, muted, isStory, hdrInfo, parts, triesCount + 1);
+        }
+
+        if (error && canBeBrokenEncoder && triesCount < 3) {
+            return convertVideoInternal(videoPath, cacheFile, rotationValue, isSecret,
+                    originalWidth, originalHeight,
+                    resultWidth, resultHeight, framerate, bitrate, originalBitrate, startTime, endTime, avatarStartTime, duration,
+                    needCompress, increaseTimeout, savedFilterState, paintPath, mediaEntities,
+                    isPhoto, cropState, isRound, gradientTopColor, gradientBottomColor, muted, isStory, hdrInfo, parts, triesCount + 1);
         }
 
         long timeLeft = System.currentTimeMillis() - time;
@@ -857,6 +918,69 @@ public class MediaCodecVideoConvertor {
         }
 
         return error;
+    }
+
+    private MediaCodec createEncoderForMimeType() throws IOException {
+        MediaCodec encoder = null;//MediaCodec.createEncoderByType(outputMimeType);
+        if (outputMimeType.equals("video/hevc") && android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.Q) {
+            String encoderName = SharedConfig.findGoodHevcEncoder();
+            if (encoderName != null) {
+                encoder = MediaCodec.createByCodecName(encoderName);
+            }
+        } else {
+            outputMimeType = "video/avc";
+            encoder = MediaCodec.createEncoderByType(outputMimeType);
+        }
+//        if (encoder != null && Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP && "c2.qti.avc.encoder".equals(encoder.getName())) {
+//            FileLog.d("searching another encoder to replace c2.qti.avc.encoder");
+//            MediaCodecInfo[] infos = new MediaCodecList(MediaCodecList.ALL_CODECS).getCodecInfos();
+//            for (MediaCodecInfo codecInfo : infos) {
+//                if (codecInfo != null && codecInfo.isEncoder() && !"c2.qti.avc.encoder".equals(codecInfo.getName())) {
+//                    String[] types = codecInfo.getSupportedTypes();
+//                    boolean found = false;
+//                    for (int i = 0; i < types.length; ++i) {
+//                        if (types[i] != null && types[i].startsWith(outputMimeType)) {
+//                            found = true;
+//                            break;
+//                        }
+//                    }
+//                    if (found) {
+//                        FileLog.d("blacklisting c2.qti.avc.encoder, replacing it with " + codecInfo.getName());
+//                        encoder.release();
+//                        encoder = MediaCodec.createByCodecName(codecInfo.getName());
+//                        break;
+//                    }
+//                }
+//            }
+//        }
+        if (encoder == null && outputMimeType.equals("video/hevc")) {
+            outputMimeType = "video/avc";
+            encoder = MediaCodec.createEncoderByType(outputMimeType);
+        }
+        return encoder;
+    }
+
+    public static void cutOfNalData(String outputMimeType, ByteBuffer encodedData, MediaCodec.BufferInfo info) {
+        int maxNalCount = 1;
+        if (outputMimeType.equals("video/hevc")) {
+            maxNalCount = 3;
+        }
+        if (info.size > 100) {
+            encodedData.position(info.offset);
+            byte[] temp = new byte[100];
+            encodedData.get(temp);
+            int nalCount = 0;
+            for (int a = 0; a < temp.length - 4; a++) {
+                if (temp[a] == 0 && temp[a + 1] == 0 && temp[a + 2] == 0 && temp[a + 3] == 1) {
+                    nalCount++;
+                    if (nalCount > maxNalCount) {
+                        info.offset += a;
+                        info.size -= a;
+                        break;
+                    }
+                }
+            }
+        }
     }
 
     private boolean isMediatekAvcEncoder(MediaCodec encoder) {
@@ -1020,14 +1144,53 @@ public class MediaCodecVideoConvertor {
             throw new ConversionCanceledException();
     }
 
+    private static String hdrFragmentShader(
+            final int srcWidth,
+            final int srcHeight,
+            final int dstWidth,
+            final int dstHeight,
+            boolean external,
+            StoryEntry.HDRInfo hdrInfo
+    ) {
+        if (external) {
+            String shaderCode;
+            if (hdrInfo.getHDRType() == 1) {
+                shaderCode = RLottieDrawable.readRes(null, R.raw.yuv_hlg2rgb);
+            } else {
+                shaderCode = RLottieDrawable.readRes(null, R.raw.yuv_pq2rgb);
+            }
+            shaderCode = shaderCode.replace("$dstWidth", dstWidth + ".0");
+            shaderCode = shaderCode.replace("$dstHeight", dstHeight + ".0");
+            return shaderCode + "\n" +
+                "in vec2 vTextureCoord;\n" +
+                "out vec4 fragColor;\n" +
+                "void main() {\n" +
+                "    fragColor = TEX(vTextureCoord);\n" +
+                "}";
+        } else {
+            return "#version 320 es\n" +
+                    "precision mediump float;\n" +
+                    "varying vec2 vTextureCoord;\n" +
+                    "uniform sampler2D sTexture;\n" +
+                    "out vec4 fragColor;\n" +
+                    "void main() {\n" +
+                    "fragColor = texture(sTexture, vTextureCoord);\n" +
+                    "}\n";
+        }
+    }
+
     private static String createFragmentShader(
             final int srcWidth,
             final int srcHeight,
             final int dstWidth,
-            final int dstHeight, boolean external) {
+            final int dstHeight, boolean external, int maxKernelRadius) {
 
         final float kernelSize = Utilities.clamp((float) (Math.max(srcWidth, srcHeight) / (float) Math.max(dstHeight, dstWidth)) * 0.8f, 2f, 1f);
-        final int kernelRadius = (int) kernelSize;
+        int kernelRadius = (int) kernelSize;
+        if (kernelRadius > 1 && SharedConfig.deviceIsAboveAverage()) {
+            kernelRadius = 1;
+        }
+        kernelRadius = Math.min(maxKernelRadius, kernelRadius);
         FileLog.d("source size " + srcWidth + "x" + srcHeight + "    dest size " + dstWidth + dstHeight + "   kernelRadius " + kernelRadius);
         if (external) {
             return "#extension GL_OES_EGL_image_external : require\n" +
@@ -1074,6 +1237,33 @@ public class MediaCodecVideoConvertor {
         public ConversionCanceledException() {
             super("canceled conversion");
         }
+    }
+
+    @NonNull
+    private MediaCodec getDecoderByFormat(MediaFormat format) {
+        if (format == null) {
+            throw new RuntimeException("getDecoderByFormat: format is null");
+        }
+        ArrayList<String> types = new ArrayList<>();
+        String mainType = format.getString(MediaFormat.KEY_MIME);
+        types.add(mainType);
+        if ("video/dolby-vision".equals(mainType)) {
+            types.add("video/hevc");
+            types.add("video/avc");
+        }
+        Exception exception = null;
+        while (!types.isEmpty()) {
+            try {
+                String mime = types.remove(0);
+                format.setString(MediaFormat.KEY_MIME, mime);
+                return MediaCodec.createDecoderByType(mime);
+            } catch (Exception e) {
+                if (exception == null) {
+                    exception = e;
+                }
+            }
+        }
+        throw new RuntimeException(exception);
     }
 
 }

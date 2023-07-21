@@ -41,6 +41,7 @@ import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.ApplicationLoader;
 import org.telegram.messenger.ChatObject;
 import org.telegram.messenger.ContactsController;
+import org.telegram.messenger.FlagSecureReason;
 import org.telegram.messenger.LanguageDetector;
 import org.telegram.messenger.LocaleController;
 import org.telegram.messenger.MessageObject;
@@ -84,7 +85,7 @@ public class MessageDetailActivity extends BaseActivity implements NotificationC
     private int dc;
     private long stickerSetOwner;
     private final ArrayList<Long> emojiSetOwners = new ArrayList<>();
-    private Runnable unregisterFlagSecure;
+    private FlagSecureReason unregisterFlagSecure;
 
     private int idRow;
     private int messageRow;
@@ -215,9 +216,8 @@ public class MessageDetailActivity extends BaseActivity implements NotificationC
     public View createView(Context context) {
         View fragmentView = super.createView(context);
 
-        if (noforwards) {
-            unregisterFlagSecure = AndroidUtilities.registerFlagSecure(getParentActivity().getWindow());
-        }
+        unregisterFlagSecure = new FlagSecureReason(getParentActivity().getWindow(), () -> noforwards);
+        unregisterFlagSecure.attach();
 
         return fragmentView;
     }
@@ -416,9 +416,7 @@ public class MessageDetailActivity extends BaseActivity implements NotificationC
     public void onFragmentDestroy() {
         super.onFragmentDestroy();
         NotificationCenter.getGlobalInstance().removeObserver(this, NotificationCenter.emojiLoaded);
-        if (unregisterFlagSecure != null) {
-            unregisterFlagSecure.run();
-        }
+        unregisterFlagSecure.detach();
     }
 
     private class ListAdapter extends BaseListAdapter {

@@ -27,6 +27,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.net.Uri;
 import android.text.TextUtils;
 import android.util.Base64;
 import android.util.Pair;
@@ -352,11 +353,11 @@ public class MessageUtils extends BaseController {
     }
 
 
-    public void saveStickerToGallery(Activity activity, MessageObject messageObject, Runnable callback) {
+    public void saveStickerToGallery(Activity activity, MessageObject messageObject, Utilities.Callback<Uri> callback) {
         saveStickerToGallery(activity, getPathToMessage(messageObject), messageObject.isVideoSticker(), callback);
     }
 
-    public static void saveStickerToGallery(Activity activity, TLRPC.Document document, Runnable callback) {
+    public static void saveStickerToGallery(Activity activity, TLRPC.Document document, Utilities.Callback<Uri> callback) {
         String path = FileLoader.getInstance(UserConfig.selectedAccount).getPathToAttach(document, true).toString();
         File temp = new File(path);
         if (!temp.exists()) {
@@ -365,7 +366,7 @@ public class MessageUtils extends BaseController {
         saveStickerToGallery(activity, path, MessageObject.isVideoSticker(document), callback);
     }
 
-    private static void saveStickerToGallery(Activity activity, String path, boolean video, Runnable callback) {
+    private static void saveStickerToGallery(Activity activity, String path, boolean video, Utilities.Callback<Uri> callback) {
         Utilities.globalQueue.postRunnable(() -> {
             try {
                 if (video) {

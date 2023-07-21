@@ -23,12 +23,13 @@ import top.qwq2333.nullgram.config.ConfigManager;
 import top.qwq2333.nullgram.utils.Defines;
 
 public class SpoilersTextView extends TextView {
-    private final SpoilersClickDetector clickDetector;
-    private final List<SpoilerEffect> spoilers = new ArrayList<>();
-    private final Stack<SpoilerEffect> spoilersPool = new Stack<>();
+    private SpoilersClickDetector clickDetector;
+    protected List<SpoilerEffect> spoilers = new ArrayList<>();
+    private Stack<SpoilerEffect> spoilersPool = new Stack<>();
     private boolean isSpoilersRevealed;
     private final Path path = new Path();
     private Paint xRefPaint;
+    public boolean allowClickSpoilers = true;
 
     public SpoilersTextView(Context context) {
         this(context, true);
@@ -53,7 +54,7 @@ public class SpoilersTextView extends TextView {
 
     @Override
     public boolean dispatchTouchEvent(MotionEvent event) {
-        if (clickDetector.onTouchEvent(event))
+        if (allowClickSpoilers && clickDetector.onTouchEvent(event))
             return true;
         return super.dispatchTouchEvent(event);
     }
