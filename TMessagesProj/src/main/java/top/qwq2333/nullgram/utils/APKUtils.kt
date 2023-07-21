@@ -18,6 +18,7 @@
  */
 package top.qwq2333.nullgram.utils
 
+import android.Manifest
 import android.annotation.SuppressLint
 import android.app.Activity
 import android.app.PendingIntent
@@ -26,6 +27,7 @@ import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.content.pm.PackageInstaller
+import android.content.pm.PackageManager
 import android.os.Build
 import android.provider.Settings
 import android.text.TextUtils
@@ -33,6 +35,7 @@ import android.util.TypedValue
 import android.view.Gravity
 import android.widget.LinearLayout
 import android.widget.TextView
+import androidx.core.app.ActivityCompat
 import androidx.core.app.NotificationChannelCompat
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
@@ -254,13 +257,15 @@ object APKUtils {
                 notificationManager.createNotificationChannel(channel)
                 val pendingIntent =
                     PendingIntent.getActivity(context, 0, startIntent, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
-                notificationManager.notify(
-                    8732833,
-                    NotificationCompat.Builder(context, "updated").setSmallIcon(R.drawable.notification).setColor(-0xee5306)
-                        .setShowWhen(false)
-                        .setContentText(LocaleController.getString("UpdateInstalledNotification", R.string.UpdateInstalledNotification))
-                        .setCategory(NotificationCompat.CATEGORY_STATUS).setContentIntent(pendingIntent).build()
-                )
+                if (ActivityCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS) == PackageManager.PERMISSION_GRANTED) {
+                    notificationManager.notify(
+                        8732833,
+                        NotificationCompat.Builder(context, "updated").setSmallIcon(R.drawable.notification).setColor(-0xee5306)
+                            .setShowWhen(false)
+                            .setContentText(LocaleController.getString("UpdateInstalledNotification", R.string.UpdateInstalledNotification))
+                            .setCategory(NotificationCompat.CATEGORY_STATUS).setContentIntent(pendingIntent).build()
+                    )
+                }
             }
         }
     }
