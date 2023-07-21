@@ -24,6 +24,7 @@ configurations {
 }
 
 var serviceAccountCredentialsFile = File(rootProject.projectDir, "service_account_credentials.json")
+val abiName = mapOf("armeabi-v7a" to "arm32", "arm64-v8a" to "arm64", "x86" to "x86", "x86_64" to "x86_64")
 
 if (serviceAccountCredentialsFile.isFile) {
     setupPlay(Version.isStable)
@@ -201,7 +202,6 @@ android {
 
     androidComponents {
         onVariants { variant ->
-            val abiName = mapOf("armeabi-v7a" to "arm32", "arm64-v8a" to "arm64", "x86" to "x86", "x86_64" to "x86_64")
             variant.buildConfigFields.put("isPlay", BuildConfigField("boolean", variant.name == "play", null))
             variant.outputs.forEach { output ->
                 val abi = output.filters.find { it.filterType == ABI }?.identifier
@@ -212,20 +212,17 @@ android {
                     )
                 )
 
-                val task = project.tasks.register<MoveApk>("copy${variant.name}${abiName[abi]}")
-                val request = variant.artifacts.use(task)
-                    .wiredWithDirectories(MoveApk::apkFolder, MoveApk::outFolder)
-                    .toTransformMany(com.android.build.api.artifact.SingleArtifact.APK)
-
-                task.configure {
-                    this.outputs.cacheIf { false }
-                    this.transformationRequest.set(request)
-                    transformer.set {
-                        File(projectDir, "build/outputs/apk/${variant.name}/Nullgram-${defaultConfig.versionName}-${abiName[abi]}.apk")
-                    }
-                }
             }
 
+        }
+    }
+
+    applicationVariants.all {
+        outputs.all {
+            val abi = this.filters.find { it.filterType == com.android.build.VariantOutput.ABI }?.identifier
+            val output = this as? com.android.build.gradle.internal.api.BaseVariantOutputImpl
+            val outputFileName = "Nullgram-${defaultConfig.versionName}-${abiName[abi]}.apk"
+            output?.outputFileName = outputFileName
         }
     }
 
@@ -234,25 +231,3 @@ android {
 
 tasks.register<ReplaceIcon>("replaceIcon") {}
 tasks.getByName("preBuild").dependsOn(tasks.getByName("replaceIcon"))
-tasks.withType(MoveApk::class.java) {
-    this.outputs.cacheIf { false }
-}
-
-abstract class MoveApk : DefaultTask() {
-    @get:Internal
-    abstract val transformer: Property<(input: com.android.build.api.variant.BuiltArtifact) -> File>
-
-    @get:InputDirectory
-    abstract val apkFolder: DirectoryProperty
-
-    @get:OutputDirectory
-    abstract val outFolder: DirectoryProperty
-
-    @get:Internal
-    abstract val transformationRequest: Property<com.android.build.api.artifact.ArtifactTransformationRequest<MoveApk>>
-
-    @TaskAction
-    fun taskAction() = transformationRequest.get().submit(this) { builtArtifact ->
-        File(builtArtifact.outputFile).copyTo(transformer.get()(builtArtifact), true)
-    }
-}

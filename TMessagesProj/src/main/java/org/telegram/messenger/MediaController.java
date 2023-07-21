@@ -43,7 +43,10 @@ import android.media.MediaFormat;
 import android.media.MediaMetadataRetriever;
 import android.media.MediaRecorder;
 import android.net.Uri;
+import android.os.Binder;
 import android.os.Build;
+import android.os.Build.VERSION;
+import android.os.Build.VERSION_CODES;
 import android.os.Environment;
 import android.os.PowerManager;
 import android.os.SystemClock;
@@ -105,6 +108,7 @@ import java.util.concurrent.CountDownLatch;
 
 import top.qwq2333.nullgram.config.ConfigManager;
 import top.qwq2333.nullgram.utils.AudioUtils;
+import top.qwq2333.nullgram.utils.CallStateListener;
 import top.qwq2333.nullgram.utils.Defines;
 import top.qwq2333.nullgram.utils.Log;
 import top.qwq2333.nullgram.utils.PermissionUtils;
@@ -974,36 +978,75 @@ public class MediaController implements AudioManager.OnAudioFocusChangeListener,
             }
 
             try {
-                PhoneStateListener phoneStateListener = new PhoneStateListener() {
-                    @Override
-                    public void onCallStateChanged(final int state, String incomingNumber) {
-                        AndroidUtilities.runOnUIThread(() -> {
-                            if (state == TelephonyManager.CALL_STATE_RINGING) {
-                                if (isPlayingMessage(playingMessageObject) && !isMessagePaused()) {
-                                    pauseMessage(playingMessageObject);
-                                } else if (recordStartRunnable != null || recordingAudio != null) {
-                                    stopRecording(2, false, 0);
-                                }
-                                EmbedBottomSheet embedBottomSheet = EmbedBottomSheet.getInstance();
-                                if (embedBottomSheet != null) {
-                                    embedBottomSheet.pause();
-                                }
-                                callInProgress = true;
-                            } else if (state == TelephonyManager.CALL_STATE_IDLE) {
-                                callInProgress = false;
-                            } else if (state == TelephonyManager.CALL_STATE_OFFHOOK) {
-                                EmbedBottomSheet embedBottomSheet = EmbedBottomSheet.getInstance();
-                                if (embedBottomSheet != null) {
-                                    embedBottomSheet.pause();
-                                }
-                                callInProgress = true;
-                            }
-                        });
-                    }
-                };
                 TelephonyManager mgr = (TelephonyManager) ApplicationLoader.applicationContext.getSystemService(Context.TELEPHONY_SERVICE);
                 if (mgr != null) {
-                    mgr.listen(phoneStateListener, PhoneStateListener.LISTEN_CALL_STATE);
+                    if (PermissionUtils.isPhoneCallStatePermissionGranted()) {
+                        Log.d("phone call permission is granted");
+                        if (VERSION.SDK_INT >= VERSION_CODES.S) {
+                            CallStateListener callStateListener = new CallStateListener() {
+                                @Override
+                                public void onCallStateChanged(int state) {
+                                    AndroidUtilities.runOnUIThread(() -> {
+                                        if (state == TelephonyManager.CALL_STATE_RINGING) {
+                                            if (isPlayingMessage(playingMessageObject) && !isMessagePaused()) {
+                                                pauseMessage(playingMessageObject);
+                                            } else if (recordStartRunnable != null || recordingAudio != null) {
+                                                stopRecording(2, false, 0);
+                                            }
+                                            EmbedBottomSheet embedBottomSheet = EmbedBottomSheet.getInstance();
+                                            if (embedBottomSheet != null) {
+                                                embedBottomSheet.pause();
+                                            }
+                                            callInProgress = true;
+                                        } else if (state == TelephonyManager.CALL_STATE_IDLE) {
+                                            callInProgress = false;
+                                        } else if (state == TelephonyManager.CALL_STATE_OFFHOOK) {
+                                            EmbedBottomSheet embedBottomSheet = EmbedBottomSheet.getInstance();
+                                            if (embedBottomSheet != null) {
+                                                embedBottomSheet.pause();
+                                            }
+                                            callInProgress = true;
+                                        }
+                                    });
+                                }
+                            };
+                            Log.d("Binder.clearCallingIdentity");
+                            Binder.clearCallingIdentity();
+                            mgr.registerTelephonyCallback(ApplicationLoader.applicationContext.getMainExecutor(), callStateListener);
+                        } else {
+                            PhoneStateListener phoneStateListener = new PhoneStateListener() {
+                                @Override
+                                public void onCallStateChanged(final int state, String incomingNumber) {
+                                    AndroidUtilities.runOnUIThread(() -> {
+                                        if (state == TelephonyManager.CALL_STATE_RINGING) {
+                                            if (isPlayingMessage(playingMessageObject) && !isMessagePaused()) {
+                                                pauseMessage(playingMessageObject);
+                                            } else if (recordStartRunnable != null || recordingAudio != null) {
+                                                stopRecording(2, false, 0);
+                                            }
+                                            EmbedBottomSheet embedBottomSheet = EmbedBottomSheet.getInstance();
+                                            if (embedBottomSheet != null) {
+                                                embedBottomSheet.pause();
+                                            }
+                                            callInProgress = true;
+                                        } else if (state == TelephonyManager.CALL_STATE_IDLE) {
+                                            callInProgress = false;
+                                        } else if (state == TelephonyManager.CALL_STATE_OFFHOOK) {
+                                            EmbedBottomSheet embedBottomSheet = EmbedBottomSheet.getInstance();
+                                            if (embedBottomSheet != null) {
+                                                embedBottomSheet.pause();
+                                            }
+                                            callInProgress = true;
+                                        }
+                                    });
+                                }
+                            };
+                            mgr.listen(phoneStateListener, PhoneStateListener.LISTEN_CALL_STATE);
+                        }
+                    } else {
+                        Log.d("phone call permission is not granted");
+                        PermissionUtils.requestPhoneCallStatePermission(baseActivity);
+                    }
                 }
             } catch (Exception e) {
                 FileLog.e(e);

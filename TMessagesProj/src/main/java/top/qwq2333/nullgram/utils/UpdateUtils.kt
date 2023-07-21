@@ -260,7 +260,7 @@ object UpdateUtils {
                     val res = resp as TLRPC.messages_Messages
                     for (msg in res.messages) {
                         if (msg.media == null) {
-                            Log.i("checkUpdate", "res.messages.get(i).media == null")
+                            Log.d("checkUpdate", "res.messages.get(i).media == null")
                             continue
                         }
                         val apkDocument = msg.media.document
