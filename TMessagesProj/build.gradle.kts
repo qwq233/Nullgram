@@ -218,6 +218,7 @@ android {
                     .toTransformMany(com.android.build.api.artifact.SingleArtifact.APK)
 
                 task.configure {
+                    this.outputs.cacheIf { false }
                     this.transformationRequest.set(request)
                     transformer.set {
                         File(projectDir, "build/outputs/apk/${variant.name}/Nullgram-${defaultConfig.versionName}-${abiName[abi]}.apk")
@@ -233,6 +234,9 @@ android {
 
 tasks.register<ReplaceIcon>("replaceIcon") {}
 tasks.getByName("preBuild").dependsOn(tasks.getByName("replaceIcon"))
+tasks.withType(MoveApk::class.java) {
+    this.outputs.cacheIf { false }
+}
 
 abstract class MoveApk : DefaultTask() {
     @get:Internal
