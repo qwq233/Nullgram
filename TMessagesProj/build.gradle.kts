@@ -43,7 +43,8 @@ fun setupPlay(stable: Boolean) {
 
 dependencies {
     implementation(platform("com.google.firebase:firebase-bom:32.2.0"))
-    implementation("com.google.firebase:firebase-crashlytics-ktx")
+    implementation("com.google.firebase:firebase-crashlytics-ndk")
+    implementation("com.google.firebase:firebase-analytics-ktx")
 
     implementation("androidx.core:core-ktx:1.10.1")
     implementation("androidx.palette:palette-ktx:1.0.0")
@@ -92,13 +93,6 @@ dependencies {
 
     implementation(project(":libs:tcp2ws"))
     implementation(project(":libs:pangu"))
-}
-
-
-dependencies {
-    val appCenterSdkVersion = "5.0.2"
-    implementation("com.microsoft.appcenter:appcenter-analytics:${appCenterSdkVersion}")
-    implementation("com.microsoft.appcenter:appcenter-crashes:${appCenterSdkVersion}")
 }
 
 android {

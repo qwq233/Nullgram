@@ -25,6 +25,7 @@ import com.google.gson.JsonPrimitive
 import org.json.JSONException
 import org.json.JSONObject
 import org.telegram.messenger.ApplicationLoader
+import top.qwq2333.nullgram.utils.AnalyticsUtils
 import top.qwq2333.nullgram.utils.Log
 import java.util.function.Function
 
@@ -157,6 +158,7 @@ object ConfigManager {
      */
     @JvmStatic
     fun putBoolean(key: String, value: Boolean) {
+        AnalyticsUtils.trackFunctionSwitch(key, value)
         synchronized(preferences) {
             try {
                 preferences.edit().putBoolean(key, value).apply()
@@ -229,6 +231,7 @@ object ConfigManager {
         synchronized(preferences) {
             try {
                 val originValue = preferences.getBoolean(key, false)
+                AnalyticsUtils.trackFunctionSwitch(key, !originValue)
                 preferences.edit().putBoolean(key, !originValue).apply()
             } catch (thr: Throwable) {
                 Log.e(thr)
