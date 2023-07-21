@@ -39,7 +39,6 @@ import androidx.core.app.NotificationManagerCompat
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
 import org.telegram.messenger.AndroidUtilities
 import org.telegram.messenger.ApplicationLoader
 import org.telegram.messenger.FileLoader
@@ -62,6 +61,7 @@ import java.io.InputStream
 import java.io.OutputStream
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
+
 
 object APKUtils {
 
@@ -147,20 +147,17 @@ object APKUtils {
         dialog!!.setCanceledOnTouchOutside(false)
         dialog!!.setCancelable(false)
         dialog!!.show()
-        CoroutineScope(Dispatchers.Main).launch {
-            try {
-                val receiver = register(context) {
-                    if (dialog != null) {
-                        dialog!!.dismiss()
-                        dialog = null
-                    }
+        CoroutineScope(Dispatchers.IO).launch {
+            val receiver = register(context) {
+                if (dialog != null) {
+                    dialog!!.dismiss()
+                    dialog = null
                 }
-                installApk(context, apk)
-                runBlocking {
-                    val intent = receiver.waitIntent()
-                    context.startActivity(intent)
-                }
-            } catch (ignore: Exception) {
+            }
+            installApk(context, apk)
+            val intent = receiver.waitIntent()
+            if (intent != null) {
+                context.startActivity(intent)
             }
         }
     }
@@ -184,8 +181,7 @@ object APKUtils {
         return receiver
     }
 
-    private class InstallReceiver(private val context: Context, private val packageName: String, private val onSuccess: Runnable) :
-        BroadcastReceiver() {
+    private class InstallReceiver(private val context: Context, private val packageName: String, private val onSuccess: Runnable) : BroadcastReceiver() {
         private val latch = CountDownLatch(1)
         private var intent: Intent? = null
 

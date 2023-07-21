@@ -50,20 +50,23 @@ object AnalyticsUtils {
             val crashlytics = FirebaseCrashlytics.getInstance()
 
             firebaseAnalytics.setUserId(currentUser.getClientUserId().toString())
+
+            Log.d("FA", "start log event")
             firebaseAnalytics.logEvent(FirebaseAnalytics.Event.APP_OPEN) {
                 for (i in 0..UserConfig.MAX_ACCOUNT_COUNT) {
                     UserConfig.getInstance(i)?.let {
                         if (!it.isClientActivated) return@let
-                        param("User $i", it.getClientUserId().toString())
+                        param("user_$i", it.getClientUserId().toString())
+                        firebaseAnalytics.setUserProperty("user_$i", it.getClientUserId().toString())
                     }
                 }
-                param("Build Time", BuildConfig.BUILD_TIME)
-                param("Flavor", BuildConfig.FLAVOR)
-                param("Build Type", BuildConfig.BUILD_TYPE)
-                param("Device", Build.DEVICE)
-                param("Model", Build.MODEL)
-                param("Product", Build.PRODUCT)
-                param("Android Version", Build.VERSION.SDK_INT.toString())
+                param("build_time", BuildConfig.BUILD_TIME)
+                param("flavor", BuildConfig.FLAVOR)
+                param("build_type", BuildConfig.BUILD_TYPE)
+                param("device", Build.DEVICE)
+                param("model", Build.MODEL)
+                param("product", Build.PRODUCT)
+                param("android_version", Build.VERSION.SDK_INT.toString())
             }
 
             crashlytics.setUserId(currentUser.getClientUserId().toString())
