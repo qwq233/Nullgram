@@ -21,20 +21,56 @@ package top.qwq2333.nullgram.utils
 import android.app.ActivityManager
 import android.app.Application
 import android.os.Build
+import android.os.Handler
 import android.util.Base64
-import com.google.firebase.analytics.FirebaseAnalytics
-import com.google.firebase.analytics.ktx.analytics
-import com.google.firebase.analytics.ktx.logEvent
 import com.google.firebase.crashlytics.FirebaseCrashlytics
-import com.google.firebase.ktx.Firebase
+import com.google.firebase.crashlytics.ktx.setCustomKeys
+import com.microsoft.appcenter.AppCenter
+import com.microsoft.appcenter.analytics.Analytics
+import com.microsoft.appcenter.channel.AbstractChannelListener
+import com.microsoft.appcenter.channel.Channel
+import com.microsoft.appcenter.crashes.Crashes
 import org.telegram.messenger.BuildConfig
+import org.telegram.messenger.BuildVars
 import org.telegram.messenger.UserConfig
 import java.util.Arrays
 
+
 object AnalyticsUtils {
-    private lateinit var firebaseAnalytics: FirebaseAnalytics
+    private val appCenterToken = BuildVars.APPCENTER_HASH
     private var isInit = false
     private val isEnabled = BuildConfig.APPLICATION_ID != Arrays.toString(Base64.decode("dG9wLnF3cTIzMzMubnVsbGdyYW0=", Base64.DEFAULT))
+    private val patchDeviceListener: Channel.Listener = object : AbstractChannelListener() {
+        override fun onPreparedLog(log: com.microsoft.appcenter.ingestion.models.Log, groupName: String, flags: Int) {
+            val device = log.device
+            device.appVersion = BuildConfig.VERSION_NAME
+            device.appBuild = BuildConfig.VERSION_CODE.toString()
+        }
+    }
+
+    private fun addPatchDeviceListener() {
+        try {
+            val channelField = AppCenter::class.java.getDeclaredField("mChannel")
+            channelField.isAccessible = true
+            val channel = (channelField[AppCenter.getInstance()] as Channel)
+            channel.addListener(patchDeviceListener)
+        } catch (e: ReflectiveOperationException) {
+            Log.e("add listener", e)
+        }
+    }
+
+    private fun patchDevice() {
+        try {
+            val handlerField = AppCenter::class.java.getDeclaredField("mHandler")
+            handlerField.isAccessible = true
+            val handler = handlerField[AppCenter.getInstance()] as Handler
+            handler.post {
+                addPatchDeviceListener()
+            }
+        } catch (e: ReflectiveOperationException) {
+            Log.e("patch device", e)
+        }
+    }
 
     @JvmStatic
     fun start(app: Application) {
@@ -42,39 +78,19 @@ object AnalyticsUtils {
         Log.d("Analytics: ${BuildConfig.APPLICATION_ID != Arrays.toString(Base64.decode("dG9wLnF3cTIzMzMubnVsbGdyYW0=", Base64.DEFAULT))}")
 
         if (isInit && UserConfig.getActivatedAccountsCount() < 1) return // stop analytics if no user login
-
-        firebaseAnalytics = Firebase.analytics
         try {
             val currentUser = UserConfig.getInstance(UserConfig.selectedAccount)
             Log.d("FirebaseCrashlytics start: set user id: " + currentUser.getClientUserId())
             val crashlytics = FirebaseCrashlytics.getInstance()
+            crashlytics.setUserId(currentUser.getClientUserId().toString())
+            crashlytics.setCustomKeys {
+                key("Build Time", BuildConfig.BUILD_TIME)
 
-            firebaseAnalytics.setUserId(currentUser.getClientUserId().toString())
-
-            Log.d("FA", "start log event")
-            firebaseAnalytics.logEvent(FirebaseAnalytics.Event.APP_OPEN) {
-                for (i in 0..UserConfig.MAX_ACCOUNT_COUNT) {
+                for (i in 0 ..  UserConfig.MAX_ACCOUNT_COUNT) {
                     UserConfig.getInstance(i)?.let {
                         if (!it.isClientActivated) return@let
-                        param("user_$i", it.getClientUserId().toString())
-                        firebaseAnalytics.setUserProperty("user_$i", it.getClientUserId().toString())
+                        key("User $i", it.getClientUserId().toString())
                     }
-                }
-                param("build_time", BuildConfig.BUILD_TIME)
-                param("flavor", BuildConfig.FLAVOR)
-                param("build_type", BuildConfig.BUILD_TYPE)
-                param("device", Build.DEVICE)
-                param("model", Build.MODEL)
-                param("product", Build.PRODUCT)
-                param("android_version", Build.VERSION.SDK_INT.toString())
-            }
-
-            crashlytics.setUserId(currentUser.getClientUserId().toString())
-            crashlytics.setCustomKey("Build Time", BuildConfig.BUILD_TIME)
-            for (i in 0 ..  UserConfig.MAX_ACCOUNT_COUNT) {
-                UserConfig.getInstance(i)?.let {
-                    if (!it.isClientActivated) return@let
-                    crashlytics.setCustomKey("User $i", it.getClientUserId().toString())
                 }
             }
         } catch (ignored: Exception) { }
@@ -84,17 +100,22 @@ object AnalyticsUtils {
             return
         }
 
+        AppCenter.start(app, appCenterToken, Analytics::class.java)
+        patchDevice()
+        trackEvent("App start")
+        AppCenter.setUserId(UserConfig.getInstance(UserConfig.selectedAccount)?.getClientUserId().toString())
+
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
             val am = app.getSystemService(ActivityManager::class.java)
+            val map = HashMap<String, String?>(1)
             val reasons = am.getHistoricalProcessExitReasons(null, 0, 1)
             if (reasons.size == 1) {
-                firebaseAnalytics.logEvent("last_exit_reason") {
-                    param("description", reasons[0].description ?: "null")
-                    param("importance", reasons[0].importance.toString())
-                    param("process", reasons[0].processName)
-                    param("reason", reasons[0].reason.toString())
-                    param("status", reasons[0].status.toString())
-                }
+                map["description"] = reasons[0].description
+                map["importance"] = reasons[0].importance.toString()
+                map["process"] = reasons[0].processName
+                map["reason"] = reasons[0].reason.toString()
+                map["status"] = reasons[0].status.toString()
+                trackEvent("Last exit reasons", map)
             }
         }
         isInit = true
@@ -104,31 +125,25 @@ object AnalyticsUtils {
     fun setUserId(id: Long) {
         if (isEnabled) return
         Log.d("FirebaseCrashlytics reset: set user id: $id")
-        firebaseAnalytics.setUserId(id.toString())
         FirebaseCrashlytics.getInstance().setUserId(id.toString())
+    }
+
+    @JvmStatic
+    fun trackEvent(event: String) {
+        if (isEnabled) return
+        Analytics.trackEvent(event)
     }
 
     @JvmStatic
     fun trackEvent(event: String, map: HashMap<String, String?>?) {
         if (isEnabled) return
-        firebaseAnalytics.logEvent(event) {
-            map?.forEach { (key, value) ->
-                param(key, value ?: "null")
-            }
-        }
+        Analytics.trackEvent(event, map)
     }
 
     @JvmStatic
     fun trackCrashes(thr: Throwable) {
         if (isEnabled) return
         FirebaseCrashlytics.getInstance().recordException(thr)
-    }
-
-    fun trackFunctionSwitch(key: String, value: Boolean) {
-        if (isEnabled) return
-        firebaseAnalytics.logEvent("func_switch") {
-            param("key", key)
-            param("value", value.toString())
-        }
+        Crashes.trackError(thr)
     }
 }
