@@ -636,7 +636,7 @@ public class FileLoadOperation {
         final CountDownLatch countDownLatch = new CountDownLatch(1);
         final File[] result = new File[1];
         Utilities.stageQueue.postRunnable(() -> {
-            if (state == stateFinished) {
+            if (state == stateFinished && !preloadFinished) {
                 result[0] = cacheFileFinal;
             } else {
                 result[0] = cacheFileTemp;
@@ -652,7 +652,7 @@ public class FileLoadOperation {
     }
 
     protected File getCurrentFileFast() {
-        if (state == stateFinished) {
+        if (state == stateFinished && !preloadFinished) {
             return cacheFileFinal;
         } else {
             return cacheFileTemp;

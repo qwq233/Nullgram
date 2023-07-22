@@ -23,6 +23,7 @@ import java.io.EOFException;
 import java.io.File;
 import java.io.IOException;
 import java.io.RandomAccessFile;
+import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CountDownLatch;
 
@@ -140,8 +141,16 @@ public class FileStreamLoadOperation extends BaseDataSource implements FileLoadO
                             countDownLatch = null;
                         }
                     }
-                    if (file == null) {
-                        currentFile = loadOperation.getCurrentFile();
+                    File currentFileFast = loadOperation.getCurrentFileFast();
+                    if (file == null || !Objects.equals(currentFile, currentFileFast)) {
+                        if (file != null) {
+                            try {
+                                file.close();
+                            } catch (Exception ignore) {
+
+                            }
+                        }
+                        currentFile = currentFileFast;
                         if (currentFile != null) {
                             try {
                                 file = new RandomAccessFile(currentFile, "r");

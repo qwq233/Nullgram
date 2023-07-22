@@ -69,6 +69,10 @@ public class FileLog {
         return;
     }
 
+    private static void checkGson() {
+    }
+
+
 
     public void init() {
         return;

@@ -590,7 +590,7 @@ public class AndroidUtilities {
     }
 
     public static void removeFromParent(View child) {
-        if (child.getParent() != null) {
+        if (child != null && child.getParent() != null) {
             ((ViewGroup) child.getParent()).removeView(child);
         }
     }
@@ -2747,6 +2747,39 @@ public class AndroidUtilities {
             FileLog.e(e);
         }
         return new SpannableStringBuilder(str);
+    }
+
+    private static Pattern linksPattern;
+    public static SpannableStringBuilder replaceLinks(String str, Theme.ResourcesProvider resourcesProvider) {
+        if (linksPattern == null) {
+            linksPattern = Pattern.compile("\\[(.+?)\\]\\((.+?)\\)");
+        }
+        SpannableStringBuilder spannable = new SpannableStringBuilder();
+        Matcher matcher = linksPattern.matcher(str);
+        int lastMatchEnd = 0;
+        while (matcher.find()) {
+            spannable.append(str, lastMatchEnd, matcher.start());
+            String linkText = matcher.group(1);
+            String url = matcher.group(2);
+            spannable.append(linkText);
+            int start = spannable.length() - linkText.length();
+            int end = spannable.length();
+            spannable.setSpan(new ClickableSpan() {
+                @Override
+                public void onClick(@NonNull View widget) {
+                    Browser.openUrl(ApplicationLoader.applicationContext, url);
+                }
+                @Override
+                public void updateDrawState(@NonNull TextPaint ds) {
+                    ds.setColor(Theme.getColor(Theme.key_chat_messageLinkIn, resourcesProvider));
+                    ds.setUnderlineText(false);
+                }
+            }, start, end, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+
+            lastMatchEnd = matcher.end();
+        }
+        spannable.append(str, lastMatchEnd, str.length());
+        return spannable;
     }
 
     public static class LinkMovementMethodMy extends LinkMovementMethod {
@@ -5328,5 +5361,13 @@ public class AndroidUtilities {
             return s;
         } catch (Exception ignore) {}
         return "";
+    }
+
+	public static void quietSleep(long millis) {
+        try {
+            Thread.sleep(millis);
+        } catch (InterruptedException ignored) {
+
+        }
     }
 }

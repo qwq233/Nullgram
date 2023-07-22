@@ -3666,7 +3666,7 @@ public class LaunchActivity extends BasePermissionsActivity implements INavigati
                             if (baseFragment != null) {
                                 storyItem.dialogId = peerId;
                                 StoryViewer storyViewer = baseFragment.getOrCreateStoryViewer();
-                                if (storyViewer.isShown()) {
+                                if (storyViewer.isShown() && storyViewer.attachedToParent()) {
                                     StoryViewer overlayStoryViewer = baseFragment.getOrCreateOverlayStoryViewer();
                                     final StoryViewer storyViewer1 = storyViewer;
                                     overlayStoryViewer.setOnCloseListener(() -> storyViewer1.setOverlayVisible(false));
@@ -5743,7 +5743,9 @@ public class LaunchActivity extends BasePermissionsActivity implements INavigati
         super.onDestroy();
         onFinish();
         FloatingDebugController.onDestroy();
-        flagSecureReason.detach();
+        if (flagSecureReason != null) {
+            flagSecureReason.detach();
+        }
     }
 
     @Override

@@ -153,6 +153,8 @@ public class EmojiView extends FrameLayout implements
     private final static int TAB_GIFS = 1;
     private final static int TAB_STICKERS = 2;
 
+    public int emojiCacheType = AnimatedEmojiDrawable.CACHE_TYPE_KEYBOARD;
+
     private ArrayList<Tab> allTabs = new ArrayList<>();
     private ArrayList<Tab> currentTabs = new ArrayList<>();
     private boolean ignorePagerScroll;
@@ -2837,7 +2839,7 @@ public class EmojiView extends FrameLayout implements
         }
 
         public void updateEmojiDrawables() {
-            animatedEmojiDrawables = AnimatedEmojiSpan.update(AnimatedEmojiDrawable.CACHE_TYPE_KEYBOARD, this, getAnimatedEmojiSpans(), animatedEmojiDrawables);
+            animatedEmojiDrawables = AnimatedEmojiSpan.update(emojiCacheType, this, getAnimatedEmojiSpans(), animatedEmojiDrawables);
         }
 
         @Override
