@@ -2145,6 +2145,8 @@ public class ChatActivityEnterView extends BlurredFrameLayout implements Notific
             public boolean onTouchEvent(MotionEvent motionEvent) {
                 if (ConfigManager.getBooleanOrFalse(Defines.hideQuickSendMediaBottom))
                     return true;
+                if (getEditField() != null && getEditField().getText() != null && !TextUtils.isEmpty(getEditField().getText()))
+                    return true;
                 createRecordCircle();
                 if (motionEvent.getAction() == MotionEvent.ACTION_DOWN) {
                     if (recordCircle.isSendButtonVisible()) {
