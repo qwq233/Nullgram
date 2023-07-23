@@ -20,45 +20,10 @@
 package top.qwq2333.nullgram.utils
 
 import android.util.Log
+import com.google.firebase.crashlytics.FirebaseCrashlytics
 
 object Log {
     const val TAG = "Nullgram"
-
-    /**
-     * 日志等级 Debug
-     * @param msg 日志内容
-     */
-    @JvmStatic
-    fun d(msg: String) {
-        Log.d(TAG, msg)
-    }
-
-    /**
-     * 日志等级 Info
-     * @param msg 日志内容
-     */
-    @JvmStatic
-    fun i(msg: String) {
-        Log.i(TAG, msg)
-    }
-
-    /**
-     * 日志等级 Warn
-     * @param msg 日志内容
-     */
-    @JvmStatic
-    fun w(msg: String) {
-        Log.w(TAG, msg)
-    }
-
-    /**
-     * 日志等级 Error
-     * @param msg 日志内容
-     */
-    @JvmStatic
-    fun e(msg: String) {
-        Log.e(TAG, msg)
-    }
 
     /**
      * 日志等级 Debug
@@ -85,6 +50,7 @@ object Log {
     @JvmStatic
     fun w(tag: String, msg: String) {
         Log.w(TAG, "$tag: $msg")
+        FirebaseCrashlytics.getInstance().log("$tag: $msg")
     }
 
     /**
@@ -94,6 +60,7 @@ object Log {
     @JvmStatic
     fun e(tag: String, msg: String) {
         Log.e(TAG, "$tag: $msg")
+        FirebaseCrashlytics.getInstance().log("$tag: $msg")
     }
 
     /**
@@ -102,6 +69,7 @@ object Log {
      * @param msg 日志内容
      */
     @JvmStatic
+    @JvmOverloads
     fun d(msg: String, throwable: Throwable? = null) {
         Log.d(TAG, msg, throwable)
     }
@@ -112,6 +80,7 @@ object Log {
      * @param msg 日志内容
      */
     @JvmStatic
+    @JvmOverloads
     fun i(msg: String, throwable: Throwable? = null) {
         Log.i(TAG, msg, throwable)
     }
@@ -122,6 +91,7 @@ object Log {
      * @param msg 日志内容
      */
     @JvmStatic
+    @JvmOverloads
     fun w(msg: String, throwable: Throwable? = null) {
         Log.w(TAG, msg, throwable)
     }
@@ -132,6 +102,7 @@ object Log {
      * @param msg 日志内容
      */
     @JvmStatic
+    @JvmOverloads
     fun e(msg: String, throwable: Throwable? = null) {
         Log.e(TAG, msg, throwable)
         if (throwable != null) {

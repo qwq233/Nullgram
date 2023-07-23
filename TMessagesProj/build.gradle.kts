@@ -43,7 +43,7 @@ fun setupPlay(stable: Boolean) {
 
 dependencies {
     implementation(platform("com.google.firebase:firebase-bom:32.2.0"))
-    implementation("com.google.firebase:firebase-crashlytics-ktx")
+    implementation("com.google.firebase:firebase-crashlytics-ndk")
 
     implementation("androidx.core:core-ktx:1.10.1")
     implementation("androidx.palette:palette-ktx:1.0.0")
@@ -211,9 +211,7 @@ android {
                         "this is just a compatibility solution and we are not using flavorProduct anymore"
                     )
                 )
-
             }
-
         }
     }
 
