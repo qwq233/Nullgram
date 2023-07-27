@@ -27812,6 +27812,10 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
     }
 
     private void logSponsoredClicked(MessageObject messageObject) {
+        // Durov我测四你的🐎，逼养的什么不学好玩跟踪是吧
+        return;
+        /*
+
         if (messageObject == null || !messageObject.isSponsored()) {
             return;
         }
@@ -27819,6 +27823,8 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
         req.random_id = messageObject.sponsoredId;
         req.channel = getMessagesController().getInputChannel(-getDialogId());
         getConnectionsManager().sendRequest(req, null);
+
+         */
     }
 
     private void didPressMessageUrl(CharacterStyle url, boolean longPress, MessageObject messageObject, ChatMessageCell cell) {
