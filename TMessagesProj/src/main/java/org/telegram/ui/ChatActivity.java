@@ -27989,11 +27989,11 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
                 builder.setTitle(formattedUrl);
                 builder.setTitleMultipleLines(true);
                 final MessageObject finalMessageObject = messageObject;
-                builder.setItems(new CharSequence[]{LocaleController.getString("Open", R.string.Open), LocaleController.getString("Copy", R.string.Copy)}, (dialog, which) -> {
+                builder.setItems(noforwards ? new CharSequence[] {LocaleController.getString("Open", R.string.Open)} : new CharSequence[]{LocaleController.getString("Open", R.string.Open), LocaleController.getString("Copy", R.string.Copy)}, (dialog, which) -> {
                     if (which == 0) {
                         logSponsoredClicked(finalMessageObject);
                         processExternalUrl(1, urlFinal, url, finalCell, false);
-                    } else if (which == 1 || which == 2) {
+                    } else if (which == 1) {
                         String url1 = urlFinal;
                         boolean tel = false;
                         boolean mail = false;
@@ -28004,26 +28004,17 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
                             url1 = url1.substring(4);
                             tel = true;
                         }
-                        if (which == 2) {
-                            AndroidUtilities.addToClipboard(url1);
-                            createUndoView();
-                            if (undoView == null) {
-                                return;
-                            }
-                            if (mail) {
-                                undoView.showWithAction(0, UndoView.ACTION_EMAIL_COPIED, null);
-                            } else if (tel) {
-                                undoView.showWithAction(0, UndoView.ACTION_PHONE_COPIED, null);
-                            } else {
-                                undoView.showWithAction(0, UndoView.ACTION_LINK_COPIED, null);
-                            }
+                        AndroidUtilities.addToClipboard(url1);
+                        createUndoView();
+                        if (undoView == null) {
+                            return;
+                        }
+                        if (mail) {
+                            undoView.showWithAction(0, UndoView.ACTION_EMAIL_COPIED, null);
+                        } else if (tel) {
+                            undoView.showWithAction(0, UndoView.ACTION_PHONE_COPIED, null);
                         } else {
-                            Intent shareIntent = new Intent(Intent.ACTION_SEND);
-                            shareIntent.setType("text/plain");
-                            shareIntent.putExtra(Intent.EXTRA_TEXT, url1);
-                            Intent chooserIntent = Intent.createChooser(shareIntent, LocaleController.getString("ShareFile", R.string.ShareFile));
-                            chooserIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                            ApplicationLoader.applicationContext.startActivity(chooserIntent);
+                            undoView.showWithAction(0, UndoView.ACTION_LINK_COPIED, null);
                         }
                     }
                 });
