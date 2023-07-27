@@ -68,6 +68,7 @@ import org.telegram.ui.Stories.StoryViewer;
 import java.time.YearMonth;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.SortedSet;
 
 import top.qwq2333.nullgram.config.ConfigManager;
 import top.qwq2333.nullgram.utils.Defines;
@@ -217,7 +218,7 @@ public class CalendarActivity extends BaseFragment implements NotificationCenter
                                 holder.drawAbove = storiesPlaceDrawAbove;
                                 holder.view = monthView;
                                 holder.clipParent = fragmentView;
-                                holder.clipTop = Math.max(0, - monthView.getY());
+                                holder.clipTop = AndroidUtilities.dp(36);
                                 holder.clipBottom = fragmentView.getBottom();
                                 holder.avatarImage = null;
                                 return true;
@@ -804,8 +805,7 @@ public class CalendarActivity extends BaseFragment implements NotificationCenter
                         PeriodDay day = getDayAtCoord(e.getX(), e.getY());
                         if (day != null && day.messageObject != null && callback != null) {
                             if (storiesList != null) {
-                                int position = storiesList.messageObjects.indexOf(day.messageObject);
-                                getOrCreateStoryViewer().open(getContext(), day.messageObject.storyItem, Math.max(0, position), storiesList, true, storiesPlaceProvider);
+                                getOrCreateStoryViewer().open(getContext(), day.messageObject.storyItem, day.messageObject.getId(), storiesList, true, storiesPlaceProvider);
                             } else {
                                 callback.onDateSelected(day.messageObject.getId(), day.startOffset);
                                 finishFragment();

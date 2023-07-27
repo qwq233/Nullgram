@@ -6996,6 +6996,18 @@ public class MessageObject {
         return isVideoMessage(messageOwner);
     }
 
+    public boolean isVideoStory() {
+        TLRPC.MessageMedia media = MessageObject.getMedia(messageOwner);
+        if (media == null) {
+            return false;
+        }
+        TLRPC.StoryItem storyItem = media.storyItem;
+        if (storyItem == null || storyItem.media == null) {
+            return false;
+        }
+        return MessageObject.isVideoDocument(storyItem.media.document);
+    }
+
     public boolean isPhoto() {
         return isPhoto(messageOwner);
     }
@@ -7134,6 +7146,12 @@ public class MessageObject {
             return attributeDuration;
         }
         TLRPC.Document document = getDocument();
+        if (document == null && type == TYPE_STORY) {
+            TLRPC.StoryItem storyItem = getMedia(messageOwner).storyItem;
+            if (storyItem != null && storyItem.media != null) {
+                document = storyItem.media.document;
+            }
+        }
         if (document == null) {
             return 0;
         }
