@@ -27606,7 +27606,7 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
             }
             final int finalTimestamp = timestamp;
             boolean noforwards = false;
-            builder.setItems(new CharSequence[]{LocaleController.getString("Open", R.string.Open), LocaleController.getString("Copy", R.string.Copy)}, (dialog, which) -> {
+            builder.setItems(new CharSequence[]{LocaleController.getString("Open", R.string.Open), LocaleController.getString("ShareLink", R.string.ShareLink), LocaleController.getString("Copy", R.string.Copy)}, (dialog, which) -> {
                 if (which == 0) {
                     if (str.startsWith("video?")) {
                         didPressMessageUrl(url, false, messageObject, cell);
