@@ -27606,7 +27606,7 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
             }
             final int finalTimestamp = timestamp;
             boolean noforwards = false;
-            builder.setItems(new CharSequence[]{LocaleController.getString("Open", R.string.Open), LocaleController.getString("ShareLink", R.string.ShareLink), LocaleController.getString("Copy", R.string.Copy)}, (dialog, which) -> {
+            builder.setItems(new CharSequence[]{LocaleController.getString("Open", R.string.Open), LocaleController.getString("Copy", R.string.Copy)}, (dialog, which) -> {
                 if (which == 0) {
                     if (str.startsWith("video?")) {
                         didPressMessageUrl(url, false, messageObject, cell);
@@ -27989,7 +27989,7 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
                 builder.setTitle(formattedUrl);
                 builder.setTitleMultipleLines(true);
                 final MessageObject finalMessageObject = messageObject;
-                builder.setItems(new CharSequence[]{LocaleController.getString("Open", R.string.Open), LocaleController.getString("Copy", R.string.Copy)}, (dialog, which) -> {
+                builder.setItems(new CharSequence[]{LocaleController.getString("Open", R.string.Open), LocaleController.getString("ShareLink", R.string.ShareLink), LocaleController.getString("Copy", R.string.Copy)}, (dialog, which) -> {
                     if (which == 0) {
                         logSponsoredClicked(finalMessageObject);
                         processExternalUrl(1, urlFinal, url, finalCell, false);
