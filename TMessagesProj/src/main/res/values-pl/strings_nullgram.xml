@@ -1,15 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="NullgramPushService">Nullgram Push Service</string>
-    <string name="NullSettings">Nullgram Settings</string>
-    <string name="OfficialChannel">Official Channel</string>
-    <string name="Chat">Chat</string>
-    <string name="Experiment">Experiment</string>
-    <string name="OfficialSite">Official Site</string>
-    <string name="ViewSourceCode">View Source Code</string>
-    <string name="Categories">Categories</string>
+    <string name="NullgramPushService">Usługa powiadomień Nullgrama</string>
+    <string name="NullSettings">Ustawienia Nullgrama</string>
+    <string name="OfficialChannel">Oficjalny kanał</string>
+    <string name="Chat">Czat</string>
+    <string name="Experiment">Eksperymentalne</string>
+    <string name="OfficialSite">Oficjalna strona</string>
+    <string name="ViewSourceCode">Zobacz kod źródłowy</string>
+    <string name="Categories">Kategorie</string>
     <string name="About">About</string>
-    <string name="OfficialChannelName">NullgramClient</string>
+    <string name="OfficialChannelName">Klient Nullgram</string>
     <string name="noAvailableUpdate">No Update.</string>
     <string name="updateAvailable">New Update Available</string>
     <string name="variantsNotFound">Release variants fail to match automatically.\nPlease download manually from GitHub.</string>
