@@ -18,7 +18,7 @@
     <string name="updateConfirm">AKTUALIZUJ</string>
     <string name="CheckUpdate">Sprawdź dostępność aktualizacji</string>
     <string name="CheckingUpdate">Sprawdzanie aktualizacji…</string>
-    <string name="LastUpdateNever">Never checked since install.</string>
+    <string name="LastUpdateNever">Nigdy nie sprawdzane od czasu instalacji.</string>
     <string name="LastUpdateDateFormatted">Last successfully checked on %1$s.</string>
     <string name="LastUpdateFormatted">Last successfully checked %1$s.</string>
     <string name="BotLogin">Zaloguj się jako bot</string>
@@ -35,8 +35,8 @@
     <string name="DeleteAllFromSelfAdmin">With admin rights</string>
     <string name="DeleteAllFromSelf">Usuń własne wiadomości</string>
     <string name="DeleteAllFromSelfAlert">Warning! This will **delete all messages from you** in this chat for **all** participants.</string>
-    <string name="MutualContactDescription">This contact is a mutual contact.</string>
-    <string name="MutualContact">Mutual contact</string>
+    <string name="MutualContactDescription">Ten kontakt jest wspólnym kontaktem.</string>
+    <string name="MutualContact">Wspólny kontakt</string>
     <string name="SelectBetween">Select between</string>
     <string name="StickerSavedHint">Sticker saved to gallery</string>
     <string name="MessageDetails">Szczegóły</string>
