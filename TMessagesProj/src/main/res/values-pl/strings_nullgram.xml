@@ -19,8 +19,8 @@
     <string name="CheckUpdate">Sprawdź dostępność aktualizacji</string>
     <string name="CheckingUpdate">Sprawdzanie aktualizacji…</string>
     <string name="LastUpdateNever">Nigdy nie sprawdzane od czasu instalacji.</string>
-    <string name="LastUpdateDateFormatted">Last successfully checked on %1$s.</string>
-    <string name="LastUpdateFormatted">Last successfully checked %1$s.</string>
+    <string name="LastUpdateDateFormatted">Ostatnio pomyślnie sprawdzono %1$s.</string>
+    <string name="LastUpdateFormatted">Ostatnio pomyślnie sprawdzono %1$s.</string>
     <string name="BotLogin">Zaloguj się jako bot</string>
     <string name="BotToken">Klucz API</string>
     <string name="InvalidAccessToken">Nieprawidłowy token dostępu</string>
