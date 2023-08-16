@@ -84,4 +84,4 @@ kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
 serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
 firebase-crashlytics = { id = "com.google.firebase.crashlytics", version = "2.9.8" }
 google-services = { id = "com.google.gms.google-services", version = "4.3.15" }
-triplet-play = { id = "com.github.triplet.play", version = "3.8.3" }
+triplet-play = { id = "com.github.triplet.play", version = "3.8.4" }
