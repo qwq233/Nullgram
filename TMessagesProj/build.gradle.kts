@@ -8,12 +8,12 @@ import java.text.SimpleDateFormat
 import java.util.Date
 
 plugins {
-    id("com.android.application")
-    id("com.google.gms.google-services")
-    id("com.google.firebase.crashlytics")
-    id("com.github.triplet.play") version "3.8.3"
-    kotlin("android")
-    kotlin("plugin.serialization") version Version.kotlin
+    alias(libs.plugins.android.application)
+    alias(libs.plugins.kotlin.android)
+    alias(libs.plugins.firebase.crashlytics)
+    alias(libs.plugins.google.services)
+    alias(libs.plugins.triplet.play)
+    alias(libs.plugins.serialization)
 }
 
 configurations {
@@ -42,63 +42,57 @@ fun setupPlay(stable: Boolean) {
 }
 
 dependencies {
-    implementation(platform("com.google.firebase:firebase-bom:32.2.0"))
-    implementation("com.google.firebase:firebase-crashlytics-ndk")
+    implementation(platform(libs.firebase.bom))
+    implementation(libs.firebase.crashlytics.ndk)
 
-    implementation("androidx.core:core-ktx:1.10.1")
-    implementation("androidx.palette:palette-ktx:1.0.0")
-    implementation("androidx.exifinterface:exifinterface:1.3.6")
-    implementation("androidx.dynamicanimation:dynamicanimation:1.0.0")
-    implementation("androidx.multidex:multidex:2.0.1")
-    implementation("androidx.interpolator:interpolator:1.0.0")
-    implementation("androidx.sharetarget:sharetarget:1.2.0")
+    implementation(libs.appcenter.analytics)
+    implementation(libs.appcenter.crashes)
 
-    compileOnly("org.checkerframework:checker-compat-qual:2.5.5")
-    implementation("com.google.firebase:firebase-messaging:23.2.0")
-    implementation("com.google.firebase:firebase-config:21.4.1")
-    implementation("com.google.firebase:firebase-datatransport:18.1.8")
-    implementation("com.google.firebase:firebase-appindexing:20.0.0")
-    implementation("com.google.android.gms:play-services-auth:20.6.0")
-    implementation("com.google.android.gms:play-services-vision:20.1.3")
-    implementation("com.google.android.gms:play-services-wearable:18.0.0")
-    implementation("com.google.android.gms:play-services-location:21.0.1")
-    implementation("com.google.android.gms:play-services-wallet:19.2.0")
+    implementation(libs.core.ktx)
+    implementation(libs.palette.ktx)
+    implementation(libs.exifinterface)
+    implementation(libs.dynamicanimation)
+    implementation(libs.interpolator)
+    implementation(libs.sharetarget)
+
+    compileOnly(libs.checker.compat.qual)
+    implementation(libs.firebase.messaging)
+    implementation(libs.firebase.config)
+    implementation(libs.firebase.datatransport)
+    implementation(libs.firebase.appindexing)
+    implementation(libs.play.services.auth)
+    implementation(libs.play.services.vision)
+    implementation(libs.play.services.wearable)
+    implementation(libs.play.services.location)
+    implementation(libs.play.services.wallet)
 //    implementation("com.google.android.gms:play-services-safetynet:18.0.1")
-    implementation("com.googlecode.mp4parser:isoparser:1.0.6") // DO NOT UPDATE THIS DEPENDENCY
+    implementation(libs.isoparser)
     implementation(files("libs/stripe.aar"))
-    implementation("com.google.mlkit:language-id:17.0.4")
+    implementation(libs.language.id)
     implementation(files("libs/libgsaverification-client.aar"))
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3")
-    implementation("com.google.code.gson:gson:2.10.1")
-    implementation("com.jakewharton:process-phoenix:2.1.2")
-    // https://mvnrepository.com/artifact/de.psdev.licensesdialog/licensesdialog
-    implementation("de.psdev.licensesdialog:licensesdialog:2.2.0")
-    implementation("io.noties.markwon:core:4.6.2")
-    implementation("org.lsposed.hiddenapibypass:hiddenapibypass:4.3")
-    implementation("org.codeberg.qwerty287:prism4j:003cb5e380")
+    implementation(libs.kotlinx.coroutines.android)
+    implementation(libs.gson)
+    implementation(libs.process.phoenix)
+    implementation(libs.licensesdialog)
+    implementation(libs.markwon.core)
+    implementation(libs.hiddenapibypass)
+    implementation(libs.prism4j)
 
-    implementation("org.jetbrains.kotlin:kotlin-stdlib-common:${Version.kotlin}")
-    implementation("org.jetbrains.kotlin:kotlin-stdlib:${Version.kotlin}")
-    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.5.1")
-    implementation("org.osmdroid:osmdroid-android:6.1.16")
-    implementation("com.android.billingclient:billing:6.0.1")
-    implementation("com.google.guava:guava:32.0.0-jre")
+    implementation(libs.kotlin.stdlib.common)
+    implementation(libs.kotlin.stdlib)
+    implementation(libs.kotlinx.serialization.json)
+    implementation(libs.osmdroid.android)
+    implementation(libs.billing)
+    implementation(libs.guava)
 
-    implementation("io.ktor:ktor-client-core:${Version.ktor}")
-    implementation("io.ktor:ktor-client-okhttp:${Version.ktor}")
-    implementation("io.ktor:ktor-client-encoding:${Version.ktor}")
-    implementation("io.ktor:ktor-client-content-negotiation:${Version.ktor}")
-    implementation("io.ktor:ktor-serialization-kotlinx-json:${Version.ktor}")
+    implementation(libs.ktor.client.core)
+    implementation(libs.ktor.client.okhttp)
+    implementation(libs.ktor.client.encoding)
+    implementation(libs.ktor.client.contentNegotiation)
+    implementation(libs.ktor.serialization.json)
 
     implementation(project(":libs:tcp2ws"))
     implementation(project(":libs:pangu"))
-}
-
-
-dependencies {
-    val appCenterSdkVersion = "5.0.2"
-    implementation("com.microsoft.appcenter:appcenter-analytics:${appCenterSdkVersion}")
-    implementation("com.microsoft.appcenter:appcenter-crashes:${appCenterSdkVersion}")
 }
 
 android {
