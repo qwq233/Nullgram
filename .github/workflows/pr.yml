@@ -1,7 +1,5 @@
 name: Build CI (Pull Request)
 
-runs-on: self-hosted
-
 on:
   pull_request:
     branches:
