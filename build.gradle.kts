@@ -1,13 +1,13 @@
-// Top-level build file where you can add configuration options common to all sub-projects/modules.
 @file:Suppress("UnstableApiUsage")
 
 plugins {
-    id("com.android.application") version "8.0.2" apply false
-    id("com.android.library") version "8.0.2" apply false
-    id("com.google.gms.google-services") version "4.3.15" apply false
-    id("com.google.firebase.crashlytics") version "2.9.5" apply false
-    kotlin("android") version Version.kotlin apply false
-    kotlin("plugin.serialization") version Version.kotlin apply false
+    alias(libs.plugins.android.application) apply false
+    alias(libs.plugins.android.library) apply false
+    alias(libs.plugins.firebase.crashlytics) apply false
+    alias(libs.plugins.google.services) apply false
+    alias(libs.plugins.kotlin.android) apply false
+    alias(libs.plugins.kotlin.jvm) apply false
+    alias(libs.plugins.serialization) apply false
 }
 
 tasks.register<Delete>("clean").configure {

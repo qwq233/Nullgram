@@ -1,0 +1,87 @@
+[versions]
+agp = "8.1.0"
+appCenter = "5.0.2"
+billing = "6.0.1"
+checkerCompatQual = "2.5.5"
+core = "4.6.2"
+dynamicanimation = "1.0.0"
+exifinterface = "1.3.6"
+coreKtx = "1.10.1"
+firebase = "32.2.2"
+firebaseAppindexing = "20.0.0"
+firebaseConfig = "21.4.1"
+firebaseDatatransport = "18.1.8"
+firebaseMessaging = "23.2.1"
+gson = "2.10.1"
+guava = "32.0.0-jre"
+hiddenapibypass = "4.3"
+interpolator = "1.0.0"
+isoparser = "1.0.6" # DO NOT UPDATE THIS DEPENDENCY
+kotlin = "1.9.0"
+kotlinxCoroutinesAndroid = "1.7.3"
+kotlinxSerializationJson = "1.5.1"
+ktor = "2.3.3"
+languageId = "17.0.4"
+licensesdialog = "2.2.0"
+osmdroidAndroid = "6.1.16"
+playServicesAuth = "20.6.0"
+playServicesWallet = "19.2.0"
+playServicesLocation = "21.0.1"
+playServicesWearable = "18.0.0"
+playServicesVision = "20.1.3"
+prism4j = "003cb5e380"
+processPhoenix = "2.1.2"
+sharetarget = "1.2.0"
+paletteKtx = "1.0.0"
+
+[libraries]
+appcenter-analytics = { module = "com.microsoft.appcenter:appcenter-analytics", version.ref = "appCenter" }
+appcenter-crashes = { module = "com.microsoft.appcenter:appcenter-crashes", version.ref = "appCenter" }
+billing = { module = "com.android.billingclient:billing", version.ref = "billing" }
+checker-compat-qual = { module = "org.checkerframework:checker-compat-qual", version.ref = "checkerCompatQual" }
+dynamicanimation = { module = "androidx.dynamicanimation:dynamicanimation", version.ref = "dynamicanimation" }
+exifinterface = { module = "androidx.exifinterface:exifinterface", version.ref = "exifinterface" }
+core-ktx = { module = "androidx.core:core-ktx", version.ref = "coreKtx" }
+firebase-appindexing = { module = "com.google.firebase:firebase-appindexing", version.ref = "firebaseAppindexing" }
+firebase-bom = { module = "com.google.firebase:firebase-bom", version.ref = "firebase" }
+firebase-config = { module = "com.google.firebase:firebase-config", version.ref = "firebaseConfig" }
+firebase-crashlytics-ndk = { module = "com.google.firebase:firebase-crashlytics-ndk" }
+firebase-datatransport = { module = "com.google.firebase:firebase-datatransport", version.ref = "firebaseDatatransport" }
+firebase-messaging = { module = "com.google.firebase:firebase-messaging", version.ref = "firebaseMessaging" }
+gson = { module = "com.google.code.gson:gson", version.ref = "gson" }
+guava = { module = "com.google.guava:guava", version.ref = "guava" }
+hiddenapibypass = { module = "org.lsposed.hiddenapibypass:hiddenapibypass", version.ref = "hiddenapibypass" }
+isoparser = { module = "com.googlecode.mp4parser:isoparser", version.ref = "isoparser" }
+kotlin-stdlib = { module = "org.jetbrains.kotlin:kotlin-stdlib", version.ref = "kotlin" }
+kotlin-stdlib-common = { module = "org.jetbrains.kotlin:kotlin-stdlib-common", version.ref = "kotlin" }
+kotlinx-coroutines-android = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-android", version.ref = "kotlinxCoroutinesAndroid" }
+kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "kotlinxSerializationJson" }
+language-id = { module = "com.google.mlkit:language-id", version.ref = "languageId" }
+licensesdialog = { module = "de.psdev.licensesdialog:licensesdialog", version.ref = "licensesdialog" }
+markwon-core = { module = "io.noties.markwon:core", version.ref = "core" }
+osmdroid-android = { module = "org.osmdroid:osmdroid-android", version.ref = "osmdroidAndroid" }
+play-services-auth = { module = "com.google.android.gms:play-services-auth", version.ref = "playServicesAuth" }
+play-services-wallet = { module = "com.google.android.gms:play-services-wallet", version.ref = "playServicesWallet" }
+play-services-location = { module = "com.google.android.gms:play-services-location", version.ref = "playServicesLocation" }
+play-services-wearable = { module = "com.google.android.gms:play-services-wearable", version.ref = "playServicesWearable" }
+play-services-vision = { module = "com.google.android.gms:play-services-vision", version.ref = "playServicesVision" }
+prism4j = { module = "org.codeberg.qwerty287:prism4j", version.ref = "prism4j" }
+process-phoenix = { module = "com.jakewharton:process-phoenix", version.ref = "processPhoenix" }
+sharetarget = { module = "androidx.sharetarget:sharetarget", version.ref = "sharetarget" }
+interpolator = { module = "androidx.interpolator:interpolator", version.ref = "interpolator" }
+palette-ktx = { module = "androidx.palette:palette-ktx", version.ref = "paletteKtx" }
+ktor-client-core = { module = "io.ktor:ktor-client-core", version.ref = "ktor" }
+ktor-client-okhttp = { module = "io.ktor:ktor-client-okhttp", version.ref = "ktor" }
+ktor-client-encoding = { module = "io.ktor:ktor-client-encoding", version.ref = "ktor" }
+ktor-client-contentNegotiation = { module = "io.ktor:ktor-client-content-negotiation", version.ref = "ktor" }
+ktor-serialization-json = { module = "io.ktor:ktor-serialization-kotlinx-json-jvm", version.ref = "ktor" }
+
+[plugins]
+android-application = { id = "com.android.application", version.ref = "agp" }
+android-library = { id = "com.android.library", version.ref = "agp" }
+kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
+kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
+serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
+firebase-crashlytics = { id = "com.google.firebase.crashlytics", version = "2.9.8" }
+google-services = { id = "com.google.gms.google-services", version = "4.3.15" }
+triplet-play = { id = "com.github.triplet.play", version = "3.8.3" }
