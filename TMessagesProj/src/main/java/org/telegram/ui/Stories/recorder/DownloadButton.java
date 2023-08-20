@@ -163,7 +163,10 @@ public class DownloadButton extends ImageView {
             downloadingVideo = false;
         }
         updateImage();
-        if (prepare == null) {
+        if (prepare != null) {
+            preparing = true;
+            prepare.run(this::onClickInternal);
+        } else {
             onClickInternal();
         }
     }

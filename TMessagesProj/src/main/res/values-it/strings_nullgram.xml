@@ -289,7 +289,6 @@
     <string name="RegistrationDateNewer">Più recente del %s</string>
     <string name="RegistrationDateOlder">Più vecchio del %s</string>
     <string name="RegistrationDateApproximately">Approssimativamente al %s</string>
-    <string name="LearnMore">Per saperne di più</string>
     <string name="showRPCError">Vedi errori RPC</string>
     <string name="enablePanguOnReceiving">Enable Pangu on receiving</string>
     <string name="enablePanguOnSending">Enable Pangu on sending</string>

@@ -1,6 +1,7 @@
 package org.telegram.ui.Stories.recorder;
 
 import static org.telegram.messenger.AndroidUtilities.dp;
+import static org.telegram.messenger.AndroidUtilities.lerp;
 import static org.telegram.ui.ActionBar.Theme.RIPPLE_MASK_CIRCLE_20DP;
 
 import android.animation.Animator;
@@ -11,6 +12,7 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapShader;
 import android.graphics.Canvas;
+import android.graphics.Color;
 import android.graphics.LinearGradient;
 import android.graphics.Matrix;
 import android.graphics.Paint;
@@ -34,6 +36,7 @@ import android.widget.ImageView;
 import androidx.interpolator.view.animation.FastOutSlowInInterpolator;
 
 import org.telegram.messenger.AndroidUtilities;
+import org.telegram.messenger.BotWebViewVibrationEffect;
 import org.telegram.messenger.Emoji;
 import org.telegram.messenger.FileLog;
 import org.telegram.messenger.LiteMode;
@@ -85,6 +88,8 @@ public class CaptionContainerView extends FrameLayout {
 
     public final KeyboardNotifier keyboardNotifier;
     public MentionsContainerView mentionContainer;
+
+    private int shiftDp = -4;
 
     public CaptionContainerView(Context context, int currentAccount, StoryRecorder.WindowView rootView, FrameLayout containerView, Theme.ResourcesProvider resourcesProvider) {
         super(context);
@@ -149,12 +154,15 @@ public class CaptionContainerView extends FrameLayout {
                 }
             }
 
+            private int lastLength;
+            private boolean lastOverLimit;
+
             @Override
             public void afterTextChanged(Editable s) {
                 EditTextCaption editText2 = editText.getEditText();
                 if (editText2 != null && editText2.getLayout() != null) {
                     editText2.ignoreClipTop = (
-                        editText2.getLayout().getHeight() > (dp(180) - editText2.getPaddingTop() - editText2.getPaddingBottom())
+                        editText2.getLayout().getHeight() > (dp(120) - editText2.getPaddingTop() - editText2.getPaddingBottom())
                     );
                 }
                 int length = 0;
@@ -163,15 +171,28 @@ public class CaptionContainerView extends FrameLayout {
                 } catch (Exception ignore) {
                 }
                 String limitText = null;
-                final int limit = MessagesController.getInstance(currentAccount).storyCaptionLengthLimit;
+                final boolean premium = UserConfig.getInstance(currentAccount).isPremium();
+                final int limit = premium ? MessagesController.getInstance(currentAccount).storyCaptionLengthLimitPremium : MessagesController.getInstance(currentAccount).storyCaptionLengthLimitDefault;
                 if (length + 25 > limit) {
                     limitText = "" + (limit - length);
                 }
                 limitTextView.cancelAnimation();
                 limitTextView.setText(limitText);
                 limitTextView.setTextColor(length >= limit ? 0xffEC7777 : 0xffffffff);
+                if (length > limit && !premium && length < MessagesController.getInstance(currentAccount).storyCaptionLengthLimitPremium && length > lastLength && captionLimitToast()) {
+                    AndroidUtilities.shakeViewSpring(limitTextView, shiftDp = -shiftDp);
+                    BotWebViewVibrationEffect.APP_ERROR.vibrate();
+                }
+                lastLength = length;
+
+                final boolean overLimit = length > limit;
+                if (overLimit != lastOverLimit) {
+                    onCaptionLimitUpdate(overLimit);
+                }
+                lastOverLimit = overLimit;
             }
         });
+        editText.getEditText().setLinkTextColor(Color.WHITE);
         addView(editText, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT, Gravity.BOTTOM | Gravity.FILL_HORIZONTAL, 12, 12, 12, 12));
 
         applyButton = new BounceableImageView(context);
@@ -194,7 +215,7 @@ public class CaptionContainerView extends FrameLayout {
         limitTextView.setAnimationProperties(.4f, 0, 320, CubicBezierInterpolator.EASE_OUT_QUINT);
         limitTextView.setTypeface(AndroidUtilities.getTypeface(AndroidUtilities.TYPEFACE_ROBOTO_MEDIUM));
         limitTextView.setTranslationX(dp(2));
-        addView(limitTextView, LayoutHelper.createFrame(52, 16, Gravity.RIGHT | Gravity.BOTTOM, 0, 0, 0, 44));
+        addView(limitTextView, LayoutHelper.createFrame(52, 16, Gravity.RIGHT | Gravity.BOTTOM, 0, 0, 0, 50));
 
         fadePaint.setShader(fadeGradient);
         fadePaint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.DST_OUT));
@@ -236,21 +257,12 @@ public class CaptionContainerView extends FrameLayout {
                     isPremium || period == 86400 || period == Integer.MAX_VALUE ? null : () -> showPremiumHint.run(period)
                 );
             }
-//            periodPopup.addGap();
-            // <string name="StoryPeriodKeepHint">Select ’Keep Always’ to show the story on your page.</string>
-//            periodPopup.addText(LocaleController.getString("StoryPeriodKeepHint"), 13);
             periodPopup.addGap();
             periodPopup.addText(LocaleController.getString("StoryPeriodHint"), 13);
             periodPopup.setDimAlpha(0).show();
         });
         setPeriod(86400, false);
         addView(periodButton, LayoutHelper.createFrame(44, 44, Gravity.RIGHT | Gravity.BOTTOM, 0, 0, 11, 11));
-
-//        setOnClickListener(e -> {
-//            if (!editText.isKeyboardVisible() && !editText.isPopupVisible()) {
-//                editText.openKeyboard();
-//            }
-//        });
     }
 
     public void closeKeyboard() {
@@ -466,10 +478,11 @@ public class CaptionContainerView extends FrameLayout {
             keyboardAnimator = ValueAnimator.ofFloat(keyboardT, show ? 1 : 0);
             keyboardAnimator.addUpdateListener(anm -> {
                 keyboardT = (float) anm.getAnimatedValue();
-                editText.getEditText().setTranslationX(AndroidUtilities.lerp(AndroidUtilities.dp(-40 + 18), AndroidUtilities.dp(2), keyboardT));
-                editText.setTranslationX(AndroidUtilities.lerp(0, AndroidUtilities.dp(-8), keyboardT));
-                editText.setTranslationY(AndroidUtilities.lerp(0, AndroidUtilities.dp(12 - 2), keyboardT));
-                limitTextView.setAlpha(AndroidUtilities.lerp(0, 1, keyboardT));
+                editText.getEditText().setTranslationX(lerp(dp(-40 + 18), dp(2), keyboardT));
+                editText.setTranslationX(lerp(0, dp(-8), keyboardT));
+                editText.setTranslationY(lerp(0, dp(12 - 2), keyboardT));
+                limitTextView.setTranslationX(lerp(-dp(8), dp(2), keyboardT));
+                limitTextView.setTranslationY(lerp(-dp(8), 0, keyboardT));
                 editText.getEmojiButton().setAlpha(keyboardT);
                 applyButton.setAlpha((float) Math.pow(keyboardT, 16));
                 periodButton.setAlpha(1f - keyboardT);
@@ -501,10 +514,11 @@ public class CaptionContainerView extends FrameLayout {
             keyboardAnimator.start();
         } else {
             keyboardT = show ? 1 : 0;
-            editText.getEditText().setTranslationX(AndroidUtilities.lerp(AndroidUtilities.dp(-40 + 18), AndroidUtilities.dp(2), keyboardT));
-            editText.setTranslationX(AndroidUtilities.lerp(0, AndroidUtilities.dp(-8), keyboardT));
-            editText.setTranslationY(AndroidUtilities.lerp(0, AndroidUtilities.dp(12 - 2), keyboardT));
-            limitTextView.setAlpha(AndroidUtilities.lerp(0, 1, keyboardT));
+            editText.getEditText().setTranslationX(lerp(AndroidUtilities.dp(-40 + 18), AndroidUtilities.dp(2), keyboardT));
+            editText.setTranslationX(lerp(0, AndroidUtilities.dp(-8), keyboardT));
+            editText.setTranslationY(lerp(0, AndroidUtilities.dp(12 - 2), keyboardT));
+            limitTextView.setTranslationX(lerp(-dp(8), dp(2), keyboardT));
+            limitTextView.setTranslationY(lerp(-dp(8), 0, keyboardT));
             editText.getEmojiButton().setAlpha(keyboardT);
             applyButton.setVisibility(show ? View.VISIBLE : View.GONE);
             applyButton.setAlpha(show ? 1f : 0f);
@@ -537,6 +551,25 @@ public class CaptionContainerView extends FrameLayout {
             }
             blurPaint.setShader(blurBitmapShader);
         }
+    }
+
+    public boolean isCaptionOverLimit() {
+        int length = 0;
+        try {
+            length = editText.getEditText().getText().length();
+        } catch (Exception ignore) {
+        }
+        final boolean premium = UserConfig.getInstance(currentAccount).isPremium();
+        final int limit = premium ? MessagesController.getInstance(currentAccount).storyCaptionLengthLimitPremium : MessagesController.getInstance(currentAccount).storyCaptionLengthLimitDefault;
+        return length > limit;
+    }
+
+    protected void onCaptionLimitUpdate(boolean overLimit) {
+
+    }
+
+    protected boolean captionLimitToast() {
+        return false;
     }
 
     protected void drawBlurBitmap(Bitmap bitmap, float amount) {
@@ -604,7 +637,7 @@ public class CaptionContainerView extends FrameLayout {
         }
         lastHeightTranslation = heightTranslation;
 
-        final float pad = AndroidUtilities.lerp(AndroidUtilities.dp(12), 0, keyboardT);
+        final float pad = lerp(AndroidUtilities.dp(12), 0, keyboardT);
         AndroidUtilities.rectTmp.set(
             pad,
             getHeight() - pad - heightAnimated,
@@ -612,7 +645,7 @@ public class CaptionContainerView extends FrameLayout {
             getHeight() - pad
         );
 
-        final float r = AndroidUtilities.lerp(AndroidUtilities.dp(21), 0, keyboardT);
+        final float r = lerp(AndroidUtilities.dp(21), 0, keyboardT);
         drawBackground(canvas, AndroidUtilities.rectTmp, r, 1f, this);
 
         canvas.save();
@@ -637,14 +670,14 @@ public class CaptionContainerView extends FrameLayout {
             blurPaint.setAlpha((int) (0xFF * keyboardT * alpha));
             canvas.drawRoundRect(rectF, r, r, blurPaint);
         }
-        backgroundPaint.setAlpha((int) (blurPaint == null ? 0x80 : AndroidUtilities.lerp(0x80, 0x99, keyboardT) * alpha));
+        backgroundPaint.setAlpha((int) (blurPaint == null ? 0x80 : lerp(0x80, 0x99, keyboardT) * alpha));
         canvas.drawRoundRect(rectF, r, r, backgroundPaint);
     }
 
     @Override
     protected boolean drawChild(Canvas canvas, View child, long drawingTime) {
         if (child == editText) {
-            final float pad = AndroidUtilities.lerp(dp(12), 0, keyboardT);
+            final float pad = lerp(dp(12), 0, keyboardT);
             AndroidUtilities.rectTmp.set(pad, getHeight() - pad - heightAnimated.get(), getWidth() - pad, getHeight() - pad);
 
             float ty = Math.max(0, editText.getHeight() - dp(150 - 7)) * (1f - keyboardT);

@@ -290,7 +290,6 @@
     <string name="RegistrationDateNewer">Новее, чем %s</string>
     <string name="RegistrationDateOlder">Старше, чем %s</string>
     <string name="RegistrationDateApproximately">Приблизительно %s</string>
-    <string name="LearnMore">Learn More</string>
     <string name="showRPCError">Show RPC Error</string>
     <string name="enablePanguOnReceiving">Enable Pangu on receiving</string>
     <string name="enablePanguOnSending">Enable Pangu on sending</string>

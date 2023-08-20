@@ -4688,6 +4688,7 @@ public class ArticleViewer implements NotificationCenter.NotificationCenterDeleg
                 FileLog.e(e);
             }
         });
+        NotificationCenter.getInstance(currentAccount).postNotificationName(NotificationCenter.articleClosed);
     }
 
     private void loadChannel(final BlockChannelCell cell, WebpageAdapter adapter, TLRPC.Chat channel) {

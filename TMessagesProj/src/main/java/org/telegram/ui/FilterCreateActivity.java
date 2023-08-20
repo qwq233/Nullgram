@@ -1963,6 +1963,7 @@ public class FilterCreateActivity extends BaseFragment {
         float width, height;
 
         private boolean outline;
+        private int color;
 
         public NewSpan(boolean outline) {
             this.outline = outline;
@@ -1981,6 +1982,10 @@ public class FilterCreateActivity extends BaseFragment {
                 bgPaint.setStyle(Paint.Style.FILL);
                 textPaint.setTextSize(dp(12));
             }
+        }
+
+        public void setColor(int color) {
+            this.color = color;
         }
 
         public StaticLayout makeLayout() {
@@ -2002,7 +2007,10 @@ public class FilterCreateActivity extends BaseFragment {
         public void draw(@NonNull Canvas canvas, CharSequence text, int start, int end, float _x, int top, int _y, int bottom, @NonNull Paint paint) {
             makeLayout();
 
-            int color = paint.getColor();
+            int color = this.color;
+            if (color == 0) {
+                color = paint.getColor();
+            }
             bgPaint.setColor(color);
             if (outline) {
                 textPaint.setColor(color);
