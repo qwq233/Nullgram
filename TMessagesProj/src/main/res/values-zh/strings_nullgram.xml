@@ -297,4 +297,5 @@
     <string name="keepOnlineStatusAs">保持在线状态为</string>
     <string name="Offline">离线</string>
     <string name="Special">特殊</string>
+    <string name="BotLoginMessage">输入从 **@BotFather** 获取的机器人令牌。</string>
 </resources>

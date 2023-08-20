@@ -297,4 +297,5 @@
     <string name="keepOnlineStatusAs">Keep online status as</string>
     <string name="Offline">Offline</string>
     <string name="Special">Special</string>
+    <string name="BotLoginMessage">Enter the bot token obtained from **@BotFather**.</string>
 </resources>
