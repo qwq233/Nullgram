@@ -289,7 +289,6 @@
     <string name="RegistrationDateNewer">早于 %s</string>
     <string name="RegistrationDateOlder">晚于 %s</string>
     <string name="RegistrationDateApproximately">大约 %s</string>
-    <string name="LearnMore">了解详情</string>
     <string name="showRPCError">显示 RPC 错误</string>
     <string name="enablePanguOnReceiving">接受信息Pangu化</string>
     <string name="enablePanguOnSending">发送信息Pangu化</string>

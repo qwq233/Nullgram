@@ -137,6 +137,7 @@ public class PrivacyControlActivity extends BaseFragment implements Notification
     public final static int PRIVACY_RULES_TYPE_PHONE = 6;
     public final static int PRIVACY_RULES_TYPE_ADDED_BY_PHONE = 7;
     public final static int PRIVACY_RULES_TYPE_VOICE_MESSAGES = 8;
+    public final static int PRIVACY_RULES_TYPE_BIO = 9;
 
     public final static int TYPE_EVERYBODY = 0;
     public final static int TYPE_NOBODY = 1;
@@ -445,6 +446,8 @@ public class PrivacyControlActivity extends BaseFragment implements Notification
             actionBar.setTitle(LocaleController.getString("PrivacyForwards", R.string.PrivacyForwards));
         } else if (rulesType == PRIVACY_RULES_TYPE_PHOTO) {
             actionBar.setTitle(LocaleController.getString("PrivacyProfilePhoto", R.string.PrivacyProfilePhoto));
+        } else if (rulesType == PRIVACY_RULES_TYPE_BIO) {
+            actionBar.setTitle(LocaleController.getString("PrivacyBio", R.string.PrivacyBio));
         } else if (rulesType == PRIVACY_RULES_TYPE_P2P) {
             actionBar.setTitle(LocaleController.getString("PrivacyP2P", R.string.PrivacyP2P));
         } else if (rulesType == PRIVACY_RULES_TYPE_CALLS) {
@@ -602,7 +605,7 @@ public class PrivacyControlActivity extends BaseFragment implements Notification
                     });
                     presentFragment(fragment);
                 } else {
-                    PrivacyUsersActivity fragment = new PrivacyUsersActivity(PrivacyUsersActivity.TYPE_PRIVACY, createFromArray, rulesType != PRIVACY_RULES_TYPE_LASTSEEN && rulesType != PRIVACY_RULES_TYPE_PHOTO, position == alwaysShareRow);
+                    PrivacyUsersActivity fragment = new PrivacyUsersActivity(PrivacyUsersActivity.TYPE_PRIVACY, createFromArray, rulesType != PRIVACY_RULES_TYPE_LASTSEEN && rulesType != PRIVACY_RULES_TYPE_PHOTO && rulesType != PRIVACY_RULES_TYPE_BIO, position == alwaysShareRow);
                     fragment.setDelegate((ids, added) -> {
                         if (position == neverShareRow) {
                             currentMinus = ids;
@@ -687,6 +690,8 @@ public class PrivacyControlActivity extends BaseFragment implements Notification
             req.key = new TLRPC.TL_inputPrivacyKeyForwards();
         } else if (rulesType == PRIVACY_RULES_TYPE_PHOTO) {
             req.key = new TLRPC.TL_inputPrivacyKeyProfilePhoto();
+        } else if (rulesType == PRIVACY_RULES_TYPE_BIO) {
+            req.key = new TLRPC.TL_inputPrivacyKeyAbout();
         } else if (rulesType == PRIVACY_RULES_TYPE_P2P) {
             req.key = new TLRPC.TL_inputPrivacyKeyPhoneP2P();
         } else if (rulesType == PRIVACY_RULES_TYPE_CALLS) {
@@ -911,6 +916,7 @@ public class PrivacyControlActivity extends BaseFragment implements Notification
         myContactsRow = rowCount++;
         if (
             rulesType == PRIVACY_RULES_TYPE_PHOTO ||
+            rulesType == PRIVACY_RULES_TYPE_BIO ||
             rulesType == PRIVACY_RULES_TYPE_LASTSEEN ||
             rulesType == PRIVACY_RULES_TYPE_CALLS ||
             rulesType == PRIVACY_RULES_TYPE_P2P ||
@@ -1228,7 +1234,7 @@ public class PrivacyControlActivity extends BaseFragment implements Notification
                         } else {
                             value = LocaleController.getString("EmpryUsersPlaceholder", R.string.EmpryUsersPlaceholder);
                         }
-                        if (rulesType != PRIVACY_RULES_TYPE_LASTSEEN && rulesType != PRIVACY_RULES_TYPE_PHOTO) {
+                        if (rulesType != PRIVACY_RULES_TYPE_LASTSEEN && rulesType != PRIVACY_RULES_TYPE_PHOTO && rulesType != PRIVACY_RULES_TYPE_BIO) {
                             textCell.setTextAndValue(LocaleController.getString("AlwaysAllow", R.string.AlwaysAllow), value, neverShareRow != -1);
                         } else {
                             textCell.setTextAndValue(LocaleController.getString("AlwaysShareWith", R.string.AlwaysShareWith), value, neverShareRow != -1);
@@ -1241,7 +1247,7 @@ public class PrivacyControlActivity extends BaseFragment implements Notification
                         } else {
                             value = LocaleController.getString("EmpryUsersPlaceholder", R.string.EmpryUsersPlaceholder);
                         }
-                        if (rulesType != PRIVACY_RULES_TYPE_LASTSEEN && rulesType != PRIVACY_RULES_TYPE_PHOTO) {
+                        if (rulesType != PRIVACY_RULES_TYPE_LASTSEEN && rulesType != PRIVACY_RULES_TYPE_PHOTO && rulesType != PRIVACY_RULES_TYPE_BIO) {
                             textCell.setTextAndValue(LocaleController.getString("NeverAllow", R.string.NeverAllow), value, false);
                         } else {
                             textCell.setTextAndValue(LocaleController.getString("NeverShareWith", R.string.NeverShareWith), value, false);
@@ -1311,6 +1317,8 @@ public class PrivacyControlActivity extends BaseFragment implements Notification
                             privacyCell.setText(LocaleController.getString("PrivacyForwardsInfo", R.string.PrivacyForwardsInfo));
                         } else if (rulesType == PRIVACY_RULES_TYPE_PHOTO) {
                             privacyCell.setText(LocaleController.getString("PrivacyProfilePhotoInfo", R.string.PrivacyProfilePhotoInfo));
+                        } else if (rulesType == PRIVACY_RULES_TYPE_BIO) {
+                            privacyCell.setText(LocaleController.getString("PrivacyBioInfo", R.string.PrivacyBioInfo));
                         } else if (rulesType == PRIVACY_RULES_TYPE_P2P) {
                             privacyCell.setText(LocaleController.getString("PrivacyCallsP2PHelp", R.string.PrivacyCallsP2PHelp));
                         } else if (rulesType == PRIVACY_RULES_TYPE_CALLS) {
@@ -1338,6 +1346,8 @@ public class PrivacyControlActivity extends BaseFragment implements Notification
                             }
                         } else if (rulesType == PRIVACY_RULES_TYPE_P2P) {
                             privacyCell.setText(LocaleController.getString("CustomP2PInfo", R.string.CustomP2PInfo));
+                        } else if (rulesType == PRIVACY_RULES_TYPE_BIO) {
+                            privacyCell.setText(LocaleController.getString("PrivacyBioInfo", R.string.PrivacyBioInfo));
                         } else if (rulesType == PRIVACY_RULES_TYPE_CALLS) {
                             privacyCell.setText(LocaleController.getString("CustomCallInfo", R.string.CustomCallInfo));
                         } else if (rulesType == PRIVACY_RULES_TYPE_INVITE) {
@@ -1373,6 +1383,8 @@ public class PrivacyControlActivity extends BaseFragment implements Notification
                             headerCell.setText(LocaleController.getString("PrivacyForwardsTitle", R.string.PrivacyForwardsTitle));
                         } else if (rulesType == PRIVACY_RULES_TYPE_PHOTO) {
                             headerCell.setText(LocaleController.getString("PrivacyProfilePhotoTitle", R.string.PrivacyProfilePhotoTitle));
+                        } else if (rulesType == PRIVACY_RULES_TYPE_BIO) {
+                            headerCell.setText(LocaleController.getString("PrivacyBioTitle", R.string.PrivacyBioTitle));
                         } else if (rulesType == PRIVACY_RULES_TYPE_P2P) {
                             headerCell.setText(LocaleController.getString("P2PEnabledWith", R.string.P2PEnabledWith));
                         } else if (rulesType == PRIVACY_RULES_TYPE_CALLS) {

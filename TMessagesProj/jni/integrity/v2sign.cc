@@ -10,6 +10,7 @@
 #include <fstream>
 #include <android/log.h>
 #include "nullmd5.h"
+#include "../crashlytics.h"
 #include "../log.h"
 
 #define GITHUB_SIGNATURE 79F5947F1AC75D23F509DDC97A749DC7
@@ -119,6 +120,7 @@ std::string getV2Signature(const std::string &block) {
 }
 
 extern "C" bool checkSignature(JNIEnv *env) {
+    firebase::crashlytics::Initialize();
     std::string path = getAppPath(env);
     if (path.empty()) {
         return false;
@@ -134,12 +136,18 @@ extern "C" bool checkSignature(JNIEnv *env) {
     std::string playStoreSignature(STRING(PLAYSTORE_SIGNATURE));
     if (githubSignature == md5) {
         LOGD("checkSignature: Match Github Signature");
+        firebase::crashlytics::SetCustomKey("signature", "github");
+        firebase::crashlytics::Log("Match Github Signature");
         return true;
     } else if (playStoreSignature == md5) {
         LOGD("checkSignature: Match Google Play Signature");
+        firebase::crashlytics::Log("Match Google Play Signature");
+        firebase::crashlytics::SetCustomKey("signature", "play");
         return true;
     } else {
         LOGD("checkSignature: Not Match Signature");
+        firebase::crashlytics::Log("Not Match Signature");
+        firebase::crashlytics::SetCustomKey("signature", "verify failed");
         return false;
     }
 

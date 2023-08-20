@@ -838,13 +838,12 @@ public class PhotoPaintView extends FrameLayout implements IPhotoPaintView, Enti
     }
 
     @Override
-    public float[] getTransformedTouch(float x, float y) {
+    public void getTransformedTouch(float x, float y, float[] output) {
         float x2 = (x - AndroidUtilities.displaySize.x / 2);
         float y2 = (y - AndroidUtilities.displaySize.y / 2);
         float rotation = (float) Math.toRadians(-entitiesView.getRotation());
-        temp[0] = (float) (x2 * Math.cos(rotation) - y2 * Math.sin(rotation)) + AndroidUtilities.displaySize.x / 2;
-        temp[1] = (float) (x2 * Math.sin(rotation) + y2 * Math.cos(rotation)) + AndroidUtilities.displaySize.y / 2;
-        return temp;
+        output[0] = (float) (x2 * Math.cos(rotation) - y2 * Math.sin(rotation)) + AndroidUtilities.displaySize.x / 2;
+        output[1] = (float) (x2 * Math.sin(rotation) + y2 * Math.cos(rotation)) + AndroidUtilities.displaySize.y / 2;
     }
 
     @Override
@@ -1755,7 +1754,9 @@ public class PhotoPaintView extends FrameLayout implements IPhotoPaintView, Enti
     }
 
     @Override
-    public void onBackPressed() {}
+    public boolean onBackPressed() {
+        return false;
+    }
 
     @Override
     public void updateZoom(boolean zoomedOut) {}

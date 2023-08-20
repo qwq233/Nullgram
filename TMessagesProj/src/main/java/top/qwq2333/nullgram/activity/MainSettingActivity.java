@@ -27,6 +27,7 @@ import android.view.View;
 
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.jakewharton.processphoenix.ProcessPhoenix;
 
@@ -58,7 +59,6 @@ import top.qwq2333.nullgram.helpers.PasscodeHelper;
 import top.qwq2333.nullgram.utils.AlertUtil;
 import top.qwq2333.nullgram.utils.Defines;
 import top.qwq2333.nullgram.utils.FileUtils;
-import top.qwq2333.nullgram.utils.JsonUtils;
 import top.qwq2333.nullgram.utils.Log;
 import top.qwq2333.nullgram.utils.PermissionUtils;
 import top.qwq2333.nullgram.utils.ShareUtil;
@@ -344,7 +344,7 @@ public class MainSettingActivity extends BaseActivity {
     public static void importSettingsConfirmed(Context context, File settingsFile) {
 
         try {
-            JsonObject configJson = JsonUtils.toJsonObject(FileUtils.readUtf8String(settingsFile));
+            JsonObject configJson = new Gson().fromJson(FileUtils.readUtf8String(settingsFile), JsonObject.class);
             ConfigManager.importSettings(configJson);
 
             AlertDialog restart = new AlertDialog(context, 0);

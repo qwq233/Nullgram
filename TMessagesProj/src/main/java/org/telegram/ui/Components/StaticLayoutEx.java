@@ -17,6 +17,8 @@ import android.text.TextDirectionHeuristics;
 import android.text.TextPaint;
 import android.text.TextUtils;
 
+import com.google.android.exoplayer2.util.Log;
+
 import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.FileLog;
 
@@ -132,6 +134,10 @@ public class StaticLayoutEx {
         }*/
         try {
             if (maxLines == 1) {
+                int index = TextUtils.indexOf(source, "\n") - 1;
+                if (index > 0) {
+                    source = SpannableStringBuilder.valueOf(source.subSequence(0, index)).append("…");
+                }
                 CharSequence text = TextUtils.ellipsize(source, paint, ellipsisWidth, TextUtils.TruncateAt.END);
                 return new StaticLayout(text, 0, text.length(), paint, outerWidth, align, spacingMult, spacingAdd, includePad);
             } else {

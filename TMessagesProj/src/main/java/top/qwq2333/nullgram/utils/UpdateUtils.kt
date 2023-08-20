@@ -120,9 +120,9 @@ object UpdateUtils {
             limit = maxReadCount
         }.let { req ->
             val sendReq = Runnable {
-                accountInstance.connectionsManager.sendRequest(req) { resp: TLObject, error: TLRPC.TL_error? ->
-                    if (error != null) {
-                        Log.e("checkUpdate", "Error when retrieving update metadata from channel ${error.text}")
+                accountInstance.connectionsManager.sendRequest(req) { resp: TLObject?, error: TLRPC.TL_error? ->
+                    if (error != null || resp == null) {
+                        Log.e("checkUpdate", "Error when retrieving update metadata from channel ${error?.text}")
                         callback.invoke(null, true)
                         return@sendRequest
                     }
@@ -196,9 +196,9 @@ object UpdateUtils {
                 TLRPC.TL_contacts_resolveUsername().apply {
                     username = metadataChannelName
                 }.let { req2 ->
-                    accountInstance.connectionsManager.sendRequest(req2) { resp: TLObject, error: TLRPC.TL_error? ->
-                        if (error != null) {
-                            Log.e("checkUpdate", "Error when retrieving update metadata from channel ${error.text}")
+                    accountInstance.connectionsManager.sendRequest(req2) { resp: TLObject?, error: TLRPC.TL_error? ->
+                        if (error != null || resp == null) {
+                            Log.e("checkUpdate", "Error when retrieving update metadata from channel ${error?.text}")
                             callback.invoke(null, true)
                             return@sendRequest
                         }
@@ -231,6 +231,7 @@ object UpdateUtils {
     @JvmStatic
     fun checkUpdate(callback: (TLRPC.TL_help_appUpdate?, Boolean) -> Unit) {
         if (BuildConfig.isPlay) return
+        if (!UserConfig.getInstance(UserConfig.selectedAccount).isClientActivated) return
         val (apksChannelID, apksChannelName) = when (ConfigManager.getIntOrDefault(Defines.updateChannel, -1)) {
             Defines.stableChannel -> stableChannelAPKsID to stableChannelAPKsName
             Defines.ciChannel -> previewChannelAPKsID to previewChannelAPKsName
@@ -250,16 +251,16 @@ object UpdateUtils {
             }
 
             val sendReq = Runnable {
-                accountInstance.connectionsManager.sendRequest(req) { resp: TLObject, error: TLRPC.TL_error? ->
-                    if (error != null) {
-                        Log.e("checkUpdate", "Error when retrieving update from channel ${error.text}")
+                accountInstance.connectionsManager.sendRequest(req) { resp: TLObject?, error: TLRPC.TL_error? ->
+                    if (error != null || resp == null) {
+                        Log.e("checkUpdate", "Error when retrieving update metadata from channel ${error?.text}")
                         callback.invoke(null, true)
                         return@sendRequest
                     }
                     val res = resp as TLRPC.messages_Messages
                     for (msg in res.messages) {
                         if (msg.media == null) {
-                            Log.i("checkUpdate", "res.messages.get(i).media == null")
+                            Log.d("checkUpdate", "res.messages.get(i).media == null")
                             continue
                         }
                         val apkDocument = msg.media.document
@@ -290,9 +291,9 @@ object UpdateUtils {
                 TLRPC.TL_contacts_resolveUsername().apply {
                     username = apksChannelName
                 }.let { req2 ->
-                    accountInstance.connectionsManager.sendRequest(req2) { resp: TLObject, error: TLRPC.TL_error? ->
-                        if (error != null) {
-                            Log.e("checkUpdate", "Error when retrieving update from channel ${error.text}")
+                    accountInstance.connectionsManager.sendRequest(req2) { resp: TLObject?, error: TLRPC.TL_error? ->
+                        if (error != null || resp == null) {
+                            Log.e("checkUpdate", "Error when retrieving update metadata from channel ${error?.text}")
                             callback.invoke(null, true)
                             return@sendRequest
                         }

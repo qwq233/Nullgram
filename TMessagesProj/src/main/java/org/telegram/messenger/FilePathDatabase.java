@@ -276,18 +276,22 @@ public class FilePathDatabase {
 
         CountDownLatch syncLatch = new CountDownLatch(1);
         long time = System.currentTimeMillis();
-        postRunnable(() -> {
+        long[] threadTime = new long[1];
+        postToFrontRunnable(() -> {
+            long threadTimeLocal = System.currentTimeMillis();
             ensureDatabaseCreated();
             try {
                 for (int i = 0; i < arrayListFinal.size(); i++) {
                     MessageObject messageObject = arrayListFinal.get(i);
                     messageObject.checkMediaExistance(false);
                 }
+                threadTime[0] = System.currentTimeMillis() - threadTimeLocal;
             } catch (Throwable e) {
                 FileLog.e(e);
             } finally {
                 syncLatch.countDown();
             }
+
         });
 
         try {
@@ -296,7 +300,7 @@ public class FilePathDatabase {
             FileLog.e(e);
         }
 
-        FileLog.d("checkMediaExistance size=" + messageObjects.size() + " time=" + (System.currentTimeMillis() - time));
+        FileLog.d("checkMediaExistance size=" + messageObjects.size() + " time=" + (System.currentTimeMillis() - time) + " thread_time=" + threadTime[0]);
 
         if (BuildVars.DEBUG_VERSION) {
             if (Thread.currentThread() == Looper.getMainLooper().getThread()) {
@@ -438,6 +442,7 @@ public class FilePathDatabase {
                             list = new ArrayList<>();
                             filesByDialogId.put(fileMeta.dialogId, list);
                         }
+                        keepMediaFiles.get(i).isStory = fileMeta.messageType == MessageObject.TYPE_STORY;
                         list.add(keepMediaFiles.get(i));
                     }
                 }
@@ -460,11 +465,17 @@ public class FilePathDatabase {
         dispatchQueue.postRunnable(runnable);
     }
 
+    private void postToFrontRunnable(Runnable runnable) {
+        ensureQueueExist();
+        dispatchQueue.postToFrontRunnable(runnable);
+    }
+
     private void ensureQueueExist() {
         if (dispatchQueue == null) {
             synchronized (this) {
                 if (dispatchQueue == null) {
                     dispatchQueue = new DispatchQueue("files_database_queue_" + currentAccount);
+                    dispatchQueue.setPriority(Thread.MAX_PRIORITY);
                 }
             }
         }

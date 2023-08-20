@@ -86,7 +86,8 @@ public class AnimatedEmojiEffect {
             effectImageReceiver.draw(canvas);
         }
 
-
+        canvas.save();
+        canvas.translate(bounds.left, bounds.top);
         for (int i = 0; i < particles.size(); i++) {
             particles.get(i).draw(canvas);
             if (particles.get(i).progress >= 1f) {
@@ -94,6 +95,7 @@ public class AnimatedEmojiEffect {
                 i--;
             }
         }
+        canvas.restore();
         if (parentView != null) {
             parentView.invalidate();
         }

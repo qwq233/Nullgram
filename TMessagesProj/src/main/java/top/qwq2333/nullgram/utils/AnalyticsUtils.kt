@@ -24,7 +24,6 @@ import android.os.Build
 import android.os.Handler
 import android.util.Base64
 import com.google.firebase.crashlytics.FirebaseCrashlytics
-import com.google.firebase.crashlytics.ktx.setCustomKeys
 import com.microsoft.appcenter.AppCenter
 import com.microsoft.appcenter.analytics.Analytics
 import com.microsoft.appcenter.channel.AbstractChannelListener
@@ -34,6 +33,7 @@ import org.telegram.messenger.BuildConfig
 import org.telegram.messenger.BuildVars
 import org.telegram.messenger.UserConfig
 import java.util.Arrays
+
 
 object AnalyticsUtils {
     private val appCenterToken = BuildVars.APPCENTER_HASH
@@ -82,14 +82,11 @@ object AnalyticsUtils {
             Log.d("FirebaseCrashlytics start: set user id: " + currentUser.getClientUserId())
             val crashlytics = FirebaseCrashlytics.getInstance()
             crashlytics.setUserId(currentUser.getClientUserId().toString())
-            crashlytics.setCustomKeys {
-                key("Build Time", BuildConfig.BUILD_TIME)
-
-                for (i in 0 ..  UserConfig.MAX_ACCOUNT_COUNT) {
-                    UserConfig.getInstance(i)?.let {
-                        if (!it.isClientActivated) return@let
-                        key("User $i", it.getClientUserId().toString())
-                    }
+            crashlytics.setCustomKey("Build Time", BuildConfig.BUILD_TIME)
+            for (i in 0 ..  UserConfig.MAX_ACCOUNT_COUNT) {
+                UserConfig.getInstance(i)?.let {
+                    if (!it.isClientActivated) return@let
+                    crashlytics.setCustomKey("User $i", it.getClientUserId().toString())
                 }
             }
         } catch (ignored: Exception) { }
@@ -102,6 +99,8 @@ object AnalyticsUtils {
         AppCenter.start(app, appCenterToken, Analytics::class.java)
         patchDevice()
         trackEvent("App start")
+        AppCenter.setUserId(UserConfig.getInstance(UserConfig.selectedAccount)?.getClientUserId().toString())
+
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
             val am = app.getSystemService(ActivityManager::class.java)
             val map = HashMap<String, String?>(1)

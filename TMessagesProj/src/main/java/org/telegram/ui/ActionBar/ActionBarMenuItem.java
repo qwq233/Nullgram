@@ -79,6 +79,17 @@ public class ActionBarMenuItem extends FrameLayout {
 
     private FrameLayout wrappedSearchFrameLayout;
 
+    public static void addText(ActionBarPopupWindow.ActionBarPopupWindowLayout popupLayout, String text, Theme.ResourcesProvider resourcesProvider) {
+        final TextView textView = new TextView(popupLayout.getContext());
+        textView.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 13);
+        textView.setTextColor(Theme.getColor(Theme.key_dialogTextBlack, resourcesProvider));
+        textView.setPadding(AndroidUtilities.dp(13), AndroidUtilities.dp(8), AndroidUtilities.dp(13), AndroidUtilities.dp(8));
+        textView.setText(text);
+        textView.setTag(R.id.fit_width_tag, 1);
+        textView.setMaxWidth(AndroidUtilities.dp(200));
+        popupLayout.addView(textView, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT));
+    }
+
     public void setSearchPaddingStart(int padding) {
         searchItemPaddingStart = padding;
         if (searchContainer != null) {
@@ -186,6 +197,7 @@ public class ActionBarMenuItem extends FrameLayout {
     private int selectedFilterIndex = -1;
     private final AnimationNotificationsLocker notificationsLocker = new AnimationNotificationsLocker();
     private float dimMenu;
+    public int searchRightMargin;
 
     private float transitionOffset;
     private View showSubMenuFrom;
@@ -518,8 +530,24 @@ public class ActionBarMenuItem extends FrameLayout {
         return cell;
     }
 
+    public static View addGap(int id, ActionBarPopupWindow.ActionBarPopupWindowLayout popupLayout) {
+        View cell = new View(popupLayout.getContext());
+        cell.setTag(id);
+        cell.setTag(R.id.object_tag, 1);
+        cell.setTag(R.id.fit_width_tag, 1);
+        popupLayout.addView(cell);
+        LinearLayout.LayoutParams layoutParams = (LinearLayout.LayoutParams) cell.getLayoutParams();
+        if (LocaleController.isRTL) {
+            layoutParams.gravity = Gravity.RIGHT;
+        }
+        layoutParams.width = LayoutHelper.MATCH_PARENT;
+        layoutParams.height = AndroidUtilities.dp(6);
+        cell.setLayoutParams(layoutParams);
+        return cell;
+    }
+
     public ActionBarMenuSubItem addSubItem(int id, int icon, Drawable iconDrawable, CharSequence text, boolean dismiss, boolean needCheck) {
-        return addSubItem(id, icon, iconDrawable, text, dismiss, needCheck, null);
+        return addSubItem(id, icon, iconDrawable, text, dismiss, needCheck, resourcesProvider);
     }
 
     public ActionBarMenuSubItem addSubItem(int id, int icon, Drawable iconDrawable, CharSequence text, boolean dismiss, boolean needCheck, Theme.ResourcesProvider resourcesProvider) {
@@ -808,7 +836,7 @@ public class ActionBarMenuItem extends FrameLayout {
     }
 
     public boolean isSearchFieldVisible() {
-        return searchContainer.getVisibility() == VISIBLE;
+        return searchContainer != null && searchContainer.getVisibility() == VISIBLE;
     }
 
     AnimatorSet searchContainerAnimator;
@@ -1338,7 +1366,7 @@ public class ActionBarMenuItem extends FrameLayout {
                 wrappedSearchFrameLayout.addView(horizontalScrollView, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, LayoutHelper.MATCH_PARENT, 0, 0, 0, 48, 0));
                 parentMenu.addView(wrappedSearchFrameLayout, 0, LayoutHelper.createLinear(0, LayoutHelper.MATCH_PARENT, 1.0f, searchItemPaddingStart, 0, 0, 0));
             } else {
-                parentMenu.addView(searchContainer, 0, LayoutHelper.createLinear(0, LayoutHelper.MATCH_PARENT, 1.0f, searchItemPaddingStart + 6, 0, 0, 0));
+                parentMenu.addView(searchContainer, 0, LayoutHelper.createLinear(0, LayoutHelper.MATCH_PARENT, 1.0f, searchItemPaddingStart + 6, 0, searchRightMargin, 0));
             }
             searchContainer.setVisibility(GONE);
 

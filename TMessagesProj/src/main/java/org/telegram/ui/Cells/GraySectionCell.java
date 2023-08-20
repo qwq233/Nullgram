@@ -82,7 +82,7 @@ public class GraySectionCell extends FrameLayout {
         return textView.getText();
     }
 
-    public void setText(String text) {
+    public void setText(CharSequence text) {
         textView.setText(text);
         rightTextView.setVisibility(GONE);
         rightTextView.setOnClickListener(null);
@@ -101,6 +101,18 @@ public class GraySectionCell extends FrameLayout {
 
     public void setRightText(String right, boolean moveDown) {
         rightTextView.setText(right, true, moveDown);
+        rightTextView.setVisibility(VISIBLE);
+    }
+
+    public void setRightText(String right, OnClickListener onClickListener) {
+        rightTextView.setText(right, false);
+        rightTextView.setOnClickListener(onClickListener);
+        rightTextView.setVisibility(VISIBLE);
+    }
+
+    public void setRightText(String right, boolean moveDown, OnClickListener onClickListener) {
+        rightTextView.setText(right, true, moveDown);
+        rightTextView.setOnClickListener(onClickListener);
         rightTextView.setVisibility(VISIBLE);
     }
 

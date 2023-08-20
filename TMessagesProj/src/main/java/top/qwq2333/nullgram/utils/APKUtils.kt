@@ -18,6 +18,7 @@
  */
 package top.qwq2333.nullgram.utils
 
+import android.Manifest
 import android.annotation.SuppressLint
 import android.app.Activity
 import android.app.PendingIntent
@@ -26,6 +27,7 @@ import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.content.pm.PackageInstaller
+import android.content.pm.PackageManager
 import android.os.Build
 import android.provider.Settings
 import android.text.TextUtils
@@ -33,13 +35,13 @@ import android.util.TypedValue
 import android.view.Gravity
 import android.widget.LinearLayout
 import android.widget.TextView
+import androidx.core.app.ActivityCompat
 import androidx.core.app.NotificationChannelCompat
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
 import org.telegram.messenger.AndroidUtilities
 import org.telegram.messenger.ApplicationLoader
 import org.telegram.messenger.FileLoader
@@ -63,24 +65,8 @@ import java.io.OutputStream
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
 
+
 object APKUtils {
-    /**
-     * 挂起当前线程
-     *
-     * @param millis 挂起的毫秒数
-     * @return 被中断返回false，否则true
-     */
-    @JvmStatic
-    fun sleep(millis: Long): Boolean {
-        if (millis > 0) {
-            try {
-                Thread.sleep(millis)
-            } catch (e: InterruptedException) {
-                return false
-            }
-        }
-        return true
-    }
 
     @SuppressLint("StaticFieldLeak")
     private var dialog: AlertDialog? = null
@@ -164,20 +150,17 @@ object APKUtils {
         dialog!!.setCanceledOnTouchOutside(false)
         dialog!!.setCancelable(false)
         dialog!!.show()
-        CoroutineScope(Dispatchers.Main).launch {
-            try {
-                val receiver = register(context) {
-                    if (dialog != null) {
-                        dialog!!.dismiss()
-                        dialog = null
-                    }
+        CoroutineScope(Dispatchers.IO).launch {
+            val receiver = register(context) {
+                if (dialog != null) {
+                    dialog!!.dismiss()
+                    dialog = null
                 }
-                installApk(context, apk)
-                runBlocking {
-                    val intent = receiver.waitIntent()
-                    context.startActivity(intent)
-                }
-            } catch (ignore: Exception) {
+            }
+            installApk(context, apk)
+            val intent = receiver.waitIntent()
+            if (intent != null) {
+                context.startActivity(intent)
             }
         }
     }
@@ -201,8 +184,7 @@ object APKUtils {
         return receiver
     }
 
-    private class InstallReceiver(private val context: Context, private val packageName: String, private val onSuccess: Runnable) :
-        BroadcastReceiver() {
+    private class InstallReceiver(private val context: Context, private val packageName: String, private val onSuccess: Runnable) : BroadcastReceiver() {
         private val latch = CountDownLatch(1)
         private var intent: Intent? = null
 
@@ -275,13 +257,15 @@ object APKUtils {
                 notificationManager.createNotificationChannel(channel)
                 val pendingIntent =
                     PendingIntent.getActivity(context, 0, startIntent, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
-                notificationManager.notify(
-                    8732833,
-                    NotificationCompat.Builder(context, "updated").setSmallIcon(R.drawable.notification).setColor(-0xee5306)
-                        .setShowWhen(false)
-                        .setContentText(LocaleController.getString("UpdateInstalledNotification", R.string.UpdateInstalledNotification))
-                        .setCategory(NotificationCompat.CATEGORY_STATUS).setContentIntent(pendingIntent).build()
-                )
+                if (ActivityCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS) == PackageManager.PERMISSION_GRANTED) {
+                    notificationManager.notify(
+                        8732833,
+                        NotificationCompat.Builder(context, "updated").setSmallIcon(R.drawable.notification).setColor(-0xee5306)
+                            .setShowWhen(false)
+                            .setContentText(LocaleController.getString("UpdateInstalledNotification", R.string.UpdateInstalledNotification))
+                            .setCategory(NotificationCompat.CATEGORY_STATUS).setContentIntent(pendingIntent).build()
+                    )
+                }
             }
         }
     }
