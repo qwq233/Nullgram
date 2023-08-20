@@ -20,6 +20,7 @@ package top.qwq2333.nullgram.config
 
 import android.annotation.SuppressLint
 import android.app.Activity
+import androidx.collection.LruCache
 import com.google.gson.JsonObject
 import com.google.gson.JsonPrimitive
 import org.json.JSONException
@@ -33,6 +34,8 @@ object ConfigManager {
         "globalConfig",
         Activity.MODE_PRIVATE
     )
+
+    private val lruCache = LruCache<String, Boolean>(250) // TODO: this is a temporary solution and will be replaced in the future
 
     /**
      * 获取Int值
@@ -66,7 +69,9 @@ object ConfigManager {
      */
     @JvmStatic
     fun getBooleanOrDefault(key: String, def: Boolean): Boolean {
-        return preferences.getBoolean(key, def)
+        val result = lruCache[key]
+        if (result != null) return result
+        preferences.getBoolean(key, def).also { lruCache.put(key, it) }.also { return it }
     }
 
     /**
@@ -77,7 +82,9 @@ object ConfigManager {
      */
     @JvmStatic
     fun getBooleanOrFalse(key: String): Boolean {
-        return preferences.getBoolean(key, false)
+        val result = lruCache[key]
+        if (result != null) return result
+        preferences.getBoolean(key, false).also { lruCache.put(key, it) }.also { return it }
     }
 
     /**
