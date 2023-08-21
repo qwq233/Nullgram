@@ -1,4 +1,4 @@
-7/*
+/*
  * Copyright (C) 2019-2023 qwq233 <qwq233@qwq2333.top>
  * https://github.com/qwq233/Nullgram
  *
