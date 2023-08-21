@@ -1,4 +1,4 @@
-/*
+7/*
  * Copyright (C) 2019-2023 qwq233 <qwq233@qwq2333.top>
  * https://github.com/qwq233/Nullgram
  *
@@ -19,7 +19,7 @@
 package top.qwq2333.nullgram.config
 
 import android.annotation.SuppressLint
-import android.app.Activit
+import android.app.Activity
 import com.google.gson.JsonObject
 import com.google.gson.JsonPrimitive
 import org.json.JSONException
