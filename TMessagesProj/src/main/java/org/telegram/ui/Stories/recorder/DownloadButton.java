@@ -172,7 +172,7 @@ public class DownloadButton extends ImageView {
     }
 
     private void onClickInternal() {
-        if (!preparing) {
+        if (!preparing || currentEntry == null) {
             return;
         }
         preparing = false;

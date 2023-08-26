@@ -989,6 +989,22 @@ public class SharedConfig {
         return true;
     }
 
+    // returns a >= b
+    private static boolean versionBiggerOrEqual(String a, String b) {
+        String[] partsA = a.split("\\.");
+        String[] partsB = b.split("\\.");
+        for (int i = 0; i < Math.min(partsA.length, partsB.length); ++i) {
+            int numA = Integer.parseInt(partsA[i]);
+            int numB = Integer.parseInt(partsB[i]);
+            if (numA < numB) {
+                return false;
+            } else if (numA > numB) {
+                return true;
+            }
+        }
+        return true;
+    }
+
     public static boolean checkPasscode(String passcode) {
         if (passcodeSalt.length == 0) {
             boolean result = Utilities.MD5(passcode).equals(passcodeHash);

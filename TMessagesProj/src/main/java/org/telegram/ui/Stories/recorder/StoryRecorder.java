@@ -1609,6 +1609,9 @@ public class StoryRecorder implements NotificationCenter.NotificationCenterDeleg
 
             @Override
             protected boolean captionLimitToast() {
+                if (MessagesController.getInstance(currentAccount).premiumLocked) {
+                    return false;
+                }
                 Bulletin visibleBulletin = Bulletin.getVisibleBulletin();
                 if (visibleBulletin != null && visibleBulletin.tag == 2) {
                     return false;
@@ -1996,7 +1999,7 @@ public class StoryRecorder implements NotificationCenter.NotificationCenterDeleg
                     try {
                         Long userId = Long.parseLong(span.getURL());
                         TLRPC.User user = MessagesController.getInstance(currentAccount).getUser(userId);
-                        if (user != null && UserObject.getPublicUsername(user) != null && !users.contains(user)) {
+                        if (user != null && !UserObject.isUserSelf(user) && UserObject.getPublicUsername(user) != null && !users.contains(user)) {
                             users.add(UserObject.getPublicUsername(user));
                         }
                     } catch (Exception ignore) {}
@@ -2013,7 +2016,7 @@ public class StoryRecorder implements NotificationCenter.NotificationCenterDeleg
                     if (u != -1) {
                         String username = caption.subSequence(u, i).toString();
                         TLObject obj = MessagesController.getInstance(currentAccount).getUserOrChat(username);
-                        if (obj instanceof TLRPC.User && !((TLRPC.User) obj).bot && ((TLRPC.User) obj).id != 777000 && !UserObject.isReplyUser((TLRPC.User) obj) && !users.contains(username)) {
+                        if (obj instanceof TLRPC.User && !((TLRPC.User) obj).bot && !UserObject.isUserSelf((TLRPC.User) obj) && ((TLRPC.User) obj).id != 777000 && !UserObject.isReplyUser((TLRPC.User) obj) && !users.contains(username)) {
                             users.add(username);
                         }
                     }
@@ -2023,7 +2026,7 @@ public class StoryRecorder implements NotificationCenter.NotificationCenterDeleg
             if (u != -1) {
                 String username = caption.subSequence(u, caption.length()).toString();
                 TLObject obj = MessagesController.getInstance(currentAccount).getUserOrChat(username);
-                if (obj instanceof TLRPC.User && !((TLRPC.User) obj).bot && ((TLRPC.User) obj).id != 777000 && !UserObject.isReplyUser((TLRPC.User) obj) && !users.contains(username)) {
+                if (obj instanceof TLRPC.User && !((TLRPC.User) obj).bot && !UserObject.isUserSelf((TLRPC.User) obj) && ((TLRPC.User) obj).id != 777000 && !UserObject.isReplyUser((TLRPC.User) obj) && !users.contains(username)) {
                     users.add(username);
                 }
             }
@@ -2108,9 +2111,9 @@ public class StoryRecorder implements NotificationCenter.NotificationCenterDeleg
         if (storyEntry == null || previewView.getWidth() <= 0 || previewView.getHeight() <= 0) {
             return null;
         }
-        if (!forDraft && !storyEntry.wouldBeVideo() && !storyEntry.isEdit) {
-            return null;
-        }
+//        if (!forDraft && !storyEntry.wouldBeVideo() && !storyEntry.isEdit) {
+//            return null;
+//        }
         File file = forDraft ? storyEntry.draftThumbFile : storyEntry.uploadThumbFile;
         if (file != null) {
             file.delete();
@@ -3069,7 +3072,7 @@ public class StoryRecorder implements NotificationCenter.NotificationCenterDeleg
 
 //            privacySelector.setStoryPeriod(outputEntry == null || !UserConfig.getInstance(currentAccount).isPremium() ? 86400 : outputEntry.period);
             captionEdit.setPeriod(outputEntry == null ? 86400 : outputEntry.period, false);
-            captionEdit.setPeriodVisible(outputEntry == null || !outputEntry.isEdit);
+            captionEdit.setPeriodVisible(!MessagesController.getInstance(currentAccount).premiumLocked && (outputEntry == null || !outputEntry.isEdit));
         }
         if (toPage == PAGE_PREVIEW) {
             videoError = false;
@@ -3224,11 +3227,14 @@ public class StoryRecorder implements NotificationCenter.NotificationCenterDeleg
             createFilterPhotoView();
 //            animatePhotoFilterTexture(true, animated);
             previewTouchable = photoFilterView;
-            photoFilterView.getToolsView().setAlpha(0f);
-            photoFilterView.getToolsView().setVisibility(View.VISIBLE);
-            animators.add(ObjectAnimator.ofFloat(photoFilterView.getToolsView(), View.TRANSLATION_Y, 0));
-            animators.add(ObjectAnimator.ofFloat(photoFilterView.getToolsView(), View.ALPHA, 1));
-            TextureView textureView = photoFilterView.getMyTextureView();
+            View toolsView = photoFilterView != null ? photoFilterView.getToolsView() : null;
+            if (toolsView != null) {
+                toolsView.setAlpha(0f);
+                toolsView.setVisibility(View.VISIBLE);
+                animators.add(ObjectAnimator.ofFloat(toolsView, View.TRANSLATION_Y, 0));
+                animators.add(ObjectAnimator.ofFloat(toolsView, View.ALPHA, 1));
+            }
+            TextureView textureView = photoFilterView != null ? photoFilterView.getMyTextureView() : null;
             if (textureView != null) {
                 animators.add(ObjectAnimator.ofFloat(textureView, View.ALPHA, 1));
             }
