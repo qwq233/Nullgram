@@ -14,6 +14,7 @@ plugins {
     alias(libs.plugins.google.services)
     alias(libs.plugins.triplet.play)
     alias(libs.plugins.serialization)
+    alias(libs.plugins.ksp)
 }
 
 configurations {
@@ -93,6 +94,7 @@ dependencies {
 
     implementation(project(":libs:tcp2ws"))
     implementation(project(":libs:pangu"))
+    ksp(project(":libs:ksp"))
 }
 
 android {
@@ -219,6 +221,12 @@ android {
     }
 
 
+}
+
+kotlin {
+    sourceSets.configureEach {
+        kotlin.srcDir("$buildDir/generated/ksp/$name/kotlin/")
+    }
 }
 
 tasks.register<ReplaceIcon>("replaceIcon") {}

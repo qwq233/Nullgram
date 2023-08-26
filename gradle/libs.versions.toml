@@ -17,7 +17,9 @@ guava = "32.0.0-jre"
 hiddenapibypass = "4.3"
 interpolator = "1.0.0"
 isoparser = "1.0.6" # DO NOT UPDATE THIS DEPENDENCY
-kotlin = "1.9.0"
+kotlin = "1.9.10"
+ksp = "1.9.10-1.0.13"
+poet = "1.14.2"
 kotlinxCoroutinesAndroid = "1.7.3"
 kotlinxSerializationJson = "1.5.1"
 ktor = "2.3.3"
@@ -54,6 +56,8 @@ hiddenapibypass = { module = "org.lsposed.hiddenapibypass:hiddenapibypass", vers
 isoparser = { module = "com.googlecode.mp4parser:isoparser", version.ref = "isoparser" }
 kotlin-stdlib = { module = "org.jetbrains.kotlin:kotlin-stdlib", version.ref = "kotlin" }
 kotlin-stdlib-common = { module = "org.jetbrains.kotlin:kotlin-stdlib-common", version.ref = "kotlin" }
+kotlinpoet-ksp = { module = "com.squareup:kotlinpoet-ksp", version.ref = "poet" }
+ksp = { module = "com.google.devtools.ksp:symbol-processing-api", version.ref = "ksp" }
 kotlinx-coroutines-android = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-android", version.ref = "kotlinxCoroutinesAndroid" }
 kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "kotlinxSerializationJson" }
 language-id = { module = "com.google.mlkit:language-id", version.ref = "languageId" }
@@ -85,3 +89,4 @@ serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref 
 firebase-crashlytics = { id = "com.google.firebase.crashlytics", version = "2.9.8" }
 google-services = { id = "com.google.gms.google-services", version = "4.3.15" }
 triplet-play = { id = "com.github.triplet.play", version = "3.8.3" }
+ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
