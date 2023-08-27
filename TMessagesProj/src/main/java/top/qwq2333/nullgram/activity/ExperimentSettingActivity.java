@@ -170,7 +170,7 @@ public class ExperimentSettingActivity extends BaseActivity {
         } else if (position == fastSpeedUploadRow) {
             Config.toggleFastSpeedUpload();
             if (view instanceof TextCheckCell) {
-                ((TextCheckCell) view).setChecked(Config.hidePremiumStickerAnim);
+                ((TextCheckCell) view).setChecked(Config.fastSpeedUpload);
             }
         } else if (position == modifyDownloadSpeedRow) {
             int[] speeds = new int[]{128, 256, 384, 512, 768, 1024};
@@ -383,7 +383,7 @@ public class ExperimentSettingActivity extends BaseActivity {
                         textCell.setTextAndCheck(LocaleController.getString("hidePremiumStickerAnim", R.string.hidePremiumStickerAnim),
                             Config.hidePremiumStickerAnim, true);
                     } else if (position == fastSpeedUploadRow) {
-                        textCell.setTextAndCheck(LocaleController.getString("fastSpeedUpload", R.string.fastSpeedUpload), Config.hidePremiumStickerAnim,
+                        textCell.setTextAndCheck(LocaleController.getString("fastSpeedUpload", R.string.fastSpeedUpload), Config.fastSpeedUpload,
                             true);
                     } else if (position == alwaysSendWithoutSoundRow) {
                         textCell.setTextAndCheck(LocaleController.getString("alwaysSendWithoutSound", R.string.alwaysSendWithoutSound),
