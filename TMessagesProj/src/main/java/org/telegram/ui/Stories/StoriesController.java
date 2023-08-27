@@ -3,7 +3,6 @@ package org.telegram.ui.Stories;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.text.TextUtils;
-import android.util.Log;
 import android.util.SparseArray;
 import android.webkit.MimeTypeMap;
 
@@ -46,7 +45,6 @@ import org.telegram.tgnet.RequestDelegate;
 import org.telegram.tgnet.SerializedData;
 import org.telegram.tgnet.TLObject;
 import org.telegram.tgnet.TLRPC;
-import org.telegram.ui.ActionBar.EmojiThemes;
 import org.telegram.ui.Components.Bulletin;
 import org.telegram.ui.Components.Premium.LimitReachedBottomSheet;
 import org.telegram.ui.Components.Reactions.ReactionsLayoutInBubble;
@@ -68,9 +66,10 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
-import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
+
+import top.qwq2333.gen.Config;
 
 public class StoriesController {
 
@@ -233,6 +232,8 @@ public class StoriesController {
     }
 
     public boolean hasStories() {
+        if (Config.hideStories) return false;
+
         return (dialogListStories != null && dialogListStories.size() > 0) || hasSelfStories();
     }
 

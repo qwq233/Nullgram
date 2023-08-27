@@ -106,6 +106,10 @@ public class GeneralSettingActivity extends BaseActivity {
     private int overrideDevicePerformanceDescRow;
     private int devices2Row;
 
+    private int storiesRow;
+    private int hideStoriesRow;
+    private int stories2Row;
+
     private int general2Row;
 
 
@@ -343,6 +347,11 @@ public class GeneralSettingActivity extends BaseActivity {
             if (view instanceof TextCheckCell) {
                 ((TextCheckCell) view).setChecked(TranslateHelper.getShowOriginal());
             }
+        } else if (position == hideStoriesRow) {
+            Config.toggleHideStories();
+            if (view instanceof TextCheckCell) {
+                ((TextCheckCell) view).setChecked(Config.hideStories);
+            }
         }
 
     }
@@ -414,6 +423,10 @@ public class GeneralSettingActivity extends BaseActivity {
         overrideDevicePerformanceRow = addRow("overrideDevicePerformance");
         overrideDevicePerformanceDescRow = addRow();
         devices2Row = addRow();
+
+        storiesRow = addRow();
+        hideStoriesRow = addRow("hideStories");
+        stories2Row = addRow();
 
         if (listAdapter != null) {
             listAdapter.notifyDataSetChanged();
@@ -586,6 +599,8 @@ public class GeneralSettingActivity extends BaseActivity {
                                 R.string.AutoTranslateAbout), TranslateHelper.getAutoTranslate(), true, false);
                     } else if (position == showOriginalRow) {
                         textCell.setTextAndCheck(LocaleController.getString("TranslatorShowOriginal", R.string.TranslatorShowOriginal), TranslateHelper.getShowOriginal(), true);
+                    } else if (position == hideStoriesRow) {
+                        textCell.setTextAndCheck(LocaleController.getString("HideStories", R.string.HideStories), Config.hideStories, true);
                     }
                     break;
                 }
@@ -597,6 +612,8 @@ public class GeneralSettingActivity extends BaseActivity {
                         headerCell.setText(LocaleController.getString("Translator", R.string.Translator));
                     } else if (position == devicesRow) {
                         headerCell.setText(LocaleController.getString("Devices", R.string.Devices));
+                    } else if (position == storiesRow) {
+                        headerCell.setText(LocaleController.getString("Stories", R.string.Stories));
                     }
                     break;
                 }
@@ -670,18 +687,22 @@ public class GeneralSettingActivity extends BaseActivity {
 
         @Override
         public int getItemViewType(int position) {
-            if (position == general2Row || position == drawer2Row || position == translator2Row || position == devices2Row) {
+            if (position == general2Row || position == drawer2Row || position == translator2Row || position == devices2Row || position == stories2Row) {
                 return 1;
             } else if (position == tabsTitleTypeRow || position == translationProviderRow || position == deepLFormalityRow || position == translationTargetRow ||
                 position == translatorTypeRow || position == doNotTranslateRow || position == overrideDevicePerformanceRow) {
                 return 2;
-            } else if (position == generalRow || position == translatorRow || position == devicesRow) {
+            } else if (position == generalRow || position == translatorRow || position == devicesRow || position == storiesRow) {
                 return 4;
             } else if (position == overrideDevicePerformanceDescRow) {
                 return 7;
             } else if (position == drawerRow) {
                 return 8;
-            } else if ((position > generalRow && position < general2Row) || (position > devicesRow && position < devices2Row) || (position > drawerRow && position < drawer2Row) || (position > translatorRow && position < translator2Row)) {
+            } else if ((position > generalRow && position < general2Row) ||
+                    (position > devicesRow && position < devices2Row) ||
+                    (position > drawerRow && position < drawer2Row) ||
+                    (position > translatorRow && position < translator2Row) ||
+                    (position > storiesRow && position < stories2Row)) {
                 return 3;
             }
             return -1;
