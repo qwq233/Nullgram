@@ -56,6 +56,7 @@ public class ExperimentSettingActivity extends BaseActivity {
     private int blockSponsorAdsRow;
     private int hideProxySponsorChannelRow;
     private int disableSendTypingRow;
+    private int storyStealthModeRow;
     private int keepOnlineStatusAsRow;
     private int syntaxHighlightRow;
     private int aliasChannelRow;
@@ -214,6 +215,11 @@ public class ExperimentSettingActivity extends BaseActivity {
             if (view instanceof TextCheckCell) {
                 ((TextCheckCell) view).setChecked(Config.enablePanguOnReceiving);
             }
+        } else if (position == storyStealthModeRow) {
+            Config.toggleStoryStealthMode();
+            if (view instanceof TextCheckCell) {
+                ((TextCheckCell) view).setChecked(Config.storyStealthMode);
+            }
         }
 
     }
@@ -256,6 +262,7 @@ public class ExperimentSettingActivity extends BaseActivity {
             hideProxySponsorChannelRow = addRow("hideProxySponsorChannel");
             disableSendTypingRow = addRow("disableSendTyping");
             keepOnlineStatusAsRow = addRow("keepOnlineStatusAs");
+            storyStealthModeRow = addRow("storyStealthMode");
             special2Row = addRow();
         }
 
@@ -341,6 +348,9 @@ public class ExperimentSettingActivity extends BaseActivity {
                     } else if (position == disableSendTypingRow) {
                         textCell.setTextAndCheck(LocaleController.getString("disableSendTyping", R.string.disableSendTyping),
                             Config.unreadBadgeOnBackButton, true);
+                    } else if (position == storyStealthModeRow) {
+                        textCell.setTextAndCheck(LocaleController.getString("storyStealthMode", R.string.storyStealthMode),
+                            Config.storyStealthMode, true);
                     } else if (position == syntaxHighlightRow) {
                         textCell.setTextAndValueAndCheck(LocaleController.getString("codeSyntaxHighlight", R.string.codeSyntaxHighlight),
                             LocaleController.getString("codeSyntaxHighlightDetails", R.string.codeSyntaxHighlightDetails),

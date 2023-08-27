@@ -338,6 +338,10 @@ public class ConnectionsManager extends BaseController {
             return;
         }
 
+        if (Config.storyStealthMode && (object instanceof TLRPC.TL_stories_readStories)) {
+            return;
+        }
+
         var user = getUserConfig().getCurrentUser();
         if (user != null && user.bot && DatabaseUtils.isUserOnlyMethod(object)) {
             FileLog.d("skip send request " + object + " user only method");

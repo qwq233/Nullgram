@@ -98,6 +98,7 @@ object Defines {
     @BooleanConfig const val enablePanguOnReceiving = "enablePanguOnReceiving"
     @BooleanConfig const val showExactTime = "showExactTime"
     @BooleanConfig const val hideStories = "hideStories"
+    @BooleanConfig const val storyStealthMode = "storyStealthMode"
 
     /**
      * 0 default 1 online 2 offline
