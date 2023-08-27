@@ -55,8 +55,6 @@ import androidx.core.graphics.ColorUtils;
 import androidx.core.math.MathUtils;
 import androidx.recyclerview.widget.ChatListItemAnimator;
 
-import com.google.android.exoplayer2.util.Log;
-
 import org.telegram.messenger.AccountInstance;
 import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.AnimationNotificationsLocker;
@@ -127,7 +125,6 @@ import org.telegram.ui.Components.LoadingDrawable;
 import org.telegram.ui.Components.MediaActivity;
 import org.telegram.ui.Components.MentionsContainerView;
 import org.telegram.ui.Components.Premium.LimitReachedBottomSheet;
-import org.telegram.ui.Components.Premium.PremiumFeatureBottomSheet;
 import org.telegram.ui.Components.RLottieDrawable;
 import org.telegram.ui.Components.RLottieImageView;
 import org.telegram.ui.Components.RadialProgress;
@@ -148,7 +145,6 @@ import org.telegram.ui.Components.voip.CellFlickerDrawable;
 import org.telegram.ui.LaunchActivity;
 import org.telegram.ui.NotificationsCustomSettingsActivity;
 import org.telegram.ui.PinchToZoomHelper;
-import org.telegram.ui.PremiumPreviewFragment;
 import org.telegram.ui.ProfileActivity;
 import org.telegram.ui.Stories.recorder.CaptionContainerView;
 import org.telegram.ui.Stories.recorder.HintView2;
@@ -167,6 +163,8 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Locale;
+
+import top.qwq2333.gen.Config;
 
 public class PeerStoriesView extends SizeNotifierFrameLayout implements NotificationCenter.NotificationCenterDelegate {
 
@@ -1181,41 +1179,13 @@ public class PeerStoriesView extends SizeNotifierFrameLayout implements Notifica
                             }
                         }
 
-                        if (!unsupported && allowShare) {
-                            if (UserConfig.getInstance(currentAccount).isPremium()) {
-                                ActionBarMenuItem.addItem(popupLayout, R.drawable.msg_gallery, LocaleController.getString("SaveToGallery", R.string.SaveToGallery), false, resourcesProvider).setOnClickListener(v -> {
-                                    saveToGallery();
-                                    if (popupMenu != null) {
-                                        popupMenu.dismiss();
-                                    }
-                                });
-                            } else if (!MessagesController.getInstance(currentAccount).premiumLocked) {
-                                Drawable lockIcon = ContextCompat.getDrawable(context, R.drawable.msg_gallery_locked2);
-                                lockIcon.setColorFilter(new PorterDuffColorFilter(ColorUtils.blendARGB(Color.WHITE, Color.BLACK, 0.5f), PorterDuff.Mode.MULTIPLY));
-                                CombinedDrawable combinedDrawable = new CombinedDrawable(
-                                        ContextCompat.getDrawable(context, R.drawable.msg_gallery_locked1),
-                                        lockIcon
-                                ) {
-                                    @Override
-                                    public void setColorFilter(ColorFilter colorFilter) {
-
-                                    }
-                                };
-                                ActionBarMenuSubItem item = ActionBarMenuItem.addItem(popupLayout, R.drawable.msg_gallery, LocaleController.getString("SaveToGallery", R.string.SaveToGallery), false, resourcesProvider);
-                                item.setIcon(combinedDrawable);
-                                item.setOnClickListener(v -> {
-                                    item.performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP);
-                                    BulletinFactory bulletinFactory = BulletinFactory.global();
-                                    if (bulletinFactory != null) {
-                                        bulletinFactory.createSimpleBulletin(R.raw.ic_save_to_gallery, AndroidUtilities.replaceSingleTag(
-                                                LocaleController.getString("SaveStoryToGalleryPremiumHint", R.string.SaveStoryToGalleryPremiumHint),
-                                                () -> {
-                                                    PremiumFeatureBottomSheet sheet = new PremiumFeatureBottomSheet(storyViewer.fragment, PremiumPreviewFragment.PREMIUM_FEATURE_STORIES, false);
-                                                    delegate.showDialog(sheet);
-                                                })).show();
-                                    }
-                                });
-                            }
+                        if (!unsupported) {
+                            ActionBarMenuItem.addItem(popupLayout, R.drawable.msg_gallery, LocaleController.getString("SaveToGallery", R.string.SaveToGallery), false, resourcesProvider).setOnClickListener(v -> {
+                                saveToGallery();
+                                if (popupMenu != null) {
+                                    popupMenu.dismiss();
+                                }
+                            });
                         }
 
                         if (!MessagesController.getInstance(currentAccount).premiumLocked) {
@@ -4479,6 +4449,9 @@ public class PeerStoriesView extends SizeNotifierFrameLayout implements Notifica
         }
 
         public boolean allowScreenshots() {
+            if (Config.allowScreenshotOnNoForwardChat) {
+                return true;
+            }
             if (uploadingStory != null) {
                 return uploadingStory.entry.allowScreenshots;
             }
