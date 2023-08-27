@@ -333,6 +333,11 @@ public class ConnectionsManager extends BaseController {
         if (BuildVars.LOGS_ENABLED) {
 //            FileLog.d("send request " + object + " with token = " + requestToken);
         }
+
+        if (Config.disableSendTyping && (object instanceof TLRPC.TL_messages_setTyping || object instanceof TLRPC.TL_messages_setEncryptedTyping)) {
+            return;
+        }
+
         var user = getUserConfig().getCurrentUser();
         if (user != null && user.bot && DatabaseUtils.isUserOnlyMethod(object)) {
             FileLog.d("skip send request " + object + " user only method");

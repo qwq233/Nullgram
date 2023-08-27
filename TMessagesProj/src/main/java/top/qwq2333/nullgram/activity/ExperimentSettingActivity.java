@@ -108,7 +108,7 @@ public class ExperimentSettingActivity extends BaseActivity {
         } else if (position == disableSendTypingRow) {
             Config.toggleDisableSendTyping();
             if (view instanceof TextCheckCell) {
-                ((TextCheckCell) view).setChecked(Config.unreadBadgeOnBackButton);
+                ((TextCheckCell) view).setChecked(Config.disableSendTyping);
             }
         } else if (position == syntaxHighlightRow) {
             Config.toggleCodeSyntaxHighlight();

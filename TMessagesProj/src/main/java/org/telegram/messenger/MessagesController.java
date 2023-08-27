@@ -7978,7 +7978,7 @@ public class MessagesController extends BaseController implements NotificationCe
     }
 
     public boolean sendTyping(long dialogId, int threadMsgId, int action, String emojicon, int classGuid) {
-        if (Config.unreadBadgeOnBackButton) {
+        if (Config.disableSendTyping) {
             return false;
         }
         if (action < 0 || action >= sendingTypings.length || dialogId == 0) {
