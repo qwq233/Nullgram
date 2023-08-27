@@ -14,7 +14,7 @@
     <string name="updateAvailable">新更新可用</string>
     <string name="variantsNotFound">发布变量无法自动匹配。\n请从GitHub 手动下载。</string>
     <string name="skipUpdate">忽略</string>
-    <string name="notNow">稍后​​​​​</string>
+    <string name="notNow">稍后更新</string>
     <string name="updateConfirm">更新</string>
     <string name="CheckUpdate">检查更新内容</string>
     <string name="CheckingUpdate">正在检查更新…</string>
@@ -298,4 +298,5 @@
     <string name="Offline">离线</string>
     <string name="Special">特殊</string>
     <string name="BotLoginMessage">输入从 **@BotFather** 获取的机器人令牌。</string>
+  <string name="NotOriginalNullgramInfo">你似乎正在使用Nullgram的分支版本。\n你是否也要进入Nullgram的频道？</string>
 </resources>
