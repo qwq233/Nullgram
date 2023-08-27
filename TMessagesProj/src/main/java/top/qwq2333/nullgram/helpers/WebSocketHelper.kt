@@ -23,6 +23,7 @@ import org.tcp2ws.tcp2wsServer
 import org.telegram.messenger.BuildConfig
 import org.telegram.messenger.LocaleController
 import org.telegram.messenger.R
+import top.qwq2333.gen.Config
 import top.qwq2333.nullgram.config.ConfigManager
 import top.qwq2333.nullgram.utils.AnalyticsUtils.trackEvent
 import top.qwq2333.nullgram.utils.Defines
@@ -51,8 +52,8 @@ object WebSocketHelper {
         else -> WsProvider.Nekogram
     }
         set(value) {
-            if (value.equals(WsProvider.Custom)) {
-                value.host = ConfigManager.getStringOrDefault(Defines.wsServerHost, "")!!
+            if (value == WsProvider.Custom) {
+                value.host = Config.wsServerHost
             }
             ConfigManager.putInt(Defines.wsBuiltInProxyBackend, value.num)
             field = value
@@ -70,12 +71,11 @@ object WebSocketHelper {
     }
 
     @JvmField
-    var wsEnableTLS = ConfigManager.getBooleanOrDefault(Defines.wsEnableTLS, true)
+    var wsEnableTLS = Config.wsEnableTLS
 
     @JvmStatic
     fun toggleWsEnableTLS() {
-        ConfigManager.putBoolean(Defines.wsEnableTLS, !ConfigManager.getBooleanOrDefault(Defines.wsEnableTLS, true))
-        wsEnableTLS = ConfigManager.getBooleanOrDefault(Defines.wsEnableTLS, true)
+        Config.toggleWsEnableTLS()
     }
 
     @JvmStatic

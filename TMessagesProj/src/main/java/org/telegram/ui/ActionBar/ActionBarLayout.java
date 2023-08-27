@@ -65,8 +65,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import top.qwq2333.nullgram.config.ConfigManager;
-import top.qwq2333.nullgram.utils.Defines;
+import top.qwq2333.gen.Config;
 import top.qwq2333.nullgram.utils.VibrationUtils;
 
 public class ActionBarLayout extends FrameLayout implements INavigationLayout, FloatingDebugProvider {
@@ -101,7 +100,7 @@ public class ActionBarLayout extends FrameLayout implements INavigationLayout, F
         public LayoutContainer(Context context) {
             super(context);
             setWillNotDraw(false);
-            if (ConfigManager.getBooleanOrFalse(Defines.scrollableChatPreview))
+            if (Config.scrollableChatPreview)
                 setClickable(true);
         }
 
@@ -225,7 +224,7 @@ public class ActionBarLayout extends FrameLayout implements INavigationLayout, F
             if ((passivePreview || transitionAnimationPreviewMode) && (ev.getActionMasked() == MotionEvent.ACTION_DOWN || ev.getActionMasked() == MotionEvent.ACTION_POINTER_DOWN)) {
                 return false;
             }
-            if (ConfigManager.getBooleanOrFalse(Defines.scrollableChatPreview) && inPreviewMode && previewMenu == null) {
+            if (Config.scrollableChatPreview && inPreviewMode && previewMenu == null) {
                 View view = containerView.getChildAt(0);
                 if (view != null) {
                     int y = (int) (view.getTop() + containerView.getTranslationY() - AndroidUtilities.dp(Build.VERSION.SDK_INT < 21 ? 20 : 0));
@@ -811,7 +810,7 @@ public class ActionBarLayout extends FrameLayout implements INavigationLayout, F
         View fragmentView = lastFragment.fragmentView;
         if (fragmentView == null) {
             fragmentView = lastFragment.createView(parentActivity);
-            if (ConfigManager.getBooleanOrFalse(Defines.disableVibration))
+            if (Config.disableVibration)
                 VibrationUtils.disableHapticFeedback(fragmentView);
         }
         ViewGroup parent = (ViewGroup) fragmentView.getParent();
@@ -1271,7 +1270,7 @@ public class ActionBarLayout extends FrameLayout implements INavigationLayout, F
         View fragmentView = fragment.fragmentView;
         if (fragmentView == null) {
             fragmentView = fragment.createView(parentActivity);
-            if (ConfigManager.getBooleanOrFalse(Defines.disableVibration))
+            if (Config.disableVibration)
                 VibrationUtils.disableHapticFeedback(fragmentView);
         } else {
             ViewGroup parent = (ViewGroup) fragmentView.getParent();
@@ -1746,7 +1745,7 @@ public class ActionBarLayout extends FrameLayout implements INavigationLayout, F
             View fragmentView = previousFragment.fragmentView;
             if (fragmentView == null) {
                 fragmentView = previousFragment.createView(parentActivity);
-                if (ConfigManager.getBooleanOrFalse(Defines.disableVibration))
+                if (Config.disableVibration)
                     VibrationUtils.disableHapticFeedback(fragmentView);
             }
 
@@ -1933,7 +1932,7 @@ public class ActionBarLayout extends FrameLayout implements INavigationLayout, F
         View fragmentView = previousFragment.fragmentView;
         if (fragmentView == null) {
             fragmentView = previousFragment.createView(parentActivity);
-            if (ConfigManager.getBooleanOrFalse(Defines.disableVibration))
+            if (Config.disableVibration)
                 VibrationUtils.disableHapticFeedback(fragmentView);
         } else {
             ViewGroup parent = (ViewGroup) fragmentView.getParent();

@@ -29,6 +29,7 @@ import java.util.concurrent.CountDownLatch;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.ZipException;
 
+import top.qwq2333.gen.Config;
 import top.qwq2333.nullgram.config.ConfigManager;
 import top.qwq2333.nullgram.utils.Defines;
 
@@ -144,7 +145,7 @@ public class FileLoadOperation {
     private final static int stateCanceled = 4;
 
     private int downloadChunkSize = 1024 * 32;
-    private int downloadChunkSizeBig = 1024 * ConfigManager.getIntOrDefault(Defines.modifyDownloadSpeed, 512);
+    private int downloadChunkSizeBig = 1024 * Config.modifyDownloadSpeed;
     ;
     private int cdnChunkCheckSize = 1024 * 128;
     private int maxDownloadRequests = 4;

@@ -27,7 +27,6 @@ import android.os.SystemClock;
 import android.telephony.TelephonyManager;
 import android.text.TextUtils;
 import android.util.Base64;
-import android.util.Log;
 import android.util.Pair;
 import android.util.SparseArray;
 import android.util.SparseBooleanArray;
@@ -91,8 +90,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CountDownLatch;
 import java.util.stream.Collectors;
 
-import top.qwq2333.nullgram.config.ConfigManager;
-import top.qwq2333.nullgram.utils.Defines;
+import top.qwq2333.gen.Config;
 
 public class MessagesController extends BaseController implements NotificationCenter.NotificationCenterDelegate {
 
@@ -5942,7 +5940,7 @@ public class MessagesController extends BaseController implements NotificationCe
                 }
                 loadingBlockedPeers = false;
                 getNotificationCenter().postNotificationName(NotificationCenter.blockedUsersDidLoad);
-                if (!reset && !blockedEndReached && ConfigManager.getBooleanOrFalse(Defines.ignoreBlockedUser)) {
+                if (!reset && !blockedEndReached && Config.ignoreBlockedUser) {
                     getBlockedPeers(false);
                 }
             }
@@ -7139,7 +7137,7 @@ public class MessagesController extends BaseController implements NotificationCe
         checkReadTasks();
 
         if (getUserConfig().isClientActivated()) {
-            var keepOnlineStatusAs = ConfigManager.getIntOrDefault(Defines.keepOnlineStatusAs, 0);
+            var keepOnlineStatusAs = Config.keepOnlineStatusAs;
             if (keepOnlineStatusAs == 1 ||
                 (!ignoreSetOnline && getConnectionsManager().getPauseTime() == 0 && ApplicationLoader.isScreenOn && !ApplicationLoader.mainInterfacePausedStageQueue)) {
                 if (ApplicationLoader.mainInterfacePausedStageQueueTime != 0 && Math.abs(ApplicationLoader.mainInterfacePausedStageQueueTime - System.currentTimeMillis()) > 1000) {
@@ -7510,7 +7508,7 @@ public class MessagesController extends BaseController implements NotificationCe
                 TLRPC.TL_help_promoData res = (TLRPC.TL_help_promoData) response;
 
                 SharedConfig.ProxyInfo proxy = SharedConfig.currentProxy;
-                if (res.proxy && (ConfigManager.getBooleanOrFalse(Defines.hideProxySponsorChannel) || (proxy != null && proxy.subId == 1L))) {
+                if (res.proxy && (Config.hideProxySponsorChannel || (proxy != null && proxy.subId == 1L))) {
                     nextPromoInfoCheckTime = getConnectionsManager().getCurrentTime() + 60 * 60;
                     noDialog = true;
                 } else {
@@ -7790,7 +7788,7 @@ public class MessagesController extends BaseController implements NotificationCe
                 newStrings.put(key, newPrintingStrings);
                 newTypes.put(key, newPrintingStringsTypes);
 
-                if (ConfigManager.getBooleanOrFalse(Defines.ignoreBlockedUser)) {
+                if (Config.ignoreBlockedUser) {
                     arr = arr.stream().filter(it -> getMessagesController().blockePeers.indexOfKey(it.userId) == -1).collect(Collectors.toCollection(ArrayList::new));
                 }
                 if (arr.isEmpty()) continue;
@@ -7980,7 +7978,7 @@ public class MessagesController extends BaseController implements NotificationCe
     }
 
     public boolean sendTyping(long dialogId, int threadMsgId, int action, String emojicon, int classGuid) {
-        if (ConfigManager.getBooleanOrFalse(Defines.disableSendTyping)) {
+        if (Config.unreadBadgeOnBackButton) {
             return false;
         }
         if (action < 0 || action >= sendingTypings.length || dialogId == 0) {
@@ -9651,7 +9649,7 @@ public class MessagesController extends BaseController implements NotificationCe
             ArrayList<MessageObject> newMessages = new ArrayList<>();
             for (int a = 0; a < dialogsRes.messages.size(); a++) {
                 TLRPC.Message message = dialogsRes.messages.get(a);
-                if ((ConfigManager.getBooleanOrFalse(Defines.ignoreBlockedUser) && getMessagesController().blockePeers.indexOfKey(message.peer_id.user_id) >= 0) || message.date == 0) {
+                if ((Config.ignoreBlockedUser && getMessagesController().blockePeers.indexOfKey(message.peer_id.user_id) >= 0) || message.date == 0) {
                     continue;
                 }
                 if (lastMessage == null || message.date < lastMessage.date) {
@@ -16784,7 +16782,7 @@ public class MessagesController extends BaseController implements NotificationCe
             }
         });
 
-        if (ConfigManager.getBooleanOrFalse(Defines.ignoreReactionMention)) {
+        if (Config.ignoreReactionMention) {
             for (int i = 0; i < unreadReactions.size(); i++) {
                 markReactionsAsRead(unreadReactions.keyAt(i), topicId);
             }
@@ -16946,7 +16944,7 @@ public class MessagesController extends BaseController implements NotificationCe
             return info.sendAsPeers;
         }
         TLRPC.Chat chat = getChat(-dialogId);
-        if (chat != null && !ChatObject.canSendAsPeers(chat) && ConfigManager.getBooleanOrFalse(Defines.quickToggleAnonymous)) {
+        if (chat != null && !ChatObject.canSendAsPeers(chat) && Config.quickToggleAnonymous) {
             var result = new TLRPC.TL_channels_sendAsPeers();
             var userID = UserConfig.getInstance(UserConfig.selectedAccount).getCurrentUser().id;
 
@@ -17295,7 +17293,7 @@ public class MessagesController extends BaseController implements NotificationCe
                     }
                 }
 
-                if (ConfigManager.getBooleanOrFalse(Defines.ignoreBlockedUser) && blockePeers.indexOfKey(lastMessage.getSenderId()) >= 0) {
+                if (Config.ignoreBlockedUser && blockePeers.indexOfKey(lastMessage.getSenderId()) >= 0) {
                     ArrayList<MessageObject> preMsg = dialogMessage.get(dialogId);
                     if (preMsg.size() > 0 && blockePeers.indexOfKey(preMsg.get(0).getSenderId()) < 0) {
                         dialogMessageFromUnblocked.put(dialogId, preMsg.get(0));
@@ -17624,7 +17622,7 @@ public class MessagesController extends BaseController implements NotificationCe
     }
 
     public static String getRestrictionReason(ArrayList<TLRPC.TL_restrictionReason> reasons) {
-        if (reasons.isEmpty() || ConfigManager.getBooleanOrFalse(Defines.showHiddenSettings)) {
+        if (reasons.isEmpty() || Config.showHiddenSettings) {
             return null;
         }
         for (int a = 0, N = reasons.size(); a < N; a++) {

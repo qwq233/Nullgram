@@ -44,8 +44,7 @@ import java.util.HashSet;
 import java.util.Locale;
 import java.util.TimeZone;
 
-import top.qwq2333.nullgram.config.ConfigManager;
-import top.qwq2333.nullgram.utils.Defines;
+import top.qwq2333.gen.Config;
 
 public class LocaleController {
 
@@ -2186,7 +2185,7 @@ public class LocaleController {
             } else {
                 int dayDiff = dateDay - day;
                 if (dayDiff == 0 || dayDiff == -1 && System.currentTimeMillis() - date < 60 * 60 * 8 * 1000) {
-                    return ConfigManager.getBooleanOrFalse(Defines.showExactTime) ?
+                    return Config.showExactTime ?
                         getInstance().formatterDayWithSeconds.format(new Date(date)) : getInstance().formatterDay.format(new Date(date));
                 } else if (dayDiff > -7 && dayDiff <= -1) {
                     return getInstance().formatterWeek.format(new Date(date));
@@ -2201,7 +2200,7 @@ public class LocaleController {
     }
 
     public static String formatShortNumber(int number, int[] rounded) {
-        if (ConfigManager.getBooleanOrFalse(Defines.showExactNumber)) {
+        if (Config.showExactNumber) {
             if (rounded != null) {
                 rounded[0] = number;
             }

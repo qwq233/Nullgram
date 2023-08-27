@@ -36,8 +36,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Locale;
 
-import top.qwq2333.nullgram.config.ConfigManager;
-import top.qwq2333.nullgram.utils.Defines;
+import top.qwq2333.gen.Config;
 import top.qwq2333.nullgram.utils.Utils;
 
 public class Emoji {
@@ -295,7 +294,7 @@ public class Emoji {
 
         @Override
         public void draw(Canvas canvas) {
-            if (!ConfigManager.getBooleanOrFalse(Defines.useSystemEmoji) && !isLoaded()) {
+            if (!Config.useSystemEmoji && !isLoaded()) {
                 loadEmoji(info.page, info.page2);
                 placeholderPaint.setColor(placeholderColor);
                 Rect bounds = getBounds();
@@ -310,7 +309,7 @@ public class Emoji {
                 b = getBounds();
             }
 
-            if (ConfigManager.getBooleanOrFalse(Defines.useSystemEmoji)) {
+            if (Config.useSystemEmoji) {
                 String emoji = fixEmoji(EmojiData.data[info.page][info.emojiIndex]);
                 textPaint.setTextSize(b.height() * 0.8f);
                 textPaint.setTypeface(Utils.getSystemEmojiTypeface());

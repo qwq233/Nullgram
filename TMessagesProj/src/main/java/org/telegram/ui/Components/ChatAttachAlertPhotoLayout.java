@@ -107,8 +107,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import top.qwq2333.nullgram.config.ConfigManager;
-import top.qwq2333.nullgram.utils.Defines;
+import top.qwq2333.gen.Config;
 import top.qwq2333.nullgram.utils.Log;
 import top.qwq2333.nullgram.utils.PermissionUtils;
 
@@ -835,7 +834,7 @@ public class ChatAttachAlertPhotoLayout extends ChatAttachAlert.AttachAlertLayou
                 }, hasSpoiler ? 250 : 0);
             } else {
                 if (SharedConfig.inappCamera) {
-                    if (ConfigManager.getBooleanOrFalse(Defines.disableInstantCamera)) {
+                    if (Config.disableInstantCamera) {
                         showCamera();
                     }
                     openCamera(true);
@@ -2032,7 +2031,7 @@ public class ChatAttachAlertPhotoLayout extends ChatAttachAlert.AttachAlertLayou
                 deviceHasGoodCamera = CameraController.getInstance().isCameraInitied();
             }
         }
-        if (deviceHasGoodCamera && ConfigManager.getBooleanOrFalse(Defines.disableInstantCamera)) {
+        if (deviceHasGoodCamera && Config.disableInstantCamera) {
             // Clear cached bitmap
             File file = new File(ApplicationLoader.getFilesDirFixed(), "cthumb.jpg");
             if (file.exists()) file.delete();
@@ -2040,7 +2039,7 @@ public class ChatAttachAlertPhotoLayout extends ChatAttachAlert.AttachAlertLayou
         if ((old != deviceHasGoodCamera || old2 != noCameraPermissions) && adapter != null) {
             adapter.notifyDataSetChanged();
         }
-        if (!parentAlert.destroyed && parentAlert.isShowing() && deviceHasGoodCamera && parentAlert.getBackDrawable().getAlpha() != 0 && !cameraOpened && !ConfigManager.getBooleanOrFalse(Defines.disableInstantCamera)) {
+        if (!parentAlert.destroyed && parentAlert.isShowing() && deviceHasGoodCamera && parentAlert.getBackDrawable().getAlpha() != 0 && !cameraOpened && !Config.disableInstantCamera) {
             showCamera();
         }
     }
@@ -2383,7 +2382,7 @@ public class ChatAttachAlertPhotoLayout extends ChatAttachAlert.AttachAlertLayou
     }
 
     private void saveLastCameraBitmap() {
-        if (!canSaveCameraPreview || ConfigManager.getBooleanOrFalse(Defines.disableInstantCamera)) {
+        if (!canSaveCameraPreview || Config.disableInstantCamera) {
             return;
         }
         try {

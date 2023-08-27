@@ -180,6 +180,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
 import kotlin.Unit;
+import top.qwq2333.gen.Config;
 import top.qwq2333.nullgram.config.ConfigManager;
 import top.qwq2333.nullgram.helpers.PasscodeHelper;
 import top.qwq2333.nullgram.ui.BottomBuilder;
@@ -699,7 +700,7 @@ public class LoginActivity extends BaseFragment implements NotificationCenter.No
         moreButtonView.addSubItem(0, LocaleController.getString("ProxySettings", R.string.ProxySettings));
         moreButtonView.addSubItem(1, LocaleController.getString("BotLogin", R.string.BotLogin));
         moreButtonView.addSubItem(2, LocaleController.getString("QRLoginTitle", R.string.QRLoginTitle));
-        if (ConfigManager.getBooleanOrFalse(Defines.showHiddenSettings))
+        if (Config.showHiddenSettings)
             moreButtonView.addSubItem(3, LocaleController.getString("CustomApiLogin", R.string.customAPI));
         moreButtonView.setDelegate(id -> {
             if (id == 0) {
@@ -708,12 +709,12 @@ public class LoginActivity extends BaseFragment implements NotificationCenter.No
                 setPage(VIEW_BOT_LOGIN, true, null, false);
             } else if (id == 2) {
                 setPage(VIEW_QR_LOGIN, true, null, false);
-            } else if (id == 3 && ConfigManager.getBooleanOrFalse(Defines.showHiddenSettings)) {
+            } else if (id == 3 && Config.showHiddenSettings) {
                 AtomicInteger targetApi = new AtomicInteger(-1);
                 BottomBuilder builder = new BottomBuilder(getParentActivity());
                 EditText[] inputs = new EditText[2];
                 builder.addTitle(LocaleController.getString("customAPI", R.string.customAPI), true, LocaleController.getString("useCustomApiNotice", R.string.useCustomApiNotice));
-                builder.addRadioItem(LocaleController.getString("disableCustonAPI", R.string.disableCustomAPI), ConfigManager.getIntOrDefault(Defines.customAPI, Defines.disableCustomAPI) == Defines.disableCustomAPI, (cell) -> {
+                builder.addRadioItem(LocaleController.getString("disableCustonAPI", R.string.disableCustomAPI), Config.customAPI == Defines.disableCustomAPI, (cell) -> {
                     targetApi.set(0);
                     builder.doRadioCheck(cell);
                     for (EditText input : inputs) {
@@ -721,7 +722,7 @@ public class LoginActivity extends BaseFragment implements NotificationCenter.No
                     }
                     return Unit.INSTANCE;
                 });
-                builder.addRadioItem(LocaleController.getString("useOfficialAPI", R.string.useOfficialAPI), ConfigManager.getIntOrDefault(Defines.customAPI, Defines.disableCustomAPI) == Defines.useTelegramAPI, (cell) -> {
+                builder.addRadioItem(LocaleController.getString("useOfficialAPI", R.string.useOfficialAPI), Config.customAPI == Defines.useTelegramAPI, (cell) -> {
                     targetApi.set(1);
                     builder.doRadioCheck(cell);
                     for (EditText input : inputs) {
@@ -730,7 +731,7 @@ public class LoginActivity extends BaseFragment implements NotificationCenter.No
                     return Unit.INSTANCE;
                 });
 
-                builder.addRadioItem(LocaleController.getString("useCustomAPI", R.string.useCustomAPI), ConfigManager.getIntOrDefault(Defines.customAPI, Defines.disableCustomAPI) == Defines.useCustomAPI, (cell) -> {
+                builder.addRadioItem(LocaleController.getString("useCustomAPI", R.string.useCustomAPI), Config.customAPI == Defines.useCustomAPI, (cell) -> {
                     targetApi.set(3);
                     builder.doRadioCheck(cell);
                     for (EditText input : inputs) {
@@ -741,8 +742,8 @@ public class LoginActivity extends BaseFragment implements NotificationCenter.No
 
                 inputs[0] = builder.addEditText("App Id");
                 inputs[0].setInputType(InputType.TYPE_CLASS_NUMBER);
-                if (ConfigManager.getIntOrDefault(Defines.customAppId, 0) != 0) {
-                    inputs[0].setText(ConfigManager.getIntOrDefault(Defines.customAppId, 0));
+                if (Config.customAppId != 0) {
+                    inputs[0].setText(Config.customAppId + "");
                 }
                 inputs[0].addTextChangedListener(new TextWatcher() {
                     @Override
@@ -752,11 +753,11 @@ public class LoginActivity extends BaseFragment implements NotificationCenter.No
                     @Override
                     public void onTextChanged(CharSequence s, int start, int before, int count) {
                         if (StringUtils.isBlank(s.toString())) {
-                            ConfigManager.putInt(Defines.customAppId, 0);
+                            Config.setCustomAppId(0);
                         } else if (!UtilsKt.isNumber(s.toString())) {
                             inputs[0].setText("0");
                         } else {
-                            ConfigManager.putInt(Defines.customAppId,  Integer.parseInt(s.toString()));
+                            Config.setCustomAppId(Integer.parseInt(s.toString()));
                         }
                     }
 
@@ -767,8 +768,8 @@ public class LoginActivity extends BaseFragment implements NotificationCenter.No
 
                 inputs[1] = builder.addEditText("App Hash");
                 inputs[1].setFilters(new InputFilter[]{new InputFilter.LengthFilter(Defines.telegramHash.length())});
-                if (!StringUtils.isBlank(ConfigManager.getStringOrDefault(Defines.customAppHash, null))) {
-                    inputs[1].setText(ConfigManager.getStringOrDefault(Defines.customAppHash, "It shouldn't be happened"));
+                if (!StringUtils.isBlank(Config.customAppHash)) {
+                    inputs[1].setText(Config.customAppHash);
                 }
                 inputs[1].addTextChangedListener(new TextWatcher() {
                     @Override
@@ -777,7 +778,7 @@ public class LoginActivity extends BaseFragment implements NotificationCenter.No
 
                     @Override
                     public void onTextChanged(CharSequence s, int start, int before, int count) {
-                        ConfigManager.putString(Defines.customAppHash, s.toString());
+                        Config.setCustomAppHash(s.toString());
                     }
 
                     @Override
@@ -785,7 +786,7 @@ public class LoginActivity extends BaseFragment implements NotificationCenter.No
                     }
                 });
 
-                if (ConfigManager.getIntOrDefault(Defines.customAPI, Defines.disableCustomAPI) <= Defines.useTelegramAPI) {
+                if (Config.customAPI <= Defines.useTelegramAPI) {
                     for (EditText input : inputs) {
                         input.setVisibility(View.GONE);
                     }
@@ -795,17 +796,17 @@ public class LoginActivity extends BaseFragment implements NotificationCenter.No
                 builder.addButton(LocaleController.getString("Set", R.string.Set), (it) -> {
                     int target = targetApi.get();
                     if (target > 2) {
-                        if (ConfigManager.getIntOrDefault(Defines.customAppId, 0) == 0) {
+                        if (Config.customAPI == 0) {
                             inputs[0].requestFocus();
                             AndroidUtilities.showKeyboard(inputs[0]);
                             return Unit.INSTANCE;
-                        } else if (StringUtils.isBlank(ConfigManager.getStringOrDefault(Defines.customAppHash, null))) {
+                        } else if (StringUtils.isBlank(Config.customAppHash)) {
                             inputs[1].requestFocus();
                             AndroidUtilities.showKeyboard(inputs[1]);
                             return Unit.INSTANCE;
                         }
                     }
-                    ConfigManager.putInt(Defines.customAPI, target);
+                    Config.setCustomAPI(target);
                     return Unit.INSTANCE;
                 });
                 builder.show();
@@ -3089,7 +3090,7 @@ public class LoginActivity extends BaseFragment implements NotificationCenter.No
             final TLRPC.TL_auth_sendCode req = new TLRPC.TL_auth_sendCode();
             String appHash = BuildVars.APP_HASH;
             int appId = BuildVars.APP_ID;
-            switch(ConfigManager.getIntOrDefault(Defines.customAPI,Defines.disableCustomAPI)){
+            switch(Config.customAPI){
                 case Defines.disableCustomAPI:
                     appId = BuildVars.APP_ID;
                     appHash = BuildVars.APP_HASH;
@@ -3099,9 +3100,8 @@ public class LoginActivity extends BaseFragment implements NotificationCenter.No
                     appHash = Defines.telegramHash;
                     break;
                 case Defines.useCustomAPI:
-                    appId = ConfigManager.getIntOrDefault(Defines.customAppId, BuildVars.APP_ID);
-                    appHash = ConfigManager.getStringOrDefault(Defines.customAppHash,
-                        BuildVars.APP_HASH);
+                    appId = Config.customAppId;
+                    appHash = Config.customAppHash;
                     break;
 
             }

@@ -181,6 +181,7 @@ import java.util.Objects;
 import java.util.Stack;
 import java.util.concurrent.atomic.AtomicReference;
 
+import top.qwq2333.gen.Config;
 import top.qwq2333.nullgram.config.ConfigManager;
 import top.qwq2333.nullgram.utils.Defines;
 import top.qwq2333.nullgram.utils.StringUtils;
@@ -319,7 +320,7 @@ public class ChatMessageCell extends BaseCell implements SeekBar.SeekBarDelegate
     }
 
     public boolean hasSpoilers() {
-        if (ConfigManager.getBooleanOrFalse(Defines.displaySpoilerMsgDirectly)) {
+        if (Config.displaySpoilerMsgDirectly) {
             return false;
         }
         if (hasCaptionLayout() && !captionSpoilers.isEmpty() || replyTextLayout != null && !replySpoilers.isEmpty()) {
@@ -12511,20 +12512,20 @@ public class ChatMessageCell extends BaseCell implements SeekBar.SeekBarDelegate
             timeString = "";
         } else if (edited) {
             String time;
-            if (ConfigManager.getBooleanOrFalse(Defines.showExactTime)) {
+            if (Config.showExactTime) {
                 time = LocaleController.getInstance().formatterDayWithSeconds.format((long) (messageObject.messageOwner.date) * 1000);
             } else {
                 time = LocaleController.getInstance().formatterDay.format((long) (messageObject.messageOwner.date) * 1000);
             }
             timeString = LocaleController.getString("EditedMessage", R.string.EditedMessage) + " " + time;
         } else {
-            if (ConfigManager.getBooleanOrFalse(Defines.showExactTime)) {
+            if (Config.showExactTime) {
                 timeString = LocaleController.getInstance().formatterDayWithSeconds.format((long) (messageObject.messageOwner.date) * 1000);
             } else {
                 timeString = LocaleController.getInstance().formatterDay.format((long) (messageObject.messageOwner.date) * 1000);
             }
         }
-        if (ConfigManager.getBooleanOrFalse(Defines.showMessageID) && currentMessageObject.messageOwner != null && currentMessageObject.isSent())
+        if (Config.showMessageID && currentMessageObject.messageOwner != null && currentMessageObject.isSent())
             timeString = timeString + " | " + messageObject.messageOwner.id;
         if (signString != null) {
             if (messageObject.messageOwner.fwd_from != null && messageObject.messageOwner.fwd_from.imported) {
@@ -12755,16 +12756,16 @@ public class ChatMessageCell extends BaseCell implements SeekBar.SeekBarDelegate
                 adminString = adminLabel;
                 adminWidth = (int) Math.ceil(Theme.chat_adminPaint.measureText(adminString));
                 nameWidth -= adminWidth;
-            } else if (ConfigManager.getBooleanOrFalse(Defines.labelChannelUser) && isMegagroup
+            } else if (Config.labelChannelUser && isMegagroup
                 && currentChat != null && currentMessageObject.isSenderChannel()) {
-                if (ConfigManager.getBooleanOrFalse(Defines.channelAlias)) {
+                if (Config.channelAlias) {
                     String aliasName = ConfigManager.getStringOrDefault(Defines.channelAliasPrefix
                         + currentMessageObject.messageOwner.from_id.channel_id, null);
 
                     String nickname = null;
-                    if (ConfigManager.getBooleanOrFalse(Defines.linkedUser)
+                    if (Config.linkedUser
                         && ConfigManager.getLongOrDefault(Defines.linkedUserPrefix + currentMessageObject.messageOwner.from_id.channel_id, 1145141919810L) != 1145141919810L
-                        && ConfigManager.getBooleanOrFalse(Defines.overrideChannelAlias)) {
+                        && Config.overrideChannelAlias) {
                         final TLRPC.User user = MessagesController.getInstance(currentAccount).getUser(ConfigManager.getLongOrDefault(Defines.linkedUserPrefix + currentMessageObject.messageOwner.from_id.channel_id, 1578562490L));
 
                         if (user != null) {
@@ -12790,9 +12791,9 @@ public class ChatMessageCell extends BaseCell implements SeekBar.SeekBarDelegate
                 } else {
 
                     String nickname = null;
-                    if (ConfigManager.getBooleanOrFalse(Defines.linkedUser)
+                    if (Config.linkedUser
                         && ConfigManager.getLongOrDefault(Defines.linkedUserPrefix + currentMessageObject.messageOwner.from_id.channel_id, 1145141919810L) != 1145141919810L
-                        && ConfigManager.getBooleanOrFalse(Defines.overrideChannelAlias)) {
+                        && Config.overrideChannelAlias) {
                         final TLRPC.User user = MessagesController.getInstance(currentAccount).getUser(ConfigManager.getLongOrDefault(Defines.linkedUserPrefix + currentMessageObject.messageOwner.from_id.channel_id, 1578562490L));
 
                         if (user.first_name != null && user.last_name != null) {
@@ -13686,7 +13687,7 @@ public class ChatMessageCell extends BaseCell implements SeekBar.SeekBarDelegate
         if ((drawTime || !mediaBackground) && !forceNotDrawTime && !transitionParams.animateBackgroundBoundsInner && !(enterTransitionInProgress && !currentMessageObject.isVoice()) && !currentMessageObject.isAnyKindOfSticker()) {
             drawTime(canvas, 1f, false);
         }
-        if (currentMessageObject.isAnyKindOfSticker() && !ConfigManager.getBooleanOrFalse(Defines.hideTimeForSticker)) {
+        if (currentMessageObject.isAnyKindOfSticker() && !Config.hideTimeForSticker) {
             drawTime(canvas, 1f, false);
         }
 

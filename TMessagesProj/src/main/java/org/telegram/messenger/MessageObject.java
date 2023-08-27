@@ -76,9 +76,8 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import top.qwq2333.nullgram.config.ConfigManager;
+import top.qwq2333.gen.Config;
 import top.qwq2333.nullgram.ui.syntaxhighlight.SyntaxHighlight;
-import top.qwq2333.nullgram.utils.Defines;
 import top.qwq2333.nullgram.utils.StringUtils;
 
 public class MessageObject {
@@ -184,7 +183,7 @@ public class MessageObject {
 
     public AtomicReference<WeakReference<View>> viewRef = new AtomicReference<>(null);
 
-    public boolean isSpoilersRevealed = ConfigManager.getBooleanOrFalse(Defines.displaySpoilerMsgDirectly);
+    public boolean isSpoilersRevealed = Config.displaySpoilerMsgDirectly;
     public boolean isMediaSpoilersRevealed;
     public boolean isMediaSpoilersRevealedInSharedMedia;
     public boolean revealingMediaSpoilers;
@@ -324,7 +323,7 @@ public class MessageObject {
         if (document == null || document.thumbs == null) {
             return false;
         }
-        if (ConfigManager.getBooleanOrFalse(Defines.hidePremiumStickerAnim))
+        if (Config.hidePremiumStickerAnim)
             return false;
         for (int i = 0; i < document.video_thumbs.size(); i++) {
             if ("f".equals(document.video_thumbs.get(i).type)) {
@@ -420,7 +419,7 @@ public class MessageObject {
     }
 
     public boolean hasMediaSpoilers() {
-        return messageOwner.media != null && messageOwner.media.spoiler && !ConfigManager.getBooleanOrFalse(Defines.displaySpoilerMsgDirectly);
+        return messageOwner.media != null && messageOwner.media.spoiler && !Config.displaySpoilerMsgDirectly;
     }
 
     public boolean shouldDrawReactionsInLayout() {
@@ -1264,7 +1263,7 @@ public class MessageObject {
             fromUser = getUser(users, sUsers, message.from_id.user_id);
         }
 
-        if (generateLayout && messageOwner.message != null && ConfigManager.getBooleanOrFalse(Defines.enablePanguOnReceiving)) {
+        if (generateLayout && messageOwner.message != null && Config.enablePanguOnReceiving) {
             var pair = StringUtils.spacingText(messageOwner.message, messageOwner.entities);
             messageOwner.message = pair.getFirst();
             messageOwner.entities = pair.getSecond();
@@ -5180,7 +5179,7 @@ public class MessageObject {
     }
 
     public void replaceEmojiToLottieFrame(CharSequence text, int[] emojiOnly) {
-        if (!(text instanceof Spannable) || ConfigManager.getBooleanOrFalse(Defines.useSystemEmoji)) {
+        if (!(text instanceof Spannable) || Config.useSystemEmoji) {
             return;
         }
         Spannable spannable = (Spannable) text;
@@ -8009,9 +8008,9 @@ public class MessageObject {
 
     public boolean isBlockedMessage() {
         var messagesController = MessagesController.getInstance(UserConfig.selectedAccount);
-        if (isSponsored() && ConfigManager.getBooleanOrFalse(Defines.blockSponsorAds))
+        if (isSponsored() && Config.blockSponsorAds)
             return true;
-        if (ConfigManager.getBooleanOrFalse(Defines.ignoreBlockedUser)) {
+        if (Config.ignoreBlockedUser) {
             var chatFull = messagesController.getChatFull(getFromChatId());
             if (chatFull != null && chatFull.blocked) {
                 return true;

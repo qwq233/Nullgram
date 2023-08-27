@@ -94,8 +94,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.StringTokenizer;
 
-import top.qwq2333.nullgram.config.ConfigManager;
-import top.qwq2333.nullgram.utils.Defines;
+import top.qwq2333.gen.Config;
 import top.qwq2333.nullgram.utils.Log;
 
 public class DocumentSelectActivity extends BaseFragment {
@@ -725,7 +724,7 @@ public class DocumentSelectActivity extends BaseFragment {
                 AlertsCreator.createScheduleDatePickerDialog(getParentActivity(),
                     chatActivity.getDialogId(), this::sendSelectedFiles);
             } else {
-                sendSelectedFiles(!ConfigManager.getBooleanOrFalse(Defines.alwaysSendWithoutSound), 0);
+                sendSelectedFiles(!Config.alwaysSendWithoutSound, 0);
             }
         });
         writeButton.setOnLongClickListener(view -> {
@@ -814,7 +813,7 @@ public class DocumentSelectActivity extends BaseFragment {
                             AlertsCreator.createScheduleDatePickerDialog(getParentActivity(),
                                 chatActivity.getDialogId(), this::sendSelectedFiles);
                         } else if (num == 2) {
-                            sendSelectedFiles(!ConfigManager.getBooleanOrFalse(Defines.alwaysSendWithoutSound), 0);
+                            sendSelectedFiles(!Config.alwaysSendWithoutSound, 0);
                         }
                     });
                     itemCells[a].setOnLongClickListener(v -> {

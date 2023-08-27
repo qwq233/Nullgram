@@ -50,8 +50,7 @@ import org.telegram.ui.Components.StickerImageView;
 
 import java.util.Map;
 
-import top.qwq2333.nullgram.config.ConfigManager;
-import top.qwq2333.nullgram.utils.Defines;
+import top.qwq2333.gen.Config;
 
 @RequiresApi(api = Build.VERSION_CODES.S)
 public class AppLinkVerifyBottomSheet extends BottomSheet {
@@ -67,7 +66,7 @@ public class AppLinkVerifyBottomSheet extends BottomSheet {
     }
 
     public static void checkBottomSheet(BaseFragment fragment) {
-        if (ConfigManager.getBooleanOrFalse(Defines.verifyLinkTip)) {
+        if (Config.verifyLinkTip) {
             return;
         }
         Context context = fragment.getParentActivity();
@@ -179,7 +178,7 @@ public class AppLinkVerifyBottomSheet extends BottomSheet {
 
         textView.setOnClickListener(view -> {
             dismiss();
-            ConfigManager.putBoolean(Defines.verifyLinkTip, true);
+            Config.setVerifyLinkTip(true);
         });
 
         ScrollView scrollView = new ScrollView(context);

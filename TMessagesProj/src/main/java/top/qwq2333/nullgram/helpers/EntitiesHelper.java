@@ -33,8 +33,8 @@ import org.telegram.ui.Components.URLSpanReplacement;
 import java.util.ArrayList;
 import java.util.regex.Pattern;
 
-import top.qwq2333.nullgram.config.ConfigManager;
-import top.qwq2333.nullgram.utils.Defines;
+import top.qwq2333.gen.Config;
+
 
 public class EntitiesHelper {
     private static final Pattern[] PATTERNS = new Pattern[]{
@@ -57,7 +57,7 @@ public class EntitiesHelper {
     public static void parseMarkdown(CharSequence[] message, boolean allowStrike) {
         var spannable = message[0] instanceof Spannable ? (Spannable) message[0] : Spannable.Factory.getInstance().newSpannable(message[0]);
         for (int i = 0; i < PATTERNS.length; i++) {
-            if (!allowStrike && i == 6 || !ConfigManager.getBooleanOrDefault(Defines.markdownParseLinks, true) && i == 8) {
+            if (!allowStrike && i == 6 || !Config.markdownParseLinks && i == 8) {
                 continue;
             }
             var m = PATTERNS[i].matcher(spannable);

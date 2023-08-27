@@ -40,6 +40,7 @@ import org.telegram.ui.ActionBar.AlertDialog
 import org.telegram.ui.ActionBar.BaseFragment
 import org.telegram.ui.ActionBar.Theme.ResourcesProvider
 import org.telegram.ui.Components.TranslateAlert
+import top.qwq2333.gen.Config
 import top.qwq2333.nullgram.activity.LanguageSelectActivity
 import top.qwq2333.nullgram.config.ConfigManager
 import top.qwq2333.nullgram.translate.BaseTranslator
@@ -72,21 +73,21 @@ object TranslateHelper {
         }
 
     @JvmStatic
-    var showOriginal = ConfigManager.getBooleanOrFalse(Defines.showOriginal)
+    var showOriginal = Config.showOriginal
 
     @JvmStatic
     fun toggleShowOriginal() {
         showOriginal = !showOriginal
-        ConfigManager.putBoolean(Defines.showOriginal, showOriginal)
+        Config.toggleShowOriginal()
     }
 
     @JvmStatic
-    var autoTranslate = ConfigManager.getBooleanOrFalse(Defines.autoTranslate)
+    var autoTranslate = Config.autoTranslate
 
     @JvmStatic
     fun toggleAutoTranslate() {
         autoTranslate = !autoTranslate
-        ConfigManager.putBoolean(Defines.autoTranslate, autoTranslate)
+        Config.toggleAutoTranslate()
     }
 
     enum class ProviderType(val num: Int) {

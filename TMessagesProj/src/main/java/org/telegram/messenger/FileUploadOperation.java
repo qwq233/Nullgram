@@ -25,8 +25,7 @@ import java.io.RandomAccessFile;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 
-import top.qwq2333.nullgram.config.ConfigManager;
-import top.qwq2333.nullgram.utils.Defines;
+import top.qwq2333.gen.Config;
 
 public class FileUploadOperation {
 
@@ -306,10 +305,10 @@ public class FileUploadOperation {
 
                 long maxUploadParts = MessagesController.getInstance(currentAccount).uploadMaxFileParts;
                 if ((AccountInstance.getInstance(currentAccount).getUserConfig().isPremium() && totalFileSize > FileLoader.DEFAULT_MAX_FILE_SIZE)
-                    || ConfigManager.getBooleanOrFalse(Defines.fastSpeedUpload)) {
+                    || Config.hidePremiumStickerAnim) {
                     maxUploadParts = MessagesController.getInstance(currentAccount).uploadMaxFilePartsPremium;
                 }
-                uploadChunkSize = (int) Math.max(slowNetwork ? minUploadChunkSlowNetworkSize : ConfigManager.getBooleanOrFalse(Defines.fastSpeedUpload) ? minUploadChunkSizeBoost :
+                uploadChunkSize = (int) Math.max(slowNetwork ? minUploadChunkSlowNetworkSize : Config.hidePremiumStickerAnim ? minUploadChunkSizeBoost :
                         minUploadChunkSize,
                     (totalFileSize + 1024L * maxUploadParts - 1) / (1024L * maxUploadParts));
                 if (1024 % uploadChunkSize != 0) {

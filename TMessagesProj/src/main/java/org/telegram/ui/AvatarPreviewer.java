@@ -43,8 +43,7 @@ import org.telegram.ui.Components.AnimatedFileDrawable;
 import org.telegram.ui.Components.MediaActionDrawable;
 import org.telegram.ui.Components.RadialProgress2;
 
-import top.qwq2333.nullgram.config.ConfigManager;
-import top.qwq2333.nullgram.utils.Defines;
+import top.qwq2333.gen.Config;
 
 public class AvatarPreviewer {
 
@@ -437,7 +436,7 @@ public class AvatarPreviewer {
                     } else {
                         moveProgress = Math.max(-1, Math.min(0f, (event.getY() - downY) / AndroidUtilities.dp(56)));
                         if (moveProgress == -1) {
-                            if (!ConfigManager.getBooleanOrFalse(Defines.disableVibration))
+                            if (!Config.disableVibration)
                                 performHapticFeedback(HapticFeedbackConstants.LONG_PRESS);
                             moveAnimator = ValueAnimator.ofFloat(moveProgress, 0);
                             moveAnimator.setDuration(200);

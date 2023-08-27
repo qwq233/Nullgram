@@ -36,8 +36,7 @@ import org.telegram.ui.Components.ThemeEditorView;
 
 import java.util.ArrayList;
 
-import top.qwq2333.nullgram.config.ConfigManager;
-import top.qwq2333.nullgram.utils.Defines;
+import top.qwq2333.gen.Config;
 
 public class BubbleActivity extends BasePermissionsActivity implements INavigationLayout.INavigationLayoutDelegate {
 
@@ -67,7 +66,7 @@ public class BubbleActivity extends BasePermissionsActivity implements INavigati
         getWindow().setBackgroundDrawableResource(R.drawable.transparent);
         if (SharedConfig.passcodeHash.length() > 0 && !SharedConfig.allowScreenCapture) {
             try {
-                if (!ConfigManager.getBooleanOrFalse(Defines.allowScreenshotOnNoForwardChat)){
+                if (!Config.allowScreenshotOnNoForwardChat){
                     getWindow().setFlags(WindowManager.LayoutParams.FLAG_SECURE, WindowManager.LayoutParams.FLAG_SECURE);
                 }   
             } catch (Exception e) {

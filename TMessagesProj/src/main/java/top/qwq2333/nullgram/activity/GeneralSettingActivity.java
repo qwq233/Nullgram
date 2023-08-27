@@ -51,6 +51,7 @@ import java.util.ArrayList;
 import java.util.Locale;
 
 import kotlin.Unit;
+import top.qwq2333.gen.Config;
 import top.qwq2333.nullgram.config.ConfigManager;
 import top.qwq2333.nullgram.helpers.TranslateHelper;
 import top.qwq2333.nullgram.helpers.TranslateHelper.ProviderType;
@@ -121,27 +122,27 @@ public class GeneralSettingActivity extends BaseActivity {
     @Override
     protected void onItemClick(View view, int position, float x, float y) {
         if (position == showBotAPIRow) {
-            ConfigManager.toggleBoolean(Defines.showBotAPIID);
+            Config.toggleShowBotAPIID();
             if (view instanceof TextCheckCell) {
-                ((TextCheckCell) view).setChecked(ConfigManager.getBooleanOrFalse(Defines.showBotAPIID));
+                ((TextCheckCell) view).setChecked(Config.showBotAPIID);
             }
         } else if (position == hidePhoneRow) {
-            ConfigManager.toggleBoolean(Defines.hidePhone);
+            Config.toggleHidePhone();
             if (view instanceof TextCheckCell) {
-                ((TextCheckCell) view).setChecked(ConfigManager.getBooleanOrFalse(Defines.hidePhone));
+                ((TextCheckCell) view).setChecked(Config.hidePhone);
             }
             parentLayout.rebuildAllFragmentViews(false, false);
             getNotificationCenter().postNotificationName(NotificationCenter.mainUserInfoChanged);
             listAdapter.notifyItemChanged(drawerRow, PARTIAL);
         } else if (position == avatarAsDrawerBackgroundRow) {
-            ConfigManager.toggleBoolean(Defines.avatarAsDrawerBackground);
+            Config.toggleAvatarAsDrawerBackground();
             if (view instanceof TextCheckCell) {
-                ((TextCheckCell) view).setChecked(ConfigManager.getBooleanOrFalse(Defines.avatarAsDrawerBackground));
+                ((TextCheckCell) view).setChecked(Config.avatarAsDrawerBackground);
             }
             getNotificationCenter().postNotificationName(NotificationCenter.mainUserInfoChanged);
             TransitionManager.beginDelayedTransition(profilePreviewCell);
             listAdapter.notifyItemChanged(drawerRow, PARTIAL);
-            if (ConfigManager.getBooleanOrFalse(Defines.avatarAsDrawerBackground)) {
+            if (Config.avatarAsDrawerBackground) {
                 updateRows();
                 listAdapter.notifyItemRangeInserted(avatarBackgroundBlurRow, 2);
             } else {
@@ -149,61 +150,61 @@ public class GeneralSettingActivity extends BaseActivity {
                 updateRows();
             }
         } else if (position == avatarBackgroundBlurRow) {
-            ConfigManager.toggleBoolean(Defines.avatarBackgroundBlur);
+            Config.toggleAvatarBackgroundBlur();
             if (view instanceof TextCheckCell) {
-                ((TextCheckCell) view).setChecked(ConfigManager.getBooleanOrFalse(Defines.avatarBackgroundBlur));
+                ((TextCheckCell) view).setChecked(Config.avatarBackgroundBlur);
             }
             getNotificationCenter().postNotificationName(NotificationCenter.mainUserInfoChanged);
             listAdapter.notifyItemChanged(drawerRow, PARTIAL);
         } else if (position == avatarBackgroundDarkenRow) {
-            ConfigManager.toggleBoolean(Defines.avatarBackgroundDarken);
+            Config.toggleAvatarBackgroundDarken();
             if (view instanceof TextCheckCell) {
-                ((TextCheckCell) view).setChecked(ConfigManager.getBooleanOrFalse(Defines.avatarBackgroundDarken));
+                ((TextCheckCell) view).setChecked(Config.avatarBackgroundDarken);
             }
             getNotificationCenter().postNotificationName(NotificationCenter.mainUserInfoChanged);
             listAdapter.notifyItemChanged(drawerRow, PARTIAL);
         } else if (position == largeAvatarAsBackgroundRow) {
-            ConfigManager.toggleBoolean(Defines.largeAvatarAsBackground);
+            Config.toggleLargeAvatarAsBackground();
             getNotificationCenter().postNotificationName(NotificationCenter.mainUserInfoChanged);
             TransitionManager.beginDelayedTransition(profilePreviewCell);
             listAdapter.notifyItemChanged(drawerRow, PARTIAL);
             if (view instanceof TextCheckCell) {
-                ((TextCheckCell) view).setChecked(ConfigManager.getBooleanOrFalse(Defines.largeAvatarAsBackground));
+                ((TextCheckCell) view).setChecked(Config.largeAvatarAsBackground);
             }
         } else if (position == showExactNumberRow) {
-            ConfigManager.toggleBoolean(Defines.showExactNumber);
+            Config.toggleShowExactNumber();
             if (view instanceof TextCheckCell) {
-                ((TextCheckCell) view).setChecked(ConfigManager.getBooleanOrFalse(Defines.showExactNumber));
+                ((TextCheckCell) view).setChecked(Config.showExactNumber);
             }
         } else if (position == showExactTimeRow) {
-            ConfigManager.toggleBoolean(Defines.showExactTime);
+            Config.toggleShowExactTime();
             if (view instanceof TextCheckCell) {
-                ((TextCheckCell) view).setChecked(ConfigManager.getBooleanOrFalse(Defines.showExactTime));
+                ((TextCheckCell) view).setChecked(Config.showExactTime);
             }
         } else if (position == disableInstantCameraRow) {
-            ConfigManager.toggleBoolean(Defines.disableInstantCamera);
+            Config.toggleDisableInstantCamera();
             if (view instanceof TextCheckCell) {
-                ((TextCheckCell) view).setChecked(ConfigManager.getBooleanOrFalse(Defines.disableInstantCamera));
+                ((TextCheckCell) view).setChecked(Config.disableInstantCamera);
             }
         } else if (position == disableUndoRow) {
-            ConfigManager.toggleBoolean(Defines.disableUndo);
+            Config.toggleDisableUndo();
             if (view instanceof TextCheckCell) {
-                ((TextCheckCell) view).setChecked(ConfigManager.getBooleanOrFalse(Defines.disableUndo));
+                ((TextCheckCell) view).setChecked(Config.disableUndo);
             }
         } else if (position == skipOpenLinkConfirmRow) {
-            ConfigManager.toggleBoolean(Defines.skipOpenLinkConfirm);
+            Config.toggleSkipOpenLinkConfirm();
             if (view instanceof TextCheckCell) {
-                ((TextCheckCell) view).setChecked(ConfigManager.getBooleanOrFalse(Defines.skipOpenLinkConfirm));
+                ((TextCheckCell) view).setChecked(Config.skipOpenLinkConfirm);
             }
         } else if (position == useSystemEmojiRow) {
-            ConfigManager.toggleBoolean(Defines.useSystemEmoji);
+            Config.toggleUseSystemEmoji();
             if (view instanceof TextCheckCell) {
-                ((TextCheckCell) view).setChecked(ConfigManager.getBooleanOrFalse(Defines.useSystemEmoji));
+                ((TextCheckCell) view).setChecked(Config.useSystemEmoji);
             }
         } else if (position == disableVibrationRow) {
-            ConfigManager.toggleBoolean(Defines.disableVibration);
+            Config.toggleDisableVibration();
             if (view instanceof TextCheckCell) {
-                ((TextCheckCell) view).setChecked(ConfigManager.getBooleanOrFalse(Defines.disableVibration));
+                ((TextCheckCell) view).setChecked(Config.disableVibration);
             }
         } else if (position == tabsTitleTypeRow) {
             ArrayList<String> arrayList = new ArrayList<>();
@@ -214,8 +215,8 @@ public class GeneralSettingActivity extends BaseActivity {
             types.add(Defines.tabMenuIcon);
             arrayList.add(LocaleController.getString("TabTitleTypeMix", R.string.TabTitleTypeMix));
             types.add(Defines.tabMenuMix);
-            PopupBuilder.show(arrayList, LocaleController.getString("TabTitleType", R.string.TabTitleType), types.indexOf(ConfigManager.getIntOrDefault(Defines.tabMenu, Defines.tabMenuMix)), getParentActivity(), view, i -> {
-                ConfigManager.putInt(Defines.tabMenu, types.get(i));
+            PopupBuilder.show(arrayList, LocaleController.getString("TabTitleType", R.string.TabTitleType), types.indexOf(Config.tabMenu), getParentActivity(), view, i -> {
+                Config.setTabMenu(types.get(i));
                 listAdapter.notifyItemChanged(tabsTitleTypeRow, PARTIAL);
                 getNotificationCenter().postNotificationName(NotificationCenter.dialogFiltersUpdated);
             });
@@ -230,29 +231,29 @@ public class GeneralSettingActivity extends BaseActivity {
             types.add(Defines.devicePerformanceMedium);
             arrayList.add(LocaleController.getString("DevicePerformanceHigh", R.string.DevicePerformanceHigh));
             types.add(Defines.devicePerformanceHigh);
-            PopupBuilder.show(arrayList, LocaleController.getString("OverrideDevicePerformance", R.string.OverrideDevicePerformance), types.indexOf(ConfigManager.getIntOrDefault(Defines.devicePerformance, Defines.devicePerformanceAuto)), getParentActivity(), view, i -> {
-                ConfigManager.putInt(Defines.devicePerformance, types.get(i));
+            PopupBuilder.show(arrayList, LocaleController.getString("OverrideDevicePerformance", R.string.OverrideDevicePerformance), types.indexOf(Config.devicePerformance), getParentActivity(), view, i -> {
+                Config.setDevicePerformance(types.get(i));
                 listAdapter.notifyItemChanged(overrideDevicePerformanceRow, PARTIAL);
             });
         } else if (position == openArchiveOnPullRow) {
-            ConfigManager.toggleBoolean(Defines.openArchiveOnPull);
+            Config.toggleOpenArchiveOnPull();
             if (view instanceof TextCheckCell) {
-                ((TextCheckCell) view).setChecked(ConfigManager.getBooleanOrFalse(Defines.openArchiveOnPull));
+                ((TextCheckCell) view).setChecked(Config.openArchiveOnPull);
             }
         } else if (position == hideAllTabRow) {
-            ConfigManager.toggleBoolean(Defines.hideAllTab);
+            Config.toggleHideAllTab();
             if (view instanceof TextCheckCell) {
-                ((TextCheckCell) view).setChecked(ConfigManager.getBooleanOrFalse(Defines.hideAllTab));
+                ((TextCheckCell) view).setChecked(Config.hideAllTab);
             }
         } else if (position == ignorMutedCountRow) {
-            ConfigManager.toggleBoolean(Defines.ignoreMutedCount);
+            Config.toggleIgnoreMutedCount();
             if (view instanceof TextCheckCell) {
-                ((TextCheckCell) view).setChecked(ConfigManager.getBooleanOrFalse(Defines.ignoreMutedCount));
+                ((TextCheckCell) view).setChecked(Config.ignoreMutedCount);
             }
         } else if (position == autoDisableBuiltInProxyRow) {
-            ConfigManager.toggleBoolean(Defines.autoDisableBuiltInProxy);
+            Config.toggleAutoDisableBuiltInProxy();
             if (view instanceof TextCheckCell) {
-                ((TextCheckCell) view).setChecked(ConfigManager.getBooleanOrFalse(Defines.autoDisableBuiltInProxy));
+                ((TextCheckCell) view).setChecked(Config.autoDisableBuiltInProxy);
             }
         } else if (position == translationProviderRow) {
             final var oldProvider = TranslateHelper.getCurrentProviderType();
@@ -361,7 +362,7 @@ public class GeneralSettingActivity extends BaseActivity {
 
         drawerRow = addRow();
         avatarAsDrawerBackgroundRow = addRow("avatarAsDrawerBackground");
-        if (ConfigManager.getBooleanOrFalse(Defines.avatarAsDrawerBackground)) {
+        if (Config.avatarAsDrawerBackground) {
             avatarBackgroundBlurRow = addRow("avatarBackgroundBlur");
             avatarBackgroundDarkenRow = addRow("avatarBackgroundDarken");
             largeAvatarAsBackgroundRow = addRow("largeAvatarAsBackground");
@@ -448,34 +449,20 @@ public class GeneralSettingActivity extends BaseActivity {
                     TextSettingsCell textCell = (TextSettingsCell) holder.itemView;
                     textCell.setTextColor(Theme.getColor(Theme.key_windowBackgroundWhiteBlackText));
                     if (position == tabsTitleTypeRow) {
-                        String value;
-                        switch (ConfigManager.getIntOrDefault(Defines.tabMenu, Defines.tabMenuMix)) {
-                            case Defines.tabMenuText:
-                                value = LocaleController.getString("TabTitleTypeText", R.string.TabTitleTypeText);
-                                break;
-                            case Defines.tabMenuIcon:
-                                value = LocaleController.getString("TabTitleTypeIcon", R.string.TabTitleTypeIcon);
-                                break;
-                            case Defines.tabMenuMix:
-                            default:
-                                value = LocaleController.getString("TabTitleTypeMix", R.string.TabTitleTypeMix);
-                        }
+                        String value = switch (Config.tabMenu) {
+                            case Defines.tabMenuText -> LocaleController.getString("TabTitleTypeText", R.string.TabTitleTypeText);
+                            case Defines.tabMenuIcon -> LocaleController.getString("TabTitleTypeIcon", R.string.TabTitleTypeIcon);
+                            case Defines.tabMenuMix -> LocaleController.getString("TabTitleTypeMix", R.string.TabTitleTypeMix);
+                            default -> LocaleController.getString("TabTitleTypeMix", R.string.TabTitleTypeMix);
+                        };
                         textCell.setTextAndValue(LocaleController.getString("TabTitleType", R.string.TabTitleType), value, payload, false);
                     } else if (position == overrideDevicePerformanceRow) {
-                        String value;
-                        switch (ConfigManager.getIntOrDefault(Defines.devicePerformance, Defines.devicePerformanceAuto)) {
-                            case Defines.devicePerformanceLow:
-                                value = LocaleController.getString("DevicePerformanceLow", R.string.DevicePerformanceLow);
-                                break;
-                            case Defines.devicePerformanceMedium:
-                                value = LocaleController.getString("DevicePerformanceMedium", R.string.DevicePerformanceMedium);
-                                break;
-                            case Defines.devicePerformanceHigh:
-                                value = LocaleController.getString("DevicePerformanceHigh", R.string.DevicePerformanceHigh);
-                                break;
-                            default:
-                                value = LocaleController.getString("DevicePerformanceAuto", R.string.DevicePerformanceAuto);
-                        }
+                        String value = switch (Config.devicePerformance) {
+                            case Defines.devicePerformanceLow -> LocaleController.getString("DevicePerformanceLow", R.string.DevicePerformanceLow);
+                            case Defines.devicePerformanceMedium -> LocaleController.getString("DevicePerformanceMedium", R.string.DevicePerformanceMedium);
+                            case Defines.devicePerformanceHigh -> LocaleController.getString("DevicePerformanceHigh", R.string.DevicePerformanceHigh);
+                            default -> LocaleController.getString("DevicePerformanceAuto", R.string.DevicePerformanceAuto);
+                        };
                         textCell.setTextAndValue(LocaleController.getString("OverrideDevicePerformance", R.string.OverrideDevicePerformance), value, payload, false);
                     } else if (position == translationProviderRow) {
                         Pair<ArrayList<String>, ArrayList<TranslateHelper.ProviderType>> providers = TranslateHelper.getProviders();
@@ -556,42 +543,42 @@ public class GeneralSettingActivity extends BaseActivity {
                     TextCheckCell textCell = (TextCheckCell) holder.itemView;
                     textCell.setEnabled(true, null);
                     if (position == showBotAPIRow) {
-                        textCell.setTextAndCheck(LocaleController.getString("showBotAPIID", R.string.showBotAPIID), ConfigManager.getBooleanOrFalse(Defines.showBotAPIID), true);
+                        textCell.setTextAndCheck(LocaleController.getString("showBotAPIID", R.string.showBotAPIID), Config.showBotAPIID, true);
                     } else if (position == hidePhoneRow) {
-                        textCell.setTextAndCheck(LocaleController.getString("hidePhone", R.string.hidePhone), ConfigManager.getBooleanOrFalse(Defines.hidePhone), true);
+                        textCell.setTextAndCheck(LocaleController.getString("hidePhone", R.string.hidePhone), Config.hidePhone, true);
                     } else if (position == showExactNumberRow) {
-                        textCell.setTextAndCheck(LocaleController.getString("showExactNumber", R.string.showExactNumber), ConfigManager.getBooleanOrFalse(Defines.showExactNumber), true);
+                        textCell.setTextAndCheck(LocaleController.getString("showExactNumber", R.string.showExactNumber), Config.showExactNumber, true);
                     } else if (position == showExactTimeRow) {
-                        textCell.setTextAndCheck(LocaleController.getString("showExactTime", R.string.showExactTime), ConfigManager.getBooleanOrFalse(Defines.showExactTime), true);
+                        textCell.setTextAndCheck(LocaleController.getString("showExactTime", R.string.showExactTime), Config.showExactTime, true);
                     } else if (position == disableInstantCameraRow) {
-                        textCell.setTextAndCheck(LocaleController.getString("disableInstantCamera", R.string.disableInstantCamera), ConfigManager.getBooleanOrFalse(Defines.disableInstantCamera), true);
+                        textCell.setTextAndCheck(LocaleController.getString("disableInstantCamera", R.string.disableInstantCamera), Config.disableInstantCamera, true);
                     } else if (position == disableUndoRow) {
-                        textCell.setTextAndCheck(LocaleController.getString("disableUndo", R.string.disableUndo), ConfigManager.getBooleanOrFalse(Defines.disableUndo), true);
+                        textCell.setTextAndCheck(LocaleController.getString("disableUndo", R.string.disableUndo), Config.disableUndo, true);
                     } else if (position == skipOpenLinkConfirmRow) {
-                        textCell.setTextAndCheck(LocaleController.getString("skipOpenLinkConfirm", R.string.skipOpenLinkConfirm), ConfigManager.getBooleanOrFalse(Defines.skipOpenLinkConfirm), true);
+                        textCell.setTextAndCheck(LocaleController.getString("skipOpenLinkConfirm", R.string.skipOpenLinkConfirm), Config.skipOpenLinkConfirm, true);
                     } else if (position == avatarAsDrawerBackgroundRow) {
-                        textCell.setTextAndCheck(LocaleController.getString("AvatarAsBackground", R.string.AvatarAsBackground), ConfigManager.getBooleanOrFalse(Defines.avatarAsDrawerBackground), true);
+                        textCell.setTextAndCheck(LocaleController.getString("AvatarAsBackground", R.string.AvatarAsBackground), Config.avatarAsDrawerBackground, true);
                     } else if (position == avatarBackgroundBlurRow) {
-                        textCell.setTextAndCheck(LocaleController.getString("BlurAvatarBackground", R.string.BlurAvatarBackground), ConfigManager.getBooleanOrFalse(Defines.avatarBackgroundBlur), true);
+                        textCell.setTextAndCheck(LocaleController.getString("BlurAvatarBackground", R.string.BlurAvatarBackground), Config.avatarBackgroundBlur, true);
                     } else if (position == avatarBackgroundDarkenRow) {
-                        textCell.setTextAndCheck(LocaleController.getString("DarkenAvatarBackground", R.string.DarkenAvatarBackground), ConfigManager.getBooleanOrFalse(Defines.avatarBackgroundDarken), true);
+                        textCell.setTextAndCheck(LocaleController.getString("DarkenAvatarBackground", R.string.DarkenAvatarBackground), Config.avatarBackgroundDarken, true);
                     } else if (position == largeAvatarAsBackgroundRow) {
-                        textCell.setTextAndCheck(LocaleController.getString("LargeAvatarAsBackground", R.string.largeAvatarAsBackground), ConfigManager.getBooleanOrFalse(Defines.largeAvatarAsBackground), true);
+                        textCell.setTextAndCheck(LocaleController.getString("LargeAvatarAsBackground", R.string.largeAvatarAsBackground), Config.largeAvatarAsBackground, true);
                     } else if (position == useSystemEmojiRow) {
-                        textCell.setTextAndCheck(LocaleController.getString("UseSystemEmoji", R.string.useSystemEmoji), ConfigManager.getBooleanOrFalse(Defines.useSystemEmoji), true);
+                        textCell.setTextAndCheck(LocaleController.getString("UseSystemEmoji", R.string.useSystemEmoji), Config.useSystemEmoji, true);
                     } else if (position == disableVibrationRow) {
-                        textCell.setTextAndCheck(LocaleController.getString("DisableVibration", R.string.disableVibration), ConfigManager.getBooleanOrFalse(Defines.disableVibration), true);
+                        textCell.setTextAndCheck(LocaleController.getString("DisableVibration", R.string.disableVibration), Config.disableVibration, true);
                     } else if (position == openArchiveOnPullRow) {
-                        textCell.setTextAndCheck(LocaleController.getString("openArchiveOnPull", R.string.openArchiveOnPull), ConfigManager.getBooleanOrFalse(Defines.openArchiveOnPull), true);
+                        textCell.setTextAndCheck(LocaleController.getString("openArchiveOnPull", R.string.openArchiveOnPull), Config.openArchiveOnPull, true);
                     } else if (position == hideAllTabRow) {
-                        textCell.setTextAndCheck(LocaleController.getString("hideAllTab", R.string.hideAllTab), ConfigManager.getBooleanOrFalse(Defines.hideAllTab), true);
+                        textCell.setTextAndCheck(LocaleController.getString("hideAllTab", R.string.hideAllTab), Config.hideAllTab, true);
                     } else if (position == ignorMutedCountRow) {
                         textCell.setTextAndCheck(LocaleController.getString("ignoreMutedCount", R.string.ignoreMutedCount),
-                            ConfigManager.getBooleanOrFalse(Defines.ignoreMutedCount), true);
+                            Config.ignoreMutedCount, true);
                     } else if (position == autoDisableBuiltInProxyRow) {
                         textCell.setTextAndValueAndCheck(LocaleController.getString("autoDisableBuiltInProxy", R.string.autoDisableBuiltInProxy),
                             LocaleController.getString("autoDisableBuiltInProxyDesc", R.string.autoDisableBuiltInProxyDesc),
-                            ConfigManager.getBooleanOrFalse(Defines.autoDisableBuiltInProxy), true, true);
+                            Config.autoDisableBuiltInProxy, true, true);
                     } else if (position == autoTranslateRow) {
                         textCell.setEnabled(LanguageDetector.hasSupport(), null);
                         textCell.setTextAndValueAndCheck(LocaleController.getString("AutoTranslate", R.string.AutoTranslate),

@@ -70,8 +70,7 @@ import org.telegram.ui.Components.SuggestEmojiView;
 
 import java.util.ArrayList;
 
-import top.qwq2333.nullgram.config.ConfigManager;
-import top.qwq2333.nullgram.utils.Defines;
+import top.qwq2333.gen.Config;
 
 public class ContentPreviewViewer {
 
@@ -547,7 +546,7 @@ public class ContentPreviewViewer {
                     }
                     int which = (int) v.getTag();
                     if (actions.get(which) == 0) {
-                        delegate.sendGif(currentDocument != null ? currentDocument : inlineResult, parentObject, !ConfigManager.getBooleanOrFalse(Defines.alwaysSendWithoutSound), 0);
+                        delegate.sendGif(currentDocument != null ? currentDocument : inlineResult, parentObject, !Config.alwaysSendWithoutSound, 0);
                     } else if (actions.get(which) == 4) {
                         delegate.sendGif(currentDocument != null ? currentDocument : inlineResult, parentObject, false, 0);
                     } else if (actions.get(which) == 1) {

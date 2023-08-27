@@ -54,10 +54,10 @@ import org.telegram.ui.LaunchActivity;
 import java.io.File;
 import java.util.ArrayList;
 
+import top.qwq2333.gen.Config;
 import top.qwq2333.nullgram.config.ConfigManager;
 import top.qwq2333.nullgram.helpers.PasscodeHelper;
 import top.qwq2333.nullgram.utils.AlertUtil;
-import top.qwq2333.nullgram.utils.Defines;
 import top.qwq2333.nullgram.utils.FileUtils;
 import top.qwq2333.nullgram.utils.Log;
 import top.qwq2333.nullgram.utils.PermissionUtils;
@@ -128,7 +128,7 @@ public class MainSettingActivity extends BaseActivity {
         if (position == experimentRow) {
             pressCount++;
             if (pressCount >= 2) {
-                ConfigManager.toggleBoolean(Defines.showHiddenSettings);
+                Config.toggleShowHiddenSettings();
                 AndroidUtilities.shakeView(view);
                 return true;
             }

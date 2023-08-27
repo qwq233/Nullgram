@@ -92,6 +92,7 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
 import kotlin.Pair;
+import top.qwq2333.gen.Config;
 import top.qwq2333.nullgram.config.ConfigManager;
 import top.qwq2333.nullgram.utils.Defines;
 import top.qwq2333.nullgram.utils.StringUtils;
@@ -1786,7 +1787,7 @@ public class SendMessagesHelper extends BaseController implements NotificationCe
 
                         var messageText = msgObj.messageText.toString();
                         var entities = msgObj.messageOwner.entities;
-                        if (!msgObj.isForwarded() && ConfigManager.getBooleanOrFalse(Defines.enablePanguOnSending)) {
+                        if (!msgObj.isForwarded() && Config.enablePanguOnSending) {
                             var pair = StringUtils.spacingText(messageText, msgObj.messageOwner.entities);
                             messageText = pair.getFirst();
                             entities = pair.getSecond();
@@ -1950,7 +1951,7 @@ public class SendMessagesHelper extends BaseController implements NotificationCe
                     newMsg.message = "";
                 }
 
-                if (!((newMsg.params.containsKey("fwd_id") || newMsg.params.containsKey("fwd_peer")) || msgObj.isForwarded() || MessageObject.isForwardedMessage(newMsg)) && ConfigManager.getBooleanOrFalse(Defines.enablePanguOnSending)) {
+                if (!((newMsg.params.containsKey("fwd_id") || newMsg.params.containsKey("fwd_peer")) || msgObj.isForwarded() || MessageObject.isForwardedMessage(newMsg)) && Config.enablePanguOnSending) {
                     var pair = StringUtils.spacingText(newMsg.message, msgObj.messageOwner.entities);
                     newMsg.message = pair.getFirst();
                     newMsg.entities = pair.getSecond();
@@ -3543,7 +3544,7 @@ public class SendMessagesHelper extends BaseController implements NotificationCe
                         newMsg = new TLRPC.TL_message();
                     }
 
-                    if (poll.poll != null && ConfigManager.getBooleanOrFalse(Defines.enablePanguOnSending)) {
+                    if (poll.poll != null && Config.enablePanguOnSending) {
                         poll.poll.question = pangu.spacingText(poll.poll.question);
                         for (int i = 0; i < poll.poll.answers.size(); i++) {
                             poll.poll.answers.get(i).text = pangu.spacingText(poll.poll.answers.get(i).text);
@@ -3915,7 +3916,7 @@ public class SendMessagesHelper extends BaseController implements NotificationCe
                 isFinalGroupMedia = params.get("final") != null;
             }
 
-            if (!((params != null && params.containsKey("fwd_id")) || MessageObject.isForwardedMessage(newMsg)) && ConfigManager.getBooleanOrFalse(Defines.enablePanguOnSending)) {
+            if (!((params != null && params.containsKey("fwd_id")) || MessageObject.isForwardedMessage(newMsg)) && Config.enablePanguOnSending) {
                 Pair<String, ArrayList<MessageEntity>> pair;
                 if (caption != null) {
                     pair = StringUtils.spacingText(caption, entities);
@@ -4000,7 +4001,7 @@ public class SendMessagesHelper extends BaseController implements NotificationCe
                         reqSend.reply_to = SendMessagesHelper.creteReplyInput(newMsg.reply_to.reply_to_msg_id, topMsgId);
                         reqSend.flags |= 1;
                     }
-                    if (!ConfigManager.getBooleanOrDefault(Defines.disableStickersAutoReorder, true) && updateStickersOrder && SharedConfig.updateStickersOrderOnSend) {
+                    if (!Config.disableStickersAutoReorder && updateStickersOrder && SharedConfig.updateStickersOrderOnSend) {
                         reqSend.update_stickersets_order = true;
                     }
                     if (newMsg.from_id != null) {
@@ -4399,7 +4400,7 @@ public class SendMessagesHelper extends BaseController implements NotificationCe
                             request.schedule_date = scheduleDate;
                             request.flags |= 1024;
                         }
-                        if (!ConfigManager.getBooleanOrDefault(Defines.disableStickersAutoReorder, true) && updateStickersOrder && SharedConfig.updateStickersOrderOnSend) {
+                        if (!Config.disableStickersAutoReorder && updateStickersOrder && SharedConfig.updateStickersOrderOnSend) {
                             request.update_stickersets_order = true;
                         }
 

@@ -24,13 +24,6 @@ import android.graphics.drawable.ShapeDrawable;
 import android.graphics.drawable.shapes.RectShape;
 import android.os.Build;
 import android.os.SystemClock;
-
-import androidx.annotation.Keep;
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.core.graphics.ColorUtils;
-import androidx.core.view.accessibility.AccessibilityNodeInfoCompat;
-
 import android.text.Layout;
 import android.text.StaticLayout;
 import android.text.TextPaint;
@@ -67,8 +60,7 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 
-import top.qwq2333.nullgram.config.ConfigManager;
-import top.qwq2333.nullgram.utils.Defines;
+import top.qwq2333.gen.Config;
 
 public class EditTextBoldCursor extends EditTextEffects {
 
@@ -161,7 +153,7 @@ public class EditTextBoldCursor extends EditTextEffects {
 
     private static Method canUndoMethod;
     private static Method canRedoMethod;
-    public static boolean disableMarkdown = ConfigManager.getBooleanOrFalse(Defines.markdownDisabled);
+    public static boolean disableMarkdown = Config.alwaysSendWithoutSound;
     private boolean showDisableMarkdown = false;
 
     static {

@@ -74,8 +74,7 @@ import org.telegram.ui.ThemeActivity;
 
 import java.util.ArrayList;
 
-import top.qwq2333.nullgram.config.ConfigManager;
-import top.qwq2333.nullgram.utils.Defines;
+import top.qwq2333.gen.Config;
 import top.qwq2333.nullgram.utils.Log;
 
 public class DrawerProfileCell extends FrameLayout implements NotificationCenter.NotificationCenterDelegate {
@@ -121,26 +120,26 @@ public class DrawerProfileCell extends FrameLayout implements NotificationCenter
         imageReceiver.setCrossfadeWithOldImage(true);
         imageReceiver.setForceCrossfade(true);
         imageReceiver.setDelegate((imageReceiver, set, thumb, memCache) -> {
-            if (ConfigManager.getBooleanOrFalse(Defines.avatarBackgroundDarken) || ConfigManager.getBooleanOrFalse(Defines.avatarBackgroundBlur)) {
+            if (Config.avatarBackgroundDarken || Config.avatarBackgroundBlur) {
                 if (thumb) {
                     return;
                 }
                 ImageReceiver.BitmapHolder bmp = imageReceiver.getBitmapSafe();
                 if (bmp != null) {
                     new Thread(() -> {
-                        int width = ConfigManager.getBooleanOrFalse(Defines.avatarBackgroundBlur) ? 150 : bmp.bitmap.getWidth();
-                        int height = ConfigManager.getBooleanOrFalse(Defines.avatarBackgroundBlur) ? 150 : bmp.bitmap.getHeight();
+                        int width = Config.avatarBackgroundBlur ? 150 : bmp.bitmap.getWidth();
+                        int height = Config.avatarBackgroundBlur ? 150 : bmp.bitmap.getHeight();
                         Bitmap bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
                         Canvas canvas = new Canvas(bitmap);
                         canvas.drawBitmap(bmp.bitmap, null, new Rect(0, 0, width, height), new Paint(Paint.FILTER_BITMAP_FLAG));
-                        if (ConfigManager.getBooleanOrFalse(Defines.avatarBackgroundBlur)) {
+                        if (Config.avatarBackgroundBlur) {
                             try {
                                 Utilities.stackBlurBitmap(bitmap, 3);
                             } catch (Exception e) {
                                 FileLog.e(e);
                             }
                         }
-                        if (ConfigManager.getBooleanOrFalse(Defines.avatarBackgroundDarken)) {
+                        if (Config.avatarBackgroundDarken) {
                             final Palette palette = Palette.from(bmp.bitmap).generate();
                             Paint paint = new Paint();
                             paint.setColor((palette.getDarkMutedColor(0xFF547499) & 0x00FFFFFF) | 0x44000000);
@@ -570,9 +569,9 @@ public class DrawerProfileCell extends FrameLayout implements NotificationCenter
 
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-        int heightBase = ConfigManager.getBooleanOrFalse(Defines.avatarAsDrawerBackground) && ConfigManager.getBooleanOrFalse(Defines.largeAvatarAsBackground) ? MeasureSpec.getSize(widthMeasureSpec) : AndroidUtilities.dp(148);
+        int heightBase = Config.avatarAsDrawerBackground && Config.largeAvatarAsBackground ? MeasureSpec.getSize(widthMeasureSpec) : AndroidUtilities.dp(148);
         if (Build.VERSION.SDK_INT >= 21) {
-            heightBase -= ConfigManager.getBooleanOrFalse(Defines.avatarAsDrawerBackground) && ConfigManager.getBooleanOrFalse(Defines.largeAvatarAsBackground) ? AndroidUtilities.statusBarHeight : 0;
+            heightBase -= Config.avatarAsDrawerBackground && Config.largeAvatarAsBackground ? AndroidUtilities.statusBarHeight : 0;
             super.onMeasure(MeasureSpec.makeMeasureSpec(MeasureSpec.getSize(widthMeasureSpec), MeasureSpec.EXACTLY), MeasureSpec.makeMeasureSpec(heightBase + AndroidUtilities.statusBarHeight, MeasureSpec.EXACTLY));
         } else {
             try {
@@ -786,7 +785,7 @@ public class DrawerProfileCell extends FrameLayout implements NotificationCenter
         }
         animatedStatus.setColor(Theme.getColor(Theme.isCurrentThemeDark() ? Theme.key_chats_verifiedBackground : Theme.key_chats_menuPhoneCats));
         status.setColor(Theme.getColor(Theme.isCurrentThemeDark() ? Theme.key_chats_verifiedBackground : Theme.key_chats_menuPhoneCats));
-        if (!ConfigManager.getBooleanOrFalse(Defines.hidePhone)) {
+        if (!Config.hidePhone) {
             phoneTextView.setText(PhoneFormat.getInstance().format("+" + user.phone));
         } else if (!TextUtils.isEmpty(user.username)) {
             phoneTextView.setText("@" + user.username);
@@ -797,13 +796,13 @@ public class DrawerProfileCell extends FrameLayout implements NotificationCenter
         avatarDrawable.setColor(Theme.getColor(Theme.key_avatar_backgroundInProfileBlue));
         avatarImageView.setForUserOrChat(user, avatarDrawable);
 
-        if (ConfigManager.getBooleanOrFalse(Defines.avatarAsDrawerBackground)) {
+        if (Config.avatarAsDrawerBackground) {
             ImageLocation imageLocation = ImageLocation.getForUser(user, ImageLocation.TYPE_BIG);
             avatarAsDrawerBackground = imageLocation != null;
             imageReceiver.setImage(imageLocation, "512_512", null, null, new ColorDrawable(0x00000000), 0, null, user, 1);
             avatarImageView.setVisibility(INVISIBLE);
-            if (ConfigManager.getBooleanOrFalse(Defines.largeAvatarAsBackground)) {
-                LayoutParams lp = ConfigManager.getBooleanOrFalse(Defines.largeAvatarAsBackground) ?
+            if (Config.largeAvatarAsBackground) {
+                LayoutParams lp = Config.largeAvatarAsBackground ?
                     LayoutHelper.createFrame(48, 48, Gravity.RIGHT | Gravity.TOP, 0, AndroidUtilities.statusBarHeight / getResources().getDisplayMetrics().density, 6, 0) :
                     LayoutHelper.createFrame(48, 48, Gravity.RIGHT | Gravity.BOTTOM, 0, 10, 6, 90);
                 darkThemeView.setLayoutParams(lp);

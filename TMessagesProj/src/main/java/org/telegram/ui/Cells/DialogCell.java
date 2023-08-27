@@ -104,7 +104,6 @@ import org.telegram.ui.Components.VectorAvatarThumbDrawable;
 import org.telegram.ui.Components.spoilers.SpoilerEffect;
 import org.telegram.ui.DialogsActivity;
 import org.telegram.ui.RightSlidingDialogContainer;
-import org.telegram.ui.Stories.StoriesController;
 import org.telegram.ui.Stories.StoriesListPlaceProvider;
 import org.telegram.ui.Stories.StoriesUtilities;
 import org.telegram.ui.Stories.StoryViewer;
@@ -116,8 +115,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Stack;
 
-import top.qwq2333.nullgram.config.ConfigManager;
-import top.qwq2333.nullgram.utils.Defines;
+import top.qwq2333.gen.Config;
 import top.qwq2333.nullgram.utils.MessageUtils;
 
 
@@ -1480,7 +1478,7 @@ public class DialogCell extends BaseCell implements StoriesListPlaceProvider.Ava
                                         messageString = new SpannableStringBuilder(emoji).append(text);
                                     } else {
                                         SpannableStringBuilder msgBuilder = new SpannableStringBuilder(message.caption);
-                                        if (ConfigManager.getBooleanOrFalse(Defines.displaySpoilerMsgDirectly) && message != null && message.messageOwner != null) {
+                                        if (Config.displaySpoilerMsgDirectly && message != null && message.messageOwner != null) {
                                             if (message != null) {
                                                 message.spoilLoginCode();
                                             }
@@ -1532,11 +1530,11 @@ public class DialogCell extends BaseCell implements StoriesListPlaceProvider.Ava
                                             messageString = AndroidUtilities.ellipsizeCenterEnd(messageString, message.highlightedWords.get(0), w, currentMessagePaint, 130);
                                         } else {
                                             SpannableStringBuilder stringBuilder = new SpannableStringBuilder(msgText);
-                                            if (ConfigManager.getBooleanOrFalse(Defines.displaySpoilerMsgDirectly) && message != null) {
+                                            if (Config.displaySpoilerMsgDirectly && message != null) {
                                                 message.spoilLoginCode();
                                             }
                                             MediaDataController.addTextStyleRuns(message, stringBuilder, TextStyleSpan.FLAG_STYLE_SPOILER | TextStyleSpan.FLAG_STYLE_STRIKE);
-                                            if (ConfigManager.getBooleanOrFalse(Defines.displaySpoilerMsgDirectly) && message != null && message.messageOwner != null) {
+                                            if (Config.displaySpoilerMsgDirectly && message != null && message.messageOwner != null) {
                                                 MediaDataController.addAnimatedEmojiSpans(message.messageOwner.entities, stringBuilder, currentMessagePaint == null ? null : currentMessagePaint.getFontMetricsInt());
                                             }
                                             messageString = stringBuilder;
@@ -2185,7 +2183,7 @@ public class DialogCell extends BaseCell implements StoriesListPlaceProvider.Ava
             }
             spoilersPool.addAll(spoilers);
             spoilers.clear();
-            if (ConfigManager.getBooleanOrFalse(Defines.displaySpoilerMsgDirectly)) {
+            if (Config.displaySpoilerMsgDirectly) {
                 SpoilerEffect.addSpoilers(this, messageLayout, -2, -2, spoilersPool, spoilers);
             }
         } catch (Exception e) {
@@ -2672,7 +2670,7 @@ public class DialogCell extends BaseCell implements StoriesListPlaceProvider.Ava
                         groupMessages = MessagesController.getInstance(currentAccount).dialogMessage.get(dialog.id);
                         message = groupMessages != null && groupMessages.size() > 0 ? groupMessages.get(0) : null;
 
-                        if (message != null && ConfigManager.getBooleanOrFalse(Defines.ignoreBlockedUser)
+                        if (message != null && Config.ignoreBlockedUser
                             && MessagesController.getInstance(currentAccount).blockePeers.indexOfKey(message.getSenderId()) >= 0) {
                             if (MessagesController.getInstance(currentAccount).dialogMessageFromUnblocked.get(dialog.id) != null) {
                                 message = MessagesController.getInstance(currentAccount).dialogMessageFromUnblocked.get(dialog.id);

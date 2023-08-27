@@ -164,9 +164,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 
-import top.qwq2333.nullgram.config.ConfigManager;
+import top.qwq2333.gen.Config;
 import top.qwq2333.nullgram.ui.syntaxhighlight.SyntaxHighlight;
-import top.qwq2333.nullgram.utils.Defines;
 
 public class ChatActivityEnterView extends BlurredFrameLayout implements NotificationCenter.NotificationCenterDelegate, SizeNotifierFrameLayout.SizeNotifierFrameLayoutDelegate, StickersAlert.StickersAlertDelegate {
 
@@ -2158,7 +2157,7 @@ public class ChatActivityEnterView extends BlurredFrameLayout implements Notific
 
             @Override
             public boolean onTouchEvent(MotionEvent motionEvent) {
-                if (ConfigManager.getBooleanOrFalse(Defines.hideQuickSendMediaBottom))
+                if (Config.hideQuickSendMediaBottom)
                     return true;
                 if (getEditField() != null && getEditField().getText() != null && !TextUtils.isEmpty(getEditField().getText()))
                     return true;
@@ -5522,7 +5521,7 @@ public class ChatActivityEnterView extends BlurredFrameLayout implements Notific
                 }
             }, resourcesProvider);
         } else {
-            sendMessageInternal(!ConfigManager.getBooleanOrFalse(Defines.alwaysSendWithoutSound), 0, true);
+            sendMessageInternal(!Config.alwaysSendWithoutSound, 0, true);
         }
     }
 
@@ -7982,7 +7981,7 @@ public class ChatActivityEnterView extends BlurredFrameLayout implements Notific
             defPeer = delegate.getSendAsPeers().peers.get(0).peer;
         }
 
-        if (ConfigManager.getBooleanOrFalse(Defines.quickToggleAnonymous) && delegate.getSendAsPeers() != null && delegate.getSendAsPeers().isModifiedByQuickToggleAnonymous) {
+        if (Config.quickToggleAnonymous && delegate.getSendAsPeers() != null && delegate.getSendAsPeers().isModifiedByQuickToggleAnonymous) {
             var chat = parentFragment.getMessagesController().getChat(-dialog_id);
             var self = UserConfig.getInstance(currentAccount).getCurrentUser();
             if (chat != null) {

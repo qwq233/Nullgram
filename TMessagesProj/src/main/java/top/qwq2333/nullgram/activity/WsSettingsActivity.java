@@ -45,11 +45,10 @@ import org.telegram.ui.Components.BulletinFactory;
 import org.telegram.ui.Components.EditTextBoldCursor;
 import org.telegram.ui.Components.LayoutHelper;
 
-import top.qwq2333.nullgram.config.ConfigManager;
+import top.qwq2333.gen.Config;
 import top.qwq2333.nullgram.helpers.WebSocketHelper;
 import top.qwq2333.nullgram.helpers.WebSocketHelper.WsProvider;
 import top.qwq2333.nullgram.ui.PopupBuilder;
-import top.qwq2333.nullgram.utils.Defines;
 import top.qwq2333.nullgram.utils.Log;
 
 
@@ -116,7 +115,7 @@ public class WsSettingsActivity extends BaseActivity {
 
                         builder.setView(ll);
                         builder.setPositiveButton(LocaleController.getString("OK", R.string.OK), (dialogInterface, i2) -> {
-                            ConfigManager.putString(Defines.wsServerHost, editText.getText().toString());
+                            Config.setWsServerHost(editText.getText().toString());
                             WebSocketHelper.setCurrentProvider(types.get(i));
                             WebSocketHelper.wsReloadConfig();
                             listAdapter.notifyItemChanged(providerRow, PARTIAL);

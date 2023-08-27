@@ -95,6 +95,7 @@ import java.util.TreeSet;
 import java.util.concurrent.CountDownLatch;
 import java.util.function.Consumer;
 
+import top.qwq2333.gen.Config;
 import top.qwq2333.nullgram.config.ConfigManager;
 import top.qwq2333.nullgram.utils.Defines;
 
@@ -914,7 +915,7 @@ public class NotificationsController extends BaseController {
                     continue;
                 }
 
-                if (ConfigManager.getBooleanOrFalse(Defines.ignoreBlockedUser) && getMessagesController().blockePeers.indexOfKey(messageObject.getSenderId()) >= 0) {
+                if (Config.ignoreBlockedUser && getMessagesController().blockePeers.indexOfKey(messageObject.getSenderId()) >= 0) {
                     continue;
                 }
 
@@ -1060,7 +1061,7 @@ public class NotificationsController extends BaseController {
                         pushDialogsOverrideMention.put(originalDialogId, current == null ? 1 : current + 1);
                     }
                 }
-                if (messageObject.isReactionPush && ConfigManager.getBooleanOrFalse(Defines.ignoreReactionMention)) {
+                if (messageObject.isReactionPush && Config.ignoreReactionMention) {
                     SparseBooleanArray sparseBooleanArray = new SparseBooleanArray();
                     sparseBooleanArray.put(mid, true);
                     getMessagesController().checkUnreadReactions(dialogId, topicId, sparseBooleanArray);
@@ -2168,7 +2169,7 @@ public class NotificationsController extends BaseController {
             return null;
         }
         StringBuilder stringBuilder = new StringBuilder(text);
-        if (ConfigManager.getBooleanOrFalse(Defines.displaySpoilerMsgDirectly)) {
+        if (Config.displaySpoilerMsgDirectly) {
             return stringBuilder.toString();
         }
         for (int i = 0; i < messageObject.messageOwner.entities.size(); i++) {
@@ -4724,7 +4725,7 @@ public class NotificationsController extends BaseController {
                 for (int a = messageObjects.size() - 1; a >= 0; a--) {
                     MessageObject messageObject = messageObjects.get(a);
                     int messageTopicId = MessageObject.getTopicId(messageObject.messageOwner, getMessagesController().isForum(messageObject));
-                    if (ConfigManager.getBooleanOrFalse(Defines.ignoreBlockedUser) && getMessagesController().blockePeers.indexOfKey(messageObject.getSenderId()) >= 0) {
+                    if (Config.ignoreBlockedUser && getMessagesController().blockePeers.indexOfKey(messageObject.getSenderId()) >= 0) {
                         continue;
                     }
 

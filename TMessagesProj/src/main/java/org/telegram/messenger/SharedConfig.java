@@ -13,7 +13,6 @@ import android.app.ActivityManager;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.content.pm.PackageInfo;
 import android.media.MediaCodecInfo;
 import android.media.MediaCodecList;
 import android.os.Build;
@@ -53,7 +52,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 
-import top.qwq2333.nullgram.config.ConfigManager;
+import top.qwq2333.gen.Config;
 import top.qwq2333.nullgram.helpers.WebSocketHelper;
 import top.qwq2333.nullgram.utils.AlertUtil;
 import top.qwq2333.nullgram.utils.Defines;
@@ -248,7 +247,7 @@ public class SharedConfig {
     public static boolean disableVoiceAudioEffects;
     public static boolean forceDisableTabletMode;
     public static boolean useLNavigation;
-    public static boolean updateStickersOrderOnSend = ConfigManager.getBooleanOrFalse(Defines.disableStickersAutoReorder);
+    public static boolean updateStickersOrderOnSend = Config.disableStickersAutoReorder;
     public static boolean bigCameraForRound;
     public static boolean useSurfaceInStories;
     public static int stealthModeSendMessageConfirm = 2;
@@ -876,7 +875,7 @@ public class SharedConfig {
             dontAskManageStorage = preferences.getBoolean("dontAskManageStorage", false);
             hasEmailLogin = preferences.getBoolean("hasEmailLogin", false);
             isFloatingDebugActive = preferences.getBoolean("floatingDebugActive", false);
-            updateStickersOrderOnSend = ConfigManager.getBooleanOrFalse(Defines.disableStickersAutoReorder);
+            updateStickersOrderOnSend = Config.disableStickersAutoReorder;
             dayNightWallpaperSwitchHint = preferences.getInt("dayNightWallpaperSwitchHint", 0);
             bigCameraForRound = preferences.getBoolean("bigCameraForRound", false);
             useSurfaceInStories = preferences.getBoolean("useSurfaceInStories", Build.VERSION.SDK_INT >= 30);
@@ -1173,7 +1172,7 @@ public class SharedConfig {
 
     public static void toggleUpdateStickersOrderOnSend() {
         updateStickersOrderOnSend = !updateStickersOrderOnSend;
-        ConfigManager.putBoolean(Defines.disableStickersAutoReorder, !ConfigManager.getBooleanOrDefault(Defines.disableStickersAutoReorder, true));
+        Config.toggleDisableStickersAutoReorder();
     }
 
     public static void checkLogsToDelete() {
@@ -1743,8 +1742,8 @@ public class SharedConfig {
 
     @PerformanceClass
     public static int getDevicePerformanceClass() {
-        if (ConfigManager.getIntOrDefault(Defines.devicePerformance, Defines.devicePerformanceAuto) != Defines.devicePerformanceAuto) {
-            return ConfigManager.getIntOrDefault(Defines.devicePerformance, Defines.devicePerformanceAuto);
+        if (Config.devicePerformance != Defines.devicePerformanceAuto) {
+            return Config.devicePerformance;
         }
         if (overrideDevicePerformanceClass != -1) {
             return overrideDevicePerformanceClass;
@@ -1921,8 +1920,8 @@ public class SharedConfig {
 
     @Deprecated
     public static int getLegacyDevicePerformanceClass() {
-        if (ConfigManager.getIntOrDefault(Defines.devicePerformance, Defines.devicePerformanceAuto) != Defines.devicePerformanceAuto) {
-            return ConfigManager.getIntOrDefault(Defines.devicePerformance, Defines.devicePerformanceAuto);
+        if (Config.devicePerformance != Defines.devicePerformanceAuto) {
+            return Config.devicePerformance;
         }
         if (legacyDevicePerformanceClass == -1) {
             int androidVersion = Build.VERSION.SDK_INT;

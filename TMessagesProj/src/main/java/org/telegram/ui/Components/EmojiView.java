@@ -141,8 +141,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
-import top.qwq2333.nullgram.config.ConfigManager;
-import top.qwq2333.nullgram.utils.Defines;
+import top.qwq2333.gen.Config;
 
 @SuppressLint("SoonBlockedPrivateApi")
 public class EmojiView extends FrameLayout implements
@@ -5148,7 +5147,7 @@ public class EmojiView extends FrameLayout implements
         if (trendingAdapter != null) {
             trendingAdapter.notifyDataSetChanged();
         }
-        if (!ConfigManager.getBooleanOrFalse(Defines.disableTrendingSticker) && !featured.isEmpty() && (featuredStickerSets.isEmpty() || preferences.getLong("featured_hidden", 0) == featured.get(0).set.id)) {
+        if (!Config.disableTrendingSticker && !featured.isEmpty() && (featuredStickerSets.isEmpty() || preferences.getLong("featured_hidden", 0) == featured.get(0).set.id)) {
             final int id = mediaDataController.getUnreadStickerSets().isEmpty() ? 2 : 3;
             final StickerTabView trendingStickersTabView = stickersTab.addStickerIconTab(id, stickerIcons[id]);
             trendingStickersTabView.textView.setText(LocaleController.getString("FeaturedStickersShort", R.string.FeaturedStickersShort));
@@ -5230,7 +5229,7 @@ public class EmojiView extends FrameLayout implements
             }
             if (info.stickerset != null) {
                 TLRPC.TL_messages_stickerSet pack = mediaDataController.getGroupStickerSetById(info.stickerset);
-                if (ConfigManager.getBooleanOrFalse(Defines.hideGroupSticker)) {
+                if (Config.hideGroupSticker) {
                     pack = null;
                     groupStickersHidden = true;
                 }
@@ -5337,7 +5336,7 @@ public class EmojiView extends FrameLayout implements
             gifTabs.addIconTab(0, gifIcons[0]).setContentDescription(LocaleController.getString("RecentStickers", R.string.RecentStickers));
         }
 
-        if(!ConfigManager.getBooleanOrFalse(Defines.disableTrendingSticker)) {
+        if(!Config.disableTrendingSticker) {
             gifTrendingTabNum = gifTabsCount++;
             gifTabs.addIconTab(1, gifIcons[1]).setContentDescription(
                 LocaleController.getString("FeaturedGifs", R.string.FeaturedGifs));
@@ -5755,7 +5754,7 @@ public class EmojiView extends FrameLayout implements
             int previousCount2 = favouriteStickers.size();
             recentStickers = MediaDataController.getInstance(currentAccount).getRecentStickers(MediaDataController.TYPE_IMAGE);
             favouriteStickers = MediaDataController.getInstance(currentAccount).getRecentStickers(MediaDataController.TYPE_FAVE);
-            if (UserConfig.getInstance(currentAccount).isPremium() && !ConfigManager.getBooleanOrFalse(Defines.disablePremiumSticker)) {
+            if (UserConfig.getInstance(currentAccount).isPremium() && !Config.disablePremiumSticker) {
                 premiumStickers = MediaDataController.getInstance(currentAccount).getRecentStickers(MediaDataController.TYPE_PREMIUM_STICKERS);
             } else {
                 premiumStickers = new ArrayList<>();
@@ -6485,7 +6484,7 @@ public class EmojiView extends FrameLayout implements
                             cell.setText(LocaleController.getString("RecentStickers", R.string.RecentStickers), R.drawable.msg_close, LocaleController.getString(R.string.ClearRecentStickersAlertTitle));
                         } else if (object == favouriteStickers) {
                             cell.setText(LocaleController.getString("FavoriteStickers", R.string.FavoriteStickers), 0);
-                        } else if (object == premiumStickers && !ConfigManager.getBooleanOrFalse(Defines.disablePremiumSticker)) {
+                        } else if (object == premiumStickers && !Config.disablePremiumSticker) {
                             cell.setText(LocaleController.getString("PremiumStickers", R.string.PremiumStickers), 0);
                         }
                     }

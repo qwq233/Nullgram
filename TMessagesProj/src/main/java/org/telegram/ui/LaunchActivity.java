@@ -209,6 +209,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import kotlin.Unit;
+import top.qwq2333.gen.Config;
 import top.qwq2333.nullgram.config.ConfigManager;
 import top.qwq2333.nullgram.helpers.MonetHelper;
 import top.qwq2333.nullgram.helpers.SettingsHelper;
@@ -5817,7 +5818,7 @@ public class LaunchActivity extends BasePermissionsActivity implements INavigati
             }
         }
 
-        if (ConfigManager.getBooleanOrFalse(Defines.autoDisableBuiltInProxy)) {
+        if (Config.autoDisableBuiltInProxy) {
             if (SharedConfig.proxyEnabled && Utils.isVPNEnabled()) {
                 SharedConfig.setProxyEnable(false);
             } else if (!Utils.isVPNEnabled()) {
@@ -7162,7 +7163,7 @@ public class LaunchActivity extends BasePermissionsActivity implements INavigati
                 }
             } else if (
                 !mainFragmentsStack.isEmpty() && (!PhotoViewer.hasInstance() || !PhotoViewer.getInstance().isVisible()) && event.getRepeatCount() == 0
-                && !ConfigManager.getBooleanOrFalse(Defines.disablePreviewVideoSoundShortcut)
+                && !Config.disablePreviewVideoSoundShortcut
             ) {
                 BaseFragment fragment = mainFragmentsStack.get(mainFragmentsStack.size() - 1);
                 if (fragment instanceof ChatActivity) {

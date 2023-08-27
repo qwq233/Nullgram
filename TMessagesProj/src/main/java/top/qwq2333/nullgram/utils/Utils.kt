@@ -42,6 +42,7 @@ import org.telegram.ui.ActionBar.ActionBarPopupWindow.ActionBarPopupWindowLayout
 import org.telegram.ui.ActionBar.BaseFragment
 import org.telegram.ui.Components.AlertsCreator
 import org.telegram.ui.Components.BulletinFactory
+import top.qwq2333.gen.Config
 import top.qwq2333.nullgram.activity.DatacenterActivity
 import top.qwq2333.nullgram.config.ConfigManager
 import top.qwq2333.nullgram.remote.NicegramController
@@ -58,7 +59,7 @@ import java.util.Locale
 object Utils {
 
     @JvmStatic
-    fun showForwardDate(obj: MessageObject, orig: CharSequence): String = if (ConfigManager.getBooleanOrFalse(Defines.dateOfForwardedMsg) &&
+    fun showForwardDate(obj: MessageObject, orig: CharSequence): String = if (Config.dateOfForwardedMsg &&
         obj.messageOwner.fwd_from.date.toLong() != 0L
     ) {
         "$orig • ${LocaleController.formatDate(obj.messageOwner.fwd_from.date.toLong())}"

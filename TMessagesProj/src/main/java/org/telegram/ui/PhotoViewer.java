@@ -271,6 +271,7 @@ import java.util.Map;
 import java.util.Objects;
 
 import kotlin.Unit;
+import top.qwq2333.gen.Config;
 import top.qwq2333.nullgram.config.ConfigManager;
 import top.qwq2333.nullgram.helpers.QrHelper;
 import top.qwq2333.nullgram.helpers.TranslateHelper;
@@ -6069,7 +6070,7 @@ public class PhotoViewer implements NotificationCenter.NotificationCenterDelegat
             if (parentChatActivity != null && parentChatActivity.isInScheduleMode() && !parentChatActivity.isEditingMessageMedia()) {
                 showScheduleDatePickerDialog();
             } else {
-                sendPressed(!ConfigManager.getBooleanOrFalse(Defines.alwaysSendWithoutSound), 0);
+                sendPressed(!Config.alwaysSendWithoutSound, 0);
             }
         });
         pickerViewSendButton.setOnLongClickListener(view -> {
@@ -6180,9 +6181,9 @@ public class PhotoViewer implements NotificationCenter.NotificationCenterDelegat
                     } else if (a == 2) {
                         replacePressed();
                     } else if (a == 3) {
-                        sendPressed(!ConfigManager.getBooleanOrFalse(Defines.alwaysSendWithoutSound), 0);
+                        sendPressed(!Config.alwaysSendWithoutSound, 0);
                     } else if (a == 4) {
-                        sendPressed(!ConfigManager.getBooleanOrFalse(Defines.alwaysSendWithoutSound), 0, false, true, false);
+                        sendPressed(!Config.alwaysSendWithoutSound, 0, false, true, false);
                     }
                 });
             }
@@ -14420,7 +14421,7 @@ public class PhotoViewer implements NotificationCenter.NotificationCenterDelegat
             } else {
                 windowLayoutParams.flags = WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM;
             }
-            if (!ConfigManager.getBooleanOrFalse(Defines.allowScreenshotOnNoForwardChat) && ((chatActivity != null && chatActivity.getCurrentEncryptedChat() != null ||
+            if (!Config.allowScreenshotOnNoForwardChat && ((chatActivity != null && chatActivity.getCurrentEncryptedChat() != null ||
                 avatarsDialogId != 0 && MessagesController.getInstance(currentAccount).isChatNoForwards(-avatarsDialogId) ||
                 messageObject != null && (MessagesController.getInstance(currentAccount).isChatNoForwards(messageObject.getChatId()) || (messageObject.messageOwner != null && messageObject.messageOwner.noforwards)))
             )) {

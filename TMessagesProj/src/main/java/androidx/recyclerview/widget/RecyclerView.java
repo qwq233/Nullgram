@@ -97,6 +97,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import top.qwq2333.gen.Config;
 import top.qwq2333.nullgram.config.ConfigManager;
 import top.qwq2333.nullgram.utils.Defines;
 import top.qwq2333.nullgram.utils.VibrationUtils;
@@ -7054,7 +7055,7 @@ public class RecyclerView extends ViewGroup implements ScrollingView,
             try {
                 TraceCompat.beginSection(TRACE_CREATE_VIEW_TAG);
                 final VH holder = onCreateViewHolder(parent, viewType);
-                if (ConfigManager.getBooleanOrFalse(Defines.disableVibration))
+                if (Config.disableVibration)
                     VibrationUtils.disableHapticFeedback(holder.itemView);
                 if (holder.itemView.getParent() != null) {
                     throw new IllegalStateException("ViewHolder views must not be attached when"

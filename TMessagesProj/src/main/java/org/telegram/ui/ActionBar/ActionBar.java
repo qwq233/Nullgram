@@ -63,8 +63,7 @@ import org.telegram.ui.Components.SnowflakesEffect;
 
 import java.util.ArrayList;
 
-import top.qwq2333.nullgram.config.ConfigManager;
-import top.qwq2333.nullgram.utils.Defines;
+import top.qwq2333.gen.Config;
 
 public class ActionBar extends FrameLayout {
 
@@ -1896,7 +1895,7 @@ public class ActionBar extends FrameLayout {
         public void setUnread(int count) {
             if (count != unreadCount) {
                 unreadCount = count;
-                String countString = (count > 99) && !ConfigManager.getBooleanOrFalse(Defines.showExactNumber) ? "99+" : Integer.toString(count);
+                String countString = (count > 99) && !Config.showExactNumber ? "99+" : Integer.toString(count);
                 int countWidth = count == 0 ? 0 : Math.max(AndroidUtilities.dp(12), (int) Math.ceil(Theme.dialogs_countTextPaint.measureText(countString)));
                 countLayout = new StaticLayout(countString, Theme.dialogs_countTextPaint, countWidth, Layout.Alignment.ALIGN_CENTER, 1.0f, 0.0f, false);
                 invalidate();
@@ -1905,7 +1904,7 @@ public class ActionBar extends FrameLayout {
     }
 
     public void unreadBadgeSetCount(int count) {
-        if (backButtonImageView != null && ConfigManager.getBooleanOrFalse(Defines.unreadBadgeOnBackButton)) {
+        if (backButtonImageView != null && Config.unreadBadgeOnBackButton) {
             backButtonImageView.setUnread(count);
         }
     }

@@ -18,6 +18,7 @@
  */
 package top.qwq2333.nullgram.utils
 
+import org.telegram.messenger.BuildVars
 import top.qwq2333.nullgram.BooleanConfig
 import top.qwq2333.nullgram.IntConfig
 import top.qwq2333.nullgram.StringConfig
@@ -27,91 +28,87 @@ import top.qwq2333.nullgram.StringConfig
  */
 object Defines {
     // Function
-    @BooleanConfig
-    const val showBotAPIID = "showBotAPIID"
-
-    @BooleanConfig
-    const val ignoreBlockedUser = "ignoreBlockedUser"
-
-    @BooleanConfig
-    const val blockSponsorAds = "blockSponsorMessages"
-    const val hideGroupSticker = "hideGroupSticker"
-    const val allowScreenshotOnNoForwardChat = "allowScreenshotOnNoForwardChat"
-    const val autoDisableBuiltInProxy = "autoDisableBuiltInProxy"
-    const val labelChannelUser = "labelChannelUser"
-    const val displaySpoilerMsgDirectly = "displaySpoilerMsgDirectly"
-    const val disableGreetingSticker = "disableGreetingSticker"
-    const val codeSyntaxHighlight = "codeSyntaxHighlight"
-    const val channelAlias = "aliasChannel" // ignore typo
+    @BooleanConfig const val showBotAPIID = "showBotAPIID"
+    @BooleanConfig const val ignoreBlockedUser = "ignoreBlockedUser"
+    @BooleanConfig const val blockSponsorAds = "blockSponsorMessages"
+    @BooleanConfig const val hideGroupSticker = "hideGroupSticker"
+    @BooleanConfig const val allowScreenshotOnNoForwardChat = "allowScreenshotOnNoForwardChat"
+    @BooleanConfig const val autoDisableBuiltInProxy = "autoDisableBuiltInProxy"
+    @BooleanConfig const val labelChannelUser = "labelChannelUser"
+    @BooleanConfig const val displaySpoilerMsgDirectly = "displaySpoilerMsgDirectly"
+    @BooleanConfig const val disableGreetingSticker = "disableGreetingSticker"
+    @BooleanConfig const val codeSyntaxHighlight = "codeSyntaxHighlight"
+    @BooleanConfig const val channelAlias = "aliasChannel" // ignore typo
     const val channelAliasPrefix = "aliasChannelName_" // ignore typo
-    const val linkedUser = "linkedUser"
+    @BooleanConfig const val linkedUser = "linkedUser"
     const val linkedUserPrefix = "linkedUser_"
-    const val overrideChannelAlias = "overrideChannelAlias"
-    const val hidePhone = "hidePhone"
-    const val openArchiveOnPull = "openArchiveOnPull"
-    const val disableJumpToNextChannel = "disableJumpToNextChannel"
-    const val verifyLinkTip = "verifyLinkTip"
-    const val showExactNumber = "showExactNumber"
-    const val disableTrendingSticker = "disableTrendingSticker"
-    const val disablePremiumSticker = "disablePremiumSticker"
-    const val disableInstantCamera = "disableInstantCamera"
-    const val showHiddenSettings = "showHiddenSettings"
-    const val confirmToSendMediaMessages = "confirmToSendMediaMessages"
-    const val disableUndo = "disableUndo"
-    const val skipOpenLinkConfirm = "skipOpenLinkConfirm"
-    const val maxRecentSticker = "maxRecentSticker"
-    const val unreadBadgeOnBackButton = "unreadBadgeOnBackButton"
-    const val disableSendTyping = "disableSendTyping"
-    const val ignoreReactionMention = "ignoreReactionMention"
+    @BooleanConfig const val overrideChannelAlias = "overrideChannelAlias"
+    @BooleanConfig const val hidePhone = "hidePhone"
+    @BooleanConfig const val openArchiveOnPull = "openArchiveOnPull"
+    @BooleanConfig const val disableJumpToNextChannel = "disableJumpToNextChannel"
+    @BooleanConfig const val verifyLinkTip = "verifyLinkTip"
+    @BooleanConfig const val showExactNumber = "showExactNumber"
+    @BooleanConfig const val disableTrendingSticker = "disableTrendingSticker"
+    @BooleanConfig const val disablePremiumSticker = "disablePremiumSticker"
+    @BooleanConfig const val disableInstantCamera = "disableInstantCamera"
+    @BooleanConfig const val showHiddenSettings = "showHiddenSettings"
+    @BooleanConfig const val confirmToSendMediaMessages = "confirmToSendMediaMessages"
+    @BooleanConfig const val disableUndo = "disableUndo"
+    @BooleanConfig const val skipOpenLinkConfirm = "skipOpenLinkConfirm"
+    @IntConfig(20) const val maxRecentSticker = "maxRecentSticker"
+    @BooleanConfig const val unreadBadgeOnBackButton = "unreadBadgeOnBackButton"
+    @BooleanConfig const val disableSendTyping = "disableSendTyping"
+    @BooleanConfig const val ignoreReactionMention = "ignoreReactionMention"
     const val stickerSize = "customStickerSize"
-    const val keepCopyFormatting = "keepCopyFormatting"
-    const val dateOfForwardedMsg = "dateOfForwardedMsg"
-    const val enchantAudio = "enchantAudio"
-    const val avatarAsDrawerBackground = "avatarAsDrawerBackground"
-    const val avatarBackgroundBlur = "avatarBackgroundBlur"
-    const val avatarBackgroundDarken = "avatarBackgroundDarken"
-    const val hideTimeForSticker = "hideTimeForSticker"
-    const val showMessageID = "showMessageID"
-    const val hideQuickSendMediaBottom = "hideQuickSendMediaButtom"
-    const val largeAvatarAsBackground = "largeAvatarAsBackground"
-    const val useSystemEmoji = "useSystemEmoji"
+    @BooleanConfig const val keepCopyFormatting = "keepCopyFormatting"
+    @BooleanConfig const val dateOfForwardedMsg = "dateOfForwardedMsg"
+    @BooleanConfig const val enchantAudio = "enchantAudio"
+    @BooleanConfig const val avatarAsDrawerBackground = "avatarAsDrawerBackground"
+    @BooleanConfig const val avatarBackgroundBlur = "avatarBackgroundBlur"
+    @BooleanConfig const val avatarBackgroundDarken = "avatarBackgroundDarken"
+    @BooleanConfig const val hideTimeForSticker = "hideTimeForSticker"
+    @BooleanConfig const val showMessageID = "showMessageID"
+    @BooleanConfig const val hideQuickSendMediaBottom = "hideQuickSendMediaButtom"
+    @BooleanConfig const val largeAvatarAsBackground = "largeAvatarAsBackground"
+    @BooleanConfig const val useSystemEmoji = "useSystemEmoji"
     const val customQuickMessage = "customQuickCommand"
-    const val customQuickMessageEnabled = "customQuickMessageEnabled"
+    @BooleanConfig const val customQuickMessageEnabled = "customQuickMessageEnabled"
     const val customQuickMessageDisplayName = "customQuickCommandDisplayName"
     const val customQuickMessageRow = 92
-    const val customQuickMsgSAR = "customQuickMessageSendAsReply"
-    const val scrollableChatPreview = "scrollableChatPreview"
-    const val disableVibration = "disableVibration"
+    @BooleanConfig const val customQuickMsgSAR = "customQuickMessageSendAsReply"
+    @BooleanConfig const val scrollableChatPreview = "scrollableChatPreview"
+    @BooleanConfig const val disableVibration = "disableVibration"
     const val aospEmojiFont = "NotoColorEmoji.ttf"
-    const val hidePremiumStickerAnim = "hidePremiumStickerAnim"
-    const val fastSpeedUpload = "fastSpeedUpload"
-    const val showTabsOnForward = "showTabsOnForward"
-    const val disableStickersAutoReorder = "disableStickersAutoReorder"
-    const val modifyDownloadSpeed = "modifyDownloadSpeed"
-    const val disablePreviewVideoSoundShortcut = "disablePreviewVideoSoundShortcut"
-    const val quickToggleAnonymous = "quickToggleAnonymous"
-    const val hideProxySponsorChannel = "hideProxySponsorChannel"
-    const val hideAllTab = "hideAllTab"
-    const val ignoreMutedCount = "ignoreMutedCount"
-    const val alwaysSendWithoutSound = "alwaysSendWithoutSound"
-    const val markdownDisabled = "markdownEnable"
-    const val markdownParseLinks = "markdownParseLinks"
-    const val newMarkdownParser = "newMarkdownParser"
-    const val showRPCError = "showRPCError"
-    const val enablePanguOnSending = "enablePanguOnSending"
-    const val enablePanguOnReceiving = "enablePanguOnReceiving"
-    const val showExactTime = "showExactTime"
+    @BooleanConfig const val hidePremiumStickerAnim = "hidePremiumStickerAnim"
+    @BooleanConfig const val fastSpeedUpload = "fastSpeedUpload"
+    @BooleanConfig const val showTabsOnForward = "showTabsOnForward"
+    @BooleanConfig(true) const val disableStickersAutoReorder = "disableStickersAutoReorder"
+    @IntConfig(512) const val modifyDownloadSpeed = "modifyDownloadSpeed"
+    @BooleanConfig const val disablePreviewVideoSoundShortcut = "disablePreviewVideoSoundShortcut"
+    @BooleanConfig const val quickToggleAnonymous = "quickToggleAnonymous"
+    @BooleanConfig const val hideProxySponsorChannel = "hideProxySponsorChannel"
+    @BooleanConfig const val hideAllTab = "hideAllTab"
+    @BooleanConfig const val ignoreMutedCount = "ignoreMutedCount"
+    @BooleanConfig const val alwaysSendWithoutSound = "alwaysSendWithoutSound"
+    @BooleanConfig const val markdownDisabled = "markdownEnable"
+    @BooleanConfig(true) const val markdownParseLinks = "markdownParseLinks"
+    @BooleanConfig(true) const val newMarkdownParser = "newMarkdownParser"
+    @BooleanConfig const val showRPCError = "showRPCError"
+    @BooleanConfig const val enablePanguOnSending = "enablePanguOnSending"
+    @BooleanConfig const val enablePanguOnReceiving = "enablePanguOnReceiving"
+    @BooleanConfig const val showExactTime = "showExactTime"
 
     /**
      * 0 default 1 online 2 offline
      */
-    const val keepOnlineStatusAs = "keepOnlineStatusAs"
+    @IntConfig(0) const val keepOnlineStatusAs = "keepOnlineStatusAs"
 
     // Custom API
-    @IntConfig(0)
+    @IntConfig(disableCustomAPI)
     const val customAPI = "customAPI"
+    @IntConfig(BuildVars.APP_ID)
     const val customAppId = "customAppId"
-    @StringConfig("It shouldn't be happened")
+    @StringConfig(BuildVars.APP_HASH)
     const val customAppHash = "customAppHash"
     const val disableCustomAPI = 0
     const val useTelegramAPI = 1
@@ -120,13 +117,13 @@ object Defines {
     const val telegramHash = "014b35b6184100b085b0d0572f9b5103"
 
     // Menu Display
-    const val showDeleteDownloadFiles = "showDeleteDownloadFiles"
-    const val showNoQuoteForward = "showNoQuoteForward"
-    const val showMessagesDetail = "showMessagesDetail"
-    const val showSaveMessages = "showSaveMessages"
-    const val showViewHistory = "showViewHistory"
-    const val showRepeat = "showRepeat"
-    const val showCopyPhoto = "showCopyPhoto"
+    @BooleanConfig const val showDeleteDownloadFiles = "showDeleteDownloadFiles"
+    @BooleanConfig(true) const val showNoQuoteForward = "showNoQuoteForward"
+    @BooleanConfig const val showMessagesDetail = "showMessagesDetail"
+    @BooleanConfig const val showSaveMessages = "showSaveMessages"
+    @BooleanConfig(true) const val showViewHistory = "showViewHistory"
+    @BooleanConfig(true) const val showRepeat = "showRepeat"
+    @BooleanConfig const val showCopyPhoto = "showCopyPhoto"
 
     // custom double tap
     @IntConfig(doubleTabReaction)
@@ -140,7 +137,6 @@ object Defines {
     const val doubleTabTranslate = 6
 
     // Auto Update
-    const val ignoredUpdateTag = "skipUpdate"
     const val lastCheckUpdateTime = "lastCheckUpdateTime"
     const val updateChannel = "updateChannel"
     const val stableChannel = 1
@@ -149,32 +145,32 @@ object Defines {
     const val updateChannelSkip = "updateChannelSkip"
 
     // Tab Menu
-    const val hasUpdateDialogFilterDatabase = "hasUpdateDialogFilterDatabaseFix"
-    const val tabMenu = "tabMenu"
+    @BooleanConfig const val hasUpdateDialogFilterDatabase = "hasUpdateDialogFilterDatabaseFix"
+    @IntConfig(tabMenuMix) const val tabMenu = "tabMenu"
     const val tabMenuText = 0
     const val tabMenuMix = 1
     const val tabMenuIcon = 2
 
     // Override device
-    const val devicePerformance = "devicePerformance"
+    @IntConfig(devicePerformanceAuto) const val devicePerformance = "devicePerformance"
     const val devicePerformanceAuto = -1
     const val devicePerformanceLow = 0
     const val devicePerformanceMedium = 1
     const val devicePerformanceHigh = 2
 
     // WebSocket Proxy
-    const val wsEnableTLS = "wsEnableTLS"
-    const val wsServerHost = "wsServerHost"
+    @BooleanConfig(true) const val wsEnableTLS = "wsEnableTLS"
+    @StringConfig("") const val wsServerHost = "wsServerHost"
     const val wsBuiltInProxyBackend = "wsBuiltInProxyBackend"
 
     // Translate
-    const val showOriginal = "showOriginal"
+    @BooleanConfig const val showOriginal = "showOriginal"
     const val translatorProvider = "translatorProvider"
     const val deepLFormality = "deepLFormality"
     const val translatorStatus = "translatorStatus"
     const val targetLanguage = "targetLanguage"
     const val restrictedLanguages = "restrictedLanguagesFix"
-    const val autoTranslate = "autoTranslate"
+    @BooleanConfig const val autoTranslate = "autoTranslate"
 
     // Misc
     @JvmField
@@ -191,7 +187,7 @@ object Defines {
     /**
      * 数组中元素未找到的下标，值为-1
      */
-    const val indexNotFound = -1
+    private const val indexNotFound = -1
 
     /**
      * 数组中是否包含元素

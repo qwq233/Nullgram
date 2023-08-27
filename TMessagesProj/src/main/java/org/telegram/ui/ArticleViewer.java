@@ -186,8 +186,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 
-import top.qwq2333.nullgram.config.ConfigManager;
-import top.qwq2333.nullgram.utils.Defines;
+import top.qwq2333.gen.Config;
 
 public class ArticleViewer implements NotificationCenter.NotificationCenterDelegate {
 
@@ -1137,7 +1136,7 @@ public class ArticleViewer implements NotificationCenter.NotificationCenterDeleg
             if (checkingForLongPress && windowView != null) {
                 checkingForLongPress = false;
                 if (pressedLink != null) {
-                    if (!ConfigManager.getBooleanOrFalse(Defines.disableVibration))
+                    if (!Config.disableVibration)
                         windowView.performHapticFeedback(HapticFeedbackConstants.LONG_PRESS, HapticFeedbackConstants.FLAG_IGNORE_GLOBAL_SETTING);
                     showCopyPopup(pressedLink.getSpan().getUrl());
                     pressedLink = null;
@@ -1151,11 +1150,11 @@ public class ArticleViewer implements NotificationCenter.NotificationCenterDeleg
                     } else {
                         textSelectionHelper.trySelect(pressedLinkOwnerView);
                     }
-                    if (textSelectionHelper.isInSelectionMode() && !ConfigManager.getBooleanOrFalse(Defines.disableVibration)) {
+                    if (textSelectionHelper.isInSelectionMode() && !Config.disableVibration) {
                         windowView.performHapticFeedback(HapticFeedbackConstants.LONG_PRESS, HapticFeedbackConstants.FLAG_IGNORE_GLOBAL_SETTING);
                     }
                 } else if (pressedLinkOwnerLayout != null && pressedLinkOwnerView != null) {
-                    if (!ConfigManager.getBooleanOrFalse(Defines.disableVibration))
+                    if (!Config.disableVibration)
                         windowView.performHapticFeedback(HapticFeedbackConstants.LONG_PRESS, HapticFeedbackConstants.FLAG_IGNORE_GLOBAL_SETTING);;
 
                     int[] location = new int[2];

@@ -21,6 +21,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Stack;
 
+import top.qwq2333.gen.Config;
 import top.qwq2333.nullgram.config.ConfigManager;
 import top.qwq2333.nullgram.utils.Defines;
 
@@ -63,7 +64,7 @@ public class SpoilersTextView extends TextView implements TextSelectionHelper.Si
 
     @Override
     public void setText(CharSequence text, BufferType type) {
-        isSpoilersRevealed = ConfigManager.getBooleanOrFalse(Defines.displaySpoilerMsgDirectly);
+        isSpoilersRevealed = Config.displaySpoilerMsgDirectly;
         super.setText(text, type);
     }
 

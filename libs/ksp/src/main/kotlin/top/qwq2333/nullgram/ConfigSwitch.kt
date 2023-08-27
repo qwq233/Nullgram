@@ -75,6 +75,7 @@ class ConfigSwitchGenerator(
                             }.build()
                         )
                         addFunction(FunSpec.builder("set$uppercaseName").apply {
+                            addAnnotation(JvmStatic::class)
                             addParameter("value", Boolean::class)
                             addStatement("%T.putBoolean(%T.$originName, value)", configManager, defines)
                         }.build())

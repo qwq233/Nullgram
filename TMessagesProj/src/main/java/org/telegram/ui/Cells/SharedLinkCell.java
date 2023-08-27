@@ -59,6 +59,7 @@ import java.util.Locale;
 import java.util.Stack;
 import java.util.concurrent.atomic.AtomicReference;
 
+import top.qwq2333.gen.Config;
 import top.qwq2333.nullgram.config.ConfigManager;
 import top.qwq2333.nullgram.utils.Defines;
 
@@ -335,7 +336,7 @@ public class SharedLinkCell extends FrameLayout {
                         for (TLRPC.MessageEntity e : message.messageOwner.entities) {
                             int ss = e.offset, se = e.offset + e.length;
                             if (
-                                ConfigManager.getBooleanOrFalse(Defines.displaySpoilerMsgDirectly)
+                                Config.displaySpoilerMsgDirectly
                                     && e instanceof TLRPC.TL_messageEntitySpoiler && start <= se
                                     && end >= ss) {
                                 TextStyleSpan.TextStyleRun run = new TextStyleSpan.TextStyleRun();

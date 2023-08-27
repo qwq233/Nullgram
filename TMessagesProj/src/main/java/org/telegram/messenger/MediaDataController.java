@@ -91,9 +91,8 @@ import java.util.concurrent.CountDownLatch;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import top.qwq2333.nullgram.config.ConfigManager;
+import top.qwq2333.gen.Config;
 import top.qwq2333.nullgram.helpers.EntitiesHelper;
-import top.qwq2333.nullgram.utils.Defines;
 
 @SuppressWarnings("unchecked")
 public class MediaDataController extends BaseController {
@@ -813,13 +812,13 @@ public class MediaDataController extends BaseController {
     public ArrayList<TLRPC.Document> getRecentStickers(int type, int padding) {
         ArrayList<TLRPC.Document> arrayList = recentStickers[type];
         if (type == TYPE_PREMIUM_STICKERS) {
-            if (ConfigManager.getBooleanOrFalse(Defines.disablePremiumSticker)) {
+            if (Config.disablePremiumSticker) {
                 return new ArrayList<>();
             } else {
                 return new ArrayList<>(recentStickers[type]);
             }
         }
-        return new ArrayList<>(arrayList.subList(0, Math.min(arrayList.size(), ConfigManager.getIntOrDefault(Defines.maxRecentSticker, 20))));
+        return new ArrayList<>(arrayList.subList(0, Math.min(arrayList.size(), Config.maxRecentSticker)));
     }
 
     public ArrayList<TLRPC.Document> getRecentStickersNoCopy(int type) {
@@ -1917,7 +1916,7 @@ public class MediaDataController extends BaseController {
     }
 
     public void loadFeaturedStickers(boolean emoji, boolean cache, boolean force) {
-        if (ConfigManager.getBooleanOrFalse(Defines.disableTrendingSticker) || (getUserConfig().getCurrentUser() != null && getUserConfig().getCurrentUser().bot) || loadingFeaturedStickers[emoji ? 1 : 0]) {
+        if (Config.disableTrendingSticker || (getUserConfig().getCurrentUser() != null && getUserConfig().getCurrentUser().bot) || loadingFeaturedStickers[emoji ? 1 : 0]) {
             return;
         }
         loadingFeaturedStickers[emoji ? 1 : 0] = true;
@@ -6224,7 +6223,7 @@ public class MediaDataController extends BaseController {
         boolean isPre = false;
         final String mono = "`";
         final String pre = "```";
-        while (!(ConfigManager.getBooleanOrDefault(Defines.newMarkdownParser, true) || EditTextBoldCursor.disableMarkdown) && (index = TextUtils.indexOf(message[0], !isPre ? mono : pre, lastIndex)) != -1) {
+        while (!(Config.newMarkdownParser || EditTextBoldCursor.disableMarkdown) && (index = TextUtils.indexOf(message[0], !isPre ? mono : pre, lastIndex)) != -1) {
             if (start == -1) {
                 isPre = message[0].length() - index > 2 && message[0].charAt(index + 1) == '`' && message[0].charAt(index + 2) == '`';
                 start = index;
@@ -6290,7 +6289,7 @@ public class MediaDataController extends BaseController {
             entities.add(entity);
         }
 
-        if (!EditTextBoldCursor.disableMarkdown && ConfigManager.getBooleanOrDefault(Defines.newMarkdownParser, true)) EntitiesHelper.parseMarkdown(message, allowStrike);
+        if (!EditTextBoldCursor.disableMarkdown && Config.newMarkdownParser) EntitiesHelper.parseMarkdown(message, allowStrike);
 
         if (message[0] instanceof Spanned) {
             Spanned spannable = (Spanned) message[0];
@@ -6392,7 +6391,7 @@ public class MediaDataController extends BaseController {
 
         CharSequence cs = message[0];
         if (entities == null) entities = new ArrayList<>();
-        if (ConfigManager.getBooleanOrDefault(Defines.newMarkdownParser, true) || EditTextBoldCursor.disableMarkdown) return entities;
+        if (Config.newMarkdownParser || EditTextBoldCursor.disableMarkdown) return entities;
         cs = parsePattern(cs, BOLD_PATTERN, entities, obj -> new TLRPC.TL_messageEntityBold());
         cs = parsePattern(cs, ITALIC_PATTERN, entities, obj -> new TLRPC.TL_messageEntityItalic());
         cs = parsePattern(cs, SPOILER_PATTERN, entities, obj -> new TLRPC.TL_messageEntitySpoiler());

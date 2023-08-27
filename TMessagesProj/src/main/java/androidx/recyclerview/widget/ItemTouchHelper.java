@@ -44,8 +44,7 @@ import org.telegram.messenger.AndroidUtilities;
 import java.util.ArrayList;
 import java.util.List;
 
-import top.qwq2333.nullgram.config.ConfigManager;
-import top.qwq2333.nullgram.utils.Defines;
+import top.qwq2333.gen.Config;
 
 /**
  * This is a utility class to add swipe to dismiss and drag & drop support to RecyclerView.
@@ -695,7 +694,7 @@ public class ItemTouchHelper extends RecyclerView.ItemDecoration
             mSelected = selected;
 
             if (actionState == ACTION_STATE_DRAG) {
-                if (ConfigManager.getBooleanOrFalse(Defines.disableVibration))
+                if (Config.disableVibration)
                     mSelected.itemView.performHapticFeedback(HapticFeedbackConstants.LONG_PRESS);
             }
         }

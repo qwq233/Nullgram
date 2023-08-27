@@ -70,6 +70,7 @@ import java.util.ArrayList;
 import java.util.Locale;
 
 import kotlin.Unit;
+import top.qwq2333.gen.Config;
 import top.qwq2333.nullgram.config.ConfigManager;
 import top.qwq2333.nullgram.helpers.TranslateHelper;
 import top.qwq2333.nullgram.utils.Defines;
@@ -273,7 +274,7 @@ public class TranslateAlert extends Dialog {
             getWindow().addFlags(WindowManager.LayoutParams.FLAG_LAYOUT_INSET_DECOR | WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN | WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
         }
 
-        if (noforwards && !ConfigManager.getBooleanOrFalse(Defines.allowScreenshotOnNoForwardChat)) {
+        if (noforwards && !Config.allowScreenshotOnNoForwardChat) {
             getWindow().addFlags(WindowManager.LayoutParams.FLAG_SECURE);
         }
 

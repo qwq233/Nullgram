@@ -27,7 +27,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.core.view.children
 import org.telegram.messenger.ApplicationLoader
-import top.qwq2333.nullgram.config.ConfigManager
+import top.qwq2333.gen.Config
 
 object VibrationUtils {
     lateinit var vibrator: Vibrator
@@ -44,7 +44,7 @@ object VibrationUtils {
     @JvmOverloads
     fun vibrate(time: Long = 200L) {
 
-        if (ConfigManager.getBooleanOrFalse(Defines.disableVibration)) return
+        if (Config.disableVibration) return
 
         if (!vibrator.hasVibrator()) return
 

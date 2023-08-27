@@ -223,8 +223,11 @@ object ConfigManager {
      * 切换boolean值 若原为false或未设置则切换为true 若原为true则切换为false
      *
      * @param key key
+     *
+     * @deprecated 使用Config.toggleXXX代替
      */
     @JvmStatic
+    @Deprecated("使用Config.toggleXXX代替")
     fun toggleBoolean(key: String) {
         synchronized(preferences) {
             try {

@@ -326,6 +326,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import kotlin.Unit;
+import top.qwq2333.gen.Config;
 import top.qwq2333.nullgram.activity.MessageDetailActivity;
 import top.qwq2333.nullgram.config.ConfigManager;
 import top.qwq2333.nullgram.config.DialogConfig;
@@ -1532,7 +1533,7 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
 
         @Override
         public boolean hasDoubleTap(View view, int position) {
-            final int currentConfig = ConfigManager.getIntOrDefault(Defines.doubleTab, Defines.doubleTabReaction);
+            final int currentConfig = Config.doubleTab;
             if (currentConfig == Defines.doubleTabNone || !(view instanceof ChatMessageCell)) {
                 return false;
             }
@@ -1605,7 +1606,7 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
 
         @Override
         public void onDoubleTap(View view, int position, float x, float y) {
-            final int currentConfig = ConfigManager.getIntOrDefault(Defines.doubleTab, Defines.doubleTabReaction);
+            final int currentConfig = Config.doubleTab;
             if (currentConfig == Defines.doubleTabNone || !(view instanceof ChatMessageCell) || getParentActivity() == null) {
                 return;
             }
@@ -5478,7 +5479,7 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
                 if (!foundTopView) {
                     scrolled = super.scrollVerticallyBy(dy, recycler, state);
                 }
-                if (!ConfigManager.getBooleanOrFalse(Defines.disableJumpToNextChannel) && dy > 0 && scrolled == 0 && ChatObject.isChannel(currentChat) && !currentChat.megagroup && chatListView.getScrollState() == RecyclerView.SCROLL_STATE_DRAGGING && !chatListView.isFastScrollAnimationRunning() && !chatListView.isMultiselect() && reportType < 0) {
+                if (!Config.disableJumpToNextChannel && dy > 0 && scrolled == 0 && ChatObject.isChannel(currentChat) && !currentChat.megagroup && chatListView.getScrollState() == RecyclerView.SCROLL_STATE_DRAGGING && !chatListView.isFastScrollAnimationRunning() && !chatListView.isMultiselect() && reportType < 0) {
                     if (pullingDownOffset == 0 && pullingDownDrawable != null) {
                         pullingDownDrawable.updateDialog();
                     }
@@ -7369,7 +7370,7 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
             Integer end = ids.get(ids.size() - 1);
             for (int i = 0; i < messages.size(); i++) {
                 int msgId = messages.get(i).getId();
-                if (ConfigManager.getBooleanOrFalse(Defines.ignoreBlockedUser) && getMessagesController().blockePeers.indexOfKey(messages.get(i).getSenderId()) >= 0)
+                if (Config.ignoreBlockedUser && getMessagesController().blockePeers.indexOfKey(messages.get(i).getSenderId()) >= 0)
                     continue;
                 if (msgId > begin && msgId < end && selectedMessagesIds[0].indexOfKey(msgId) < 0) {
                     MessageObject message = messages.get(i);
@@ -7698,7 +7699,7 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
             actionModeViews.add(actionMode.addItemWithWidth(star, R.drawable.msg_fave, AndroidUtilities.dp(54), LocaleController.getString("AddToFavorites", R.string.AddToFavorites)));
             actionModeViews.add(actionMode.addItemWithWidth(copy, R.drawable.msg_copy, AndroidUtilities.dp(54), LocaleController.getString("Copy", R.string.Copy)));
             actionModeViews.add(actionMode.addItemWithWidth(forward, R.drawable.msg_forward, AndroidUtilities.dp(54), LocaleController.getString("Forward", R.string.Forward)));
-            if (ConfigManager.getBooleanOrDefault(Defines.showNoQuoteForward, true)) {
+            if (Config.showNoQuoteForward) {
                 actionModeViews.add(actionMode.addItemWithWidth(OPTION_NOQUOTE_FORWARD, R.drawable.msg_noquote_forward, AndroidUtilities.dp(54), LocaleController.getString("NoQuoteForward", R.string.NoQuoteForward)));
             }
             actionModeViews.add(actionMode.addItemWithWidth(delete, R.drawable.msg_delete, AndroidUtilities.dp(54), LocaleController.getString("Delete", R.string.Delete)));
@@ -18793,7 +18794,7 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
     }
 
     private void loadSendAsPeers(boolean animatedUpdate) {
-        if (sendAsPeersObj != null || currentChat == null || (!ChatObject.canSendAsPeers(currentChat) && !ConfigManager.getBooleanOrFalse(Defines.quickToggleAnonymous))
+        if (sendAsPeersObj != null || currentChat == null || (!ChatObject.canSendAsPeers(currentChat) && !Config.quickToggleAnonymous)
             || chatActivityEnterView == null) {
             return;
         }
@@ -23997,18 +23998,18 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
                             items.add(LocaleController.getString("Forward", R.string.Forward));
                             options.add(OPTION_FORWARD);
                             icons.add(R.drawable.msg_forward);
-                            if (ConfigManager.getBooleanOrDefault(Defines.showNoQuoteForward, true) && !UserObject.isUserSelf(currentUser)) {
+                            if (Config.showNoQuoteForward && !UserObject.isUserSelf(currentUser)) {
                                 items.add(LocaleController.getString("NoQuoteForward", R.string.NoQuoteForward));
                                 options.add(95);
                                 icons.add(R.drawable.msg_noquote_forward);
                             }
-                            if (ConfigManager.getBooleanOrFalse(Defines.showSaveMessages) && !UserObject.isUserSelf(currentUser)) {
+                            if (Config.showSaveMessages && !UserObject.isUserSelf(currentUser)) {
                                 items.add(LocaleController.getString("saveMessages", R.string.saveMessages));
                                 options.add(OPTION_SAVE_MESSAGE);
                                 icons.add(R.drawable.msg_saved);
                             }
                         }
-                        if (ConfigManager.getBooleanOrDefault(Defines.showRepeat, true)) {
+                        if (Config.showRepeat) {
                             if (!selectedObject.isSponsored() && chatMode != MODE_SCHEDULED && (!selectedObject.needDrawBluredPreview() || selectedObject.hasExtendedMediaPreview()) &&
                                 !selectedObject.isLiveLocation() && selectedObject.type != MessageObject.TYPE_PHONE_CALL &&
                                 selectedObject.type != MessageObject.TYPE_GIFT_PREMIUM) {
@@ -24021,14 +24022,14 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
                                 }
                             }
                         }
-                        if (ConfigManager.getBooleanOrFalse(Defines.customQuickMessageEnabled)) {
+                        if (Config.customQuickMessageEnabled) {
                             if (allowChatActions) {
                                 items.add(ConfigManager.getStringOrDefault(Defines.customQuickMessageDisplayName, "NULL"));
                                 options.add(Defines.customQuickMessageRow);
                                 icons.add(R.drawable.msg_fave);
                             }
                         }
-                        if (ConfigManager.getBooleanOrDefault(Defines.showViewHistory, true)) {
+                        if (Config.showViewHistory) {
                             boolean allowViewHistory = currentChat != null && chatMode == 0 && !currentChat.broadcast && !(threadMessageObjects != null && threadMessageObjects.contains(message));
                             if (allowViewHistory) {
                                 items.add(LocaleController.getString("ViewUserHistory", R.string.ViewHistory));
@@ -24036,7 +24037,7 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
                                 icons.add(R.drawable.msg_recent);
                             }
                         }
-                        if (ConfigManager.getBooleanOrFalse(Defines.showMessagesDetail)) {
+                        if (Config.showMessagesDetail) {
                             items.add(LocaleController.getString("MessageDetails", R.string.MessageDetails));
                             options.add(OPTION_DETAIL);
                             icons.add(R.drawable.msg_info);
@@ -25314,7 +25315,7 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
         contentView.addView(emptyViewContainer, 1, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT, Gravity.CENTER));
 
         int distance = getArguments().getInt("nearby_distance", -1);
-        if (!ConfigManager.getBooleanOrFalse(Defines.disableGreetingSticker) && (distance >= 0 || preloadedGreetingsSticker != null) && currentUser != null && !userBlocked) {
+        if (!Config.disableGreetingSticker && (distance >= 0 || preloadedGreetingsSticker != null) && currentUser != null && !userBlocked) {
             greetingsViewContainer = new ChatGreetingsView(getContext(), currentUser, distance, currentAccount, preloadedGreetingsSticker, themeDelegate);
             greetingsViewContainer.setListener((sticker) -> {
                 animatingDocuments.put(sticker, 0);
@@ -25346,7 +25347,7 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
                     emptyMessage = LocaleController.getString("GotAQuestion", R.string.GotAQuestion);
                 } else if (currentUser == null || currentUser.self || currentUser.deleted || userBlocked) {
                     emptyMessage = LocaleController.getString("NoMessages", R.string.NoMessages);
-                } else if (ConfigManager.getBooleanOrFalse(Defines.disableGreetingSticker)){
+                } else if (Config.disableGreetingSticker){
                     emptyMessage = LocaleController.getString("NoMessages", R.string.NoMessages);
                 }
                 if (emptyMessage == null) {
@@ -26513,7 +26514,7 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
                     return;
                 }
                 getSendMessagesHelper().sendMessage(SendMessageParams.of(ConfigManager.getStringOrDefault(Defines.customQuickMessage, "NULL"),
-                        dialog_id, selectedObject, ConfigManager.getBooleanOrFalse(Defines.customQuickMsgSAR) ? threadMessageObject : null,
+                        dialog_id, selectedObject, Config.customQuickMsgSAR ? threadMessageObject : null,
                         null, false, null, null, null, true, 0, null, false));
                 break;
             }
@@ -28613,7 +28614,7 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
                 View view = holder.itemView;
 
                 boolean fromUserBlocked = getMessagesController().blockePeers.indexOfKey(message.getFromChatId()) >= 0
-                    && ConfigManager.getBooleanOrFalse(Defines.ignoreBlockedUser);
+                    && Config.ignoreBlockedUser;
 
 
                 if (view instanceof ChatMessageCell) {
@@ -29976,7 +29977,7 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
                     button.url != null ? LocaleController.getString("CopyLink", R.string.CopyLink) : null,
                     button.query != null ? LocaleController.getString("CopyInlineQuery", R.string.CopyInlineQuery) : null,
                     button.user_id != 0 ? LocaleController.getString("CopyID", R.string.CopyID) : null,
-                    ConfigManager.getBooleanOrFalse(Defines.showHiddenSettings) && button.data != null ? LocaleController.getString("SendCallback", R.string.SendCallback) : null}, (dialog, which) -> {
+                    Config.showHiddenSettings && button.data != null ? LocaleController.getString("SendCallback", R.string.SendCallback) : null}, (dialog, which) -> {
                     if (which == 0) {
                         AndroidUtilities.addToClipboard(button.text);
                     } else if (which == 1) {

@@ -59,6 +59,7 @@ import org.telegram.ui.PaymentFormActivity;
 
 import java.util.ArrayList;
 
+import top.qwq2333.gen.Config;
 import top.qwq2333.nullgram.config.ConfigManager;
 import top.qwq2333.nullgram.utils.Defines;
 
@@ -463,7 +464,7 @@ public class UndoView extends FrameLayout {
         timeLeft = 5000;
         currentInfoObject = infoObject;
 
-        if (ConfigManager.getBooleanOrFalse(Defines.disableUndo) && !isTooltipAction()) {
+        if (Config.disableUndo && !isTooltipAction()) {
             if (actionRunnable != null) actionRunnable.run();
             return;
         }
