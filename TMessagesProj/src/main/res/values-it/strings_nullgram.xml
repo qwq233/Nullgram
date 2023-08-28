@@ -271,7 +271,7 @@
     <string name="DevicePerformanceMedium">Media</string>
     <string name="DevicePerformanceHigh">Alta</string>
     <string name="OverrideDevicePerformance">Ignora verifica prestazioni</string>
-    <string name="OverrideDevicePerformanceDesc">Ignora la verifica prestazioni di Telegram.\nLa modalità bassa riduce le animazioni e simili il più possibile, riducendo il consumo di energia quando in uso.\nLa modalità alta potrebbe aumentare il consumo e il carico, con potenziali rallentamenti del dispositivo.</string>
+    <string name="OverrideDevicePerformanceDesc">Ignora la verifica prestazioni di TELEOFFICIAL.\nLa modalità a basso consumo riduce le animazioni e simili il più possibile, riducendo il consumo di energia quando in uso.\nLa modalità ad alto consumo potrebbe aumentare il consumo e il carico, con potenziali rallentamenti del dispositivo.</string>
     <string name="JumpToBeginning">Torna all\'inizio</string>
     <string name="DisableQuickSendMediaBottom">Disattiva bottone invio media rapido</string>
     <string name="ProviderBaiduTranslate">Baidu Translator</string>
@@ -290,8 +290,8 @@
     <string name="RegistrationDateOlder">Più vecchio del %s</string>
     <string name="RegistrationDateApproximately">Approssimativamente al %s</string>
     <string name="showRPCError">Vedi errori RPC</string>
-    <string name="enablePanguOnReceiving">Abilita Pangu su ricezione</string>
-    <string name="enablePanguOnSending">Abilita Pangu su invio</string>
+    <string name="enablePanguOnReceiving">Abilita Pangu alla ricezione</string>
+    <string name="enablePanguOnSending">Abilita Pangu all\'invio</string>
     <string name="panguInfo">Spaziatura paranoica per migliorare la leggibilità, inserisce spazi tra caratteri CJK (Cinese, Giapponese, Coreano), inglese \"half-width\" (carattere a mezza larghezza), numeri e simboli.</string>
     <string name="showExactTime">Mostra orario con i secondi</string>
     <string name="keepOnlineStatusAs">Mantieni stato online su</string>
@@ -300,7 +300,7 @@
     <string name="BotLoginMessage">Inserisci il token ottenuto da **@BotFather**.</string>
     <string name="Stories">Storie</string>
     <string name="HideStories">Nascondi storie</string>
-    <string name="storyStealthMode">Modalità stealth della storia</string>
+    <string name="storyStealthMode">Modalità incognito storie</string>
     <string name="OneMoreThing">Un\'ultima cosa</string>
     <string name="NotOriginalNullgramInfo">Sembra che tu stia usando un fork di Nullgram.\nVuoi anche seguire il canale di Nullgram?</string>
 </resources>
