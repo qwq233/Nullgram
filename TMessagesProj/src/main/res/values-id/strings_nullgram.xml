@@ -290,9 +290,9 @@
     <string name="RegistrationDateOlder">Lebih lama dari %s</string>
     <string name="RegistrationDateApproximately">Sekitar %s</string>
     <string name="showRPCError">Tampilkan kesalahan RPC</string>
-    <string name="enablePanguOnReceiving">Enable Pangu on receiving</string>
+    <string name="enablePanguOnReceiving">Aktifkan Pangu saat menerima</string>
     <string name="enablePanguOnSending">Enable Pangu on sending</string>
-    <string name="panguInfo">Paranoid text spacing for good readability, to automatically insert whitespace between CJK (Chinese, Japanese, Korean), half-width English, digit and symbol characters.</string>
+    <string name="panguInfo">Spasi teks paranoid agar mudah dibaca, untuk secara otomatis menyisipkan spasi antara CJK (Cina, Jepang, Korea), bahasa Inggris setengah lebar, karakter angka dan simbol.</string>
     <string name="showExactTime">Display time in seconds</string>
     <string name="keepOnlineStatusAs">Keep online status as</string>
     <string name="Offline">Offline</string>
