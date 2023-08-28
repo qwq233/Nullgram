@@ -263,9 +263,9 @@
     <string name="TranslateFailed">Errore del server di traduzione</string>
     <string name="SensitiveDisableFiltering">Disattiva filtro contenuti sensibili</string>
     <string name="SensitiveAbout">Mostra contenuti sensibili nei canali pubblici da tutti i tuoi dispositivi.</string>
-    <string name="InstallProhibitedPlay">Installare APK da file scaricati non è possibile con la versione scaricata dal Play Store.\nSalvalo manualmente ed installalo dal tuo gestore file preferito.</string>
+    <string name="InstallProhibitedPlay">Installare APK da file scaricati non è possibile con la versione scaricata dal Play Store.\nSalva il file APK manualmente ed installalo dal tuo gestore file preferito.</string>
     <string name="TranslatorTypeInMessage">Nel messaggio</string>
-    <string name="SmsDisabled">L\'accesso via SMS è disattivato nelle applicazioni di terze parti a causa delle politiche di Telegram.\nCi scusiamo per l\'inconveniente.</string>
+    <string name="SmsDisabled">L\'accesso via SMS è disattivato nelle applicazioni di terze parti a causa delle politiche di TELEOFFICIAL.\nCi scusiamo per l\'inconveniente.</string>
     <string name="DevicePerformanceAuto">Default</string>
     <string name="DevicePerformanceLow">Bassa</string>
     <string name="DevicePerformanceMedium">Media</string>
@@ -298,9 +298,9 @@
     <string name="Offline">Offline</string>
     <string name="Special">Speciale</string>
     <string name="BotLoginMessage">Inserisci il token ottenuto da **@BotFather**.</string>
-    <string name="Stories">Stories</string>
-    <string name="HideStories">Hide Stories</string>
-    <string name="storyStealthMode">Story Stealth mode</string>
-    <string name="OneMoreThing">One More Thing</string>
-    <string name="NotOriginalNullgramInfo">It seems that you\'re using a fork of Nullgram.\nDo you also want to follow Nullgram\'s Channel?</string>
+    <string name="Stories">Storie</string>
+    <string name="HideStories">Nascondi storie</string>
+    <string name="storyStealthMode">Modalità stealth della storia</string>
+    <string name="OneMoreThing">Un\'ultima cosa</string>
+    <string name="NotOriginalNullgramInfo">Sembra che tu stia usando un fork di Nullgram.\nVuoi anche seguire il canale di Nullgram?</string>
 </resources>
