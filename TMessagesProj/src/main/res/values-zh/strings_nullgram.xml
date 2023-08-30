@@ -298,9 +298,9 @@
     <string name="Offline">离线</string>
     <string name="Special">特殊</string>
     <string name="BotLoginMessage">输入从 **@BotFather** 获取的机器人令牌。</string>
-    <string name="Stories">Stories</string>
-    <string name="HideStories">Hide Stories</string>
-    <string name="storyStealthMode">Story Stealth mode</string>
-    <string name="OneMoreThing">One More Thing</string>
-    <string name="NotOriginalNullgramInfo">It seems that you\'re using a fork of Nullgram.\nDo you also want to follow Nullgram\'s Channel?</string>
+    <string name="Stories">动态</string>
+    <string name="HideStories">隐藏动态</string>
+    <string name="storyStealthMode">动态隐身模式</string>
+    <string name="OneMoreThing">还有一件事</string>
+    <string name="NotOriginalNullgramInfo">你似乎正在使用 Nullgram 的分支。\n 你想要关注 Nullgram 的频道吗？</string>
 </resources>
