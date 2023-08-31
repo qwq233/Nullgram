@@ -9,7 +9,7 @@
     <string name="ViewSourceCode">عرض كود المصدر</string>
     <string name="Categories">الفئات</string>
     <string name="About">عن التطبيق</string>
-    <string name="OfficialChannelName">NullgramClient</string>
+    <string name="OfficialChannelName">عميل Nullgram</string>
     <string name="noAvailableUpdate">لا يوجد تحديث.</string>
     <string name="updateAvailable">يوجد تحديث جديد</string>
     <string name="variantsNotFound">متغيرات الإصدار لا تتطابق تلقائيا.\nالرجاء التحميل يدوياً من GitHub.</string>
