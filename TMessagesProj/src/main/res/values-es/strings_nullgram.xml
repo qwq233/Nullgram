@@ -211,6 +211,7 @@
     <string name="openArchiveOnPull">Abrir archivados al deslizar hacia abajo</string>
     <string name="hideAllTab">Ocultar pestaña \"Todos los chats\"</string>
     <string name="ignoreMutedCount">Ignorar recuento silenciado en la pestaña</string>
+    <string name="disableSharePhoneWithContactByDefault">No Share Phone Number When Add Contact</string>
     <string name="disableStickersAutoReorder">Desactivar order dinámico de packs de stickers</string>
     <string name="Ban">Ban</string>
     <string name="autoDisableBuiltInProxy">Deshabilitar automáticamente el proxy integrado</string>
