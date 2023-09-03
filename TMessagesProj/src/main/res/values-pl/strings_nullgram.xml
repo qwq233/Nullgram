@@ -289,7 +289,6 @@
     <string name="RegistrationDateNewer">Newer than %s</string>
     <string name="RegistrationDateOlder">Older than %s</string>
     <string name="RegistrationDateApproximately">Approximately %s</string>
-    <string name="LearnMore">Dowiedz się więcej</string>
     <string name="showRPCError">Show RPC Error</string>
     <string name="enablePanguOnReceiving">Enable Pangu on receiving</string>
     <string name="enablePanguOnSending">Enable Pangu on sending</string>
@@ -299,4 +298,9 @@
     <string name="Offline">Offline</string>
     <string name="Special">Special</string>
     <string name="BotLoginMessage">Wprowadź token bota otrzymany od **@BotFather**.</string>
+    <string name="Stories">Stories</string>
+    <string name="HideStories">Hide Stories</string>
+    <string name="storyStealthMode">Story Stealth mode</string>
+    <string name="OneMoreThing">One More Thing</string>
+    <string name="NotOriginalNullgramInfo">It seems that you\'re using a fork of Nullgram.\nDo you also want to follow Nullgram\'s Channel?</string>
 </resources>

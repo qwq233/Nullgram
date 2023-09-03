@@ -9,7 +9,7 @@
     <string name="ViewSourceCode">عرض كود المصدر</string>
     <string name="Categories">الفئات</string>
     <string name="About">عن التطبيق</string>
-    <string name="OfficialChannelName">NullgramClient</string>
+    <string name="OfficialChannelName">عميل Nullgram</string>
     <string name="noAvailableUpdate">لا يوجد تحديث.</string>
     <string name="updateAvailable">يوجد تحديث جديد</string>
     <string name="variantsNotFound">متغيرات الإصدار لا تتطابق تلقائيا.\nالرجاء التحميل يدوياً من GitHub.</string>
@@ -300,4 +300,9 @@
     <string name="Offline">Offline</string>
     <string name="Special">Special</string>
     <string name="BotLoginMessage">Enter the bot token obtained from **@BotFather**.</string>
+    <string name="Stories">Stories</string>
+    <string name="HideStories">Hide Stories</string>
+    <string name="storyStealthMode">Story Stealth mode</string>
+    <string name="OneMoreThing">One More Thing</string>
+    <string name="NotOriginalNullgramInfo">It seems that you\'re using a fork of Nullgram.\nDo you also want to follow Nullgram\'s Channel?</string>
 </resources>
