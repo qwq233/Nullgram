@@ -88,8 +88,8 @@ object ConfigManager {
      * @return key所对应值
      */
     @JvmStatic
-    fun getStringOrDefault(key: String, def: String): String {
-        return preferences.getString(key, def) ?: def
+    fun getStringOrDefault(key: String, def: String?): String? {
+        return preferences.getString(key, def)
     }
 
     /**
