@@ -151,7 +151,7 @@ class ConfigSwitchGenerator(
                             PropertySpec.builder(originName, String::class).apply {
                                 mutable(true)
                                 addAnnotation(JvmField::class)
-                                initializer("%T.getStringOrDefault($defines.$originName, %S)", configManager, defValue)
+                                initializer("%T.getStringOrDefault($defines.$originName, %S)!!", configManager, defValue)
                             }.build()
                         )
                         addFunction(FunSpec.builder("set$uppercaseName").apply {
