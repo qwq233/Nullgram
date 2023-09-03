@@ -211,6 +211,7 @@
     <string name="openArchiveOnPull">Apri archivio su pull</string>
     <string name="hideAllTab">Nascondi scheda \"Tutte le chat\"</string>
     <string name="ignoreMutedCount">Ignora chat silenziate nella conta</string>
+    <string name="disableSharePhoneWithContactByDefault">No Share Phone Number When Add Contact</string>
     <string name="disableStickersAutoReorder">Disattiva autoriordino stickerpack</string>
     <string name="Ban">Ban</string>
     <string name="autoDisableBuiltInProxy">Disattiva automaticamente proxy integrato</string>
