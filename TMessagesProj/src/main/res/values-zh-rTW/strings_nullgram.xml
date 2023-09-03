@@ -211,6 +211,7 @@
     <string name="openArchiveOnPull">下拉時開啟封存</string>
     <string name="hideAllTab">隱藏「所有對話」分頁</string>
     <string name="ignoreMutedCount">忽略分頁中已靜音的數量</string>
+    <string name="disableSharePhoneWithContactByDefault">No Share Phone Number When Add Contact</string>
     <string name="disableStickersAutoReorder">停用貼圖包自動重新排序功能</string>
     <string name="Ban">封鎖</string>
     <string name="autoDisableBuiltInProxy">自動停用內建代理</string>
