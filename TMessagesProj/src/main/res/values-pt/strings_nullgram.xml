@@ -211,6 +211,7 @@
     <string name="openArchiveOnPull">Abrir arquivo ao puxar para baixo</string>
     <string name="hideAllTab">Ocultar aba \"Todos os Bate-Papos\"</string>
     <string name="ignoreMutedCount">Ignorar Contagem de Silenciados na Aba</string>
+    <string name="disableSharePhoneWithContactByDefault">No Share Phone Number When Add Contact</string>
     <string name="disableStickersAutoReorder">Desativar a reorganização automática dos pacotes de adesivos</string>
     <string name="Ban">Banir</string>
     <string name="autoDisableBuiltInProxy">Auto Desativar Proxy integrado</string>
