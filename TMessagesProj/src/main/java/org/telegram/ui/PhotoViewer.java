@@ -5016,9 +5016,9 @@ public class PhotoViewer implements NotificationCenter.NotificationCenterDelegat
                                         CheckBoxCell cell = new CheckBoxCell(parentActivity, 1, resourcesProvider);
                                         cell.setBackgroundDrawable(Theme.getSelectorDrawable(false));
                                         if (currentChat != null) {
-                                            cell.setText(LocaleController.getString("DeleteForAll", R.string.DeleteForAll), "", false, false);
+                                            cell.setText(LocaleController.getString("DeleteForAll", R.string.DeleteForAll), "", true, false);
                                         } else {
-                                            cell.setText(LocaleController.formatString("DeleteForUser", R.string.DeleteForUser, UserObject.getFirstName(currentUser)), "", false, false);
+                                            cell.setText(LocaleController.formatString("DeleteForUser", R.string.DeleteForUser, UserObject.getFirstName(currentUser)), "", true, false);
                                         }
                                         cell.setPadding(LocaleController.isRTL ? AndroidUtilities.dp(16) : AndroidUtilities.dp(8), 0, LocaleController.isRTL ? AndroidUtilities.dp(8) : AndroidUtilities.dp(16), 0);
                                         frameLayout.addView(cell, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, 48, Gravity.TOP | Gravity.LEFT, 0, 0, 0, 0));
