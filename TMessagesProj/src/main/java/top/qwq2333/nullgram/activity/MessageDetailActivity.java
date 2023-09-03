@@ -587,9 +587,10 @@ public class MessageDetailActivity extends BaseActivity implements NotificationC
             TLRPC.User user = (TLRPC.User) object;
             builder.append(ContactsController.formatName(user.first_name, user.last_name));
             builder.append("\n");
-            if (!TextUtils.isEmpty(user.username)) {
+            var username = UserObject.getPublicUsername(user);
+            if (!TextUtils.isEmpty(username)) {
                 builder.append("@");
-                builder.append(UserObject.getPublicUsername(user));
+                builder.append(username);
                 builder.append("\n");
             }
             builder.append(user.id);
@@ -597,9 +598,10 @@ public class MessageDetailActivity extends BaseActivity implements NotificationC
             TLRPC.Chat chat = (TLRPC.Chat) object;
             builder.append(chat.title);
             builder.append("\n");
-            if (!TextUtils.isEmpty(chat.username)) {
+            var username = ChatObject.getPublicUsername(chat);
+            if (!TextUtils.isEmpty(username)) {
                 builder.append("@");
-                builder.append(ChatObject.getPublicUsername(chat));
+                builder.append(username);
                 builder.append("\n");
             }
             builder.append(chat.id);
