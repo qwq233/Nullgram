@@ -298,5 +298,9 @@
     <string name="Offline">离线</string>
     <string name="Special">特殊</string>
     <string name="BotLoginMessage">输入从 **@BotFather** 获取的机器人令牌。</string>
-  <string name="NotOriginalNullgramInfo">你似乎正在使用Nullgram的分支版本。\n你是否也要进入Nullgram的频道？</string>
+    <string name="Stories">动态</string>
+    <string name="HideStories">隐藏动态</string>
+    <string name="storyStealthMode">动态隐身模式</string>
+    <string name="OneMoreThing">还有一件事</string>
+    <string name="NotOriginalNullgramInfo">你似乎正在使用Nullgram的分支版本。\n你是否也要进入Nullgram的频道？</string>
 </resources>
