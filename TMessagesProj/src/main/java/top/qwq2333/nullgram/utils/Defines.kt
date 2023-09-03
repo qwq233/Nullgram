@@ -33,6 +33,7 @@ object Defines {
     @BooleanConfig const val blockSponsorAds = "blockSponsorMessages"
     @BooleanConfig const val hideGroupSticker = "hideGroupSticker"
     @BooleanConfig const val allowScreenshotOnNoForwardChat = "allowScreenshotOnNoForwardChat"
+    @BooleanConfig(true) const val disableSharePhoneWithContactByDefault = "disableSharePhoneWithContactByDefault"
     @BooleanConfig const val autoDisableBuiltInProxy = "autoDisableBuiltInProxy"
     @BooleanConfig const val labelChannelUser = "labelChannelUser"
     @BooleanConfig const val displaySpoilerMsgDirectly = "displaySpoilerMsgDirectly"
