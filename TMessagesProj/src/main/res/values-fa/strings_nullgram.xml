@@ -211,6 +211,7 @@
     <string name="openArchiveOnPull">باز شدن آرشیو هنگام کشیدن</string>
     <string name="hideAllTab">Hide \"All Chats\" tab</string>
     <string name="ignoreMutedCount">چشم‌پوشی شمارش بی‌صدا در برگه</string>
+    <string name="disableSharePhoneWithContactByDefault">No Share Phone Number When Add Contact</string>
     <string name="disableStickersAutoReorder">Disable sticker packs auto-reorder</string>
     <string name="Ban">Ban</string>
     <string name="autoDisableBuiltInProxy">Auto Disable Built-In Proxy</string>
