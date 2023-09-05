@@ -301,7 +301,7 @@
     <string name="BotLoginMessage">Digite o token do bot obtido de **@BotFather**.</string>
     <string name="Stories">Histórias</string>
     <string name="HideStories">Ocultar histórias</string>
-    <string name="storyStealthMode">Story Stealth mode</string>
+    <string name="storyStealthMode">Modo furtivo de histórias</string>
     <string name="OneMoreThing">Mais uma coisa</string>
     <string name="NotOriginalNullgramInfo">Parece que você esta utilizando uma fork do Nullgram.\nVocê também quer seguir o canal do Nullgram?</string>
 </resources>
