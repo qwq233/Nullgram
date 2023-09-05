@@ -294,7 +294,7 @@
     <string name="enablePanguOnReceiving">Enable Pangu on receiving</string>
     <string name="enablePanguOnSending">Enable Pangu on sending</string>
     <string name="panguInfo">Paranoid text spacing for good readability, to automatically insert whitespace between CJK (Chinese, Japanese, Korean), half-width English, digit and symbol characters.</string>
-    <string name="showExactTime">Display time in seconds</string>
+    <string name="showExactTime">Exibir o tempo em segundos</string>
     <string name="keepOnlineStatusAs">Keep online status as</string>
     <string name="Offline">Offline</string>
     <string name="Special">Special</string>
