@@ -304,4 +304,5 @@
     <string name="storyStealthMode">动态隐身模式</string>
     <string name="OneMoreThing">还有一件事</string>
     <string name="NotOriginalNullgramInfo">你似乎正在使用 Nullgram 的分支。\n 你想要关注 Nullgram 的频道吗？</string>
+    <string name="Official">Official</string>
 </resources>
