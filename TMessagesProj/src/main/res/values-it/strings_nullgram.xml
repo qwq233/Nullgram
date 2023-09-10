@@ -304,4 +304,5 @@
     <string name="storyStealthMode">Modalità incognito storie</string>
     <string name="OneMoreThing">Un\'ultima cosa</string>
     <string name="NotOriginalNullgramInfo">Sembra che tu stia usando un fork di Nullgram.\nVuoi anche seguire il canale di Nullgram?</string>
+    <string name="Official">Official</string>
 </resources>
