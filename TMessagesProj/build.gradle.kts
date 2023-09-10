@@ -1,7 +1,7 @@
 @file:Suppress("UnstableApiUsage")
 
 import com.android.build.api.variant.BuildConfigField
-import com.android.build.api.variant.FilterConfiguration.FilterType.*
+import com.android.build.api.variant.FilterConfiguration.FilterType.ABI
 import com.android.build.gradle.internal.cxx.configure.gradleLocalProperties
 import com.google.firebase.crashlytics.buildtools.gradle.CrashlyticsExtension
 import java.text.SimpleDateFormat
@@ -228,6 +228,3 @@ kotlin {
         kotlin.srcDir("$buildDir/generated/ksp/$name/kotlin/")
     }
 }
-
-tasks.register<ReplaceIcon>("replaceIcon") {}
-tasks.getByName("preBuild").dependsOn(tasks.getByName("replaceIcon"))
