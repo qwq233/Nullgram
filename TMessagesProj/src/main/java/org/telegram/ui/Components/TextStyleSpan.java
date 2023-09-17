@@ -17,6 +17,8 @@ import org.telegram.messenger.AndroidUtilities;
 import org.telegram.tgnet.TLRPC;
 import org.telegram.ui.ActionBar.Theme;
 
+import top.qwq2333.nullgram.utils.TypefaceUtils;
+
 public class TextStyleSpan extends MetricAffectingSpan {
 
     private int textSize;
@@ -77,11 +79,11 @@ public class TextStyleSpan extends MetricAffectingSpan {
         public Typeface getTypeface() {
             if ((flags & FLAG_STYLE_MONO) != 0 || (flags & FLAG_STYLE_QUOTE) != 0) {
                 return Typeface.MONOSPACE;
-            } else if ((flags & FLAG_STYLE_BOLD) != 0 && (flags & FLAG_STYLE_ITALIC) != 0) {
+            } else if ((flags & FLAG_STYLE_BOLD) != 0 && (flags & FLAG_STYLE_ITALIC) != 0 && TypefaceUtils.isMediumWeightSupported() && TypefaceUtils.isItalicSupported()) {
                 return AndroidUtilities.getTypeface("fonts/rmediumitalic.ttf");
-            } else if ((flags & FLAG_STYLE_BOLD) != 0) {
+            } else if ((flags & FLAG_STYLE_BOLD) != 0 && TypefaceUtils.isMediumWeightSupported()) {
                 return AndroidUtilities.getTypeface("fonts/rmedium.ttf");
-            } else if ((flags & FLAG_STYLE_ITALIC) != 0) {
+            } else if ((flags & FLAG_STYLE_ITALIC) != 0 && TypefaceUtils.isItalicSupported()) {
                 return AndroidUtilities.getTypeface("fonts/ritalic.ttf");
             } else {
                 return null;
