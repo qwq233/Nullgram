@@ -44,7 +44,6 @@ import org.telegram.ui.Components.AlertsCreator
 import org.telegram.ui.Components.BulletinFactory
 import top.qwq2333.gen.Config
 import top.qwq2333.nullgram.activity.DatacenterActivity
-import top.qwq2333.nullgram.config.ConfigManager
 import top.qwq2333.nullgram.remote.NicegramController
 import java.io.BufferedReader
 import java.io.File
@@ -305,4 +304,10 @@ fun String.isNumber(): Boolean = try {
     true
 } catch (e: NumberFormatException) {
     false
+}
+
+internal inline fun tryOrLog(block: () -> Unit) = runCatching {
+    block()
+}.onFailure {
+    Log.e(it)
 }
