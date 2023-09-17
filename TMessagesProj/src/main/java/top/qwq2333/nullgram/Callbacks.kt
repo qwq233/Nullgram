@@ -17,7 +17,7 @@
  * <https://www.gnu.org/licenses/>
  */
 
-package top.qwq2333.nullgram.utils
+package top.qwq2333.nullgram
 
 import android.os.Build
 import android.telephony.TelephonyCallback
