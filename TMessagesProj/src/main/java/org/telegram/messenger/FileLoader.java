@@ -121,6 +121,41 @@ public class FileLoader extends BaseController {
         return fileLoaderQueue;
     }
 
+    public void setLocalPathTo(TLObject attach, String attachPath) {
+        long documentId = 0;
+        int dcId = 0;
+        int type = 0;
+        if (attach instanceof TLRPC.Document) {
+            TLRPC.Document document = (TLRPC.Document) attach;
+            if (document.key != null) {
+                type = MEDIA_DIR_CACHE;
+            } else {
+                if (MessageObject.isVoiceDocument(document)) {
+                    type = MEDIA_DIR_AUDIO;
+                } else if (MessageObject.isVideoDocument(document)) {
+                    type = MEDIA_DIR_VIDEO;
+                } else {
+                    type = MEDIA_DIR_DOCUMENT;
+                }
+            }
+            documentId = document.id;
+            dcId = document.dc_id;
+            filePathDatabase.putPath(documentId, dcId, type, FilePathDatabase.FLAG_LOCALLY_CREATED, attachPath);
+        } else if (attach instanceof TLRPC.PhotoSize) {
+            TLRPC.PhotoSize photoSize = (TLRPC.PhotoSize) attach;
+            if (photoSize instanceof TLRPC.TL_photoStrippedSize || photoSize instanceof TLRPC.TL_photoPathSize) {
+                return;
+            } else if (photoSize.location == null || photoSize.location.key != null || photoSize.location.volume_id == Integer.MIN_VALUE && photoSize.location.local_id < 0 || photoSize.size < 0) {
+                type = MEDIA_DIR_CACHE;
+            } else {
+                type = MEDIA_DIR_IMAGE;
+            }
+            documentId = photoSize.location.volume_id;
+            dcId = photoSize.location.dc_id + (photoSize.location.local_id << 16);
+            filePathDatabase.putPath(documentId, dcId, type, FilePathDatabase.FLAG_LOCALLY_CREATED, attachPath);
+        }
+    }
+
 
     public interface FileLoaderDelegate {
         void fileUploadProgressChanged(FileUploadOperation operation, String location, long uploadedSize, long totalSize, boolean isEncrypted);
@@ -922,12 +957,17 @@ public class FileLoader extends BaseController {
 
             @Override
             public void saveFilePath(FilePathDatabase.PathData pathSaveData, File cacheFileFinal) {
-                getFileDatabase().putPath(pathSaveData.id, pathSaveData.dc, pathSaveData.type, cacheFileFinal != null ? cacheFileFinal.toString() : null);
+                getFileDatabase().putPath(pathSaveData.id, pathSaveData.dc, pathSaveData.type, 0, cacheFileFinal != null ? cacheFileFinal.toString() : null);
             }
 
             @Override
             public boolean hasAnotherRefOnFile(String path) {
                 return getFileDatabase().hasAnotherRefOnFile(path);
+            }
+
+            @Override
+            public boolean isLocallyCreatedFile(String path) {
+                return getFileDatabase().isLocallyCreated(path);
             }
         };
         operation.setDelegate(fileLoadOperationDelegate);
@@ -1129,6 +1169,10 @@ public class FileLoader extends BaseController {
     }
 
     public File getPathToMessage(TLRPC.Message message, boolean useFileDatabaseQueue) {
+        return getPathToMessage(message, useFileDatabaseQueue, false);
+    }
+
+    public File getPathToMessage(TLRPC.Message message, boolean useFileDatabaseQueue, boolean saveAsFile) {
         if (message == null) {
             return new File("");
         }
@@ -1144,7 +1188,7 @@ public class FileLoader extends BaseController {
             }
         } else {
             if (MessageObject.getMedia(message) instanceof TLRPC.TL_messageMediaDocument) {
-                return getPathToAttach(MessageObject.getMedia(message).document, null, MessageObject.getMedia(message).ttl_seconds != 0, useFileDatabaseQueue);
+                return getPathToAttach(MessageObject.getMedia(message).document, null,null, MessageObject.getMedia(message).ttl_seconds != 0, useFileDatabaseQueue, saveAsFile);
             } else if (MessageObject.getMedia(message) instanceof TLRPC.TL_messageMediaPhoto) {
                 ArrayList<TLRPC.PhotoSize> sizes = MessageObject.getMedia(message).photo.sizes;
                 if (sizes.size() > 0) {
@@ -1181,21 +1225,22 @@ public class FileLoader extends BaseController {
     }
 
     public File getPathToAttach(TLObject attach, String ext, boolean forceCache) {
-        return getPathToAttach(attach, null, ext, forceCache, true);
+        return getPathToAttach(attach, null, ext, forceCache, true, false);
     }
 
     public File getPathToAttach(TLObject attach, String ext, boolean forceCache, boolean useFileDatabaseQueue) {
-        return getPathToAttach(attach, null, ext, forceCache, useFileDatabaseQueue);
+        return getPathToAttach(attach, null, ext, forceCache, useFileDatabaseQueue, false);
     }
 
     /**
      * Return real file name. Used before file.exist()
      */
-    public File getPathToAttach(TLObject attach, String size, String ext, boolean forceCache, boolean useFileDatabaseQueue) {
+    public File getPathToAttach(TLObject attach, String size, String ext, boolean forceCache, boolean useFileDatabaseQueue, boolean saveAsFile) {
         File dir = null;
         long documentId = 0;
         int dcId = 0;
         int type = 0;
+        String fileName = null;
         if (forceCache) {
             dir = getDirectory(MEDIA_DIR_CACHE);
         } else {
@@ -1212,7 +1257,13 @@ public class FileLoader extends BaseController {
                     } else if (MessageObject.isVideoDocument(document)) {
                         type = MEDIA_DIR_VIDEO;
                     } else {
-                        type = MEDIA_DIR_DOCUMENT;
+                        String documentFileName = getDocumentFileName(document);
+                        if (saveAsFile && !TextUtils.isEmpty(documentFileName)) {
+                            fileName = documentFileName;
+                            type = MEDIA_DIR_FILES;
+                        } else {
+                            type = MEDIA_DIR_DOCUMENT;
+                        }
                     }
                 }
                 documentId = document.id;
@@ -1283,7 +1334,10 @@ public class FileLoader extends BaseController {
                 return new File(path);
             }
         }
-        return new File(dir, getAttachFileName(attach, ext));
+        if (fileName == null) {
+            fileName = getAttachFileName(attach, ext);
+        }
+        return new File(dir, fileName);
     }
 
     public FilePathDatabase getFileDatabase() {

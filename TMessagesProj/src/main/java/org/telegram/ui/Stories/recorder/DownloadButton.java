@@ -143,6 +143,17 @@ public class DownloadButton extends ImageView {
             preparing = true;
             prepare.run(this::onClickInternal);
         }
+        updateImage();
+        if (prepare == null) {
+            onClickInternal();
+        }
+    }
+
+    private void onClickInternal() {
+        if (!preparing || currentEntry == null) {
+            return;
+        }
+        preparing = false;
         if (currentEntry.wouldBeVideo()) {
             downloadingVideo = true;
             toast = new PreparingVideoToast(getContext());
@@ -159,24 +170,7 @@ public class DownloadButton extends ImageView {
                 updateImage();
             });
             container.addView(toast);
-        } else {
-            downloadingVideo = false;
-        }
-        updateImage();
-        if (prepare != null) {
-            preparing = true;
-            prepare.run(this::onClickInternal);
-        } else {
-            onClickInternal();
-        }
-    }
 
-    private void onClickInternal() {
-        if (!preparing || currentEntry == null) {
-            return;
-        }
-        preparing = false;
-        if (currentEntry.wouldBeVideo()) {
             final File file = AndroidUtilities.generateVideoPath();
             buildingVideo = new BuildingVideo(currentAccount, currentEntry, file, () -> {
                 if (!downloading || currentEntry == null) {
@@ -205,6 +199,7 @@ public class DownloadButton extends ImageView {
                 updateImage();
             });
         } else {
+            downloadingVideo = false;
             final File file = AndroidUtilities.generatePicturePath(false, "png");
             if (file == null) {
                 toast.setDone(R.raw.error, LocaleController.getString("UnknownError"), 3500);

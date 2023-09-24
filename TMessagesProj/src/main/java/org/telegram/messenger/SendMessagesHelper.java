@@ -3723,6 +3723,7 @@ public class SendMessagesHelper extends BaseController implements NotificationCe
                     TLRPC.TL_messageMediaStory mediaStory = new MessageMediaStoryFull();
                     mediaStory.id = sendingStory.id;
                     mediaStory.user_id = sendingStory.dialogId;
+                    mediaStory.peer = getMessagesController().getPeer(sendingStory.dialogId);
                     mediaStory.storyItem = sendingStory;
                     newMsg.media = mediaStory;
                     type = MEDIA_TYPE_STORY;
@@ -4324,7 +4325,7 @@ public class SendMessagesHelper extends BaseController implements NotificationCe
                     } else if (type == MEDIA_TYPE_STORY) {
                         TLRPC.TL_inputMediaStory inputMediaStory = new TLRPC.TL_inputMediaStory();
                         inputMediaStory.id = sendingStory.id;
-                        inputMediaStory.user_id = MessagesController.getInstance(currentAccount).getInputUser(sendingStory.dialogId);
+                        inputMediaStory.peer = MessagesController.getInstance(currentAccount).getInputPeer(sendingStory.dialogId);
                         inputMedia = inputMediaStory;
                     }
 
@@ -7845,7 +7846,7 @@ public class SendMessagesHelper extends BaseController implements NotificationCe
                                 accountInstance.getUserConfig().saveConfig(false);
                                 TLRPC.TL_documentAttributeVideo attributeVideo;
                                 if (isEncrypted) {
-                                    attributeVideo = new TLRPC.TL_documentAttributeVideo();
+                                    attributeVideo = new TLRPC.TL_documentAttributeVideo_layer159();
                                 } else {
                                     attributeVideo = new TLRPC.TL_documentAttributeVideo();
                                     attributeVideo.supports_streaming = true;
@@ -8518,7 +8519,7 @@ public class SendMessagesHelper extends BaseController implements NotificationCe
                         if (encryptedChat == null) {
                             return;
                         }
-                        attributeVideo = new TLRPC.TL_documentAttributeVideo();
+                        attributeVideo = new TLRPC.TL_documentAttributeVideo_layer159();
                     } else {
                         attributeVideo = new TLRPC.TL_documentAttributeVideo();
                         attributeVideo.supports_streaming = true;

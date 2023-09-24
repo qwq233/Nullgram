@@ -27,6 +27,8 @@ import android.util.Log;
 import android.util.SparseArray;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.ViewGroup;
+import android.widget.FrameLayout;
 
 import androidx.core.content.ContextCompat;
 import androidx.core.graphics.ColorUtils;
@@ -49,10 +51,12 @@ import org.telegram.ui.Components.CombinedDrawable;
 import org.telegram.ui.Components.CubicBezierInterpolator;
 import org.telegram.ui.Components.FlickerLoadingView;
 import org.telegram.ui.Components.spoilers.SpoilerEffect;
+import org.telegram.ui.Components.spoilers.SpoilerEffect2;
 import org.telegram.ui.PhotoViewer;
+import org.telegram.ui.Stories.StoryWidgetsImageDecorator;
 import org.telegram.ui.Stories.recorder.DominantColors;
 
-public class SharedPhotoVideoCell2 extends View {
+public class SharedPhotoVideoCell2 extends FrameLayout {
 
     public ImageReceiver imageReceiver = new ImageReceiver();
     public ImageReceiver blurImageReceiver = new ImageReceiver();
@@ -90,6 +94,7 @@ public class SharedPhotoVideoCell2 extends View {
     private float spoilerRevealX;
     private float spoilerRevealY;
     private float spoilerMaxRadius;
+    private SpoilerEffect2 mediaSpoilerEffect2;
 
     public final static int STYLE_SHARED_MEDIA = 0;
     public final static int STYLE_CACHE = 1;
@@ -105,7 +110,7 @@ public class SharedPhotoVideoCell2 extends View {
         setChecked(false, false);
         imageReceiver.setParentView(this);
         blurImageReceiver.setParentView(this);
-;
+
         imageReceiver.setDelegate((imageReceiver1, set, thumb, memCache) -> {
             if (set && !thumb && currentMessageObject != null && currentMessageObject.hasMediaSpoilers() && imageReceiver.getBitmap() != null) {
                 if (blurImageReceiver.getBitmap() != null) {
@@ -114,6 +119,8 @@ public class SharedPhotoVideoCell2 extends View {
                 blurImageReceiver.setImageBitmap(Utilities.stackBlurBitmapMax(imageReceiver.getBitmap()));
             }
         });
+
+        setWillNotDraw(false);
     }
 
     public void setStyle(int style) {
@@ -152,6 +159,7 @@ public class SharedPhotoVideoCell2 extends View {
         }
         currentMessageObject = messageObject;
         isStory = currentMessageObject != null && currentMessageObject.isStory();
+        updateSpoilers2();
         if (messageObject == null) {
             imageReceiver.onDetachedFromWindow();
             blurImageReceiver.onDetachedFromWindow();
@@ -185,6 +193,7 @@ public class SharedPhotoVideoCell2 extends View {
         videoText = null;
         videoInfoLayot = null;
         showVideoLayout = false;
+        imageReceiver.clearDecorators();
         if (!TextUtils.isEmpty(restrictionReason)) {
             showImageStub = true;
         } else if (messageObject.storyItem != null && messageObject.storyItem.media instanceof TLRPC.TL_messageMediaUnsupported) {
@@ -262,6 +271,9 @@ public class SharedPhotoVideoCell2 extends View {
         }
         if (imageReceiver.getBitmap() != null && currentMessageObject.hasMediaSpoilers() && !currentMessageObject.isMediaSpoilersRevealed) {
             blurImageReceiver.setImageBitmap(Utilities.stackBlurBitmapMax(imageReceiver.getBitmap()));
+        }
+        if (messageObject != null && messageObject.storyItem != null) {
+            imageReceiver.addDecorator(new StoryWidgetsImageDecorator(messageObject.storyItem));
         }
 
         invalidate();
@@ -385,10 +397,15 @@ public class SharedPhotoVideoCell2 extends View {
 
                 blurImageReceiver.draw(canvas);
 
-                int sColor = Color.WHITE;
-                mediaSpoilerEffect.setColor(ColorUtils.setAlphaComponent(sColor, (int) (Color.alpha(sColor) * 0.325f)));
-                mediaSpoilerEffect.setBounds((int) imageReceiver.getImageX(), (int) imageReceiver.getImageY(), (int) imageReceiver.getImageX2(), (int) imageReceiver.getImageY2());
-                mediaSpoilerEffect.draw(canvas);
+                if (mediaSpoilerEffect2 != null) {
+                    canvas.clipRect(imageReceiver.getImageX(), imageReceiver.getImageY(), imageReceiver.getImageX2(), imageReceiver.getImageY2());
+                    mediaSpoilerEffect2.draw(canvas, this, (int) imageReceiver.getImageWidth(), (int) imageReceiver.getImageHeight());
+                } else {
+                    int sColor = Color.WHITE;
+                    mediaSpoilerEffect.setColor(ColorUtils.setAlphaComponent(sColor, (int) (Color.alpha(sColor) * 0.325f)));
+                    mediaSpoilerEffect.setBounds((int) imageReceiver.getImageX(), (int) imageReceiver.getImageY(), (int) imageReceiver.getImageX2(), (int) imageReceiver.getImageY2());
+                    mediaSpoilerEffect.draw(canvas);
+                }
                 canvas.restore();
 
                 invalidate();
@@ -511,6 +528,13 @@ public class SharedPhotoVideoCell2 extends View {
             imageReceiver.onAttachedToWindow();
             blurImageReceiver.onAttachedToWindow();
         }
+        if (mediaSpoilerEffect2 != null) {
+            if (mediaSpoilerEffect2.destroyed) {
+                mediaSpoilerEffect2 = SpoilerEffect2.getInstance(this);
+            } else {
+                mediaSpoilerEffect2.attach(this);
+            }
+        }
     }
 
     @Override
@@ -523,6 +547,9 @@ public class SharedPhotoVideoCell2 extends View {
         if (currentMessageObject != null) {
             imageReceiver.onDetachedFromWindow();
             blurImageReceiver.onDetachedFromWindow();
+        }
+        if (mediaSpoilerEffect2 != null) {
+            mediaSpoilerEffect2.detach(this);
         }
     }
 
@@ -538,6 +565,23 @@ public class SharedPhotoVideoCell2 extends View {
             height /= 2;
         }
         setMeasuredDimension(width, height);
+        updateSpoilers2();
+    }
+
+    private void updateSpoilers2() {
+        if (getMeasuredHeight() <= 0 || getMeasuredWidth() <= 0) {
+            return;
+        }
+        if (currentMessageObject != null && currentMessageObject.hasMediaSpoilers() && SpoilerEffect2.supports()) {
+            if (mediaSpoilerEffect2 == null) {
+                mediaSpoilerEffect2 = SpoilerEffect2.getInstance(this);
+            }
+        } else {
+            if (mediaSpoilerEffect2 != null) {
+                mediaSpoilerEffect2.detach(this);
+                mediaSpoilerEffect2 = null;
+            }
+        }
     }
 
     public int getMessageId() {

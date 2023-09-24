@@ -3,7 +3,6 @@ package org.telegram.ui.Stories;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.ValueAnimator;
-import android.app.Activity;
 import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Color;
@@ -12,9 +11,7 @@ import android.graphics.RectF;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.GradientDrawable;
-import android.text.Layout;
 import android.text.SpannableStringBuilder;
-import android.text.TextPaint;
 import android.text.TextUtils;
 import android.util.TypedValue;
 import android.view.Gravity;
@@ -29,11 +26,9 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.core.graphics.ColorUtils;
-import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.exoplayer2.util.Consumer;
-import com.google.android.exoplayer2.util.Log;
 
 import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.BuildVars;
@@ -52,7 +47,6 @@ import org.telegram.ui.ActionBar.ActionBarMenuSubItem;
 import org.telegram.ui.ActionBar.ActionBarPopupWindow;
 import org.telegram.ui.ActionBar.AdjustPanLayoutHelper;
 import org.telegram.ui.ActionBar.BaseFragment;
-import org.telegram.ui.ActionBar.SimpleTextView;
 import org.telegram.ui.ActionBar.Theme;
 import org.telegram.ui.Cells.FixedHeightEmptyCell;
 import org.telegram.ui.Cells.ReactedUserHolderView;
@@ -62,7 +56,6 @@ import org.telegram.ui.Components.BulletinFactory;
 import org.telegram.ui.Components.CubicBezierInterpolator;
 import org.telegram.ui.Components.CustomPopupMenu;
 import org.telegram.ui.Components.EmojiPacksAlert;
-import org.telegram.ui.Components.FillLastGridLayoutManager;
 import org.telegram.ui.Components.FillLastLinearLayoutManager;
 import org.telegram.ui.Components.FlickerLoadingView;
 import org.telegram.ui.Components.ItemOptions;
@@ -81,7 +74,6 @@ import org.telegram.ui.LaunchActivity;
 import org.telegram.ui.PremiumPreviewFragment;
 import org.telegram.ui.ProfileActivity;
 import org.telegram.ui.RecyclerListViewScroller;
-import org.telegram.ui.Stories.recorder.HintView2;
 import org.telegram.ui.Stories.recorder.StoryPrivacyBottomSheet;
 
 import java.util.ArrayList;
@@ -141,6 +133,7 @@ public class SelfStoryViewsPage extends FrameLayout implements NotificationCente
     Drawable shadowDrawable;
     private boolean checkAutoscroll;
     private boolean showServerErrorText;
+    private long dialogId;
 
     private boolean isStoryShownToUser(TLRPC.TL_storyView view) {
         if (MessagesController.getInstance(currentAccount).getStoriesController().isBlocked(view)) {
@@ -490,7 +483,8 @@ public class SelfStoryViewsPage extends FrameLayout implements NotificationCente
         }
     }
 
-    public void setStoryItem(SelfStoryViewsView.StoryItemInternal storyItem) {
+    public void setStoryItem(long dialogId, SelfStoryViewsView.StoryItemInternal storyItem) {
+        this.dialogId = dialogId;
         this.storyItem = storyItem;
         updateViewsVisibility();
         updateViewState(false);
@@ -514,7 +508,7 @@ public class SelfStoryViewsPage extends FrameLayout implements NotificationCente
                 if (defaultModel != null) {
                     defaultModel.release();
                 }
-                defaultModel = new ViewsModel(currentAccount, serverItem, true);
+                defaultModel = new ViewsModel(currentAccount, dialogId, serverItem, true);
                 defaultModel.reloadIfNeed(state, showContactsFilter, showReactionsSort);
                 defaultModel.loadNext();
                 MessagesController.getInstance(currentAccount).storiesController.selfViewsModel.put(serverItem.id, defaultModel);
@@ -588,7 +582,7 @@ public class SelfStoryViewsPage extends FrameLayout implements NotificationCente
         ((MarginLayoutParams) shadowView2.getLayoutParams()).topMargin = AndroidUtilities.dp(TOP_PADDING - 17);
     }
 
-    public static void preload(int currentAccount, TLRPC.StoryItem storyItem) {
+    public static void preload(int currentAccount, long dialogId, TLRPC.StoryItem storyItem) {
         if (storyItem == null) {
             return;
         }
@@ -598,7 +592,7 @@ public class SelfStoryViewsPage extends FrameLayout implements NotificationCente
             if (model != null) {
                 model.release();
             }
-            model = new ViewsModel(currentAccount, storyItem, true);
+            model = new ViewsModel(currentAccount, dialogId, storyItem, true);
             model.loadNext();
             MessagesController.getInstance(currentAccount).storiesController.selfViewsModel.put(storyItem.id, model);
         }
@@ -658,14 +652,14 @@ public class SelfStoryViewsPage extends FrameLayout implements NotificationCente
     public void didReceivedNotification(int id, int account, Object... args) {
         if (id == NotificationCenter.storiesUpdated) {
             if (storyItem.uploadingStory != null) {
-                TLRPC.TL_userStories stories = MessagesController.getInstance(currentAccount).storiesController.getStories(UserConfig.getInstance(currentAccount).clientUserId);
+                TLRPC.PeerStories stories = MessagesController.getInstance(currentAccount).storiesController.getStories(UserConfig.getInstance(currentAccount).clientUserId);
                 if (stories != null) {
                     for (int i = 0; i < stories.stories.size(); i++) {
                         TLRPC.StoryItem storyItem = stories.stories.get(i);
                         if (storyItem.attachPath != null && storyItem.attachPath.equals(this.storyItem.uploadingStory.path)) {
                             this.storyItem.uploadingStory = null;
                             this.storyItem.storyItem = storyItem;
-                            setStoryItem(this.storyItem);
+                            setStoryItem(dialogId, this.storyItem);
                             break;
                         }
                     }
@@ -706,6 +700,10 @@ public class SelfStoryViewsPage extends FrameLayout implements NotificationCente
     }
 
     public boolean onBackPressed() {
+        if (popupMenu != null && popupMenu.isShowing()) {
+            popupMenu.dismiss();
+            return true;
+        }
         if (Math.abs(topViewsContainer.getTranslationY() - recyclerListView.getPaddingTop()) > AndroidUtilities.dp(2)) {
             recyclerListView.dispatchTouchEvent(AndroidUtilities.emptyMotionEvent());
             recyclerListView.smoothScrollToPosition(0);
@@ -739,7 +737,7 @@ public class SelfStoryViewsPage extends FrameLayout implements NotificationCente
                     view = new FixedHeightEmptyCell(getContext(), 70);
                     break;
                 case USER_ITEM:
-                    view = new ReactedUserHolderView(ReactedUserHolderView.STYLE_STORY, currentAccount, getContext(), resourcesProvider) {
+                    view = new ReactedUserHolderView(ReactedUserHolderView.STYLE_STORY, currentAccount, getContext(), resourcesProvider, false) {
                         @Override
                         public void openStory(long dialogId, Runnable onDone) {
                             BaseFragment lastFragment = LaunchActivity.getLastFragment();
@@ -958,6 +956,7 @@ public class SelfStoryViewsPage extends FrameLayout implements NotificationCente
 
         public int totalCount;
         TLRPC.StoryItem storyItem;
+        private long dialogId;
         int currentAccount;
         boolean loading;
         ArrayList<TLRPC.TL_storyView> views = new ArrayList<>();
@@ -974,9 +973,10 @@ public class SelfStoryViewsPage extends FrameLayout implements NotificationCente
         ArrayList<SelfStoryViewsPage> listeners = new ArrayList<>();
         FiltersState state = new FiltersState();
 
-        public ViewsModel(int currentAccount, TLRPC.StoryItem storyItem, boolean isDefault) {
+        public ViewsModel(int currentAccount, long dialogId, TLRPC.StoryItem storyItem, boolean isDefault) {
             this.currentAccount = currentAccount;
             this.storyItem = storyItem;
+            this.dialogId = dialogId;
             this.totalCount = storyItem.views == null ? 0 : storyItem.views.views_count;
             if (totalCount < 200) {
                 useLocalFilters = true;
@@ -1009,6 +1009,7 @@ public class SelfStoryViewsPage extends FrameLayout implements NotificationCente
             }
             TLRPC.TL_stories_getStoryViewsList req = new TLRPC.TL_stories_getStoryViewsList();
             req.id = storyItem.id;
+            req.peer = MessagesController.getInstance(currentAccount).getInputPeer(dialogId);
             if (useLocalFilters) {
                 req.q = "";
                 req.just_contacts = false;
@@ -1069,12 +1070,21 @@ public class SelfStoryViewsPage extends FrameLayout implements NotificationCente
                     if (storyItem.views == null) {
                         storyItem.views = new TLRPC.TL_storyViews();
                     }
+                    boolean counterUpdated = false;
                     if (res.count > storyItem.views.views_count) {
                         storyItem.views.recent_viewers.clear();
                         for (int i = 0; i < (Math.min(3, res.users.size())); i++) {
                             storyItem.views.recent_viewers.add(res.users.get(i).id);
                         }
                         storyItem.views.views_count = res.count;
+                        counterUpdated = true;
+                    }
+                    if (storyItem.views.reactions_count != res.reactions_count) {
+                        storyItem.views.reactions_count = res.reactions_count;
+                        counterUpdated = true;
+                    }
+                    if (counterUpdated) {
+                        NotificationCenter.getInstance(currentAccount).postNotificationName(NotificationCenter.storiesUpdated);
                     }
                 } else {
                     hasNext = false;
@@ -1224,6 +1234,7 @@ public class SelfStoryViewsPage extends FrameLayout implements NotificationCente
             ImageView imageView = new ImageView(getContext());
             imageView.setScaleType(ImageView.ScaleType.FIT_XY);
             imageView.setImageDrawable(replacableDrawable);
+            imageView.setPadding(AndroidUtilities.dp(1), AndroidUtilities.dp(1), AndroidUtilities.dp(1), AndroidUtilities.dp(1));
             buttonContainer.addView(imageView, LayoutHelper.createLinear(26, 26));
 
             ImageView arrowImage = new ImageView(getContext());

@@ -16,6 +16,7 @@
 -keep class com.google.android.exoplayer2.metadata.flac.PictureFrame { *; }
 -keep class com.google.android.exoplayer2.decoder.SimpleOutputBuffer { *; }
 -keep class com.google.android.exoplayer2.decoder.SimpleDecoderOutputBuffer { *; }
+-keep class org.telegram.ui.Stories.recorder.FfmpegAudioWaveformLoader { *; }
 
 -keep public class * extends java.lang.Exception
 

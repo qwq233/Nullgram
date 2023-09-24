@@ -72,6 +72,7 @@ public class ActionBarLayout extends FrameLayout implements INavigationLayout, F
 
     public boolean highlightActionButtons = false;
     private boolean attached;
+    private boolean isSheet;
 
     @Override
     public void setHighlightActionButtons(boolean highlightActionButtons) {
@@ -467,6 +468,16 @@ public class ActionBarLayout extends FrameLayout implements INavigationLayout, F
     }
 
     @Override
+    public void setIsSheet(boolean isSheet) {
+        this.isSheet = isSheet;
+    }
+
+    @Override
+    public boolean isSheet() {
+        return isSheet;
+    }
+
+    @Override
     public void onConfigurationChanged(android.content.res.Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
         if (!fragmentsStack.isEmpty()) {
@@ -516,7 +527,8 @@ public class ActionBarLayout extends FrameLayout implements INavigationLayout, F
 
     @Override
     public void drawHeaderShadow(Canvas canvas, int alpha, int y) {
-        if (headerShadowDrawable != null) {
+        if (headerShadowDrawable != null && SharedConfig.drawActionBarShadow) {
+            alpha = alpha / 2;
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
                 if (headerShadowDrawable.getAlpha() != alpha) {
                     headerShadowDrawable.setAlpha(alpha);
@@ -1240,7 +1252,7 @@ public class ActionBarLayout extends FrameLayout implements INavigationLayout, F
             return false;
         }
         if (BuildVars.LOGS_ENABLED) {
-            FileLog.d("present fragment " + fragment.getClass().getSimpleName());
+            FileLog.d("present fragment " + fragment.getClass().getSimpleName() + " args=" + fragment.getArguments());
         }
         StoryViewer.closeGlobalInstances();
         if (inPreviewMode && transitionAnimationPreviewMode) {

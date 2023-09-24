@@ -1,6 +1,7 @@
 package org.telegram.messenger.video;
 
 import android.graphics.Bitmap;
+import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.SurfaceTexture;
 import android.net.Uri;
@@ -103,10 +104,13 @@ public class VideoPlayerHolderBase {
         });
     }
 
-    public void start(boolean paused, Uri uri, long t, boolean audioDisabled) {
+    public void start(boolean paused, Uri uri, long position, boolean audioDisabled) {
         startTime = System.currentTimeMillis();
         this.audioDisabled = audioDisabled;
         this.paused = paused;
+        if (position > 0) {
+            currentPosition = position;
+        }
         dispatchQueue.postRunnable(initRunnable = () -> {
             if (released) {
                 return;
@@ -133,8 +137,8 @@ public class VideoPlayerHolderBase {
                     videoPlayer.play();
                 }
             }
-            if (t > 0) {
-                videoPlayer.seekTo(t);
+            if (position > 0) {
+                videoPlayer.seekTo(position);
             }
 
            // videoPlayer.setVolume(isInSilentMode ? 0 : 1f);
@@ -188,7 +192,7 @@ public class VideoPlayerHolderBase {
                         onReadyListener.run();
                         onReadyListener = null;
                     }
-                }, 16);
+                }, surfaceView == null ? 16 : 32);
             }
 
             @Override
@@ -251,6 +255,15 @@ public class VideoPlayerHolderBase {
             return;
         }
         paused = true;
+        prepareStub();
+        dispatchQueue.postRunnable(() -> {
+            if (videoPlayer != null) {
+                videoPlayer.pause();
+            }
+        });
+    }
+
+    public void prepareStub() {
         if (surfaceView != null && firstFrameRendered && surfaceView.getHolder().getSurface().isValid()) {
             stubAvailable = true;
             if (playerStubBitmap == null) {
@@ -259,13 +272,11 @@ public class VideoPlayerHolderBase {
             }
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
                 AndroidUtilities.getBitmapFromSurface(surfaceView, playerStubBitmap);
+                if (playerStubBitmap.getPixel(0, 0) == Color.TRANSPARENT) {
+                    stubAvailable = false;
+                }
             }
         }
-        dispatchQueue.postRunnable(() -> {
-            if (videoPlayer != null) {
-                videoPlayer.pause();
-            }
-        });
     }
 
     public void play() {

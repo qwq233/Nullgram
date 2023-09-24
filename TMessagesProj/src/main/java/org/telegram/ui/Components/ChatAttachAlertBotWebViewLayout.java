@@ -1,5 +1,7 @@
 package org.telegram.ui.Components;
 
+import static org.telegram.ui.Components.Bulletin.DURATION_PROLONG;
+
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.ValueAnimator;
@@ -120,6 +122,8 @@ public class ChatAttachAlertBotWebViewLayout extends ChatAttachAlert.AttachAlert
             }));
         }
     };
+    private boolean hasCustomActionBarBackground;
+    private int customActionBarBackground;
 
     public ChatAttachAlertBotWebViewLayout(ChatAttachAlert alert, Context context, Theme.ResourcesProvider resourcesProvider) {
         super(alert, context, resourcesProvider);
@@ -178,6 +182,11 @@ public class ChatAttachAlertBotWebViewLayout extends ChatAttachAlert.AttachAlert
                     }
                 }
                 return super.dispatchTouchEvent(ev);
+            }
+
+            @Override
+            public void onWebViewCreated() {
+                swipeContainer.setWebView(webViewContainer.getWebView());
             }
         };
         swipeContainer = new WebViewSwipeContainer(context) {
@@ -270,6 +279,21 @@ public class ChatAttachAlertBotWebViewLayout extends ChatAttachAlert.AttachAlert
     @Override
     public int getCustomBackground() {
         return customBackground;
+    }
+
+    @Override
+    boolean hasCustomActionBarBackground() {
+        return hasCustomActionBarBackground;
+    }
+
+    @Override
+    int getCustomActionBarBackground() {
+        return customActionBarBackground;
+    }
+
+    public void setCustomActionBarBackground(int customActionBarBackground) {
+        hasCustomActionBarBackground = true;
+        this.customActionBarBackground = customActionBarBackground;
     }
 
     public boolean canExpandByRequest() {
@@ -481,7 +505,6 @@ public class ChatAttachAlertBotWebViewLayout extends ChatAttachAlert.AttachAlert
                 TLRPC.TL_webViewResultUrl resultUrl = (TLRPC.TL_webViewResultUrl) response;
                 queryId = resultUrl.query_id;
                 webViewContainer.loadUrl(currentAccount, resultUrl.url);
-                swipeContainer.setWebView(webViewContainer.getWebView());
 
                 AndroidUtilities.runOnUIThread(pollRunnable);
             }
@@ -621,6 +644,34 @@ public class ChatAttachAlertBotWebViewLayout extends ChatAttachAlert.AttachAlert
         } else if (id == NotificationCenter.didSetNewTheme) {
             webViewContainer.updateFlickerBackgroundColor(getThemedColor(Theme.key_dialogBackground));
         }
+    }
+
+    public void showJustAddedBulletin() {
+        TLRPC.User user = MessagesController.getInstance(currentAccount).getUser(botId);
+        TLRPC.TL_attachMenuBot currentBot = null;
+        for (TLRPC.TL_attachMenuBot bot : MediaDataController.getInstance(currentAccount).getAttachMenuBots().bots) {
+            if (bot.bot_id == botId) {
+                currentBot = bot;
+                break;
+            }
+        }
+        if (currentBot == null) {
+            return;
+        }
+        String str;
+        if (currentBot.show_in_side_menu && currentBot.show_in_attach_menu) {
+            str = LocaleController.formatString("BotAttachMenuShortcatAddedAttachAndSide", R.string.BotAttachMenuShortcatAddedAttachAndSide, user.first_name);
+        } else if (currentBot.show_in_side_menu) {
+            str = LocaleController.formatString("BotAttachMenuShortcatAddedSide", R.string.BotAttachMenuShortcatAddedSide, user.first_name);
+        } else {
+            str = LocaleController.formatString("BotAttachMenuShortcatAddedAttach", R.string.BotAttachMenuShortcatAddedAttach, user.first_name);
+        }
+        AndroidUtilities.runOnUIThread(() -> {
+        BulletinFactory.of(parentAlert.getContainer(), resourcesProvider)
+                .createSimpleBulletin(R.raw.contact_check, AndroidUtilities.replaceTags(str))
+                .setDuration(DURATION_PROLONG)
+                .show(true);
+        }, 200);
     }
 
     public static class WebViewSwipeContainer extends FrameLayout {

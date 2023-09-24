@@ -54,6 +54,7 @@ dependencies {
     implementation(libs.exifinterface)
     implementation(libs.dynamicanimation)
     implementation(libs.interpolator)
+    implementation(libs.fragment)
     implementation(libs.sharetarget)
 
     compileOnly(libs.checker.compat.qual)

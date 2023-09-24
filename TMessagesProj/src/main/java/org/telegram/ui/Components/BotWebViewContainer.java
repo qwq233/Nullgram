@@ -49,17 +49,14 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.JSONTokener;
-import org.telegram.PhoneFormat.PhoneFormat;
 import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.ApplicationLoader;
 import org.telegram.messenger.BotWebViewVibrationEffect;
-import org.telegram.messenger.ContactsController;
 import org.telegram.messenger.FileLog;
 import org.telegram.messenger.ImageLocation;
 import org.telegram.messenger.ImageReceiver;
 import org.telegram.messenger.LocaleController;
 import org.telegram.messenger.MediaDataController;
-import org.telegram.messenger.MessageObject;
 import org.telegram.messenger.MessagesController;
 import org.telegram.messenger.NotificationCenter;
 import org.telegram.messenger.R;
@@ -88,7 +85,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-public class BotWebViewContainer extends FrameLayout implements NotificationCenter.NotificationCenterDelegate {
+public abstract class BotWebViewContainer extends FrameLayout implements NotificationCenter.NotificationCenterDelegate {
     private final static String DURGER_KING_USERNAME = "DurgerKingBot";
     private final static int REQUEST_CODE_WEB_VIEW_FILE = 3000, REQUEST_CODE_WEB_PERMISSION = 4000, REQUEST_CODE_QR_CAMERA_PERMISSION = 5000;
     private final static int DIALOG_SEQUENTIAL_COOLDOWN_TIME = 3000;
@@ -512,6 +509,8 @@ public class BotWebViewContainer extends FrameLayout implements NotificationCent
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
             webView.addJavascriptInterface(new WebViewProxy(), "TelegramWebviewProxy");
         }
+
+        onWebViewCreated();
     }
 
     private void onOpenUri(Uri uri) {
@@ -863,27 +862,29 @@ public class BotWebViewContainer extends FrameLayout implements NotificationCent
     }
 
     public void reload() {
-        checkCreateWebView();
-
-        isPageLoaded = false;
-        lastClickMs = 0;
-        hasUserPermissions = false;
-        if (webView != null) {
-            webView.reload();
-        }
+        NotificationCenter.getInstance(currentAccount).doOnIdle(() -> {
+            checkCreateWebView();
+            isPageLoaded = false;
+            lastClickMs = 0;
+            hasUserPermissions = false;
+            if (webView != null) {
+                webView.reload();
+            }
+        });
     }
 
     public void loadUrl(int currentAccount, String url) {
-        checkCreateWebView();
-
         this.currentAccount = currentAccount;
-        isPageLoaded = false;
-        lastClickMs = 0;
-        hasUserPermissions = false;
-        mUrl = url;
-        if (webView != null) {
-            webView.loadUrl(url);
-        }
+        NotificationCenter.getInstance(currentAccount).doOnIdle(() -> {
+            isPageLoaded = false;
+            lastClickMs = 0;
+            hasUserPermissions = false;
+            mUrl = url;
+            checkCreateWebView();
+            if (webView != null) {
+                webView.loadUrl(url);
+            }
+        });
     }
 
     @Override
@@ -937,22 +938,25 @@ public class BotWebViewContainer extends FrameLayout implements NotificationCent
 
     @SuppressWarnings("deprecation")
     public void evaluateJs(String script, boolean create) {
-        if (create) {
-            checkCreateWebView();
-        }
-        if (webView == null) {
-            return;
-        }
-
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
-            webView.evaluateJavascript(script, value -> {});
-        } else {
-            try {
-                webView.loadUrl("javascript:" + URLEncoder.encode(script, "UTF-8"));
-            } catch (UnsupportedEncodingException e) {
-                webView.loadUrl("javascript:" + URLEncoder.encode(script));
+        NotificationCenter.getInstance(currentAccount).doOnIdle(() -> {
+            if (create) {
+                checkCreateWebView();
             }
-        }
+            if (webView == null) {
+                return;
+            }
+
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+                webView.evaluateJavascript(script, value -> {
+                });
+            } else {
+                try {
+                    webView.loadUrl("javascript:" + URLEncoder.encode(script, "UTF-8"));
+                } catch (UnsupportedEncodingException e) {
+                    webView.loadUrl("javascript:" + URLEncoder.encode(script));
+                }
+            }
+        });
     }
 
     @Override
@@ -1207,20 +1211,28 @@ public class BotWebViewContainer extends FrameLayout implements NotificationCent
             case "web_app_set_header_color": {
                 try {
                     JSONObject jsonObject = new JSONObject(eventData);
-                    String key = jsonObject.getString("color_key");
-                    int themeKey = -1;
-                    switch (key) {
-                        case "bg_color": {
-                            themeKey = Theme.key_windowBackgroundWhite;
-                            break;
+                    String overrideColorString = jsonObject.optString("color", null);
+                    if (!TextUtils.isEmpty(overrideColorString)) {
+                        int color = Color.parseColor(overrideColorString);
+                        if (color != 0) {
+                            delegate.onWebAppSetActionBarColor(color, true);
                         }
-                        case "secondary_bg_color": {
-                            themeKey = Theme.key_windowBackgroundGray;
-                            break;
+                    } else {
+                        String key = jsonObject.optString("color_key");
+                        int themeKey = -1;
+                        switch (key) {
+                            case "bg_color": {
+                                themeKey = Theme.key_windowBackgroundWhite;
+                                break;
+                            }
+                            case "secondary_bg_color": {
+                                themeKey = Theme.key_windowBackgroundGray;
+                                break;
+                            }
                         }
-                    }
-                    if (themeKey >= 0) {
-                        delegate.onWebAppSetActionBarColor(themeKey);
+                        if (themeKey >= 0) {
+                            delegate.onWebAppSetActionBarColor(Theme.getColor(themeKey, resourcesProvider), false);
+                        }
                     }
                 } catch (JSONException e) {
                     FileLog.e(e);
@@ -1442,6 +1454,9 @@ public class BotWebViewContainer extends FrameLayout implements NotificationCent
                             ConnectionsManager.getInstance(currentAccount).sendRequest(req2, (res2, err2) -> AndroidUtilities.runOnUIThread(() -> {
                                 if (res2 != null) {
                                     status[0] = "allowed";
+                                    if (res2 instanceof TLRPC.Updates) {
+                                        MessagesController.getInstance(currentAccount).processUpdates((TLRPC.Updates) res2, false);
+                                    }
                                 }
                                 if (err2 != null) {
                                     unknownError(err2.text);
@@ -1707,6 +1722,10 @@ public class BotWebViewContainer extends FrameLayout implements NotificationCent
         return hex;
     }
 
+    public void onWebViewCreated() {
+
+    }
+
     private class WebViewProxy {
         @JavascriptInterface
         public void postEvent(String eventType, String eventData) {
@@ -1749,8 +1768,9 @@ public class BotWebViewContainer extends FrameLayout implements NotificationCent
          * Called when WebView requests to set action bar color
          *
          * @param colorKey  Color theme key
+         * @param isOverrideColor
          */
-        void onWebAppSetActionBarColor(int colorKey);
+        void onWebAppSetActionBarColor(int colorKey, boolean isOverrideColor);
 
         /**
          * Called when WebView requests to set background color

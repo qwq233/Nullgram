@@ -22,6 +22,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.ContactsController;
+import org.telegram.messenger.DialogObject;
 import org.telegram.messenger.FileLog;
 import org.telegram.messenger.LocaleController;
 import org.telegram.messenger.MessagesController;
@@ -67,7 +68,7 @@ public class ContactsAdapter extends RecyclerListView.SectionsAdapter {
     private boolean hasGps;
     private boolean isEmpty;
     public boolean hasStories;
-    public ArrayList<TLRPC.TL_userStories> userStories = new ArrayList<>();
+    public ArrayList<TLRPC.PeerStories> userStories = new ArrayList<>();
 
     DialogStoriesCell dialogStoriesCell;
     BaseFragment fragment;
@@ -83,7 +84,7 @@ public class ContactsAdapter extends RecyclerListView.SectionsAdapter {
         this.fragment = fragment;
     }
 
-    public void setStories(ArrayList<TLRPC.TL_userStories> stories, boolean animated) {
+    public void setStories(ArrayList<TLRPC.PeerStories> stories, boolean animated) {
 //        boolean hasStories = !stories.isEmpty();
 //        userStories.clear();
 //        userStories.addAll(stories);
@@ -193,7 +194,7 @@ public class ContactsAdapter extends RecyclerListView.SectionsAdapter {
             if (position == userStories.size()) {
                 return "Header";
             } else {
-                return userStories.get(position).user_id;
+                return DialogObject.getPeerDialogId(userStories.get(position).peer);
             }
         } else if (hasStories && section > 1) {
             section--;
@@ -516,7 +517,7 @@ public class ContactsAdapter extends RecyclerListView.SectionsAdapter {
                     userCell.setAvatarPadding(6);
                     userCell.storyParams.drawSegments = true;
                     StoriesController storiesController = MessagesController.getInstance(currentAccount).getStoriesController();
-                    TLRPC.User user = MessagesController.getInstance(currentAccount).getUser(userStories.get(position).user_id);
+                    TLRPC.User user = MessagesController.getInstance(currentAccount).getUser(DialogObject.getPeerDialogId(userStories.get(position).peer));
                     if (storiesController.hasUnreadStories(user.id)) {
                         int newStories = storiesController.getUnreadStoriesCount(user.id);
                         userCell.setData(user, ContactsController.formatName(user), LocaleController.formatPluralString("NewStories", newStories, newStories).toLowerCase(), 0);
@@ -702,7 +703,7 @@ public class ContactsAdapter extends RecyclerListView.SectionsAdapter {
 
     public void removeStory(long dialogId) {
         for (int i = 0; i < userStories.size(); i++) {
-            if (userStories.get(i).user_id == dialogId) {
+            if (DialogObject.getPeerDialogId(userStories.get(i).peer) == dialogId) {
                 userStories.remove(i);
 
                 if (userStories.isEmpty()) {

@@ -174,6 +174,7 @@ public class ChatActivityEnterView extends BlurredFrameLayout implements Notific
     private ActionBarMenuSubItem sendWhenOnlineButton;
     private LinearLayout recordTimeContainer;
     private CharSequence overrideHint;
+    private CharSequence overrideHint2;
     float emojiButtonScale = 1f;
     float emojiButtonAlpha = 1f;
     float emojiButtonPaddingScale = 1f;
@@ -305,6 +306,10 @@ public class ChatActivityEnterView extends BlurredFrameLayout implements Notific
 
         default TLRPC.StoryItem getReplyToStory() {
             return null;
+        }
+
+        default void onKeyboardRequested() {
+
         }
     }
 
@@ -625,6 +630,9 @@ public class ChatActivityEnterView extends BlurredFrameLayout implements Notific
             }
 
             if (!destroyed && messageEditText != null && waitingForKeyboardOpen && !keyboardVisible && !AndroidUtilities.usingHardwareInput && !AndroidUtilities.isInMultiwindow) {
+                if (delegate != null) {
+                    delegate.onKeyboardRequested();
+                }
                 messageEditText.requestFocus();
                 AndroidUtilities.showKeyboard(messageEditText);
                 AndroidUtilities.cancelRunOnUIThread(openKeyboardRunnable);
@@ -3654,6 +3662,7 @@ public class ChatActivityEnterView extends BlurredFrameLayout implements Notific
                     }, resourcesProvider);
                 });
                 sendPopupLayout.addView(scheduleButton, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, 48));
+                SharedConfig.removeScheduledHint();
                 if (!self && dialog_id > 0) {
                     sendWhenOnlineButton = new ActionBarMenuSubItem(getContext(), true, !sendWithoutSoundButtonValue, resourcesProvider);
                     sendWhenOnlineButton.setTextAndIcon(LocaleController.getString("SendWhenOnline", R.string.SendWhenOnline), R.drawable.msg_online);
@@ -5059,6 +5068,9 @@ public class ChatActivityEnterView extends BlurredFrameLayout implements Notific
         int visibility = getVisibility();
         if (showKeyboardOnResume && parentFragment != null && parentFragment.isLastFragment()) {
             showKeyboardOnResume = false;
+            if (delegate != null) {
+                delegate.onKeyboardRequested();
+            }
             if (searchingType == 0 && messageEditText != null) {
                 messageEditText.requestFocus();
             }
@@ -5201,6 +5213,7 @@ public class ChatActivityEnterView extends BlurredFrameLayout implements Notific
         }
         if (overrideHint != null) {
             messageEditText.setHintText(overrideHint, animated);
+            messageEditText.setHintText2(overrideHint2, animated);
             return;
         }
         if (!sendPlainEnabled && !isEditingMessage()) {
@@ -9418,6 +9431,9 @@ public class ChatActivityEnterView extends BlurredFrameLayout implements Notific
             return;
         }
         showPopup(AndroidUtilities.usingHardwareInput || AndroidUtilities.isInMultiwindow || parentFragment != null && parentFragment.isInBubbleMode() || isPaused ? 0 : 2, 0);
+        if (delegate != null) {
+            delegate.onKeyboardRequested();
+        }
         if (messageEditText != null) {
             messageEditText.requestFocus();
         }
@@ -9454,6 +9470,9 @@ public class ChatActivityEnterView extends BlurredFrameLayout implements Notific
         if (hasBotWebView() && botCommandsMenuIsShowing()) {
             return;
         }
+        if (delegate != null) {
+            delegate.onKeyboardRequested();
+        }
         if (messageEditText != null && !AndroidUtilities.showKeyboard(messageEditText)) {
             messageEditText.clearFocus();
             messageEditText.requestFocus();
@@ -9466,6 +9485,10 @@ public class ChatActivityEnterView extends BlurredFrameLayout implements Notific
 
     public boolean isPopupShowing() {
         return emojiViewVisible || botKeyboardViewVisible;
+    }
+
+    public boolean closeCreationLinkDialog() {
+        return messageEditText != null && messageEditText.closeCreationLinkDialog();
     }
 
     public boolean isKeyboardVisible() {
@@ -9783,7 +9806,7 @@ public class ChatActivityEnterView extends BlurredFrameLayout implements Notific
                         TLRPC.DocumentAttribute attribute = audioToSend.attributes.get(a);
                         if (attribute instanceof TLRPC.TL_documentAttributeAudio) {
                             if (attribute.waveform == null || attribute.waveform.length == 0) {
-                                attribute.waveform = MediaController.getInstance().getWaveform(audioToSendPath);
+                                attribute.waveform = MediaController.getWaveform(audioToSendPath);
                             }
                             recordedAudioSeekBar.setWaveform(attribute.waveform);
                             break;
@@ -10882,6 +10905,14 @@ public class ChatActivityEnterView extends BlurredFrameLayout implements Notific
                 recordedAudioBackground.invalidate();
             }
         }
+        if (messageEditText != null) {
+            float scale = AndroidUtilities.lerp(0.88f, 1f, progress);
+            messageEditText.setPivotX(0);
+            messageEditText.setPivotY(messageEditText.getMeasuredHeight() / 2f);
+            messageEditText.setScaleX(scale);
+            messageEditText.setScaleY(scale);
+            messageEditText.setHintRightOffset(AndroidUtilities.lerp(AndroidUtilities.dp(30), 0, progress));
+        }
     }
 
     private void updateMessageTextParams() {
@@ -10910,6 +10941,13 @@ public class ChatActivityEnterView extends BlurredFrameLayout implements Notific
 
     public void setOverrideHint(CharSequence overrideHint, boolean animated) {
         this.overrideHint = overrideHint;
+        this.overrideHint2 = null;
+        updateFieldHint(animated);
+    }
+
+    public void setOverrideHint(CharSequence overrideHint, CharSequence overrideHint2, boolean animated) {
+        this.overrideHint = overrideHint;
+        this.overrideHint2 = overrideHint2;
         updateFieldHint(animated);
     }
 

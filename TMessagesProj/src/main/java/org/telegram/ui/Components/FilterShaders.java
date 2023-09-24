@@ -324,7 +324,7 @@ public class FilterShaders {
         }
     }
 
-    private static final String simpleVertexVideoShaderCode =
+    public static final String simpleVertexVideoShaderCode =
             "attribute vec4 position;" +
             "uniform mat4 videoMatrix;" +
             "attribute vec4 inputTexCoord;" +
@@ -1113,7 +1113,8 @@ public class FilterShaders {
                 -1.0f, 1.0f,
                 1.0f, 1.0f,
                 -1.0f, -1.0f,
-                1.0f, -1.0f};
+                1.0f, -1.0f
+        };
 
         ByteBuffer bb = ByteBuffer.allocateDirect(squareCoordinates.length * 4);
         bb.order(ByteOrder.nativeOrder());
@@ -1125,7 +1126,8 @@ public class FilterShaders {
                 -1.0f, -1.0f,
                 1.0f, -1.0f,
                 -1.0f, 1.0f,
-                1.0f, 1.0f};
+                1.0f, 1.0f
+        };
 
         bb = ByteBuffer.allocateDirect(squareCoordinates2.length * 4);
         bb.order(ByteOrder.nativeOrder());
@@ -1149,6 +1151,10 @@ public class FilterShaders {
 
     public void setDelegate(FilterShadersDelegate filterShadersDelegate) {
         delegate = filterShadersDelegate;
+    }
+
+    public boolean drawOriginal() {
+        return delegate == null || delegate.shouldShowOriginal();
     }
 
     public boolean create() {
@@ -1974,8 +1980,7 @@ public class FilterShaders {
         return Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight(), matrix, true);
     }
 
-
-    private boolean scaleBitmap = true;
+    public boolean scaleBitmap = true;
     public void setScaleBitmap(boolean scale) {
         this.scaleBitmap = scale;
     }

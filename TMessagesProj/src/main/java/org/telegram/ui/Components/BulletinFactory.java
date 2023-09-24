@@ -21,6 +21,7 @@ import androidx.core.graphics.ColorUtils;
 
 import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.ApplicationLoader;
+import org.telegram.messenger.BuildVars;
 import org.telegram.messenger.ChatObject;
 import org.telegram.messenger.DialogObject;
 import org.telegram.messenger.LocaleController;
@@ -65,6 +66,18 @@ public final class BulletinFactory {
             return null;
         }
         return BulletinFactory.of(baseFragment);
+    }
+
+    public static void showForError(TLRPC.TL_error error) {
+        BulletinFactory bulletinFactory = BulletinFactory.global();
+        if (bulletinFactory == null) {
+            return;
+        }
+        if (BuildVars.DEBUG_VERSION) {
+            bulletinFactory.createErrorBulletin(error.code + " " + error.text).show();
+        } else {
+            bulletinFactory.createErrorBulletin(LocaleController.getString("UnknownError", R.string.UnknownError)).show();
+        }
     }
 
     public enum FileType {
@@ -304,18 +317,18 @@ public final class BulletinFactory {
         return create(layout, Bulletin.DURATION_PROLONG);
     }
 
-    public Bulletin createUsersBulletin(List<TLRPC.User> users, CharSequence text) {
+    public Bulletin createUsersBulletin(List<? extends TLObject> users, CharSequence text) {
        return createUsersBulletin(users, text, null, null);
     }
 
-    public Bulletin createUsersBulletin(List<TLRPC.User> users, CharSequence text, CharSequence subtitle, UndoObject undoObject) {
+    public Bulletin createUsersBulletin(List<? extends TLObject> users, CharSequence text, CharSequence subtitle, UndoObject undoObject) {
         final Bulletin.UsersLayout layout = new Bulletin.UsersLayout(getContext(), subtitle != null, resourcesProvider);
         int count = 0;
         if (users != null) {
             for (int i = 0; i < users.size(); ++i) {
                 if (count >= 3)
                     break;
-                TLRPC.User user = users.get(i);
+                TLObject user = users.get(i);
                 if (user != null) {
                     layout.avatarsImageView.setCount(++count);
                     layout.avatarsImageView.setObject(count - 1, UserConfig.selectedAccount, user);

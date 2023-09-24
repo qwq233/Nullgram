@@ -23,6 +23,7 @@ import android.widget.TextView;
 
 import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.ApplicationLoader;
+import org.telegram.messenger.BuildVars;
 import org.telegram.messenger.FileLoader;
 import org.telegram.messenger.FileLog;
 import org.telegram.messenger.LocaleController;
@@ -143,16 +144,18 @@ public class BlockingUpdateView extends FrameLayout implements NotificationCente
         acceptButton.setPadding(AndroidUtilities.dp(34), 0, AndroidUtilities.dp(34), 0);
         addView(acceptButton, LayoutHelper.createFrame(LayoutHelper.WRAP_CONTENT, 46, Gravity.CENTER_HORIZONTAL | Gravity.BOTTOM, 0, 0, 0, 45));
         acceptButton.setOnClickListener(view1 -> {
-            if (!checkApkInstallPermissions(getContext())) {
-                return;
-            }
-            if (appUpdate.document instanceof TLRPC.TL_document) {
-                if (!openApkInstall((Activity) getContext(), appUpdate.document)) {
-                    FileLoader.getInstance(accountNum).loadFile(appUpdate.document, "update", FileLoader.PRIORITY_HIGH, 1);
-                    showProgress(true);
+            if (BuildVars.isStandaloneApp() || BuildVars.DEBUG_VERSION) {
+                if (!ApplicationLoader.applicationLoaderInstance.checkApkInstallPermissions(getContext())) {
+                    return;
                 }
-            } else if (appUpdate.url != null) {
-                Browser.openUrl(getContext(), appUpdate.url);
+                if (appUpdate.document instanceof TLRPC.TL_document) {
+                    if (!ApplicationLoader.applicationLoaderInstance.openApkInstall((Activity) getContext(), appUpdate.document)) {
+                        FileLoader.getInstance(accountNum).loadFile(appUpdate.document, "update", FileLoader.PRIORITY_HIGH, 1);
+                        showProgress(true);
+                    }
+                } else if (appUpdate.url != null) {
+                    Browser.openUrl(getContext(), appUpdate.url);
+                }
             }
         });
 
@@ -207,7 +210,7 @@ public class BlockingUpdateView extends FrameLayout implements NotificationCente
             String location = (String) args[0];
             if (fileName != null && fileName.equals(location)) {
                 showProgress(false);
-                openApkInstall((Activity) getContext(), appUpdate.document);
+                ApplicationLoader.applicationLoaderInstance.openApkInstall((Activity) getContext(), appUpdate.document);
             }
         } else if (id == NotificationCenter.fileLoadFailed) {
             String location = (String) args[0];
@@ -225,13 +228,6 @@ public class BlockingUpdateView extends FrameLayout implements NotificationCente
         }
     }
 
-    public static boolean checkApkInstallPermissions(final Context context) {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O && !ApplicationLoader.applicationContext.getPackageManager().canRequestPackageInstalls()) {
-            AlertsCreator.createApkRestrictedDialog(context, null).show();
-            return false;
-        }
-        return true;
-    }
 
     public static boolean openApkInstall(Activity activity, TLRPC.Document document) {
         boolean exists = false;
@@ -317,7 +313,7 @@ public class BlockingUpdateView extends FrameLayout implements NotificationCente
         NotificationCenter.getInstance(accountNum).addObserver(this, NotificationCenter.fileLoaded);
         NotificationCenter.getInstance(accountNum).addObserver(this, NotificationCenter.fileLoadFailed);
         NotificationCenter.getInstance(accountNum).addObserver(this, NotificationCenter.fileLoadProgressChanged);
-        if (check) {
+        if (check && BuildVars.isStandaloneApp()) {
             TLRPC.TL_help_getAppUpdate req = new TLRPC.TL_help_getAppUpdate();
             try {
                 req.source = ApplicationLoader.applicationContext.getPackageManager().getInstallerPackageName(ApplicationLoader.applicationContext.getPackageName());

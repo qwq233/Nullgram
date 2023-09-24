@@ -43,6 +43,7 @@ import org.telegram.ui.ActionBar.Theme;
 import org.telegram.ui.Cells.ChatMessageCell;
 import org.telegram.ui.Components.AnimatedEmojiDrawable;
 import org.telegram.ui.Components.AnimatedEmojiSpan;
+import org.telegram.ui.Components.ColoredImageSpan;
 import org.telegram.ui.Components.Forum.ForumBubbleDrawable;
 import org.telegram.ui.Components.Forum.ForumUtilities;
 import org.telegram.ui.Components.Reactions.ReactionsLayoutInBubble;
@@ -180,6 +181,7 @@ public class MessageObject {
     public StringBuilder botButtonsLayout;
     public boolean isRestrictedMessage;
     public long loadedFileSize;
+    public boolean forceExpired;
 
     public AtomicReference<WeakReference<View>> viewRef = new AtomicReference<>(null);
 
@@ -419,7 +421,7 @@ public class MessageObject {
     }
 
     public boolean hasMediaSpoilers() {
-        return messageOwner.media != null && messageOwner.media.spoiler && !Config.displaySpoilerMsgDirectly;
+        return (messageOwner.media != null && messageOwner.media.spoiler || needDrawBluredPreview()) && !Config.displaySpoilerMsgDirectly;
     }
 
     public boolean shouldDrawReactionsInLayout() {
@@ -1666,6 +1668,18 @@ public class MessageObject {
                     if (o.edit_messages != n.edit_messages) {
                         rights.append('\n').append(n.edit_messages ? '+' : '-').append(' ');
                         rights.append(LocaleController.getString("EventLogPromotedEditMessages", R.string.EventLogPromotedEditMessages));
+                    }
+                    if (o.post_stories != n.post_stories) {
+                        rights.append('\n').append(n.post_stories ? '+' : '-').append(' ');
+                        rights.append(LocaleController.getString("EventLogPromotedPostStories", R.string.EventLogPromotedPostStories));
+                    }
+                    if (o.edit_stories != n.edit_stories) {
+                        rights.append('\n').append(n.edit_messages ? '+' : '-').append(' ');
+                        rights.append(LocaleController.getString("EventLogPromotedEditStories", R.string.EventLogPromotedEditStories));
+                    }
+                    if (o.delete_stories != n.delete_stories) {
+                        rights.append('\n').append(n.delete_stories ? '+' : '-').append(' ');
+                        rights.append(LocaleController.getString("EventLogPromotedDeleteStories", R.string.EventLogPromotedDeleteStories));
                     }
                 }
                 if (o.delete_messages != n.delete_messages) {
@@ -3631,12 +3645,23 @@ public class MessageObject {
                             messageText = AndroidUtilities.replaceTags(LocaleController.formatString("AutoDeleteGlobalActionFromYou", R.string.AutoDeleteGlobalActionFromYou, LocaleController.formatTTLString(action.period)));
                         } else {
                             TLObject object = null;
-                            if (users != null) {
-                                users.get(action.auto_setting_from);
+                            if (sUsers != null) {
+                                object = sUsers.get(action.auto_setting_from);
+                            }
+                            if (object == null && users != null) {
+                                object = users.get(action.auto_setting_from);
                             }
                             if (object == null && chats != null) {
                                 object = chats.get(action.auto_setting_from);
-                            } else {
+                            }
+                            if (object == null) {
+                                if (action.auto_setting_from > 0) {
+                                    object = MessagesController.getInstance(currentAccount).getUser(action.auto_setting_from);
+                                } else {
+                                    object = MessagesController.getInstance(currentAccount).getChat(-action.auto_setting_from);
+                                }
+                            }
+                            if (object == null) {
                                 object = fromObject;
                             }
                             messageText = replaceWithLink(AndroidUtilities.replaceTags(LocaleController.formatString("AutoDeleteGlobalAction", R.string.AutoDeleteGlobalAction, LocaleController.formatTTLString(action.period))), "un1", object);
@@ -3998,7 +4023,7 @@ public class MessageObject {
                     } else {
                         messageText = LocaleController.getString("AttachPhoto", R.string.AttachPhoto);
                     }
-                } else if (isVideo() || getMedia(messageOwner) instanceof TLRPC.TL_messageMediaDocument && getDocument() instanceof TLRPC.TL_documentEmpty && getMedia(messageOwner).ttl_seconds != 0) {
+                } else if (isVideo() || getMedia(messageOwner) instanceof TLRPC.TL_messageMediaDocument && (getDocument() instanceof TLRPC.TL_documentEmpty || getDocument() == null) && getMedia(messageOwner).ttl_seconds != 0) {
                     if (getMedia(messageOwner).ttl_seconds != 0 && !(messageOwner instanceof TLRPC.TL_message_secret)) {
                         messageText = LocaleController.getString("AttachDestructingVideo", R.string.AttachDestructingVideo);
                     } else {
@@ -4114,7 +4139,7 @@ public class MessageObject {
                 }
             } else if (hasExtendedMediaPreview()) {
                 type = TYPE_EXTENDED_MEDIA_PREVIEW;
-            } else if (getMedia(messageOwner).ttl_seconds != 0 && (getMedia(messageOwner).photo instanceof TLRPC.TL_photoEmpty || getDocument() instanceof TLRPC.TL_documentEmpty)) {
+            } else if (getMedia(messageOwner).ttl_seconds != 0 && (getMedia(messageOwner).photo instanceof TLRPC.TL_photoEmpty || getDocument() instanceof TLRPC.TL_documentEmpty || getMedia(messageOwner) instanceof TLRPC.TL_messageMediaDocument && getDocument() == null || forceExpired)) {
                 contentType = 1;
                 type = TYPE_DATE;
             } else if (getMedia(messageOwner) instanceof TLRPC.TL_messageMediaDice) {
@@ -4319,8 +4344,8 @@ public class MessageObject {
 
     public static boolean canPreviewDocument(TLRPC.Document document) {
         if (document != null && document.mime_type != null) {
-            String mime = document.mime_type.toLowerCase();
-            if (isDocumentHasThumb(document) && (mime.equals("image/png") || mime.equals("image/jpg") || mime.equals("image/jpeg")) || (Build.VERSION.SDK_INT >= 26 && (mime.equals("image/heic")))) {
+            String mime = document.mime_type;
+            if (isDocumentHasThumb(document) && (mime.equalsIgnoreCase("image/png") || mime.equalsIgnoreCase("image/jpg") || mime.equalsIgnoreCase("image/jpeg")) || (Build.VERSION.SDK_INT >= 26 && (mime.equalsIgnoreCase("image/heic")))) {
                 for (int a = 0; a < document.attributes.size(); a++) {
                     TLRPC.DocumentAttribute attribute = document.attributes.get(a);
                     if (attribute instanceof TLRPC.TL_documentAttributeImageSize) {
@@ -6319,9 +6344,22 @@ public class MessageObject {
         return secondsLeft;
     }
 
-    public String getSecretTimeString() {
+    private CharSequence secretOnceSpan;
+    private CharSequence secretPlaySpan;
+
+    public CharSequence getSecretTimeString() {
         if (!isSecretMedia()) {
             return null;
+        }
+        if (messageOwner.ttl == 0x7FFFFFFF) {
+            if (secretOnceSpan == null) {
+                secretOnceSpan = new SpannableString("v");
+                ColoredImageSpan span = new ColoredImageSpan(R.drawable.mini_viewonce);
+                span.setTranslateX(-AndroidUtilities.dp(3));
+                span.setWidth(AndroidUtilities.dp(13));
+                ((Spannable) secretOnceSpan).setSpan(span, 0, secretOnceSpan.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+            }
+            return TextUtils.concat(secretOnceSpan, "1");
         }
         int secondsLeft = getSecretTimeLeft();
         String str;
@@ -6330,7 +6368,14 @@ public class MessageObject {
         } else {
             str = secondsLeft / 60 + "m";
         }
-        return str;
+        if (secretPlaySpan == null) {
+            secretPlaySpan = new SpannableString("p");
+            ColoredImageSpan span = new ColoredImageSpan(R.drawable.play_mini_video);
+            span.setTranslateX(AndroidUtilities.dp(1));
+            span.setWidth(AndroidUtilities.dp(13));
+            ((Spannable) secretPlaySpan).setSpan(span, 0, secretPlaySpan.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+        }
+        return TextUtils.concat(secretPlaySpan, str);
     }
 
     public String getDocumentName() {
@@ -6889,6 +6934,7 @@ public class MessageObject {
                 }
                 photoHeight = h;
             }
+
             return photoHeight + AndroidUtilities.dp(14);
         }
     }
@@ -8083,7 +8129,7 @@ public class MessageObject {
         webpage.type = "telegram_story";
         TLRPC.TL_webPageAttributeStory attr = new TLRPC.TL_webPageAttributeStory();
         attr.id = messageOwner.media.id;
-        attr.user_id = messageOwner.media.user_id;
+        attr.peer = MessagesController.getInstance(currentAccount).getPeer(messageOwner.media.user_id);
         if (messageOwner.media.storyItem != null) {
             attr.flags |= 1;
             attr.storyItem = messageOwner.media.storyItem;
