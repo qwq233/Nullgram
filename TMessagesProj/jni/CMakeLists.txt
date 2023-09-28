@@ -8,12 +8,12 @@ if (CCACHE)
     set(CMAKE_C_COMPILER_LAUNCHER ${CCACHE})
 endif ()
 
-set(CMAKE_CXX_FLAGS "-std=c++14 -DANDROID -g")
-set(CMAKE_C_FLAGS "-w -std=c11 -DANDROID -D_LARGEFILE_SOURCE=1 -g")
+set(CMAKE_CXX_FLAGS "-std=c++2a -DANDROID -g")
+set(CMAKE_C_FLAGS "-w -std=c18 -DANDROID -D_LARGEFILE_SOURCE=1 -g")
 set(CMAKE_ASM_FLAGS "${CFLAGS} -x assembler-with-cpp")
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -ffunction-sections -fdata-sections")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -ffunction-sections -fdata-sections")
-set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -Wl,--build-id,-Bsymbolic,--exclude-libs,libtgvoip.a,libtgcalls.a,libtgcalls_tp.a,libtgnet.a,liblz4.a,libwebp.a,
+set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -Wl,--build-id,-Bsymbolic,--exclude-libs,libtgvoip.a,libtgcalls.a,libtgcalls_tp.a,libtgnet.a,liblz4.a,libwebp/libwebp.a,
 libflac.a,librlottie.a,libsqlite.a,
 ${CMAKE_HOME_DIRECTORY}/ffmpeg/${ANDROID_ABI}/libswscale.a,
 ${CMAKE_HOME_DIRECTORY}/ffmpeg/${ANDROID_ABI}/libavformat.a,
@@ -193,78 +193,7 @@ target_include_directories(flac PUBLIC
         exoplayer/libFLAC/include)
 
 #webp
-add_library(webp STATIC
-        libwebp/dec/alpha.c
-        libwebp/dec/buffer.c
-        libwebp/dec/frame.c
-        libwebp/dec/idec.c
-        libwebp/dec/io.c
-        libwebp/dec/quant.c
-        libwebp/dec/tree.c
-        libwebp/dec/vp8.c
-        libwebp/dec/vp8l.c
-        libwebp/dec/webp.c
-        libwebp/dsp/alpha_processing.c
-        libwebp/dsp/alpha_processing_sse2.c
-        libwebp/dsp/cpu.c
-        libwebp/dsp/dec.c
-        libwebp/dsp/dec_clip_tables.c
-        libwebp/dsp/dec_mips32.c
-        libwebp/dsp/dec_neon.c
-        libwebp/dsp/dec_sse2.c
-        libwebp/dsp/enc.c
-        libwebp/dsp/enc_avx2.c
-        libwebp/dsp/enc_mips32.c
-        libwebp/dsp/enc_neon.c
-        libwebp/dsp/enc_sse2.c
-        libwebp/dsp/lossless.c
-        libwebp/dsp/lossless_mips32.c
-        libwebp/dsp/lossless_neon.c
-        libwebp/dsp/lossless_sse2.c
-        libwebp/dsp/upsampling.c
-        libwebp/dsp/upsampling_neon.c
-        libwebp/dsp/upsampling_sse2.c
-        libwebp/dsp/yuv.c
-        libwebp/dsp/yuv_mips32.c
-        libwebp/dsp/yuv_sse2.c
-        libwebp/enc/alpha.c
-        libwebp/enc/analysis.c
-        libwebp/enc/backward_references.c
-        libwebp/enc/config.c
-        libwebp/enc/cost.c
-        libwebp/enc/filter.c
-        libwebp/enc/frame.c
-        libwebp/enc/histogram.c
-        libwebp/enc/iterator.c
-        libwebp/enc/picture.c
-        libwebp/enc/picture_csp.c
-        libwebp/enc/picture_psnr.c
-        libwebp/enc/picture_rescale.c
-        libwebp/enc/picture_tools.c
-        libwebp/enc/quant.c
-        libwebp/enc/syntax.c
-        libwebp/enc/token.c
-        libwebp/enc/tree.c
-        libwebp/enc/vp8l.c
-        libwebp/enc/webpenc.c
-        libwebp/utils/bit_reader.c
-        libwebp/utils/bit_writer.c
-        libwebp/utils/color_cache.c
-        libwebp/utils/filters.c
-        libwebp/utils/huffman.c
-        libwebp/utils/huffman_encode.c
-        libwebp/utils/quant_levels.c
-        libwebp/utils/quant_levels_dec.c
-        libwebp/utils/random.c
-        libwebp/utils/rescaler.c
-        libwebp/utils/thread.c
-        libwebp/utils/utils.c)
-target_compile_options(webp PUBLIC
-        -Wall -finline-functions -ffast-math -Os)
-set_target_properties(webp PROPERTIES
-        ANDROID_ARM_MODE arm)
-target_compile_definitions(webp PUBLIC
-        HAVE_MALLOC_H HAVE_PTHREAD WEBP_USE_THREAD)
+add_subdirectory(${CMAKE_HOME_DIRECTORY}/libwebp/)
 
 #lz4
 add_library(lz4 STATIC

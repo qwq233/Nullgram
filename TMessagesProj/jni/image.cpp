@@ -10,8 +10,8 @@
 #include <tgnet/FileLog.h>
 #include <vector>
 #include <algorithm>
-#include "libwebp/webp/decode.h"
-#include "libwebp/webp/encode.h"
+#include "libwebp/src/webp/decode.h"
+#include "libwebp/src/webp/encode.h"
 #include "c_utils.h"
 
 extern "C" {
