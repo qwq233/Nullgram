@@ -255,8 +255,8 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
 import kotlin.Unit;
-import top.qwq2333.nullgram.activity.MainSettingActivity;
 import top.qwq2333.gen.Config;
+import top.qwq2333.nullgram.activity.MainSettingActivity;
 import top.qwq2333.nullgram.config.ConfigManager;
 import top.qwq2333.nullgram.helpers.TranslateHelper;
 import top.qwq2333.nullgram.translate.LanguageDetectorTimeout;
@@ -6268,7 +6268,7 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
 
                 boolean writeButtonVisible = diff > 0.2f && !searchMode && (imageUpdater == null || setAvatarRow == -1);
                 if (writeButtonVisible && chatId != 0) {
-                    writeButtonVisible = ChatObject.isChannel(currentChat) && !currentChat.megagroup && chatInfo != null && chatInfo.linked_chat_id != 0 && infoHeaderRow != -1;
+                    writeButtonVisible = ChatObject.isChannel(currentChat) /*&& !currentChat.megagroup*/ && chatInfo != null && chatInfo.linked_chat_id != 0 && infoHeaderRow != -1;
                 }
                 if (!openAnimationInProgress) {
                     boolean currentVisible = writeButton.getTag() == null;
