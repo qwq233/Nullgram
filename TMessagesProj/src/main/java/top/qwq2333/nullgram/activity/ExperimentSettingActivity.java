@@ -347,7 +347,7 @@ public class ExperimentSettingActivity extends BaseActivity {
                             Config.hideProxySponsorChannel, true);
                     } else if (position == disableSendTypingRow) {
                         textCell.setTextAndCheck(LocaleController.getString("disableSendTyping", R.string.disableSendTyping),
-                            Config.unreadBadgeOnBackButton, true);
+                            Config.disableSendTyping, true);
                     } else if (position == storyStealthModeRow) {
                         textCell.setTextAndCheck(LocaleController.getString("storyStealthMode", R.string.storyStealthMode),
                             Config.storyStealthMode, true);
