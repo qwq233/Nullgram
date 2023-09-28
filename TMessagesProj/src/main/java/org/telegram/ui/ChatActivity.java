@@ -114,7 +114,6 @@ import androidx.viewpager.widget.PagerAdapter;
 import androidx.viewpager.widget.ViewPager;
 
 import com.google.android.exoplayer2.ui.AspectRatioFrameLayout;
-import com.google.android.exoplayer2.util.Consumer;
 import com.google.zxing.common.detector.MathUtils;
 
 import org.telegram.PhoneFormat.PhoneFormat;
@@ -317,7 +316,6 @@ import java.util.Calendar;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -11112,7 +11110,7 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
         if (arrayList == null || arrayList.isEmpty()) {
             return;
         }
-        if (!checkSlowModeAlert()) {
+        if (did == 0 && !checkSlowModeAlert()) {
             return;
         }
         if ((scheduleDate != 0) == (chatMode == MODE_SCHEDULED)) {
