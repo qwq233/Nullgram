@@ -28,7 +28,6 @@ import android.opengl.GLUtils;
 import android.opengl.Matrix;
 import android.os.Build;
 import android.os.Build.VERSION_CODES;
-import android.text.Layout;
 import android.text.SpannableString;
 import android.text.Spanned;
 import android.util.Pair;
@@ -49,9 +48,7 @@ import org.telegram.messenger.FileLog;
 import org.telegram.messenger.LocaleController;
 import org.telegram.messenger.MediaController;
 import org.telegram.messenger.UserConfig;
-import org.telegram.messenger.Utilities;
 import org.telegram.messenger.VideoEditedInfo;
-import org.telegram.tgnet.TLRPC;
 import org.telegram.ui.Components.AnimatedEmojiDrawable;
 import org.telegram.ui.Components.AnimatedEmojiSpan;
 import org.telegram.ui.Components.AnimatedFileDrawable;
@@ -1250,12 +1247,10 @@ public class TextureRenderer {
                     ByteBuffer buffer = file.getChannel().map(FileChannel.MapMode.READ_ONLY, 0, path.length());
                     BitmapFactory.Options bmOptions = new BitmapFactory.Options();
                     bmOptions.inJustDecodeBounds = true;
-                    Utilities.loadWebpImage(null, buffer, buffer.limit(), bmOptions, true);
                     if (entity.type == VideoEditedInfo.MediaEntity.TYPE_PHOTO) {
                         bmOptions.inMutable = true;
                     }
                     entity.bitmap = Bitmaps.createBitmap(bmOptions.outWidth, bmOptions.outHeight, Bitmap.Config.ARGB_8888);
-                    Utilities.loadWebpImage(entity.bitmap, buffer, buffer.limit(), null, true);
                     file.close();
                 } catch (Throwable e) {
                     FileLog.e(e);
