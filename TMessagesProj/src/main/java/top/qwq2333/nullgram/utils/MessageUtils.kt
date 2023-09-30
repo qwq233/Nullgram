@@ -313,7 +313,6 @@ class MessageUtils(num: Int) : BaseController(num) {
             val fromId = MessagesController.getInputPeer(userConfig.currentUser)
             doSearchMessages(fragment, peer = peer, replyMessageId = replyMessageId, fromId = fromId, offsetId = Int.MAX_VALUE, hash = 0).let { it ->
                 if (it.isNotEmpty()) {
-                    it.forEach { Log.e("i: $it ") }
 
                     val lists = ArrayList<ArrayList<Int>>().apply {
                         for (i in 0..it.size / 100) {
