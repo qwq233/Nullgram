@@ -305,4 +305,6 @@
     <string name="OneMoreThing">Una cosa más</string>
     <string name="NotOriginalNullgramInfo">Parece que estás usando un fork de Nullgram.\n¿También quieres seguir el canal de Nullgram?</string>
     <string name="Official">Oficial</string>
+    <string name="Before">Before...</string>
+    <string name="Custom">Custom</string>
 </resources>
