@@ -45,6 +45,11 @@ import androidx.core.content.FileProvider
 import com.google.zxing.EncodeHintType
 import com.google.zxing.qrcode.QRCodeWriter
 import com.google.zxing.qrcode.decoder.ErrorCorrectionLevel
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.withContext
 import org.telegram.SQLite.SQLiteCursor
 import org.telegram.SQLite.SQLiteException
 import org.telegram.messenger.AndroidUtilities
@@ -93,7 +98,6 @@ import java.nio.ByteBuffer
 import java.nio.charset.StandardCharsets
 import java.util.Calendar
 import java.util.Locale
-import java.util.concurrent.CountDownLatch
 import java.util.concurrent.atomic.AtomicBoolean
 import java.util.concurrent.atomic.AtomicReference
 import kotlin.math.min
@@ -304,42 +308,43 @@ class MessageUtils(num: Int) : BaseController(num) {
         before: Int = -1,
         callback: ((Int, Runnable?) -> Unit)?
     ) {
-        val peer = messagesController.getInputPeer(dialogId)
-        val fromId = MessagesController.getInputPeer(userConfig.currentUser)
-        doSearchMessages(fragment, peer = peer, replyMessageId = replyMessageId, fromId = fromId, offsetId = Int.MAX_VALUE, hash = 0).let { it ->
-            if (it.isNotEmpty()) {
+        CoroutineScope(Dispatchers.IO).launch {
+            val peer = messagesController.getInputPeer(dialogId)
+            val fromId = MessagesController.getInputPeer(userConfig.currentUser)
+            doSearchMessages(fragment, peer = peer, replyMessageId = replyMessageId, fromId = fromId, offsetId = Int.MAX_VALUE, hash = 0).let { it ->
+                if (it.isNotEmpty()) {
 
-                val lists = ArrayList<ArrayList<Int>>().apply {
-                    for (i in 0..it.size / 100) {
-                        add(ArrayList(it.subList(i * 100, min((i + 1) * 100, it.size))))
+                    val lists = ArrayList<ArrayList<Int>>().apply {
+                        for (i in 0..it.size / 100) {
+                            add(ArrayList(it.subList(i * 100, min((i + 1) * 100, it.size))))
+                        }
                     }
-                }
 
-                val deleteAction = Runnable {
-                    Log.d("deleteAction")
-                    for (list in lists) {
-                        messagesController.deleteMessages(list, null, null, dialogId, true, false)
+                    val deleteAction = Runnable {
+                        Log.d("deleteAction")
+                        for (list in lists) {
+                            messagesController.deleteMessages(list, null, null, dialogId, true, false)
+                        }
                     }
-                }
-                AndroidUtilities.runOnUIThread {
-                    if (callback != null) {
-                        callback.invoke(it.size, deleteAction)
-                    } else {
-                        deleteAction.run()
+                    AndroidUtilities.runOnUIThread {
+                        if (callback != null) {
+                            callback.invoke(it.size, deleteAction)
+                        } else {
+                            deleteAction.run()
+                        }
                     }
+                } else {
+                    Log.d("it is empty")
                 }
-            } else {
-                Log.d("it is empty")
             }
-        }
-        if (mergeDialogId != 0L) {
-            deleteUserHistoryWithSearch(fragment, mergeDialogId, 0, 0, before, null)
+            if (mergeDialogId != 0L) {
+                deleteUserHistoryWithSearch(fragment, mergeDialogId, 0, 0, before, null)
+            }
         }
     }
 
-    private fun doSearchMessages(
+    private suspend fun doSearchMessages(
         fragment: BaseFragment?,
-        latch: CountDownLatch = CountDownLatch(1),
         messagesId: MutableList<Int> = mutableListOf(),
         peer: TLRPC.InputPeer?,
         replyMessageId: Int,
@@ -364,37 +369,40 @@ class MessageUtils(num: Int) : BaseController(num) {
             this.hash = hash
         }
 
-        connectionsManager.sendRequest(req, { response, error ->
-            if (response is TLRPC.messages_Messages) {
-                if (response is TLRPC.TL_messages_messagesNotModified || response.messages.isEmpty()) {
-                    Log.d("response is empty")
-                    latch.countDown()
-                }
-                var newOffsetId = offsetId
-                for (message in response.messages) {
-                    newOffsetId = min(newOffsetId.toDouble(), message.id.toDouble()).toInt()
-                    if (!message.out || message.post || message.date <= before) {
-                        continue
+        return withContext(Dispatchers.IO) {
+            connectionsHelper.sendReqAndDo(req, ConnectionsManager.RequestFlagFailOnServerErrors) { response, error ->
+                if (response is TLRPC.messages_Messages) {
+                    if (response is TLRPC.TL_messages_messagesNotModified || response.messages.isEmpty()) {
+                        Log.d("response is empty")
+                        return@sendReqAndDo messagesId
                     }
-                    messagesId.add(message.id)
-                }
-                doSearchMessages(fragment, latch,  messagesId, peer, replyMessageId, fromId, newOffsetId, calcMessagesHash(response.messages), before)
-            } else {
-                if (error != null) {
-                    AndroidUtilities.runOnUIThread {
-                        AlertsCreator.showSimpleAlert(
-                            fragment, """
+                    var newOffsetId = offsetId
+                    for (message in response.messages) {
+                        newOffsetId = min(newOffsetId.toDouble(), message.id.toDouble()).toInt()
+                        if (!message.out || message.post || message.date <= before) {
+                            continue
+                        }
+                        messagesId.add(message.id)
+                    }
+                    runBlocking {
+                        doSearchMessages(fragment, messagesId, peer, replyMessageId, fromId, newOffsetId, calcMessagesHash(response.messages), before)
+                    }
+                    return@sendReqAndDo messagesId
+                } else {
+                    if (error != null) {
+                        AndroidUtilities.runOnUIThread {
+                            AlertsCreator.showSimpleAlert(
+                                fragment, """
                                     ${LocaleController.getString("ErrorOccurred", R.string.ErrorOccurred)}
                                     ${error.text}
                                     """.trimIndent()
-                        )
+                            )
+                        }
                     }
+                    return@sendReqAndDo messagesId
                 }
             }
-        }, ConnectionsManager.RequestFlagFailOnServerErrors)
-        latch.await()
-
-        return messagesId
+        } ?: throw Exception("res is null")
     }
 
     private fun calcMessagesHash(messages: ArrayList<TLRPC.Message>?): Long {

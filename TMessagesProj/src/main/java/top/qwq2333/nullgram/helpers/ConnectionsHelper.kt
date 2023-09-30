@@ -48,35 +48,18 @@ class ConnectionsHelper(instance: Int) : AccountInstance(instance) {
         }
     }
 
-    suspend fun sendReqAndGet(req: TLObject): TLObject? {
-        var result: TLObject? = null
-        val latch = CountDownLatch(1)
-
-        withContext(Dispatchers.IO) {
-            connectionsManager.sendRequest(req) { response, _ ->
-                if (response != null) {
-                    result = response
-                }
-                latch.countDown()
-            }
-            latch.await()
-        }
-        return result
-    }
-
     suspend fun <T> sendReqAndDo(req: TLObject, flags: Int = 0, action: (TLObject?, TLRPC.TL_error?) -> T?): T? {
-        var result: T? = null
+        var result: Pair<TLObject?, TLRPC.TL_error? >? = null
         val latch = CountDownLatch(1)
-        withContext(Dispatchers.IO) {
+        return withContext(Dispatchers.IO) {
             connectionsManager.sendRequest(req, { response: TLObject?, error: TLRPC.TL_error? ->
-                result = action(response, error)
+                result = Pair(response, error)
                 Log.d("countdown")
                 latch.countDown()
             }, flags)
             Log.d("await")
             latch.await()
+            action(result?.first, result?.second)
         }
-
-        return result
     }
 }
