@@ -49,7 +49,7 @@ class ConnectionsHelper(instance: Int) : AccountInstance(instance) {
     }
 
     suspend fun <T> sendReqAndDo(req: TLObject, flags: Int = 0, action: (TLObject?, TLRPC.TL_error?) -> T?): T? {
-        var result: Pair<TLObject?, TLRPC.TL_error? >? = null
+        lateinit var result: Pair<TLObject?, TLRPC.TL_error?>
         val latch = CountDownLatch(1)
         return withContext(Dispatchers.IO) {
             connectionsManager.sendRequest(req, { response: TLObject?, error: TLRPC.TL_error? ->
@@ -59,7 +59,7 @@ class ConnectionsHelper(instance: Int) : AccountInstance(instance) {
             }, flags)
             Log.d("await")
             latch.await()
-            action(result?.first, result?.second)
+            action(result.first, result.second)
         }
     }
 }
