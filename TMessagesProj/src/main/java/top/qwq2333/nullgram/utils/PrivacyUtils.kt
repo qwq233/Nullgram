@@ -60,11 +60,15 @@ object PrivacyUtils {
         }, { response, _ ->
             if (response is TLRPC.TL_account_privacyRules) {
                 if (response.rules.isEmpty()) {
-                    showPrivacyAlert(ctx, account, 0)
+                    AndroidUtilities.runOnUIThread {
+                        showPrivacyAlert(ctx, account, 0)
+                    }
                 } else {
                     response.rules.forEach {
                         if (it is TLRPC.TL_privacyValueAllowAll) {
-                            showPrivacyAlert(ctx, account, 0)
+                            AndroidUtilities.runOnUIThread {
+                                showPrivacyAlert(ctx, account, 0)
+                            }
                             return@forEach
                         }
                     }
@@ -72,17 +76,22 @@ object PrivacyUtils {
             }
         }, ConnectionsManager.RequestFlagFailOnServerErrors)
     }
+
     private fun postCheckAddMeByPhone(ctx: Context, account: Int) {
         ConnectionsManager.getInstance(account).sendRequest(TLRPC.TL_account_getPrivacy().apply {
             key = TLRPC.TL_inputPrivacyKeyAddedByPhone()
         }, { response, _ ->
             if (response is TLRPC.TL_account_privacyRules) {
                 if (response.rules.isEmpty()) {
-                    showPrivacyAlert(ctx, account, 1)
+                    AndroidUtilities.runOnUIThread {
+                        showPrivacyAlert(ctx, account, 1)
+                    }
                 } else {
                     response.rules.forEach {
                         if (it is TLRPC.TL_privacyValueAllowAll) {
-                            showPrivacyAlert(ctx, account, 1)
+                            AndroidUtilities.runOnUIThread {
+                                showPrivacyAlert(ctx, account, 1)
+                            }
                             return@forEach
                         }
                     }
@@ -90,17 +99,22 @@ object PrivacyUtils {
             }
         }, ConnectionsManager.RequestFlagFailOnServerErrors)
     }
+
     private fun postCheckAllowP2p(ctx: Context, account: Int) {
         ConnectionsManager.getInstance(account).sendRequest(TLRPC.TL_account_getPrivacy().apply {
             key = TLRPC.TL_inputPrivacyKeyPhoneP2P()
         }, { response, _ ->
             if (response is TLRPC.TL_account_privacyRules) {
                 if (response.rules.isEmpty()) {
-                    showPrivacyAlert(ctx, account, 2)
+                    AndroidUtilities.runOnUIThread {
+                        showPrivacyAlert(ctx, account, 2)
+                    }
                 } else {
                     response.rules.forEach {
                         if (it is TLRPC.TL_privacyValueAllowAll) {
-                            showPrivacyAlert(ctx, account, 2)
+                            AndroidUtilities.runOnUIThread {
+                                showPrivacyAlert(ctx, account, 2)
+                            }
                             return@forEach
                         }
                     }
@@ -108,15 +122,19 @@ object PrivacyUtils {
             }
         }, ConnectionsManager.RequestFlagFailOnServerErrors)
     }
+
     private fun postCheckAllow2fa(ctx: Context, account: Int) {
         ConnectionsManager.getInstance(account).sendRequest(TLRPC.TL_account_getPassword(), { response, _ ->
-                if (response is TLRPC.TL_account_password) {
-                    if (!response.has_password) {
+            if (response is TLRPC.TL_account_password) {
+                if (!response.has_password) {
+                    AndroidUtilities.runOnUIThread {
                         show2faAlert(ctx, account, response)
                     }
                 }
-            }, ConnectionsManager.RequestFlagFailOnServerErrors)
+            }
+        }, ConnectionsManager.RequestFlagFailOnServerErrors)
     }
+
     private fun showPrivacyAlert(ctx: Context, account: Int, type: Int) {
         val builder = AlertDialog.Builder(ctx)
         builder.setTitle(LocaleController.getString("PrivacyNotice", R.string.PrivacyNotice))
@@ -137,19 +155,19 @@ object PrivacyUtils {
         )
         builder.setPositiveButton(LocaleController.getString("ApplySuggestion", R.string.ApplySuggestion)) { _, _ ->
             ConnectionsManager.getInstance(account).sendRequest(TLRPC.TL_account_setPrivacy().apply {
-                    key = when (type) {
-                        0 -> TLRPC.TL_inputPrivacyKeyPhoneNumber()
-                        1 -> TLRPC.TL_inputPrivacyKeyAddedByPhone()
-                        else -> TLRPC.TL_inputPrivacyKeyPhoneP2P()
+                key = when (type) {
+                    0 -> TLRPC.TL_inputPrivacyKeyPhoneNumber()
+                    1 -> TLRPC.TL_inputPrivacyKeyAddedByPhone()
+                    else -> TLRPC.TL_inputPrivacyKeyPhoneP2P()
+                }
+                rules = arrayListOf(
+                    when (type) {
+                        0 -> TLRPC.TL_inputPrivacyValueDisallowAll()
+                        1 -> TLRPC.TL_inputPrivacyValueAllowContacts()
+                        else -> TLRPC.TL_inputPrivacyValueDisallowAll()
                     }
-                    rules = arrayListOf(
-                        when (type) {
-                            0 -> TLRPC.TL_inputPrivacyValueDisallowAll()
-                            1 -> TLRPC.TL_inputPrivacyValueAllowContacts()
-                            else -> TLRPC.TL_inputPrivacyValueDisallowAll()
-                        }
-                    )
-                }) { _, _ -> /* ignored */ }
+                )
+            }) { _, _ -> /* ignored */ }
 
         }
         builder.setNegativeButton(LocaleController.getString("Cancel", R.string.Cancel), null)
@@ -175,20 +193,19 @@ object PrivacyUtils {
             )
         }
     }
+
     private fun show2faAlert(ctx: Context, account: Int, password: TLRPC.TL_account_password) {
         val builder = AlertDialog.Builder(ctx)
         builder.setTitle(LocaleController.getString("PrivacyNotice", R.string.PrivacyNotice))
         builder.setMessage(
             AndroidUtilities.replaceTags(
-                LocaleController.getString(
-                    "PrivacyNotice2fa", R.string.PrivacyNotice2fa
-                )
+                LocaleController.getString("PrivacyNotice2fa", R.string.PrivacyNotice2fa)
             )
         )
         builder.setPositiveButton(LocaleController.getString("Set", R.string.Set)) { _, _ ->
             if (ctx is LaunchActivity) {
                 ApplicationLoader.applicationHandler.post{
-                    ctx.presentFragment(TwoStepVerificationActivity(account))
+                    ctx.presentFragment(TwoStepVerificationActivity(account, password))
                 }
             }
         }

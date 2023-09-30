@@ -60,11 +60,13 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import javax.net.ssl.SSLException;
 
+import kotlin.Unit;
 import top.qwq2333.gen.Config;
 import top.qwq2333.nullgram.helpers.WebSocketHelper;
 import top.qwq2333.nullgram.utils.DatabaseUtils;
 import top.qwq2333.nullgram.utils.Log;
 import top.qwq2333.nullgram.utils.Utils;
+import top.qwq2333.nullgram.utils.UtilsKt;
 
 @SuppressWarnings("JavaJniMissingFunction")
 public class ConnectionsManager extends BaseController {
@@ -412,7 +414,7 @@ public class ConnectionsManager extends BaseController {
                     final TLObject finalResponse = resp;
                     final TLRPC.TL_error finalError = error;
                     // the original way will block the thread if call this function inside this function
-                    new Thread(() -> {
+                    UtilsKt.runOnIoDispatcher(()->{
                         if (onComplete != null) {
                             onComplete.run(finalResponse, finalError);
                         } else if (onCompleteTimestamp != null) {
@@ -421,7 +423,8 @@ public class ConnectionsManager extends BaseController {
                         if (finalResponse != null) {
                             finalResponse.freeResources();
                         }
-                    }).start();
+                        return Unit.INSTANCE;
+                    });
                 } catch (Exception e) {
                     FileLog.e(e);
                 }

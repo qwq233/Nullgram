@@ -29,6 +29,9 @@ import android.net.NetworkCapabilities
 import android.util.Base64
 import android.view.View
 import android.widget.Toast
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import org.telegram.messenger.AndroidUtilities
 import org.telegram.messenger.ApplicationLoader
 import org.telegram.messenger.LocaleController
@@ -310,4 +313,10 @@ internal inline fun tryOrLog(block: () -> Unit) = runCatching {
     block()
 }.onFailure {
     Log.e(it)
+}
+
+internal inline fun runOnIoDispatcher(crossinline block: ()->Unit) {
+    CoroutineScope(Dispatchers.IO).launch {
+        block()
+    }
 }
