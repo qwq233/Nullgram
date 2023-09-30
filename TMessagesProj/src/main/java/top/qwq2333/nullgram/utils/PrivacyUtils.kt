@@ -23,6 +23,7 @@ import android.content.Context
 import android.content.DialogInterface
 import android.widget.TextView
 import org.telegram.messenger.AndroidUtilities
+import org.telegram.messenger.ApplicationLoader
 import org.telegram.messenger.LocaleController
 import org.telegram.messenger.MessagesController
 import org.telegram.messenger.R
@@ -186,9 +187,9 @@ object PrivacyUtils {
         )
         builder.setPositiveButton(LocaleController.getString("Set", R.string.Set)) { _, _ ->
             if (ctx is LaunchActivity) {
-                UIUtil.runOnUIThread(Runnable {
+                ApplicationLoader.applicationHandler.post{
                     ctx.presentFragment(TwoStepVerificationActivity(account))
-                })
+                }
             }
         }
         builder.setNeutralButton(LocaleController.getString("Cancel", R.string.Cancel), null)

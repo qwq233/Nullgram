@@ -21,7 +21,11 @@ package top.qwq2333.nullgram.utils
 
 import android.content.Context
 import android.util.Base64
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import org.telegram.messenger.AccountInstance
+import org.telegram.messenger.ApplicationLoader
 import org.telegram.messenger.BuildConfig
 import org.telegram.messenger.LocaleController
 import org.telegram.messenger.MessagesController
@@ -44,8 +48,8 @@ object UpdateUtils {
     private val originalChannelUsername = String(Base64.decode("TnVsbGdyYW1DbGllbnQK", Base64.DEFAULT))
 
     @JvmStatic
-    fun postCheckFollowChannel(ctx: Context, currentAccount: Int) = UIUtil.runOnIoDispatcher {
-        if (ConfigManager.getBooleanOrFalse(Defines.updateChannelSkip)) return@runOnIoDispatcher
+    fun postCheckFollowChannel(ctx: Context, currentAccount: Int) = CoroutineScope(Dispatchers.IO).launch {
+        if (ConfigManager.getBooleanOrFalse(Defines.updateChannelSkip)) return@launch
 
         val messagesCollector = MessagesController.getInstance(currentAccount)
         val connectionsManager = ConnectionsManager.getInstance(currentAccount)
@@ -86,7 +90,7 @@ object UpdateUtils {
         if (!channel.left || channel.kicked) {
             return
         }
-        UIUtil.runOnUIThread {
+        ApplicationLoader.applicationHandler.post {
             val messagesCollector = MessagesController.getInstance(currentAccount)
             val userConfig = UserConfig.getInstance(currentAccount)
 
@@ -118,7 +122,7 @@ object UpdateUtils {
         }
 
         if (BuildConfig.APPLICATION_ID != Arrays.toString(Base64.decode("dG9wLnF3cTIzMzMubnVsbGdyYW0=", Base64.DEFAULT))) {
-            UIUtil.runOnUIThread {
+            ApplicationLoader.applicationHandler.post {
                 val messagesCollector = MessagesController.getInstance(currentAccount)
                 val userConfig = UserConfig.getInstance(currentAccount)
                 val builder = AlertDialog.Builder(ctx)

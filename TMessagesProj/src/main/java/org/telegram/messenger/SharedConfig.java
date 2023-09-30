@@ -58,7 +58,6 @@ import top.qwq2333.nullgram.utils.AlertUtil;
 import top.qwq2333.nullgram.utils.Defines;
 import top.qwq2333.nullgram.utils.Log;
 import top.qwq2333.nullgram.utils.StringUtils;
-import top.qwq2333.nullgram.utils.UIUtil;
 
 public class SharedConfig {
     /**
@@ -112,9 +111,6 @@ public class SharedConfig {
     static Boolean allowPreparingHevcPlayers;
 
     public static boolean allowPreparingHevcPlayers() {
-        if (android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.M) {
-            return false;
-        }
         if (allowPreparingHevcPlayers == null) {
             int codecCount = MediaCodecList.getCodecCount();
             int maxInstances = 0;
@@ -585,7 +581,7 @@ public class SharedConfig {
             info = new ProxyInfo();
         }
         ProxyInfo finalInfo = info;
-        UIUtil.runOnIoDispatcher(() -> {
+        ApplicationLoader.applicationHandler.post(() -> {
             try {
                 if (enable && finalInfo instanceof ExternalSocks5Proxy) {
                     ((ExternalSocks5Proxy) finalInfo).start();
@@ -598,7 +594,7 @@ public class SharedConfig {
                 return;
             }
             ConnectionsManager.setProxySettings(enable, finalInfo.address, finalInfo.port, finalInfo.username, finalInfo.password, finalInfo.secret);
-            UIUtil.runOnUIThread(() -> NotificationCenter.getGlobalInstance().postNotificationName(NotificationCenter.proxySettingsChanged));
+            ApplicationLoader.applicationHandler.post(() -> NotificationCenter.getGlobalInstance().postNotificationName(NotificationCenter.proxySettingsChanged));
         });
 
     }

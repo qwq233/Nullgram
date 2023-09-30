@@ -194,7 +194,7 @@ object Utils {
                     }
                     if ((SharedConfig.proxyEnabled && vpn) || (!SharedConfig.proxyEnabled && !vpn)) {
                         SharedConfig.setProxyEnable(!vpn)
-                        UIUtil.runOnUIThread {
+                        ApplicationLoader.applicationHandler.post {
                             NotificationCenter.getGlobalInstance().postNotificationName(NotificationCenter.proxySettingsChanged)
                         }
                     }

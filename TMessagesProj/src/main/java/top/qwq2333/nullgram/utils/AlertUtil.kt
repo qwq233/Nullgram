@@ -41,14 +41,14 @@ object AlertUtil {
     }
 
     @JvmStatic
-    fun showToast(text: String) = UIUtil.runOnUIThread(Runnable {
+    fun showToast(text: String) = ApplicationLoader.applicationHandler.post {
         Toast.makeText(
             ApplicationLoader.applicationContext,
             text.takeIf { it.isNotBlank() }
                 ?: "Rua !",
             Toast.LENGTH_LONG
         ).show()
-    })
+    }
 
     @JvmStatic
     fun showSimpleAlert(ctx: Context?, error: Throwable) {
@@ -76,9 +76,9 @@ object AlertUtil {
         title: String?,
         text: String,
         listener: ((AlertDialog.Builder) -> Unit)? = null
-    ) = UIUtil.runOnUIThread(Runnable {
+    ) = ApplicationLoader.applicationHandler.post {
 
-        if (ctx == null) return@Runnable
+        if (ctx == null) return@post
 
         val builder = AlertDialog.Builder(ctx)
 
@@ -94,7 +94,7 @@ object AlertUtil {
 
         builder.show()
 
-    })
+    }
 
     @JvmStatic
     @JvmOverloads
@@ -106,7 +106,7 @@ object AlertUtil {
         button: String,
         red: Boolean,
         listener: Runnable
-    ) = UIUtil.runOnUIThread(Runnable {
+    ) = ApplicationLoader.applicationHandler.post {
         val builder = BottomBuilder(ctx)
 
         if (text != null) {
@@ -121,7 +121,7 @@ object AlertUtil {
         builder.addCancelItem()
         builder.show()
 
-    })
+    }
 
 
 }
