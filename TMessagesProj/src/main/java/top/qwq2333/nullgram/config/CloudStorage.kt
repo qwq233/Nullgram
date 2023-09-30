@@ -19,19 +19,22 @@
 
 package top.qwq2333.nullgram.config
 
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.future.future
+import kotlinx.coroutines.launch
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import org.telegram.messenger.AccountInstance
 import org.telegram.messenger.UserConfig
 import org.telegram.tgnet.TLRPC
-import java.util.concurrent.CountDownLatch
-import java.util.concurrent.TimeUnit
+import top.qwq2333.nullgram.utils.Log
 
 class CloudStorage(instance: Int) : AccountInstance(instance) {
     private var botUser: TLRPC.User? = null
 
     @Serializable
-    data class KeyPair (val key: String, val value: String? = null)
+    data class KeyPair(val key: String, val value: String? = null)
 
     private enum class Method(val method: String) {
         get("getStorageValues"),
@@ -41,11 +44,10 @@ class CloudStorage(instance: Int) : AccountInstance(instance) {
     }
 
     private fun invokeStorageMethod(method: Method, params: KeyPair): KeyPair? {
-        val latch = CountDownLatch(1)
         if (botUser == null) {
-            throw IllegalStateException("For some reason, unable to get bot user")
+            Log.e(IllegalStateException("For some reason, unable to get bot user"))
+            return null
         }
-        var result : KeyPair? = null
         val req = TLRPC.TL_bots_invokeWebViewCustomMethod().apply {
             bot = messagesController.getInputUser(botUser)
             custom_method = method.method
@@ -58,15 +60,13 @@ class CloudStorage(instance: Int) : AccountInstance(instance) {
             }
         }
 
-        connectionsManager.sendRequest(req) { response, _ ->
-            if (response is TLRPC.TL_dataJSON) {
-                result = Json.decodeFromString(KeyPair.serializer(), response.data)
+        return CoroutineScope(Dispatchers.IO).future {
+            connectionsHelper.sendReqAndDo(req) { response, _ ->
+                if (response is TLRPC.TL_dataJSON) {
+                    return@sendReqAndDo Json.decodeFromString(KeyPair.serializer(), response.data)
+                } else null
             }
-            latch.countDown()
-        }
-
-        latch.await(5, TimeUnit.SECONDS)
-        return result
+        }.get()
     }
 
     fun get(key: String): String? {
@@ -93,24 +93,23 @@ class CloudStorage(instance: Int) : AccountInstance(instance) {
                     localInstance = CloudStorage(num)
                     Instance[num] = localInstance
 
-                    val latch = CountDownLatch(1)
                     val req = TLRPC.TL_contacts_resolveUsername().apply {
-                        username = TODO()
+                        username = ""
                     }
-                    localInstance?.let {
-                        it.connectionsManager.sendRequest(req) { response, error ->
-                            if (error == null) {
-                                response as TLRPC.TL_contacts_resolvedPeer
 
-                                it.messagesController.putUsers(response.users, false)
-                                it.messagesController.putChats(response.chats, false)
-                                it.messagesStorage.putUsersAndChats(response.users, response.chats, true, true)
-                                it.botUser = it.messagesController.getUser(response.peer.user_id)
+                    CoroutineScope(Dispatchers.IO).launch {
+                        localInstance!!.connectionsHelper.sendReqAndDo(req) { response, _ ->
+                            if (response != null) {
+                                response as TLRPC.TL_contacts_resolvedPeer
+                                localInstance!!.apply {
+                                    messagesController.putUsers(response.users, false)
+                                    messagesController.putChats(response.chats, false)
+                                    messagesStorage.putUsersAndChats(response.users, response.chats, true, true)
+                                    botUser = messagesController.getUser(response.peer.user_id)
+                                }
                             }
-                            latch.countDown()
                         }
                     }
-                    latch.await()
                 }
             }
 

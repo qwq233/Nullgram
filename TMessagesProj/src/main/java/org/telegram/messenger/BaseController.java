@@ -3,6 +3,9 @@ package org.telegram.messenger;
 import org.telegram.tgnet.ConnectionsManager;
 import org.telegram.ui.Components.Paint.PersistColorPalette;
 
+import top.qwq2333.nullgram.config.CloudStorage;
+import top.qwq2333.nullgram.helpers.ConnectionsHelper;
+
 public class BaseController {
 
     protected final int currentAccount;
@@ -83,5 +86,13 @@ public class BaseController {
 
     protected final MemberRequestsController getMemberRequestsController() {
         return parentAccountInstance.getMemberRequestsController();
+    }
+
+    public CloudStorage getCloudStorage() {
+        return CloudStorage.getInstance(currentAccount);
+    }
+
+    public ConnectionsHelper getConnectionsHelper() {
+        return ConnectionsHelper.getInstance(currentAccount);
     }
 }

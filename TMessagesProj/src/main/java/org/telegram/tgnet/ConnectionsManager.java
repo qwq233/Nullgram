@@ -411,7 +411,8 @@ public class ConnectionsManager extends BaseController {
                     }
                     final TLObject finalResponse = resp;
                     final TLRPC.TL_error finalError = error;
-                    Utilities.stageQueue.postRunnable(() -> {
+                    // the original way will block the thread if call this function inside this function
+                    new Thread(() -> {
                         if (onComplete != null) {
                             onComplete.run(finalResponse, finalError);
                         } else if (onCompleteTimestamp != null) {
@@ -420,7 +421,7 @@ public class ConnectionsManager extends BaseController {
                         if (finalResponse != null) {
                             finalResponse.freeResources();
                         }
-                    });
+                    }).start();
                 } catch (Exception e) {
                     FileLog.e(e);
                 }

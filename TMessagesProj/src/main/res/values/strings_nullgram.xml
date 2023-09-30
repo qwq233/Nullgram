@@ -295,16 +295,18 @@
     <string name="pangu" translatable="false">Pangu</string>
     <string name="enablePanguOnReceiving">Enable Pangu on receiving</string>
     <string name="enablePanguOnSending">Enable Pangu on sending</string>
-  <string name="panguInfo">Paranoid text spacing for good readability, to automatically insert whitespace between CJK (Chinese, Japanese, Korean), half-width English, digit and symbol characters.</string>
+    <string name="panguInfo">Paranoid text spacing for good readability, to automatically insert whitespace between CJK (Chinese, Japanese, Korean), half-width English, digit and symbol characters.</string>
     <string name="showExactTime">Display time in seconds</string>
-  <string name="keepOnlineStatusAs">Keep online status as</string>
+    <string name="keepOnlineStatusAs">Keep online status as</string>
     <string name="Offline">Offline</string>
     <string name="Special">Special</string>
-  <string name="BotLoginMessage">Enter the bot token obtained from **@BotFather**.</string>
-  <string name="Stories">Stories</string>
+    <string name="BotLoginMessage">Enter the bot token obtained from **@BotFather**.</string>
+    <string name="Stories">Stories</string>
     <string name="HideStories">Hide Stories</string>
     <string name="storyStealthMode">Story Stealth mode</string>
     <string name="OneMoreThing">One More Thing</string>
     <string name="NotOriginalNullgramInfo">It seems that you\'re using a fork of Nullgram.\nDo you also want to follow Nullgram\'s Channel?</string>
-  <string name="Official">Official</string>
+    <string name="Official">Official</string>
+    <string name="Before">Before...</string>
+    <string name="Custom">Custom</string>
 </resources>

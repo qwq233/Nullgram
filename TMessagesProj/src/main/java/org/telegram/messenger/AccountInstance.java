@@ -5,6 +5,9 @@ import android.content.SharedPreferences;
 import org.telegram.tgnet.ConnectionsManager;
 import org.telegram.ui.Components.Paint.PersistColorPalette;
 
+import top.qwq2333.nullgram.config.CloudStorage;
+import top.qwq2333.nullgram.helpers.ConnectionsHelper;
+
 public class AccountInstance {
 
     private int currentAccount;
@@ -96,6 +99,14 @@ public class AccountInstance {
 
     public MemberRequestsController getMemberRequestsController() {
         return MemberRequestsController.getInstance(currentAccount);
+    }
+
+    public CloudStorage getCloudStorage() {
+        return CloudStorage.getInstance(currentAccount);
+    }
+
+    public ConnectionsHelper getConnectionsHelper() {
+        return ConnectionsHelper.getInstance(currentAccount);
     }
 
     public int getCurrentAccount() {

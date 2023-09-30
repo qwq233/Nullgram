@@ -20,6 +20,8 @@ package top.qwq2333.nullgram.utils
 
 import android.annotation.SuppressLint
 import android.app.Activity
+import android.app.DatePickerDialog
+import android.app.TimePickerDialog
 import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
@@ -38,10 +40,16 @@ import android.view.ViewGroup.MarginLayoutParams
 import android.view.inputmethod.EditorInfo
 import android.widget.FrameLayout
 import android.widget.TextView
+import android.widget.TimePicker
 import androidx.core.content.FileProvider
 import com.google.zxing.EncodeHintType
 import com.google.zxing.qrcode.QRCodeWriter
 import com.google.zxing.qrcode.decoder.ErrorCorrectionLevel
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.withContext
 import org.telegram.SQLite.SQLiteCursor
 import org.telegram.SQLite.SQLiteException
 import org.telegram.messenger.AndroidUtilities
@@ -88,11 +96,12 @@ import java.io.File
 import java.io.FileOutputStream
 import java.nio.ByteBuffer
 import java.nio.charset.StandardCharsets
+import java.util.Calendar
 import java.util.Locale
-import java.util.concurrent.CountDownLatch
 import java.util.concurrent.atomic.AtomicBoolean
 import java.util.concurrent.atomic.AtomicReference
 import kotlin.math.min
+
 
 class MessageUtils(num: Int) : BaseController(num) {
 
@@ -122,11 +131,17 @@ class MessageUtils(num: Int) : BaseController(num) {
     }
 
     @JvmOverloads
-    fun createDeleteHistoryAlert(fragment: BaseFragment?, chat: TLRPC.Chat?, forumTopic: TLRPC.TL_forumTopic?, mergeDialogId: Long, resourcesProvider: Theme.ResourcesProvider? = null) {
-        if (fragment?.getParentActivity() == null || chat == null) {
+    fun createDeleteHistoryAlert(
+        fragment: BaseFragment,
+        chat: TLRPC.Chat?,
+        forumTopic: TLRPC.TL_forumTopic?,
+        mergeDialogId: Long,
+        resourcesProvider: Theme.ResourcesProvider? = null
+    ) {
+        if (fragment.parentActivity == null || chat == null) {
             return
         }
-        val context: Context = fragment.getParentActivity()
+        val context: Context = fragment.parentActivity
         val builder = AlertDialog.Builder(context, resourcesProvider)
         val cell = if (forumTopic == null && ChatObject.isChannel(chat) && ChatObject.canUserDoAction(chat, ChatObject.ACTION_DELETE_MESSAGES)) CheckBoxCell(
             context, 1, resourcesProvider
@@ -134,7 +149,7 @@ class MessageUtils(num: Int) : BaseController(num) {
         val messageTextView = TextView(context)
         messageTextView.setTextColor(Theme.getColor(Theme.key_dialogTextBlack))
         messageTextView.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 16f)
-        messageTextView.setGravity((if (LocaleController.isRTL) Gravity.RIGHT else Gravity.LEFT) or Gravity.TOP)
+        messageTextView.gravity = (if (LocaleController.isRTL) Gravity.RIGHT else Gravity.LEFT) or Gravity.TOP
         val frameLayout: FrameLayout = object : FrameLayout(context) {
             override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
                 super.onMeasure(widthMeasureSpec, heightMeasureSpec)
@@ -200,13 +215,84 @@ class MessageUtils(num: Int) : BaseController(num) {
         messageTextView.text = AndroidUtilities.replaceTags(LocaleController.getString("DeleteAllFromSelfAlert", R.string.DeleteAllFromSelfAlert))
         builder.setPositiveButton(LocaleController.getString("DeleteAll", R.string.DeleteAll)) { _: DialogInterface?, i: Int ->
             if (cell != null && cell.isChecked) {
-                showDeleteHistoryBulletin(fragment, 0, false, { messagesController.deleteUserChannelHistory(chat, userConfig.currentUser, null, 0) }, resourcesProvider)
+                showDeleteHistoryBulletin(fragment, 0, false, resourcesProvider) {
+                    messagesController.deleteUserChannelHistory(chat, userConfig.currentUser, null, 0)
+                }
             } else {
                 deleteUserHistoryWithSearch(
                     fragment, -chat.id, forumTopic?.id ?: 0, mergeDialogId
-                ) { count: Int, deleteAction: Runnable? -> showDeleteHistoryBulletin(fragment, count, true, deleteAction, resourcesProvider) }
+                ) { count: Int, deleteAction: Runnable? ->
+                    showDeleteHistoryBulletin(fragment, count, true, resourcesProvider, deleteAction)
+                }
             }
         }
+
+        builder.setNeutralButton(LocaleController.getString("Before", R.string.Before)) { _, _ ->
+            fun prepareDelete(date: Int) {
+                deleteUserHistoryWithSearch(
+                    fragment, -chat.id, forumTopic?.id ?: 0, mergeDialogId, date
+                ) { count: Int, deleteAction: Runnable? ->
+                    showDeleteHistoryBulletin(fragment, count, true, resourcesProvider, deleteAction)
+                }
+            }
+
+            val builder = AlertDialog.Builder(context)
+            builder.setTitle(LocaleController.getString("Before", R.string.Before))
+            builder.setItems(
+                arrayOf(
+                    LocaleController.formatPluralString("Days", 1),
+                    LocaleController.formatPluralString("Weeks", 1),
+                    LocaleController.formatPluralString("Months", 1),
+                    LocaleController.getString("UserRestrictionsCustom", R.string.UserRestrictionsCustom)
+                )
+            ) { _, which ->
+                when (which) {
+                    0 -> prepareDelete(connectionsManager.currentTime - 60 * 60 * 24)
+                    1 -> prepareDelete(connectionsManager.currentTime - 60 * 60 * 24 * 7)
+                    2 -> prepareDelete(connectionsManager.currentTime - 60 * 60 * 24 * 30)
+                    3 -> {
+                        val calendar = Calendar.getInstance()
+                        val dateDialog = DatePickerDialog(context, { _, year: Int, month: Int, dayOfMonth: Int ->
+                            val timeDialog = TimePickerDialog(
+                                context,
+                                { _: TimePicker?, hourOfDay: Int, minute: Int ->
+                                    calendar[year, month, dayOfMonth, hourOfDay] = minute
+                                    prepareDelete((calendar.timeInMillis / 1000).toInt())
+                                }, calendar[Calendar.HOUR_OF_DAY], calendar[Calendar.MINUTE], true
+                            )
+                            timeDialog.setButton(DialogInterface.BUTTON_POSITIVE, LocaleController.getString("Set", R.string.Set), timeDialog)
+                            timeDialog.setButton(
+                                DialogInterface.BUTTON_NEGATIVE, LocaleController.getString("Cancel", R.string.Cancel)
+                            ) { _, _ -> }
+                            fragment.showDialog(timeDialog)
+                        }, calendar[Calendar.YEAR], calendar[Calendar.MONTH], calendar[Calendar.DAY_OF_MONTH])
+
+
+                        val datePicker = dateDialog.datePicker
+                        datePicker.minDate = 1375315200000L // 2013-08-01
+                        datePicker.maxDate = connectionsManager.currentTime * 1000L
+                        dateDialog.setButton(DialogInterface.BUTTON_POSITIVE, LocaleController.getString("Set", R.string.Set), dateDialog)
+                        dateDialog.setButton(
+                            DialogInterface.BUTTON_NEGATIVE, LocaleController.getString("Cancel", R.string.Cancel)
+                        ) { _, _ -> }
+                        dateDialog.setOnShowListener {
+                            for (i in 0..datePicker.childCount) {
+                                datePicker.getChildAt(i)?.let {
+                                    val layoutParams = it.layoutParams
+                                    layoutParams.width = LayoutHelper.MATCH_PARENT
+                                    it.layoutParams = layoutParams
+                                }
+                            }
+                        }
+                        fragment.showDialog(dateDialog)
+                    }
+                }
+                builder.dismissRunnable.run()
+            }
+
+            fragment.showDialog(builder.create())
+        }
+
         builder.setNegativeButton(LocaleController.getString("Cancel", R.string.Cancel), null)
         val alertDialog = builder.create()
         fragment.showDialog(alertDialog)
@@ -214,89 +300,110 @@ class MessageUtils(num: Int) : BaseController(num) {
         button.setTextColor(Theme.getColor(Theme.key_text_RedRegular))
     }
 
-    fun deleteUserHistoryWithSearch(fragment: BaseFragment?, dialogId: Long, replyMessageId: Int, mergeDialogId: Long, callback: ((Int, Runnable?) -> Unit)?) {
-        Utilities.globalQueue.postRunnable {
-            val messageIds = ArrayList<Int>()
-            val latch = CountDownLatch(1)
+    private fun deleteUserHistoryWithSearch(
+        fragment: BaseFragment?,
+        dialogId: Long,
+        replyMessageId: Int,
+        mergeDialogId: Long,
+        before: Int = -1,
+        callback: ((Int, Runnable?) -> Unit)?
+    ) {
+        CoroutineScope(Dispatchers.IO).launch {
             val peer = messagesController.getInputPeer(dialogId)
             val fromId = MessagesController.getInputPeer(userConfig.currentUser)
-            doSearchMessages(fragment, latch, messageIds, peer, replyMessageId, fromId, Int.MAX_VALUE, 0)
-            try {
-                latch.await()
-            } catch (e: Exception) {
-                e.printStackTrace()
-            }
-            if (messageIds.isNotEmpty()) {
-                val lists = ArrayList<ArrayList<Int>>()
-                val N = messageIds.size
-                var i = 0
-                while (i < N) {
-                    lists.add(ArrayList(messageIds.subList(i, min(N.toDouble(), (i + 100).toDouble()).toInt())))
-                    i += 100
-                }
-                val deleteAction = Runnable {
-                    for (list in lists) {
-                        messagesController.deleteMessages(list, null, null, dialogId, true, false)
+            doSearchMessages(fragment, peer = peer, replyMessageId = replyMessageId, fromId = fromId, offsetId = Int.MAX_VALUE, hash = 0).let { it ->
+                if (it.isNotEmpty()) {
+                    it.forEach { Log.e("i: $it ") }
+
+                    val lists = ArrayList<ArrayList<Int>>().apply {
+                        for (i in 0..it.size / 100) {
+                            add(ArrayList(it.subList(i * 100, min((i + 1) * 100, it.size))))
+                        }
                     }
-                }
-                AndroidUtilities.runOnUIThread {
-                    if (callback != null) {
-                        callback.invoke(messageIds.size, deleteAction)
-                    } else {
-                        deleteAction.run()
+
+                    val deleteAction = Runnable {
+                        Log.d("deleteAction")
+                        for (list in lists) {
+                            messagesController.deleteMessages(list, null, null, dialogId, true, false)
+                        }
                     }
+                    AndroidUtilities.runOnUIThread {
+                        if (callback != null) {
+                            callback.invoke(it.size, deleteAction)
+                        } else {
+                            deleteAction.run()
+                        }
+                    }
+                } else {
+                    Log.d("it is empty")
                 }
             }
             if (mergeDialogId != 0L) {
-                deleteUserHistoryWithSearch(fragment, mergeDialogId, 0, 0, null)
+                deleteUserHistoryWithSearch(fragment, mergeDialogId, 0, 0, before, null)
             }
         }
     }
 
-    fun doSearchMessages(
-        fragment: BaseFragment?, latch: CountDownLatch, messageIds: ArrayList<Int>, peer: TLRPC.InputPeer?, replyMessageId: Int, fromId: TLRPC.InputPeer?, offsetId: Int, hash: Long
-    ) {
-        val req = TLRPC.TL_messages_search()
-        req.peer = peer
-        req.limit = 100
-        req.q = ""
-        req.offset_id = offsetId
-        req.from_id = fromId
-        req.flags = req.flags or 1
-        req.filter = TLRPC.TL_inputMessagesFilterEmpty()
-        if (replyMessageId != 0) {
-            req.top_msg_id = replyMessageId
-            req.flags = req.flags or 2
-        }
-        req.hash = hash
-        connectionsManager.sendRequest(req, { response: TLObject?, error: TLRPC.TL_error? ->
-            if (response is TLRPC.messages_Messages) {
-                val res = response
-                if (response is TLRPC.TL_messages_messagesNotModified || res.messages.isEmpty()) {
-                    latch.countDown()
-                    return@sendRequest
-                }
-                var newOffsetId = offsetId
-                for (message in res.messages) {
-                    newOffsetId = min(newOffsetId.toDouble(), message.id.toDouble()).toInt()
-                    if (!message.out || message.post) {
-                        continue
-                    }
-                    messageIds.add(message.id)
-                }
-                doSearchMessages(fragment, latch, messageIds, peer, replyMessageId, fromId, newOffsetId, calcMessagesHash(res.messages))
-            } else {
-                if (error != null) {
-                    AndroidUtilities.runOnUIThread { AlertsCreator.showSimpleAlert(fragment, """
-     ${LocaleController.getString("ErrorOccurred", R.string.ErrorOccurred)}
-     ${error.text}
-     """.trimIndent()
-                        )
-                    }
-                }
-                latch.countDown()
+    private suspend fun doSearchMessages(
+        fragment: BaseFragment?,
+        messagesId: MutableList<Int> = mutableListOf(),
+        peer: TLRPC.InputPeer?,
+        replyMessageId: Int,
+        fromId: TLRPC.InputPeer?,
+        offsetId: Int, hash: Long,
+        before: Int = -1
+    ): MutableList<Int> {
+        Log.d("trigger doSearchMessages")
+
+        val req = TLRPC.TL_messages_search().apply {
+            this.peer = peer
+            limit = 100
+            q = ""
+            offset_id = offsetId
+            from_id = fromId
+            flags = flags or 1
+            filter = TLRPC.TL_inputMessagesFilterEmpty()
+            if (replyMessageId != 0) {
+                top_msg_id = replyMessageId
+                flags = flags or 2
             }
-        }, ConnectionsManager.RequestFlagFailOnServerErrors)
+            this.hash = hash
+        }
+
+        return withContext(Dispatchers.IO) {
+            connectionsHelper.sendReqAndDo(req, ConnectionsManager.RequestFlagFailOnServerErrors) { response, error ->
+                if (response is TLRPC.messages_Messages) {
+                    if (response is TLRPC.TL_messages_messagesNotModified || response.messages.isEmpty()) {
+                        Log.d("response is empty")
+                        return@sendReqAndDo messagesId
+                    }
+                    var newOffsetId = offsetId
+                    for (message in response.messages) {
+                        newOffsetId = min(newOffsetId.toDouble(), message.id.toDouble()).toInt()
+                        if (!message.out || message.post || message.date <= before) {
+                            continue
+                        }
+                        messagesId.add(message.id)
+                    }
+                    runBlocking {
+                        doSearchMessages(fragment, messagesId, peer, replyMessageId, fromId, newOffsetId, calcMessagesHash(response.messages), before)
+                    }
+                    return@sendReqAndDo messagesId
+                } else {
+                    if (error != null) {
+                        AndroidUtilities.runOnUIThread {
+                            AlertsCreator.showSimpleAlert(
+                                fragment, """
+                                    ${LocaleController.getString("ErrorOccurred", R.string.ErrorOccurred)}
+                                    ${error.text}
+                                    """.trimIndent()
+                            )
+                        }
+                    }
+                    return@sendReqAndDo messagesId
+                }
+            }
+        } ?: throw Exception("res is null")
     }
 
     private fun calcMessagesHash(messages: ArrayList<TLRPC.Message>?): Long {
@@ -426,7 +533,8 @@ class MessageUtils(num: Int) : BaseController(num) {
     }
 
     fun createQR(key: String?): Bitmap? {
-        tryOrLog { val hints = HashMap<EncodeHintType, Any?>()
+        tryOrLog {
+            val hints = HashMap<EncodeHintType, Any?>()
             hints[EncodeHintType.ERROR_CORRECTION] = ErrorCorrectionLevel.M
             hints[EncodeHintType.MARGIN] = 0
             val writer = QRCodeWriter()
@@ -624,14 +732,14 @@ class MessageUtils(num: Int) : BaseController(num) {
         var resp: MessageObject? = null
         try {
             cursor = messagesStorage.database.queryFinalized(
-                    String.format(
-                        Locale.US,
-                        "SELECT data,send_state,mid,date FROM messages WHERE uid = %d ORDER BY date DESC LIMIT %d,%d",
-                        dialogId,
-                        0,
-                        10
-                    )
+                String.format(
+                    Locale.US,
+                    "SELECT data,send_state,mid,date FROM messages WHERE uid = %d ORDER BY date DESC LIMIT %d,%d",
+                    dialogId,
+                    0,
+                    10
                 )
+            )
             while (cursor.next()) {
                 val data = cursor.byteBufferValue(0) ?: continue
                 val message = TLRPC.Message.TLdeserialize(data, data.readInt32(false), false)
@@ -686,7 +794,7 @@ class MessageUtils(num: Int) : BaseController(num) {
             return localInstance
         }
 
-        fun showDeleteHistoryBulletin(fragment: BaseFragment, count: Int, search: Boolean, delayedAction: Runnable?, resourcesProvider: Theme.ResourcesProvider?) {
+        fun showDeleteHistoryBulletin(fragment: BaseFragment, count: Int, search: Boolean, resourcesProvider: Theme.ResourcesProvider? = null, delayedAction: Runnable?) {
             if (fragment.getParentActivity() == null) {
                 delayedAction?.run()
                 return
