@@ -13042,6 +13042,7 @@ public class ChatMessageCell extends BaseCell implements SeekBar.SeekBarDelegate
                     if (hasPsaHint) {
                         forwardedNameWidth -= AndroidUtilities.dp(36);
                     }
+                    currentForwardNameString = Utils.showForwardDate(messageObject, currentForwardNameString);
                     String from = LocaleController.getString("From", R.string.From);
                     String fromFormattedString = LocaleController.getString("FromFormatted", R.string.FromFormatted);
                     int idx = fromFormattedString.indexOf("%1$s");
