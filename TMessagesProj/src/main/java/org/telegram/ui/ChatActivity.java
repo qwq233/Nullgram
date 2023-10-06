@@ -10990,16 +10990,13 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
                     urls.add(charSequence.subSequence(m.start(), m.end()));
                 }
                 if (charSequence instanceof Spannable) {
-                    URLSpan[] spans = ((Spannable) charSequence).getSpans(0, charSequence.length(), URLSpan.class);
+                    URLSpanReplacement[] spans = ((Spannable) charSequence).getSpans(0, charSequence.length(), URLSpanReplacement.class);
                     if (spans != null && spans.length > 0) {
                         if (urls == null) {
                             urls = new ArrayList<>();
                         }
-                        for (var span : spans) {
-                            var url = span.getURL();
-                            if (url.startsWith("http")) {
-                                urls.add(span.getURL());
-                            }
+                        for (int a = 0; a < spans.length; a++) {
+                            urls.add(spans[a].getURL());
                         }
                     }
                 }

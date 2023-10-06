@@ -159,7 +159,7 @@ public class EditTextBoldCursor extends EditTextEffects {
 
     private static Method canUndoMethod;
     private static Method canRedoMethod;
-    public static boolean disableMarkdown = Config.alwaysSendWithoutSound;
+    public static boolean disableMarkdown = Config.markdownDisabled;
     private boolean showDisableMarkdown = false;
 
     static {
