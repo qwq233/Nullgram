@@ -350,9 +350,9 @@ public class ChatSettingActivity extends BaseActivity {
             }
             listAdapter.notifyItemChanged(markdown2Row);
         } else if (position == markdownDisableRow) {
-            Config.toggleShowBotAPIID();
+            Config.toggleMarkdownDisabled();
             if (view instanceof TextCheckCell) {
-                ((TextCheckCell) view).setChecked(Config.alwaysSendWithoutSound);
+                ((TextCheckCell) view).setChecked(Config.markdownDisabled);
             }
         }
 
@@ -537,7 +537,7 @@ public class ChatSettingActivity extends BaseActivity {
                     } else if (position == markdownParseLinksRow) {
                         textCell.setTextAndCheck(LocaleController.getString("MarkdownParseLinks", R.string.MarkdownParseLinks), Config.markdownParseLinks, false);
                     } else if (position == markdownDisableRow) {
-                        textCell.setTextAndCheck(LocaleController.getString("MarkdownDisableByDefault", R.string.MarkdownDisableByDefault), Config.alwaysSendWithoutSound, true);
+                        textCell.setTextAndCheck(LocaleController.getString("MarkdownDisableByDefault", R.string.MarkdownDisableByDefault), Config.markdownDisabled, true);
                     }
                     break;
                 }
