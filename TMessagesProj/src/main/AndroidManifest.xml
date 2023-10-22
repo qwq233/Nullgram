@@ -489,7 +489,7 @@
                 android:resource="@xml/auth"/>
         </service>
 
-        <service android:name=".ContactsSyncAdapterService" android:exported="true">
+        <service android:name=".ContactsSyncAdapterService" android:exported="true" android:foregroundServiceType="dataSync">
             <intent-filter>
                 <action android:name="android.content.SyncAdapter" />
             </intent-filter>
@@ -505,17 +505,17 @@
         <service android:name=".BringAppForegroundService" android:enabled="true"  android:exported="true"/>
         <service android:name=".NotificationsService" android:enabled="true"  android:exported="true"/>
         <service android:name=".NotificationRepeat" android:exported="false"/>
-        <service android:name=".VideoEncodingService" android:enabled="true" android:exported="true"/>
-        <service android:name="org.telegram.ui.Stories.recorder.StoryUploadingService" android:enabled="true" android:exported="true"/>
-        <service android:name=".ImportingService" android:enabled="true" android:exported="true"/>
+        <service android:name=".VideoEncodingService" android:foregroundServiceType="mediaPlayback" android:enabled="true" android:exported="true"/>
+        <service android:name="org.telegram.ui.Stories.recorder.StoryUploadingService" android:foregroundServiceType="remoteMessaging" android:enabled="true" android:exported="true"/>
+        <service android:name=".ImportingService" android:foregroundServiceType="remoteMessaging" android:enabled="true" android:exported="true"/>
         <service android:name=".LocationSharingService"
             android:foregroundServiceType="location"
             android:enabled="true"
             android:exported="true"/>
         <service android:name=".voip.VoIPService" android:enabled="true" android:foregroundServiceType="mediaProjection|camera|microphone|mediaPlayback"/>
-        <service android:name=".GoogleVoiceClientService" android:exported="false"/>
-        <service android:name=".MusicPlayerService" android:exported="true" android:enabled="true" android:foregroundServiceType="mediaPlayback"/>
-        <service android:name=".MusicBrowserService" android:exported="true">
+        <service android:name=".GoogleVoiceClientService" android:foregroundServiceType="mediaPlayback" android:exported="false"/>
+        <service android:name=".MusicPlayerService" android:foregroundServiceType="mediaPlayback"  android:exported="true" android:enabled="true"/>
+        <service android:name=".MusicBrowserService" android:foregroundServiceType="mediaPlayback" android:exported="true">
             <intent-filter>
                 <action android:name="android.media.browse.MediaBrowserService"/>
             </intent-filter>
@@ -628,7 +628,7 @@
 <!--        <service android:name=".FeedWidgetService"-->
 <!--            android:permission="android.permission.BIND_REMOTEVIEWS"-->
 <!--            android:exported="false" />-->
-        <service android:name=".FilesMigrationService" android:exported="false"/>
+        <service android:name=".FilesMigrationService" android:foregroundServiceType="dataSync" android:exported="false"/>
 
         <service
             android:name=".GcmPushListenerService" android:exported="false">
