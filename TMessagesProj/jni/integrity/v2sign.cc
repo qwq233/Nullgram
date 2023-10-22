@@ -189,7 +189,6 @@ std::string getSignBlock(uint8_t *base, size_t size) {
     std::reverse(signBlock.begin(), signBlock.end());
     return signBlock;
 }
-
 std::string getBlockMd5(const std::string &block) {
     return MD5(block).getDigest();
 }
@@ -232,10 +231,16 @@ extern "C" bool checkSignature(JNIEnv *env) {
     void *baseAddress = nullptr;
     size_t fileSize = 0;
 
-    int fd = getSelfApkFd(env);
-    // fd is stolen from system, so we don't need to close it
+    std::string apkPath = getAppPath(env);
+    if (apkPath.empty()) {
+        LOGE("getAppPath failed");
+        firebase::crashlytics::Log("getAppPath failed");
+        return false;
+    }
+    int fd = sys_openat(AT_FDCWD, apkPath.c_str(), O_RDONLY, 0);
     if (fd < 0) {
-        LOGE("getSelfApkFd failed");
+        LOGE("open apk failed");
+        firebase::crashlytics::Log("open apk failed");
         return false;
     }
     int ret;
@@ -249,16 +254,18 @@ extern "C" bool checkSignature(JNIEnv *env) {
     fileSize = stat.st_size;
 #endif
     if (ret < 0) {
+        sys_close(fd);
         LOGE("fstat failed");
         return false;
     }
     baseAddress = sys_mmap(nullptr, fileSize, PROT_READ, MAP_PRIVATE, fd, 0);
     if (baseAddress == MAP_FAILED) {
+        sys_close(fd);
         LOGE("mmap failed");
         return false;
     }
+    sys_close(fd);
 
-    // __android_log_print(ANDROID_LOG_INFO, "QAuxv", "isModule: %d, path: %s", isModule, path.c_str());
     std::string block =
             getSignBlock(reinterpret_cast<uint8_t *>(baseAddress), fileSize);
 
@@ -266,6 +273,7 @@ extern "C" bool checkSignature(JNIEnv *env) {
     if (block.empty()) {
         sys_munmap(const_cast<void *>(baseAddress), fileSize);
         LOGE("sign block is empty");
+        firebase::crashlytics::Log("sign block is empty");
         return false;
     }
 
