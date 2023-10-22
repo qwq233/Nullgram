@@ -38,7 +38,7 @@ object Defines {
     @BooleanConfig const val labelChannelUser = "labelChannelUser"
     @BooleanConfig const val displaySpoilerMsgDirectly = "displaySpoilerMsgDirectly"
     @BooleanConfig const val disableGreetingSticker = "disableGreetingSticker"
-    @BooleanConfig const val codeSyntaxHighlight = "codeSyntaxHighlight"
+    @BooleanConfig(true) const val codeSyntaxHighlight = "codeSyntaxHighlight"
     @BooleanConfig const val channelAlias = "aliasChannel" // ignore typo
     const val channelAliasPrefix = "aliasChannelName_" // ignore typo
     @BooleanConfig const val linkedUser = "linkedUser"
