@@ -1265,6 +1265,10 @@ public class MessageObject {
             fromUser = getUser(users, sUsers, message.from_id.user_id);
         }
 
+        if (isBlockedMessage()) {
+            generateLayout = false;
+        }
+
         if (generateLayout && messageOwner.message != null && Config.enablePanguOnReceiving) {
             var pair = StringUtils.spacingText(messageOwner.message, messageOwner.entities);
             messageOwner.message = pair.getFirst();
