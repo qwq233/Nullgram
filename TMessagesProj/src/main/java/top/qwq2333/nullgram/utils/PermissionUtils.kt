@@ -34,10 +34,38 @@ object PermissionUtils {
     }
 
     @JvmStatic
-    fun isImagesPermissionGranted(): Boolean = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+    fun isImagesPermissionGranted(): Boolean = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+        isPermissionGranted(Manifest.permission.READ_MEDIA_IMAGES) && isPermissionGranted(Manifest.permission.READ_MEDIA_VISUAL_USER_SELECTED)
+    } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
         isPermissionGranted(Manifest.permission.READ_MEDIA_IMAGES)
     } else {
         isStoragePermissionGranted()
+    }
+
+
+    @JvmStatic
+    fun isVideoPermissionGranted(): Boolean = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+        isPermissionGranted(Manifest.permission.READ_MEDIA_VIDEO) && isPermissionGranted(Manifest.permission.READ_MEDIA_VISUAL_USER_SELECTED)
+    } else  if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+        isPermissionGranted(Manifest.permission.READ_MEDIA_VIDEO)
+    } else {
+        isStoragePermissionGranted()
+    }
+
+    @JvmStatic
+    fun isAudioPermissionGranted(): Boolean = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+        isPermissionGranted(Manifest.permission.READ_MEDIA_AUDIO) && isPermissionGranted(Manifest.permission.READ_MEDIA_VISUAL_USER_SELECTED)
+    } else  if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+        isPermissionGranted(Manifest.permission.READ_MEDIA_AUDIO)
+    } else {
+        isStoragePermissionGranted()
+    }
+
+    @JvmStatic
+    fun isStoragePermissionGranted(): Boolean = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+        isImagesPermissionGranted() && isVideoPermissionGranted() && isAudioPermissionGranted()
+    } else {
+        isPermissionGranted(Manifest.permission.READ_EXTERNAL_STORAGE)
     }
 
     @JvmStatic
@@ -64,7 +92,14 @@ object PermissionUtils {
 
     @JvmStatic
     fun requestImagesPermission(activity: Activity?, requestCode: Int) {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+            requestPermissions(
+                activity,
+                requestCode,
+                Manifest.permission.READ_MEDIA_IMAGES,
+                Manifest.permission.READ_MEDIA_VISUAL_USER_SELECTED
+            )
+        } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             requestPermissions(activity, requestCode, Manifest.permission.READ_MEDIA_IMAGES)
         } else {
             requestPermissions(activity, requestCode, Manifest.permission.READ_EXTERNAL_STORAGE)
@@ -73,7 +108,15 @@ object PermissionUtils {
 
     @JvmStatic
     fun requestImagesAndVideoPermission(activity: Activity?, requestCode: Int) {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+            requestPermissions(
+                activity,
+                requestCode,
+                Manifest.permission.READ_MEDIA_IMAGES,
+                Manifest.permission.READ_MEDIA_VIDEO,
+                Manifest.permission.READ_MEDIA_VISUAL_USER_SELECTED
+            )
+        } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             requestPermissions(
                 activity,
                 requestCode,
@@ -87,7 +130,14 @@ object PermissionUtils {
 
     @JvmStatic
     fun requestAudioPermission(activity: Activity?) {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+            requestPermissions(
+                activity,
+                BasePermissionsActivity.REQUEST_CODE_EXTERNAL_STORAGE,
+                Manifest.permission.READ_MEDIA_AUDIO,
+                Manifest.permission.READ_MEDIA_VISUAL_USER_SELECTED
+            )
+        } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             requestPermissions(
                 activity,
                 BasePermissionsActivity.REQUEST_CODE_EXTERNAL_STORAGE,
@@ -104,7 +154,16 @@ object PermissionUtils {
 
     @JvmStatic
     fun requestStoragePermission(activity: Activity?) {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+            requestPermissions(
+                activity,
+                BasePermissionsActivity.REQUEST_CODE_EXTERNAL_STORAGE,
+                Manifest.permission.READ_MEDIA_IMAGES,
+                Manifest.permission.READ_MEDIA_VIDEO,
+                Manifest.permission.READ_MEDIA_AUDIO,
+                Manifest.permission.READ_MEDIA_VISUAL_USER_SELECTED
+            )
+        } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             requestPermissions(
                 activity,
                 BasePermissionsActivity.REQUEST_CODE_EXTERNAL_STORAGE,
@@ -130,27 +189,6 @@ object PermissionUtils {
             return
         }
         activity.requestPermissions(permissions, requestCode)
-    }
-
-    @JvmStatic
-    fun isVideoPermissionGranted(): Boolean = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-        isPermissionGranted(Manifest.permission.READ_MEDIA_VIDEO)
-    } else {
-        isStoragePermissionGranted()
-    }
-
-    @JvmStatic
-    fun isAudioPermissionGranted(): Boolean = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-        isPermissionGranted(Manifest.permission.READ_MEDIA_AUDIO)
-    } else {
-        isStoragePermissionGranted()
-    }
-
-    @JvmStatic
-    fun isStoragePermissionGranted(): Boolean = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-        isImagesPermissionGranted() && isVideoPermissionGranted() && isAudioPermissionGranted()
-    } else {
-        isPermissionGranted(Manifest.permission.READ_EXTERNAL_STORAGE)
     }
 
 }
