@@ -94,7 +94,6 @@
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_DATA_SYNC" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_CAMERA" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MICROPHONE" />
-    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MEDIA_PROJECTION" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_REMOTE_MESSAGING" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_LOCATION" />
@@ -513,7 +512,7 @@
             android:foregroundServiceType="location"
             android:enabled="true"
             android:exported="true"/>
-        <service android:name=".voip.VoIPService" android:enabled="true" android:foregroundServiceType="mediaProjection|camera|microphone|mediaPlayback"/>
+        <service android:name=".voip.VoIPService" android:enabled="true" android:foregroundServiceType="camera|microphone|mediaPlayback"/>
         <service android:name=".GoogleVoiceClientService" android:foregroundServiceType="mediaPlayback" android:exported="false"/>
         <service android:name=".MusicPlayerService" android:foregroundServiceType="mediaPlayback"  android:exported="true" android:enabled="true"/>
         <service android:name=".MusicBrowserService" android:foregroundServiceType="mediaPlayback" android:exported="true">
