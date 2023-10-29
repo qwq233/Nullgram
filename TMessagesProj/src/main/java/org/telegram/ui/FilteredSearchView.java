@@ -473,7 +473,7 @@ public class FilteredSearchView extends FrameLayout implements NotificationCente
             if (ChatObject.isForum(chatTo)) {
                 TLRPC.TL_forumTopic topic = MessagesController.getInstance(UserConfig.selectedAccount).getTopicsController().findTopic(chatTo.id, MessageObject.getTopicId(messageObject.messageOwner, true));
                 if (topic != null) {
-                    chatTitle = ForumUtilities.getTopicSpannedName(topic, null);
+                    chatTitle = ForumUtilities.getTopicSpannedName(topic, null, false);
                 }
             }
             chatTitle = Emoji.replaceEmoji(chatTitle, textPaint == null ? null : textPaint.getFontMetricsInt(), false);
@@ -492,7 +492,7 @@ public class FilteredSearchView extends FrameLayout implements NotificationCente
             if (ChatObject.isForum(chatFrom)) {
                 TLRPC.TL_forumTopic topic = MessagesController.getInstance(UserConfig.selectedAccount).getTopicsController().findTopic(chatFrom.id, MessageObject.getTopicId(messageObject.messageOwner, true));
                 if (topic != null) {
-                    chatTitle = ForumUtilities.getTopicSpannedName(topic, null);
+                    chatTitle = ForumUtilities.getTopicSpannedName(topic, null, false);
                 }
             }
             chatTitle = Emoji.replaceEmoji(chatTitle, textPaint == null ? null : textPaint.getFontMetricsInt(),  false);

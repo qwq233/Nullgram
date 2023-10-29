@@ -319,7 +319,7 @@ object UpdateUtils {
                         val apkDocument = msg.media.document
                         val fileName = if (apkDocument.attributes.size == 0) "" else apkDocument.attributes[0].file_name
                         Log.d("checkUpdate", "file_name： ${apkDocument.attributes[0].file_name}")
-                        if (!(fileName.contains(BuildConfig.FLAVOR) && fileName.contains(metadata.versionName))) continue
+                        if (!(fileName.contains(BuildConfig.ABI) && fileName.contains(metadata.versionName))) continue
                         val update = TLRPC.TL_help_appUpdate().apply {
                             version = metadata.versionName
                             document = apkDocument

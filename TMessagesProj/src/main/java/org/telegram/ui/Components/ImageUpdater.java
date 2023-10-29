@@ -954,7 +954,6 @@ public class ImageUpdater implements NotificationCenter.NotificationCenterDelega
             if (messageObject != convertingVideo || parentFragment == null) {
                 return;
             }
-            parentFragment.getSendMessagesHelper().stopVideoService(messageObject.messageOwner.attachPath);
             NotificationCenter.getInstance(currentAccount).removeObserver(ImageUpdater.this, NotificationCenter.filePreparingStarted);
             NotificationCenter.getInstance(currentAccount).removeObserver(ImageUpdater.this, NotificationCenter.filePreparingFailed);
             NotificationCenter.getInstance(currentAccount).removeObserver(ImageUpdater.this, NotificationCenter.fileNewChunkAvailable);
@@ -1006,7 +1005,6 @@ public class ImageUpdater implements NotificationCenter.NotificationCenterDelega
                 NotificationCenter.getInstance(currentAccount).removeObserver(ImageUpdater.this, NotificationCenter.filePreparingStarted);
                 NotificationCenter.getInstance(currentAccount).removeObserver(ImageUpdater.this, NotificationCenter.filePreparingFailed);
                 NotificationCenter.getInstance(currentAccount).removeObserver(ImageUpdater.this, NotificationCenter.fileNewChunkAvailable);
-                parentFragment.getSendMessagesHelper().stopVideoService(messageObject.messageOwner.attachPath);
                 uploadingVideo = videoPath = finalPath;
                 convertingVideo = null;
             }

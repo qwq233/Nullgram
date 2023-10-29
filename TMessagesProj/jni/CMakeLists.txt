@@ -218,7 +218,7 @@ include(${CMAKE_HOME_DIRECTORY}/voip/CMakeLists.txt)
 
 include(${CMAKE_HOME_DIRECTORY}/integrity/CMakeLists.txt)
 
-set(NATIVE_LIB "tmessages.46")
+set(NATIVE_LIB "tmessages.47")
 
 #tmessages
 add_library(${NATIVE_LIB} SHARED

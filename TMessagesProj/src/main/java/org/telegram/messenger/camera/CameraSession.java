@@ -53,7 +53,7 @@ public class CameraSession {
     private boolean destroyed;
     public boolean previewStarted = false;
 
-    protected ArrayList<String> availableFlashModes = new ArrayList<>();
+    public ArrayList<String> availableFlashModes = new ArrayList<>();
 
     private int infoCameraId = -1;
     Camera.CameraInfo info = new Camera.CameraInfo();

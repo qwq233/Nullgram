@@ -54,8 +54,8 @@ import org.telegram.ui.Stories.StoriesUtilities;
 public class UserCell extends FrameLayout implements NotificationCenter.NotificationCenterDelegate {
 
     public BackupImageView avatarImageView;
-    private SimpleTextView nameTextView;
-    private SimpleTextView statusTextView;
+    protected SimpleTextView nameTextView;
+    protected SimpleTextView statusTextView;
     private ImageView imageView;
     private CheckBox checkBox;
     private CheckBoxSquare checkBoxBig;
@@ -63,10 +63,10 @@ public class UserCell extends FrameLayout implements NotificationCenter.Notifica
     private TextView addButton;
     private Drawable premiumDrawable;
     private AnimatedEmojiDrawable.SwapAnimatedEmojiDrawable emojiStatus;
-    private Theme.ResourcesProvider resourcesProvider;
     private ImageView mutualView;
-
-    private AvatarDrawable avatarDrawable;
+    
+    protected Theme.ResourcesProvider resourcesProvider;
+    protected AvatarDrawable avatarDrawable;
     private boolean storiable;
     private Object currentObject;
     private TLRPC.EncryptedChat encryptedChat;

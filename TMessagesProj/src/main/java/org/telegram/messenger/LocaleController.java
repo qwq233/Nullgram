@@ -73,6 +73,10 @@ public class LocaleController {
     public FastDateFormat formatterScheduleDay;
     public FastDateFormat formatterScheduleYear;
     public FastDateFormat formatterMonthYear;
+    public FastDateFormat formatterGiveawayCard;
+    public FastDateFormat formatterBoostExpired;
+    public FastDateFormat formatterGiveawayMonthDay;
+    public FastDateFormat formatterGiveawayMonthDayYear;
     public FastDateFormat[] formatterScheduleSend = new FastDateFormat[15];
 
     private static final HashMap<Integer, String> resourcesCacheMap = new HashMap<>();
@@ -1991,87 +1995,39 @@ public class LocaleController {
             || currentLocaleInfo != null && currentLocaleInfo.isRtl;
         nameDisplayOrder = lang.equals("ko") ? 2 : 1;
 
-        formatterMonthYear = createFormatter(locale,
-            getStringInternal("formatterMonthYear", R.string.formatterMonthYear), "MMM yyyy");
-        formatterDayMonth = createFormatter(locale,
-            getStringInternal("formatterMonth", R.string.formatterMonth), "dd MMM");
-        formatterYear = createFormatter(locale,
-            getStringInternal("formatterYear", R.string.formatterYear), "dd.MM.yy");
-        formatterYearMax = createFormatter(locale,
-            getStringInternal("formatterYearMax", R.string.formatterYearMax), "dd.MM.yyyy");
-        chatDate = createFormatter(locale, getStringInternal("chatDate", R.string.chatDate),
-            "d MMMM");
-        chatFullDate = createFormatter(locale,
-            getStringInternal("chatFullDate", R.string.chatFullDate), "d MMMM yyyy");
-        formatterWeek = createFormatter(locale,
-            getStringInternal("formatterWeek", R.string.formatterWeek), "EEE");
-        formatterWeekLong = createFormatter(locale,
-            getStringInternal("formatterWeekLong", R.string.formatterWeekLong), "EEEE");
-        formatterScheduleDay = createFormatter(locale,
-            getStringInternal("formatDateSchedule", R.string.formatDateSchedule), "MMM d");
-        formatterScheduleYear = createFormatter(locale,
-            getStringInternal("formatDateScheduleYear", R.string.formatDateScheduleYear),
-            "MMM d yyyy");
-        formatterDay = createFormatter(
-            lang.equalsIgnoreCase("ar") || lang.equalsIgnoreCase("ko") ? locale : Locale.US,
-            is24HourFormat ? getStringInternal("formatterDay24H", R.string.formatterDay24H)
-                : getStringInternal("formatterDay12H", R.string.formatterDay12H),
-            is24HourFormat ? "HH:mm" : "h:mm a");
-        formatterDayWithSeconds = createFormatter(
-            lang.equalsIgnoreCase("ar") || lang.equalsIgnoreCase("ko") ? locale : Locale.US,
-            is24HourFormat ? getStringInternal("formatterDay24HSec", R.string.formatterDay24HSec)
-                : getStringInternal("formatterDay12HSec", R.string.formatterDay12HSec),
-            is24HourFormat ? "HH:mm:ss" : "h:mm:ss a");
-        formatterStats = createFormatter(locale,
-            is24HourFormat ? getStringInternal("formatterStats24H", R.string.formatterStats24H)
-                : getStringInternal("formatterStats12H", R.string.formatterStats12H),
-            is24HourFormat ? "MMM dd yyyy, HH:mm" : "MMM dd yyyy, h:mm a");
-        formatterBannedUntil = createFormatter(locale,
-            is24HourFormat ? getStringInternal("formatterBannedUntil24H",
-                R.string.formatterBannedUntil24H)
-                : getStringInternal("formatterBannedUntil12H", R.string.formatterBannedUntil12H),
-            is24HourFormat ? "MMM dd yyyy, HH:mm" : "MMM dd yyyy, h:mm a");
-        formatterBannedUntilThisYear = createFormatter(locale,
-            is24HourFormat ? getStringInternal("formatterBannedUntilThisYear24H",
-                R.string.formatterBannedUntilThisYear24H)
-                : getStringInternal("formatterBannedUntilThisYear12H",
-                    R.string.formatterBannedUntilThisYear12H),
-            is24HourFormat ? "MMM dd, HH:mm" : "MMM dd, h:mm a");
-        formatterScheduleSend[0] = createFormatter(locale,
-            getStringInternal("SendTodayAt", R.string.SendTodayAt), "'Send today at' HH:mm");
-        formatterScheduleSend[1] = createFormatter(locale,
-            getStringInternal("SendDayAt", R.string.SendDayAt), "'Send on' MMM d 'at' HH:mm");
-        formatterScheduleSend[2] = createFormatter(locale,
-            getStringInternal("SendDayYearAt", R.string.SendDayYearAt),
-            "'Send on' MMM d yyyy 'at' HH:mm");
-        formatterScheduleSend[3] = createFormatter(locale,
-            getStringInternal("RemindTodayAt", R.string.RemindTodayAt), "'Remind today at' HH:mm");
-        formatterScheduleSend[4] = createFormatter(locale,
-            getStringInternal("RemindDayAt", R.string.RemindDayAt), "'Remind on' MMM d 'at' HH:mm");
-        formatterScheduleSend[5] = createFormatter(locale,
-            getStringInternal("RemindDayYearAt", R.string.RemindDayYearAt),
-            "'Remind on' MMM d yyyy 'at' HH:mm");
-        formatterScheduleSend[6] = createFormatter(locale,
-            getStringInternal("StartTodayAt", R.string.StartTodayAt), "'Start today at' HH:mm");
-        formatterScheduleSend[7] = createFormatter(locale,
-            getStringInternal("StartDayAt", R.string.StartDayAt), "'Start on' MMM d 'at' HH:mm");
-        formatterScheduleSend[8] = createFormatter(locale,
-            getStringInternal("StartDayYearAt", R.string.StartDayYearAt),
-            "'Start on' MMM d yyyy 'at' HH:mm");
-        formatterScheduleSend[9] = createFormatter(locale,
-            getStringInternal("StartShortTodayAt", R.string.StartShortTodayAt), "'Today,' HH:mm");
-        formatterScheduleSend[10] = createFormatter(locale,
-            getStringInternal("StartShortDayAt", R.string.StartShortDayAt), "MMM d',' HH:mm");
-        formatterScheduleSend[11] = createFormatter(locale,
-            getStringInternal("StartShortDayYearAt", R.string.StartShortDayYearAt),
-            "MMM d yyyy, HH:mm");
-        formatterScheduleSend[12] = createFormatter(locale,
-            getStringInternal("StartsTodayAt", R.string.StartsTodayAt), "'Starts today at' HH:mm");
-        formatterScheduleSend[13] = createFormatter(locale,
-            getStringInternal("StartsDayAt", R.string.StartsDayAt), "'Starts on' MMM d 'at' HH:mm");
-        formatterScheduleSend[14] = createFormatter(locale,
-            getStringInternal("StartsDayYearAt", R.string.StartsDayYearAt),
-            "'Starts on' MMM d yyyy 'at' HH:mm");
+        formatterBoostExpired = createFormatter(locale, getStringInternal("formatterBoostExpired", R.string.formatterBoostExpired), "MMM dd, yyyy");
+        formatterGiveawayCard = createFormatter(locale, getStringInternal("formatterGiveawayCard", R.string.formatterGiveawayCard), "dd MMM yyyy");
+        formatterGiveawayMonthDay = createFormatter(locale, getStringInternal("formatterGiveawayMonthDay", R.string.formatterGiveawayMonthDay), "MMMM dd");
+        formatterGiveawayMonthDayYear = createFormatter(locale, getStringInternal("formatterGiveawayMonthDayYear", R.string.formatterGiveawayMonthDayYear), "MMMM dd, yyyy");
+        formatterMonthYear = createFormatter(locale, getStringInternal("formatterMonthYear", R.string.formatterMonthYear), "MMM yyyy");
+        formatterDayMonth = createFormatter(locale, getStringInternal("formatterMonth", R.string.formatterMonth), "dd MMM");
+        formatterYear = createFormatter(locale, getStringInternal("formatterYear", R.string.formatterYear), "dd.MM.yy");
+        formatterYearMax = createFormatter(locale, getStringInternal("formatterYearMax", R.string.formatterYearMax), "dd.MM.yyyy");
+        chatDate = createFormatter(locale, getStringInternal("chatDate", R.string.chatDate), "d MMMM");
+        chatFullDate = createFormatter(locale, getStringInternal("chatFullDate", R.string.chatFullDate), "d MMMM yyyy");
+        formatterWeek = createFormatter(locale, getStringInternal("formatterWeek", R.string.formatterWeek), "EEE");
+        formatterWeekLong = createFormatter(locale, getStringInternal("formatterWeekLong", R.string.formatterWeekLong), "EEEE");
+        formatterScheduleDay = createFormatter(locale, getStringInternal("formatDateSchedule", R.string.formatDateSchedule), "MMM d");
+        formatterScheduleYear = createFormatter(locale, getStringInternal("formatDateScheduleYear", R.string.formatDateScheduleYear), "MMM d yyyy");
+        formatterDay = createFormatter(lang.toLowerCase().equals("ar") || lang.toLowerCase().equals("ko") ? locale : Locale.US, is24HourFormat ? getStringInternal("formatterDay24H", R.string.formatterDay24H) : getStringInternal("formatterDay12H", R.string.formatterDay12H), is24HourFormat ? "HH:mm" : "h:mm a");
+        formatterStats = createFormatter(locale, is24HourFormat ? getStringInternal("formatterStats24H", R.string.formatterStats24H) : getStringInternal("formatterStats12H", R.string.formatterStats12H), is24HourFormat ? "MMM dd yyyy, HH:mm" : "MMM dd yyyy, h:mm a");
+        formatterBannedUntil = createFormatter(locale, is24HourFormat ? getStringInternal("formatterBannedUntil24H", R.string.formatterBannedUntil24H) : getStringInternal("formatterBannedUntil12H", R.string.formatterBannedUntil12H), is24HourFormat ? "MMM dd yyyy, HH:mm" : "MMM dd yyyy, h:mm a");
+        formatterBannedUntilThisYear = createFormatter(locale, is24HourFormat ? getStringInternal("formatterBannedUntilThisYear24H", R.string.formatterBannedUntilThisYear24H) : getStringInternal("formatterBannedUntilThisYear12H", R.string.formatterBannedUntilThisYear12H), is24HourFormat ? "MMM dd, HH:mm" : "MMM dd, h:mm a");
+        formatterScheduleSend[0] = createFormatter(locale, getStringInternal("SendTodayAt", R.string.SendTodayAt), "'Send today at' HH:mm");
+        formatterScheduleSend[1] = createFormatter(locale, getStringInternal("SendDayAt", R.string.SendDayAt), "'Send on' MMM d 'at' HH:mm");
+        formatterScheduleSend[2] = createFormatter(locale, getStringInternal("SendDayYearAt", R.string.SendDayYearAt), "'Send on' MMM d yyyy 'at' HH:mm");
+        formatterScheduleSend[3] = createFormatter(locale, getStringInternal("RemindTodayAt", R.string.RemindTodayAt), "'Remind today at' HH:mm");
+        formatterScheduleSend[4] = createFormatter(locale, getStringInternal("RemindDayAt", R.string.RemindDayAt), "'Remind on' MMM d 'at' HH:mm");
+        formatterScheduleSend[5] = createFormatter(locale, getStringInternal("RemindDayYearAt", R.string.RemindDayYearAt), "'Remind on' MMM d yyyy 'at' HH:mm");
+        formatterScheduleSend[6] = createFormatter(locale, getStringInternal("StartTodayAt", R.string.StartTodayAt), "'Start today at' HH:mm");
+        formatterScheduleSend[7] = createFormatter(locale, getStringInternal("StartDayAt", R.string.StartDayAt), "'Start on' MMM d 'at' HH:mm");
+        formatterScheduleSend[8] = createFormatter(locale, getStringInternal("StartDayYearAt", R.string.StartDayYearAt), "'Start on' MMM d yyyy 'at' HH:mm");
+        formatterScheduleSend[9] = createFormatter(locale, getStringInternal("StartShortTodayAt", R.string.StartShortTodayAt), "'Today,' HH:mm");
+        formatterScheduleSend[10] = createFormatter(locale, getStringInternal("StartShortDayAt", R.string.StartShortDayAt), "MMM d',' HH:mm");
+        formatterScheduleSend[11] = createFormatter(locale, getStringInternal("StartShortDayYearAt", R.string.StartShortDayYearAt), "MMM d yyyy, HH:mm");
+        formatterScheduleSend[12] = createFormatter(locale, getStringInternal("StartsTodayAt", R.string.StartsTodayAt), "'Starts today at' HH:mm");
+        formatterScheduleSend[13] = createFormatter(locale, getStringInternal("StartsDayAt", R.string.StartsDayAt), "'Starts on' MMM d 'at' HH:mm");
+        formatterScheduleSend[14] = createFormatter(locale, getStringInternal("StartsDayYearAt", R.string.StartsDayYearAt), "'Starts on' MMM d yyyy 'at' HH:mm");
     }
 
     public static boolean isRTLCharacter(char ch) {

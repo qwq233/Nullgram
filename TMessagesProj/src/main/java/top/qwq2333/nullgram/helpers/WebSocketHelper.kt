@@ -119,7 +119,7 @@ object WebSocketHelper {
                 tcp2wsStarted = true
                 val map = HashMap<String, String?>()
                 map["buildType"] = BuildConfig.BUILD_TYPE
-                map["buildFlavor"] = BuildConfig.FLAVOR
+                map["buildFlavor"] = BuildConfig.ABI
                 map["isPlay"] = BuildConfig.isPlay.toString()
                 trackEvent("tcp2ws started", map)
             }

@@ -480,7 +480,8 @@ public class ChatSettingActivity extends BaseActivity {
                     } else if (position == customQuickMessageRow) {
                         textCell.setText(LocaleController.getString("setCustomQuickMessage", R.string.setCustomQuickMessage), true);
                     } else if (position == markdownParserRow) {
-                        textCell.setTextAndValue(LocaleController.getString("MarkdownParser", R.string.MarkdownParser), Config.newMarkdownParser ? "Nullgram" : "Telegram", payload, position + 1 != markdown2Row);
+                        textCell.setTextAndValue(LocaleController.getString("MarkdownParser", R.string.MarkdownParser), Config.newMarkdownParser ? "Nullgram" : "Telegram", payload,
+                            position + 1 != markdown2Row);
                     }
                     break;
                 }

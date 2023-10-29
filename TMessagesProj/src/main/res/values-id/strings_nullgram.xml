@@ -26,7 +26,7 @@
     <string name="InvalidAccessToken">Token akses tidak valid</string>
     <string name="QRLoginTitle">Login QR</string>
     <string name="QRLoginMessage">Pindai Kode QR dengan perangkat lain untuk masuk.</string>
-    <string name="NullgramVersion">Nullgram %1$s\nBerbasiskan dari Telegram resmi %2$s</string>
+    <string name="NullgramVersion">Nullgram %1$s\nBerbasiskan dari TELEOFFICIAL resmi %2$s</string>
     <string name="RestrictionReason">Alasan pembatasan</string>
     <string name="showBotAPIID">Tampilkan ID API Bot</string>
     <string name="hideGroupSticker">Sembunyikan Paket Stiker Grup</string>

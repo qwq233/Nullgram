@@ -203,7 +203,7 @@ android {
             variant.outputs.forEach { output ->
                 val abi = output.filters.find { it.filterType == ABI }?.identifier
                 variant.buildConfigFields.put(
-                    "FLAVOR", BuildConfigField(
+                    "ABI", BuildConfigField(
                         "String", "\"${abiName[abi]}\"",
                         "this is just a compatibility solution and we are not using flavorProduct anymore"
                     )

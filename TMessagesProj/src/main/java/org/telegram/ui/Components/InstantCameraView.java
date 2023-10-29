@@ -16,6 +16,7 @@ import android.animation.ValueAnimator;
 import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
 import android.app.Activity;
+import android.app.ActivityManager;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothProfile;
 import android.content.Context;
@@ -51,6 +52,7 @@ import android.os.Build;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.HapticFeedbackConstants;
 import android.view.MotionEvent;
@@ -233,6 +235,7 @@ public class InstantCameraView extends FrameLayout implements NotificationCenter
             285904780, // XIAOMI (Redmi Note 7)
             -1394191079 // samsung a31
     };
+    private boolean allowSendingWhileRecording;
 
 
     @SuppressLint("ClickableViewAccessibility")
@@ -1902,6 +1905,9 @@ public class InstantCameraView extends FrameLayout implements NotificationCenter
         public void startRecording(File outputFile, android.opengl.EGLContext sharedContext) {
             int resolution = MessagesController.getInstance(currentAccount).roundVideoSize;
             int bitrate = MessagesController.getInstance(currentAccount).roundVideoBitrate * 1024;
+            AndroidUtilities.runOnUIThread(() -> {
+                NotificationCenter.getInstance(currentAccount).postNotificationName(NotificationCenter.stopAllHeavyOperations, 512);
+            });
 
             videoFile = outputFile;
             videoWidth = resolution;
@@ -1943,6 +1949,9 @@ public class InstantCameraView extends FrameLayout implements NotificationCenter
 
         public void stopRecording(int send) {
             handler.sendMessage(handler.obtainMessage(MSG_STOP_RECORDING, send, 0));
+            AndroidUtilities.runOnUIThread(() -> {
+                NotificationCenter.getInstance(currentAccount).postNotificationName(NotificationCenter.stopAllHeavyOperations, 512);
+            });
         }
 
         long prevTimestamp;
@@ -2556,6 +2565,9 @@ public class InstantCameraView extends FrameLayout implements NotificationCenter
                 movie.setRotation(0);
                 movie.setSize(videoWidth, videoHeight);
                 mediaMuxer = new MP4Builder().createMovie(movie, isSecretChat, false);
+                allowSendingWhileRecording = SharedConfig.deviceIsHigh();
+                
+                mediaMuxer.setAllowSyncFiles(allowSendingWhileRecording);
 
                 AndroidUtilities.runOnUIThread(() -> {
                     if (cancelled) {
@@ -2757,13 +2769,13 @@ public class InstantCameraView extends FrameLayout implements NotificationCenter
                                     } catch (Exception e) {
                                         e.printStackTrace();
                                     }
-                                    if (availableSize != 0 && !writingToDifferentFile) {
+                                    if (availableSize != 0 && !writingToDifferentFile && allowSendingWhileRecording) {
                                         didWriteData(videoFile, availableSize, false);
                                     }
                                 });
                             } else {
                                 long availableSize = mediaMuxer.writeSampleData(videoTrackIndex, encodedData, videoBufferInfo, true);
-                                if (availableSize != 0 && !writingToDifferentFile) {
+                                if (availableSize != 0 && !writingToDifferentFile && allowSendingWhileRecording) {
                                     didWriteData(videoFile, availableSize, false);
                                 }
                             }
@@ -2849,7 +2861,7 @@ public class InstantCameraView extends FrameLayout implements NotificationCenter
                                 } catch (Exception e) {
                                     e.printStackTrace();
                                 }
-                                if (availableSize != 0 && !writingToDifferentFile) {
+                                if (availableSize != 0 && !writingToDifferentFile && allowSendingWhileRecording) {
                                     didWriteData(videoFile, availableSize, false);
                                 }
                             });
@@ -2858,7 +2870,7 @@ public class InstantCameraView extends FrameLayout implements NotificationCenter
                             }
                         } else {
                             long availableSize = mediaMuxer.writeSampleData(audioTrackIndex, encodedData, audioBufferInfo, false);
-                            if (availableSize != 0 && !writingToDifferentFile) {
+                            if (availableSize != 0 && !writingToDifferentFile && allowSendingWhileRecording) {
                                 didWriteData(videoFile, availableSize, false);
                             }
                             if (audioEncoder != null) {

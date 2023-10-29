@@ -13,6 +13,7 @@ import org.telegram.tgnet.ConnectionsManager;
 import org.telegram.tgnet.NativeByteBuffer;
 import org.telegram.tgnet.TLObject;
 import org.telegram.tgnet.TLRPC;
+import org.telegram.tgnet.tl.TL_stories;
 import org.telegram.ui.LaunchActivity;
 import org.telegram.ui.Storage.CacheModel;
 
@@ -782,7 +783,7 @@ public class FileLoadOperation {
     public boolean start(final FileLoadOperationStream stream, final long streamOffset, final boolean streamPriority) {
         startTime = System.currentTimeMillis();
         updateParams();
-        isStory = parentObject instanceof TLRPC.TL_storyItem;
+        isStory = parentObject instanceof TL_stories.TL_storyItem;
         if (currentDownloadChunkSize == 0) {
             if (forceSmallChunk) {
                 if (BuildVars.LOGS_ENABLED) {
