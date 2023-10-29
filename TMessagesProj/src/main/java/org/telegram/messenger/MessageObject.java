@@ -11,9 +11,6 @@ package org.telegram.messenger;
 import static org.telegram.messenger.AndroidUtilities.dp;
 
 import android.graphics.Paint;
-import android.graphics.Path;
-import android.graphics.Rect;
-import android.graphics.RectF;
 import android.graphics.Typeface;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
@@ -89,7 +86,6 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import top.qwq2333.gen.Config;
-import top.qwq2333.nullgram.ui.syntaxhighlight.SyntaxHighlight;
 import top.qwq2333.nullgram.utils.StringUtils;
 
 public class MessageObject {
