@@ -507,8 +507,8 @@
         <service android:name=".NotificationsService" android:enabled="true"  android:exported="true"/>
         <service android:name=".NotificationRepeat" android:exported="false"/>
         <service android:name=".VideoEncodingService" android:foregroundServiceType="mediaPlayback" android:enabled="true" android:exported="true"/>
-        <service android:name="org.telegram.ui.Stories.recorder.StoryUploadingService" android:foregroundServiceType="remoteMessaging" android:enabled="true" android:exported="true"/>
-        <service android:name=".ImportingService" android:foregroundServiceType="remoteMessaging" android:enabled="true" android:exported="true"/>
+        <service android:name="org.telegram.ui.Stories.recorder.StoryUploadingService" android:foregroundServiceType="dataSync" android:enabled="true" android:exported="true"/>
+        <service android:name=".ImportingService" android:foregroundServiceType="dataSync" android:enabled="true" android:exported="true"/>
         <service android:name=".LocationSharingService"
             android:foregroundServiceType="location"
             android:enabled="true"
