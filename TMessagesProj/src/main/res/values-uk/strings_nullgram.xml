@@ -46,8 +46,8 @@
     <string name="Repeat">Повторити</string>
     <string name="saveMessages">Зберегти повідомлення</string>
     <string name="ViewHistory">Перегляд історії</string>
-    <string name="NoQuoteForward">NoQuote forward</string>
-    <string name="MessageMenu">Message menu</string>
+    <string name="NoQuoteForward">Переслати без цитування</string>
+    <string name="MessageMenu">Меню повідомлення</string>
     <string name="allowScreenshotOnNoForwardChat">Bypass Screenshot Limit</string>
     <string name="allowScreenshotOnNoForwardChatWarning">It will also allow you to bypass screenshot limit in SecureChat!</string>
     <string name="labelChannelUser">Label Channel User</string>
