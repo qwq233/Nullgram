@@ -21,8 +21,8 @@
     <string name="LastUpdateNever">Ніколи не перевіряти після установки.</string>
     <string name="LastUpdateDateFormatted">Востаннє успішно перевірена %1$s.</string>
     <string name="LastUpdateFormatted">Остання успішна перевірка %1$s.</string>
-    <string name="BotLogin">Bot Login</string>
-    <string name="BotToken">API Key</string>
+    <string name="BotLogin">Бот Логін</string>
+    <string name="BotToken">API Ключі</string>
     <string name="InvalidAccessToken">Invalid access token</string>
     <string name="QRLoginTitle">QR Login</string>
     <string name="QRLoginMessage">Scan QRCode with another device to login.</string>
