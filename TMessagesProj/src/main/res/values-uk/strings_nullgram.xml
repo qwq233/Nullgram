@@ -19,8 +19,8 @@
     <string name="CheckUpdate">Перевірити оновлення</string>
     <string name="CheckingUpdate">Перевірка наявності оновлень…</string>
     <string name="LastUpdateNever">Ніколи не перевіряти після установки.</string>
-    <string name="LastUpdateDateFormatted">Last successfully checked on %1$s.</string>
-    <string name="LastUpdateFormatted">Last successfully checked %1$s.</string>
+    <string name="LastUpdateDateFormatted">Востаннє успішно перевірена %1$s.</string>
+    <string name="LastUpdateFormatted">Остання успішна перевірка %1$s.</string>
     <string name="BotLogin">Bot Login</string>
     <string name="BotToken">API Key</string>
     <string name="InvalidAccessToken">Invalid access token</string>
