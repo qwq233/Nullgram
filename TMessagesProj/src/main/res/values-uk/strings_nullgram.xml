@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="NullgramPushService">Nullgram Push Service</string>
-    <string name="NullSettings">Nullgram Settings</string>
-    <string name="OfficialChannel">Official Channel</string>
-    <string name="Chat">Chat</string>
-    <string name="Experiment">Experiment</string>
+    <string name="NullgramPushService">Служба сповіщень Nullgram</string>
+    <string name="NullSettings">Налаштування Nullgram</string>
+    <string name="OfficialChannel">Офіційний канал</string>
+    <string name="Chat">Чат</string>
+    <string name="Experiment">Експеримент</string>
     <string name="OfficialSite">Official Site</string>
     <string name="ViewSourceCode">View Source Code</string>
     <string name="Categories">Categories</string>
