@@ -211,6 +211,7 @@
     <string name="openArchiveOnPull">下拉時開啟封存</string>
     <string name="hideAllTab">隱藏「所有對話」分頁</string>
     <string name="ignoreMutedCount">忽略分頁中已靜音的數量</string>
+    <string name="disableSharePhoneWithContactByDefault">無法分享電話號碼添加聯絡人</string>
     <string name="disableStickersAutoReorder">停用貼圖包自動重新排序功能</string>
     <string name="Ban">封鎖</string>
     <string name="autoDisableBuiltInProxy">自動停用內建代理</string>
@@ -298,9 +299,12 @@
     <string name="Offline">離線</string>
     <string name="Special">特殊</string>
     <string name="BotLoginMessage">輸入從 **@BotFather** 取得的機器人令牌。</string>
-    <string name="Stories">Stories</string>
-    <string name="HideStories">Hide Stories</string>
-    <string name="storyStealthMode">Story Stealth mode</string>
-    <string name="OneMoreThing">One More Thing</string>
-    <string name="NotOriginalNullgramInfo">It seems that you\'re using a fork of Nullgram.\nDo you also want to follow Nullgram\'s Channel?</string>
+    <string name="Stories">限時動態</string>
+    <string name="HideStories">隱藏限時動態</string>
+    <string name="storyStealthMode">限時動態隱身模式</string>
+    <string name="OneMoreThing">還有一件事</string>
+    <string name="NotOriginalNullgramInfo">看起來您正在使用 Nullgram 的分支。\n您是否也想關注 Nullgram 的頻道？</string>
+    <string name="Official">官方</string>
+    <string name="Before">在此之前…</string>
+    <string name="Custom">自訂選項</string>
 </resources>

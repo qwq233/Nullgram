@@ -211,6 +211,7 @@
     <string name="openArchiveOnPull">باز شدن آرشیو هنگام کشیدن</string>
     <string name="hideAllTab">Hide \"All Chats\" tab</string>
     <string name="ignoreMutedCount">چشم‌پوشی شمارش بی‌صدا در برگه</string>
+    <string name="disableSharePhoneWithContactByDefault">No Share Phone Number When Add Contact</string>
     <string name="disableStickersAutoReorder">Disable sticker packs auto-reorder</string>
     <string name="Ban">Ban</string>
     <string name="autoDisableBuiltInProxy">Auto Disable Built-In Proxy</string>
@@ -303,4 +304,7 @@
     <string name="storyStealthMode">Story Stealth mode</string>
     <string name="OneMoreThing">One More Thing</string>
     <string name="NotOriginalNullgramInfo">It seems that you\'re using a fork of Nullgram.\nDo you also want to follow Nullgram\'s Channel?</string>
+    <string name="Official">Official</string>
+    <string name="Before">Before...</string>
+    <string name="Custom">Custom</string>
 </resources>

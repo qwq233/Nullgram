@@ -211,6 +211,7 @@
     <string name="openArchiveOnPull">Buka Arsip Saat Menarik</string>
     <string name="hideAllTab">Sembunyikan Tab \"Semua Obrolan\"</string>
     <string name="ignoreMutedCount">Abaikan Hitungan Yang Dibisukan di tab</string>
+    <string name="disableSharePhoneWithContactByDefault">No Share Phone Number When Add Contact</string>
     <string name="disableStickersAutoReorder">Nonaktifkan susun ulang otomatis paket stiker</string>
     <string name="Ban">Blokir</string>
     <string name="autoDisableBuiltInProxy">Nonaktifkan otomatis Proxy Bawaan</string>
@@ -303,4 +304,7 @@
     <string name="storyStealthMode">Story Stealth mode</string>
     <string name="OneMoreThing">One More Thing</string>
     <string name="NotOriginalNullgramInfo">Sepertinya Anda menggunakan fork dari Nullgram.\nApakah Anda juga ingin mengikuti Saluran Nullgram?</string>
+    <string name="Official">Official</string>
+    <string name="Before">Before...</string>
+    <string name="Custom">Custom</string>
 </resources>

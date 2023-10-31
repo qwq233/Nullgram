@@ -14,7 +14,7 @@
     <string name="updateAvailable">新更新可用</string>
     <string name="variantsNotFound">发布变量无法自动匹配。\n请从GitHub 手动下载。</string>
     <string name="skipUpdate">忽略</string>
-    <string name="notNow">稍后更新</string>
+    <string name="notNow">稍后​​​​​</string>
     <string name="updateConfirm">更新</string>
     <string name="CheckUpdate">检查更新内容</string>
     <string name="CheckingUpdate">正在检查更新…</string>
@@ -211,7 +211,7 @@
     <string name="openArchiveOnPull">下拉打开已归档对话</string>
     <string name="hideAllTab">隐藏“全部对话”栏</string>
     <string name="ignoreMutedCount">忽略标签中的静音计数</string>
-    <string name="disableSharePhoneWithContactByDefault">添加联系人时默认不分享电话号码</string>
+    <string name="disableSharePhoneWithContactByDefault">No Share Phone Number When Add Contact</string>
     <string name="disableStickersAutoReorder">禁用贴纸自动重新排列</string>
     <string name="Ban">封禁</string>
     <string name="autoDisableBuiltInProxy">自动关闭内置代理</string>
@@ -303,5 +303,8 @@
     <string name="HideStories">隐藏动态</string>
     <string name="storyStealthMode">动态隐身模式</string>
     <string name="OneMoreThing">还有一件事</string>
-    <string name="NotOriginalNullgramInfo">你似乎正在使用Nullgram的分支版本。\n你是否也要进入Nullgram的频道？</string>
+    <string name="NotOriginalNullgramInfo">你似乎正在使用 Nullgram 的分支。\n 你想要关注 Nullgram 的频道吗？</string>
+    <string name="Official">Official</string>
+    <string name="Before">Before...</string>
+    <string name="Custom">Custom</string>
 </resources>

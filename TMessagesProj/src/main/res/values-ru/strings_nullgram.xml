@@ -212,6 +212,7 @@
     <string name="openArchiveOnPull">Открыть архив при вытягивании</string>
     <string name="hideAllTab">Скрыть папку \"Все Чаты\"</string>
     <string name="ignoreMutedCount">Ignore Muted Count in tab</string>
+    <string name="disableSharePhoneWithContactByDefault">No Share Phone Number When Add Contact</string>
     <string name="disableStickersAutoReorder">Отключить автосортировку стикеров</string>
     <string name="Ban">Заблокировать</string>
     <string name="autoDisableBuiltInProxy">Автоотключение встроенного прокси</string>
@@ -304,4 +305,7 @@
     <string name="storyStealthMode">Story Stealth mode</string>
     <string name="OneMoreThing">One More Thing</string>
     <string name="NotOriginalNullgramInfo">It seems that you\'re using a fork of Nullgram.\nDo you also want to follow Nullgram\'s Channel?</string>
+    <string name="Official">Official</string>
+    <string name="Before">Before...</string>
+    <string name="Custom">Custom</string>
 </resources>
