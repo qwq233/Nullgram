@@ -81,7 +81,6 @@ object DeepLTranslator : BaseTranslator() {
         client.post("https://www2.deepl.com/jsonrpc") {
             contentType(ContentType.Application.Json)
             header("Referer", "https://www.deepl.com/")
-            header("Accept-Encoding", "gzip")
             header("User-Agent", "DeepL/1.8(52) Android 13 (Pixel 5;aarch64)")
             header("Client-Id", uuid)
             header("x-instance", uuid)
