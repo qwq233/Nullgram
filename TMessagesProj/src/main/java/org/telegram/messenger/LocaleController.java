@@ -45,6 +45,7 @@ import java.util.Locale;
 import java.util.TimeZone;
 
 import top.qwq2333.gen.Config;
+import top.qwq2333.nullgram.utils.Log;
 
 public class LocaleController {
 
@@ -1110,26 +1111,21 @@ public class LocaleController {
     }
 
     private String getStringInternal(String key, String fallback, int res) {
-        if (key.equals("AppName")) {
-            try {
-                return ApplicationLoader.applicationContext.getString(R.string.NullgramName);
-            } catch (Exception e) {
-                FileLog.e(e);
+        try {
+            switch (key) {
+                case "AppName":
+                case "AppNameBeta": {
+                    return ApplicationLoader.applicationContext.getString(R.string.NullgramName);
+                }
+                case "TelegramFeaturesUrl":
+                    return ApplicationLoader.applicationContext.getString(R.string.TelegramFeaturesUrl);
+                case "UnsupportedMedia":
+                    return ApplicationLoader.applicationContext.getString(R.string.UnsupportedMediaNullgram);
+                default:
+                    break;
             }
-        }
-        if (key.equals("AppNameBeta")) {
-            try {
-                return ApplicationLoader.applicationContext.getString(R.string.NullgramName);
-            } catch (Exception e) {
-                FileLog.e(e);
-            }
-        }
-        if (key.equals("TelegramFeaturesUrl")) {
-            try {
-                return ApplicationLoader.applicationContext.getString(R.string.TelegramFeaturesUrl);
-            } catch (Exception e) {
-                FileLog.e(e);
-            }
+        } catch (Exception e) {
+            Log.e(e);
         }
         String value = BuildVars.USE_CLOUD_STRINGS ? localeValues.get(key) : null;
         if (value == null) {
