@@ -7611,4 +7611,5 @@
     <string name="OpenGift">OPEN</string>
     <string name="UserColorApplied">Your name color has been updated!</string>
     <string name="ChannelColorApplied">Your channel color has been updated!</string>
+    <string name="ignoreUserSpecifiedReplyColor">Ignore user-set reply color</string>
 </resources>
