@@ -78,7 +78,6 @@ dependencies {
     implementation(libs.licensesdialog)
     implementation(libs.markwon.core)
     implementation(libs.hiddenapibypass)
-    implementation(libs.prism4j)
 
     implementation(libs.kotlin.stdlib.common)
     implementation(libs.kotlin.stdlib)
