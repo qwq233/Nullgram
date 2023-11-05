@@ -3972,11 +3972,11 @@ public class SendMessagesHelper extends BaseController implements NotificationCe
                 }
             }
             boolean destroyReply = false;
-            if (replyToMsg != null && replyToStoryItem == null && newMsg.reply_to != null) {
+            if (replyToMsg != null && replyToStoryItem == null && newMsg.reply_to != null && !DialogObject.isEncryptedDialog(replyToMsg.getDialogId())) {
                 boolean convertToQuote = false;
                 TLRPC.Peer peer2 = getMessagesController().getPeer(replyToMsg.getDialogId() > 0 ? replyToMsg.getSenderId() : replyToMsg.getDialogId());
                 boolean anotherChat = peer2 != null && !MessageObject.peersEqual(getMessagesController().getPeer(replyToMsg.getDialogId()), newMsg.peer_id);
-                if (replyToMsg.isForwarded() && !replyToMsg.isImportedForward() && replyToMsg.messageOwner.fwd_from.saved_from_peer == null) {
+                if (anotherChat && replyToMsg.isForwarded() && !replyToMsg.isImportedForward() && replyToMsg.messageOwner.fwd_from.saved_from_peer == null) {
                     if (replyToMsg.messageOwner.fwd_from.from_id != null && (replyToMsg.messageOwner.fwd_from.flags & 4) != 0) {
                         peer2 = replyToMsg.messageOwner.fwd_from.from_id;
                         newMsg.reply_to.reply_to_msg_id = replyToMsg.messageOwner.fwd_from.channel_post;
@@ -3984,7 +3984,19 @@ public class SendMessagesHelper extends BaseController implements NotificationCe
                         anotherChat = true;
                     }
                 }
-                final boolean anotherTopic = replyToTopMsg != null && replyToTopMsg.getId() != replyToMsg.getId() && MessageObject.getTopicId(replyToMsg.messageOwner, true) != replyToTopMsg.getId();
+                boolean anotherTopic = false;
+                if (replyToMsg != null) {
+                    boolean isForum = false;
+                    if (!isForum) {
+                        TLRPC.Chat chat = getMessagesController().getChat(-DialogObject.getPeerDialogId(newMsg.peer_id));
+                        if (ChatObject.isForum(chat)) {
+                            isForum = true;
+                        }
+                    }
+                    if (isForum) {
+                        anotherTopic = replyToTopMsg.getId() != replyToMsg.getId() && MessageObject.getTopicId(replyToMsg.messageOwner, true) != replyToTopMsg.getId();
+                    }
+                }
                 if (anotherChat || anotherTopic) {
                     newMsg.reply_to.flags |= 1;
                     newMsg.reply_to.reply_to_peer_id = peer2;

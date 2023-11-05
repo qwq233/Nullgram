@@ -919,12 +919,13 @@ public class PremiumPreviewFragment extends BaseFragment implements Notification
             }
             final boolean isPremium = UserConfig.getInstance(currentAccount).isPremium();
             final boolean isYearTier = tier.getMonths() == 12;
-            final String price = isYearTier ? tier.getFormattedPricePerYear() : tier.getFormattedPricePerMonth();
+            String price = isYearTier ? tier.getFormattedPricePerYear() : tier.getFormattedPricePerMonth();
             final int resId;
             if (isPremium) {
                 resId = isYearTier ? R.string.UpgradePremiumPerYear : R.string.UpgradePremiumPerMonth;
             } else {
-                resId = isYearTier ? R.string.SubscribeToPremiumPerYear : R.string.SubscribeToPremium;
+                price = tier.getFormattedPricePerMonthRounded();
+                resId = R.string.SubscribeToPremium;
             }
             return LocaleController.formatString(resId, price);
         }
@@ -1834,6 +1835,14 @@ public class PremiumPreviewFragment extends BaseFragment implements Notification
             }
 
             return googlePlayProductDetails == null ? "" : BillingController.getInstance().formatCurrency(getPricePerYear(), getCurrency(), 6);
+        }
+
+        public String getFormattedPricePerMonthRounded() {
+            if (BuildVars.useInvoiceBilling() || subscriptionOption.store_product == null) {
+                return BillingController.getInstance().formatCurrency(getPricePerMonth(), getCurrency(), BillingController.getInstance().getCurrencyExp(getCurrency()), true);
+            }
+
+            return googlePlayProductDetails == null ? "" : BillingController.getInstance().formatCurrency(getPricePerMonth(), getCurrency(), 6, true);
         }
 
         public String getFormattedPricePerMonth() {

@@ -1,6 +1,7 @@
 package org.telegram.ui.Components.Premium.boosts;
 
 import static org.telegram.messenger.AndroidUtilities.dp;
+import static org.telegram.messenger.AndroidUtilities.isTablet;
 
 import android.content.Context;
 import android.content.res.Configuration;
@@ -58,6 +59,8 @@ public class BoostPagerBottomSheet extends BottomSheet {
         return instance;
     }
 
+    private boolean isLandscapeOrientation;
+
     public BoostPagerBottomSheet(Context context, boolean needFocus, BoostViaGiftsBottomSheet leftSheet, SelectorBottomSheet rightSheet, Theme.ResourcesProvider resourcesProvider, boolean forceDark) {
         super(context, needFocus, resourcesProvider);
         this.rightSheet = rightSheet;
@@ -67,6 +70,7 @@ public class BoostPagerBottomSheet extends BottomSheet {
         setBackgroundColor(Color.TRANSPARENT);
         fixNavigationBar();
         AndroidUtilities.setLightStatusBar(getWindow(), isLightStatusBar());
+        checkScreenOrientation();
 
         viewPager = new ViewPagerFixed(getContext()) {
 
@@ -74,6 +78,7 @@ public class BoostPagerBottomSheet extends BottomSheet {
             private final Paint backgroundPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
             private boolean isScrolling;
             private boolean isKeyboardVisible;
+            private final boolean isTablet = isTablet();
 
             @Override
             protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
@@ -131,6 +136,9 @@ public class BoostPagerBottomSheet extends BottomSheet {
                     super.dispatchDraw(canvas);
                     canvas.restore();
                 } else {
+                    if (isTablet || isLandscapeOrientation) {
+                        canvas.clipRect(0, 0, getMeasuredWidth(), getMeasuredHeight());
+                    }
                     super.dispatchDraw(canvas);
                 }
             }
@@ -225,6 +233,10 @@ public class BoostPagerBottomSheet extends BottomSheet {
         });
     }
 
+    private void checkScreenOrientation() {
+        isLandscapeOrientation = getContext().getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE;
+    }
+
     @Override
     public void dismissInternal() {
         super.dismissInternal();
@@ -234,6 +246,7 @@ public class BoostPagerBottomSheet extends BottomSheet {
     @Override
     public void onConfigurationChanged(Configuration newConfig) {
         rightSheet.onConfigurationChanged(newConfig);
+        checkScreenOrientation();
         super.onConfigurationChanged(newConfig);
     }
 

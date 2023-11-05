@@ -593,7 +593,7 @@ public class PeerColorActivity extends BaseFragment implements NotificationCente
 
         public int getColor() {
             if (selectedColor < 7) {
-                return getThemedColor(AvatarDrawable.getNameColorKey1For(selectedColor));
+                return getThemedColor(Theme.keys_avatar_nameInMessage[selectedColor]);
             } else {
                 MessagesController.PeerColors peerColors = MessagesController.getInstance(currentAccount).peerColors;
                 if (peerColors != null) {
@@ -603,7 +603,7 @@ public class PeerColorActivity extends BaseFragment implements NotificationCente
                     }
                 }
             }
-            return getThemedColor(AvatarDrawable.getNameColorKey1For(0));
+            return getThemedColor(Theme.keys_avatar_nameInMessage[0]);
         }
 
         @Override
@@ -669,6 +669,7 @@ public class PeerColorActivity extends BaseFragment implements NotificationCente
                 return 0;
             }
         };
+        popupLayout.useAccentForPlus = true;
         popupLayout.setSelected(selectedEmoji == 0 ? null : selectedEmoji);
         popupLayout.setSaveState(3);
         popupLayout.setScrimDrawable(scrimDrawable, scrimDrawableParent);

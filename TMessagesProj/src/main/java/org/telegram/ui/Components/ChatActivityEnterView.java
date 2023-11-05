@@ -134,6 +134,7 @@ import org.telegram.messenger.UserConfig;
 import org.telegram.messenger.UserObject;
 import org.telegram.messenger.Utilities;
 import org.telegram.messenger.VideoEditedInfo;
+import org.telegram.messenger.XiaomiUtilities;
 import org.telegram.messenger.browser.Browser;
 import org.telegram.messenger.camera.CameraController;
 import org.telegram.tgnet.ConnectionsManager;
@@ -4284,7 +4285,6 @@ public class ChatActivityEnterView extends BlurredFrameLayout implements Notific
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
             messageEditText.setFallbackLineSpacing(false);
         }
-        messageEditText.wrapCanvasToFixClipping = true;
         messageEditText.setDelegate(() -> {
             messageEditText.invalidateEffects();
             if (delegate != null) {
@@ -5914,7 +5914,11 @@ public class ChatActivityEnterView extends BlurredFrameLayout implements Notific
             editingMessageObject.editingMessageSearchWebPage = messageWebPageSearch;
             if (parentFragment != null && parentFragment.messagePreviewParams != null) {
                 if (parentFragment.foundWebPage instanceof TLRPC.TL_webPagePending) {
-                    editingMessageObject.editingMessageSearchWebPage = true;
+                    editingMessageObject.editingMessageSearchWebPage = false;
+                    if (editingMessageObject.type == MessageObject.TYPE_TEXT || editingMessageObject.type == MessageObject.TYPE_EMOJIS) {
+                        editingMessageObject.messageOwner.media = new TLRPC.TL_messageMediaEmpty();
+                        editingMessageObject.messageOwner.media.flags |= 512;
+                    }
                 } else if (parentFragment.messagePreviewParams.webpage != null) {
                     editingMessageObject.editingMessageSearchWebPage = false;
                     editingMessageObject.messageOwner.media = new TLRPC.TL_messageMediaWebPage();
@@ -5931,6 +5935,12 @@ public class ChatActivityEnterView extends BlurredFrameLayout implements Notific
                 if (parentFragment.messagePreviewParams.hasMedia && editingMessageObject.messageOwner.media instanceof TLRPC.TL_messageMediaWebPage) {
                     editingMessageObject.messageOwner.media.force_small_media = parentFragment.messagePreviewParams.webpageSmall;
                     editingMessageObject.messageOwner.media.force_large_media = !parentFragment.messagePreviewParams.webpageSmall;
+                }
+            } else {
+                editingMessageObject.editingMessageSearchWebPage = false;
+                if (editingMessageObject.type == MessageObject.TYPE_TEXT || editingMessageObject.type == MessageObject.TYPE_EMOJIS) {
+                    editingMessageObject.messageOwner.media = new TLRPC.TL_messageMediaEmpty();
+                    editingMessageObject.messageOwner.media.flags |= 512;
                 }
             }
             SendMessagesHelper.getInstance(currentAccount).editMessage(editingMessageObject, null, null, null, null, null, false, editingMessageObject.hasMediaSpoilers(), null);
@@ -6024,21 +6034,23 @@ public class ChatActivityEnterView extends BlurredFrameLayout implements Notific
                 SendMessagesHelper.SendMessageParams params = SendMessagesHelper.SendMessageParams.of(message[0].toString(), dialog_id, replyingMessageObject, replyToTopMsg, messageWebPage, messageWebPageSearch, entities, null, null, notify, scheduleDate, sendAnimationData, updateStickersOrder);
                 applyStoryToSendMessageParams(params);
                 params.invert_media = parentFragment != null && parentFragment.messagePreviewParams != null && parentFragment.messagePreviewParams.webpageTop;
-                if (messageWebPage != null) {
+                if (messageWebPage instanceof TLRPC.TL_webPagePending) {
+                    params.searchLinks = true;
+                    params.mediaWebPage = null;
+                } else if (messageWebPage != null) {
                     params.mediaWebPage = new TLRPC.TL_messageMediaWebPage();
                     params.mediaWebPage.webpage = messageWebPage;
                     params.mediaWebPage.force_large_media = parentFragment != null && parentFragment.messagePreviewParams != null && !parentFragment.messagePreviewParams.webpageSmall;
                     params.mediaWebPage.force_small_media = parentFragment != null && parentFragment.messagePreviewParams != null && parentFragment.messagePreviewParams.webpageSmall;
-
-                    if (parentFragment != null) {
-                        parentFragment.editingMessageObject = null;
-                        parentFragment.foundWebPage = null;
-                        if (parentFragment.messagePreviewParams != null) {
-                            parentFragment.messagePreviewParams.updateLink(currentAccount, null, "", null, null, null);
-                        }
-                        setWebPage(null, true);
-                        parentFragment.fallbackFieldPanel();
+                }
+                if (parentFragment != null) {
+                    parentFragment.editingMessageObject = null;
+                    parentFragment.foundWebPage = null;
+                    if (parentFragment.messagePreviewParams != null) {
+                        parentFragment.messagePreviewParams.updateLink(currentAccount, null, "", null, null, null);
                     }
+                    setWebPage(null, true);
+                    parentFragment.fallbackFieldPanel();
                 }
                 SendMessagesHelper.getInstance(currentAccount).sendMessage(params);
                 start = end + 1;
@@ -7709,14 +7721,13 @@ public class ChatActivityEnterView extends BlurredFrameLayout implements Notific
                                     span = new AnimatedEmojiSpan(emojiEntity.document_id, fontMetricsInt);
                                 }
                                 stringBuilder.setSpan(span, entity.offset, entity.offset + entity.length, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
-                            } else if (entity instanceof TLRPC.TL_messageEntityBlockquote) {
-                                QuoteSpan.putQuoteToEditable(stringBuilder, entity.offset, entity.offset + entity.length);
                             }
                         }
                     } catch (Exception e) {
                         FileLog.e(e);
                     }
                 }
+                QuoteSpan.mergeQuotes(stringBuilder, entities);
                 textToSetWithKeyboard = Emoji.replaceEmoji(new SpannableStringBuilder(stringBuilder), fontMetricsInt, false, null);
                 if (entities != null) {
                     try {
@@ -7726,13 +7737,6 @@ public class ChatActivityEnterView extends BlurredFrameLayout implements Notific
                                 if (!(textToSetWithKeyboard instanceof Spannable)) {
                                     textToSetWithKeyboard = new SpannableStringBuilder(textToSetWithKeyboard);
                                 }
-//                                CodeHighlighting.highlight((Spannable) textToSetWithKeyboard, entity.offset, entity.offset + entity.length, entity.language, 0, null, false);
-//                                ((Spannable) textToSetWithKeyboard).setSpan(
-//                                    new CodeHighlighting.Span(false, 0, null, entity.language, textToSetWithKeyboard.subSequence(entity.offset, entity.offset + entity.length).toString(), false, false, entity.offset, entity.offset + entity.length),
-//                                    entity.offset,
-//                                    entity.offset + entity.length,
-//                                    Spanned.SPAN_EXCLUSIVE_EXCLUSIVE
-//                                );
                                 ((SpannableStringBuilder) textToSetWithKeyboard).insert(entity.offset + entity.length, "```\n");
                                 ((SpannableStringBuilder) textToSetWithKeyboard).insert(entity.offset, "```"+(entity.language == null ? "" : entity.language)+"\n");
                             }
@@ -8592,12 +8596,7 @@ public class ChatActivityEnterView extends BlurredFrameLayout implements Notific
                     BotWebViewSheet webViewSheet = new BotWebViewSheet(getContext(), resourcesProvider);
                     webViewSheet.setParentActivity(parentActivity);
                     webViewSheet.requestWebView(currentAccount, messageObject.messageOwner.dialog_id, botId, button.text, button.url, button instanceof TLRPC.TL_keyboardButtonSimpleWebView ? BotWebViewSheet.TYPE_SIMPLE_WEB_VIEW_BUTTON : BotWebViewSheet.TYPE_WEB_VIEW_BUTTON, replyMessageObject != null ? replyMessageObject.messageOwner.id : 0, false);
-                    BaseFragment lastFragment = getLastFragment();
-                    if (lastFragment != null) {
-                        lastFragment.showDialog(webViewSheet);
-                    } else {
-                        webViewSheet.show();
-                    }
+                    webViewSheet.show();
                 }
             };
             if (SharedPrefsHelper.isWebViewConfirmShown(currentAccount, botId)) {

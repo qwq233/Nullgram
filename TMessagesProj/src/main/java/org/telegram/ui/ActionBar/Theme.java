@@ -3509,25 +3509,6 @@ public class Theme {
     public static int[] keys_avatar_background2 = {key_avatar_background2Red, key_avatar_background2Orange, key_avatar_background2Violet, key_avatar_background2Green, key_avatar_background2Cyan, key_avatar_background2Blue, key_avatar_background2Pink};
     public static int[] keys_avatar_nameInMessage = {key_avatar_nameInMessageRed, key_avatar_nameInMessageOrange, key_avatar_nameInMessageViolet, key_avatar_nameInMessageGreen, key_avatar_nameInMessageCyan, key_avatar_nameInMessageBlue, key_avatar_nameInMessagePink};
 
-    public static final int key_avatar_composite_nameInMessageRed = colorsCount++;
-    public static final int key_avatar_composite_nameInMessageOrange = colorsCount++;
-    public static final int key_avatar_composite_nameInMessageViolet = colorsCount++;
-    public static final int key_avatar_composite_nameInMessageGreen = colorsCount++;
-    public static final int key_avatar_composite_nameInMessageCyan = colorsCount++;
-    public static final int key_avatar_composite_nameInMessageBlue = colorsCount++;
-    public static final int key_avatar_composite_nameInMessagePink = colorsCount++;
-
-    public static final int key_avatar_composite_nameInMessageRed2 = colorsCount++;
-    public static final int key_avatar_composite_nameInMessageOrange2 = colorsCount++;
-    public static final int key_avatar_composite_nameInMessageViolet2 = colorsCount++;
-    public static final int key_avatar_composite_nameInMessageGreen2 = colorsCount++;
-    public static final int key_avatar_composite_nameInMessageCyan2 = colorsCount++;
-    public static final int key_avatar_composite_nameInMessageBlue2 = colorsCount++;
-    public static final int key_avatar_composite_nameInMessagePink2 = colorsCount++;
-
-    public static int[] keys_avatar_composite_nameInMessage = {key_avatar_composite_nameInMessageRed, key_avatar_composite_nameInMessageOrange, key_avatar_composite_nameInMessageViolet, key_avatar_composite_nameInMessageGreen, key_avatar_composite_nameInMessageCyan, key_avatar_composite_nameInMessageBlue, key_avatar_composite_nameInMessagePink};
-    public static int[] keys_avatar_composite_nameInMessage2 = {key_avatar_composite_nameInMessageRed2, key_avatar_composite_nameInMessageOrange2, key_avatar_composite_nameInMessageViolet2, key_avatar_composite_nameInMessageGreen2, key_avatar_composite_nameInMessageCyan2, key_avatar_composite_nameInMessageBlue2, key_avatar_composite_nameInMessagePink2};
-
     public static final int key_actionBarDefault = colorsCount++;
     public static final int key_actionBarDefaultSelector = colorsCount++;
     public static final int key_actionBarWhiteSelector = colorsCount++;
@@ -4433,12 +4414,6 @@ public class Theme {
         }
         for (int i = 0; i < keys_avatar_nameInMessage.length; i++) {
             themeAccentExclusionKeys.add(keys_avatar_nameInMessage[i]);
-        }
-        for (int i = 0; i < keys_avatar_composite_nameInMessage.length; i++) {
-            themeAccentExclusionKeys.add(keys_avatar_composite_nameInMessage[i]);
-        }
-        for (int i = 0; i < keys_avatar_composite_nameInMessage2.length; i++) {
-            themeAccentExclusionKeys.add(keys_avatar_composite_nameInMessage2[i]);
         }
         for (int i = 0; i < keys_colors.length; i++) {
             themeAccentExclusionKeys.add(keys_colors[i]);
@@ -8775,8 +8750,8 @@ public class Theme {
             chat_attachButtonDrawables[5] = new RLottieDrawable(R.raw.attach_poll, "attach_poll", AndroidUtilities.dp(26), AndroidUtilities.dp(26));
             chat_attachEmptyDrawable = resources.getDrawable(R.drawable.nophotos3);
 
-            chat_shareIconDrawable = resources.getDrawable(R.drawable.filled_share).mutate();
-            chat_replyIconDrawable = resources.getDrawable(R.drawable.filled_reply);
+            chat_shareIconDrawable = resources.getDrawable(R.drawable.filled_button_share).mutate();
+            chat_replyIconDrawable = resources.getDrawable(R.drawable.filled_button_reply);
             chat_goIconDrawable = resources.getDrawable(R.drawable.message_arrow);
 
             int rad = AndroidUtilities.dp(2);

@@ -59,7 +59,7 @@ public class StickerSizePreviewMessagesCell extends LinearLayout {
     private final Drawable shadowDrawable;
     private final INavigationLayout parentLayout;
 
-    public StickerSizePreviewMessagesCell(Context context, INavigationLayout layout) {
+    public StickerSizePreviewMessagesCell(Context context, INavigationLayout layout, Theme.ResourcesProvider resourcesProvider) {
         super(context);
 
         parentLayout = layout;
@@ -68,7 +68,7 @@ public class StickerSizePreviewMessagesCell extends LinearLayout {
         setOrientation(LinearLayout.VERTICAL);
         setPadding(0, AndroidUtilities.dp(11), 0, AndroidUtilities.dp(11));
 
-        shadowDrawable = Theme.getThemedDrawable(context, R.drawable.greydivider_bottom, Theme.key_windowBackgroundGrayShadow);
+        shadowDrawable = Theme.getThemedDrawable(context, R.drawable.greydivider_bottom, Theme.getColor(Theme.key_windowBackgroundGrayShadow, resourcesProvider));
 
         int date = (int) (System.currentTimeMillis() / 1000) - 60 * 60;
         TLRPC.TL_message message = new TLRPC.TL_message();
@@ -109,7 +109,7 @@ public class StickerSizePreviewMessagesCell extends LinearLayout {
         message.out = false;
         message.peer_id = new TLRPC.TL_peerUser();
         message.peer_id.user_id = 1;
-        messageObjects[0].customReplyName = "James Clef";
+        messageObjects[0].customReplyName = "FiveYellowMice";
         messageObjects[0].replyMessageObject = new MessageObject(UserConfig.selectedAccount, message, true, false);
 
         message = new TLRPC.TL_message();
@@ -117,18 +117,19 @@ public class StickerSizePreviewMessagesCell extends LinearLayout {
         message.date = date + 1270;
         message.dialog_id = -1;
         message.flags = 259;
-        message.id = 2;
+        message.id = 3;
+        message.reply_to = new TLRPC.TL_messageReplyHeader();
+        message.reply_to.flags |= 16;
+        message.reply_to.reply_to_msg_id = 2;
         message.media = new TLRPC.TL_messageMediaEmpty();
         message.out = false;
         message.peer_id = new TLRPC.TL_peerUser();
         message.peer_id.user_id = 1;
         messageObjects[1] = new MessageObject(UserConfig.selectedAccount, message, true, false);
-        TLRPC.User currentUser = MessagesController.getInstance(UserConfig.selectedAccount).getUser(UserConfig.getInstance(UserConfig.selectedAccount).getClientUserId());
-        messageObjects[1].customReplyName = ContactsController.formatName(currentUser.first_name, currentUser.last_name);
         messageObjects[1].replyMessageObject = messageObjects[0];
 
         for (int a = 0; a < cells.length; a++) {
-            cells[a] = new ChatMessageCell(context);
+            cells[a] = new ChatMessageCell(context, false, null, resourcesProvider);
             cells[a].setDelegate(new ChatMessageCell.ChatMessageCellDelegate() {
             });
             cells[a].isChat = false;
@@ -249,4 +250,3 @@ public class StickerSizePreviewMessagesCell extends LinearLayout {
         return false;
     }
 }
-
