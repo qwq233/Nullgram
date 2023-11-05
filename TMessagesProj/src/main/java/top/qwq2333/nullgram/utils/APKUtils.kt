@@ -180,7 +180,11 @@ object APKUtils {
         val filter = IntentFilter(Intent.ACTION_PACKAGE_ADDED)
         filter.addDataScheme("package")
         context.registerReceiver(receiver, filter)
-        context.registerReceiver(receiver, IntentFilter(APKUtils::class.java.name))
+        if (Build.VERSION_CODES.TIRAMISU <= Build.VERSION.SDK_INT) {
+            context.registerReceiver(receiver, IntentFilter(APKUtils::class.java.name), Context.RECEIVER_NOT_EXPORTED)
+        } else {
+            context.registerReceiver(receiver, IntentFilter(APKUtils::class.java.name))
+        }
         return receiver
     }
 
