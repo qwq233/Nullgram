@@ -11,12 +11,10 @@ package org.telegram.ui.Components;
 import android.graphics.Paint;
 import android.graphics.Typeface;
 import android.text.TextPaint;
-import android.text.TextUtils;
 import android.text.style.MetricAffectingSpan;
 
 import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.SharedConfig;
-import org.telegram.ui.ActionBar.Theme;
 
 public class URLSpanMono extends MetricAffectingSpan {
 
@@ -38,19 +36,8 @@ public class URLSpanMono extends MetricAffectingSpan {
         style = run;
     }
 
-    public String getTextToCopy() {
-        return currentMessage.subSequence(currentStart, currentEnd).toString();
-    }
-
     public void copyToClipboard() {
         AndroidUtilities.addToClipboard(currentMessage.subSequence(currentStart, currentEnd).toString());
-    }
-
-    public String getLanguage() {
-        if (style == null || style.urlEntity == null || TextUtils.isEmpty(style.urlEntity.language)) {
-            return null;
-        }
-        return style.urlEntity.language;
     }
 
     @Override
@@ -69,10 +56,8 @@ public class URLSpanMono extends MetricAffectingSpan {
         p.setTextSize(AndroidUtilities.dp(SharedConfig.fontSize - 1));
         if (currentType == 2) {
             p.setColor(0xffffffff);
-        } else if (currentType == 1) {
-            p.setColor(Theme.getColor(Theme.key_chat_messageTextOut));
         } else {
-            p.setColor(Theme.getColor(Theme.key_chat_messageTextIn));
+            p.setColor(p.getColor());
         }
         if (style != null) {
             style.applyStyle(p);
