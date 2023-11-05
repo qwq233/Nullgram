@@ -309,4 +309,7 @@
     <string name="Official">Official</string>
     <string name="Before">Before...</string>
     <string name="Custom">Custom</string>
+    <string name="MonoCode">Code</string>
+    <string name="CreateCode">Create Code</string>
+    <string name="CreateCodeLanguage">Language</string>
 </resources>
