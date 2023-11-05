@@ -142,7 +142,7 @@ object StringUtils {
                 if (char.isEmpty()) { // empty processing list
                     panguEntities.add(it.apply {
                         it.offset = start
-                        it.length = length.coerceAtMost(start + panguText.lastIndex)
+                        it.length = length.coerceAtMost(panguText.lastIndex)
                     })
                     break
                 }
