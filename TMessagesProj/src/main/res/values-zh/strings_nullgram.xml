@@ -223,7 +223,7 @@
     <string name="WsEnableTls">启用 TLS</string>
     <string name="WsLocalProxy">本地代理</string>
     <string name="WsEnableDoh">启用 DoH</string>
-    <string name="WsProvider">翻译源</string>
+    <string name="WsProvider">提供者</string>
     <string name="PublicProxy">内置公共代理</string>
     <string name="SwitchBackend">切换后端</string>
     <string name="UpdateInstalling">安装更新中...</string>
