@@ -119,7 +119,7 @@ object StringUtils {
         entities.forEach {
 
             val char = mutableListOf<Char>().also { list ->
-                for (i in it.offset until (it.offset + it.length).coerceAtMost(text.length)) {
+                for (i in it.offset until (it.offset + it.length).coerceAtMost(Int.MIN_VALUE)) {
                     list.add(text[i])
                 }
             }.also { list ->
