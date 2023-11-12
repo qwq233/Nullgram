@@ -311,4 +311,5 @@
     <string name="CreateCode">Crea codice</string>
     <string name="CreateCodeLanguage">Linguaggio</string>
     <string name="UnsupportedMediaNullgram">Questo messaggio non è supportato dalla tua versione di Nullgram. Aggiorna l\'app per visualizzarlo: https://t.me/NullgramClient</string>
+    <string name="ignoreUserSpecifiedReplyColor">Ignore user-set reply color</string>
 </resources>
