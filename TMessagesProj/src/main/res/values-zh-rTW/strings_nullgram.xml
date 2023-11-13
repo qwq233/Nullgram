@@ -311,5 +311,5 @@
     <string name="CreateCode">創建代碼</string>
     <string name="CreateCodeLanguage">語言</string>
     <string name="UnsupportedMediaNullgram">您的 Nullgram 版本不支援此訊息。請更新應用程式以查看：https://t.me/NullgramClient</string>
-    <string name="ignoreUserSpecifiedReplyColor">Ignore user-set reply color</string>
+    <string name="ignoreUserSpecifiedReplyColor">忽略用戶設定的回覆顏色</string>
 </resources>
