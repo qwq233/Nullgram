@@ -8491,10 +8491,12 @@ public class ChatMessageCell extends BaseCell implements SeekBar.SeekBarDelegate
         }
         if (isBlockedUserMessage()) {
             totalHeight = 0;
-            
-            avatarDrawable.setVisible(false, true);
-            avatarImage.setVisible(false, false);
-            getAvatarImage().setVisible(false, false);
+            if (avatarDrawable != null)
+                avatarDrawable.setVisible(false, true);
+            if (avatarImage != null)
+                avatarImage.setVisible(false, false);
+            if (getAvatarImage() != null)
+                getAvatarImage().setVisible(false, false);
         }
         if (transcribeButton != null) {
             transcribeButton.setOpen(currentMessageObject.messageOwner != null && currentMessageObject.messageOwner.voiceTranscriptionOpen && currentMessageObject.messageOwner.voiceTranscriptionFinal && TranscribeButton.isVideoTranscriptionOpen(currentMessageObject), !messageIdChanged);
