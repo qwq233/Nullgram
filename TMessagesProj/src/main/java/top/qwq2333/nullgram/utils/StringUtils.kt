@@ -112,42 +112,30 @@ object StringUtils {
         if (entities.isNullOrEmpty()) return Pair(pangu.spacingText(text), entities)
 
         val panguText = pangu.spacingText(text)
-        val panguEntities = arrayListOf<TLRPC.MessageEntity>()
 
         if (panguText.length == text.length) return Pair(panguText, entities) // processed or unnecessary
 
-        entities.forEach {
+        var skip = 0
+        for (i in 0 until text.lastIndex) {
+            if (i + skip >= panguText.length) break
+            if (text[i] == panguText[i + skip]) continue
 
-            val char = mutableListOf<Char>().also { list ->
-                for (i in it.offset until (it.offset + it.length).coerceAtMost(text.length)) {
-                    list.add(text[i])
-                }
-            }.also { list ->
-                if (list.isEmpty()) return@forEach
+            entities.forEach {
+                if (it.offset >= i + skip) { // text is after this entity
+                    it.offset += 1
+                } else if (it.offset + it.length >= i + skip) { // text is in this entity
+                    it.length += 1
+                } // text is before this entity
             }
-
-            var length = 0
-            var start = it.offset
-            var matched = false // matched first character
-            for (i in it.offset until panguText.length) {
-                if (start > i) continue
-                if (panguText[i] == char[0]) { // match
-                    char.removeAt(0)
-                    if (!matched) {
-                        start = i
-                        matched = true
-                    }
-                }
-                if (matched) length++
-                if (char.isEmpty()) { // empty processing list
-                    panguEntities.add(it.apply {
-                        it.offset = start
-                        it.length = length.coerceAtMost(panguText.lastIndex)
-                    })
-                    break
-                }
-            }
+            skip += 1
         }
-        return Pair(panguText, panguEntities)
+
+        // ensure offset and length is valid
+        entities.forEach {
+            it.offset = it.offset.coerceAtLeast(0).coerceAtMost(panguText.length)
+            it.length = it.length.coerceAtLeast(0).coerceAtMost(panguText.length - it.offset)
+        }
+
+        return Pair(panguText, entities)
     }
 }
