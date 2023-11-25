@@ -157,7 +157,6 @@ import org.telegram.messenger.SendMessagesHelper;
 import org.telegram.messenger.SendMessagesHelper.SendMessageParams;
 import org.telegram.messenger.SharedConfig;
 import org.telegram.messenger.SvgHelper;
-import org.telegram.messenger.TranslateController;
 import org.telegram.messenger.UserConfig;
 import org.telegram.messenger.UserObject;
 import org.telegram.messenger.Utilities;
@@ -31491,40 +31490,6 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
         @Override
         public void didPressUrl(ChatMessageCell cell, final CharacterStyle url, boolean longPress) {
             didPressMessageUrl(url, longPress, cell.getMessageObject(), cell);
-        }
-
-        @Override
-        public void didPressCode(ChatMessageCell cell, CharSequence code, String language, boolean longPress) {
-            if (code == null) {
-                return;
-            }
-            SpannableStringBuilder text = new SpannableStringBuilder(code);
-            text.setSpan(new CodeHighlighting.Span(false, 0, null, language, code.toString()), 0, text.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
-            if (!longPress) {
-                AndroidUtilities.addToClipboard(text);
-                createUndoView();
-                undoView.showWithAction(0, UndoView.ACTION_TEXT_COPIED, null);
-            } else {
-                BottomSheet.Builder builder = new BottomSheet.Builder(getParentActivity(), false, themeDelegate);
-                if (!TextUtils.isEmpty(language)) builder.setTitle(language);
-                builder.setItems(new CharSequence[]{LocaleController.getString("ShareFile", R.string.ShareFile), LocaleController.getString("Copy", R.string.Copy)}, (dialog, which) -> {
-                    if (which == 1) {
-                        AndroidUtilities.addToClipboard(text);
-                        UndoView undoView = getUndoView();
-                        if (undoView != null) {
-                            undoView.showWithAction(0, UndoView.ACTION_TEXT_COPIED, null);
-                        }
-                    } else {
-                        Intent shareIntent = new Intent(Intent.ACTION_SEND);
-                        shareIntent.setType("text/plain");
-                        shareIntent.putExtra(Intent.EXTRA_TEXT, text);
-                        Intent chooserIntent = Intent.createChooser(shareIntent, LocaleController.getString("ShareFile", R.string.ShareFile));
-                        chooserIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                        ApplicationLoader.applicationContext.startActivity(chooserIntent);
-                    }
-                });
-                showDialog(builder.create());
-            }
         }
 
         @Override

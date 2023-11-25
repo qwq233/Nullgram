@@ -691,9 +691,8 @@ public class MessageObject {
 
         public boolean code;
         public boolean quote;
-        public String language;
-        public Drawable selectorDrawable;
 
+        public String language;
         public Text languageLayout;
         public int languageHeight; // included in padTop
 
@@ -6534,11 +6533,11 @@ public class MessageObject {
             try {
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
                     StaticLayout.Builder builder =
-                            StaticLayout.Builder.obtain(text, 0, text.length(), textPaint, width)
-                                    .setLineSpacing(lineAdd, lineSpacing)
-                                    .setBreakStrategy(StaticLayout.BREAK_STRATEGY_HIGH_QUALITY)
-                                    .setHyphenationFrequency(StaticLayout.HYPHENATION_FREQUENCY_NONE)
-                                    .setAlignment(align);
+                        StaticLayout.Builder.obtain(text, 0, text.length(), textPaint, width)
+                            .setLineSpacing(lineAdd, lineSpacing)
+                            .setBreakStrategy(StaticLayout.BREAK_STRATEGY_HIGH_QUALITY)
+                            .setHyphenationFrequency(StaticLayout.HYPHENATION_FREQUENCY_NONE)
+                            .setAlignment(align);
                     textLayout = builder.build();
                 } else {
                     textLayout = new StaticLayout(text, textPaint, width, align, lineSpacing, lineAdd, false);
@@ -6603,7 +6602,6 @@ public class MessageObject {
 
                 block.code = range.code;
                 block.quote = range.quote;
-                block.language = range.language;
 
                 block.first = a == 0;
                 block.last = a == textRanges.size() - 1;
@@ -6658,11 +6656,11 @@ public class MessageObject {
                         }
                         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
                             StaticLayout.Builder builder =
-                                    StaticLayout.Builder.obtain(sb, 0, text.length(), layoutPaint, blockMaxWidth)
-                                            .setLineSpacing(lineAdd, lineSpacing)
-                                            .setBreakStrategy(StaticLayout.BREAK_STRATEGY_HIGH_QUALITY)
-                                            .setHyphenationFrequency(StaticLayout.HYPHENATION_FREQUENCY_NONE)
-                                            .setAlignment(align);
+                                StaticLayout.Builder.obtain(sb, 0, text.length(), layoutPaint, blockMaxWidth)
+                                    .setLineSpacing(lineAdd, lineSpacing)
+                                    .setBreakStrategy(StaticLayout.BREAK_STRATEGY_HIGH_QUALITY)
+                                    .setHyphenationFrequency(StaticLayout.HYPHENATION_FREQUENCY_NONE)
+                                    .setAlignment(align);
                             textLayout = builder.build();
                         } else {
                             textLayout = new StaticLayout(sb, layoutPaint, blockMaxWidth, align, lineSpacing, lineAdd, false);
