@@ -69,6 +69,11 @@ public class FileLog {
         return;
     }
 
+    private static boolean gsonDisabled;
+    public static void disableGson(boolean disable) {
+        gsonDisabled = disable;
+    }
+
     private static void checkGson() {
     }
 
