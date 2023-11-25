@@ -33,7 +33,6 @@ import android.text.TextUtils;
 import android.text.style.CharacterStyle;
 import android.text.style.ClickableSpan;
 import android.text.style.URLSpan;
-import android.util.Log;
 import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.HapticFeedbackConstants;
@@ -2524,7 +2523,7 @@ public class PeerStoriesView extends SizeNotifierFrameLayout implements Notifica
             headerView.backupImageView.getImageReceiver().setForUserOrChat(chat, avatarDrawable);
             headerView.titleView.setText(chat.title);
 
-            if (chat != null && chat.verified) {
+            if (chat != null && chat.verifiedExtended()) {
                 Drawable verifyDrawable = ContextCompat.getDrawable(getContext(), R.drawable.verified_profile).mutate();
                 verifyDrawable.setAlpha(255);
                 CombinedDrawable drawable = new CombinedDrawable(verifyDrawable, null);
