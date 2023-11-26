@@ -2,49 +2,29 @@ package org.telegram.messenger;
 
 import static org.telegram.messenger.AndroidUtilities.dp;
 
-import android.content.Context;
-import android.graphics.Canvas;
-import android.graphics.Paint;
 import android.graphics.Typeface;
-import android.text.Editable;
-import android.text.Layout;
 import android.text.Spannable;
 import android.text.SpannableString;
-import android.text.SpannableStringBuilder;
 import android.text.Spanned;
-import android.text.SpannedString;
 import android.text.TextPaint;
 import android.text.TextUtils;
 import android.text.style.CharacterStyle;
-import android.text.style.LeadingMarginSpan;
-import android.text.style.LineHeightSpan;
-import android.text.style.MetricAffectingSpan;
-import android.util.Log;
 
-import androidx.annotation.NonNull;
-
-import org.telegram.tgnet.AbstractSerializedData;
-import org.telegram.tgnet.SerializedData;
 import org.telegram.ui.ActionBar.Theme;
 import org.telegram.ui.Components.TextStyleSpan;
 
 import java.io.BufferedInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Array;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.LinkedList;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.zip.GZIPInputStream;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipInputStream;
 
 public class CodeHighlighting {
 
@@ -214,7 +194,7 @@ public class CodeHighlighting {
             long S = System.currentTimeMillis();
             final StringToken[][] tokens = new StringToken[1][];
             try {
-                tokens[0] = tokenize(text.subSequence(start, end).toString(), compiledPatterns == null ? null : compiledPatterns.get(lng.toLowerCase().replaceAll("\\W", ""))).toArray();
+                tokens[0] = tokenize(text.subSequence(start, end).toString(), compiledPatterns == null ? null : compiledPatterns.get(lng.toLowerCase().replaceAll("\\W", "")), 0).toArray();
             } catch (Exception e) {
                 FileLog.e(e);
             }
