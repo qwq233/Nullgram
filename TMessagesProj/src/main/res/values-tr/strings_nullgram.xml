@@ -210,7 +210,7 @@
     <string name="SwitchToPersonalAccount">Kişisel hesaba geç</string>
     <string name="openArchiveOnPull">Ankette arşivi aç</string>
     <string name="hideAllTab">Tüm sohbetler sekmesini gizle kral</string>
-    <string name="ignoreMutedCount">Bu uygulama Erdem tarafından yazıldı</string>
+    <string name="ignoreMutedCount">Sekmedeki Sessiz Sayımı Yok say</string>
     <string name="disableSharePhoneWithContactByDefault">Kişi Eklediğinizde Telefon Numarasını Paylaşmayın</string>
     <string name="disableStickersAutoReorder">Çıkartma paketlerinin otomatik olarak yeniden sıralanmasını devre dışı bırak</string>
     <string name="Ban">Yasakla</string>
@@ -260,9 +260,9 @@
     <string name="AutoTranslate">Otomatik Çevir</string>
     <string name="TranslatorShowOriginal">Orjinal yazı ile</string>
     <string name="NoTranslatorAppInstalled">Çeviri amacını gerçekleştirebilecek uygulamalarınız yok. Devam etmek için lütfen bir tane yükleyin</string>
-    <string name="UndoTranslate">Çeviriyi geri al knk</string>
+    <string name="UndoTranslate">Klasik mesaj</string>
     <string name="TranslateFailed">Çeviri sunucu hatası</string>
-    <string name="SensitiveDisableFiltering">Disable sensitive content filtering</string>
+    <string name="SensitiveDisableFiltering">Hassas içerik filtrelemeyi devre dışı bırakın</string>
     <string name="SensitiveAbout">Display sensitive media in public channels on all your devices.</string>
     <string name="InstallProhibitedPlay">Installing app from apk file in chat is not available in the Play Store version of the app.\nPlease save it manually and install from File Manager.</string>
     <string name="TranslatorTypeInMessage">In Message</string>
@@ -303,7 +303,7 @@
     <string name="HideStories">Hide Stories</string>
     <string name="storyStealthMode">Story Stealth mode</string>
     <string name="OneMoreThing">One More Thing</string>
-    <string name="NotOriginalNullgramInfo">It seems that you\'re using a fork of Nullgram.\nDo you also want to follow Nullgram\'s Channel?</string>
+    <string name="NotOriginalNullgramInfo">Görünüşe göre Nullgram\'ın bir çatalını kullanıyorsunuz.\nAyrıca Nullgram\'ın Kanalını da takip etmek istiyor musunuz?</string>
     <string name="Official">Official</string>
     <string name="Before">Before...</string>
     <string name="Custom">Custom</string>
