@@ -237,7 +237,7 @@
     <string name="ProviderGoogleTranslate">Google Çeviri</string>
     <string name="ProviderYandexTranslate">Yandex Çeviri</string>
     <string name="ProviderTelegramTranslate">TELERESMİ Çeviri</string>
-    <string name="ProviderMicrosoftTranslate">Mikrosoft çevirmen</string>
+    <string name="ProviderMicrosoftTranslate">Microsoft Çevirmen</string>
     <string name="ProviderDeepLTranslate">DeepL çeviri</string>
     <string name="ProviderLingoTranslate">Lingo Çeviri</string>
     <string name="TranslationProvider">Çeviri yapan motor</string>
@@ -266,7 +266,7 @@
     <string name="SensitiveAbout">Display sensitive media in public channels on all your devices.</string>
     <string name="InstallProhibitedPlay">Installing app from apk file in chat is not available in the Play Store version of the app.\nPlease save it manually and install from File Manager.</string>
     <string name="TranslatorTypeInMessage">In Message</string>
-    <string name="SmsDisabled">Login via sms is currently disabled for any 3rd TELEOFFICIAL client due to TELEOFFICIAL\'s policy.\nWe apologize for any inconvenience caused.</string>
+    <string name="SmsDisabled">TELEGRAMOFFICIAL\'in politikası nedeniyle herhangi bir 3. TELEGRAMOFFICIAL müşterisi için sms yoluyla giriş şu anda devre dışıdır.\nVerdikleri rahatsızlıktan dolayı özür dilesinler.</string>
     <string name="DevicePerformanceAuto">Default</string>
     <string name="DevicePerformanceLow">Low</string>
     <string name="DevicePerformanceMedium">Medium</string>
@@ -275,7 +275,7 @@
     <string name="OverrideDevicePerformanceDesc">Override TELEOFFICIAL\'s device performance detector.\nLow mode will reduce animation effects and other stuff as much as possible, which may help to save power in the foreground.\nHigh mode may greatly increase power consumption and performance burden and cause stuttering.</string>
     <string name="JumpToBeginning">Jump To Beginning</string>
     <string name="DisableQuickSendMediaBottom">Disable Quick Send Media Bottom</string>
-    <string name="ProviderBaiduTranslate">Baidu Translator</string>
+    <string name="ProviderBaiduTranslate">Baidu çevirmen</string>
     <string name="alwaysSendWithoutSound">Always Send Without Sound</string>
     <string name="EditEnableMarkdown">Enable Markdown</string>
     <string name="EditDisableMarkdown">Disable Markdown</string>
@@ -286,7 +286,7 @@
     <string name="MarkdownAbout2">Edit text in messages using markdown: ^1**bold**^1, ^2__italic__^2, ^3~~strikethrough~~^3, ^4`monospace`^4, ^5||spoiler||^5.</string>
     <string name="MarkdownDisableByDefault">Disable by default</string>
     <string name="DatacenterStatusShort">Datacenter</string>
-    <string name="RegistrationDate">Registration date</string>
+    <string name="RegistrationDate">Kayıt tarihi</string>
     <string name="RegistrationDateNewer">Newer than %s</string>
     <string name="RegistrationDateOlder">Older than %s</string>
     <string name="RegistrationDateApproximately">Approximately %s</string>
