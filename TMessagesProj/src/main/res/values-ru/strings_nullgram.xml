@@ -26,7 +26,7 @@
     <string name="InvalidAccessToken">Неверный токен доступа</string>
     <string name="QRLoginTitle">Вход через QR-код</string>
     <string name="QRLoginMessage">Отсканируйте QR-код с помощью другого устройства для входа.</string>
-    <string name="NullgramVersion">Nullgram %1$s\nОснован на TELEOFFICIAL %2$s</string>
+    <string name="NullgramVersion">Nullgram %1$s\nОснован на Telegram %2$s</string>
     <string name="RestrictionReason">Причина ограничения</string>
     <string name="showBotAPIID">Показать API ID бота</string>
     <string name="hideGroupSticker">Скрыть стикеры группы</string>
@@ -308,4 +308,9 @@
     <string name="Official">Official</string>
     <string name="Before">Before...</string>
     <string name="Custom">Custom</string>
+    <string name="MonoCode">Code</string>
+    <string name="CreateCode">Create Code</string>
+    <string name="CreateCodeLanguage">Language</string>
+    <string name="UnsupportedMediaNullgram">This message is not supported on your version of Nullgram. Update the app to view: https://t.me/NullgramClient</string>
+    <string name="ignoreUserSpecifiedReplyColor">Ignore user-set reply color</string>
 </resources>

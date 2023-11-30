@@ -223,7 +223,7 @@
     <string name="WsEnableTls">启用 TLS</string>
     <string name="WsLocalProxy">本地代理</string>
     <string name="WsEnableDoh">启用 DoH</string>
-    <string name="WsProvider">翻译源</string>
+    <string name="WsProvider">提供者</string>
     <string name="PublicProxy">内置公共代理</string>
     <string name="SwitchBackend">切换后端</string>
     <string name="UpdateInstalling">安装更新中...</string>
@@ -307,4 +307,9 @@
     <string name="Official">Official</string>
     <string name="Before">Before...</string>
     <string name="Custom">Custom</string>
+    <string name="MonoCode">Code</string>
+    <string name="CreateCode">Create Code</string>
+    <string name="CreateCodeLanguage">Language</string>
+    <string name="UnsupportedMediaNullgram">This message is not supported on your version of Nullgram. Update the app to view: https://t.me/NullgramClient</string>
+    <string name="ignoreUserSpecifiedReplyColor">Ignore user-set reply color</string>
 </resources>

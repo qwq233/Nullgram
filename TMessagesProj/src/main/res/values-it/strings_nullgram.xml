@@ -211,7 +211,7 @@
     <string name="openArchiveOnPull">Apri archivio su pull</string>
     <string name="hideAllTab">Nascondi scheda \"Tutte le chat\"</string>
     <string name="ignoreMutedCount">Ignora chat silenziate nella conta</string>
-    <string name="disableSharePhoneWithContactByDefault">No Share Phone Number When Add Contact</string>
+    <string name="disableSharePhoneWithContactByDefault">Non condividere numero su aggiunta contatto</string>
     <string name="disableStickersAutoReorder">Disattiva autoriordino stickerpack</string>
     <string name="Ban">Ban</string>
     <string name="autoDisableBuiltInProxy">Disattiva automaticamente proxy integrato</string>
@@ -304,7 +304,12 @@
     <string name="storyStealthMode">Modalità Stealth delle storie</string>
     <string name="OneMoreThing">Un\'ultima cosa</string>
     <string name="NotOriginalNullgramInfo">Sembra che tu stia usando un fork di Nullgram.\nVuoi anche seguire il canale di Nullgram?</string>
-    <string name="Official">Official</string>
-    <string name="Before">Before...</string>
+    <string name="Official">Ufficiale</string>
+    <string name="Before">Prima...</string>
     <string name="Custom">Custom</string>
+    <string name="MonoCode">Codice</string>
+    <string name="CreateCode">Crea codice</string>
+    <string name="CreateCodeLanguage">Linguaggio</string>
+    <string name="UnsupportedMediaNullgram">Questo messaggio non è supportato dalla tua versione di Nullgram. Aggiorna l\'app per visualizzarlo: https://t.me/NullgramClient</string>
+    <string name="ignoreUserSpecifiedReplyColor">Ignore user-set reply color</string>
 </resources>

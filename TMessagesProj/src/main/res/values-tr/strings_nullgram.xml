@@ -26,7 +26,7 @@
     <string name="InvalidAccessToken">Erişim anahtarı geçersiz</string>
     <string name="QRLoginTitle">QR Girişi</string>
     <string name="QRLoginMessage">Başka bir cihazda oturum açmak için QR Codunuzu tarayın.</string>
-    <string name="NullgramVersion">Nullgram %1$s\TELEOFFICIAL\'a Dayalı %2$s</string>
+    <string name="NullgramVersion">Nullgram %1$s\nTelegram\'a Dayalı %2$s</string>
     <string name="RestrictionReason">Kısıtlama nedeni</string>
     <string name="showBotAPIID">Bot API Kimliğini Göster</string>
     <string name="hideGroupSticker">Grup Stickerlarını Gizle</string>
@@ -210,7 +210,7 @@
     <string name="SwitchToPersonalAccount">Kişisel hesaba geç</string>
     <string name="openArchiveOnPull">Ankette arşivi aç</string>
     <string name="hideAllTab">Tüm sohbetler sekmesini gizle kral</string>
-    <string name="ignoreMutedCount">Bu uygulama Erdem tarafından yazıldı</string>
+    <string name="ignoreMutedCount">Sekmedeki Sessiz Sayımı Yok say</string>
     <string name="disableSharePhoneWithContactByDefault">Kişi Eklediğinizde Telefon Numarasını Paylaşmayın</string>
     <string name="disableStickersAutoReorder">Çıkartma paketlerinin otomatik olarak yeniden sıralanmasını devre dışı bırak</string>
     <string name="Ban">Yasakla</string>
@@ -237,7 +237,7 @@
     <string name="ProviderGoogleTranslate">Google Çeviri</string>
     <string name="ProviderYandexTranslate">Yandex Çeviri</string>
     <string name="ProviderTelegramTranslate">TELERESMİ Çeviri</string>
-    <string name="ProviderMicrosoftTranslate">Mikrosoft çevirmen</string>
+    <string name="ProviderMicrosoftTranslate">Microsoft Çevirmen</string>
     <string name="ProviderDeepLTranslate">DeepL çeviri</string>
     <string name="ProviderLingoTranslate">Lingo Çeviri</string>
     <string name="TranslationProvider">Çeviri yapan motor</string>
@@ -260,13 +260,13 @@
     <string name="AutoTranslate">Otomatik Çevir</string>
     <string name="TranslatorShowOriginal">Orjinal yazı ile</string>
     <string name="NoTranslatorAppInstalled">Çeviri amacını gerçekleştirebilecek uygulamalarınız yok. Devam etmek için lütfen bir tane yükleyin</string>
-    <string name="UndoTranslate">Çeviriyi geri al knk</string>
+    <string name="UndoTranslate">Klasik mesaj</string>
     <string name="TranslateFailed">Çeviri sunucu hatası</string>
-    <string name="SensitiveDisableFiltering">Disable sensitive content filtering</string>
+    <string name="SensitiveDisableFiltering">Hassas içerik filtrelemeyi devre dışı bırakın</string>
     <string name="SensitiveAbout">Display sensitive media in public channels on all your devices.</string>
     <string name="InstallProhibitedPlay">Installing app from apk file in chat is not available in the Play Store version of the app.\nPlease save it manually and install from File Manager.</string>
     <string name="TranslatorTypeInMessage">In Message</string>
-    <string name="SmsDisabled">Login via sms is currently disabled for any 3rd TELEOFFICIAL client due to TELEOFFICIAL\'s policy.\nWe apologize for any inconvenience caused.</string>
+    <string name="SmsDisabled">TELEGRAMOFFICIAL\'in politikası nedeniyle herhangi bir 3. TELEGRAMOFFICIAL müşterisi için sms yoluyla giriş şu anda devre dışıdır.\nVerdikleri rahatsızlıktan dolayı özür dilesinler.</string>
     <string name="DevicePerformanceAuto">Default</string>
     <string name="DevicePerformanceLow">Low</string>
     <string name="DevicePerformanceMedium">Medium</string>
@@ -275,7 +275,7 @@
     <string name="OverrideDevicePerformanceDesc">Override TELEOFFICIAL\'s device performance detector.\nLow mode will reduce animation effects and other stuff as much as possible, which may help to save power in the foreground.\nHigh mode may greatly increase power consumption and performance burden and cause stuttering.</string>
     <string name="JumpToBeginning">Jump To Beginning</string>
     <string name="DisableQuickSendMediaBottom">Disable Quick Send Media Bottom</string>
-    <string name="ProviderBaiduTranslate">Baidu Translator</string>
+    <string name="ProviderBaiduTranslate">Baidu çevirmen</string>
     <string name="alwaysSendWithoutSound">Always Send Without Sound</string>
     <string name="EditEnableMarkdown">Enable Markdown</string>
     <string name="EditDisableMarkdown">Disable Markdown</string>
@@ -286,7 +286,7 @@
     <string name="MarkdownAbout2">Edit text in messages using markdown: ^1**bold**^1, ^2__italic__^2, ^3~~strikethrough~~^3, ^4`monospace`^4, ^5||spoiler||^5.</string>
     <string name="MarkdownDisableByDefault">Disable by default</string>
     <string name="DatacenterStatusShort">Datacenter</string>
-    <string name="RegistrationDate">Registration date</string>
+    <string name="RegistrationDate">Kayıt tarihi</string>
     <string name="RegistrationDateNewer">Newer than %s</string>
     <string name="RegistrationDateOlder">Older than %s</string>
     <string name="RegistrationDateApproximately">Approximately %s</string>
@@ -303,8 +303,13 @@
     <string name="HideStories">Hide Stories</string>
     <string name="storyStealthMode">Story Stealth mode</string>
     <string name="OneMoreThing">One More Thing</string>
-    <string name="NotOriginalNullgramInfo">It seems that you\'re using a fork of Nullgram.\nDo you also want to follow Nullgram\'s Channel?</string>
+    <string name="NotOriginalNullgramInfo">Görünüşe göre Nullgram\'ın bir çatalını kullanıyorsunuz.\nAyrıca Nullgram\'ın Kanalını da takip etmek istiyor musunuz?</string>
     <string name="Official">Official</string>
     <string name="Before">Before...</string>
     <string name="Custom">Custom</string>
+    <string name="MonoCode">Code</string>
+    <string name="CreateCode">Create Code</string>
+    <string name="CreateCodeLanguage">Language</string>
+    <string name="UnsupportedMediaNullgram">This message is not supported on your version of Nullgram. Update the app to view: https://t.me/NullgramClient</string>
+    <string name="ignoreUserSpecifiedReplyColor">Ignore user-set reply color</string>
 </resources>

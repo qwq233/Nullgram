@@ -26,7 +26,7 @@
     <string name="InvalidAccessToken">Token de acceso inválido</string>
     <string name="QRLoginTitle">Inicio de sesión con QR</string>
     <string name="QRLoginMessage">Escanea código QR con otro dispositivo para conectarte.</string>
-    <string name="NullgramVersion">Nullgram %1$s\nBasado en TELEOFFICIAL %2$s</string>
+    <string name="NullgramVersion">Nullgram %1$s\nBasado en TELEOFICIAL %2$s</string>
     <string name="RestrictionReason">Motivo de la restricción</string>
     <string name="showBotAPIID">Mostrar ID Bot API</string>
     <string name="hideGroupSticker">Ocultar pack de stickers de grupo</string>
@@ -307,4 +307,9 @@
     <string name="Official">Oficial</string>
     <string name="Before">Before...</string>
     <string name="Custom">Custom</string>
+    <string name="MonoCode">Code</string>
+    <string name="CreateCode">Create Code</string>
+    <string name="CreateCodeLanguage">Language</string>
+    <string name="UnsupportedMediaNullgram">This message is not supported on your version of Nullgram. Update the app to view: https://t.me/NullgramClient</string>
+    <string name="ignoreUserSpecifiedReplyColor">Ignore user-set reply color</string>
 </resources>

@@ -26,7 +26,7 @@
     <string name="InvalidAccessToken">Token akses tidak valid</string>
     <string name="QRLoginTitle">Login QR</string>
     <string name="QRLoginMessage">Pindai Kode QR dengan perangkat lain untuk masuk.</string>
-    <string name="NullgramVersion">Nullgram %1$s\nBerbasiskan dari TELEOFFICIAL resmi %2$s</string>
+    <string name="NullgramVersion">Nullgram %1$s\nBerbasiskan dari Telegram resmi %2$s</string>
     <string name="RestrictionReason">Alasan pembatasan</string>
     <string name="showBotAPIID">Tampilkan ID API Bot</string>
     <string name="hideGroupSticker">Sembunyikan Paket Stiker Grup</string>
@@ -307,4 +307,9 @@
     <string name="Official">Official</string>
     <string name="Before">Before...</string>
     <string name="Custom">Custom</string>
+    <string name="MonoCode">Code</string>
+    <string name="CreateCode">Create Code</string>
+    <string name="CreateCodeLanguage">Language</string>
+    <string name="UnsupportedMediaNullgram">This message is not supported on your version of Nullgram. Update the app to view: https://t.me/NullgramClient</string>
+    <string name="ignoreUserSpecifiedReplyColor">Ignore user-set reply color</string>
 </resources>
