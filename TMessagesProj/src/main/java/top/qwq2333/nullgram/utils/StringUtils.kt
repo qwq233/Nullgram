@@ -130,12 +130,6 @@ object StringUtils {
             skip += 1
         }
 
-        // ensure offset and length is valid
-        entities.forEach {
-            it.offset = it.offset.coerceAtLeast(0).coerceAtMost(panguText.length)
-            it.length = it.length.coerceAtLeast(0).coerceAtMost(panguText.length - it.offset)
-        }
-
         return Pair(panguText, entities)
     }
 }

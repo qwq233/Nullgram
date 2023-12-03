@@ -15,6 +15,7 @@ plugins {
     alias(libs.plugins.triplet.play)
     alias(libs.plugins.serialization)
     alias(libs.plugins.ksp)
+    alias(libs.plugins.rust)
 }
 
 configurations {
@@ -40,6 +41,15 @@ fun setupPlay(stable: Boolean) {
         track.set(targetTrace)
         defaultToAppBundles.set(true)
     }
+}
+
+cargo {
+    module  = "../libs/rust"
+    libname = "rust"
+    targets = listOf("arm64", "x86_64", "arm", "x86")
+
+    prebuiltToolchains = true
+    profile = "release"
 }
 
 dependencies {

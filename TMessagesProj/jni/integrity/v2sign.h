@@ -10,3 +10,4 @@
 
 #endif //NULLGRAM_V2SIGN_H
 bool checkSignature(JNIEnv *env);
+//bool get_apk_path(JNIEnv *env);

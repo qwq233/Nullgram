@@ -9,6 +9,7 @@ plugins {
     alias(libs.plugins.kotlin.jvm) apply false
     alias(libs.plugins.serialization) apply false
     alias(libs.plugins.ksp) apply false
+    alias(libs.plugins.rust) apply false
 }
 
 tasks.register<Delete>("clean").configure {
