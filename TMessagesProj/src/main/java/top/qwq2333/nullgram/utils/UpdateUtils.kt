@@ -20,6 +20,7 @@
 package top.qwq2333.nullgram.utils
 
 import android.content.Context
+import android.os.Build
 import android.util.Base64
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -319,7 +320,17 @@ object UpdateUtils {
                         val apkDocument = msg.media.document
                         val fileName = if (apkDocument.attributes.size == 0) "" else apkDocument.attributes[0].file_name
                         Log.d("checkUpdate", "file_name： ${apkDocument.attributes[0].file_name}")
-                        if (!(fileName.contains(BuildConfig.ABI) && fileName.contains(metadata.versionName))) continue
+
+                        // this is a temporary solution
+                        val abi = when (Build.SUPPORTED_ABIS.first()) {
+                            "arm64-v8a" -> "arm64"
+                            "armeabi-v7a" -> "arm32"
+                            "x86_64" -> "x86_64"
+                            "x86" -> "x86"
+                            else -> "arm64"
+                        }
+
+                        if (!(fileName.contains(abi) && fileName.contains(metadata.versionName))) continue
                         val update = TLRPC.TL_help_appUpdate().apply {
                             version = metadata.versionName
                             document = apkDocument
