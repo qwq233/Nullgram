@@ -3,3 +3,4 @@
 	url = https://chromium.googlesource.com/linux-syscall-support
 [submodule "libs/rust"]
 	path = libs/rust
+	url = https://github.com/qwq233/nullgram-rs
