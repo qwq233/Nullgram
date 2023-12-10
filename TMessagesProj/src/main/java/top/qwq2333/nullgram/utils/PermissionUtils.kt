@@ -55,6 +55,7 @@ object PermissionUtils {
     @JvmStatic
     fun isAudioPermissionGranted(): Boolean = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
         isPermissionGranted(Manifest.permission.READ_MEDIA_AUDIO) && isPermissionGranted(Manifest.permission.READ_MEDIA_VISUAL_USER_SELECTED)
+            && isPermissionGranted(Manifest.permission.FOREGROUND_SERVICE_MICROPHONE)
     } else  if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
         isPermissionGranted(Manifest.permission.READ_MEDIA_AUDIO)
     } else {
@@ -135,6 +136,7 @@ object PermissionUtils {
                 activity,
                 BasePermissionsActivity.REQUEST_CODE_EXTERNAL_STORAGE,
                 Manifest.permission.READ_MEDIA_AUDIO,
+                Manifest.permission.FOREGROUND_SERVICE_MICROPHONE,
                 Manifest.permission.READ_MEDIA_VISUAL_USER_SELECTED
             )
         } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {

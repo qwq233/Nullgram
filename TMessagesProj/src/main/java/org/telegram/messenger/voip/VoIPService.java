@@ -4229,7 +4229,14 @@ public class VoIPService extends Service implements SensorEventListener, AudioMa
 			builder.addAction(R.drawable.ic_call, answerTitle, answerPendingIntent);
 			incomingNotification = builder.getNotification();
 		}
-		startForeground(ID_INCOMING_CALL_NOTIFICATION, incomingNotification);
+        if (Build.VERSION.SDK_INT >= VERSION_CODES.UPSIDE_DOWN_CAKE) {
+            if (PermissionUtils.isAudioPermissionGranted()) {
+                startForeground(ID_INCOMING_CALL_NOTIFICATION, incomingNotification,
+                    ServiceInfo.FOREGROUND_SERVICE_TYPE_MICROPHONE | ServiceInfo.FOREGROUND_SERVICE_TYPE_MEDIA_PLAYBACK | ServiceInfo.FOREGROUND_SERVICE_TYPE_CAMERA);
+            }
+        } else {
+            startForeground(ID_INCOMING_CALL_NOTIFICATION, incomingNotification);
+        }
 		startRingtoneAndVibration();
 	}
 
