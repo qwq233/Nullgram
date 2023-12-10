@@ -126,7 +126,7 @@ public class ChatPullingDownDrawable implements NotificationCenter.NotificationC
                 MessagesController.getInstance(currentAccount).getChat(dialog.id);
             }
             AvatarDrawable avatarDrawable = new AvatarDrawable();
-            avatarDrawable.setInfo(nextChat);
+            avatarDrawable.setInfo(currentAccount, nextChat);
             imageReceiver.setImage(ImageLocation.getForChat(nextChat, ImageLocation.TYPE_SMALL), "50_50", avatarDrawable, null, UserConfig.getInstance(0).getCurrentUser(), 0);
             MessagesController.getInstance(currentAccount).ensureMessagesLoaded(dialog.id, 0, null);
             counterDrawable.setCount(dialog.unread_count, false);

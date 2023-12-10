@@ -121,7 +121,7 @@ public class AccountSelectCell extends FrameLayout {
     public void setAccount(int account, boolean check) {
         accountNumber = account;
         TLRPC.User user = UserConfig.getInstance(accountNumber).getCurrentUser();
-        avatarDrawable.setInfo(user);
+        avatarDrawable.setInfo(account, user);
         textView.setText(ContactsController.formatName(user.first_name, user.last_name));
         imageView.getImageReceiver().setCurrentAccount(account);
         imageView.setForUserOrChat(user, avatarDrawable);

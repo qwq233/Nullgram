@@ -7018,7 +7018,7 @@ public class GroupCallActivity extends BottomSheet implements NotificationCenter
             imageView.setRoundRadius(AndroidUtilities.dp(20));
             frameLayout.addView(imageView, LayoutHelper.createFrame(40, 40, (LocaleController.isRTL ? Gravity.RIGHT : Gravity.LEFT) | Gravity.TOP, 22, 5, 22, 0));
 
-            avatarDrawable.setInfo(object);
+            avatarDrawable.setInfo(currentAccount, object);
             String name;
             if (object instanceof TLRPC.User) {
                 TLRPC.User user = (TLRPC.User) object;
