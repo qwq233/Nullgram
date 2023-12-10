@@ -130,6 +130,16 @@ object StringUtils {
             skip += 1
         }
 
+        // prevent out of bound
+        entities.forEach {
+            if (it.offset >= panguText.length) {
+                it.offset = panguText.length - 1
+            }
+            if (it.offset + it.length > panguText.length) {
+                it.length = panguText.length - it.offset
+            }
+        }
+
         return Pair(panguText, entities)
     }
 }
