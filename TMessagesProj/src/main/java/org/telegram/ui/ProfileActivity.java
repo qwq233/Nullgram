@@ -10177,7 +10177,7 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
                     try {
                         PackageInfo pInfo = ApplicationLoader.applicationContext.getPackageManager().getPackageInfo(ApplicationLoader.applicationContext.getPackageName(), 0);
                         int code = pInfo.versionCode;
-                        String abi = BuildConfig.ABI;
+                        String abi = Utils.getAbi();
                         cell.setText(LocaleController.formatString("NullgramVersion", R.string.NullgramVersion, String.format(Locale.US, "%s (%d) %s", pInfo.versionName, code, abi), String.format(Locale.US, "%s (%d)", BuildVars.BUILD_VERSION_STRING, BuildVars.BUILD_VERSION)));
                     } catch (Exception e) {
                         FileLog.e(e);

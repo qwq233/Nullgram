@@ -41,7 +41,8 @@ import org.telegram.tgnet.ConnectionsManager;
 import org.telegram.tgnet.TLRPC;
 import org.telegram.ui.Components.AlertsCreator;
 import org.telegram.ui.Components.ForegroundDetector;
-import org.telegram.ui.Components.Premium.boosts.BoostRepository;
+import org.telegram.ui.Components.UpdateAppAlertDialog;
+import org.telegram.ui.Components.UpdateLayout;
 import org.telegram.ui.IUpdateLayout;
 import org.telegram.ui.LauncherIconController;
 
@@ -614,11 +615,16 @@ public class ApplicationLoader extends Application {
     }
 
     public boolean showUpdateAppPopup(Context context, TLRPC.TL_help_appUpdate update, int account) {
-        return false;
+        try {
+            (new UpdateAppAlertDialog(context, update, account)).show();
+        } catch (Exception e) {
+            FileLog.e(e);
+        }
+        return true;
     }
 
     public IUpdateLayout takeUpdateLayout(Activity activity, ViewGroup sideMenu, ViewGroup sideMenuContainer) {
-        return null;
+        return new UpdateLayout(activity, sideMenu, sideMenuContainer);
     }
 
 }

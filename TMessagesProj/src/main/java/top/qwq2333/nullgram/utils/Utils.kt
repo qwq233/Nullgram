@@ -56,6 +56,7 @@ import java.security.MessageDigest
 import java.security.NoSuchAlgorithmException
 import java.security.SecureRandom
 import java.util.Locale
+import java.util.zip.ZipFile
 
 
 object Utils {
@@ -297,6 +298,22 @@ object Utils {
         AndroidUtilities.runOnUIThread {
             Toast.makeText(ApplicationLoader.applicationContext, "${DatabaseUtils.getMethodName(method)}: $text", Toast.LENGTH_SHORT).show()
         }
+    }
+
+    @JvmStatic
+    fun getAbi(): String = try {
+        val apkFile = ZipFile(ApplicationLoader.applicationContext.applicationInfo.sourceDir)
+        val libFolder = apkFile.entries().asSequence().find { it.name.contains("libtmessages") }!!
+        when (libFolder.name.split("/")[1]) {
+            "arm64-v8a" -> "arm64"
+            "armeabi-v7a" -> "arm32"
+            "x86" -> "x86"
+            "x86_64" -> "x86_64"
+            else -> "arm64"
+        }
+    } catch (e: Exception) {
+        Log.e(e)
+        "unknown"
     }
 
 }

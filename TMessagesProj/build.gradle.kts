@@ -1,7 +1,6 @@
 @file:Suppress("UnstableApiUsage")
 
 import com.android.build.api.variant.BuildConfigField
-import com.android.build.api.variant.FilterConfiguration.FilterType.ABI
 import com.android.build.gradle.internal.cxx.configure.gradleLocalProperties
 import com.google.firebase.crashlytics.buildtools.gradle.CrashlyticsExtension
 import java.text.SimpleDateFormat
@@ -209,15 +208,6 @@ android {
     androidComponents {
         onVariants { variant ->
             variant.buildConfigFields.put("isPlay", BuildConfigField("boolean", variant.name == "play", null))
-            variant.outputs.forEach { output ->
-                val abi = output.filters.find { it.filterType == ABI }?.identifier
-                variant.buildConfigFields.put(
-                    "ABI", BuildConfigField(
-                        "String", "\"${abiName[abi]}\"",
-                        "this is just a compatibility solution and we are not using flavorProduct anymore"
-                    )
-                )
-            }
         }
     }
 

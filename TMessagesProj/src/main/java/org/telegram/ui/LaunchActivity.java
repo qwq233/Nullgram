@@ -8,7 +8,6 @@
 
 package org.telegram.ui;
 
-import static org.telegram.ui.Components.Premium.LimitReachedBottomSheet.TYPE_ACCOUNTS;
 import static org.telegram.ui.Components.Premium.LimitReachedBottomSheet.TYPE_BOOSTS_FOR_USERS;
 
 import android.Manifest;
@@ -21,7 +20,6 @@ import android.app.Activity;
 import android.app.ActivityManager;
 import android.app.Dialog;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
@@ -30,12 +28,8 @@ import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
-import android.graphics.LinearGradient;
-import android.graphics.Matrix;
-import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.Point;
-import android.graphics.Shader;
 import android.location.LocationManager;
 import android.media.AudioManager;
 import android.net.Uri;
@@ -55,7 +49,6 @@ import android.text.style.ClickableSpan;
 import android.util.Base64;
 import android.util.SparseArray;
 import android.util.SparseIntArray;
-import android.util.TypedValue;
 import android.view.ActionMode;
 import android.view.Gravity;
 import android.view.KeyEvent;
@@ -109,7 +102,6 @@ import org.telegram.messenger.FileLog;
 import org.telegram.messenger.FingerprintController;
 import org.telegram.messenger.FlagSecureReason;
 import org.telegram.messenger.GenericProvider;
-import org.telegram.messenger.ImageLoader;
 import org.telegram.messenger.LiteMode;
 import org.telegram.messenger.LocaleController;
 import org.telegram.messenger.LocationController;
@@ -144,7 +136,6 @@ import org.telegram.ui.ActionBar.INavigationLayout;
 import org.telegram.ui.ActionBar.SimpleTextView;
 import org.telegram.ui.ActionBar.Theme;
 import org.telegram.ui.Adapters.DrawerLayoutAdapter;
-import org.telegram.ui.Cells.CheckBoxCell;
 import org.telegram.ui.Cells.DrawerActionCell;
 import org.telegram.ui.Cells.DrawerAddCell;
 import org.telegram.ui.Cells.DrawerProfileCell;
@@ -171,7 +162,6 @@ import org.telegram.ui.Components.Forum.ForumUtilities;
 import org.telegram.ui.Components.GroupCallPip;
 import org.telegram.ui.Components.JoinGroupAlert;
 import org.telegram.ui.Components.LayoutHelper;
-import org.telegram.ui.Components.MediaActionDrawable;
 import org.telegram.ui.Components.MediaActivity;
 import org.telegram.ui.Components.PasscodeView;
 import org.telegram.ui.Components.PhonebookShareAlert;
@@ -222,7 +212,6 @@ import top.qwq2333.gen.Config;
 import top.qwq2333.nullgram.config.ConfigManager;
 import top.qwq2333.nullgram.helpers.MonetHelper;
 import top.qwq2333.nullgram.helpers.SettingsHelper;
-import top.qwq2333.nullgram.utils.APKUtils;
 import top.qwq2333.nullgram.utils.Defines;
 import top.qwq2333.nullgram.utils.Log;
 import top.qwq2333.nullgram.utils.UpdateUtils;
@@ -5264,12 +5253,10 @@ public class LaunchActivity extends BasePermissionsActivity implements INavigati
 
     @SuppressLint("NotifyDataSetChanged")
     public void checkAppUpdate(boolean force) {
-        if (ConfigManager.getIntOrDefault(Defines.updateChannel, Defines.stableChannel)
-            == Defines.disableAutoUpdate) {
+        if (ConfigManager.getIntOrDefault(Defines.updateChannel, Defines.stableChannel) == Defines.disableAutoUpdate) {
             return;
         }
-        if (!force && System.currentTimeMillis()
-            < ConfigManager.getLongOrDefault(Defines.lastCheckUpdateTime, 0L) + 1000L * 60 * 60) {
+        if (!force && System.currentTimeMillis() < ConfigManager.getLongOrDefault(Defines.lastCheckUpdateTime, 0L) + 1000L * 60 * 60) {
             return;
         }
         ConfigManager.putLong(Defines.lastCheckUpdateTime, System.currentTimeMillis());
@@ -5285,6 +5272,9 @@ public class LaunchActivity extends BasePermissionsActivity implements INavigati
                     if (SharedConfig.setNewAppVersionAvailable(res)) {
                         if (res.can_not_skip) {
                             showUpdateActivity(accountNum, res, false);
+                        } else {
+                            drawerLayoutAdapter.notifyDataSetChanged();
+                            ApplicationLoader.applicationLoaderInstance.showUpdateAppPopup(LaunchActivity.this, res, accountNum);
                         }
                         NotificationCenter.getGlobalInstance().postNotificationName(NotificationCenter.appUpdateAvailable);
                     }
@@ -5304,8 +5294,7 @@ public class LaunchActivity extends BasePermissionsActivity implements INavigati
                     SharedConfig.setNewAppVersionAvailable(null);
                     drawerLayoutAdapter.notifyDataSetChanged();
                 }
-                NotificationCenter.getGlobalInstance()
-                    .postNotificationName(NotificationCenter.appUpdateAvailable);
+                NotificationCenter.getGlobalInstance().postNotificationName(NotificationCenter.appUpdateAvailable);
             });
             return Unit.INSTANCE;
         });
@@ -6046,12 +6035,14 @@ public class LaunchActivity extends BasePermissionsActivity implements INavigati
                 MediaController.getInstance().seekToProgress(messageObject, messageObject.audioProgress);
             }
         }
+        checkAppUpdate(false);
+
+
         if (UserConfig.getInstance(UserConfig.selectedAccount).unacceptedTermsOfService != null) {
             showTosActivity(UserConfig.selectedAccount, UserConfig.getInstance(UserConfig.selectedAccount).unacceptedTermsOfService);
         } else if (SharedConfig.pendingAppUpdate != null && SharedConfig.pendingAppUpdate.can_not_skip) {
             showUpdateActivity(UserConfig.selectedAccount, SharedConfig.pendingAppUpdate, true);
         }
-        checkAppUpdate(false);
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             ApplicationLoader.canDrawOverlays = Settings.canDrawOverlays(this);

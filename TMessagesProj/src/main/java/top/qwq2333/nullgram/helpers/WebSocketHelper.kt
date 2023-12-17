@@ -28,6 +28,7 @@ import top.qwq2333.nullgram.config.ConfigManager
 import top.qwq2333.nullgram.utils.AnalyticsUtils.trackEvent
 import top.qwq2333.nullgram.utils.Defines
 import top.qwq2333.nullgram.utils.Log
+import top.qwq2333.nullgram.utils.Utils
 import java.net.ServerSocket
 
 object WebSocketHelper {
@@ -119,7 +120,7 @@ object WebSocketHelper {
                 tcp2wsStarted = true
                 val map = HashMap<String, String?>()
                 map["buildType"] = BuildConfig.BUILD_TYPE
-                map["buildFlavor"] = BuildConfig.ABI
+                map["buildFlavor"] = Utils.getAbi()
                 map["isPlay"] = BuildConfig.isPlay.toString()
                 trackEvent("tcp2ws started", map)
             }
