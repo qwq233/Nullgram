@@ -28351,6 +28351,9 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
                 if (messageObject.getDialogId() == mergeDialogId && startMessageObject.getDialogId() != mergeDialogId) {
                     continue;
                 }
+                if (messageObject.isBlockedMessage()) {
+                    continue;
+                }
                 if ((currentEncryptedChat == null && messageObject.getId() > messageId || currentEncryptedChat != null && messageObject.getId() < messageId) && (messageObject.isVoice() || messageObject.isRoundVideo()) && (!playingUnreadMedia || messageObject.isContentUnread() && !messageObject.isOut())) {
                     messageObjects.add(messageObject);
                 }
