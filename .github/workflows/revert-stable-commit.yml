@@ -4,6 +4,8 @@ on:
     push:
         branches:
             - master
+        paths:
+            - "buildSrc/src/main/kotlin/Version.kt"
 
 jobs:
     build:
