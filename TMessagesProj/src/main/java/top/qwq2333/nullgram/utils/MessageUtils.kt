@@ -311,9 +311,8 @@ class MessageUtils(num: Int) : BaseController(num) {
         CoroutineScope(Dispatchers.IO).launch {
             val peer = messagesController.getInputPeer(dialogId)
             val fromId = MessagesController.getInputPeer(userConfig.currentUser)
-            doSearchMessages(fragment, peer = peer, replyMessageId = replyMessageId, fromId = fromId, offsetId = Int.MAX_VALUE, hash = 0).let { it ->
+            doSearchMessages(fragment, peer = peer, replyMessageId = replyMessageId, fromId = fromId, offsetId = Int.MAX_VALUE, hash = 0, before = before).let {
                 if (it.isNotEmpty()) {
-
                     val lists = ArrayList<ArrayList<Int>>().apply {
                         for (i in 0..it.size / 100) {
                             add(ArrayList(it.subList(i * 100, min((i + 1) * 100, it.size))))
@@ -321,7 +320,6 @@ class MessageUtils(num: Int) : BaseController(num) {
                     }
 
                     val deleteAction = Runnable {
-                        Log.d("deleteAction")
                         for (list in lists) {
                             messagesController.deleteMessages(list, null, null, dialogId, true, false)
                         }
@@ -379,7 +377,7 @@ class MessageUtils(num: Int) : BaseController(num) {
                     var newOffsetId = offsetId
                     for (message in response.messages) {
                         newOffsetId = min(newOffsetId.toDouble(), message.id.toDouble()).toInt()
-                        if (!message.out || message.post || message.date <= before) {
+                        if (!message.out || message.post || message.date >= before) {
                             continue
                         }
                         messagesId.add(message.id)
