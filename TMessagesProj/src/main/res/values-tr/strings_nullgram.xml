@@ -12,11 +12,11 @@
     <string name="OfficialChannelName">NullgramClient</string>
     <string name="noAvailableUpdate">Güncelleme Yok.</string>
     <string name="updateAvailable">Yeni Güncelleştirme Mevcut</string>
-    <string name="variantsNotFound">Sürüm varyantları otomatik olarak eşleşmez.\nLütfen GitHub\'dan manuel olarak indirin.</string>
+    <string name="variantsNotFound">Sürüm varyantları otomatik olarak eşleşmiyor.\nLütfen GitHub\'dan manuel olarak indirin.</string>
     <string name="skipUpdate">Yoksay</string>
     <string name="notNow">Henüz Değil</string>
     <string name="updateConfirm">GÜNCELLE</string>
-    <string name="CheckUpdate">Güncellemeleri kontrol ediniz</string>
+    <string name="CheckUpdate">Güncelleme için kontrol edin</string>
     <string name="CheckingUpdate">Güncelleme kontrol ediliyor…</string>
     <string name="LastUpdateNever">Kurulumdan sonra hiç kontrol edilmedi.</string>
     <string name="LastUpdateDateFormatted">Son olarak %1$s tarihinde başarıyla kontrol edildi.</string>
@@ -25,7 +25,7 @@
     <string name="BotToken">API Anahtarı</string>
     <string name="InvalidAccessToken">Erişim anahtarı geçersiz</string>
     <string name="QRLoginTitle">QR Girişi</string>
-    <string name="QRLoginMessage">Başka bir cihazda oturum açmak için QR Codunuzu tarayın.</string>
+    <string name="QRLoginMessage">Başka bir cihazda oturum açmak için QR Kodunuzu tarayın.</string>
     <string name="NullgramVersion">Nullgram %1$s\nTelegram\'a Dayalı %2$s</string>
     <string name="RestrictionReason">Kısıtlama nedeni</string>
     <string name="showBotAPIID">Bot API Kimliğini Göster</string>
@@ -35,7 +35,7 @@
     <string name="DeleteAllFromSelfAdmin">Yönetici haklarına sahip</string>
     <string name="DeleteAllFromSelf">Kendi mesajlarını sil</string>
     <string name="DeleteAllFromSelfAlert">Uyarı! Bu, **tüm** katılımcılar için bu sohbetteki **sizden gelen tüm mesajları siler**.</string>
-    <string name="MutualContactDescription">This contact is a mutual contact.</string>
+    <string name="MutualContactDescription">Bu kişi karşılıklı bir kişidir.</string>
     <string name="MutualContact">Ortak kişi</string>
     <string name="SelectBetween">Aralarından seçim yapın</string>
     <string name="StickerSavedHint">Çıkartma galeriye kaydedildi</string>
@@ -300,16 +300,16 @@
     <string name="Special">Special</string>
     <string name="BotLoginMessage">Enter the bot token obtained from **@BotFather**.</string>
     <string name="Stories">Stories</string>
-    <string name="HideStories">Hide Stories</string>
+    <string name="HideStories">Hikayeleri Gizler</string>
     <string name="storyStealthMode">Story Stealth mode</string>
     <string name="OneMoreThing">One More Thing</string>
     <string name="NotOriginalNullgramInfo">Görünüşe göre Nullgram\'ın bir çatalını kullanıyorsunuz.\nAyrıca Nullgram\'ın Kanalını da takip etmek istiyor musunuz?</string>
     <string name="Official">Official</string>
     <string name="Before">Before...</string>
-    <string name="Custom">Custom</string>
+    <string name="Custom">Özelleştirilmiş</string>
     <string name="MonoCode">Code</string>
     <string name="CreateCode">Create Code</string>
     <string name="CreateCodeLanguage">Language</string>
-    <string name="UnsupportedMediaNullgram">This message is not supported on your version of Nullgram. Update the app to view: https://t.me/NullgramClient</string>
-    <string name="ignoreUserSpecifiedReplyColor">Ignore user-set reply color</string>
+    <string name="UnsupportedMediaNullgram">Bu mesaj Nullgram sürümünüzde desteklenmiyor. Görüntülemek için uygulamayı güncelleyin: https://t.me/NullgramClient</string>
+    <string name="ignoreUserSpecifiedReplyColor">Kullanıcı tarafından ayarlanan yanıt rengini yoksay</string>
 </resources>
