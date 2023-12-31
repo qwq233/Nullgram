@@ -2193,7 +2193,7 @@ public class ThemeActivity extends BaseFragment implements NotificationCenter.No
                     break;
                 }
                 case TYPE_CHOOSE_COLOR:
-                    view = new PeerColorActivity.ChangeNameColorCell(currentAccount, false, mContext, getResourceProvider());
+                    view = new PeerColorActivity.ChangeNameColorCell(currentAccount, 0, mContext, getResourceProvider());
                     break;
             }
             return new RecyclerListView.Holder(view);

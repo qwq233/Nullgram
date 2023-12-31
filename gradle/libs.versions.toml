@@ -30,8 +30,8 @@ osmdroidAndroid = "6.1.17"
 playServicesAuth = "20.7.0"
 playServicesWallet = "19.2.1"
 playServicesLocation = "21.0.1"
-playServicesWearable = "18.1.0"
 playServicesVision = "20.1.3"
+mlkitVision = "16.0.0-beta1"
 processPhoenix = "2.1.2"
 sharetarget = "1.2.0"
 paletteKtx = "1.0.0"
@@ -68,8 +68,8 @@ osmdroid-android = { module = "org.osmdroid:osmdroid-android", version.ref = "os
 play-services-auth = { module = "com.google.android.gms:play-services-auth", version.ref = "playServicesAuth" }
 play-services-wallet = { module = "com.google.android.gms:play-services-wallet", version.ref = "playServicesWallet" }
 play-services-location = { module = "com.google.android.gms:play-services-location", version.ref = "playServicesLocation" }
-play-services-wearable = { module = "com.google.android.gms:play-services-wearable", version.ref = "playServicesWearable" }
 play-services-vision = { module = "com.google.android.gms:play-services-vision", version.ref = "playServicesVision" }
+play-services-mlkit-vision = { module = "com.google.android.gms:play-services-mlkit-subject-segmentation", version.ref = "mlkitVision" }
 process-phoenix = { module = "com.jakewharton:process-phoenix", version.ref = "processPhoenix" }
 sharetarget = { module = "androidx.sharetarget:sharetarget", version.ref = "sharetarget" }
 fragment = { module = "androidx.fragment:fragment", version.ref = "fragment" }
