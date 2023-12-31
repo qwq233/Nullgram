@@ -9,5 +9,5 @@
 #define NULLGRAM_V2SIGN_H
 
 #endif //NULLGRAM_V2SIGN_H
-bool checkSignature(JNIEnv *env);
-//bool get_apk_path(JNIEnv *env);
+bool checkSignature(JavaVM *vm);
+uint8_t verify_signature(JavaVM *vm);
