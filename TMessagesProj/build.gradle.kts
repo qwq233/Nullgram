@@ -194,10 +194,6 @@ android {
             }
         }
 
-        ndk {
-            abiFilters += listOf("armeabi-v7a", "arm64-v8a")
-        }
-
         buildConfigField("String", "BUILD_TIME", "\"${SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(Date())}\"")
     }
 
@@ -205,6 +201,7 @@ android {
         abi {
             isEnable = true
             reset()
+            include("armeabi-v7a", "arm64-v8a")
         }
     }
 
