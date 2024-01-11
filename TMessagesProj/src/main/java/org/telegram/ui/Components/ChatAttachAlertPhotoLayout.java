@@ -11,6 +11,7 @@ package org.telegram.ui.Components;
 import static android.view.WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON;
 
 import android.Manifest;
+import android.Manifest.permission;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.AnimatorSet;
@@ -1067,9 +1068,15 @@ public class ChatAttachAlertPhotoLayout extends ChatAttachAlert.AttachAlertLayou
                     return false;
                 }
                 if (Build.VERSION.SDK_INT >= 23) {
-                    if (getContext().checkSelfPermission(Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED) {
+                    if (PermissionUtils.isRecordAudioPermissionGranted()) {
                         requestingPermissions = true;
-                        baseFragment.getParentActivity().requestPermissions(new String[]{Manifest.permission.RECORD_AUDIO}, 21);
+                        String[] permissions;
+                        if (Build.VERSION.SDK_INT >= 34) {
+                            permissions = new String[]{Manifest.permission.RECORD_AUDIO, permission.FOREGROUND_SERVICE_MICROPHONE};
+                        } else {
+                            permissions = new String[]{Manifest.permission.RECORD_AUDIO};
+                        }
+                        baseFragment.getParentActivity().requestPermissions(permissions, 21);
                         return false;
                     }
                 }

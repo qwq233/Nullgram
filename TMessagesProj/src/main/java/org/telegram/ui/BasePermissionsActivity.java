@@ -1,6 +1,5 @@
 package org.telegram.ui;
 
-import android.Manifest;
 import android.app.Activity;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -21,6 +20,8 @@ import org.telegram.messenger.camera.CameraController;
 import org.telegram.ui.ActionBar.AlertDialog;
 import org.telegram.ui.ActionBar.Theme;
 import org.telegram.ui.Components.AlertsCreator;
+
+import top.qwq2333.nullgram.utils.PermissionUtils;
 
 public class BasePermissionsActivity extends Activity {
     public final static int REQUEST_CODE_GEOLOCATION = 2,
@@ -69,15 +70,8 @@ public class BasePermissionsActivity extends Activity {
                 ContactsController.getInstance(currentAccount).forceImportContacts();
             }
         } else if (requestCode == 3 || requestCode == REQUEST_CODE_VIDEO_MESSAGE) {
-            boolean audioGranted = true;
-            boolean cameraGranted = true;
-            for (int i = 0, size = Math.min(permissions.length, grantResults.length); i < size; i++) {
-                if (Manifest.permission.RECORD_AUDIO.equals(permissions[i])) {
-                    audioGranted = grantResults[i] == PackageManager.PERMISSION_GRANTED;
-                } else if (Manifest.permission.CAMERA.equals(permissions[i])) {
-                    cameraGranted = grantResults[i] == PackageManager.PERMISSION_GRANTED;
-                }
-            }
+            boolean audioGranted = PermissionUtils.isRecordAudioPermissionGranted();
+            boolean cameraGranted = PermissionUtils.isCameraPermissionGranted();
             if (requestCode == REQUEST_CODE_VIDEO_MESSAGE && (!audioGranted || !cameraGranted)) {
                 showPermissionErrorAlert(R.raw.permission_request_camera, LocaleController.getString("PermissionNoCameraMicVideo", R.string.PermissionNoCameraMicVideo));
             } else if (!audioGranted) {

@@ -5,6 +5,7 @@ import static org.telegram.messenger.AndroidUtilities.isTablet;
 import static org.telegram.ui.GroupCallActivity.TRANSITION_DURATION;
 
 import android.Manifest;
+import android.Manifest.permission;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.AnimatorSet;
@@ -94,9 +95,9 @@ import org.telegram.ui.Components.HideViewAfterAnimation;
 import org.telegram.ui.Components.LayoutHelper;
 import org.telegram.ui.Components.voip.AcceptDeclineView;
 import org.telegram.ui.Components.voip.EmojiRationalLayout;
+import org.telegram.ui.Components.voip.EndCloseLayout;
 import org.telegram.ui.Components.voip.HideEmojiTextView;
 import org.telegram.ui.Components.voip.ImageWithWavesView;
-import org.telegram.ui.Components.voip.EndCloseLayout;
 import org.telegram.ui.Components.voip.PrivateVideoPreviewDialogNew;
 import org.telegram.ui.Components.voip.RateCallLayout;
 import org.telegram.ui.Components.voip.VoIPBackgroundProvider;
@@ -122,6 +123,8 @@ import org.webrtc.TextureViewRenderer;
 import java.io.ByteArrayOutputStream;
 import java.util.ArrayList;
 import java.util.List;
+
+import top.qwq2333.nullgram.utils.PermissionUtils;
 
 public class VoIPFragment implements VoIPService.StateListener, NotificationCenter.NotificationCenterDelegate {
 
@@ -1050,8 +1053,8 @@ public class VoIPFragment implements VoIPService.StateListener, NotificationCent
                         FileLog.e(e);
                     }
                 } else {
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && activity.checkSelfPermission(Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED) {
-                        activity.requestPermissions(new String[]{Manifest.permission.RECORD_AUDIO}, 101);
+                    if (PermissionUtils.isRecordAudioPermissionGranted()) {
+                        PermissionUtils.requestRecordAudioPermission(activity);
                     } else {
                         if (VoIPService.getSharedInstance() != null) {
                             runAcceptCallAnimation(() -> {
@@ -2841,7 +2844,8 @@ public class VoIPFragment implements VoIPService.StateListener, NotificationCent
                     }
                 });
             } else {
-                if (!activity.shouldShowRequestPermissionRationale(Manifest.permission.RECORD_AUDIO)) {
+                if (!activity.shouldShowRequestPermissionRationale(Manifest.permission.RECORD_AUDIO)
+                    || !(Build.VERSION.SDK_INT >= 34 && activity.shouldShowRequestPermissionRationale(permission.FOREGROUND_SERVICE_MICROPHONE))) {
                     VoIPService.getSharedInstance().declineIncomingCall();
                     VoIPHelper.permissionDenied(activity, () -> windowView.finish(), requestCode);
                     return;

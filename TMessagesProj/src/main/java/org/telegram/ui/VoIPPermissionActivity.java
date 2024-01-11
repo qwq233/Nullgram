@@ -1,10 +1,12 @@
 package org.telegram.ui;
 
 import android.Manifest;
+import android.Manifest.permission;
 import android.annotation.TargetApi;
 import android.app.Activity;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.os.Build;
 import android.os.Bundle;
 
 import org.telegram.messenger.FileLog;
@@ -26,9 +28,15 @@ public class VoIPPermissionActivity extends Activity {
 		if (checkSelfPermission(Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED) {
 			permissions.add(Manifest.permission.RECORD_AUDIO);
 		}
+        if (Build.VERSION.SDK_INT >= 34 && checkSelfPermission(permission.FOREGROUND_SERVICE_MICROPHONE) != PackageManager.PERMISSION_GRANTED) {
+            permissions.add(Manifest.permission.FOREGROUND_SERVICE_MICROPHONE);
+        }
 		if (isVideoCall && checkSelfPermission(Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
 			permissions.add(Manifest.permission.CAMERA);
 		}
+        if (isVideoCall && Build.VERSION.SDK_INT >= 34 && checkSelfPermission(permission.FOREGROUND_SERVICE_CAMERA) != PackageManager.PERMISSION_GRANTED) {
+            permissions.add(Manifest.permission.FOREGROUND_SERVICE_CAMERA);
+        }
 		if (!permissions.isEmpty()) {
 			try {
 				requestPermissions(permissions.toArray(new String[0]), isVideoCall ? 102 : 101);

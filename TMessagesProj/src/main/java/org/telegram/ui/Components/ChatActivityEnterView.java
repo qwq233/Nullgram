@@ -148,7 +148,6 @@ import org.telegram.ui.ActionBar.BaseFragment;
 import org.telegram.ui.ActionBar.BottomSheet;
 import org.telegram.ui.ActionBar.SimpleTextView;
 import org.telegram.ui.ActionBar.Theme;
-import org.telegram.ui.BasePermissionsActivity;
 import org.telegram.ui.ChatActivity;
 import org.telegram.ui.Components.Premium.GiftPremiumBottomSheet;
 import org.telegram.ui.Components.Premium.PremiumFeatureBottomSheet;
@@ -173,6 +172,7 @@ import java.util.List;
 import java.util.Locale;
 
 import top.qwq2333.gen.Config;
+import top.qwq2333.nullgram.utils.PermissionUtils;
 
 public class ChatActivityEnterView extends BlurredFrameLayout implements NotificationCenter.NotificationCenterDelegate, SizeNotifierFrameLayout.SizeNotifierFrameLayoutDelegate, StickersAlert.StickersAlertDelegate {
 
@@ -759,19 +759,11 @@ public class ChatActivityEnterView extends BlurredFrameLayout implements Notific
             audioToSend = null;
             if (isInVideoMode()) {
                 if (Build.VERSION.SDK_INT >= 23) {
-                    boolean hasAudio = parentActivity.checkSelfPermission(Manifest.permission.RECORD_AUDIO) == PackageManager.PERMISSION_GRANTED;
-                    boolean hasVideo = parentActivity.checkSelfPermission(Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED;
+                    boolean hasAudio = PermissionUtils.isRecordAudioPermissionGranted();
+                    boolean hasVideo = PermissionUtils.isCameraPermissionGranted();
                     if (!hasAudio || !hasVideo) {
-                        String[] permissions = new String[!hasAudio && !hasVideo ? 2 : 1];
-                        if (!hasAudio && !hasVideo) {
-                            permissions[0] = Manifest.permission.RECORD_AUDIO;
-                            permissions[1] = Manifest.permission.CAMERA;
-                        } else if (!hasAudio) {
-                            permissions[0] = Manifest.permission.RECORD_AUDIO;
-                        } else {
-                            permissions[0] = Manifest.permission.CAMERA;
-                        }
-                        parentActivity.requestPermissions(permissions, BasePermissionsActivity.REQUEST_CODE_VIDEO_MESSAGE);
+                        if (!hasAudio) PermissionUtils.requestRecordAudioPermission(parentActivity);
+                        if (!hasVideo) PermissionUtils.requestCameraPermission(parentActivity);
                         return;
                     }
                 }
@@ -791,8 +783,8 @@ public class ChatActivityEnterView extends BlurredFrameLayout implements Notific
                     }
                 }
             } else {
-                if (Build.VERSION.SDK_INT >= 23 && parentActivity.checkSelfPermission(Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED) {
-                    parentActivity.requestPermissions(new String[]{Manifest.permission.RECORD_AUDIO}, 3);
+                if (PermissionUtils.isRecordAudioPermissionGranted()) {
+                    PermissionUtils.requestRecordAudioPermission(parentActivity);
                     return;
                 }
 

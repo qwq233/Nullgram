@@ -1,7 +1,7 @@
 package org.telegram.ui.Components.voip;
 
 import android.Manifest;
-import android.annotation.TargetApi;
+import android.Manifest.permission;
 import android.app.Activity;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -104,9 +104,15 @@ public class VoIPHelper {
 			if (activity.checkSelfPermission(Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED) {
 				permissions.add(Manifest.permission.RECORD_AUDIO);
 			}
+            if (Build.VERSION.SDK_INT >= 34 && activity.checkSelfPermission(permission.FOREGROUND_SERVICE_MICROPHONE) != PackageManager.PERMISSION_GRANTED) {
+                permissions.add(Manifest.permission.FOREGROUND_SERVICE_MICROPHONE);
+            }
 			if (videoCall && activity.checkSelfPermission(Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
 				permissions.add(Manifest.permission.CAMERA);
 			}
+            if (Build.VERSION.SDK_INT >= 34 && activity.checkSelfPermission(permission.FOREGROUND_SERVICE_CAMERA) != PackageManager.PERMISSION_GRANTED) {
+                permissions.add(Manifest.permission.FOREGROUND_SERVICE_CAMERA);
+            }
 			if (permissions.isEmpty()) {
 				initiateCall(user, null, null, videoCall, canVideoCall, false, null, activity, null, accountInstance);
 			} else {
@@ -151,6 +157,9 @@ public class VoIPHelper {
 			if (activity.checkSelfPermission(Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED && !(call != null && call.call.rtmp_stream)) {
 				permissions.add(Manifest.permission.RECORD_AUDIO);
 			}
+            if (Build.VERSION.SDK_INT >= 34 && activity.checkSelfPermission(permission.FOREGROUND_SERVICE_MICROPHONE) != PackageManager.PERMISSION_GRANTED) {
+                permissions.add(Manifest.permission.FOREGROUND_SERVICE_MICROPHONE);
+            }
 			if (permissions.isEmpty()) {
 				initiateCall(null, chat, hash, false, false, createCall, checkJoiner, activity, fragment, accountInstance);
 			} else {
@@ -346,10 +355,12 @@ public class VoIPHelper {
 		}
 	}
 
-	@TargetApi(Build.VERSION_CODES.M)
 	public static void permissionDenied(final Activity activity, final Runnable onFinish, int code) {
 		boolean mergedRequest = code == 102;
-		if (!activity.shouldShowRequestPermissionRationale(Manifest.permission.RECORD_AUDIO) || mergedRequest && !activity.shouldShowRequestPermissionRationale(Manifest.permission.CAMERA)) {
+        var isForeground =
+            Build.VERSION.SDK_INT >= 34 && (!activity.shouldShowRequestPermissionRationale(Manifest.permission.FOREGROUND_SERVICE_MICROPHONE) ||
+                mergedRequest && !activity.shouldShowRequestPermissionRationale(Manifest.permission.FOREGROUND_SERVICE_CAMERA));
+		if (isForeground || (!activity.shouldShowRequestPermissionRationale(Manifest.permission.RECORD_AUDIO) || mergedRequest && !activity.shouldShowRequestPermissionRationale(Manifest.permission.CAMERA))) {
 			AlertDialog.Builder dlg = new AlertDialog.Builder(activity)
 					.setMessage(AndroidUtilities.replaceTags(mergedRequest ? LocaleController.getString("VoipNeedMicCameraPermissionWithHint", R.string.VoipNeedMicCameraPermissionWithHint) : LocaleController.getString("VoipNeedMicPermissionWithHint", R.string.VoipNeedMicPermissionWithHint)))
 					.setPositiveButton(LocaleController.getString("Settings", R.string.Settings), (dialog, which) -> {

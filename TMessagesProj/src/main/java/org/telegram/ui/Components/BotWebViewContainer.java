@@ -1,6 +1,7 @@
 package org.telegram.ui.Components;
 
 import android.Manifest;
+import android.Manifest.permission;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.AnimatorSet;
@@ -422,12 +423,18 @@ public abstract class BotWebViewContainer extends FrameLayout implements Notific
 
                     switch (resource) {
                         case PermissionRequest.RESOURCE_AUDIO_CAPTURE: {
-                            lastPermissionsDialog = AlertsCreator.createWebViewPermissionsRequestDialog(parentActivity, resourcesProvider, new String[] {Manifest.permission.RECORD_AUDIO}, R.raw.permission_request_microphone, LocaleController.formatString(R.string.BotWebViewRequestMicrophonePermission, UserObject.getUserName(botUser)), LocaleController.formatString(R.string.BotWebViewRequestMicrophonePermissionWithHint, UserObject.getUserName(botUser)), allow -> {
+                            String[] permissions;
+                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+                                permissions = new String[] {Manifest.permission.RECORD_AUDIO, permission.FOREGROUND_SERVICE_MICROPHONE};
+                            } else {
+                                permissions = new String[] {Manifest.permission.RECORD_AUDIO};
+                            }
+                            lastPermissionsDialog = AlertsCreator.createWebViewPermissionsRequestDialog(parentActivity, resourcesProvider, permissions, R.raw.permission_request_microphone, LocaleController.formatString(R.string.BotWebViewRequestMicrophonePermission, UserObject.getUserName(botUser)), LocaleController.formatString(R.string.BotWebViewRequestMicrophonePermissionWithHint, UserObject.getUserName(botUser)), allow -> {
                                 if (lastPermissionsDialog != null) {
                                     lastPermissionsDialog = null;
 
                                     if (allow) {
-                                        runWithPermissions(new String[] {Manifest.permission.RECORD_AUDIO}, allowSystem -> {
+                                        runWithPermissions(permissions, allowSystem -> {
                                             if (allowSystem) {
                                                 request.grant(new String[] {resource});
                                                 hasUserPermissions = true;
@@ -471,12 +478,18 @@ public abstract class BotWebViewContainer extends FrameLayout implements Notific
                         (PermissionRequest.RESOURCE_AUDIO_CAPTURE.equals(resources[0]) || PermissionRequest.RESOURCE_VIDEO_CAPTURE.equals(resources[0])) &&
                         (PermissionRequest.RESOURCE_AUDIO_CAPTURE.equals(resources[1]) || PermissionRequest.RESOURCE_VIDEO_CAPTURE.equals(resources[1]))
                 ) {
-                    lastPermissionsDialog = AlertsCreator.createWebViewPermissionsRequestDialog(parentActivity, resourcesProvider, new String[] {Manifest.permission.CAMERA, Manifest.permission.RECORD_AUDIO}, R.raw.permission_request_camera, LocaleController.formatString(R.string.BotWebViewRequestCameraMicPermission, UserObject.getUserName(botUser)), LocaleController.formatString(R.string.BotWebViewRequestCameraMicPermissionWithHint, UserObject.getUserName(botUser)), allow -> {
+                    String[] permissions;
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+                        permissions = new String[] {Manifest.permission.RECORD_AUDIO, permission.FOREGROUND_SERVICE_MICROPHONE, Manifest.permission.CAMERA, permission.FOREGROUND_SERVICE_CAMERA};
+                    } else {
+                        permissions = new String[] {Manifest.permission.RECORD_AUDIO, Manifest.permission.CAMERA};
+                    }
+                    lastPermissionsDialog = AlertsCreator.createWebViewPermissionsRequestDialog(parentActivity, resourcesProvider, permissions, R.raw.permission_request_camera, LocaleController.formatString(R.string.BotWebViewRequestCameraMicPermission, UserObject.getUserName(botUser)), LocaleController.formatString(R.string.BotWebViewRequestCameraMicPermissionWithHint, UserObject.getUserName(botUser)), allow -> {
                         if (lastPermissionsDialog != null) {
                             lastPermissionsDialog = null;
 
                             if (allow) {
-                                runWithPermissions(new String[] {Manifest.permission.CAMERA, Manifest.permission.RECORD_AUDIO}, allowSystem -> {
+                                runWithPermissions(permissions, allowSystem -> {
                                     if (allowSystem) {
                                         request.grant(new String[] {resources[0], resources[1]});
                                         hasUserPermissions = true;

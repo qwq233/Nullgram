@@ -3694,7 +3694,7 @@ public class VoIPService extends Service implements SensorEventListener, AudioMa
 				bldr.setSmallIcon(R.drawable.ic_call);
 			}
             if (Build.VERSION.SDK_INT >= VERSION_CODES.UPSIDE_DOWN_CAKE) {
-                if (PermissionUtils.isAudioPermissionGranted()) {
+                if (PermissionUtils.isRecordAudioPermissionGranted()) {
                     startForeground(ID_ONGOING_CALL_NOTIFICATION, bldr.build(),
                         ServiceInfo.FOREGROUND_SERVICE_TYPE_MICROPHONE | ServiceInfo.FOREGROUND_SERVICE_TYPE_MEDIA_PLAYBACK | ServiceInfo.FOREGROUND_SERVICE_TYPE_CAMERA);
                 }
@@ -4284,7 +4284,7 @@ public class VoIPService extends Service implements SensorEventListener, AudioMa
 			incomingNotification = builder.getNotification();
 		}
         if (Build.VERSION.SDK_INT >= VERSION_CODES.UPSIDE_DOWN_CAKE) {
-            if (PermissionUtils.isAudioPermissionGranted()) {
+            if (PermissionUtils.isRecordAudioPermissionGranted()) {
                 startForeground(ID_INCOMING_CALL_NOTIFICATION, incomingNotification,
                     ServiceInfo.FOREGROUND_SERVICE_TYPE_MICROPHONE | ServiceInfo.FOREGROUND_SERVICE_TYPE_MEDIA_PLAYBACK | ServiceInfo.FOREGROUND_SERVICE_TYPE_CAMERA);
             }
@@ -4528,7 +4528,7 @@ public class VoIPService extends Service implements SensorEventListener, AudioMa
 
 	private void acceptIncomingCallFromNotification() {
 		showNotification();
-		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && Build.VERSION.SDK_INT < Build.VERSION_CODES.R && (checkSelfPermission(Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED || privateCall.video && checkSelfPermission(Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED)) {
+		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && Build.VERSION.SDK_INT < Build.VERSION_CODES.R && (PermissionUtils.isRecordAudioPermissionGranted() || privateCall.video && PermissionUtils.isCameraPermissionGranted())) {
 			try {
 				//intent.addFlags(Intent.FLAG_ACTIVITY_NEW_DOCUMENT);
 				PendingIntent.getActivity(VoIPService.this, 0, new Intent(VoIPService.this, VoIPPermissionActivity.class).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK), PendingIntent.FLAG_MUTABLE | PendingIntent.FLAG_ONE_SHOT).send();

@@ -54,12 +54,26 @@ object PermissionUtils {
 
     @JvmStatic
     fun isAudioPermissionGranted(): Boolean = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
-        isPermissionGranted(Manifest.permission.READ_MEDIA_AUDIO) && isPermissionGranted(Manifest.permission.READ_MEDIA_VISUAL_USER_SELECTED)
+        isPermissionGranted(Manifest.permission.RECORD_AUDIO) && isPermissionGranted(Manifest.permission.READ_MEDIA_VISUAL_USER_SELECTED)
             && isPermissionGranted(Manifest.permission.FOREGROUND_SERVICE_MICROPHONE)
     } else  if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-        isPermissionGranted(Manifest.permission.READ_MEDIA_AUDIO)
+        isPermissionGranted(Manifest.permission.RECORD_AUDIO)
     } else {
         isStoragePermissionGranted()
+    }
+
+    @JvmStatic
+    fun isRecordAudioPermissionGranted(): Boolean = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+        isPermissionGranted(Manifest.permission.RECORD_AUDIO) && isPermissionGranted(Manifest.permission.FOREGROUND_SERVICE_MICROPHONE)
+    } else {
+        isPermissionGranted(Manifest.permission.RECORD_AUDIO)
+    }
+
+    @JvmStatic
+    fun isCameraPermissionGranted(): Boolean = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+        isPermissionGranted(Manifest.permission.CAMERA) && isPermissionGranted(Manifest.permission.FOREGROUND_SERVICE_CAMERA)
+    } else {
+        isPermissionGranted(Manifest.permission.CAMERA)
     }
 
     @JvmStatic
@@ -136,7 +150,6 @@ object PermissionUtils {
                 activity,
                 BasePermissionsActivity.REQUEST_CODE_EXTERNAL_STORAGE,
                 Manifest.permission.READ_MEDIA_AUDIO,
-                Manifest.permission.FOREGROUND_SERVICE_MICROPHONE,
                 Manifest.permission.READ_MEDIA_VISUAL_USER_SELECTED
             )
         } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
@@ -150,6 +163,42 @@ object PermissionUtils {
                 activity,
                 BasePermissionsActivity.REQUEST_CODE_EXTERNAL_STORAGE,
                 Manifest.permission.READ_EXTERNAL_STORAGE
+            )
+        }
+    }
+
+    @JvmStatic
+    fun requestRecordAudioPermission(activity: Activity?) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+            requestPermissions(
+                activity,
+                BasePermissionsActivity.REQUEST_CODE_CALLS,
+                Manifest.permission.RECORD_AUDIO,
+                Manifest.permission.FOREGROUND_SERVICE_MICROPHONE,
+            )
+        } else {
+            requestPermissions(
+                activity,
+                BasePermissionsActivity.REQUEST_CODE_CALLS,
+                Manifest.permission.RECORD_AUDIO
+            )
+        }
+    }
+
+    @JvmStatic
+    fun requestCameraPermission(activity: Activity?) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+            requestPermissions(
+                activity,
+                BasePermissionsActivity.REQUEST_CODE_VIDEO_MESSAGE,
+                Manifest.permission.CAMERA,
+                Manifest.permission.FOREGROUND_SERVICE_CAMERA,
+            )
+        } else {
+            requestPermissions(
+                activity,
+                BasePermissionsActivity.REQUEST_CODE_VIDEO_MESSAGE,
+                Manifest.permission.CAMERA
             )
         }
     }
