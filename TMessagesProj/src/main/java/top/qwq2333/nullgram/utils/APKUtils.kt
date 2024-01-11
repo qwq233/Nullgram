@@ -107,45 +107,71 @@ object APKUtils {
             return
         }
         if (XiaomiUtilities.isMIUI()) {
-            AndroidUtilities.openForView(document, false, context)
+            AndroidUtilities.openForView(document, true, context);
             return
         }
         val apk = FileLoader.getInstance(UserConfig.selectedAccount).getPathToAttach(document, true) ?: return
         if (dialog != null && dialog!!.isShowing) {
             return
         }
-        val linearLayout = LinearLayout(context)
-        linearLayout.orientation = LinearLayout.VERTICAL
-        linearLayout.layoutParams =
-            LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT.toFloat(), Gravity.TOP or Gravity.LEFT, 4f, 4f, 4f, 4f)
-        val imageView = RLottieImageView(context)
-        imageView.setAutoRepeat(true)
-        imageView.setAnimation(R.raw.db_migration_placeholder, 160, 160)
-        imageView.playAnimation()
-        linearLayout.addView(imageView, LayoutHelper.createLinear(160, 160, Gravity.CENTER_HORIZONTAL or Gravity.TOP, 17, 24, 17, 0))
-        val textView = TextView(context)
-        textView.typeface = AndroidUtilities.getTypeface("fonts/rmedium.ttf")
-        textView.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 16f)
-        textView.setTextColor(Theme.getColor(Theme.key_dialogTextBlack))
-        textView.isSingleLine = true
-        textView.ellipsize = TextUtils.TruncateAt.END
-        textView.text = LocaleController.getString("UpdateInstalling", R.string.UpdateInstalling)
-        linearLayout.addView(
-            textView,
-            LayoutHelper.createLinear(LayoutHelper.WRAP_CONTENT, LayoutHelper.WRAP_CONTENT, Gravity.CENTER_HORIZONTAL or Gravity.TOP, 17, 20, 17, 0)
-        )
-        val textView2 = TextView(context)
-        textView2.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 12f)
-        textView2.setTextColor(Theme.getColor(Theme.key_dialogTextGray))
-        textView2.text = if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q || Settings.canDrawOverlays(context)) LocaleController.getString(
-            "UpdateInstallingRelaunch", R.string.UpdateInstallingRelaunch
-        ) else LocaleController.getString("UpdateInstallingNotification", R.string.UpdateInstallingNotification)
-        linearLayout.addView(
-            textView2,
-            LayoutHelper.createLinear(LayoutHelper.WRAP_CONTENT, LayoutHelper.WRAP_CONTENT, Gravity.CENTER_HORIZONTAL or Gravity.TOP, 17, 4, 17, 24)
-        )
-        val builder = AlertDialog.Builder(context)
-        builder.setView(linearLayout)
+        val linearLayout = LinearLayout(context).apply {
+            orientation = LinearLayout.VERTICAL
+            layoutParams = LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT.toFloat(), Gravity.TOP or Gravity.LEFT, 4f, 4f, 4f, 4f)
+        }
+
+        val imageView = RLottieImageView(context).apply {
+            setAutoRepeat(true)
+            setAnimation(R.raw.db_migration_placeholder, 160, 160)
+            playAnimation()
+        }
+        linearLayout.addView(imageView) {
+            width = 160
+            height = 160
+            gravity = Gravity.CENTER_HORIZONTAL or Gravity.TOP
+            leftMargin = 17
+            topMargin = 24
+            rightMargin = 17
+            bottomMargin = 0
+        }
+
+        val textView = TextView(context).apply {
+            setTypeface(AndroidUtilities.getTypeface("fonts/rmedium.ttf"))
+            setTextSize(TypedValue.COMPLEX_UNIT_DIP, 16f)
+            setTextColor(Theme.getColor(Theme.key_dialogTextBlack))
+            isSingleLine = true
+            ellipsize = TextUtils.TruncateAt.END
+            text = LocaleController.getString("UpdateInstalling", R.string.UpdateInstalling)
+        }
+        linearLayout.addView(textView) {
+            width = LayoutHelper.WRAP_CONTENT
+            height = LayoutHelper.WRAP_CONTENT
+            gravity = Gravity.CENTER_HORIZONTAL or Gravity.TOP
+            leftMargin = 17
+            topMargin = 24
+            rightMargin = 17
+            bottomMargin = 0
+        }
+
+        val textView2 = TextView(context).apply {
+            setTextSize(TypedValue.COMPLEX_UNIT_DIP, 12f)
+            setTextColor(Theme.getColor(Theme.key_dialogTextGray))
+            text = if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q || Settings.canDrawOverlays(context)) {
+                LocaleController.getString("UpdateInstallingRelaunch", R.string.UpdateInstallingRelaunch)
+            } else {
+                LocaleController.getString("UpdateInstallingNotification", R.string.UpdateInstallingNotification)
+            }
+        }
+        linearLayout.addView(textView2) {
+            width = LayoutHelper.WRAP_CONTENT
+            height = LayoutHelper.WRAP_CONTENT
+            gravity = Gravity.CENTER_HORIZONTAL or Gravity.TOP
+            leftMargin = 17
+            topMargin = 4
+            rightMargin = 17
+            bottomMargin = 24
+        }
+
+        val builder = AlertDialog.Builder(context).also { it.setView(linearLayout) }
         dialog = builder.create()
         dialog!!.setCanceledOnTouchOutside(false)
         dialog!!.setCancelable(false)
@@ -164,7 +190,6 @@ object APKUtils {
             }
         }
     }
-
     @Throws(IOException::class)
     private fun transfer(`in`: InputStream, out: OutputStream) {
         val size = 8192

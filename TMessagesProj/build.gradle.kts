@@ -193,7 +193,6 @@ android {
                 )
             }
         }
-
         buildConfigField("String", "BUILD_TIME", "\"${SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(Date())}\"")
     }
 

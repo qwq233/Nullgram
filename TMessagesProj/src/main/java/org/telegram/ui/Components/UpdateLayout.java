@@ -233,4 +233,3 @@ public class UpdateLayout extends IUpdateLayout {
         }
     }
 }
-

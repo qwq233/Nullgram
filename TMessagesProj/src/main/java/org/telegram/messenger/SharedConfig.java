@@ -1012,7 +1012,7 @@ public class SharedConfig {
     }
 
     public static boolean isAppUpdateAvailable() {
-        if (pendingAppUpdate == null || pendingAppUpdate.document == null || !ApplicationLoader.isStandaloneBuild()) {
+        if (pendingAppUpdate == null || pendingAppUpdate.document == null) {
             return false;
         }
         return pendingAppUpdateBuildVersion == BuildConfig.VERSION_CODE;
