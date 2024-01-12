@@ -71,7 +71,6 @@ dependencies {
     implementation(libs.firebase.config)
     implementation(libs.firebase.datatransport)
     implementation(libs.firebase.appindexing)
-    implementation(libs.play.services.auth)
     implementation(libs.play.services.vision)
     implementation(libs.play.services.location)
     implementation(libs.play.services.wallet)
@@ -92,7 +91,6 @@ dependencies {
     implementation(libs.kotlin.stdlib)
     implementation(libs.kotlinx.serialization.json)
     implementation(libs.osmdroid.android)
-    implementation(libs.billing)
     implementation(libs.guava)
 
     implementation(libs.ktor.client.core)

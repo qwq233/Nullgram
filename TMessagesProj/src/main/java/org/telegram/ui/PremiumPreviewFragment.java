@@ -42,11 +42,6 @@ import androidx.core.graphics.ColorUtils;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.android.billingclient.api.BillingClient;
-import com.android.billingclient.api.BillingFlowParams;
-import com.android.billingclient.api.ProductDetails;
-import com.android.billingclient.api.Purchase;
-
 import org.telegram.PhoneFormat.PhoneFormat;
 import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.BillingController;
@@ -583,7 +578,7 @@ public class PremiumPreviewFragment extends BaseFragment implements Notification
 //                if (subscriptionTiers.isEmpty()) {
 //                    return;
 //                }
-                // }
+               // }
 
                 SubscriptionTier tier = selectedTierIndex < 0 || selectedTierIndex >= subscriptionTiers.size() ? null : subscriptionTiers.get(selectedTierIndex);
                 showDialog(new PremiumFeatureBottomSheet(PremiumPreviewFragment.this, cell.data.type, false, tier));
@@ -718,7 +713,7 @@ public class PremiumPreviewFragment extends BaseFragment implements Notification
         buyPremium(fragment, tier, source, forcePremium, null);
     }
 
-    public static void buyPremium(BaseFragment fragment, SubscriptionTier tier, String source, boolean forcePremium, BillingFlowParams.SubscriptionUpdateParams updateParams) {
+    public static void buyPremium(BaseFragment fragment, SubscriptionTier tier, String source, boolean forcePremium, String a/*BillingFlowParams.SubscriptionUpdateParams updateParams*/) {
         if (BuildVars.IS_BILLING_UNAVAILABLE) {
             fragment.showDialog(new PremiumNotAvailableBottomSheet(fragment));
             return;
@@ -750,9 +745,9 @@ public class PremiumPreviewFragment extends BaseFragment implements Notification
                 if (selectedTier == null || selectedTier.subscriptionOption == null || selectedTier.subscriptionOption.bot_url == null) {
                     if (!TextUtils.isEmpty(fragment.getMessagesController().premiumBotUsername)) {
                         launchActivity.setNavigateToPremiumBot(true);
-                        launchActivity.onNewIntent(new Intent(Intent.ACTION_VIEW, Uri.parse("https://t.me/" + fragment.getMessagesController().premiumBotUsername + "?start=" + source)).putExtra("internal", true));
+                        launchActivity.onNewIntent(new Intent(Intent.ACTION_VIEW, Uri.parse("https://t.me/" + fragment.getMessagesController().premiumBotUsername + "?start=" + source)));
                     } else if (!TextUtils.isEmpty(fragment.getMessagesController().premiumInvoiceSlug)) {
-                        launchActivity.onNewIntent(new Intent(Intent.ACTION_VIEW, Uri.parse("https://t.me/$" + fragment.getMessagesController().premiumInvoiceSlug)).putExtra("internal", true));
+                        launchActivity.onNewIntent(new Intent(Intent.ACTION_VIEW, Uri.parse("https://t.me/$" + fragment.getMessagesController().premiumInvoiceSlug)));
                     }
                 } else {
                     Uri uri = Uri.parse(selectedTier.subscriptionOption.bot_url);
@@ -766,7 +761,7 @@ public class PremiumPreviewFragment extends BaseFragment implements Notification
                 return;
             }
         }
-
+        /*
         if (BillingController.PREMIUM_PRODUCT_DETAILS == null) {
             return;
         }
@@ -854,10 +849,10 @@ public class PremiumPreviewFragment extends BaseFragment implements Notification
                     AndroidUtilities.runOnUIThread(() -> {
                         if (response instanceof TLRPC.TL_boolTrue) {
                             BillingController.getInstance().launchBillingFlow(fragment.getParentActivity(), fragment.getAccountInstance(), purpose, Collections.singletonList(
-                                BillingFlowParams.ProductDetailsParams.newBuilder()
-                                    .setProductDetails(BillingController.PREMIUM_PRODUCT_DETAILS)
-                                    .setOfferToken(selectedTier.getOfferDetails().getOfferToken())
-                                    .build()
+                                    BillingFlowParams.ProductDetailsParams.newBuilder()
+                                            .setProductDetails(BillingController.PREMIUM_PRODUCT_DETAILS)
+                                            .setOfferToken(selectedTier.getOfferDetails().getOfferToken())
+                                            .build()
                             ), updateParams, false);
                         } else {
                             AlertsCreator.processError(fragment.getCurrentAccount(), error, fragment, req);
@@ -866,6 +861,7 @@ public class PremiumPreviewFragment extends BaseFragment implements Notification
                 });
             }
         }));
+        */
     }
 
     public static String getPremiumButtonText(int currentAccount, SubscriptionTier tier) {
@@ -903,8 +899,8 @@ public class PremiumPreviewFragment extends BaseFragment implements Notification
 
                 return LocaleController.getString(R.string.SubscribeToPremiumNoPrice);
             }
-
             String price = null;
+			/*
             if (BillingController.PREMIUM_PRODUCT_DETAILS != null) {
                 List<ProductDetails.SubscriptionOfferDetails> details = BillingController.PREMIUM_PRODUCT_DETAILS.getSubscriptionOfferDetails();
                 if (!details.isEmpty()) {
@@ -919,14 +915,15 @@ public class PremiumPreviewFragment extends BaseFragment implements Notification
                     }
                 }
             }
-
+			*/
             if (price == null) {
                 return LocaleController.getString(R.string.Loading);
             }
 
             return LocaleController.formatString(R.string.SubscribeToPremium, price);
+
         } else {
-            if (!BuildVars.useInvoiceBilling() && tier.getOfferDetails() == null) {
+            if (!BuildVars.useInvoiceBilling()/* && tier.getOfferDetails() == null*/) {
                 return LocaleController.getString(R.string.Loading);
             }
             final boolean isPremium = UserConfig.getInstance(currentAccount).isPremium();
@@ -1446,9 +1443,9 @@ public class PremiumPreviewFragment extends BaseFragment implements Notification
                 subscriptionTiers.clear();
                 currentSubscriptionTier = null;
             } else if (!BuildVars.useInvoiceBilling() && currentSubscriptionTier != null && !Objects.equals(BillingController.getInstance().getLastPremiumTransaction(),
-                currentSubscriptionTier.subscriptionOption != null ? currentSubscriptionTier.subscriptionOption.transaction != null ?
-                    currentSubscriptionTier.subscriptionOption.transaction.replaceAll(TRANSACTION_PATTERN, "$1") : null : null) ||
-                currentSubscriptionTier != null && currentSubscriptionTier.getMonths() == 12) {
+                    currentSubscriptionTier.subscriptionOption != null ? currentSubscriptionTier.subscriptionOption.transaction != null ?
+                            currentSubscriptionTier.subscriptionOption.transaction.replaceAll(TRANSACTION_PATTERN, "$1") : null : null) ||
+                                currentSubscriptionTier != null && currentSubscriptionTier.getMonths() == 12) {
                 subscriptionTiers.clear();
                 currentSubscriptionTier = null;
             }
@@ -1457,7 +1454,7 @@ public class PremiumPreviewFragment extends BaseFragment implements Notification
                 for (SubscriptionTier tier : subscriptionTiers) {
                     tier.setPricePerYearRegular(pricePerYearMax);
                 }
-            } else if (BillingController.getInstance().isReady() && BillingController.PREMIUM_PRODUCT_DETAILS != null) {
+            }/* else if (BillingController.getInstance().isReady() && BillingController.PREMIUM_PRODUCT_DETAILS != null) {
                 long pricePerMonthMaxStore = 0;
 
                 for (SubscriptionTier subscriptionTier : subscriptionTiers) {
@@ -1471,7 +1468,7 @@ public class PremiumPreviewFragment extends BaseFragment implements Notification
                 for (SubscriptionTier subscriptionTier : subscriptionTiers) {
                     subscriptionTier.setPricePerYearRegular(pricePerMonthMaxStore);
                 }
-            }
+            }*/
 
             if (selectedTierIndex == -1) {
                 for (int i = 0; i < subscriptionTiers.size(); i++) {
@@ -1549,16 +1546,10 @@ public class PremiumPreviewFragment extends BaseFragment implements Notification
             animated = false;
         }
         if (BuildVars.IS_BILLING_UNAVAILABLE) {
-            String text;
-            if (subscriptionTiers.isEmpty()) {
-                text = LocaleController.getString(R.string.SubscribeToPremiumNotAvailable);
-            } else {
-                text = getPremiumButtonText(currentAccount, subscriptionTiers.get(selectedTierIndex));
-            }
-            premiumButtonView.setButton(text, v -> buyPremium(this), animated);
+            premiumButtonView.setButton(getPremiumButtonText(currentAccount, subscriptionTiers.get(selectedTierIndex)), v -> buyPremium(this), animated);
             return;
         }
-        if (!BuildVars.useInvoiceBilling() && (!BillingController.getInstance().isReady() || subscriptionTiers.isEmpty() || selectedTierIndex >= subscriptionTiers.size() || subscriptionTiers.get(selectedTierIndex).googlePlayProductDetails == null)) {
+        if (!BuildVars.useInvoiceBilling() && (/*!BillingController.getInstance().isReady() || */subscriptionTiers.isEmpty() || selectedTierIndex >= subscriptionTiers.size()/* || subscriptionTiers.get(selectedTierIndex).googlePlayProductDetails == null*/)) {
             premiumButtonView.setButton(LocaleController.getString(R.string.Loading), v -> {}, animated);
             premiumButtonView.setFlickerDisabled(true);
             return;
@@ -1566,14 +1557,14 @@ public class PremiumPreviewFragment extends BaseFragment implements Notification
         if (!subscriptionTiers.isEmpty()) {
             premiumButtonView.setButton(getPremiumButtonText(currentAccount, subscriptionTiers.get(selectedTierIndex)), v -> {
                 SubscriptionTier tier = subscriptionTiers.get(selectedTierIndex);
-                BillingFlowParams.SubscriptionUpdateParams updateParams = null;
+                /*BillingFlowParams.SubscriptionUpdateParams updateParams = null;
                 if (currentSubscriptionTier != null && currentSubscriptionTier.subscriptionOption != null && currentSubscriptionTier.subscriptionOption.transaction != null) {
                     updateParams = BillingFlowParams.SubscriptionUpdateParams.newBuilder()
-                        .setOldPurchaseToken(BillingController.getInstance().getLastPremiumToken())
-                        .setReplaceProrationMode(BillingFlowParams.ProrationMode.IMMEDIATE_AND_CHARGE_FULL_PRICE)
-                        .build();
-                }
-                buyPremium(this, tier, "settings", true, updateParams);
+                            .setOldPurchaseToken(BillingController.getInstance().getLastPremiumToken())
+                            .setReplaceProrationMode(BillingFlowParams.ProrationMode.IMMEDIATE_AND_CHARGE_FULL_PRICE)
+                            .build();
+                }*/
+                buyPremium(this, tier, "settings", true, null);
             }, animated);
             premiumButtonView.setFlickerDisabled(false);
         }
@@ -1613,9 +1604,9 @@ public class PremiumPreviewFragment extends BaseFragment implements Notification
     @Override
     public ArrayList<ThemeDescription> getThemeDescriptions() {
         return SimpleThemeDescription.createThemeDescriptions(this::updateColors,
-            Theme.key_premiumGradient1, Theme.key_premiumGradient2, Theme.key_premiumGradient3, Theme.key_premiumGradient4,
-            Theme.key_premiumGradientBackground1, Theme.key_premiumGradientBackground2, Theme.key_premiumGradientBackground3, Theme.key_premiumGradientBackground4,
-            Theme.key_premiumGradientBackgroundOverlay, Theme.key_premiumStartGradient1, Theme.key_premiumStartGradient2, Theme.key_premiumStartSmallStarsColor, Theme.key_premiumStartSmallStarsColor2
+                Theme.key_premiumGradient1, Theme.key_premiumGradient2, Theme.key_premiumGradient3, Theme.key_premiumGradient4,
+                Theme.key_premiumGradientBackground1, Theme.key_premiumGradientBackground2, Theme.key_premiumGradientBackground3, Theme.key_premiumGradientBackground4,
+                Theme.key_premiumGradientBackgroundOverlay, Theme.key_premiumStartGradient1, Theme.key_premiumStartGradient2, Theme.key_premiumStartSmallStarsColor, Theme.key_premiumStartSmallStarsColor2
         );
     }
 
@@ -1769,6 +1760,28 @@ public class PremiumPreviewFragment extends BaseFragment implements Notification
         });
     }
 
+    // Fake.
+    public final class ProductDetails {
+        public final class SubscriptionOfferDetails {
+            public final class Phases {
+                public final class Phase {
+                    public long getPriceAmountMicros() {
+                        return 0;
+                    }
+                    public String getPriceCurrencyCode() {
+                        return "";
+                    }
+                }
+                public ArrayList<Phase> getPricingPhaseList() {
+                    return new ArrayList<Phase>();
+                }
+            }
+            public Phases getPricingPhases() {
+                return new Phases();
+            }
+        }
+    }
+
     public final static class SubscriptionTier {
         public final TLRPC.TL_premiumSubscriptionOption subscriptionOption;
         private int discount;
@@ -1776,15 +1789,12 @@ public class PremiumPreviewFragment extends BaseFragment implements Notification
         private long pricePerYear;
 
         private long pricePerYearRegular;
-        private ProductDetails googlePlayProductDetails;
-        private ProductDetails.SubscriptionOfferDetails offerDetails;
-
         public int yOffset;
 
         public SubscriptionTier(TLRPC.TL_premiumSubscriptionOption subscriptionOption) {
             this.subscriptionOption = subscriptionOption;
         }
-
+        /*
         public ProductDetails getGooglePlayProductDetails() {
             return googlePlayProductDetails;
         }
@@ -1797,7 +1807,7 @@ public class PremiumPreviewFragment extends BaseFragment implements Notification
         public void setGooglePlayProductDetails(ProductDetails googlePlayProductDetails) {
             this.googlePlayProductDetails = googlePlayProductDetails;
         }
-
+*/
         public void setPricePerYearRegular(long pricePerYearRegular) {
             this.pricePerYearRegular = pricePerYearRegular;
         }
@@ -1848,7 +1858,7 @@ public class PremiumPreviewFragment extends BaseFragment implements Notification
                 return BillingController.getInstance().formatCurrency(pricePerYearRegular, getCurrency());
             }
 
-            return googlePlayProductDetails == null ? "" : BillingController.getInstance().formatCurrency(pricePerYearRegular, getCurrency(), 6);
+            return BillingController.getInstance().formatCurrency(pricePerYearRegular, getCurrency(), 6);
         }
 
         public String getFormattedPricePerYear() {
@@ -1856,7 +1866,7 @@ public class PremiumPreviewFragment extends BaseFragment implements Notification
                 return BillingController.getInstance().formatCurrency(getPricePerYear(), getCurrency());
             }
 
-            return googlePlayProductDetails == null ? "" : BillingController.getInstance().formatCurrency(getPricePerYear(), getCurrency(), 6);
+            return BillingController.getInstance().formatCurrency(getPricePerYear(), getCurrency(), 6);
         }
 
         public String getFormattedPricePerMonth() {
@@ -1864,7 +1874,7 @@ public class PremiumPreviewFragment extends BaseFragment implements Notification
                 return BillingController.getInstance().formatCurrency(getPricePerMonth(), getCurrency());
             }
 
-            return googlePlayProductDetails == null ? "" : BillingController.getInstance().formatCurrency(getPricePerMonth(), getCurrency(), 6);
+            return BillingController.getInstance().formatCurrency(getPricePerMonth(), getCurrency(), 6);
         }
 
         public String getFormattedPrice() {
@@ -1872,32 +1882,35 @@ public class PremiumPreviewFragment extends BaseFragment implements Notification
                 return BillingController.getInstance().formatCurrency(getPrice(), getCurrency());
             }
 
-            return googlePlayProductDetails == null ? "" : BillingController.getInstance().formatCurrency(getPrice(), getCurrency(), 6);
+            return BillingController.getInstance().formatCurrency(getPrice(), getCurrency(), 6);
         }
 
         public long getPrice() {
-            if (BuildVars.useInvoiceBilling() || subscriptionOption.store_product == null) {
+            //if (BuildVars.useInvoiceBilling() || subscriptionOption.store_product == null) {
                 return subscriptionOption.amount;
-            }
+            /*}
             if (googlePlayProductDetails == null) {
                 return 0;
             }
             checkOfferDetails();
             return offerDetails == null ? 0 : offerDetails.getPricingPhases().getPricingPhaseList().get(0).getPriceAmountMicros();
+            */
         }
 
         public String getCurrency() {
-            if (BuildVars.useInvoiceBilling() || subscriptionOption.store_product == null) {
+            //if (BuildVars.useInvoiceBilling() || subscriptionOption.store_product == null) {
                 return subscriptionOption.currency;
-            }
+            /*}
             if (googlePlayProductDetails == null) {
                 return "";
             }
             checkOfferDetails();
             return offerDetails == null ? "" : offerDetails.getPricingPhases().getPricingPhaseList().get(0).getPriceCurrencyCode();
+             */
         }
 
         private void checkOfferDetails() {
+/*
             if (googlePlayProductDetails == null) {
                 return;
             }
@@ -1911,6 +1924,7 @@ public class PremiumPreviewFragment extends BaseFragment implements Notification
                     }
                 }
             }
+*/
         }
     }
 }

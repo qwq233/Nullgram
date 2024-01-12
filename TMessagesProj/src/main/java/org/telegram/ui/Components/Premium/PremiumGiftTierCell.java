@@ -195,7 +195,7 @@ public class PremiumGiftTierCell extends ViewGroup {
 
         titleView.setText(LocaleController.formatPluralString("Months", tier.getMonths()));
 
-        isDrawingGradient = !BuildVars.useInvoiceBilling() && (!BillingController.getInstance().isReady() || tier.getGooglePlayProductDetails() == null);
+        isDrawingGradient = !BuildVars.useInvoiceBilling();
         if (!isDrawingGradient) {
             if (tier.getDiscount() <= 0) {
                 discountView.setVisibility(GONE);
