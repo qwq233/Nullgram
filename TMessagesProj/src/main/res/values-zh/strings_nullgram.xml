@@ -276,6 +276,7 @@
     <string name="JumpToBeginning">回到顶部</string>
     <string name="DisableQuickSendMediaBottom">禁用快速发送媒体按钮</string>
     <string name="ProviderBaiduTranslate">百度翻译</string>
+    <string name="ProviderTranSmartTranslate">腾讯交互翻译</string>
     <string name="alwaysSendWithoutSound">总是静音发送</string>
     <string name="EditEnableMarkdown">启用Markdown</string>
     <string name="EditDisableMarkdown">禁用Markdown</string>

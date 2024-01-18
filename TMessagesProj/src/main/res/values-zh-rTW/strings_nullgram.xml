@@ -276,6 +276,7 @@
     <string name="JumpToBeginning">跳至開始</string>
     <string name="DisableQuickSendMediaBottom">停用快速傳送媒體底部</string>
     <string name="ProviderBaiduTranslate">百度翻譯</string>
+    <string name="ProviderTranSmartTranslate">騰訊交互翻譯</string>
     <string name="alwaysSendWithoutSound">總是無聲傳送</string>
     <string name="EditEnableMarkdown">啟用 Markdown</string>
     <string name="EditDisableMarkdown">停用 Markdown</string>
