@@ -9,5 +9,5 @@ object Version {
     val officialVersionName = "10.6.1"
 
     @JvmStatic
-    val isStable = true
+    val isStable = false
 }
