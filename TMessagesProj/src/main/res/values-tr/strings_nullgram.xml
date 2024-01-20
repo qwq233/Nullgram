@@ -313,4 +313,7 @@
     <string name="CreateCodeLanguage">Language</string>
     <string name="UnsupportedMediaNullgram">Bu mesaj Nullgram sürümünüzde desteklenmiyor. Görüntülemek için uygulamayı güncelleyin: https://t.me/NullgramClient</string>
     <string name="ignoreUserSpecifiedReplyColor">Kullanıcı tarafından ayarlanan yanıt rengini yoksay</string>
+    <string name="ShowTitle">Show title</string>
+    <string name="HideTitle">Hide title</string>
+    <string name="showHideTitle">Show hide title</string>
 </resources>
