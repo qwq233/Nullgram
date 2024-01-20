@@ -454,6 +454,7 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
     private ActionBarMenuItem.Item muteItem;
     private ActionBarMenuItem.Item muteItemGap;
     private ChatNotificationsPopupWrapper chatNotificationsPopupWrapper;
+    private ActionBarMenuSubItem hideTitleItem;
     private float pagedownButtonEnterProgress;
     private float mentionsButtonEnterProgress;
     private float reactionsMentionButtonEnterProgress;
@@ -1401,6 +1402,7 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
     private final static int bot_settings = 31;
     private final static int call = 32;
     private final static int video_call = 33;
+    private final static int hide_title = 102;
 
     private final static int delete_history = 101;
 
@@ -3514,6 +3516,17 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
 //                    Bundle bundle = new Bundle();
 //                    bundle.putLong("chat_id", -dialog_id);
 //                    presentFragment(new TopicsFragment(bundle));
+                } else if (id == hide_title) {
+                    Config.toggleHideTitle();
+                    updateTitle(false);
+                    checkAndUpdateAvatar();
+                    if (hideTitleItem != null) {
+                        if (Config.hideTitle) {
+                            hideTitleItem.setText(LocaleController.getString("ShowTitle", R.string.ShowTitle));
+                        } else {
+                            hideTitleItem.setText(LocaleController.getString("HideTitle", R.string.HideTitle));
+                        }
+                    }
                 }
             }
         });
@@ -3811,6 +3824,15 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
                 }
                 if (themeDelegate.isThemeChangeAvailable(true)) {
                     headerItem.lazilyAddSubItem(change_colors, R.drawable.msg_colors, LocaleController.getString("SetWallpapers", R.string.SetWallpapers));
+                }
+                if (Config.showHideTitle) {
+                    String hideTitleString = "";
+                    if (Config.hideTitle) {
+                        hideTitleString = LocaleController.getString("ShowTitle", R.string.ShowTitle);
+                    } else {
+                        hideTitleString = LocaleController.getString("HideTitle", R.string.HideTitle);
+                    }
+                    hideTitleItem = headerItem.addSubItem(hide_title, R.drawable.hide_title, hideTitleString, themeDelegate);
                 }
                 if (!isTopic) {
                     clearHistoryItem = headerItem.lazilyAddSubItem(clear_history, R.drawable.msg_clear, LocaleController.getString("ClearHistory", R.string.ClearHistory));

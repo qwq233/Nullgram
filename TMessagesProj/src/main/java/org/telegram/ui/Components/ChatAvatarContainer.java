@@ -60,6 +60,8 @@ import org.telegram.ui.TopicsFragment;
 
 import java.util.concurrent.atomic.AtomicReference;
 
+import top.qwq2333.gen.Config;
+
 public class ChatAvatarContainer extends FrameLayout implements NotificationCenter.NotificationCenterDelegate {
 
     public boolean allowDrawStories;
@@ -1132,6 +1134,12 @@ public class ChatAvatarContainer extends FrameLayout implements NotificationCent
             }
             avatarImageView.setRoundRadius(chat.forum ? AndroidUtilities.dp(16) : AndroidUtilities.dp(21));
         }
+
+        int visibility = Config.hideTitle
+            ? android.view.View.GONE
+            : android.view.View.VISIBLE;
+        avatarImageView.setVisibility(visibility);
+        titleTextView.setVisibility(visibility);
     }
 
     public void updateOnlineCount() {

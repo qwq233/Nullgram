@@ -315,4 +315,7 @@
     <string name="CreateCodeLanguage">Language</string>
     <string name="UnsupportedMediaNullgram">This message is not supported on your version of Nullgram. Update the app to view: https://t.me/NullgramClient</string>
     <string name="ignoreUserSpecifiedReplyColor">Ignore user-set reply color</string>
+    <string name="ShowTitle">Show title</string>
+    <string name="HideTitle">Hide title</string>
+    <string name="showHideTitle">Show hide title</string>
 </resources>

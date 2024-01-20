@@ -99,7 +99,9 @@ object Defines {
     @BooleanConfig const val showExactTime = "showExactTime"
     @BooleanConfig const val hideStories = "hideStories"
     @BooleanConfig const val storyStealthMode = "storyStealthMode"
-    @BooleanConfig const val ignoreUserSpecifiedReplyColor = "ignoreUserSpecifiedReplyColor";
+    @BooleanConfig const val ignoreUserSpecifiedReplyColor = "ignoreUserSpecifiedReplyColor"
+    @BooleanConfig const val hideTitle = "hideTitle"
+    @BooleanConfig const val showHideTitle = "showHideTitle"
 
     /**
      * 0 default 1 online 2 offline

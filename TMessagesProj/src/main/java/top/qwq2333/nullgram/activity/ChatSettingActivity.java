@@ -114,6 +114,7 @@ public class ChatSettingActivity extends BaseActivity {
     private int scrollableChatPreviewRow;
     private int showTabsOnForwardRow;
     private int disableStickersAutoReorderRow;
+    private int hideTitleRow;
     private int chat2Row;
 
     private int markdownRow;
@@ -354,6 +355,11 @@ public class ChatSettingActivity extends BaseActivity {
             if (view instanceof TextCheckCell) {
                 ((TextCheckCell) view).setChecked(Config.markdownDisabled);
             }
+        } else if (position == hideTitleRow) {
+            Config.toggleShowHideTitle();
+            if (view instanceof TextCheckCell) {
+                ((TextCheckCell) view).setChecked(Config.showHideTitle);
+            }
         }
 
     }
@@ -405,6 +411,7 @@ public class ChatSettingActivity extends BaseActivity {
         scrollableChatPreviewRow = addRow("scrollableChatPreview");
         showTabsOnForwardRow = addRow("showTabsOnForward");
         disableStickersAutoReorderRow = addRow("disableStickersAutoReorder");
+        hideTitleRow = addRow("showHideTitle");
         chat2Row = addRow();
         markdownRow = addRow();
         markdownDisableRow = addRow("markdownDisabled");
@@ -539,6 +546,8 @@ public class ChatSettingActivity extends BaseActivity {
                         textCell.setTextAndCheck(LocaleController.getString("MarkdownParseLinks", R.string.MarkdownParseLinks), Config.markdownParseLinks, false);
                     } else if (position == markdownDisableRow) {
                         textCell.setTextAndCheck(LocaleController.getString("MarkdownDisableByDefault", R.string.MarkdownDisableByDefault), Config.markdownDisabled, true);
+                    } else if (position == hideTitleRow) {
+                        textCell.setTextAndCheck(LocaleController.getString("showHideTitle", R.string.showHideTitle), Config.showHideTitle, true);
                     }
                     break;
                 }
