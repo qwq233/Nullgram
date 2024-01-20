@@ -276,6 +276,7 @@
     <string name="JumpToBeginning">Torna all\'inizio</string>
     <string name="DisableQuickSendMediaBottom">Disattiva bottone invio media rapido</string>
     <string name="ProviderBaiduTranslate">Baidu Translator</string>
+    <string name="ProviderTranSmartTranslate">TranSmart Translator</string>
     <string name="alwaysSendWithoutSound">Invia sempre senza suono</string>
     <string name="EditEnableMarkdown">Abilita Markdown</string>
     <string name="EditDisableMarkdown">Disattiva Markdown</string>
