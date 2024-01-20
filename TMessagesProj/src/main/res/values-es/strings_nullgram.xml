@@ -276,6 +276,7 @@
     <string name="JumpToBeginning">Ir al inicio</string>
     <string name="DisableQuickSendMediaBottom">Desactivar rápida envío de medios instantáneos</string>
     <string name="ProviderBaiduTranslate">Traductor Baidu</string>
+    <string name="ProviderTranSmartTranslate">TranSmart Translator</string>
     <string name="alwaysSendWithoutSound">Siempre enviar sin sonido</string>
     <string name="EditEnableMarkdown">Habilitar Markdown</string>
     <string name="EditDisableMarkdown">Desactivar Markdown</string>
