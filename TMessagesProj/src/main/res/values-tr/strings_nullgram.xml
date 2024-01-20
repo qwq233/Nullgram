@@ -276,6 +276,7 @@
     <string name="JumpToBeginning">Başa atla</string>
     <string name="DisableQuickSendMediaBottom">Hızlı Gönderim Medyasını Alttan Devre Dışı Bırak</string>
     <string name="ProviderBaiduTranslate">Baidu çevirmen</string>
+    <string name="ProviderTranSmartTranslate">TranSmart Translator</string>
     <string name="alwaysSendWithoutSound">Her zaman sessiz gönder</string>
     <string name="EditEnableMarkdown">Markdown u etkinleştir</string>
     <string name="EditDisableMarkdown">Markdown kapat</string>
