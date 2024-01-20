@@ -1,6 +1,6 @@
 [versions]
 agp = "8.1.4"
-appCenter = "5.0.3"
+appCenter = "5.0.4"
 checkerCompatQual = "2.5.6"
 core = "4.6.2"
 dynamicanimation = "1.0.0"
