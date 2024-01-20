@@ -276,6 +276,7 @@
     <string name="JumpToBeginning">Lompat Ke Awal</string>
     <string name="DisableQuickSendMediaBottom">Nonaktifkan Bagian Bawah Media Kirim Cepat</string>
     <string name="ProviderBaiduTranslate">Penerjemah Baidu</string>
+    <string name="ProviderTranSmartTranslate">TranSmart Translator</string>
     <string name="alwaysSendWithoutSound">Selalu Kirim Tanpa Suara</string>
     <string name="EditEnableMarkdown">Aktifkan Markdown</string>
     <string name="EditDisableMarkdown">Nonaktifkan Markdown</string>
