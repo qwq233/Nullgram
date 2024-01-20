@@ -17,6 +17,8 @@
  * <https://www.gnu.org/licenses/>
  */
 
+@file:Suppress("PropertyName")
+
 package top.qwq2333.nullgram.translate.providers
 
 import io.ktor.client.call.body
