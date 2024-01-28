@@ -26,12 +26,9 @@ import android.media.audiofx.NoiseSuppressor
 import top.qwq2333.gen.Config
 
 object AudioUtils {
-    var automaticGainControl: AutomaticGainControl? =
-        null
-    var acousticEchoCanceler: AcousticEchoCanceler? =
-        null
-    var noiseSuppressor: NoiseSuppressor? =
-        null
+    private var automaticGainControl: AutomaticGainControl? = null
+    private var acousticEchoCanceler: AcousticEchoCanceler? = null
+    private var noiseSuppressor: NoiseSuppressor? = null
 
     @JvmStatic
     fun initVoiceEnhance(
@@ -39,48 +36,33 @@ object AudioUtils {
     ) {
         if (!Config.enchantAudio) return
         if (AutomaticGainControl.isAvailable()) {
-            automaticGainControl =
-                AutomaticGainControl.create(
-                    audioRecord.audioSessionId
-                )
-            automaticGainControl?.enabled =
-                true
+            automaticGainControl = AutomaticGainControl.create(
+                audioRecord.audioSessionId
+            )
+            automaticGainControl?.enabled = true
         }
         if (AcousticEchoCanceler.isAvailable()) {
-            acousticEchoCanceler =
-                AcousticEchoCanceler.create(
-                    audioRecord.audioSessionId
-                )
-            acousticEchoCanceler?.enabled =
-                true
+            acousticEchoCanceler = AcousticEchoCanceler.create(
+                audioRecord.audioSessionId
+            )
+            acousticEchoCanceler?.enabled = true
         }
         if (NoiseSuppressor.isAvailable()) {
-            noiseSuppressor =
-                NoiseSuppressor.create(
-                    audioRecord.audioSessionId
-                )
-            noiseSuppressor?.enabled =
-                true
+            noiseSuppressor = NoiseSuppressor.create(
+                audioRecord.audioSessionId
+            )
+            noiseSuppressor?.enabled = true
         }
     }
 
     @JvmStatic
     fun releaseVoiceEnhance() {
-        if (automaticGainControl != null) {
-            automaticGainControl?.release()
-            automaticGainControl =
-                null
-        }
-        if (acousticEchoCanceler != null) {
-            acousticEchoCanceler?.release()
-            acousticEchoCanceler =
-                null
-        }
-        if (noiseSuppressor != null) {
-            noiseSuppressor?.release()
-            noiseSuppressor =
-                null
-        }
+        automaticGainControl?.release()
+        automaticGainControl = null
+        acousticEchoCanceler?.release()
+        acousticEchoCanceler = null
+        noiseSuppressor?.release()
+        noiseSuppressor = null
     }
 
     @JvmStatic

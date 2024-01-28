@@ -10571,7 +10571,7 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
             }
         }
         if (Build.VERSION.SDK_INT >= 23 && getParentActivity() != null) {
-            if (PermissionUtils.isRecordAudioPermissionGranted()) {
+            if (!PermissionUtils.isRecordAudioPermissionGranted()) {
                 PermissionUtils.requestRecordAudioPermission(getParentActivity());
                 return true;
             }

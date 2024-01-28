@@ -1068,7 +1068,7 @@ public class ChatAttachAlertPhotoLayout extends ChatAttachAlert.AttachAlertLayou
                     return false;
                 }
                 if (Build.VERSION.SDK_INT >= 23) {
-                    if (PermissionUtils.isRecordAudioPermissionGranted()) {
+                    if (!PermissionUtils.isRecordAudioPermissionGranted()) {
                         requestingPermissions = true;
                         String[] permissions;
                         if (Build.VERSION.SDK_INT >= 34) {

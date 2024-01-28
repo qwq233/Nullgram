@@ -55,6 +55,8 @@ object PermissionUtils {
     @JvmStatic
     fun isAudioPermissionGranted(): Boolean = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
         isPermissionGranted(Manifest.permission.READ_MEDIA_VISUAL_USER_SELECTED) && isPermissionGranted(Manifest.permission.READ_MEDIA_AUDIO)
+    } else  if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+        isPermissionGranted(Manifest.permission.READ_MEDIA_AUDIO)
     } else {
         isStoragePermissionGranted()
     }
