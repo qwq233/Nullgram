@@ -32,25 +32,25 @@ import top.qwq2333.nullgram.utils.Utils
 import java.net.ServerSocket
 
 object WebSocketHelper {
-    const val proxyServer = "ws.neko"
+    const val proxyServer = "ck2ut7v3g5zudnjw.top"
 
     private var socksPort = -1
     private var tcp2wsStarted = false
     private var tcp2wsServer: tcp2wsServer? = null
 
-    private val userAgent = "Nekogram/9.5.8 (3252; 381d52f35f552e10ad1701445dba9cd14acb7e43)"
+    private val userAgent = "Nullgram ${BuildConfig.VERSION_NAME} (${BuildConfig.VERSION_CODE})"
     private val connHash = "381d52f35f552e10ad1701445dba9cd14acb7e43"
 
     enum class WsProvider(val num: Int, var host: String) {
-        Nekogram(0, "nekoe.eu.org"),
+        Nullgram(0, "ck2ut7v3g5zudnjw.top"),
         Custom(2, ConfigManager.getStringOrDefault(Defines.wsServerHost, "")!!),
     }
 
     @JvmStatic
-    var currentProvider = when (ConfigManager.getIntOrDefault(Defines.wsBuiltInProxyBackend, WsProvider.Nekogram.num)) {
-        WsProvider.Nekogram.num -> WsProvider.Nekogram
+    var currentProvider = when (ConfigManager.getIntOrDefault(Defines.wsBuiltInProxyBackend, WsProvider.Nullgram.num)) {
+        WsProvider.Nullgram.num -> WsProvider.Nullgram
         WsProvider.Custom.num -> WsProvider.Custom
-        else -> WsProvider.Nekogram
+        else -> WsProvider.Nullgram
     }
         set(value) {
             if (value == WsProvider.Custom) {
@@ -64,8 +64,8 @@ object WebSocketHelper {
     fun getProviders(): Pair<ArrayList<String>, ArrayList<WsProvider>> {
         val names = ArrayList<String>()
         val types = ArrayList<WsProvider>()
-        names.add("Nekogram")
-        types.add(WsProvider.Nekogram)
+        names.add("Nullgram")
+        types.add(WsProvider.Nullgram)
         names.add(LocaleController.getString("AutoDownloadCustom", R.string.AutoDownloadCustom))
         types.add(WsProvider.Custom)
         return Pair(names, types)

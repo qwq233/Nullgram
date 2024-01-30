@@ -235,8 +235,8 @@ public class WsSettingsActivity extends BaseActivity {
                 case TYPE_INFO_PRIVACY: {
                     TextInfoPrivacyCell cell = (TextInfoPrivacyCell) holder.itemView;
                     String value = null;
-                    if (WebSocketHelper.getCurrentProvider().equals(WsProvider.Nekogram)) {
-                        value = LocaleController.getString("NekogramWsDescription", R.string.NekogramWsDescription);
+                    if (WebSocketHelper.getCurrentProvider().equals(WsProvider.Nullgram)) {
+                        value = LocaleController.getString("NullgramWsDescription", R.string.NullgramWsDescription);
                     } else if (WebSocketHelper.getCurrentProvider().equals(WsProvider.Custom)) {
                         value = LocaleController.getString("WsCustomDescription", R.string.WsCustomDescription);
                     }
