@@ -216,7 +216,7 @@
     <string name="Ban">封禁</string>
     <string name="autoDisableBuiltInProxy">自动关闭内置代理</string>
     <string name="autoDisableBuiltInProxyDesc">当Nullgram 检测到您打开VPN 时，它将自动关闭内置代理</string>
-    <string name="NekogramWsDescription">通过CloudFlare提供的WebSocket连接到TELEOFFICIAL数据中心\n由Nekogram提供</string>
+    <string name="NullgramWsDescription">Connect to TELEOFFICIAL through WebSocket via Cloudflare.\nProvided by Nullgram</string>
     <string name="NekogramXWsDescription">由 Nekogram X 提供</string>
     <string name="WsGetHelp">你也可以轻松地自己部署它！</string>
     <string name="WsCustomDescription">自建WebSocket隧道  连接到 TELEOFFICAL 数据中心</string>
