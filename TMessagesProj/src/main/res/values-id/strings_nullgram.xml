@@ -216,7 +216,7 @@
     <string name="Ban">Blokir</string>
     <string name="autoDisableBuiltInProxy">Nonaktifkan otomatis Proxy Bawaan</string>
     <string name="autoDisableBuiltInProxyDesc">Ini akan otomatis menonaktifkan proxy bawaan ketika Nullgram mendeteksi anda mengaktifkan VPN</string>
-    <string name="NekogramWsDescription">Hubungkan ke Telegram Resmi melalui WebSocket via Cloudflare.\nDisediakan oleh Nekogram</string>
+    <string name="NullgramWsDescription">Connect to TELEOFFICIAL through WebSocket via Cloudflare.\nProvided by Nullgram</string>
     <string name="NekogramXWsDescription">Disediakan oleh Nekogram X</string>
     <string name="WsGetHelp">Anda juga dapat membuatnya sendiri dengan mudah!</string>
     <string name="WsCustomDescription">Gunakan domain kustom untuk menghubungkan ke Telegram Resmi melalui WebSocket via Cloudflare.</string>
