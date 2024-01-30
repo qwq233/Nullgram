@@ -216,7 +216,7 @@
     <string name="Ban">Ban</string>
     <string name="autoDisableBuiltInProxy">Disattiva automaticamente proxy integrato</string>
     <string name="autoDisableBuiltInProxyDesc">Disattiverà automaticamente il proxy integrato in Nullgram non appena riconoscerà la VPN</string>
-    <string name="NekogramWsDescription">Collegati a TELEOFFICIAL attraverso WebSocket su Cloudflare.\nFornito da Nekogram</string>
+    <string name="NullgramWsDescription">Connect to TELEOFFICIAL through WebSocket via Cloudflare.\nProvided by Nullgram</string>
     <string name="NekogramXWsDescription">Fornito da Nekogram X</string>
     <string name="WsGetHelp">Puoi installartelo facilmente anche da te!</string>
     <string name="WsCustomDescription">Usa un dominio custom per collegarti a TELEOFFICIAL attraverso WebSocket su Cloudflare.</string>
