@@ -303,9 +303,9 @@ object Utils {
     }
 
     @JvmStatic
-    fun getAbi(): String  {
+    val abi: String by lazy {
         val apkFile = ZipFile(ApplicationLoader.applicationContext.applicationInfo.sourceDir)
-        return try {
+        try {
             val libFolder = apkFile.entries().asSequence().find { it.name.contains("libtmessages") }!!
             when (libFolder.name.split("/")[1]) {
                 "arm64-v8a" -> "arm64"
