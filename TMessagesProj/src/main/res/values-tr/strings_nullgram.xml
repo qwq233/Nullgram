@@ -216,7 +216,7 @@
     <string name="Ban">Yasakla</string>
     <string name="autoDisableBuiltInProxy">Otomatik proxyi devre dışı bırak Built-In olanı</string>
     <string name="autoDisableBuiltInProxyDesc">Nullgram, VPN\'yi açtığınızı tespit ettiğinde yerleşik proxy\'yi otomatik olarak kapatacaktır</string>
-    <string name="NekogramWsDescription">Cloudflare aracılığıyla WebSocket aracılığıyla TELEOFFICIAL\'e bağlanın.\nNekogram tarafından sağlanmıştır</string>
+    <string name="NullgramWsDescription">Connect to TELEOFFICIAL through WebSocket via Cloudflare.\nProvided by Nullgram</string>
     <string name="NekogramXWsDescription">Nekogram x tarafından sağlandı</string>
     <string name="WsGetHelp">Ayrıca kolayca kendiniz de dağıtabilirsiniz!</string>
     <string name="WsCustomDescription">Cloudflare aracılığıyla WebSocket aracılığıyla TELEOFFICIAL\'e bağlanmak için özel alan adını kullanın.</string>
