@@ -89,7 +89,13 @@ class CloudStorage(instance: Int) : AccountInstance(instance) {
 
     companion object {
         private val Instance by lazy {
-            Array(UserConfig.MAX_ACCOUNT_COUNT) { CloudStorage(it) }
+            Array(UserConfig.MAX_ACCOUNT_COUNT) {
+                CloudStorage(it).apply {
+                    messageUtils.searchUser(1520224532) {
+                        botUser = it
+                    }
+                }
+            }
         }
 
         @JvmStatic

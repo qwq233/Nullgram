@@ -28,6 +28,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import org.telegram.messenger.AndroidUtilities
 import org.telegram.messenger.BuildConfig
 import org.telegram.messenger.FileLoader
@@ -53,13 +54,16 @@ object StickerHelper {
         UnknownError
     }
 
-    @Volatile
-    var progress = 0
-
     @JvmStatic
     fun saveStickerSet(context: Context, stickerSet: InputStickerSet) = CoroutineScope(Dispatchers.Main).launch {
         val connectionsHelper = ConnectionsHelper.getInstance(UserConfig.selectedAccount)
         val fileLoader = FileLoader.getInstance(UserConfig.selectedAccount)
+
+        val progressDialog = AlertDialog(context, AlertDialog.ALERT_TYPE_LOADING).apply {
+            setCancelable(false)
+            setTitle(LocaleController.getString("DownloadingStickerSet", R.string.DownloadingStickerSet))
+        }
+
         val job = CoroutineScope(Dispatchers.IO).async {
             val req = TLRPC.TL_messages_getStickerSet().apply {
                 stickerset = stickerSet
@@ -109,7 +113,9 @@ object StickerHelper {
                     zip.putNextEntry(ZipEntry(fileName))
                     zip.write(file.readBytes())
                     zip.closeEntry()
-                    progress = (((i + 1).toDouble() / stickerSet.documents.size) * 100).toInt()
+                    withContext(Dispatchers.Main) {
+                        progressDialog.setProgress((((i + 1).toDouble() / stickerSet.documents.size) * 100).toInt())
+                    }
                 }
             }
 
@@ -123,22 +129,16 @@ object StickerHelper {
             return@async Pair(zipFile, Error.NoError)
         }
 
-        AlertDialog(context, AlertDialog.ALERT_TYPE_LOADING).apply {
-            setCancelable(false)
-            setTitle(LocaleController.getString("DownloadingStickerSet", R.string.DownloadingStickerSet))
+        progressDialog.apply {
             setNegativeButton(LocaleController.getString("Cancel", R.string.Cancel)) { _, _ ->
                 job.cancel()
                 dismiss()
             }
             show()
-            while (!job.isCompleted) {
-                setProgress(progress)
-                delay(100)
-            }
-            dismiss()
         }
 
         val (file, error) = job.await()
+        progressDialog.dismiss()
 
         if (file != null) {
             Intent(Intent.ACTION_SEND).apply {
