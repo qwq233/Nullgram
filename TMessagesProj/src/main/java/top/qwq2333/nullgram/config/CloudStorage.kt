@@ -17,18 +17,20 @@
  * <https://www.gnu.org/licenses/>
  */
 
+@file:Suppress("EnumEntryName")
+
 package top.qwq2333.nullgram.config
 
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.future.future
-import kotlinx.coroutines.launch
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import org.telegram.messenger.AccountInstance
 import org.telegram.messenger.UserConfig
 import org.telegram.tgnet.TLRPC
 import top.qwq2333.nullgram.utils.Log
+import java.util.concurrent.CompletableFuture
 
 class CloudStorage(instance: Int) : AccountInstance(instance) {
     private var botUser: TLRPC.User? = null
@@ -43,10 +45,10 @@ class CloudStorage(instance: Int) : AccountInstance(instance) {
         getKeys("getStorageKeys")
     }
 
-    private fun invokeStorageMethod(method: Method, params: KeyPair): KeyPair? {
+    @Throws(IllegalStateException::class)
+    private fun invokeStorageMethod(method: Method, params: KeyPair): CompletableFuture<KeyPair?> {
         if (botUser == null) {
-            Log.e(IllegalStateException("For some reason, unable to get bot user"))
-            return null
+            throw IllegalStateException("For some reason, unable to get bot user")
         }
         val req = TLRPC.TL_bots_invokeWebViewCustomMethod().apply {
             bot = messagesController.getInputUser(botUser)
@@ -61,16 +63,20 @@ class CloudStorage(instance: Int) : AccountInstance(instance) {
         }
 
         return CoroutineScope(Dispatchers.IO).future {
-            connectionsHelper.sendReqAndDo(req) { response, _ ->
+            connectionsHelper.sendRequestAndDo(req) { response, err ->
+                if (err != null) {
+                    throw IllegalStateException("Error while invoking storage method: ${err.text}")
+                }
                 if (response is TLRPC.TL_dataJSON) {
-                    return@sendReqAndDo Json.decodeFromString(KeyPair.serializer(), response.data)
+                    Log.d("CloudStorage", "invokeStorageMethod: data: ${response.data}")
+                    return@sendRequestAndDo Json.decodeFromString(KeyPair.serializer(), response.data)
                 } else null
             }
-        }.get()
+        }
     }
 
-    fun get(key: String): String? {
-        return invokeStorageMethod(Method.get, KeyPair(key))?.value
+    fun get(key: String): CompletableFuture<KeyPair?> {
+        return invokeStorageMethod(Method.get, KeyPair(key))
     }
 
     fun set(key: String, value: String) {
@@ -82,38 +88,13 @@ class CloudStorage(instance: Int) : AccountInstance(instance) {
     }
 
     companion object {
-        private val Instance = arrayOfNulls<CloudStorage>(UserConfig.MAX_ACCOUNT_COUNT)
+        private val Instance by lazy {
+            Array(UserConfig.MAX_ACCOUNT_COUNT) { CloudStorage(it) }
+        }
 
         @JvmStatic
         fun getInstance(num: Int): CloudStorage {
-            var localInstance: CloudStorage?
-            synchronized(CloudStorage::class.java) {
-                localInstance = Instance[num]
-                if (localInstance == null) {
-                    localInstance = CloudStorage(num)
-                    Instance[num] = localInstance
-
-                    val req = TLRPC.TL_contacts_resolveUsername().apply {
-                        username = ""
-                    }
-
-                    CoroutineScope(Dispatchers.IO).launch {
-                        localInstance!!.connectionsHelper.sendReqAndDo(req) { response, _ ->
-                            if (response != null) {
-                                response as TLRPC.TL_contacts_resolvedPeer
-                                localInstance!!.apply {
-                                    messagesController.putUsers(response.users, false)
-                                    messagesController.putChats(response.chats, false)
-                                    messagesStorage.putUsersAndChats(response.users, response.chats, true, true)
-                                    botUser = messagesController.getUser(response.peer.user_id)
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-
-            return localInstance!!
+            return Instance[num]
         }
     }
 

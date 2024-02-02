@@ -318,4 +318,7 @@
     <string name="ShowTitle">Show title</string>
     <string name="HideTitle">Hide title</string>
     <string name="showHideTitle">Show hide title</string>
+  <string name="DownloadingStickerSet">Downloading sticker set...</string>
+    <string name="IncompleteDownload">Download timed out, please check your network</string>
+    <string name="StickerPackNotFound">Sticker pack not found.</string>
 </resources>

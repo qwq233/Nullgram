@@ -25,39 +25,30 @@ import org.telegram.messenger.AccountInstance
 import org.telegram.messenger.UserConfig
 import org.telegram.tgnet.TLObject
 import org.telegram.tgnet.TLRPC
-import top.qwq2333.nullgram.config.CloudStorage
-import top.qwq2333.nullgram.utils.Log
 import java.util.concurrent.CountDownLatch
 
 class ConnectionsHelper(instance: Int) : AccountInstance(instance) {
     companion object {
-        private val Instance = arrayOfNulls<ConnectionsHelper>(UserConfig.MAX_ACCOUNT_COUNT)
+        private val Instance by lazy {
+            Array(UserConfig.MAX_ACCOUNT_COUNT) {
+                ConnectionsHelper(it)
+            }
+        }
 
         @JvmStatic
         fun getInstance(num: Int): ConnectionsHelper {
-            var localInstance: ConnectionsHelper?
-            synchronized(CloudStorage::class.java) {
-                localInstance = Instance[num]
-                if (localInstance == null) {
-                    localInstance = ConnectionsHelper(num)
-                    Instance[num] = localInstance
-                }
-            }
-
-            return localInstance!!
+            return Instance[num]
         }
     }
 
-    suspend fun <T> sendReqAndDo(req: TLObject, flags: Int = 0, action: (TLObject?, TLRPC.TL_error?) -> T?): T? {
+    suspend fun <T> sendRequestAndDo(req: TLObject, flags: Int = 0, action: (TLObject?, TLRPC.TL_error?) -> T?): T? {
         lateinit var result: Pair<TLObject?, TLRPC.TL_error?>
         val latch = CountDownLatch(1)
         return withContext(Dispatchers.IO) {
             connectionsManager.sendRequest(req, { response: TLObject?, error: TLRPC.TL_error? ->
                 result = Pair(response, error)
-                Log.d("countdown")
                 latch.countDown()
             }, flags)
-            Log.d("await")
             latch.await()
             action(result.first, result.second)
         }

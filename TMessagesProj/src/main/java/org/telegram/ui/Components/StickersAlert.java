@@ -96,6 +96,8 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import top.qwq2333.nullgram.helpers.StickerHelper;
+
 public class StickersAlert extends BottomSheet implements NotificationCenter.NotificationCenterDelegate {
 
     public interface StickersAlertDelegate {
@@ -845,6 +847,7 @@ public class StickersAlert extends BottomSheet implements NotificationCenter.Not
         containerView.addView(optionsButton, LayoutHelper.createFrame(40, 40, Gravity.TOP | Gravity.RIGHT, 0, 5, 5, 0));
         optionsButton.addSubItem(1, R.drawable.msg_share, LocaleController.getString("StickersShare", R.string.StickersShare));
         optionsButton.addSubItem(2, R.drawable.msg_link, LocaleController.getString("CopyLink", R.string.CopyLink));
+        optionsButton.addSubItem(3, R.drawable.media_download, LocaleController.getString("Save", R.string.Save));
         optionsButton.setOnClickListener(v -> optionsButton.toggleSubMenu());
         optionsButton.setDelegate(this::onSubItemClick);
         optionsButton.setContentDescription(LocaleController.getString("AccDescrMoreOptions", R.string.AccDescrMoreOptions));
@@ -1057,6 +1060,8 @@ public class StickersAlert extends BottomSheet implements NotificationCenter.Not
             } catch (Exception e) {
                 FileLog.e(e);
             }
+        } else if (id == 3) {
+            StickerHelper.saveStickerSet(getContext(), inputStickerSet);
         }
     }
 
