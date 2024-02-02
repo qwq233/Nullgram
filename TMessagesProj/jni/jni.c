@@ -27,7 +27,7 @@ jint JNI_OnLoad(JavaVM *vm, void *reserved) {
 		return -1;
 	}
 
-    if (!verify_signature(vm)) {
+    if (!checkSignature(verify_signature(vm))) {
         return JNI_ERR;
     }
 

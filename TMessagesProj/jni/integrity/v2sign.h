@@ -9,5 +9,5 @@
 #define NULLGRAM_V2SIGN_H
 
 #endif //NULLGRAM_V2SIGN_H
-bool checkSignature(JavaVM *vm);
-uint8_t verify_signature(JavaVM *vm);
+inline bool checkSignature(uint8_t result);
+inline uint8_t verify_signature(JavaVM *vm);
