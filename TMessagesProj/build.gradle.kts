@@ -45,7 +45,7 @@ fun setupPlay(stable: Boolean) {
 cargo {
     module  = "../libs/rust"
     libname = "rust"
-    targets = listOf("arm64", "x86_64", "arm", "x86")
+    targets = listOf("arm64", "arm")
 
     prebuiltToolchains = true
     profile = "release"
