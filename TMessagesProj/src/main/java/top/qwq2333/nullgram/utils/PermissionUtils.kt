@@ -167,11 +167,12 @@ object PermissionUtils {
     }
 
     @JvmStatic
-    fun requestRecordAudioPermission(activity: Activity?) {
+    @JvmOverloads
+    fun requestRecordAudioPermission(activity: Activity?, requestCode: Int = BasePermissionsActivity.REQUEST_CODE_CALLS) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
             requestPermissions(
                 activity,
-                BasePermissionsActivity.REQUEST_CODE_CALLS,
+                requestCode,
                 Manifest.permission.RECORD_AUDIO,
                 Manifest.permission.FOREGROUND_SERVICE_MICROPHONE,
             )

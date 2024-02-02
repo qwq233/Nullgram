@@ -136,7 +136,6 @@ import org.telegram.messenger.UserConfig;
 import org.telegram.messenger.UserObject;
 import org.telegram.messenger.Utilities;
 import org.telegram.messenger.VideoEditedInfo;
-import org.telegram.messenger.XiaomiUtilities;
 import org.telegram.messenger.browser.Browser;
 import org.telegram.messenger.camera.CameraController;
 import org.telegram.tgnet.ConnectionsManager;
@@ -803,7 +802,7 @@ public class ChatActivityEnterView extends BlurredFrameLayout implements Notific
                 }
             } else {
                 if (!PermissionUtils.isRecordAudioPermissionGranted()) {
-                    PermissionUtils.requestRecordAudioPermission(parentActivity);
+                    PermissionUtils.requestRecordAudioPermission(parentActivity, 3);
                     return;
                 }
 
