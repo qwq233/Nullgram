@@ -216,7 +216,7 @@
     <string name="Ban">封禁</string>
     <string name="autoDisableBuiltInProxy">自动关闭内置代理</string>
     <string name="autoDisableBuiltInProxyDesc">当Nullgram 检测到您打开VPN 时，它将自动关闭内置代理</string>
-    <string name="NekogramWsDescription">通过CloudFlare提供的WebSocket连接到TELEOFFICIAL数据中心\n由Nekogram提供</string>
+    <string name="NullgramWsDescription">Connect to TELEOFFICIAL through WebSocket via Cloudflare.\nProvided by Nullgram</string>
     <string name="NekogramXWsDescription">由 Nekogram X 提供</string>
     <string name="WsGetHelp">你也可以轻松地自己部署它！</string>
     <string name="WsCustomDescription">自建WebSocket隧道  连接到 TELEOFFICAL 数据中心</string>
@@ -276,7 +276,7 @@
     <string name="JumpToBeginning">回到顶部</string>
     <string name="DisableQuickSendMediaBottom">禁用快速发送媒体按钮</string>
     <string name="ProviderBaiduTranslate">百度翻译</string>
-    <string name="ProviderTranSmartTranslate">腾讯交互翻译</string>
+    <string name="ProviderTranSmartTranslate">TranSmart Translator</string>
     <string name="alwaysSendWithoutSound">总是静音发送</string>
     <string name="EditEnableMarkdown">启用Markdown</string>
     <string name="EditDisableMarkdown">禁用Markdown</string>
@@ -313,4 +313,10 @@
     <string name="CreateCodeLanguage">Language</string>
     <string name="UnsupportedMediaNullgram">This message is not supported on your version of Nullgram. Update the app to view: https://t.me/NullgramClient</string>
     <string name="ignoreUserSpecifiedReplyColor">Ignore user-set reply color</string>
+    <string name="ShowTitle">Show title</string>
+    <string name="HideTitle">Hide title</string>
+    <string name="showHideTitle">Show hide title</string>
+    <string name="DownloadingStickerSet">Downloading sticker set...</string>
+    <string name="IncompleteDownload">Download timed out, please check your network</string>
+    <string name="StickerPackNotFound">Sticker pack not found.</string>
 </resources>
