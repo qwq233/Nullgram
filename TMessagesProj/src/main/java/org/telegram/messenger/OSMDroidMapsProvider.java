@@ -531,7 +531,7 @@ public class OSMDroidMapsProvider implements IMapsProvider {
         @Override
         public LatLng getPosition() {
             GeoPoint pos = this.marker.getPosition();
-            return new LatLng(pos.getLatitude(), pos.getLatitude());
+            return new LatLng(pos.getLatitude(), pos.getLongitude());
         }
 
         @Override
@@ -709,4 +709,3 @@ public class OSMDroidMapsProvider implements IMapsProvider {
         }
     }
 }
-
