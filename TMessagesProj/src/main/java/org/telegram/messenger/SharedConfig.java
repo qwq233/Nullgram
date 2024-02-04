@@ -1842,8 +1842,8 @@ public class SharedConfig {
 
     @PerformanceClass
     public static int getDevicePerformanceClass() {
-        if (Config.devicePerformance != Defines.devicePerformanceAuto) {
-            return Config.devicePerformance;
+        if (Config.getDevicePerformance() != Defines.devicePerformanceAuto) {
+            return Config.getDevicePerformance();
         }
         if (overrideDevicePerformanceClass != -1) {
             return overrideDevicePerformanceClass;
@@ -2020,8 +2020,8 @@ public class SharedConfig {
 
     @Deprecated
     public static int getLegacyDevicePerformanceClass() {
-        if (Config.devicePerformance != Defines.devicePerformanceAuto) {
-            return Config.devicePerformance;
+        if (Config.getDevicePerformance() != Defines.devicePerformanceAuto) {
+            return Config.getDevicePerformance();
         }
         if (legacyDevicePerformanceClass == -1) {
             int androidVersion = Build.VERSION.SDK_INT;

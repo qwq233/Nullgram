@@ -112,16 +112,17 @@ class ConfigSwitchGenerator(
                         addProperty(
                             PropertySpec.builder(originName, Int::class).apply {
                                 mutable(true)
-                                addAnnotation(JvmField::class)
-                                initializer("%T.getIntOrDefault(%T.$originName, $defValue)", configManager, defines)
+                                getter(FunSpec.getterBuilder().apply {
+                                    addAnnotation(JvmStatic::class)
+                                    addStatement("return %T.getIntOrDefault(%T.$originName, $defValue)", configManager, defines)
+                                }.build())
+                                setter(FunSpec.setterBuilder().apply {
+                                    addAnnotation(JvmStatic::class)
+                                    addParameter("value", Int::class)
+                                    addStatement("%T.putInt(%T.$originName, value)", configManager, defines)
+                                }.build())
                             }.build()
                         )
-                        addFunction(FunSpec.builder("set$uppercaseName").apply {
-                            addParameter("value", Int::class)
-                            addStatement("$originName = value")
-                            addStatement("%T.putInt(%T.$originName, $originName)", configManager, defines)
-                            addAnnotation(JvmStatic::class)
-                        }.build())
                     }
                 }
             }
@@ -150,16 +151,17 @@ class ConfigSwitchGenerator(
                         addProperty(
                             PropertySpec.builder(originName, String::class).apply {
                                 mutable(true)
-                                addAnnotation(JvmField::class)
-                                initializer("%T.getStringOrDefault($defines.$originName, %S)!!", configManager, defValue)
+                                getter(FunSpec.getterBuilder().apply {
+                                    addAnnotation(JvmStatic::class)
+                                    addStatement("return %T.getStringOrDefault(%T.$originName, %S)!!", configManager, defines, defValue)
+                                }.build())
+                                setter(FunSpec.setterBuilder().apply {
+                                    addAnnotation(JvmStatic::class)
+                                    addParameter("value", String::class)
+                                    addStatement("%T.putString(%T.$originName, value)", configManager, defines)
+                                }.build())
                             }.build()
                         )
-                        addFunction(FunSpec.builder("set$uppercaseName").apply {
-                            addParameter("value", String::class)
-                            addStatement("$originName = value")
-                            addStatement("%T.putString(%T.$originName, $originName)", configManager, defines)
-                            addAnnotation(JvmStatic::class)
-                        }.build())
                     }
                 }
             }

@@ -246,7 +246,7 @@ public class ChatSettingActivity extends BaseActivity {
             types.add(Defines.doubleTabRepeat);
             arrayList.add(LocaleController.getString("TranslateMessage", R.string.TranslateMessage));
             types.add(Defines.doubleTabTranslate);
-            PopupBuilder.show(arrayList, LocaleController.getString("customDoubleTap", R.string.customDoubleTap), types.indexOf(Config.doubleTab), getParentActivity(), view, i -> {
+            PopupBuilder.show(arrayList, LocaleController.getString("customDoubleTap", R.string.customDoubleTap), types.indexOf(Config.getDoubleTab()), getParentActivity(), view, i -> {
                 Config.setDoubleTab(types.get(i));
                 listAdapter.notifyItemChanged(customDoubleClickTapRow, PARTIAL);
                 getNotificationCenter().postNotificationName(NotificationCenter.dialogFiltersUpdated);
@@ -454,11 +454,11 @@ public class ChatSettingActivity extends BaseActivity {
                     } else if (position == messageMenuRow) {
                         textCell.setText(LocaleController.getString("MessageMenu", R.string.MessageMenu), false);
                     } else if (position == maxRecentStickerRow) {
-                        textCell.setTextAndValue(LocaleController.getString("maxRecentSticker", R.string.maxRecentSticker), String.valueOf(Config.maxRecentSticker), payload, true);
+                        textCell.setTextAndValue(LocaleController.getString("maxRecentSticker", R.string.maxRecentSticker), String.valueOf(Config.getMaxRecentSticker()), payload, true);
 
                     } else if (position == customDoubleClickTapRow) {
                         String value;
-                        switch (Config.doubleTab) {
+                        switch (Config.getDoubleTab()) {
                             case Defines.doubleTabNone:
                                 value = LocaleController.getString("Disable", R.string.Disable);
                                 break;
@@ -757,7 +757,7 @@ public class ChatSettingActivity extends BaseActivity {
         editText.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 18);
         editText.setTextColor(getThemedColor(Theme.key_dialogTextBlack));
         editText.setHintText(LocaleController.getString("Number", R.string.Number));
-        editText.setText(Config.maxRecentSticker + "");
+        editText.setText(Config.getMaxRecentSticker() + "");
         editText.setHeaderHintColor(getThemedColor(Theme.key_windowBackgroundWhiteBlueHeader));
         editText.setSingleLine(true);
         editText.setFocusable(true);

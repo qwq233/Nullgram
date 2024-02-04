@@ -146,7 +146,7 @@ public class FileLoadOperation {
     private final static int stateCanceled = 4;
 
     private int downloadChunkSize = 1024 * 32;
-    private int downloadChunkSizeBig = 1024 * Config.modifyDownloadSpeed;
+    private int downloadChunkSizeBig = 1024 * Config.getModifyDownloadSpeed();
     ;
     private int cdnChunkCheckSize = 1024 * 128;
     private int maxDownloadRequests = 4;

@@ -117,7 +117,7 @@ public class FilterTabsView extends FrameLayout {
 
         public Tab(int i, String t, String e) {
             id = i;
-            title = Config.tabMenu != Defines.tabMenuIcon ? t : "";
+            title = Config.getTabMenu() != Defines.tabMenuIcon ? t : "";
             emoticon = i != Integer.MAX_VALUE ? e : "\uD83D\uDCAC";
         }
 
@@ -147,7 +147,7 @@ public class FilterTabsView extends FrameLayout {
         }
 
         public boolean setTitle(String newTitle) {
-            newTitle = Config.tabMenu != Defines.tabMenuIcon ? newTitle : "";
+            newTitle = Config.getTabMenu() != Defines.tabMenuIcon ? newTitle : "";
             if (TextUtils.equals(title, newTitle)) {
                 return false;
             }
@@ -350,7 +350,7 @@ public class FilterTabsView extends FrameLayout {
                 countWidth = (int) (countWidth + (AndroidUtilities.dp(20) - countWidth) * editingStartAnimationProgress);
             }
 
-            if (Config.tabMenu != Defines.tabMenuIcon) {
+            if (Config.getTabMenu() != Defines.tabMenuIcon) {
                 tabWidth = currentTab.iconWidth + currentTab.titleWidth + ((countWidth != 0 && !animateCounterRemove) ? countWidth + AndroidUtilities.dp(6 * (counterText != null ? 1.0f : editingStartAnimationProgress)) : 0);
             } else {
                 tabWidth = currentTab.iconWidth + ((countWidth != 0 && !animateCounterRemove) ? countWidth + AndroidUtilities.dp(6 * (counterText != null ? 1.0f : editingStartAnimationProgress)) : 0);
@@ -405,7 +405,7 @@ public class FilterTabsView extends FrameLayout {
             }
 
             int iconX = 0;
-            if (Config.tabMenu != Defines.tabMenuText) {
+            if (Config.getTabMenu() != Defines.tabMenuText) {
                 int emoticonSize = FolderIconHelper.getIconWidth();
                 if (!TextUtils.equals(currentTab.emoticon, currentEmoticon)) {
                     currentEmoticon = currentTab.emoticon;
@@ -475,7 +475,7 @@ public class FilterTabsView extends FrameLayout {
                 if (animateTextChange) {
                     titleWidth = animateFromTitleWidth * (1f - changeProgress) + currentTab.titleWidth * changeProgress;
                 }
-                int textSpace = Config.tabMenu != Defines.tabMenuIcon ? AndroidUtilities.dp(6) : 0;
+                int textSpace = Config.getTabMenu() != Defines.tabMenuIcon ? AndroidUtilities.dp(6) : 0;
                 if (animateTextChange && titleAnimateOutLayout == null) {
                     x = textX - titleXOffset + titleOffsetX + titleWidth + textSpace;
                 } else {
@@ -655,7 +655,7 @@ public class FilterTabsView extends FrameLayout {
                 countWidth = 0;
             }
             int tabWidth;
-            if (Config.tabMenu != Defines.tabMenuIcon) {
+            if (Config.getTabMenu() != Defines.tabMenuIcon) {
                 tabWidth = currentTab.iconWidth + currentTab.titleWidth + (countWidth != 0 ? countWidth + AndroidUtilities.dp(6 * (counterText != null ? 1.0f : editingStartAnimationProgress)) : 0);
             } else {
                 tabWidth = currentTab.iconWidth + (countWidth != 0 ? countWidth + AndroidUtilities.dp(6 * (counterText != null ? 1.0f : editingStartAnimationProgress)) : 0);
@@ -713,7 +713,7 @@ public class FilterTabsView extends FrameLayout {
                 }
             }
 
-            if (Config.tabMenu != Defines.tabMenuText) {
+            if (Config.getTabMenu() != Defines.tabMenuText) {
                 int iconX = (int) ((getMeasuredWidth() - tabWidth) / 2f);
 
                 if (iconX != lastIconX) {

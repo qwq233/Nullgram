@@ -1627,7 +1627,7 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
 
         @Override
         public boolean hasDoubleTap(View view, int position) {
-            final int currentConfig = Config.doubleTab;
+            final int currentConfig = Config.getDoubleTab();
             if (currentConfig == Defines.doubleTabNone || !(view instanceof ChatMessageCell)) {
                 return false;
             }
@@ -1701,7 +1701,7 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
 
         @Override
         public void onDoubleTap(View view, int position, float x, float y) {
-            final int currentConfig = Config.doubleTab;
+            final int currentConfig = Config.getDoubleTab();
             if (currentConfig == Defines.doubleTabNone || !(view instanceof ChatMessageCell) || getParentActivity() == null) {
                 return;
             }

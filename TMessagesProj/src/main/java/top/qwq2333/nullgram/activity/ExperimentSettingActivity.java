@@ -172,7 +172,7 @@ public class ExperimentSettingActivity extends BaseActivity {
                 speedsStr.add(speed + " Kb/block");
             }
             PopupBuilder.show(speedsStr, LocaleController.getString("modifyDownloadSpeed", R.string.modifyDownloadSpeed),
-                speedsStr.indexOf(Config.modifyDownloadSpeed + " Kb/block"), getParentActivity(), view, i -> {
+                speedsStr.indexOf(Config.getModifyDownloadSpeed() + " Kb/block"), getParentActivity(), view, i -> {
                     Log.i("speeds[i]: " + speeds[i]);
                     Log.i("i: " + i);
                     Config.setModifyDownloadSpeed(speeds[i]);
@@ -184,7 +184,7 @@ public class ExperimentSettingActivity extends BaseActivity {
             str.add(LocaleController.getString("Online", R.string.Online));
             str.add(LocaleController.getString("Offline", R.string.Offline));
             PopupBuilder.show(str, LocaleController.getString("keepOnlineStatusAsRow", R.string.keepOnlineStatusAs),
-                Config.keepOnlineStatusAs, getParentActivity(), view, i -> {
+                Config.getKeepOnlineStatusAs(), getParentActivity(), view, i -> {
                     Config.setKeepOnlineStatusAs(i);
                     listAdapter.notifyItemChanged(keepOnlineStatusAsRow, PARTIAL);
                 });
@@ -315,9 +315,9 @@ public class ExperimentSettingActivity extends BaseActivity {
                     textCell.setTextColor(Theme.getColor(Theme.key_windowBackgroundWhiteBlackText));
                     if (position == modifyDownloadSpeedRow) {
                         textCell.setTextAndValue(LocaleController.getString("modifyDownloadSpeed", R.string.modifyDownloadSpeed),
-                            Config.modifyDownloadSpeed + " Kb/block", payload, false);
+                            Config.getModifyDownloadSpeed() + " Kb/block", payload, false);
                     } else if (position == keepOnlineStatusAsRow) {
-                        String value = switch (Config.keepOnlineStatusAs) {
+                        String value = switch (Config.getKeepOnlineStatusAs()) {
                             case 0 -> LocaleController.getString("Default", R.string.Default);
                             case 1 -> LocaleController.getString("Online", R.string.Online);
                             case 2 -> LocaleController.getString("Offline", R.string.Offline);
