@@ -211,7 +211,7 @@
     <string name="openArchiveOnPull">下拉打开已归档对话</string>
     <string name="hideAllTab">隐藏“全部对话”栏</string>
     <string name="ignoreMutedCount">忽略标签中的静音计数</string>
-    <string name="disableSharePhoneWithContactByDefault">No Share Phone Number When Add Contact</string>
+    <string name="disableSharePhoneWithContactByDefault">添加联系人时不分享手机号码</string>
     <string name="disableStickersAutoReorder">禁用贴纸自动重新排列</string>
     <string name="Ban">封禁</string>
     <string name="autoDisableBuiltInProxy">自动关闭内置代理</string>
@@ -230,7 +230,7 @@
     <string name="UpdateInstallingRelaunch">更新完成后应用将重新启动。</string>
     <string name="UpdateInstallingNotification">更新完成后将显示通知。</string>
     <string name="NoUpdateAvailablePlay">请在 Play 商店检查更新。</string>
-    <string name="NoUpdateAvailablePlayDelay">Google Play商店的更新通常比直接的 APK 慢.</string>
+    <string name="NoUpdateAvailablePlayDelay">Google Play 商店的更新通常比直接的 APK 慢。</string>
     <string name="UpdateInstalledNotification">更新安装完成，点击启动应用。</string>
     <string name="UpdateFailedToInstall">安装更新失败： %d</string>
     <string name="Translator">翻译</string>
@@ -310,13 +310,13 @@
     <string name="Custom">Custom</string>
     <string name="MonoCode">Code</string>
     <string name="CreateCode">Create Code</string>
-    <string name="CreateCodeLanguage">Language</string>
+    <string name="CreateCodeLanguage">语言</string>
     <string name="UnsupportedMediaNullgram">This message is not supported on your version of Nullgram. Update the app to view: https://t.me/NullgramClient</string>
-    <string name="ignoreUserSpecifiedReplyColor">Ignore user-set reply color</string>
-    <string name="ShowTitle">Show title</string>
-    <string name="HideTitle">Hide title</string>
+    <string name="ignoreUserSpecifiedReplyColor">忽略用户设置的回复颜色</string>
+    <string name="ShowTitle">显示标题</string>
+    <string name="HideTitle">隐藏标题</string>
     <string name="showHideTitle">Show hide title</string>
-    <string name="DownloadingStickerSet">Downloading sticker set...</string>
-    <string name="IncompleteDownload">Download timed out, please check your network</string>
-    <string name="StickerPackNotFound">Sticker pack not found.</string>
+    <string name="DownloadingStickerSet">正在下载贴图包...</string>
+    <string name="IncompleteDownload">下载超时，请检查您的网络</string>
+    <string name="StickerPackNotFound">未找到贴纸包</string>
 </resources>
