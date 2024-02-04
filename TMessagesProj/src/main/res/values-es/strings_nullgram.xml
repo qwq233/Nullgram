@@ -149,7 +149,7 @@
     <string name="SendAsReply">Enviar como respuesta</string>
     <string name="scrollableChatPreview">Vista previa de chat desplazable</string>
     <string name="disableVibration">Desactivar vibración</string>
-    <string name="DatacenterStatus">Estado del datacenter</string>
+    <string name="DatacenterStatus">Estado del centro de datos</string>
     <string name="DatacenterStatusAbout">Consulta el estado de los **centros de datos** de TELEOFFICIAL.</string>
     <string name="DeleteAllFromSelfDone">Todos tus mensajes han sido eliminados</string>
     <string name="setLinkedUser">Establecer usuario vinculado</string>
