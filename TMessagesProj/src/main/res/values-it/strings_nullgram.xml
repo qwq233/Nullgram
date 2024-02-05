@@ -313,10 +313,10 @@
     <string name="CreateCodeLanguage">Linguaggio</string>
     <string name="UnsupportedMediaNullgram">Questo messaggio non è supportato dalla tua versione di Nullgram. Aggiorna l\'app per visualizzarlo: https://t.me/NullgramClient</string>
     <string name="ignoreUserSpecifiedReplyColor">Ignore user-set reply color</string>
-    <string name="ShowTitle">Show title</string>
-    <string name="HideTitle">Hide title</string>
-    <string name="showHideTitle">Show hide title</string>
-    <string name="DownloadingStickerSet">Downloading sticker set...</string>
-    <string name="IncompleteDownload">Download timed out, please check your network</string>
-    <string name="StickerPackNotFound">Sticker pack not found.</string>
+    <string name="ShowTitle">Mostra titolo</string>
+    <string name="HideTitle">Nascondi titolo</string>
+    <string name="showHideTitle">Mostra nascondi titolo</string>
+    <string name="DownloadingStickerSet">Scaricando pacchetto sticker...</string>
+    <string name="IncompleteDownload">Download scaduto, controlla la tua connessione</string>
+    <string name="StickerPackNotFound">Pacchetto sticker non trovato.</string>
 </resources>
