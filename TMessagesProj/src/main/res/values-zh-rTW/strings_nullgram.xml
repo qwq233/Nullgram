@@ -216,7 +216,7 @@
     <string name="Ban">封鎖</string>
     <string name="autoDisableBuiltInProxy">自動停用內建代理</string>
     <string name="autoDisableBuiltInProxyDesc">當 Nullgram 偵測到您開啟 VPN 時，將自動關閉內建代理</string>
-    <string name="NullgramWsDescription">Connect to TELEOFFICIAL through WebSocket via Cloudflare.\nProvided by Nullgram</string>
+    <string name="NullgramWsDescription">透過 Cloudflare 以 WebSocket 連接至 TELEOFFICIAL。\n由 Nullgram 提供</string>
     <string name="NekogramXWsDescription">由 Nekogram X 提供</string>
     <string name="WsGetHelp">您也可以輕鬆自行部署！</string>
     <string name="WsCustomDescription">使用自訂網域透過 Cloudflare 連接到 TELEOFFICIAL。</string>
@@ -276,7 +276,7 @@
     <string name="JumpToBeginning">跳至開始</string>
     <string name="DisableQuickSendMediaBottom">停用快速傳送媒體底部</string>
     <string name="ProviderBaiduTranslate">百度翻譯</string>
-    <string name="ProviderTranSmartTranslate">TranSmart Translator</string>
+    <string name="ProviderTranSmartTranslate">TranSmart 翻譯器</string>
     <string name="alwaysSendWithoutSound">總是無聲傳送</string>
     <string name="EditEnableMarkdown">啟用 Markdown</string>
     <string name="EditDisableMarkdown">停用 Markdown</string>
@@ -313,10 +313,10 @@
     <string name="CreateCodeLanguage">語言</string>
     <string name="UnsupportedMediaNullgram">您的 Nullgram 版本不支援此訊息。請更新應用程式以查看：https://t.me/NullgramClient</string>
     <string name="ignoreUserSpecifiedReplyColor">忽略用戶設定的回覆顏色</string>
-    <string name="ShowTitle">Show title</string>
-    <string name="HideTitle">Hide title</string>
-    <string name="showHideTitle">Show hide title</string>
-    <string name="DownloadingStickerSet">Downloading sticker set...</string>
-    <string name="IncompleteDownload">Download timed out, please check your network</string>
-    <string name="StickerPackNotFound">Sticker pack not found.</string>
+    <string name="ShowTitle">顯示標題</string>
+    <string name="HideTitle">隱藏標題</string>
+    <string name="showHideTitle">顯示/隱藏標題</string>
+    <string name="DownloadingStickerSet">正在下載貼圖集...</string>
+    <string name="IncompleteDownload">下載逾時，請檢查您的網路</string>
+    <string name="StickerPackNotFound">找不到貼圖集。</string>
 </resources>
