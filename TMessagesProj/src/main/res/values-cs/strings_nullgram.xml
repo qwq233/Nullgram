@@ -14,7 +14,7 @@
     <string name="updateAvailable">Nová aktualizace k dispozici</string>
     <string name="variantsNotFound">Varianty vydání se neshodují automaticky. Stáhněte si je prosím ručně z GitHubu.</string>
     <string name="skipUpdate">Ignore</string>
-    <string name="notNow">Not Now</string>
+    <string name="notNow">Teď ne</string>
     <string name="updateConfirm">UPDATE</string>
     <string name="CheckUpdate">Check for update</string>
     <string name="CheckingUpdate">Checking for update…</string>
