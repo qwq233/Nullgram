@@ -6,7 +6,7 @@ object Version {
     val java = JavaVersion.VERSION_17
 
     @JvmStatic
-    val officialVersionName = "10.6.1"
+    val officialVersionName = "10.6.4"
 
     @JvmStatic
     val isStable = false

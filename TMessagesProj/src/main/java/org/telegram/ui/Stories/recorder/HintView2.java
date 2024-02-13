@@ -467,6 +467,7 @@ public class HintView2 extends View {
         if (shown) {
             bounceShow();
         }
+        AndroidUtilities.makeAccessibilityAnnouncement(getText());
         shown = true;
         invalidate();
 

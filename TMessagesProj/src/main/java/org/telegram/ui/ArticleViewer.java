@@ -6491,7 +6491,7 @@ public class ArticleViewer implements NotificationCenter.NotificationCenterDeleg
             }
 
             videoPlayer.seekTo(playFrom);
-            videoPlayer.preparePlayer(uri, true);
+            videoPlayer.preparePlayer(uri, true, 1f);
             videoPlayer.play();
 
         }

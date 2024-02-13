@@ -108,6 +108,7 @@ import org.telegram.ui.ActionBar.Theme;
 import org.telegram.ui.AvatarSpan;
 import org.telegram.ui.Cells.TextSelectionHelper;
 import org.telegram.ui.ChatActivity;
+import org.telegram.ui.ChooseSpeedLayout;
 import org.telegram.ui.Components.AlertsCreator;
 import org.telegram.ui.Components.AnimatedEmojiDrawable;
 import org.telegram.ui.Components.AnimatedEmojiSpan;
@@ -136,6 +137,7 @@ import org.telegram.ui.Components.LoadingDrawable;
 import org.telegram.ui.Components.MediaActivity;
 import org.telegram.ui.Components.MentionsContainerView;
 import org.telegram.ui.Components.Premium.LimitReachedBottomSheet;
+import org.telegram.ui.Components.Premium.PremiumFeatureBottomSheet;
 import org.telegram.ui.Components.RLottieDrawable;
 import org.telegram.ui.Components.RLottieImageView;
 import org.telegram.ui.Components.RadialProgress;
@@ -148,6 +150,7 @@ import org.telegram.ui.Components.ReactionsContainerLayout;
 import org.telegram.ui.Components.ScaleStateListAnimator;
 import org.telegram.ui.Components.ShareAlert;
 import org.telegram.ui.Components.SizeNotifierFrameLayout;
+import org.telegram.ui.Components.SpeedIconDrawable;
 import org.telegram.ui.Components.TextStyleSpan;
 import org.telegram.ui.Components.TranslateAlert2;
 import org.telegram.ui.Components.URLSpanMono;
@@ -163,6 +166,7 @@ import org.telegram.ui.NotificationsCustomSettingsActivity;
 import org.telegram.ui.PinchToZoomHelper;
 import org.telegram.ui.PremiumPreviewFragment;
 import org.telegram.ui.ProfileActivity;
+import org.telegram.ui.Stories.recorder.ButtonWithCounterView;
 import org.telegram.ui.Stories.recorder.CaptionContainerView;
 import org.telegram.ui.Stories.recorder.HintView2;
 import org.telegram.ui.Stories.recorder.StoryEntry;
@@ -358,6 +362,9 @@ public class PeerStoriesView extends SizeNotifierFrameLayout implements Notifica
     private float viewsThumbScale;
     private float viewsThumbPivotY;
     private boolean userCanSeeViews;
+
+    private ChooseSpeedLayout speedLayout;
+    private ActionBarMenuSubItem speedItem;
 
     public PeerStoriesView(@NonNull Context context, StoryViewer storyViewer, SharedResources sharedResources, Theme.ResourcesProvider resourcesProvider) {
         super(context);
@@ -1142,7 +1149,10 @@ public class PeerStoriesView extends SizeNotifierFrameLayout implements Notifica
                 MessagesController.getInstance(currentAccount).getStoriesController().loadSendAs();
                 MessagesController.getInstance(currentAccount).getStoriesController().getDraftsController().load();
             }
-            popupMenu = new CustomPopupMenu(getContext(), resourcesProvider, isSelf) {
+            final boolean userCanEditStory = isSelf || MessagesController.getInstance(currentAccount).getStoriesController().canEditStory(currentStory.storyItem);
+            final boolean canEditStory = isSelf || (isChannel && userCanEditStory);
+            final boolean speedControl = currentStory.isVideo;
+            popupMenu = new CustomPopupMenu(getContext(), resourcesProvider, speedControl) {
                 private boolean edit;
 
                 private void addViewStatistics(ActionBarPopupWindow.ActionBarPopupWindowLayout popupLayout, TL_stories.StoryItem storyItem) {
@@ -1179,10 +1189,61 @@ public class PeerStoriesView extends SizeNotifierFrameLayout implements Notifica
                     }
                 }
 
+                private void addSpeedLayout(ActionBarPopupWindow.ActionBarPopupWindowLayout popupLayout, boolean addGap) {
+                    if (!speedControl || currentStory != null && currentStory.uploadingStory != null) {
+                        speedLayout = null;
+                        speedItem = null;
+                        return;
+                    }
+
+                    speedLayout = new ChooseSpeedLayout(getContext(), popupLayout.getSwipeBack(), new ChooseSpeedLayout.Callback() {
+                        @Override
+                        public void onSpeedSelected(float speed, boolean isFinal, boolean closeMenu) {
+                            if (storyViewer != null) {
+                                storyViewer.setSpeed(speed);
+                            }
+                            updateSpeedItem(isFinal);
+                            if (closeMenu && popupLayout.getSwipeBack() != null) {
+                                popupLayout.getSwipeBack().closeForeground();
+                            }
+                        }
+                    });
+                    speedLayout.update(StoryViewer.currentSpeed, true);
+
+                    speedItem = new ActionBarMenuSubItem(getContext(), false, false, false, resourcesProvider);
+                    speedItem.setTextAndIcon(LocaleController.getString(R.string.Speed), R.drawable.msg_speed, null);
+                    updateSpeedItem(true);
+                    speedItem.setMinimumWidth(AndroidUtilities.dp(196));
+                    speedItem.setRightIcon(R.drawable.msg_arrowright);
+                    popupLayout.addView(speedItem);
+                    LinearLayout.LayoutParams layoutParams = (LinearLayout.LayoutParams) speedItem.getLayoutParams();
+                    if (LocaleController.isRTL) {
+                        layoutParams.gravity = Gravity.RIGHT;
+                    }
+                    layoutParams.width = LayoutHelper.MATCH_PARENT;
+                    layoutParams.height = AndroidUtilities.dp(48);
+                    speedItem.setLayoutParams(layoutParams);
+                    int swipeBackIndex = popupLayout.addViewToSwipeBack(speedLayout.speedSwipeBackLayout);
+                    speedItem.openSwipeBackLayout = () -> {
+                        if (popupLayout.getSwipeBack() != null) {
+                            popupLayout.getSwipeBack().openForeground(swipeBackIndex);
+                        }
+                    };
+                    speedItem.setOnClickListener(view -> {
+                        speedItem.openSwipeBack();
+                    });
+
+                    popupLayout.swipeBackGravityRight = true;
+
+                    if (addGap) {
+                        ActionBarPopupWindow.GapView gap = new ActionBarPopupWindow.GapView(getContext(), resourcesProvider, Theme.key_actionBarDefaultSubmenuSeparator);
+                        gap.setTag(R.id.fit_width_tag, 1);
+                        popupLayout.addView(gap, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, 8));
+                    }
+                }
+
                 @Override
                 protected void onCreate(ActionBarPopupWindow.ActionBarPopupWindowLayout popupLayout) {
-                    final boolean userCanEditStory = isSelf || MessagesController.getInstance(currentAccount).getStoriesController().canEditStory(currentStory.storyItem);
-                    boolean canEditStory = isSelf || (isChannel && userCanEditStory);
                     if (canEditStory || currentStory.uploadingStory != null) {
                         TL_stories.StoryItem storyItem = currentStory.storyItem;
                         if (currentStory.uploadingStory != null) {
@@ -1213,7 +1274,9 @@ public class PeerStoriesView extends SizeNotifierFrameLayout implements Notifica
                                 }
                             });
                             item.setItemHeight(56);
-
+                        }
+                        addSpeedLayout(popupLayout, false);
+                        if (isSelf || speedControl) {
                             ActionBarPopupWindow.GapView gap = new ActionBarPopupWindow.GapView(getContext(), resourcesProvider, Theme.key_actionBarDefaultSubmenuSeparator);
                             gap.setTag(R.id.fit_width_tag, 1);
                             popupLayout.addView(gap, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, 8));
@@ -1387,6 +1450,7 @@ public class PeerStoriesView extends SizeNotifierFrameLayout implements Notifica
 //                            }
 //                        });
 
+                        addSpeedLayout(popupLayout, true);
 
                         final String key = NotificationsController.getSharedPrefKey(dialogId, 0);
                         boolean muted = !NotificationsCustomSettingsActivity.areStoriesNotMuted(currentAccount, dialogId);
@@ -1457,12 +1521,16 @@ public class PeerStoriesView extends SizeNotifierFrameLayout implements Notifica
                             }
                         }
 
-                        if (!unsupported) {
+                        if (!MessagesController.getInstance(currentAccount).premiumFeaturesBlocked() && currentStory.isVideo) {
+                            createQualityItem(popupLayout);
+                        }
+
+                        if (!unsupported && allowShare) {
                             ActionBarMenuItem.addItem(popupLayout, R.drawable.msg_gallery, LocaleController.getString("SaveToGallery", R.string.SaveToGallery), false, resourcesProvider).setOnClickListener(v -> {
-                                    saveToGallery();
-                                    if (popupMenu != null) {
-                                        popupMenu.dismiss();
-                                    }
+                                saveToGallery();
+                                if (popupMenu != null) {
+                                    popupMenu.dismiss();
+                                }
                             });
                         }
 
@@ -1470,7 +1538,7 @@ public class PeerStoriesView extends SizeNotifierFrameLayout implements Notifica
                             createStealthModeItem(popupLayout);
                         }
                         if (allowShareLink) {
-                            ActionBarMenuItem.addItem(popupLayout, R.drawable.msg_link, LocaleController.getString("CopyLink", R.string.CopyLink), false, resourcesProvider).setOnClickListener(v -> {
+                            ActionBarMenuItem.addItem(popupLayout, R.drawable.msg_link2, LocaleController.getString("CopyLink", R.string.CopyLink), false, resourcesProvider).setOnClickListener(v -> {
                                 AndroidUtilities.addToClipboard(currentStory.createLink());
                                 onLinkCopied();
                                 if (popupMenu != null) {
@@ -1722,6 +1790,24 @@ public class PeerStoriesView extends SizeNotifierFrameLayout implements Notifica
             });
             item2.setIcon(combinedDrawable2);
         }
+    }
+
+    private void createQualityItem(ActionBarPopupWindow.ActionBarPopupWindowLayout popupLayout) {
+        final boolean qualityFull = MessagesController.getInstance(currentAccount).storyQualityFull;
+        ActionBarMenuItem.addItem(popupLayout, qualityFull ? R.drawable.menu_quality_sd : R.drawable.menu_quality_hd, LocaleController.getString(qualityFull ? R.string.StoryQualityDecrease : R.string.StoryQualityIncrease), false, resourcesProvider).setOnClickListener(v -> {
+            final boolean newQualityFull = !qualityFull;
+            MessagesController.getInstance(currentAccount).setStoryQuality(newQualityFull);
+            BulletinFactory.of(storyContainer, resourcesProvider)
+                .createSimpleBulletin(
+                    R.raw.chats_infotip,
+                    LocaleController.getString(newQualityFull ? R.string.StoryQualityIncreasedTitle : R.string.StoryQualityDecreasedTitle),
+                    LocaleController.getString(newQualityFull ? R.string.StoryQualityIncreasedMessage : R.string.StoryQualityDecreasedMessage)
+                )
+                .show();
+            if (popupMenu != null) {
+                popupMenu.dismiss();
+            }
+        });
     }
 
     private void showLikesReaction(boolean show) {
@@ -2071,6 +2157,29 @@ public class PeerStoriesView extends SizeNotifierFrameLayout implements Notifica
                 });
         }
         bulletin.show();
+    }
+
+    private void updateSpeedItem(boolean isFinal) {
+        if (speedItem == null || speedLayout == null) return;
+        if (speedItem.getVisibility() != View.VISIBLE) {
+            return;
+        }
+        if (isFinal) {
+            if (Math.abs(StoryViewer.currentSpeed - 0.2f) < 0.05f) {
+                speedItem.setSubtext(LocaleController.getString(R.string.VideoSpeedVerySlow));
+            } else if (Math.abs(StoryViewer.currentSpeed - 0.5f) < 0.05f) {
+                speedItem.setSubtext(LocaleController.getString(R.string.VideoSpeedSlow));
+            } else if (Math.abs(StoryViewer.currentSpeed - 1.0f) < 0.05f) {
+                speedItem.setSubtext(LocaleController.getString(R.string.VideoSpeedNormal));
+            } else if (Math.abs(StoryViewer.currentSpeed - 1.5f) < 0.05f) {
+                speedItem.setSubtext(LocaleController.getString(R.string.VideoSpeedFast));
+            } else if (Math.abs(StoryViewer.currentSpeed - 2f) < 0.05f) {
+                speedItem.setSubtext(LocaleController.getString(R.string.VideoSpeedVeryFast));
+            } else {
+                speedItem.setSubtext(LocaleController.formatString(R.string.VideoSpeedCustom, SpeedIconDrawable.formatNumber(StoryViewer.currentSpeed) + "x"));
+            }
+        }
+        speedLayout.update(StoryViewer.currentSpeed, isFinal);
     }
 
     private void createEnterView() {
@@ -3415,6 +3524,7 @@ public class PeerStoriesView extends SizeNotifierFrameLayout implements Notifica
         }
        // sharedResources.muteDrawable.addView(muteIconView);
         NotificationCenter.getInstance(currentAccount).addObserver(this, NotificationCenter.storiesUpdated);
+        NotificationCenter.getInstance(currentAccount).addObserver(this, NotificationCenter.storyQualityUpdate);
         NotificationCenter.getInstance(currentAccount).addObserver(this, NotificationCenter.storiesListUpdated);
         NotificationCenter.getInstance(currentAccount).addObserver(this, NotificationCenter.stealthModeChanged);
         NotificationCenter.getInstance(currentAccount).addObserver(this, NotificationCenter.storiesLimitUpdate);
@@ -3447,6 +3557,7 @@ public class PeerStoriesView extends SizeNotifierFrameLayout implements Notifica
         }
         //sharedResources.muteDrawable.removeView(muteIconView);
         NotificationCenter.getInstance(currentAccount).removeObserver(this, NotificationCenter.storiesUpdated);
+        NotificationCenter.getInstance(currentAccount).removeObserver(this, NotificationCenter.storyQualityUpdate);
         NotificationCenter.getInstance(currentAccount).removeObserver(this, NotificationCenter.storiesListUpdated);
         NotificationCenter.getInstance(currentAccount).removeObserver(this, NotificationCenter.stealthModeChanged);
         NotificationCenter.getInstance(currentAccount).removeObserver(this, NotificationCenter.storiesLimitUpdate);
@@ -3485,6 +3596,8 @@ public class PeerStoriesView extends SizeNotifierFrameLayout implements Notifica
             if (editStoryItem != null) {
                 editStoryItem.animate().alpha(storiesController.hasUploadingStories(dialogId) && currentStory.isVideo && !SharedConfig.allowPreparingHevcPlayers() ? .5f : 1f).start();
             }
+        } else if (id == NotificationCenter.storyQualityUpdate) {
+            updatePosition();
         } else if (id == NotificationCenter.emojiLoaded) {
             storyCaptionView.captionTextview.invalidate();
         } else if (id == NotificationCenter.stealthModeChanged) {
@@ -6007,7 +6120,7 @@ public class PeerStoriesView extends SizeNotifierFrameLayout implements Notifica
                     sparseIntArray.put(Theme.key_chat_emojiPanelBackground, ColorUtils.setAlphaComponent(Color.WHITE, 30));
                 }
             });
-            reactionsContainerLayout.setHint(LocaleController.getString("StoryReactionsHint", R.string.StoryReactionsHint));
+            reactionsContainerLayout.setHint(LocaleController.getString(R.string.StoryReactionsHint));
             reactionsContainerLayout.skipEnterAnimation = true;
             addView(reactionsContainerLayout, reactionsContainerIndex, LayoutHelper.createFrame(LayoutHelper.WRAP_CONTENT, 52 + 20, Gravity.TOP | Gravity.CENTER_HORIZONTAL, 0, 0, 0, 64));
             reactionsContainerLayout.setDelegate(new ReactionsContainerLayout.ReactionsContainerDelegate() {
