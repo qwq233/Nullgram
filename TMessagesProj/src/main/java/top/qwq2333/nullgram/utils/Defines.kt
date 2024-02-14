@@ -102,6 +102,7 @@ object Defines {
     @BooleanConfig const val ignoreUserSpecifiedReplyColor = "ignoreUserSpecifiedReplyColor"
     @BooleanConfig const val hideTitle = "hideTitle"
     @BooleanConfig const val showHideTitle = "showHideTitle"
+    @StringConfig("") const val messageFilter = "messageFilter1"
 
     /**
      * 0 default 1 online 2 offline

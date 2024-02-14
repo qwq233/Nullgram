@@ -6167,6 +6167,7 @@ public class MessagesController extends BaseController implements NotificationCe
                 }
 
                 ArrayList<MessageObject> objects = new ArrayList<>();
+                objects.removeIf(MessageObject::isBlockedMessage);
                 for (int a = 0; a < messagesRes.messages.size(); a++) {
                     TLRPC.Message message = messagesRes.messages.get(a);
                     message.dialog_id = dialogId;
@@ -11660,6 +11661,7 @@ public class MessagesController extends BaseController implements NotificationCe
             }
 
             ArrayList<MessageObject> newMessages = new ArrayList<>();
+            newMessages.removeIf(MessageObject::isBlockedMessage);
             for (int a = 0; a < dialogsRes.messages.size(); a++) {
                 TLRPC.Message message = dialogsRes.messages.get(a);
                 if (promoDialogId == 0 || promoDialogId != message.dialog_id) {
@@ -18536,6 +18538,8 @@ public class MessagesController extends BaseController implements NotificationCe
         long channelId = 0;
         boolean updateRating = false;
         boolean hasNotOutMessage = false;
+
+
         if (!scheduled) {
             for (int a = 0; a < messages.size(); a++) {
                 MessageObject message = messages.get(a);

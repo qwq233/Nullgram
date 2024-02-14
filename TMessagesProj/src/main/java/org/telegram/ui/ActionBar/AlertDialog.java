@@ -12,7 +12,6 @@ import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
-import android.animation.ValueAnimator;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -20,7 +19,6 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapShader;
 import android.graphics.Canvas;
 import android.graphics.ColorFilter;
-import android.graphics.CornerPathEffect;
 import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.PorterDuff;
@@ -55,8 +53,6 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.graphics.ColorUtils;
 
-import com.google.android.exoplayer2.util.Log;
-
 import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.FileLog;
 import org.telegram.messenger.LiteMode;
@@ -73,7 +69,6 @@ import org.telegram.ui.Components.RLottieDrawable;
 import org.telegram.ui.Components.RLottieImageView;
 import org.telegram.ui.Components.RadialProgressView;
 import org.telegram.ui.Components.spoilers.SpoilersTextView;
-import org.telegram.ui.LaunchActivity;
 
 import java.util.ArrayList;
 import java.util.Map;
@@ -1668,6 +1663,16 @@ public class AlertDialog extends Dialog implements Drawable.Callback, Notificati
 
         public Builder setMessageTextViewClickable(boolean value) {
             alertDialog.messageTextViewClickable = value;
+            return this;
+        }
+
+        public Builder setCancelable(boolean cancelable) {
+            alertDialog.setCancelable(cancelable);
+            return this;
+        }
+
+        public Builder cancel() {
+            alertDialog.cancel();
             return this;
         }
 

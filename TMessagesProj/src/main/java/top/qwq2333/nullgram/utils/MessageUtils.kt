@@ -642,6 +642,36 @@ class MessageUtils(num: Int) : BaseController(num) {
         }
     }
 
+    fun searchUser(userName: String, callback: (TLRPC.User?) -> Unit) {
+        val req = TLRPC.TL_contacts_resolveUsername().apply {
+            username = userName
+        }
+        CoroutineScope(Dispatchers.IO).launch {
+            connectionsHelper.sendRequestAndDo(req) { response, error ->
+                if (response is TLRPC.TL_contacts_resolvedPeer) {
+                    messagesController.putUsers(response.users, false)
+                    messagesController.putChats(response.chats, false)
+                    messagesStorage.putUsersAndChats(response.users, response.chats, true, true)
+                    callback.invoke(messagesController.getUser(response.peer.user_id))
+                } else {
+                    callback.invoke(null)
+                }
+            }
+
+        }
+    }
+
+    fun searchUser(userName: String): TLRPC.User? {
+        var user: TLRPC.User? = null
+        val latch = CountDownLatch(1)
+        searchUser(userName) {
+            user = it
+            latch.countDown()
+        }
+        latch.await()
+        return user
+    }
+
     fun searchUser(userId: Long): TLRPC.User? {
         return runBlocking {
             val latch = CountDownLatch(1)

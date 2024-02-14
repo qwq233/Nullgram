@@ -318,7 +318,10 @@
     <string name="ShowTitle">Show title</string>
     <string name="HideTitle">Hide title</string>
     <string name="showHideTitle">Show hide title</string>
-  <string name="DownloadingStickerSet">Downloading sticker set...</string>
+    <string name="DownloadingStickerSet">Downloading sticker set…</string>
     <string name="IncompleteDownload">Download timed out, please check your network</string>
     <string name="StickerPackNotFound">Sticker pack not found.</string>
+    <string name="MessageFilter">Message Filter</string>
+    <string name="Pattern">Pattern</string>
+    <string name="MessageFilterDesc">Use regular expressions to match messages, and the matched messages will be hidden.\nLeave it blank to disable it</string>
 </resources>

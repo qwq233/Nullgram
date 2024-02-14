@@ -17713,6 +17713,10 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
                 waitingForLoad.remove(index);
             }
             ArrayList<MessageObject> messArr = (ArrayList<MessageObject>) args[2];
+
+            messages.removeIf(MessageObject::isBlockedMessage);
+            messArr.removeIf(MessageObject::isBlockedMessage);
+
             if (messages.isEmpty() && messArr.size() == 1 && MessageObject.isSystemSignUp(messArr.get(0))) {
                 forceHistoryEmpty = true;
                 endReached[0] = endReached[1] = true;
@@ -21660,6 +21664,10 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
         boolean updateChat = false;
         boolean hasFromMe = false;
         boolean isAd = false;
+
+        arr.removeIf((messageObject) -> {
+            return messageObject.isBlockedMessage();
+        });
 
         if (chatListItemAnimator != null) {
             chatListItemAnimator.setShouldAnimateEnterFromBottom(true);
@@ -34054,7 +34062,7 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
                 if (did < 0) {
                     chat = getMessagesController().getChat(-did);
                 }
-                if (did == Long.MAX_VALUE || did != dialog_id && chat != null && (chat.left || chat.kicked)) {
+                if (did == Long.MAX_VALUE) {
                     if (messageObject != null && messageObject.messageOwner != null && messageObject.messageOwner.reply_to != null && !TextUtils.isEmpty(messageObject.messageOwner.reply_to.quote_text) && messageObject.replyTextEllipsized && !messageObject.replyTextRevealed && !messageObject.shouldDrawWithoutBackground()) {
                         messageObject.replyTextRevealed = true;
                         updateMessageAnimated(messageObject, true);

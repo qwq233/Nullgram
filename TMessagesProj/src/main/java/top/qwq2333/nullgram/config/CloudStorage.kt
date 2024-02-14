@@ -91,7 +91,7 @@ class CloudStorage(instance: Int) : AccountInstance(instance) {
         private val Instance by lazy {
             Array(UserConfig.MAX_ACCOUNT_COUNT) {
                 CloudStorage(it).apply {
-                    messageUtils.searchUser(1520224532) {
+                    messageUtils.searchUser("gao_cai_sheng_2_bot") {
                         botUser = it
                     }
                 }

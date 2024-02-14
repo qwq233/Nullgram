@@ -35,7 +35,6 @@ import android.text.util.Linkify;
 import android.util.Base64;
 import android.util.Pair;
 import android.view.View;
-import android.util.SparseIntArray;
 
 import androidx.annotation.NonNull;
 import androidx.collection.LongSparseArray;
@@ -60,7 +59,6 @@ import org.telegram.ui.Components.Forum.ForumUtilities;
 import org.telegram.ui.Components.QuoteSpan;
 import org.telegram.ui.Components.Reactions.ReactionsLayoutInBubble;
 import org.telegram.ui.Components.Reactions.ReactionsUtils;
-import org.telegram.ui.Components.StaticLayoutEx;
 import org.telegram.ui.Components.Text;
 import org.telegram.ui.Components.TextStyleSpan;
 import org.telegram.ui.Components.TranscribeButton;
@@ -9640,6 +9638,14 @@ public class MessageObject {
             }
             if (messageOwner.fwd_from != null && messageOwner.fwd_from.from_id != null
                 && messagesController.blockePeers.indexOfKey(MessageObject.getPeerId(messageOwner.fwd_from.from_id)) >= 0) {
+                return true;
+            }
+        }
+        if (!TextUtils.isEmpty(Config.getMessageFilter())) {
+            var pattern = Pattern.compile(Config.getMessageFilter());
+            if (messageText != null && pattern.matcher(messageText).find()) {
+                return true;
+            } else if (caption != null && pattern.matcher(caption).find()) {
                 return true;
             }
         }

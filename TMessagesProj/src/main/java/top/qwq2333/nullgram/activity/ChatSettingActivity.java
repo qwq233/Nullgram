@@ -19,6 +19,8 @@
 
 package top.qwq2333.nullgram.activity;
 
+import static top.qwq2333.nullgram.UIKt.createMessageFilterSetter;
+
 import android.animation.ValueAnimator;
 import android.annotation.SuppressLint;
 import android.content.Context;
@@ -115,6 +117,7 @@ public class ChatSettingActivity extends BaseActivity {
     private int showTabsOnForwardRow;
     private int disableStickersAutoReorderRow;
     private int hideTitleRow;
+    private int messageFiltersRow;
     private int chat2Row;
 
     private int markdownRow;
@@ -360,8 +363,9 @@ public class ChatSettingActivity extends BaseActivity {
             if (view instanceof TextCheckCell) {
                 ((TextCheckCell) view).setChecked(Config.showHideTitle);
             }
+        } else if (position == messageFiltersRow) {
+            createMessageFilterSetter(this, getContext(), resourcesProvider);
         }
-
     }
 
     @Override
@@ -412,6 +416,7 @@ public class ChatSettingActivity extends BaseActivity {
         showTabsOnForwardRow = addRow("showTabsOnForward");
         disableStickersAutoReorderRow = addRow("disableStickersAutoReorder");
         hideTitleRow = addRow("showHideTitle");
+        messageFiltersRow = addRow("messageFilters");
         chat2Row = addRow();
         markdownRow = addRow();
         markdownDisableRow = addRow("markdownDisabled");
@@ -455,7 +460,6 @@ public class ChatSettingActivity extends BaseActivity {
                         textCell.setText(LocaleController.getString("MessageMenu", R.string.MessageMenu), false);
                     } else if (position == maxRecentStickerRow) {
                         textCell.setTextAndValue(LocaleController.getString("maxRecentSticker", R.string.maxRecentSticker), String.valueOf(Config.getMaxRecentSticker()), payload, true);
-
                     } else if (position == customDoubleClickTapRow) {
                         String value;
                         switch (Config.getDoubleTab()) {
@@ -489,6 +493,8 @@ public class ChatSettingActivity extends BaseActivity {
                     } else if (position == markdownParserRow) {
                         textCell.setTextAndValue(LocaleController.getString("MarkdownParser", R.string.MarkdownParser), Config.newMarkdownParser ? "Nullgram" : "Telegram", payload,
                             position + 1 != markdown2Row);
+                    } else if (position == messageFiltersRow) {
+                        textCell.setText(LocaleController.getString("MessageFilter", R.string.MessageFilter), payload);
                     }
                     break;
                 }
@@ -631,7 +637,8 @@ public class ChatSettingActivity extends BaseActivity {
         public int getItemViewType(int position) {
             if (position == chat2Row || position == stickerSize2Row) {
                 return TYPE_SHADOW;
-            } else if (position == messageMenuRow || position == customDoubleClickTapRow || position == maxRecentStickerRow || position == customQuickMessageRow || position == markdownParserRow) {
+            } else if (position == messageMenuRow || position == customDoubleClickTapRow || position == maxRecentStickerRow || position == customQuickMessageRow || position == markdownParserRow
+            || position == messageFiltersRow) {
                 return TYPE_SETTINGS;
             } else if (position == chatRow || position == stickerSizeHeaderRow || position == markdownRow) {
                 return TYPE_HEADER;
