@@ -316,7 +316,10 @@
     <string name="ShowTitle">显示标题</string>
     <string name="HideTitle">隐藏标题</string>
     <string name="showHideTitle">显示隐藏标题</string>
-    <string name="DownloadingStickerSet">正在下载贴图包...</string>
+    <string name="DownloadingStickerSet">Downloading sticker set…</string>
     <string name="IncompleteDownload">下载超时，请检查您的网络</string>
     <string name="StickerPackNotFound">未找到贴纸包</string>
+    <string name="MessageFilter">Message Filter</string>
+    <string name="Pattern">Pattern</string>
+    <string name="MessageFilterDesc">Use regular expressions to match messages, and the matched messages will be hidden.\nLeave it blank to disable it</string>
 </resources>
