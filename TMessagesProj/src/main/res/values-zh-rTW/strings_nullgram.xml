@@ -316,10 +316,10 @@
     <string name="ShowTitle">顯示標題</string>
     <string name="HideTitle">隱藏標題</string>
     <string name="showHideTitle">顯示/隱藏標題</string>
-    <string name="DownloadingStickerSet">Downloading sticker set…</string>
+    <string name="DownloadingStickerSet">正在下載貼圖集…</string>
     <string name="IncompleteDownload">下載逾時，請檢查您的網路</string>
     <string name="StickerPackNotFound">找不到貼圖集。</string>
-    <string name="MessageFilter">Message Filter</string>
-    <string name="Pattern">Pattern</string>
-    <string name="MessageFilterDesc">Use regular expressions to match messages, and the matched messages will be hidden.\nLeave it blank to disable it</string>
+    <string name="MessageFilter">訊息過濾器</string>
+    <string name="Pattern">匹配模式</string>
+    <string name="MessageFilterDesc">使用正規式來匹配訊息，匹配到的訊息將被隱藏。\n留空則表示禁用此功能</string>
 </resources>
