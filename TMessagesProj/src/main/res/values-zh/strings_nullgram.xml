@@ -307,7 +307,7 @@
     <string name="NotOriginalNullgramInfo">你似乎正在使用 Nullgram 的分支。\n 你想要关注 Nullgram 的频道吗？</string>
     <string name="Official">官方</string>
     <string name="Before">开始...</string>
-    <string name="Custom">Custom</string>
+    <string name="Custom">自定义</string>
     <string name="MonoCode">Code</string>
     <string name="CreateCode">Create Code</string>
     <string name="CreateCodeLanguage">语言</string>
