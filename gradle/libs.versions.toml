@@ -19,9 +19,9 @@ isoparser = "1.0.6" # DO NOT UPDATE THIS DEPENDENCY
 kotlin = "1.9.22"
 ksp = "1.9.22-1.0.17"
 poet = "1.16.0"
-kotlinxCoroutinesAndroid = "1.7.3"
-kotlinxSerializationJson = "1.6.2"
-ktor = "2.3.7"
+kotlinxCoroutinesAndroid = "1.8.0"
+kotlinxSerializationJson = "1.6.3"
+ktor = "2.3.8"
 languageId = "17.0.5"
 licensesdialog = "2.2.0"
 osmdroidAndroid = "6.1.18"
@@ -81,7 +81,7 @@ kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
 serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
 firebase-crashlytics = { id = "com.google.firebase.crashlytics", version = "2.9.9" }
-google-services = { id = "com.google.gms.google-services", version = "4.4.0" }
-triplet-play = { id = "com.github.triplet.play", version = "3.8.6" }
+google-services = { id = "com.google.gms.google-services", version = "4.4.1" }
+triplet-play = { id = "com.github.triplet.play", version = "3.9.0" }
 ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
 rust = { id = "org.mozilla.rust-android-gradle.rust-android", version.ref = "rust" }
