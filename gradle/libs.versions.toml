@@ -1,6 +1,5 @@
 [versions]
 agp = "8.2.2"
-appCenter = "5.0.4"
 checkerCompatQual = "2.5.6"
 core = "4.6.2"
 dynamicanimation = "1.0.0"
@@ -23,7 +22,7 @@ poet = "1.16.0"
 kotlinxCoroutinesAndroid = "1.7.3"
 kotlinxSerializationJson = "1.6.2"
 ktor = "2.3.7"
-languageId = "17.0.4"
+languageId = "17.0.5"
 licensesdialog = "2.2.0"
 osmdroidAndroid = "6.1.18"
 playServicesWallet = "19.2.1"
@@ -36,8 +35,6 @@ paletteKtx = "1.0.0"
 rust = "0.9.3"
 
 [libraries]
-appcenter-analytics = { module = "com.microsoft.appcenter:appcenter-analytics", version.ref = "appCenter" }
-appcenter-crashes = { module = "com.microsoft.appcenter:appcenter-crashes", version.ref = "appCenter" }
 checker-compat-qual = { module = "org.checkerframework:checker-compat-qual", version.ref = "checkerCompatQual" }
 dynamicanimation = { module = "androidx.dynamicanimation:dynamicanimation", version.ref = "dynamicanimation" }
 exifinterface = { module = "androidx.exifinterface:exifinterface", version.ref = "exifinterface" }

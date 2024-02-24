@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019-2023 qwq233 <qwq233@qwq2333.top>
+ * Copyright (C) 2019-2024 qwq233 <qwq233@qwq2333.top>
  * https://github.com/qwq233/Nullgram
  *
  * This program is free software; you can redistribute it and/or
@@ -25,10 +25,8 @@ import org.telegram.messenger.LocaleController
 import org.telegram.messenger.R
 import top.qwq2333.gen.Config
 import top.qwq2333.nullgram.config.ConfigManager
-import top.qwq2333.nullgram.utils.AnalyticsUtils.trackEvent
 import top.qwq2333.nullgram.utils.Defines
 import top.qwq2333.nullgram.utils.Log
-import top.qwq2333.nullgram.utils.Utils
 import java.net.ServerSocket
 
 object WebSocketHelper {
@@ -118,11 +116,6 @@ object WebSocketHelper {
                     .setConnHash(connHash)
                 tcp2wsServer!!.start(socksPort)
                 tcp2wsStarted = true
-                val map = HashMap<String, String?>()
-                map["buildType"] = BuildConfig.BUILD_TYPE
-                map["buildFlavor"] = Utils.abi
-                map["isPlay"] = BuildConfig.isPlay.toString()
-                trackEvent("tcp2ws started", map)
             }
             Log.d("tcp2ws started on port " + socksPort)
             Log.d("serverHost: " + currentProvider.host + " tls: " + wsEnableTLS)
