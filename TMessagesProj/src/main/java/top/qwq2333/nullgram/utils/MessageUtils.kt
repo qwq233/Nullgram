@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019-2023 qwq233 <qwq233@qwq2333.top>
+ * Copyright (C) 2019-2024 qwq233 <qwq233@qwq2333.top>
  * https://github.com/qwq233/Nullgram
  *
  * This program is free software; you can redistribute it and/or
@@ -221,7 +221,7 @@ class MessageUtils(num: Int) : BaseController(num) {
                 }
             } else {
                 deleteUserHistoryWithSearch(
-                    fragment, -chat.id, forumTopic?.id ?: 0, mergeDialogId
+                    fragment, -chat.id, forumTopic?.id ?: 0, mergeDialogId, before = connectionsManager.currentTime
                 ) { count: Int, deleteAction: Runnable? ->
                     showDeleteHistoryBulletin(fragment, count, true, resourcesProvider, deleteAction)
                 }
