@@ -1,9 +1,20 @@
 /*
- * This is the source code of Telegram for Android v. 5.x.x.
- * It is licensed under GNU GPL v. 2 or later.
- * You should have received a copy of the license in this archive (see LICENSE).
+ * Copyright (C) 2019-2024 qwq233 <qwq233@qwq2333.top>
+ * https://github.com/qwq233/Nullgram
  *
- * Copyright Nikolai Kudashov, 2013-2018.
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation; either version 2
+ * of the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along with this software.
+ *  If not, see
+ * <https://www.gnu.org/licenses/>
  */
 
 package org.telegram.ui;
@@ -66,7 +77,6 @@ import android.text.TextPaint;
 import android.text.TextUtils;
 import android.text.style.ClickableSpan;
 import android.text.style.ForegroundColorSpan;
-import android.text.style.ReplacementSpan;
 import android.util.Property;
 import android.util.SparseIntArray;
 import android.util.TypedValue;
@@ -278,7 +288,6 @@ import top.qwq2333.nullgram.activity.MainSettingActivity;
 import top.qwq2333.nullgram.config.ConfigManager;
 import top.qwq2333.nullgram.helpers.TranslateHelper;
 import top.qwq2333.nullgram.translate.LanguageDetectorTimeout;
-import top.qwq2333.nullgram.ui.AutoTranslatePopupWrapper;
 import top.qwq2333.nullgram.ui.BottomBuilder;
 import top.qwq2333.nullgram.ui.SimpleTextViewSwitcher;
 import top.qwq2333.nullgram.utils.AlertUtil;
@@ -3680,6 +3689,14 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
                 builder.addItem(LocaleController.getString("Copy", R.string.Copy), R.drawable.msg_copy, (it) -> {
                     AndroidUtilities.addToClipboard(finalMessage);
                     AlertUtil.showToast(LocaleController.getString("TextCopied", R.string.TextCopied));
+                    return Unit.INSTANCE;
+                });
+                builder.addItem(LocaleController.getString("DebugClearLogs", R.string.DebugClearLogs), R.drawable.delete, (it) -> {
+                    Log.refreshLog();
+                    return Unit.INSTANCE;
+                });
+                builder.addItem(LocaleController.getString("DebugSendLastLogs", R.string.DebugSendLastLogs), R.drawable.share, (it) -> {
+                    Log.shareLog(getContext());
                     return Unit.INSTANCE;
                 });
                 builder.addItem(LocaleController.getString("CheckUpdate", R.string.CheckUpdate), R.drawable.msg_search, (it) -> {

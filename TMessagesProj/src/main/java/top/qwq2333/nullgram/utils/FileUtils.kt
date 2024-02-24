@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019-2023 qwq233 <qwq233@qwq2333.top>
+ * Copyright (C) 2019-2024 qwq233 <qwq233@qwq2333.top>
  * https://github.com/qwq233/Nullgram
  *
  * This program is free software; you can redistribute it and/or
@@ -19,10 +19,11 @@
 
 package top.qwq2333.nullgram.utils
 
-import org.telegram.messenger.ApplicationLoader
 import java.io.File
 import java.io.InputStream
 import java.io.OutputStream
+import java.nio.file.Files
+import java.nio.file.attribute.BasicFileAttributes
 
 object FileUtils {
 
@@ -39,58 +40,32 @@ object FileUtils {
 
     @JvmStatic
     fun initDir(dir: File) {
-
         var parentDir: File? = dir
-
         while (parentDir != null) {
-
             if (parentDir.isDirectory) break
-
             if (parentDir.isFile) parentDir.deleteRecursively()
-
             parentDir = parentDir.parentFile
-
         }
-
         dir.mkdirs()
-
         // ignored
-
     }
 
     @JvmStatic
-    @JvmOverloads
-    fun delete(file: File?, filter: (File) -> Boolean = { true }) {
-
-        runCatching {
-
-            file?.takeIf { filter(it) }?.deleteRecursively()
-
-        }
-
+    fun delete(file: File?, filter: (File) -> Boolean = { true }) = runCatching {
+        file?.takeIf { filter(it) }?.deleteRecursively()
     }
 
     @JvmStatic
     fun initFile(file: File) {
-
         file.parentFile?.also { initDir(it) }
-
         if (!file.isFile) {
-
             if (file.isDirectory) file.deleteRecursively()
-
             if (!file.isFile) {
-
                 if (!file.createNewFile() && !file.isFile) {
-
                     error("unable to create file ${file.path}")
-
                 }
-
             }
-
         }
-
     }
 
     @JvmStatic
@@ -98,28 +73,10 @@ object FileUtils {
 
     @JvmStatic
     fun writeUtf8String(text: String, save: File) {
-
         initFile(save)
-
         save.writeText(text)
-
     }
 
-    @JvmStatic
-    fun saveAsset(path: String, saveTo: File) {
-
-        val assets = ApplicationLoader.applicationContext.assets
-
-        try {
-            saveTo.outputStream().use {
-                copy(assets.open(path), it)
-            }
-        } catch (thr: Throwable) {
-            // Ignore
-        }
-
-
-    }
 
     @JvmStatic
     fun copy(source: InputStream, target: OutputStream) {
@@ -131,3 +88,5 @@ object FileUtils {
     }
 
 }
+
+internal fun File.readAttributes(): BasicFileAttributes = Files.readAttributes(this.toPath(), BasicFileAttributes::class.java)
