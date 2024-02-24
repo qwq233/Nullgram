@@ -41,7 +41,6 @@ import org.telegram.messenger.FileLog;
 import org.telegram.messenger.ImageLoader;
 import org.telegram.messenger.ImageReceiver;
 import org.telegram.messenger.LocaleController;
-import org.telegram.messenger.MediaDataController;
 import org.telegram.messenger.MessagesController;
 import org.telegram.messenger.NotificationCenter;
 import org.telegram.messenger.R;
@@ -318,14 +317,6 @@ public class ChatAvatarContainer extends FrameLayout implements NotificationCent
         }
 
         emojiStatusDrawable = new AnimatedEmojiDrawable.SwapAnimatedEmojiDrawable(titleTextView, AndroidUtilities.dp(24));
-
-        setOnLongClickListener(v -> {
-            if (canSearch()) {
-                openSearch();
-                return true;
-            }
-            return false;
-        });
     }
 
     private ButtonBounce bounce = new ButtonBounce(this);

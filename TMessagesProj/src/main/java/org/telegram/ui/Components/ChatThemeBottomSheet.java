@@ -25,7 +25,6 @@ import android.os.Bundle;
 import android.text.SpannableStringBuilder;
 import android.text.Spanned;
 import android.text.TextUtils;
-import android.util.Log;
 import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.MotionEvent;
@@ -934,16 +933,7 @@ public class ChatThemeBottomSheet extends BottomSheet implements NotificationCen
                 limitReachedBottomSheet.setDialogId(chatActivity.getDialogId());
                 limitReachedBottomSheet.showStatisticButtonInLink(() -> {
                     TLRPC.Chat chat = chatActivity.getMessagesController().getChat(-chatActivity.getDialogId());
-                    Bundle args = new Bundle();
-                    args.putLong("chat_id", -chatActivity.getDialogId());
-                    args.putBoolean("is_megagroup", chat.megagroup);
-                    args.putBoolean("start_from_boosts", true);
-                    TLRPC.ChatFull chatInfo = chatActivity.getMessagesController().getChatFull(-chatActivity.getDialogId());
-                    if (chatInfo == null || !chatInfo.can_view_stats) {
-                        args.putBoolean("only_boosts", true);
-                    };
-                    StatisticActivity fragment = new StatisticActivity(args);
-                    showAsSheet(fragment);
+                    showAsSheet(StatisticActivity.create(chat));
                 });
                 limitReachedBottomSheet.show();
             });

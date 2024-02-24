@@ -32,7 +32,6 @@ import android.transition.TransitionManager;
 import android.transition.TransitionSet;
 import android.transition.TransitionValues;
 import android.transition.Visibility;
-import android.util.Log;
 import android.util.TypedValue;
 import android.view.ActionMode;
 import android.view.Gravity;
@@ -2473,6 +2472,9 @@ public class ActionBarMenuItem extends FrameLayout {
     }
     public Item lazilyAddSubItem(int id, int icon, CharSequence text) {
         return lazilyAddSubItem(id, icon, null, text, true, false);
+    }
+    public Item lazilyAddSubItem(int id, Drawable iconDrawable, CharSequence text) {
+        return lazilyAddSubItem(id, 0, iconDrawable, text, true, false);
     }
     public Item lazilyAddSubItem(int id, int icon, Drawable iconDrawable, CharSequence text, boolean dismiss, boolean needCheck) {
         return putLazyItem(Item.asSubItem(id, icon, iconDrawable, text, dismiss, needCheck));

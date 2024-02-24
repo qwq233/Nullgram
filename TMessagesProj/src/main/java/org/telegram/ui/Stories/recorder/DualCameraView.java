@@ -22,20 +22,18 @@ import org.telegram.messenger.MessagesController;
 import org.telegram.messenger.R;
 import org.telegram.messenger.SharedConfig;
 import org.telegram.messenger.UserConfig;
-import org.telegram.messenger.camera.CameraController;
-import org.telegram.messenger.camera.CameraSession;
+import org.telegram.messenger.camera.CameraSessionWrapper;
 import org.telegram.messenger.camera.CameraView;
 import org.telegram.tgnet.ConnectionsManager;
 import org.telegram.tgnet.TLRPC;
 import org.telegram.ui.ActionBar.AlertDialog;
 
-public class DualCameraView extends CameraView implements CameraController.ErrorCallback {
+public class DualCameraView extends CameraView {
 
     private boolean dualAvailable;
 
     public DualCameraView(Context context, boolean frontface, boolean lazy) {
         super(context, frontface, lazy);
-        CameraController.getInstance().addOnErrorListener(this);
         dualAvailable = dualAvailableStatic(context);
     }
 
@@ -49,7 +47,6 @@ public class DualCameraView extends CameraView implements CameraController.Error
     public void destroy(boolean async, Runnable beforeDestroyRunnable) {
         saveDual();
         super.destroy(async, beforeDestroyRunnable);
-        CameraController.getInstance().removeOnErrorListener(this);
     }
 
     private final PointF lastTouch = new PointF();
@@ -477,7 +474,7 @@ public class DualCameraView extends CameraView implements CameraController.Error
     }
 
     @Override
-    public void onError(int error, Camera camera, CameraSession session) {
+    public void onError(int error, Camera camera, CameraSessionWrapper session) {
         if (isDual()) {
             if (!dualAvailableDefault(getContext(), false)) {
                 MessagesController.getGlobalMainSettings().edit().putBoolean("dual_available", dualAvailable = false).apply();
@@ -490,7 +487,7 @@ public class DualCameraView extends CameraView implements CameraController.Error
             log(false);
             toggleDual();
         }
-        if (getCameraSession(0) == session) {
+        if (getCameraSession(0) != null && getCameraSession(0).equals(session)) {
             resetCamera();
         }
         onCameraError();

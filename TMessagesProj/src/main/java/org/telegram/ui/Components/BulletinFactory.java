@@ -5,7 +5,6 @@ import android.graphics.PorterDuff;
 import android.graphics.PorterDuffColorFilter;
 import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
-import android.os.Bundle;
 import android.text.Spannable;
 import android.text.SpannableString;
 import android.text.SpannableStringBuilder;
@@ -43,7 +42,6 @@ import org.telegram.tgnet.TLObject;
 import org.telegram.tgnet.TLRPC;
 import org.telegram.ui.ActionBar.BaseFragment;
 import org.telegram.ui.ActionBar.Theme;
-import org.telegram.ui.ChatActivity;
 import org.telegram.ui.LaunchActivity;
 import org.telegram.ui.PremiumPreviewFragment;
 import org.telegram.ui.Stories.recorder.HintView2;
@@ -80,8 +78,12 @@ public final class BulletinFactory {
         if (BuildVars.DEBUG_VERSION) {
             createErrorBulletin(error.code + " " + error.text).show();
         } else {
-            createErrorBulletin(LocaleController.getString("UnknownError", R.string.UnknownError)).show();
+            createErrorBulletin(LocaleController.getString(R.string.UnknownError)).show();
         }
+    }
+
+    public static void showError(TLRPC.TL_error error) {
+        global().createErrorBulletin(LocaleController.formatString(R.string.UnknownErrorCode, error.text)).show();
     }
 
     public enum FileType {

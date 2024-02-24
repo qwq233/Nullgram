@@ -27,13 +27,10 @@ import android.graphics.Rect;
 import android.graphics.RectF;
 import android.graphics.Shader;
 import android.graphics.drawable.Drawable;
-import android.os.Build;
 import android.text.Editable;
-import android.text.Layout;
 import android.text.SpannableStringBuilder;
 import android.text.TextPaint;
 import android.text.TextWatcher;
-import android.util.Log;
 import android.view.Gravity;
 import android.view.MotionEvent;
 import android.view.View;
@@ -49,7 +46,6 @@ import com.google.zxing.common.detector.MathUtils;
 
 import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.BotWebViewVibrationEffect;
-import org.telegram.messenger.BuildVars;
 import org.telegram.messenger.Emoji;
 import org.telegram.messenger.FileLog;
 import org.telegram.messenger.LiteMode;
@@ -59,7 +55,6 @@ import org.telegram.messenger.R;
 import org.telegram.messenger.SharedConfig;
 import org.telegram.messenger.UserConfig;
 import org.telegram.messenger.Utilities;
-import org.telegram.messenger.XiaomiUtilities;
 import org.telegram.ui.ActionBar.AdjustPanLayoutHelper;
 import org.telegram.ui.ActionBar.Theme;
 import org.telegram.ui.Components.AnimatedEmojiDrawable;
@@ -375,7 +370,7 @@ public class CaptionContainerView extends FrameLayout {
 
     @Override
     public boolean dispatchTouchEvent(MotionEvent ev) {
-        if (ignoreTouches || ev.getAction() == MotionEvent.ACTION_DOWN && ignoreTouches(ev.getX(), ev.getY()) || !bounds.contains(ev.getX(), ev.getY()) && !keyboardShown) {
+        if (ignoreTouches || ev.getAction() == MotionEvent.ACTION_DOWN && ignoreTouches(ev.getX(), ev.getY()) || !clickBounds.contains(ev.getX(), ev.getY()) && !keyboardShown) {
             return false;
         }
         if (ev.getAction() == MotionEvent.ACTION_DOWN && !keyboardShown) {
@@ -764,6 +759,7 @@ public class CaptionContainerView extends FrameLayout {
 
     private final RectF rectF = new RectF();
     private final RectF bounds = new RectF();
+    private final RectF clickBounds = new RectF();
 
     protected void onEditHeightChange(int height) {}
 
@@ -886,19 +882,25 @@ public class CaptionContainerView extends FrameLayout {
             editText.getEditText().setTranslationY(lastHeightTranslation = heightTranslation);
         }
 
-        final float pad = lerp(AndroidUtilities.dp(12), 0, keyboardT);
+        final float pad = lerp(dp(12), 0, keyboardT);
         bounds.set(
             pad,
             getHeight() - pad - heightAnimated,
             getWidth() - pad,
             getHeight() - pad
         );
+        clickBounds.set(
+            0,
+            getHeight() - heightAnimated - dp(24),
+            getWidth(),
+            getHeight()
+        );
 
         canvas.save();
         final float s = bounce.getScale(.018f);
         canvas.scale(s, s, bounds.centerX(), bounds.centerY());
 
-        final float r = lerp(AndroidUtilities.dp(21), 0, keyboardT);
+        final float r = lerp(dp(21), 0, keyboardT);
         if (customBlur()) {
             drawBlur(backgroundBlur, canvas, bounds, r, false, 0, 0, true);
             backgroundPaint.setAlpha((int) (lerp(0x26, 0x40, keyboardT)));

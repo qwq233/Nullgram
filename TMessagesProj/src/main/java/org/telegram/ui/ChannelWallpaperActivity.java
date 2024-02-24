@@ -25,8 +25,8 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import org.telegram.messenger.AndroidUtilities;
+import org.telegram.messenger.ChatObject;
 import org.telegram.messenger.ChatThemeController;
-import org.telegram.messenger.DialogObject;
 import org.telegram.messenger.LocaleController;
 import org.telegram.messenger.MessagesController;
 import org.telegram.messenger.R;
@@ -46,8 +46,6 @@ import org.telegram.ui.Components.LayoutHelper;
 import org.telegram.ui.Components.RLottieDrawable;
 import org.telegram.ui.Components.RecyclerListView;
 
-import java.util.Locale;
-
 public class ChannelWallpaperActivity extends BaseFragment {
 
     public final long dialogId;
@@ -55,12 +53,14 @@ public class ChannelWallpaperActivity extends BaseFragment {
     public TL_stories.TL_premium_boostsStatus boostsStatus;
     public TLRPC.WallPaper galleryWallpaper;
     public TLRPC.WallPaper currentWallpaper, selectedWallpaper;
+    private boolean isChannel;
 
     public ChannelWallpaperActivity(long dialogId, TL_stories.TL_premium_boostsStatus boostsStatus) {
         super();
         this.dialogId = dialogId;
         TLRPC.Chat chat = getMessagesController().getChat(-dialogId);
         if (chat != null) {
+            isChannel = ChatObject.isChannelAndNotMegaGroup(chat);
             currentLevel = chat.level;
         }
         this.boostsStatus = boostsStatus;
@@ -111,7 +111,7 @@ public class ChannelWallpaperActivity extends BaseFragment {
     @Override
     public View createView(Context context) {
         actionBar.setBackButtonImage(R.drawable.ic_ab_back);
-        actionBar.setTitle(LocaleController.getString(R.string.ChannelWallpaper));
+        actionBar.setTitle(LocaleController.getString(isChannel ? R.string.ChannelWallpaper : R.string.GroupWallpaper));
         actionBar.setActionBarMenuOnItemClick(new ActionBar.ActionBarMenuOnItemClick() {
             @Override
             public void onItemClick(int id) {
@@ -308,7 +308,7 @@ public class ChannelWallpaperActivity extends BaseFragment {
                 ((TextCell) holder.itemView).setTextAndIcon(LocaleController.getString(R.string.ChannelWallpaperRemove), R.drawable.msg_delete, false);
                 ((TextCell) holder.itemView).setColors(Theme.key_text_RedRegular, Theme.key_text_RedRegular);
             } else if (position == infoRow) {
-                ((TextInfoPrivacyCell) holder.itemView).setText(LocaleController.getString(R.string.ChannelWallpaperInfo));
+                ((TextInfoPrivacyCell) holder.itemView).setText(LocaleController.getString(isChannel ? R.string.ChannelWallpaperInfo : R.string.GroupWallpaperInfo));
                 ((TextInfoPrivacyCell) holder.itemView).setBackgroundColor(getThemedColor(Theme.key_windowBackgroundGray));
                 ((TextInfoPrivacyCell) holder.itemView).setForeground(Theme.getThemedDrawableByKey(getContext(), R.drawable.greydivider, Theme.key_windowBackgroundGrayShadow, resourceProvider));
             } else if (position == themesRow) {

@@ -265,7 +265,6 @@ private:
     friend class Config;
     friend class FileLog;
     friend class Handshake;
-
 };
 
 #ifdef ANDROID

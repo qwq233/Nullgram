@@ -42,7 +42,6 @@ import org.telegram.tgnet.ConnectionsManager;
 import org.telegram.tgnet.NativeByteBuffer;
 import org.telegram.tgnet.TLRPC;
 import org.telegram.ui.ActionBar.Theme;
-import org.telegram.ui.Components.Reactions.HwEmojis;
 import org.telegram.ui.SelectAnimatedEmojiDialog;
 
 import java.io.File;
@@ -1110,6 +1109,15 @@ public class AnimatedEmojiDrawable extends Drawable {
 
         public void set(TLRPC.Document document, boolean animated) {
             set(document, cacheType, animated);
+        }
+
+        public void removeOldDrawable() {
+            if (drawables[1] != null) {
+                if (drawables[1] instanceof AnimatedEmojiDrawable) {
+                    ((AnimatedEmojiDrawable) drawables[1]).removeView(this);
+                }
+                drawables[1] = null;
+            }
         }
 
         public void set(TLRPC.Document document, int cacheType, boolean animated) {

@@ -12,7 +12,6 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapShader;
 import android.graphics.BlendMode;
 import android.graphics.Canvas;
-import android.graphics.Color;
 import android.graphics.ColorFilter;
 import android.graphics.ComposeShader;
 import android.graphics.Matrix;
@@ -31,8 +30,6 @@ import android.view.View;
 
 import androidx.annotation.Keep;
 
-import com.google.android.exoplayer2.util.Log;
-
 import org.telegram.tgnet.TLObject;
 import org.telegram.tgnet.TLRPC;
 import org.telegram.ui.Components.AnimatedFileDrawable;
@@ -46,7 +43,6 @@ import org.telegram.ui.Components.RecyclableDrawable;
 import org.telegram.ui.Components.VectorAvatarThumbDrawable;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 public class ImageReceiver implements NotificationCenter.NotificationCenterDelegate {
@@ -1650,6 +1646,9 @@ public class ImageReceiver implements NotificationCenter.NotificationCenterDeleg
                 if (drawable instanceof SvgHelper.SvgDrawable) {
                     svgDrawable = (SvgHelper.SvgDrawable) drawable;
                     svgDrawable.setParent(this);
+                }
+                if (colorFilter != null && drawable != null) {
+                    drawable.setColorFilter(colorFilter);
                 }
                 try {
                     drawable.setAlpha(alpha);

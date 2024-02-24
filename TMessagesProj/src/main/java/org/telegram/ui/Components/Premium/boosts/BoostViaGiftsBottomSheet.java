@@ -11,6 +11,7 @@ import androidx.recyclerview.widget.DefaultItemAnimator;
 import androidx.recyclerview.widget.RecyclerView;
 
 import org.telegram.messenger.AndroidUtilities;
+import org.telegram.messenger.ChatObject;
 import org.telegram.messenger.LocaleController;
 import org.telegram.messenger.MessagesController;
 import org.telegram.messenger.NotificationCenter;
@@ -26,16 +27,16 @@ import org.telegram.ui.Components.CubicBezierInterpolator;
 import org.telegram.ui.Components.LayoutHelper;
 import org.telegram.ui.Components.Premium.PremiumPreviewBottomSheet;
 import org.telegram.ui.Components.Premium.boosts.adapters.BoostAdapter;
+import org.telegram.ui.Components.Premium.boosts.adapters.BoostAdapter.Item;
 import org.telegram.ui.Components.Premium.boosts.cells.ActionBtnCell;
 import org.telegram.ui.Components.Premium.boosts.cells.AddChannelCell;
 import org.telegram.ui.Components.Premium.boosts.cells.BaseCell;
-import org.telegram.ui.Components.Premium.boosts.cells.DateEndCell;
-import org.telegram.ui.Components.Premium.boosts.cells.ParticipantsTypeCell;
 import org.telegram.ui.Components.Premium.boosts.cells.BoostTypeCell;
+import org.telegram.ui.Components.Premium.boosts.cells.DateEndCell;
 import org.telegram.ui.Components.Premium.boosts.cells.DurationCell;
+import org.telegram.ui.Components.Premium.boosts.cells.ParticipantsTypeCell;
 import org.telegram.ui.Components.Premium.boosts.cells.SwitcherCell;
 import org.telegram.ui.Components.RecyclerListView;
-import org.telegram.ui.Components.Premium.boosts.adapters.BoostAdapter.Item;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -168,7 +169,7 @@ public class BoostViaGiftsBottomSheet extends BottomSheetWithRecyclerListView im
             }
         });
         this.currentChat = MessagesController.getInstance(currentAccount).getChat(-dialogId);
-        this.adapter.setItems(items, recyclerListView, sliderIndex -> {
+        this.adapter.setItems(currentChat, items, recyclerListView, sliderIndex -> {
             selectedSliderIndex = sliderIndex;
             actionBtn.updateCounter(getSelectedSliderValueWithBoosts());
             updateRows(false, false);
@@ -332,13 +333,14 @@ public class BoostViaGiftsBottomSheet extends BottomSheetWithRecyclerListView im
             items.add(Item.asBoost(BoostTypeCell.TYPE_SPECIFIC_USERS, selectedUsers.size(), selectedUsers.size() > 0 ? selectedUsers.get(0) : null, selectedBoostType));
         }
         items.add(Item.asDivider());
+        boolean isChannel = ChatObject.isChannelAndNotMegaGroup(currentChat);
         if (selectedBoostType == BoostTypeCell.TYPE_GIVEAWAY) {
             if (!isPreparedGiveaway()) {
                 items.add(Item.asSubTitleWithCounter(LocaleController.getString("BoostingQuantityPrizes", R.string.BoostingQuantityPrizes), getSelectedSliderValueWithBoosts()));
                 items.add(Item.asSlider(sliderValues, selectedSliderIndex));
                 items.add(Item.asDivider(LocaleController.getString("BoostingChooseHowMany", R.string.BoostingChooseHowMany), false));
             }
-            items.add(Item.asSubTitle(LocaleController.getString("BoostingChannelsIncludedGiveaway", R.string.BoostingChannelsIncludedGiveaway)));
+            items.add(Item.asSubTitle(LocaleController.getString("BoostingChannelsGroupsIncludedGiveaway", R.string.BoostingChannelsGroupsIncludedGiveaway)));
             if (isPreparedGiveaway()) {
                 items.add(Item.asChat(currentChat, false, prepaidGiveaway.quantity * BoostRepository.giveawayBoostsPerPremium()));
             } else {
@@ -355,11 +357,11 @@ public class BoostViaGiftsBottomSheet extends BottomSheetWithRecyclerListView im
             if (selectedChats.size() < BoostRepository.giveawayAddPeersMax()) {
                 items.add(Item.asAddChannel());
             }
-            items.add(Item.asDivider(LocaleController.getString("BoostingChooseChannelsNeedToJoin", R.string.BoostingChooseChannelsNeedToJoin), false));
+            items.add(Item.asDivider(LocaleController.getString("BoostingChooseChannelsGroupsNeedToJoin", R.string.BoostingChooseChannelsGroupsNeedToJoin), false));
             items.add(Item.asSubTitle(LocaleController.getString("BoostingEligibleUsers", R.string.BoostingEligibleUsers)));
             items.add(Item.asParticipants(ParticipantsTypeCell.TYPE_ALL, selectedParticipantsType, true, selectedCountries));
             items.add(Item.asParticipants(ParticipantsTypeCell.TYPE_NEW, selectedParticipantsType, false, selectedCountries));
-            items.add(Item.asDivider(LocaleController.getString("BoostingChooseLimitGiveaway", R.string.BoostingChooseLimitGiveaway), false));
+            items.add(Item.asDivider(LocaleController.getString(isChannel ? R.string.BoostingChooseLimitGiveaway : R.string.BoostingChooseLimitGiveawayGroups), false));
         }
 
         if (!isPreparedGiveaway()) {
@@ -406,10 +408,10 @@ public class BoostViaGiftsBottomSheet extends BottomSheetWithRecyclerListView im
             items.add(Item.asDateEnd(selectedEndDate));
 
             if (!isPreparedGiveaway()) {
-                items.add(Item.asDivider(LocaleController.formatPluralString("BoostingChooseRandom", getSelectedSliderValue()), false));
+                items.add(Item.asDivider(LocaleController.formatPluralString(isChannel ? "BoostingChooseRandom" : "BoostingChooseRandomGroup", getSelectedSliderValue()), false));
             } else {
                 items.add(Item.asDivider(AndroidUtilities.replaceSingleTag(
-                        LocaleController.formatPluralString("BoostingChooseRandom", prepaidGiveaway.quantity) + "\n\n" + LocaleController.getString("BoostingStoriesFeaturesAndTerms", R.string.BoostingStoriesFeaturesAndTerms),
+                        LocaleController.formatPluralString(isChannel ? "BoostingChooseRandom" : "BoostingChooseRandomGroup", prepaidGiveaway.quantity) + "\n\n" + LocaleController.getString("BoostingStoriesFeaturesAndTerms", R.string.BoostingStoriesFeaturesAndTerms),
                         Theme.key_chat_messageLinkIn, 0, () -> {
                             PremiumPreviewBottomSheet previewBottomSheet = new PremiumPreviewBottomSheet(getBaseFragment(), currentAccount, null, resourcesProvider);
                             previewBottomSheet.setOnDismissListener(dialog -> adapter.setPausedStars(false));

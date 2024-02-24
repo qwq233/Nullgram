@@ -15,7 +15,6 @@ import org.telegram.messenger.R;
 import org.telegram.tgnet.TLRPC;
 import org.telegram.ui.ActionBar.ActionBar;
 import org.telegram.ui.ActionBar.Theme;
-import org.telegram.ui.ChatActivity;
 
 public class ChatAttachRestrictedLayout extends ChatAttachAlert.AttachAlertLayout {
 
@@ -35,7 +34,7 @@ public class ChatAttachRestrictedLayout extends ChatAttachAlert.AttachAlertLayou
         addView(progressView, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT));
 
         progressView.setLottie(R.raw.media_forbidden, 150, 150);
-        TLRPC.Chat chat = ((ChatActivity) parentAlert.baseFragment).getCurrentChat();
+        TLRPC.Chat chat = parentAlert.getChat();
         if (id == 1) {
             progressView.setText(ChatObject.getRestrictedErrorText(chat, ChatObject.ACTION_SEND_MEDIA));
         } else if (id == 3) {
