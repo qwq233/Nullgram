@@ -3708,7 +3708,7 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
                     AlertUtil.showToast(LocaleController.getString("TextCopied", R.string.TextCopied));
                     return Unit.INSTANCE;
                 });
-                builder.addItem(LocaleController.getString("DebugClearLogs", R.string.DebugClearLogs), R.drawable.delete, (it) -> {
+                builder.addItem(LocaleController.getString("DebugClearLogs", R.string.DebugClearLogs), R.drawable.msg_delete, (it) -> {
                     Log.refreshLog();
                     return Unit.INSTANCE;
                 });
