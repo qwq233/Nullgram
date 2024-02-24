@@ -456,7 +456,7 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
     private ActionBarMenuItem.Item muteItem;
     private ActionBarMenuItem.Item muteItemGap;
     private ChatNotificationsPopupWrapper chatNotificationsPopupWrapper;
-    private ActionBarMenuSubItem hideTitleItem;
+    private ActionBarMenuItem.Item hideTitleItem;
     private float pagedownButtonEnterProgress;
     private float searchUpDownEnterProgress;
     private float mentionsButtonEnterProgress;
@@ -3865,13 +3865,16 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
                 headerItem.lazilyAddSubItem(add_shortcut, R.drawable.msg_home, LocaleController.getString(R.string.AddShortcut));
             }
             if (Config.showHideTitle) {
-                    String hideTitleString = "";
-                    if (Config.hideTitle) {
-                        hideTitleString = LocaleController.getString("ShowTitle", R.string.ShowTitle);
-                    } else {
-                        hideTitleString = LocaleController.getString("HideTitle", R.string.HideTitle);
-                    }
-                    hideTitleItem = headerItem.addSubItem(hide_title, R.drawable.hide_title, hideTitleString, themeDelegate);
+                String hideTitleString = "";
+                if (Config.hideTitle) {
+                    hideTitleString = LocaleController.getString("ShowTitle", R.string.ShowTitle);
+                } else {
+                    hideTitleString = LocaleController.getString("HideTitle", R.string.HideTitle);
+                }
+                hideTitleItem = headerItem.lazilyAddSubItem(hide_title, R.drawable.hide_title, hideTitleString);
+            }
+            if (currentChat != null && (ChatObject.isMegagroup(currentChat) || !ChatObject.isChannel(currentChat))) {
+                headerItem.lazilyAddSubItem(delete_history, R.drawable.msg_delete, LocaleController.getString("DeleteAllFromSelf", R.string.DeleteAllFromSelf));
             }
             if (!isTopic) {
                 clearHistoryItem = headerItem.lazilyAddSubItem(clear_history, R.drawable.msg_clear, LocaleController.getString("ClearHistory", R.string.ClearHistory));
