@@ -218,7 +218,7 @@
     <string name="Ban">Ban</string>
     <string name="autoDisableBuiltInProxy">Auto Disable Built-In Proxy</string>
     <string name="autoDisableBuiltInProxyDesc">It will automatically turn off the built-in proxy when Nullgram detected you turn on the VPN</string>
-    <string name="NekogramWsDescription">Connect to TELEOFFICIAL through WebSocket via Cloudflare.\nProvided by Nekogram</string>
+    <string name="NullgramWsDescription">Connect to TELEOFFICIAL through WebSocket via Cloudflare.\nProvided by Nullgram</string>
     <string name="NekogramXWsDescription">Provided by Nekogram X</string>
     <string name="WsGetHelp">You can also deploy it easily by yourself!</string>
     <string name="WsCustomDescription">Use custom domain to connect to TELEOFFICIAL through WebSocket via Cloudflare.</string>
@@ -278,6 +278,7 @@
     <string name="JumpToBeginning">Jump To Beginning</string>
     <string name="DisableQuickSendMediaBottom">Disable Quick Send Media Bottom</string>
     <string name="ProviderBaiduTranslate">Baidu Translator</string>
+    <string name="ProviderTranSmartTranslate">TranSmart Translator</string>
     <string name="alwaysSendWithoutSound">Always Send Without Sound</string>
     <string name="EditEnableMarkdown">Enable Markdown</string>
     <string name="EditDisableMarkdown">Disable Markdown</string>
@@ -314,4 +315,13 @@
     <string name="CreateCodeLanguage">Language</string>
     <string name="UnsupportedMediaNullgram">This message is not supported on your version of Nullgram. Update the app to view: https://t.me/NullgramClient</string>
     <string name="ignoreUserSpecifiedReplyColor">Ignore user-set reply color</string>
+    <string name="ShowTitle">Show title</string>
+    <string name="HideTitle">Hide title</string>
+    <string name="showHideTitle">Show hide title</string>
+    <string name="DownloadingStickerSet">Downloading sticker set…</string>
+    <string name="IncompleteDownload">Download timed out, please check your network</string>
+    <string name="StickerPackNotFound">Sticker pack not found.</string>
+    <string name="MessageFilter">Message Filter</string>
+    <string name="Pattern">Pattern</string>
+    <string name="MessageFilterDesc">Use regular expressions to match messages, and the matched messages will be hidden.\nLeave it blank to disable it</string>
 </resources>

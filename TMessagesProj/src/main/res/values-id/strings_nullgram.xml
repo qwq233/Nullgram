@@ -216,7 +216,7 @@
     <string name="Ban">Blokir</string>
     <string name="autoDisableBuiltInProxy">Nonaktifkan otomatis Proxy Bawaan</string>
     <string name="autoDisableBuiltInProxyDesc">Ini akan otomatis menonaktifkan proxy bawaan ketika Nullgram mendeteksi anda mengaktifkan VPN</string>
-    <string name="NekogramWsDescription">Hubungkan ke Telegram Resmi melalui WebSocket via Cloudflare.\nDisediakan oleh Nekogram</string>
+    <string name="NullgramWsDescription">Connect to TELEOFFICIAL through WebSocket via Cloudflare.\nProvided by Nullgram</string>
     <string name="NekogramXWsDescription">Disediakan oleh Nekogram X</string>
     <string name="WsGetHelp">Anda juga dapat membuatnya sendiri dengan mudah!</string>
     <string name="WsCustomDescription">Gunakan domain kustom untuk menghubungkan ke Telegram Resmi melalui WebSocket via Cloudflare.</string>
@@ -276,6 +276,7 @@
     <string name="JumpToBeginning">Lompat Ke Awal</string>
     <string name="DisableQuickSendMediaBottom">Nonaktifkan Bagian Bawah Media Kirim Cepat</string>
     <string name="ProviderBaiduTranslate">Penerjemah Baidu</string>
+    <string name="ProviderTranSmartTranslate">TranSmart Translator</string>
     <string name="alwaysSendWithoutSound">Selalu Kirim Tanpa Suara</string>
     <string name="EditEnableMarkdown">Aktifkan Markdown</string>
     <string name="EditDisableMarkdown">Nonaktifkan Markdown</string>
@@ -312,4 +313,13 @@
     <string name="CreateCodeLanguage">Language</string>
     <string name="UnsupportedMediaNullgram">This message is not supported on your version of Nullgram. Update the app to view: https://t.me/NullgramClient</string>
     <string name="ignoreUserSpecifiedReplyColor">Ignore user-set reply color</string>
+    <string name="ShowTitle">Show title</string>
+    <string name="HideTitle">Hide title</string>
+    <string name="showHideTitle">Show hide title</string>
+    <string name="DownloadingStickerSet">Downloading sticker set…</string>
+    <string name="IncompleteDownload">Download timed out, please check your network</string>
+    <string name="StickerPackNotFound">Sticker pack not found.</string>
+    <string name="MessageFilter">Message Filter</string>
+    <string name="Pattern">Pattern</string>
+    <string name="MessageFilterDesc">Use regular expressions to match messages, and the matched messages will be hidden.\nLeave it blank to disable it</string>
 </resources>

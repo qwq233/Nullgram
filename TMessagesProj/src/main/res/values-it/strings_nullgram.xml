@@ -185,8 +185,8 @@
     <string name="hidePremiumStickerAnim">Nascondi animazioni sticker premium</string>
     <string name="premium">Premium</string>
     <string name="fastSpeedUpload">Accelera upload</string>
-    <string name="showTabsOnForward">Mostra tab su inoltro</string>
-    <string name="TabTitleType">Mostra nelle tab</string>
+    <string name="showTabsOnForward">Mostra schede su inoltro</string>
+    <string name="TabTitleType">Mostra nelle schede</string>
     <string name="TabTitleTypeTip">Le icone sono sincronizzate nel cloud da TELEOFFICIAL.</string>
     <string name="TabTitleTypeText">Titoli</string>
     <string name="TabTitleTypeIcon">Icone</string>
@@ -210,13 +210,13 @@
     <string name="SwitchToPersonalAccount">Passa al tuo account</string>
     <string name="openArchiveOnPull">Apri archivio su pull</string>
     <string name="hideAllTab">Nascondi scheda \"Tutte le chat\"</string>
-    <string name="ignoreMutedCount">Ignora chat silenziate nella conta</string>
+    <string name="ignoreMutedCount">Non contare chat silenziate su schede</string>
     <string name="disableSharePhoneWithContactByDefault">Non condividere numero su aggiunta contatto</string>
     <string name="disableStickersAutoReorder">Disattiva autoriordino stickerpack</string>
     <string name="Ban">Ban</string>
     <string name="autoDisableBuiltInProxy">Disattiva automaticamente proxy integrato</string>
     <string name="autoDisableBuiltInProxyDesc">Disattiverà automaticamente il proxy integrato in Nullgram non appena riconoscerà la VPN</string>
-    <string name="NekogramWsDescription">Collegati a TELEOFFICIAL attraverso WebSocket su Cloudflare.\nFornito da Nekogram</string>
+    <string name="NullgramWsDescription">Connettiti a TELEOFFICIAL attraverso WebSocket via Cloudflare.\nFornito da Nullgram</string>
     <string name="NekogramXWsDescription">Fornito da Nekogram X</string>
     <string name="WsGetHelp">Puoi installartelo facilmente anche da te!</string>
     <string name="WsCustomDescription">Usa un dominio custom per collegarti a TELEOFFICIAL attraverso WebSocket su Cloudflare.</string>
@@ -276,6 +276,7 @@
     <string name="JumpToBeginning">Torna all\'inizio</string>
     <string name="DisableQuickSendMediaBottom">Disattiva bottone invio media rapido</string>
     <string name="ProviderBaiduTranslate">Baidu Translator</string>
+    <string name="ProviderTranSmartTranslate">Traduttore TranSmart</string>
     <string name="alwaysSendWithoutSound">Invia sempre senza suono</string>
     <string name="EditEnableMarkdown">Abilita Markdown</string>
     <string name="EditDisableMarkdown">Disattiva Markdown</string>
@@ -311,5 +312,14 @@
     <string name="CreateCode">Crea codice</string>
     <string name="CreateCodeLanguage">Linguaggio</string>
     <string name="UnsupportedMediaNullgram">Questo messaggio non è supportato dalla tua versione di Nullgram. Aggiorna l\'app per visualizzarlo: https://t.me/NullgramClient</string>
-    <string name="ignoreUserSpecifiedReplyColor">Ignore user-set reply color</string>
+    <string name="ignoreUserSpecifiedReplyColor">Ignora colore risposte impostato dall\'utente</string>
+    <string name="ShowTitle">Mostra titolo</string>
+    <string name="HideTitle">Nascondi titolo</string>
+    <string name="showHideTitle">Mostra nascondi titolo</string>
+    <string name="DownloadingStickerSet">Downloading sticker set…</string>
+    <string name="IncompleteDownload">Download scaduto, controlla la tua connessione</string>
+    <string name="StickerPackNotFound">Pacchetto sticker non trovato.</string>
+    <string name="MessageFilter">Message Filter</string>
+    <string name="Pattern">Pattern</string>
+    <string name="MessageFilterDesc">Use regular expressions to match messages, and the matched messages will be hidden.\nLeave it blank to disable it</string>
 </resources>

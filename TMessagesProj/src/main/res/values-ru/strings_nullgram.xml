@@ -212,12 +212,12 @@
     <string name="openArchiveOnPull">Открыть архив при вытягивании</string>
     <string name="hideAllTab">Скрыть папку \"Все Чаты\"</string>
     <string name="ignoreMutedCount">Ignore Muted Count in tab</string>
-    <string name="disableSharePhoneWithContactByDefault">No Share Phone Number When Add Contact</string>
+    <string name="disableSharePhoneWithContactByDefault">Не показывать мой номер телефона при добавлении контакта</string>
     <string name="disableStickersAutoReorder">Отключить автосортировку стикеров</string>
     <string name="Ban">Заблокировать</string>
     <string name="autoDisableBuiltInProxy">Автоотключение встроенного прокси</string>
     <string name="autoDisableBuiltInProxyDesc">Встроенный прокси-сервер будет автоматически отключен, когда Nullgram обнаружит, что вы включаете VPN</string>
-    <string name="NekogramWsDescription">Connect to TELEOFFICIAL through WebSocket via Cloudflare.\nProvided by Nekogram</string>
+    <string name="NullgramWsDescription">Connect to TELEOFFICIAL through WebSocket via Cloudflare.\nProvided by Nullgram</string>
     <string name="NekogramXWsDescription">Предоставлено Nekogram X</string>
     <string name="WsGetHelp">You can also deploy it easily by yourself!</string>
     <string name="WsCustomDescription">Use custom domain to connect to TELEOFFICIAL through WebSocket via Cloudflare.</string>
@@ -277,6 +277,7 @@
     <string name="JumpToBeginning">Вернуться к Началу</string>
     <string name="DisableQuickSendMediaBottom">Скрыть быструю отправку медиа</string>
     <string name="ProviderBaiduTranslate">Переводчик Baidu</string>
+    <string name="ProviderTranSmartTranslate">TranSmart Translator</string>
     <string name="alwaysSendWithoutSound">Всегда отправлять без звука</string>
     <string name="EditEnableMarkdown">Включить разметку текста</string>
     <string name="EditDisableMarkdown">Отключить разметку текста</string>
@@ -313,4 +314,13 @@
     <string name="CreateCodeLanguage">Language</string>
     <string name="UnsupportedMediaNullgram">This message is not supported on your version of Nullgram. Update the app to view: https://t.me/NullgramClient</string>
     <string name="ignoreUserSpecifiedReplyColor">Ignore user-set reply color</string>
+    <string name="ShowTitle">Show title</string>
+    <string name="HideTitle">Hide title</string>
+    <string name="showHideTitle">Show hide title</string>
+    <string name="DownloadingStickerSet">Downloading sticker set…</string>
+    <string name="IncompleteDownload">Download timed out, please check your network</string>
+    <string name="StickerPackNotFound">Sticker pack not found.</string>
+    <string name="MessageFilter">Message Filter</string>
+    <string name="Pattern">Pattern</string>
+    <string name="MessageFilterDesc">Use regular expressions to match messages, and the matched messages will be hidden.\nLeave it blank to disable it</string>
 </resources>

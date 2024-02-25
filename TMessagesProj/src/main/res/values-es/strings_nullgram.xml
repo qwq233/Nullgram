@@ -149,7 +149,7 @@
     <string name="SendAsReply">Enviar como respuesta</string>
     <string name="scrollableChatPreview">Vista previa de chat desplazable</string>
     <string name="disableVibration">Desactivar vibración</string>
-    <string name="DatacenterStatus">Estado del datacenter</string>
+    <string name="DatacenterStatus">Estado del centro de datos</string>
     <string name="DatacenterStatusAbout">Consulta el estado de los **centros de datos** de TELEOFFICIAL.</string>
     <string name="DeleteAllFromSelfDone">Todos tus mensajes han sido eliminados</string>
     <string name="setLinkedUser">Establecer usuario vinculado</string>
@@ -216,7 +216,7 @@
     <string name="Ban">Ban</string>
     <string name="autoDisableBuiltInProxy">Deshabilitar automáticamente el proxy integrado</string>
     <string name="autoDisableBuiltInProxyDesc">Desactivará automáticamente el proxy integrado cuando Nullgram detecte que activa la VPN</string>
-    <string name="NekogramWsDescription">Conéctese a TELEOFFICIAL a través de WebSocket a través de Cloudflare.\nProporcionado por Negra</string>
+    <string name="NullgramWsDescription">Connect to TELEOFFICIAL through WebSocket via Cloudflare.\nProvided by Nullgram</string>
     <string name="NekogramXWsDescription">Proporcionado por Nekogram X</string>
     <string name="WsGetHelp">¡También puede implementarlo fácilmente usted mismo!</string>
     <string name="WsCustomDescription">Use un dominio personalizado para conectarse a TELEOFFICIAL a través de WebSocket a través de Cloudflare.</string>
@@ -276,6 +276,7 @@
     <string name="JumpToBeginning">Ir al inicio</string>
     <string name="DisableQuickSendMediaBottom">Desactivar rápida envío de medios instantáneos</string>
     <string name="ProviderBaiduTranslate">Traductor Baidu</string>
+    <string name="ProviderTranSmartTranslate">TranSmart Translator</string>
     <string name="alwaysSendWithoutSound">Siempre enviar sin sonido</string>
     <string name="EditEnableMarkdown">Habilitar Markdown</string>
     <string name="EditDisableMarkdown">Desactivar Markdown</string>
@@ -312,4 +313,13 @@
     <string name="CreateCodeLanguage">Language</string>
     <string name="UnsupportedMediaNullgram">This message is not supported on your version of Nullgram. Update the app to view: https://t.me/NullgramClient</string>
     <string name="ignoreUserSpecifiedReplyColor">Ignore user-set reply color</string>
+    <string name="ShowTitle">Show title</string>
+    <string name="HideTitle">Hide title</string>
+    <string name="showHideTitle">Show hide title</string>
+    <string name="DownloadingStickerSet">Downloading sticker set…</string>
+    <string name="IncompleteDownload">Download timed out, please check your network</string>
+    <string name="StickerPackNotFound">Sticker pack not found.</string>
+    <string name="MessageFilter">Message Filter</string>
+    <string name="Pattern">Pattern</string>
+    <string name="MessageFilterDesc">Use regular expressions to match messages, and the matched messages will be hidden.\nLeave it blank to disable it</string>
 </resources>

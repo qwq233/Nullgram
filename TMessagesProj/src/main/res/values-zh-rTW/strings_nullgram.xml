@@ -8,20 +8,20 @@
     <string name="OfficialSite">官方網站</string>
     <string name="ViewSourceCode">檢視原始碼</string>
     <string name="Categories">分類</string>
-    <string name="About">關注Nullgram</string>
-    <string name="OfficialChannelName">官方頻道名稱</string>
+    <string name="About">關於</string>
+    <string name="OfficialChannelName">NullgramClient</string>
     <string name="noAvailableUpdate">無可用更新</string>
     <string name="updateAvailable">新更新可用</string>
-    <string name="variantsNotFound">釋出版本無法自動匹配。\n請手動從 GitHub 下載。</string>
+    <string name="variantsNotFound">發佈變量無法自動匹配。\n請從 GitHub 手動下載。</string>
     <string name="skipUpdate">跳過更新</string>
     <string name="notNow">稍後</string>
-    <string name="updateConfirm">確定更新</string>
+    <string name="updateConfirm">更新</string>
     <string name="CheckUpdate">檢查更新</string>
     <string name="CheckingUpdate">正在檢查更新</string>
     <string name="LastUpdateNever">沒有最新更新</string>
     <string name="LastUpdateDateFormatted">最新更新檢查時間為 %1$s.</string>
     <string name="LastUpdateFormatted">最新更新為 %1$s.</string>
-    <string name="BotLogin">機器人Token登入</string>
+    <string name="BotLogin">機器人登入</string>
     <string name="BotToken">API 登入</string>
     <string name="InvalidAccessToken">無效訪問令牌</string>
     <string name="QRLoginTitle">二維碼登入</string>
@@ -49,9 +49,9 @@
     <string name="NoQuoteForward">無引用轉發</string>
     <string name="MessageMenu">訊息選單</string>
     <string name="allowScreenshotOnNoForwardChat">跳過螢幕截圖限制</string>
-    <string name="allowScreenshotOnNoForwardChatWarning">它還允許您繞過 SecureChat 的截圖限制！</string>
-    <string name="labelChannelUser">標籤 頻道 使用者</string>
-    <string name="labelChannelUserDetails">如果訊息發送者是頻道，將標記為「頻道」</string>
+    <string name="allowScreenshotOnNoForwardChatWarning">它還允許您繞過私密聊天的截圖限制！</string>
+    <string name="labelChannelUser">標記頻道使用者</string>
+    <string name="labelChannelUserDetails">如果訊息發送者是 Channel，將標記為「Channel」</string>
     <string name="displaySpoilerDirectly">直接顯示隱藏訊息</string>
     <string name="StorageResetInfo">所有應用程式資料將永久刪除（請先嘗試登出所有帳戶）。</string>
     <string name="SendLogsNoSuchThings">請使用 logcat 手動抓取日誌</string>
@@ -63,7 +63,7 @@
     <string name="CreateMention">建立提及</string>
     <string name="Name">名稱</string>
     <string name="channelAlias">頻道別名</string>
-    <string name="channelAliasDetails">需要啟用標籤頻道使用者。</string>
+    <string name="channelAliasDetails">需要啟用標記頻道使用者。</string>
     <string name="setChannelAliasName">設定別名</string>
     <string name="AutoCheckUpdateOFF">關閉</string>
     <string name="AutoCheckUpdateSwitch">自動更新</string>
@@ -97,7 +97,7 @@
     <string name="disableCustomAPI">不使用自訂 API</string>
     <string name="useOfficialAPI">TELEOFFICIAL 官方版</string>
     <string name="customAPI">自訂 API</string>
-    <string name="useCustomApiNotice">如果無法註冊或登入，請嘗試使用自訂 Api 登入。\n\n請注意：如果您使用的是釋出版本，Fcm 將無法運作。</string>
+    <string name="useCustomApiNotice">如果無法註冊或登入，請嘗試使用自訂 API 登入。\n\n請注意：如果您使用的是釋出版本，API 將無法運作。</string>
     <string name="useCustomAPI">手動輸入</string>
     <string name="TestBackendOn">使用測試伺服器登入賬號</string>
     <string name="TestBackendOff">使用生產伺服器登入賬號</string>
@@ -105,7 +105,7 @@
     <string name="confirmToSendMediaMessages">強制需確認以傳送媒體訊息</string>
     <string name="disableInstantCamera">禁用即時相機</string>
     <string name="LastUpdateRecently">最後一次檢查剛剛完成。</string>
-    <string name="NullgramPrivacyPolicyUrl">Nullgram隱私政策</string>
+    <string name="NullgramPrivacyPolicyUrl">https://github.com/qwq233/Nullgram/wiki/Privacy-Policy</string>
     <string name="skipOpenLinkConfirm">跳過連結確認</string>
     <string name="maxRecentSticker">最近貼紙數量上限</string>
     <string name="setMaxRecentSticker">設定最大數目的最近使用貼圖</string>
@@ -122,7 +122,7 @@
     <string name="CopyTitle">複製標題</string>
     <string name="CopyCallback">複製回呼資料</string>
     <string name="CopyInlineQuery">複製內嵌查詢</string>
-    <string name="CopyID">複製ID</string>
+    <string name="CopyID">複製 ID</string>
     <string name="SendCallback">發送回呼資料</string>
     <string name="CallbackData">回呼資料</string>
     <string name="TestBackend">測試後端</string>
@@ -130,7 +130,7 @@
     <string name="unreadBadgeOnBackButton">返回按鈕上的未讀提示</string>
     <string name="keepFormatting">複製文字時保留格式</string>
     <string name="showForwardDate">顯示轉發訊息的日期</string>
-    <string name="enchantAudio">陶醉音效品質</string>
+    <string name="enchantAudio">增強音效品質</string>
     <string name="enchantAudioDetails">此功能由 Android 音效系統支援。\n我們無法保證聲音品質會有重大變化。</string>
     <string name="AvatarAsBackground">以個人頭像作為背景</string>
     <string name="BlurAvatarBackground">模糊個人頭像</string>
@@ -139,7 +139,7 @@
     <string name="showMessageID">顯示訊息 ID</string>
     <string name="hideQuickSendMediaBottom">隱藏快速傳送媒體按鈕</string>
     <string name="largeAvatarAsBackground">將大頭貼設為背景</string>
-    <string name="useSystemEmoji">使用系統表情符號</string>
+    <string name="useSystemEmoji">使用系統 Emoji 符號</string>
     <string name="Command">命令</string>
     <string name="setCustomQuickMessage">設定自訂快速訊息</string>
     <string name="emptyInput">這裡不能輸入空值</string>
@@ -216,7 +216,7 @@
     <string name="Ban">封鎖</string>
     <string name="autoDisableBuiltInProxy">自動停用內建代理</string>
     <string name="autoDisableBuiltInProxyDesc">當 Nullgram 偵測到您開啟 VPN 時，將自動關閉內建代理</string>
-    <string name="NekogramWsDescription">透過 Cloudflare 的 WebSocket 連接到 TELEOFFICIAL。\n由 Nekogram 提供</string>
+    <string name="NullgramWsDescription">透過 Cloudflare 以 WebSocket 連接至 TELEOFFICIAL。\n由 Nullgram 提供</string>
     <string name="NekogramXWsDescription">由 Nekogram X 提供</string>
     <string name="WsGetHelp">您也可以輕鬆自行部署！</string>
     <string name="WsCustomDescription">使用自訂網域透過 Cloudflare 連接到 TELEOFFICIAL。</string>
@@ -276,7 +276,7 @@
     <string name="JumpToBeginning">跳至開始</string>
     <string name="DisableQuickSendMediaBottom">停用快速傳送媒體底部</string>
     <string name="ProviderBaiduTranslate">百度翻譯</string>
-    <string name="ProviderTranSmartTranslate">騰訊交互翻譯</string>
+    <string name="ProviderTranSmartTranslate">TranSmart 翻譯器</string>
     <string name="alwaysSendWithoutSound">總是無聲傳送</string>
     <string name="EditEnableMarkdown">啟用 Markdown</string>
     <string name="EditDisableMarkdown">停用 Markdown</string>
@@ -313,4 +313,13 @@
     <string name="CreateCodeLanguage">語言</string>
     <string name="UnsupportedMediaNullgram">您的 Nullgram 版本不支援此訊息。請更新應用程式以查看：https://t.me/NullgramClient</string>
     <string name="ignoreUserSpecifiedReplyColor">忽略用戶設定的回覆顏色</string>
+    <string name="ShowTitle">顯示標題</string>
+    <string name="HideTitle">隱藏標題</string>
+    <string name="showHideTitle">顯示/隱藏標題</string>
+    <string name="DownloadingStickerSet">正在下載貼圖集…</string>
+    <string name="IncompleteDownload">下載逾時，請檢查您的網路</string>
+    <string name="StickerPackNotFound">找不到貼圖集。</string>
+    <string name="MessageFilter">訊息過濾器</string>
+    <string name="Pattern">匹配模式</string>
+    <string name="MessageFilterDesc">使用正規式來匹配訊息，匹配到的訊息將被隱藏。\n留空則表示禁用此功能</string>
 </resources>

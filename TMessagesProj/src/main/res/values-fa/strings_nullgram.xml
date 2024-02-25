@@ -1,15 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="NullgramPushService">Nullgram Push Service</string>
+    <string name="NullgramPushService">خدمات پوش نالگرام</string>
     <string name="NullSettings">تنظیمات نالگرام</string>
     <string name="OfficialChannel">کانال رسمی</string>
     <string name="Chat">چت</string>
     <string name="Experiment">آزمایشی</string>
     <string name="OfficialSite">سایت رسمی</string>
-    <string name="ViewSourceCode">View Source Code</string>
+    <string name="ViewSourceCode">نمایش کد مبدأ</string>
     <string name="Categories">دسته‌ها</string>
     <string name="About">درباره‌ی ما</string>
-    <string name="OfficialChannelName">NullgramClient</string>
+    <string name="OfficialChannelName">وابسته به نالگرام</string>
     <string name="noAvailableUpdate">هیچ به‌روزرسانی‌ای موجود نیست.</string>
     <string name="updateAvailable">بروزرسانی جدید در دسترس است</string>
     <string name="variantsNotFound">همخوانی نسخه دیگر به صورت خودکار ناموفق بود.\nلطفا به صورت دستی از گیتهاب دانلود کنید.</string>
@@ -18,15 +18,15 @@
     <string name="updateConfirm">به‌روزرسانی</string>
     <string name="CheckUpdate">بررسی برای به‌روزرسانی</string>
     <string name="CheckingUpdate">در حال بررسی برای به‌روزرسانی…</string>
-    <string name="LastUpdateNever">Never checked since install.</string>
-    <string name="LastUpdateDateFormatted">Last successfully checked on %1$s.</string>
-    <string name="LastUpdateFormatted">Last successfully checked %1$s.</string>
+    <string name="LastUpdateNever">از زمان نصب اصلا چک نشده.</string>
+    <string name="LastUpdateDateFormatted">آخرین بررسی موفق.</string>
+    <string name="LastUpdateFormatted">آخرین بررسی موفق.</string>
     <string name="BotLogin">ورود بات</string>
     <string name="BotToken">کلید API</string>
     <string name="InvalidAccessToken">توکن دسترسی نامعتبر</string>
     <string name="QRLoginTitle">ورود با QR</string>
     <string name="QRLoginMessage">جهت ورود کد QR را با دستگاه دیگری اسکن کنید.</string>
-    <string name="NullgramVersion">Nullgram %1$s\nBased on TELEOFFICIAL %2$s</string>
+    <string name="NullgramVersion">نالگرام وابسته به تلگرام اصلی</string>
     <string name="RestrictionReason">دلیل محدودیت</string>
     <string name="showBotAPIID">نمایش Bot API ID</string>
     <string name="hideGroupSticker">مخفی کردن بسته‌ی استیکر گروه</string>
@@ -35,7 +35,7 @@
     <string name="DeleteAllFromSelfAdmin">اعطای دسترسی مدیر</string>
     <string name="DeleteAllFromSelf">حذف پیام‌های خود</string>
     <string name="DeleteAllFromSelfAlert">هشدار! با این کار **همه‌ی پیام‌های شما** در این چت برای **همه‌ی** شرکت کنندگان حذف می‌شود.</string>
-    <string name="MutualContactDescription">This contact is a mutual contact.</string>
+    <string name="MutualContactDescription">حاوی صحنه های بزرگسالان.</string>
     <string name="MutualContact">مخاطب‌های دو طرفه</string>
     <string name="SelectBetween">انتخاب بین</string>
     <string name="StickerSavedHint">استیکر در گالری ذخیره شد</string>
@@ -53,8 +53,8 @@
     <string name="labelChannelUser">برچسب کانال کاربر</string>
     <string name="labelChannelUserDetails">اگر فرستنده‌ی پیام کانال باشد، آن را به عنوان \"کانال\" برچسب گذاری می‌کند</string>
     <string name="displaySpoilerDirectly">نمایش مستقیم پیام‌های اسپویلر</string>
-    <string name="StorageResetInfo">All data of this application will be permanently deleted (and try to log out of all accounts first).</string>
-    <string name="SendLogsNoSuchThings">Please use logcat to catch logs manually</string>
+    <string name="StorageResetInfo">همه اطلاعات این برنامه به صورت کلی حذف خواهد شد ( ابتدا از همه حساب های خود خارج شوید).</string>
+    <string name="SendLogsNoSuchThings">لطفا از قسمت logcat برای دسترسی دستی به کش ذخیره ها استفاده کنید</string>
     <string name="StorageReset">پاک‌سازی فضای ذخیره‌سازی</string>
     <string name="codeSyntaxHighlight">رنگی‌کردن قالب کد</string>
     <string name="CreateMono">ایجاد Monospace</string>
@@ -63,7 +63,7 @@
     <string name="CreateMention">تگ کردن</string>
     <string name="Name">نام</string>
     <string name="channelAlias">مستعار کانال</string>
-    <string name="channelAliasDetails">Require label channel user enabled.</string>
+    <string name="channelAliasDetails">نیازمند به فعال بودن لیبل کانال شخص.</string>
     <string name="setChannelAliasName">تنظیم نام مستعار</string>
     <string name="AutoCheckUpdateOFF">خاموش</string>
     <string name="AutoCheckUpdateSwitch">به‌روزرسانی خودکار</string>
@@ -77,8 +77,8 @@
     <string name="SwitchVersion">تغییر کانال انتشار</string>
     <string name="BackupSettings">پشتیبان‌گیری تنظیمات</string>
     <string name="ImportSettings">بازیابی تنظیمات</string>
-    <string name="RestartAppToTakeEffect">Restart App To Take Effect</string>
-    <string name="ImportSettingsAlert">Are you sure you want to overwrite the settings? Importing settings from unknown sources may cause the pin to be overwritten and cause the application to be locked.</string>
+    <string name="RestartAppToTakeEffect">برای مشاهده تاثیرات لطفا برنامه را دوباره راه اندازی کنید</string>
+    <string name="ImportSettingsAlert">مطمئن هستید میخواهید تنظیمات را تغییر بدهید ؟ وارد کردن تنظیمات از منابع ناشناس ممکن است باعث قفل شدن برنامه شود.</string>
     <string name="PrivacyNotice2fa">It is detected that you have not set a password, which may cause government-controlled hackers to find your true identity, please set one!</string>
     <string name="PrivacyNotice">Privacy warning</string>
     <string name="ApplySuggestion">OK, Apply it</string>
@@ -216,7 +216,7 @@
     <string name="Ban">Ban</string>
     <string name="autoDisableBuiltInProxy">Auto Disable Built-In Proxy</string>
     <string name="autoDisableBuiltInProxyDesc">It will automatically turn off the built-in proxy when Nullgram detected you turn on the VPN</string>
-    <string name="NekogramWsDescription">Connect to TELEOFFICIAL through WebSocket via Cloudflare.\nProvided by Nekogram</string>
+    <string name="NullgramWsDescription">Connect to TELEOFFICIAL through WebSocket via Cloudflare.\nProvided by Nullgram</string>
     <string name="NekogramXWsDescription">Provided by Nekogram X</string>
     <string name="WsGetHelp">You can also deploy it easily by yourself!</string>
     <string name="WsCustomDescription">Use custom domain to connect to TELEOFFICIAL through WebSocket via Cloudflare.</string>
@@ -276,6 +276,7 @@
     <string name="JumpToBeginning">Jump To Beginning</string>
     <string name="DisableQuickSendMediaBottom">Disable Quick Send Media Bottom</string>
     <string name="ProviderBaiduTranslate">مترجم Baidu</string>
+    <string name="ProviderTranSmartTranslate">TranSmart Translator</string>
     <string name="alwaysSendWithoutSound">Always Send Without Sound</string>
     <string name="EditEnableMarkdown">Enable Markdown</string>
     <string name="EditDisableMarkdown">Disable Markdown</string>
@@ -312,4 +313,13 @@
     <string name="CreateCodeLanguage">Language</string>
     <string name="UnsupportedMediaNullgram">This message is not supported on your version of Nullgram. Update the app to view: https://t.me/NullgramClient</string>
     <string name="ignoreUserSpecifiedReplyColor">Ignore user-set reply color</string>
+    <string name="ShowTitle">Show title</string>
+    <string name="HideTitle">Hide title</string>
+    <string name="showHideTitle">Show hide title</string>
+    <string name="DownloadingStickerSet">Downloading sticker set…</string>
+    <string name="IncompleteDownload">Download timed out, please check your network</string>
+    <string name="StickerPackNotFound">Sticker pack not found.</string>
+    <string name="MessageFilter">Message Filter</string>
+    <string name="Pattern">Pattern</string>
+    <string name="MessageFilterDesc">Use regular expressions to match messages, and the matched messages will be hidden.\nLeave it blank to disable it</string>
 </resources>
