@@ -184,6 +184,12 @@
     <string name="PasscodePanicCodeAbout">استخدم رمز الذعر لتسجيل الخروج من الحسابات إذا حدث خطأ ما.</string>
     <string name="PhotoCopied">تم نسخ الصورة</string>
     <string name="CopyPhoto">نسخ الصورة</string>
+    <string name="SaveToDownloadCount_zero">Saving %1$d files to Download</string>
+    <string name="SaveToDownloadCount_one">Saving %1$d file to Download</string>
+    <string name="SaveToDownloadCount_two">Saving %1$d files to Download</string>
+    <string name="SaveToDownloadCount_few">Saving %1$d files to Download</string>
+    <string name="SaveToDownloadCount_many">Saving %1$d files to Download</string>
+    <string name="SaveToDownloadCount_other">Saving %1$d files to Download</string>
     <string name="hidePremiumStickerAnim">إخفاء الملصقات المتحركة المدفوعة</string>
     <string name="premium">بريميوم</string>
     <string name="fastSpeedUpload">سرعة الرفع السريع</string>

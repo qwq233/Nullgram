@@ -183,6 +183,12 @@
     <string name="PasscodePanicCodeAbout">Использовать экстренный пароль для выхода из аккаунтов, если что-то пойдет не так.</string>
     <string name="PhotoCopied">Фотография скопирована</string>
     <string name="CopyPhoto">Скопировать изображение</string>
+    <string name="SaveToDownloadCount_zero">Сохранение %1$d файлов в загрузки</string>
+    <string name="SaveToDownloadCount_one">Сохранение %1$d файла в загрузки</string>
+    <string name="SaveToDownloadCount_two">Сохранение %1$d файлов в загрузки</string>
+    <string name="SaveToDownloadCount_few">Сохранение %1$d файлов в загрузки</string>
+    <string name="SaveToDownloadCount_many">Сохранение %1$d файлов в загрузки</string>
+    <string name="SaveToDownloadCount_other">Сохранение %1$d файлов в загрузки</string>
     <string name="hidePremiumStickerAnim">Отключить анимацию премиум стикеров</string>
     <string name="premium">Premium</string>
     <string name="fastSpeedUpload">Ускорение скорости загрузки</string>

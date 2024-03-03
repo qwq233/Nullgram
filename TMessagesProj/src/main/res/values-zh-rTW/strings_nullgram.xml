@@ -182,6 +182,12 @@
     <string name="PasscodePanicCodeAbout">若發生問題，使用緊急碼登出帳戶。</string>
     <string name="PhotoCopied">複製照片</string>
     <string name="CopyPhoto">複製相片</string>
+    <string name="SaveToDownloadCount_zero">正在儲存%1$d到Download</string>
+    <string name="SaveToDownloadCount_one">正在儲存%1$d到Download</string>
+    <string name="SaveToDownloadCount_two">正在儲存%1$d到Download</string>
+    <string name="SaveToDownloadCount_few">正在儲存%1$d到Download</string>
+    <string name="SaveToDownloadCount_many">正在儲存%1$d到Download</string>
+    <string name="SaveToDownloadCount_other">正在儲存%1$d到Download</string>
     <string name="hidePremiumStickerAnim">隱藏高級貼圖動畫</string>
     <string name="premium">高級</string>
     <string name="fastSpeedUpload">加快上傳速度</string>

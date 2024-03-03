@@ -182,6 +182,12 @@
     <string name="PasscodePanicCodeAbout">如果出现错误，请使用紧急代码登出账户。</string>
     <string name="PhotoCopied">图片已复制</string>
     <string name="CopyPhoto">复制图片</string>
+    <string name="SaveToDownloadCount_zero">正在保存 %1$d 个文件到下载</string>
+    <string name="SaveToDownloadCount_one">正在保存 %1$d 个文件到下载</string>
+    <string name="SaveToDownloadCount_two">正在保存 %1$d 个文件到下载</string>
+    <string name="SaveToDownloadCount_few">正在保存 %1$d 个文件到下载</string>
+    <string name="SaveToDownloadCount_many">正在保存 %1$d 个文件到下载</string>
+    <string name="SaveToDownloadCount_other">正在保存 %1$d 个文件到下载</string>
     <string name="hidePremiumStickerAnim">隐藏会员贴图动画</string>
     <string name="premium">Premium</string>
     <string name="fastSpeedUpload">更快的上传速度</string>

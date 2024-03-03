@@ -182,6 +182,12 @@
     <string name="PasscodePanicCodeAbout">Use o código de pânico para desconectar as contas se algo der errado.</string>
     <string name="PhotoCopied">Foto copiada</string>
     <string name="CopyPhoto">Copiar Foto</string>
+    <string name="SaveToDownloadCount_zero">Saving %1$d files to Download</string>
+    <string name="SaveToDownloadCount_one">Saving %1$d file to Download</string>
+    <string name="SaveToDownloadCount_two">Saving %1$d files to Download</string>
+    <string name="SaveToDownloadCount_few">Saving %1$d files to Download</string>
+    <string name="SaveToDownloadCount_many">Saving %1$d files to Download</string>
+    <string name="SaveToDownloadCount_other">Saving %1$d files to Download</string>
     <string name="hidePremiumStickerAnim">Ocultar Animação de Adesivo Premium</string>
     <string name="premium">Premium</string>
     <string name="fastSpeedUpload">Velocidade Máxima de Upload</string>

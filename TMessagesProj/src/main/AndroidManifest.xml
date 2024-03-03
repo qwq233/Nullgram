@@ -476,6 +476,12 @@
             </intent-filter>
         </receiver>
 
+        <receiver android:name="top.qwq2333.nullgram.SaveToDownloadReceiver" android:exported="false">
+            <intent-filter>
+                <action android:name="${applicationId}.CANCEL_SAVE_TO_DOWNLOAD" />
+            </intent-filter>
+        </receiver>
+
         <service android:name=".AuthenticatorService" android:exported="true">
             <intent-filter>
                 <action android:name="android.accounts.AccountAuthenticator"/>

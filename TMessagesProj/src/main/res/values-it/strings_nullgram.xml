@@ -182,6 +182,12 @@
     <string name="PasscodePanicCodeAbout">Usa il codice antipanico per scollegare gli account in caso di emergenza.</string>
     <string name="PhotoCopied">Foto copiata</string>
     <string name="CopyPhoto">Copia foto</string>
+    <string name="SaveToDownloadCount_zero">Saving %1$d files to Download</string>
+    <string name="SaveToDownloadCount_one">Saving %1$d file to Download</string>
+    <string name="SaveToDownloadCount_two">Saving %1$d files to Download</string>
+    <string name="SaveToDownloadCount_few">Saving %1$d files to Download</string>
+    <string name="SaveToDownloadCount_many">Saving %1$d files to Download</string>
+    <string name="SaveToDownloadCount_other">Saving %1$d files to Download</string>
     <string name="hidePremiumStickerAnim">Nascondi animazioni sticker premium</string>
     <string name="premium">Premium</string>
     <string name="fastSpeedUpload">Accelera upload</string>

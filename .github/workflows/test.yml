@@ -1,0 +1,70 @@
+name: Build CI (Pull Request)
+
+on:
+    workflow_dispatch:
+
+jobs:
+    build:
+        name: Gradle Build
+        runs-on: ubuntu-latest
+        env:
+            CCACHE_COMPILERCHECK: "%compiler% -dumpmachine; %compiler% -dumpversion"
+            CCACHE_NOHASHDIR: "true"
+            CCACHE_MAXSIZE: "10G"
+            CCACHE_HARDLINK: "true"
+        steps:
+            - uses: actions/checkout@v2
+              with:
+                  submodules: 'recursive'
+                  fetch-depth: 0
+            - name: Setup cmake
+              uses: jwlawson/actions-setup-cmake@v1.12
+              with:
+                  cmake-version: '3.22.1'
+            - name: Setup Java
+              uses: actions/setup-java@v3
+              with:
+                  distribution: 'temurin'
+                  java-version: '17'
+                  cache: 'gradle'
+            - name: Setup Gradle
+              uses: gradle/gradle-build-action@v2.4.2
+            - name: Set up ccache
+              uses: hendrikmuhs/ccache-action@v1.2
+              with:
+                  key: ccache
+                  restore-keys: ccache
+            - name: Setup Android SDK Tools
+              uses: android-actions/setup-android@v2
+            - name: Prepare Environment
+              run: |
+                  echo "Removing large packages"
+                  sudo apt-get remove -y '^dotnet-.*' aspnetcore-targeting-pack-6.0 aspnetcore-targeting-pack-7.0
+                  sudo apt-get remove -y '^llvm-.*'
+                  sudo apt-get remove -y 'php.*'
+                  sudo apt-get remove -y '^mongodb-.*'
+                  sudo apt-get remove -y '^mysql-.*'
+                  sudo apt-get remove -y azure-cli google-chrome-stable firefox powershell mono-devel libgl1-mesa-dri
+                  sudo apt-get autoremove -y
+                  sudo apt-get clean
+                  echo "Removing large directories"
+                  sudo rm -rf /usr/share/dotnet/
+                  sudo rm -rf /usr/local/graalvm/
+                  sudo rm -rf /usr/local/.ghcup/
+                  sudo rm -rf /usr/local/share/powershell
+                  sudo rm -rf /usr/local/share/chromium
+                  sudo rm -rf /usr/local/lib/node_modules
+                  df -h
+                  
+                  sudo apt-get install bison gcc make curl ninja-build ccache -y
+                  echo "y" | sdkmanager --install "ndk;23.2.8568313" --sdk_root=${ANDROID_SDK_ROOT} &> /dev/null
+                  echo "sdk.dir=${ANDROID_HOME}" >> local.properties
+                  echo "ndk.dir=${ANDROID_HOME}/ndk/23.2.8568313" >> local.properties
+            - name: Debug Build
+              run: |
+                  sed '/signingConfig =/d' TMessagesProj/build.gradle.kts > TMessagesProj/build.gradle.kts.tmp
+                  cp TMessagesProj/build.gradle.kts.tmp TMessagesProj/build.gradle.kts
+                  ./gradlew TMessagesProj:assembleDebug
+        
+
+  
