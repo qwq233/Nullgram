@@ -1,4 +1,23 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!--
+  ~ Copyright (C) 2019-2024 qwq233 <qwq233@qwq2333.top>
+  ~ https://github.com/qwq233/Nullgram
+  ~
+  ~ This program is free software; you can redistribute it and/or
+  ~ modify it under the terms of the GNU General Public License
+  ~ as published by the Free Software Foundation; either version 2
+  ~ of the License, or (at your option) any later version.
+  ~
+  ~ This program is distributed in the hope that it will be useful,
+  ~ but WITHOUT ANY WARRANTY; without even the implied warranty of
+  ~ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  ~ GNU General Public License for more details.
+  ~
+  ~ You should have received a copy of the GNU General Public License along with this software.
+  ~  If not, see
+  ~ <https://www.gnu.org/licenses/>
+  -->
+
 <resources>
     <string name="NullgramPushService">Nullgram 推送服务</string>
     <string name="NullSettings">Nullgram 设置</string>
@@ -321,5 +340,10 @@
     <string name="StickerPackNotFound">未找到贴纸包</string>
     <string name="MessageFilter">Message Filter</string>
     <string name="Pattern">Pattern</string>
-    <string name="MessageFilterDesc">Use regular expressions to match messages, and the matched messages will be hidden.\nLeave it blank to disable it</string>
+    <string name="SaveToDownloadCount_zero">正在保存 %1$d 个文件到下载</string>
+    <string name="SaveToDownloadCount_one">正在保存 %1$d 个文件到下载</string>
+    <string name="SaveToDownloadCount_two">正在保存 %1$d 个文件到下载</string>
+    <string name="SaveToDownloadCount_few">正在保存 %1$d 个文件到下载</string>
+    <string name="SaveToDownloadCount_many">正在保存 %1$d 个文件到下载</string>
+    <string name="SaveToDownloadCount_other">正在保存 %1$d 个文件到下载</string>
 </resources>
