@@ -20,6 +20,7 @@
 @file:Suppress("UnstableApiUsage")
 
 import com.android.build.api.variant.BuildConfigField
+import com.android.build.api.variant.FilterConfiguration
 import com.android.build.gradle.internal.cxx.configure.gradleLocalProperties
 import com.google.firebase.crashlytics.buildtools.gradle.CrashlyticsExtension
 import java.text.SimpleDateFormat
@@ -150,21 +151,15 @@ android {
         jvmToolchain(Version.java.toString().toInt())
     }
 
-    var keystorePwd: String? = null
-    var alias: String? = null
-    var pwd: String? = null
-    if (project.rootProject.file("local.properties").exists()) {
-        keystorePwd = gradleLocalProperties(rootDir).getProperty("RELEASE_STORE_PASSWORD")
-        alias = gradleLocalProperties(rootDir).getProperty("RELEASE_KEY_ALIAS")
-        pwd = gradleLocalProperties(rootDir).getProperty("RELEASE_KEY_PASSWORD")
-    }
-
     signingConfigs {
         create("release") {
             storeFile = File(projectDir, "config/release.keystore")
-            storePassword = (keystorePwd ?: System.getenv("KEYSTORE_PASS"))
-            keyAlias = (alias ?: System.getenv("ALIAS_NAME"))
-            keyPassword = (pwd ?: System.getenv("ALIAS_PASS"))
+            gradleLocalProperties(rootDir, providers).apply {
+                storePassword = getProperty("RELEASE_STORE_PASSWORD", System.getenv("KEYSTORE_PASS"))
+                keyAlias = getProperty("RELEASE_KEY_ALIAS", System.getenv("ALIAS_NAME"))
+                keyPassword = getProperty("RELEASE_KEY_PASSWORD", System.getenv("ALIAS_PASS"))
+            }
+
             enableV3Signing = true
             enableV4Signing = true
         }
@@ -176,11 +171,6 @@ android {
             isMinifyEnabled = true
             isShrinkResources = true
             proguardFiles(File(projectDir, "proguard-rules.pro"))
-            optimization {
-                keepRules {
-                    ignoreExternalDependencies("com.microsoft.appcenter:appcenter")
-                }
-            }
 
             the<CrashlyticsExtension>().nativeSymbolUploadEnabled = true
             the<CrashlyticsExtension>().mappingFileUploadEnabled = true
@@ -226,7 +216,7 @@ android {
 
     applicationVariants.all {
         outputs.all {
-            val abi = this.filters.find { it.filterType == com.android.build.VariantOutput.ABI }?.identifier
+            val abi = this.filters.find { it.filterType == FilterConfiguration.FilterType.ABI.name }?.identifier
             val output = this as? com.android.build.gradle.internal.api.BaseVariantOutputImpl
             val outputFileName = "Nullgram-${defaultConfig.versionName}-${abiName[abi]}.apk"
             output?.outputFileName = outputFileName
@@ -238,6 +228,6 @@ android {
 
 kotlin {
     sourceSets.configureEach {
-        kotlin.srcDir("$buildDir/generated/ksp/$name/kotlin/")
+        kotlin.srcDir("${layout.buildDirectory.asFile.get().absolutePath}/generated/ksp/$name/kotlin/")
     }
 }

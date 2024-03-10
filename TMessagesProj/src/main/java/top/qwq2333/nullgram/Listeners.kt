@@ -19,12 +19,18 @@
 
 package top.qwq2333.nullgram
 
-import android.annotation.SuppressLint
+import android.os.Build
 import android.service.notification.NotificationListenerService
+import android.telephony.TelephonyCallback
+import androidx.annotation.RequiresApi
 import org.telegram.messenger.ApplicationLoader
 import org.telegram.messenger.KeepAliveJob
 
-@SuppressLint("OverrideAbstract")
+@RequiresApi(Build.VERSION_CODES.S)
+abstract class CallStateListener : TelephonyCallback(), TelephonyCallback.CallStateListener {
+    abstract override fun onCallStateChanged(state: Int)
+}
+
 class NullgramPushService : NotificationListenerService() {
 
     override fun onCreate() {
