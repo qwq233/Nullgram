@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019-2023 qwq233 <qwq233@qwq2333.top>
+ * Copyright (C) 2019-2024 qwq233 <qwq233@qwq2333.top>
  * https://github.com/qwq233/Nullgram
  *
  * This program is free software; you can redistribute it and/or
@@ -303,22 +303,21 @@ object Utils {
     }
 
     @JvmStatic
-    val abi: String by lazy {
-        val apkFile = ZipFile(ApplicationLoader.applicationContext.applicationInfo.sourceDir)
-        try {
-            val libFolder = apkFile.entries().asSequence().find { it.name.contains("libtmessages") }!!
-            when (libFolder.name.split("/")[1]) {
-                "arm64-v8a" -> "arm64"
-                "armeabi-v7a" -> "arm32"
-                "x86" -> "x86"
-                "x86_64" -> "x86_64"
-                else -> "unknown"
+    val abi by lazy {
+        ZipFile(ApplicationLoader.applicationContext.applicationInfo.sourceDir).use {
+            try {
+                val libFolder = it.entries().asSequence().find { it.name.contains("libtmessages") }!!
+                when (libFolder.name.split("/")[1]) {
+                    "arm64-v8a" -> "arm64"
+                    "armeabi-v7a" -> "arm32"
+                    "x86" -> "x86"
+                    "x86_64" -> "x86_64"
+                    else -> "unknown"
+                }
+            } catch (e: Exception) {
+                Log.e(e)
+                "unknown"
             }
-        } catch (e: Exception) {
-            Log.e(e)
-            "unknown"
-        } finally {
-            apkFile.close()
         }
     }
 
