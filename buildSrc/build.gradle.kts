@@ -11,7 +11,7 @@ repositories {
     mavenCentral()
 
     dependencies {
-        implementation("org.eclipse.jgit:org.eclipse.jgit:6.8.0.202311291450-r")
+        implementation("org.eclipse.jgit:org.eclipse.jgit:6.9.0.202403050737-r")
     }
 }
 
