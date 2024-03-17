@@ -95,14 +95,6 @@
   <init>(com.google.android.exoplayer2.upstream.DataSource$Factory);
 }
 
--keepclassmembernames class com.microsoft.appcenter.AppCenter {
-    private com.microsoft.appcenter.channel.Channel mChannel;
-    private android.os.Handler mHandler;
-}
--keepclassmembers class * implements com.microsoft.appcenter.AppCenterService {
-    public static ** getInstance();
-}
-
 -keep class org.telegram.messenger.voip.* { *; }
 -keep class org.telegram.messenger.AnimatedFileDrawableStream { <methods>; }
 -keep class org.telegram.SQLite.SQLiteException { <methods>; }
@@ -143,6 +135,10 @@
     public static *** d(...);
 }
 
+-dontwarn org.slf4j.impl.StaticMDCBinder
+-keep class io.ktor.client.** { *; }
+-keep class io.ktor.serialization.** { *; }
+-keep class kotlinx.coroutines.** { *; }
 
 # Keep `Companion` object fields of serializable classes.
 # This avoids serializer lookup through `getDeclaredClasses` as done for named companion objects.
