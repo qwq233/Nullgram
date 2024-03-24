@@ -1,9 +1,20 @@
 /*
- * This is the source code of Telegram for Android v. 5.x.x.
- * It is licensed under GNU GPL v. 2 or later.
- * You should have received a copy of the license in this archive (see LICENSE).
+ * Copyright (C) 2019-2024 qwq233 <qwq233@qwq2333.top>
+ * https://github.com/qwq233/Nullgram
  *
- * Copyright Nikolai Kudashov, 2013-2018.
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation; either version 2
+ * of the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along with this software.
+ *  If not, see
+ * <https://www.gnu.org/licenses/>
  */
 
 package org.telegram.messenger;
@@ -67,7 +78,6 @@ import org.telegram.ui.Components.AnimatedEmojiDrawable;
 import org.telegram.ui.Components.BulletinFactory;
 import org.telegram.ui.Components.ImageUpdater;
 import org.telegram.ui.Components.JoinCallAlert;
-import org.telegram.ui.Components.JoinGroupAlert;
 import org.telegram.ui.Components.MotionBackgroundDrawable;
 import org.telegram.ui.Components.Premium.LimitReachedBottomSheet;
 import org.telegram.ui.Components.Reactions.ReactionsLayoutInBubble;
@@ -6287,7 +6297,7 @@ public class MessagesController extends BaseController implements NotificationCe
                 }
 
                 ArrayList<MessageObject> objects = new ArrayList<>();
-                objects.removeIf(MessageObject::isBlockedMessage);
+//                objects.removeIf(MessageObject::isBlockedMessage);
                 for (int a = 0; a < messagesRes.messages.size(); a++) {
                     TLRPC.Message message = messagesRes.messages.get(a);
                     message.dialog_id = dialogId;
@@ -11796,7 +11806,7 @@ public class MessagesController extends BaseController implements NotificationCe
             }
 
             ArrayList<MessageObject> newMessages = new ArrayList<>();
-            newMessages.removeIf(MessageObject::isBlockedMessage);
+//            newMessages.removeIf(MessageObject::isBlockedMessage);
             for (int a = 0; a < dialogsRes.messages.size(); a++) {
                 TLRPC.Message message = dialogsRes.messages.get(a);
                 if (promoDialogId == 0 || promoDialogId != message.dialog_id) {
