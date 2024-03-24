@@ -164,6 +164,10 @@
    kotlinx.serialization.KSerializer serializer(...);
 }
 
+-keep class top.qwq2333.nullgram.utils.Log {
+    public static *** nativeLog(...);
+}
+
 # @Serializable and @Polymorphic are used at runtime for polymorphic serialization.
 -keepattributes RuntimeVisibleAnnotations,AnnotationDefault
 

@@ -5,4 +5,5 @@ target_compile_options(checkSignature PUBLIC
 target_include_directories(checkSignature PUBLIC
         integrity
         ../../libs/linux-syscall-support)
-target_link_libraries(checkSignature -Wl)
+target_link_libraries(checkSignature
+    rust)
