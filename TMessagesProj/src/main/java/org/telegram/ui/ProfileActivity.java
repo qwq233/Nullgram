@@ -297,6 +297,7 @@ import top.qwq2333.nullgram.activity.MainSettingActivity;
 import top.qwq2333.nullgram.config.ConfigManager;
 import top.qwq2333.nullgram.helpers.TranslateHelper;
 import top.qwq2333.nullgram.translate.LanguageDetectorTimeout;
+import top.qwq2333.nullgram.ui.AutoTranslatePopupWrapper;
 import top.qwq2333.nullgram.ui.BottomBuilder;
 import top.qwq2333.nullgram.ui.SimpleTextViewSwitcher;
 import top.qwq2333.nullgram.utils.AlertUtil;
@@ -9835,9 +9836,13 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
     }
 
     private void createAutoTranslateItem(long dialogId) {
+        createAutoTranslateItem(dialogId, 0);
     }
 
     private void createAutoTranslateItem(long dialogId, int topicId) {
+        var autoTranslatePopupWrapper = new AutoTranslatePopupWrapper(ProfileActivity.this, otherItem.getPopupLayout().getSwipeBack(), dialogId, topicId, getResourceProvider());
+        otherItem.addSwipeBackItem(R.drawable.msg_translate, null, LocaleController.getString("AutoTranslate", R.string.AutoTranslate), autoTranslatePopupWrapper.windowLayout);
+        otherItem.addColoredGap();
     }
 
     private void setAutoDeleteHistory(int time, int action) {
