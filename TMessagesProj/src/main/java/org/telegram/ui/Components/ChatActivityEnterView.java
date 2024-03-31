@@ -1,9 +1,20 @@
 /*
- * This is the source code of Telegram for Android v. 5.x.x.
- * It is licensed under GNU GPL v. 2 or later.
- * You should have received a copy of the license in this archive (see LICENSE).
+ * Copyright (C) 2019-2024 qwq233 <qwq233@qwq2333.top>
+ * https://github.com/qwq233/Nullgram
  *
- * Copyright Nikolai Kudashov, 2013-2018.
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation; either version 2
+ * of the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along with this software.
+ *  If not, see
+ * <https://www.gnu.org/licenses/>
  */
 
 package org.telegram.ui.Components;
@@ -151,7 +162,6 @@ import org.telegram.ui.ActionBar.BaseFragment;
 import org.telegram.ui.ActionBar.BottomSheet;
 import org.telegram.ui.ActionBar.SimpleTextView;
 import org.telegram.ui.ActionBar.Theme;
-import org.telegram.ui.BasePermissionsActivity;
 import org.telegram.ui.Business.QuickRepliesController;
 import org.telegram.ui.ChatActivity;
 import org.telegram.ui.Components.Premium.GiftPremiumBottomSheet;
@@ -3700,6 +3710,27 @@ public class ChatActivityEnterView extends BlurredFrameLayout implements Notific
                 senderSelectPopupWindow = new SenderSelectPopup(getContext(), parentFragment, controller, chatFull, delegate.getSendAsPeers(), (recyclerView, senderView, peer) -> {
                     if (senderSelectPopupWindow == null) return;
                     if (chatFull != null) {
+                        var chat = controller.getChat(chatFull.id);
+                        if (chat != null && chat.creator) {
+                            var self = UserConfig.getInstance(currentAccount).getCurrentUser();
+
+                            if (peer.channel_id == chat.id) {
+                                var rights = chat.admin_rights;
+                                if (!rights.anonymous) {
+                                    rights.anonymous = true;
+                                    var rank = MessagesController.getInstance(currentAccount).getAdminRank(chat.id, self.id);
+                                    MessagesController.getInstance(currentAccount).setUserAdminRole(chat.id, self, rights,  rank, false, parentFragment, false, false, null, null);
+                                }
+                            } else if (peer.user_id == self.id) {
+                                var rights = chat.admin_rights;
+                                if (rights.anonymous) {
+                                    rights.anonymous = false;
+                                    var rank = MessagesController.getInstance(currentAccount).getAdminRank(chat.id, self.id);
+                                    MessagesController.getInstance(currentAccount).setUserAdminRole(chat.id, self, rights,  rank, false, parentFragment, false, false, null, null);
+                                }
+                            }
+                        }
+
                         chatFull.default_send_as = peer;
                         updateSendAsButton();
                     }
