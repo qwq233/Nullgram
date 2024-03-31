@@ -7,10 +7,19 @@
 -keep class org.webrtc.audio.* { *; }
 -keep class org.webrtc.voiceengine.* { *; }
 -keep class org.telegram.tgnet.RequestDelegateInternal { *; }
+-keep class org.telegram.messenger.* { *; }
+-keep class org.telegram.messenger.camera.* { *; }
+-keep class org.telegram.messenger.secretmedia.* { *; }
+-keep class org.telegram.messenger.support.* { *; }
+-keep class org.telegram.messenger.support.* { *; }
+-keep class org.telegram.messenger.time.* { *; }
+-keep class org.telegram.messenger.video.* { *; }
+-keep class org.telegram.messenger.voip.* { *; }
+-keep class org.telegram.SQLite.** { *; }
+-keep class org.telegram.tgnet.ConnectionsManager { *; }
+-keep class org.telegram.tgnet.NativeByteBuffer { *; }
 -keep class org.telegram.tgnet.RequestTimeDelegate { *; }
 -keep class org.telegram.tgnet.RequestDelegate { *; }
--keep class org.telegram.tgnet.QuickAckDelegate { *; }
--keep class org.telegram.tgnet.WriteToSocketDelegate { *; }
 -keep class com.google.android.exoplayer2.ext.** { *; }
 -keep class com.google.android.exoplayer2.extractor.FlacStreamMetadata { *; }
 -keep class com.google.android.exoplayer2.metadata.flac.PictureFrame { *; }
@@ -95,14 +104,6 @@
   <init>(com.google.android.exoplayer2.upstream.DataSource$Factory);
 }
 
--keepclassmembernames class com.microsoft.appcenter.AppCenter {
-    private com.microsoft.appcenter.channel.Channel mChannel;
-    private android.os.Handler mHandler;
-}
--keepclassmembers class * implements com.microsoft.appcenter.AppCenterService {
-    public static ** getInstance();
-}
-
 -keep class org.telegram.messenger.voip.* { *; }
 -keep class org.telegram.messenger.AnimatedFileDrawableStream { <methods>; }
 -keep class org.telegram.SQLite.SQLiteException { <methods>; }
@@ -143,6 +144,10 @@
     public static *** d(...);
 }
 
+-dontwarn org.slf4j.impl.StaticMDCBinder
+-keep class io.ktor.client.** { *; }
+-keep class io.ktor.serialization.** { *; }
+-keep class kotlinx.coroutines.** { *; }
 
 # Keep `Companion` object fields of serializable classes.
 # This avoids serializer lookup through `getDeclaredClasses` as done for named companion objects.
@@ -166,6 +171,10 @@
 -keepclassmembers class <1> {
    public static <1> INSTANCE;
    kotlinx.serialization.KSerializer serializer(...);
+}
+
+-keep class top.qwq2333.nullgram.utils.Log {
+    public static *** nativeLog(...);
 }
 
 # @Serializable and @Polymorphic are used at runtime for polymorphic serialization.

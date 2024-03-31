@@ -322,7 +322,7 @@ class MessageUtils(num: Int) : BaseController(num) {
 
                     val deleteAction = Runnable {
                         for (list in lists) {
-                            messagesController.deleteMessages(list, null, null, dialogId, true, false)
+                            messagesController.deleteMessages(list, null, null, dialogId, 0, true, 0)
                         }
                     }
                     AndroidUtilities.runOnUIThread {

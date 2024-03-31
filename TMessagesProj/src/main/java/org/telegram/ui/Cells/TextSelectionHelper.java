@@ -58,6 +58,7 @@ import org.telegram.ui.ActionBar.FloatingToolbar;
 import org.telegram.ui.ActionBar.Theme;
 import org.telegram.ui.ArticleViewer;
 import org.telegram.ui.Components.AnimatedEmojiSpan;
+import org.telegram.ui.Components.CornerPath;
 import org.telegram.ui.Components.LayoutHelper;
 import org.telegram.ui.Components.RecyclerListView;
 
@@ -88,7 +89,7 @@ public abstract class TextSelectionHelper<Cell extends TextSelectionHelper.Selec
     protected float cornerRadius;
     protected Paint selectionPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
     protected Paint selectionHandlePaint = new Paint(Paint.ANTI_ALIAS_FLAG);
-    protected Path selectionPath = new Path();
+    protected CornerPath selectionPath = new CornerPath();
     protected Path selectionHandlePath = new Path();
     protected PathCopyTo selectionPathMirror = new PathCopyTo(selectionPath);
 
@@ -307,6 +308,7 @@ public abstract class TextSelectionHelper<Cell extends TextSelectionHelper.Selec
         longpressDelay = ViewConfiguration.getLongPressTimeout();
         touchSlop = ViewConfiguration.get(ApplicationLoader.applicationContext).getScaledTouchSlop();
         selectionPaint.setPathEffect(new CornerPathEffect(cornerRadius = dp(6)));
+        selectionPath.setRectsUnionDiffDelta(1f);
     }
 
     public void setInvalidateParent() {
@@ -1719,7 +1721,7 @@ public abstract class TextSelectionHelper<Cell extends TextSelectionHelper.Selec
                 }
             }
         }
-
+        selectionPath.closeRects();
         canvas.drawPath(selectionPath, selectionPaint);
         if (restore) {
             canvas.restore();
