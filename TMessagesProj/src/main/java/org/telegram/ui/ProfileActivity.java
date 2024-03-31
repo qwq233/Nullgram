@@ -161,7 +161,6 @@ import org.telegram.tgnet.ConnectionsManager;
 import org.telegram.tgnet.SerializedData;
 import org.telegram.tgnet.TLObject;
 import org.telegram.tgnet.TLRPC;
-import org.telegram.tgnet.tl.TL_stories;
 import org.telegram.ui.ActionBar.ActionBar;
 import org.telegram.ui.ActionBar.ActionBarMenu;
 import org.telegram.ui.ActionBar.ActionBarMenuItem;
@@ -9624,10 +9623,12 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
             }
             if (ChatObject.isChannel(chat)) {
                 if (isTopic) {
+                    createAutoTranslateItem(chatId, topicId);
                     if (ChatObject.canManageTopic(currentAccount, chat, topicId)) {
                         editItemVisible = true;
                     }
                 } else {
+                    createAutoTranslateItem(chatId);
                     if ((ChatObject.hasAdminRights(chat) || chat.megagroup && ChatObject.canChangeChatInfo(chat)) || chat.megagroup) {
                         editItemVisible = true;
                     }
@@ -9839,7 +9840,7 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
         createAutoTranslateItem(dialogId, 0);
     }
 
-    private void createAutoTranslateItem(long dialogId, int topicId) {
+    private void createAutoTranslateItem(long dialogId, long topicId) {
         var autoTranslatePopupWrapper = new AutoTranslatePopupWrapper(ProfileActivity.this, otherItem.getPopupLayout().getSwipeBack(), dialogId, topicId, getResourceProvider());
         otherItem.addSwipeBackItem(R.drawable.msg_translate, null, LocaleController.getString("AutoTranslate", R.string.AutoTranslate), autoTranslatePopupWrapper.windowLayout);
         otherItem.addColoredGap();
