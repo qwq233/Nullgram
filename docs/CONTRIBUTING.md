@@ -21,7 +21,7 @@
 2. Encode in UTF-8, with LF as the end of line sequence.
 
 3. Config Key should be defined
-   in [Defines.java](../TMessagesProj/src/main/java/top/qwq2333/nullgram/utils/Defines.java).
+   in [Defines.kt](../TMessagesProj/src/main/java/top/qwq2333/nullgram/utils/Defines.java).
 
 4. Variable naming adopts camelcase.
 
@@ -36,5 +36,4 @@
 
 9. Except in some cases, the code header must be added
 
-10. **At no point should you arbitrarily change [build.gradle.kts](../build.gradle.kts), especially
-    upgrading `com.android.tools.build:gradle` version**
+10. **At no point should you arbitrarily change [build.gradle.kts](../build.gradle.kts).**

@@ -4,7 +4,7 @@
 
 [English](README.md)
 
-Nullgram 是一款**自由且开源**的Telegram第三方客户端，基于[NekoX](https://github.com/NekoX-Dev/NekoX)和[Nekogram](https://gitlab.com/Nekogram/Nekogram)制作。
+Nullgram 是一款**自由且开源**的Telegram第三方客户端，基于[Telegram Android](https://play.google.com/store/apps/details?id=org.telegram.messenger)制作。
 
 ## 为何选择 Nullgram
 天下苦社区分裂久矣。由于很多原因，NekoX和Nekogram社区彻底分裂，再加之Nekogram[^1]和NekoX的主要开发均存在较大问题，我便决定整合两款app的功能，然后便做了Nullgram。

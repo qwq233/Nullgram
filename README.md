@@ -4,8 +4,7 @@
 
 [中文](README_CN.md)
 
-Nullgram is an **free and open source** third-party Telegram client, based on Telegram, [NekoX](https://github.com/NekoX-Dev/NekoX) and [Nekogram](https://gitlab.com/Nekogram/Nekogram).
- the official source code for [Telegram App for Android](https://play.google.com/store/apps/details?id=org.telegram.messenger).
+Nullgram is an **free and open source** third-party Telegram client, based on the official source code for [Telegram App for Android](https://play.google.com/store/apps/details?id=org.telegram.messenger).
 
 ## Why Nullgram
 Due to the fragmentation of the NekoX and Nekogram communities, and the serious problems with the main developers of NekoX and Nekogram[^1], I decided to make Nullgram to integrate both of their functions to avoid these problems.
@@ -36,15 +35,15 @@ If you experience a crash, you can use logcat to catch the log (TAG:  `Nullgram`
 
 ### Compilation Guide
 
-You will require Android Studio 3.4, Android NDK rev. 20 and Android SDK 8.1
+You will require Android NDK rev. 21 and Android SDK 14
 
 1. Download the Telegram source code from https://github.com/qwq233/Nullgram
-2. Copy your release.keystore into TMessagesProj/config
-3. Fill out RELEASE_KEY_PASSWORD, RELEASE_KEY_ALIAS, RELEASE_STORE_PASSWORD in gradle.properties to access your  release.keystore
-4.  Go to https://console.firebase.google.com/, create two android apps with application IDs `top.qwq2333.nullgram`, turn on firebase messaging and download google-services.json, which should be copied to the same folder as TMessagesProj.
-5. Open the project in the Studio (note that it should be opened, NOT imported).
-6. Fill out values in TMessagesProj/src/main/java/org/telegram/messenger/BuildVars.java – there’s a link for each of the variables showing where and which data to obtain.
-7. You are ready to compile Telegram.
+2. Download the ccache from [here](https://ccache.dev/) and make sure it is in your `PATH`.
+3. Replace release.keystore in TMessagesProj/config with your own one.
+4. Fill out RELEASE_KEY_PASSWORD, RELEASE_KEY_ALIAS, RELEASE_STORE_PASSWORD in gradle.properties to access your release.keystore
+5.  Go to https://console.firebase.google.com/, create one android app with application ID `top.qwq2333.nullgram`, turn on firebase messaging and download google-services.json, 
+    which should be copied to the same folder as TMessagesProj.
+6. Open your terminal and run `./gradlew assembleRelease` to build the APK
 
 ## Sponsor
 
