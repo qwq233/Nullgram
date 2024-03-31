@@ -379,6 +379,7 @@ import top.qwq2333.nullgram.config.DialogConfig;
 import top.qwq2333.nullgram.config.ForwardContext;
 import top.qwq2333.nullgram.helpers.QrHelper;
 import top.qwq2333.nullgram.helpers.TranslateHelper;
+import top.qwq2333.nullgram.helpers.TranslateHelper.Status;
 import top.qwq2333.nullgram.translate.LanguageDetectorTimeout;
 import top.qwq2333.nullgram.ui.TranslatorSettingsPopupWrapper;
 import top.qwq2333.nullgram.utils.Defines;
@@ -1693,11 +1694,14 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
 
         @Override
         public boolean hasDoubleTap(View view, int position) {
-            final int currentConfig = Config.getDoubleTab();
-            if (currentConfig == Defines.doubleTabNone || !(view instanceof ChatMessageCell)) {
+            if (chatMode == MODE_QUICK_REPLIES) return false;
+            if (Config.getDoubleTab() == Defines.doubleTabNone || !(view instanceof ChatMessageCell)) {
                 return false;
             }
-            if (currentConfig == Defines.doubleTabReaction) {
+            if (Config.getDoubleTab() == Defines.doubleTabReaction) {
+                if (getDialogId() == getUserConfig().getClientUserId() && !getUserConfig().isPremium()) {
+                    return false;
+                }
                 String reactionStringSetting = getMediaDataController().getDoubleTapReaction();
                 TLRPC.TL_availableReaction reaction = getMediaDataController().getReactionsMap().get(reactionStringSetting);
                 if (reaction == null && (reactionStringSetting == null || !reactionStringSetting.startsWith("animated_"))) {
@@ -1707,12 +1711,11 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
                 if (!available && chatInfo != null) {
                     available = ChatObject.reactionIsAvailable(chatInfo, reaction == null ? reactionStringSetting : reaction.reaction);
                 }
-
                 if (!available || !(view instanceof ChatMessageCell)) {
                     return false;
                 }
                 ChatMessageCell cell = (ChatMessageCell) view;
-                return !cell.getMessageObject().isSending() && !cell.getMessageObject().isEditing() && cell.getMessageObject().type != 16 && !actionBar.isActionModeShowed() && !isSecretChat() && !isInScheduleMode() && !cell.getMessageObject().isSponsored();
+                return !cell.getMessageObject().isSending() && !cell.getMessageObject().isEditing() && cell.getMessageObject().type != MessageObject.TYPE_PHONE_CALL && !actionBar.isActionModeShowed() && !isSecretChat() && !isInScheduleMode() && !cell.getMessageObject().isSponsored();
             } else {
                 var cell = (ChatMessageCell) view;
                 var message = cell.getMessageObject();
@@ -1722,9 +1725,7 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
                     !message.isSponsored() && (getMessageType(message) != 1 || message.getDialogId() != mergeDialogId) &&
                     !(message.messageOwner.action instanceof TLRPC.TL_messageActionSecureValuesSent) &&
                     (currentEncryptedChat != null || message.getId() >= 0) &&
-                    (bottomOverlayChat == null || bottomOverlayChat.getVisibility() != View.VISIBLE) &&
-                    (bottomOverlayChat == null || bottomOverlayChat.getVisibility() != View.VISIBLE || bottomOverlayChatWaitsReply && selectedObject != null
-                        && (MessageObject.getTopicId(UserConfig.selectedAccount, selectedObject.messageOwner, false) != 0 || selectedObject.wasJustSent)) &&
+                    (bottomOverlayChat == null || bottomOverlayChat.getVisibility() != View.VISIBLE || bottomOverlayChatWaitsReply && selectedObject != null && (MessageObject.getTopicId(currentAccount, selectedObject.messageOwner, ChatObject.isForum(currentChat)) != 0 || selectedObject.wasJustSent)) &&
                     (currentChat == null || ((!ChatObject.isNotInChat(currentChat) || isThreadChat()) && (!ChatObject.isChannel(currentChat) || ChatObject.canPost(currentChat) || currentChat.megagroup) && ChatObject.canSendMessages(currentChat)));
                 boolean allowEdit = message.canEditMessage(currentChat) && !chatActivityEnterView.hasAudioToSend() && message.getDialogId() != mergeDialogId;
                 if (allowEdit && messageGroup != null) {
@@ -1740,26 +1741,23 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
                     }
                     allowEdit = captionsCount < 2;
                 }
-                switch (currentConfig) {
+                switch (Config.getDoubleTab()) {
+                    case Defines.doubleTabTranslate:
+                        if (TranslateHelper.getCurrentStatus() != Status.External || !noforwards) {
+                            MessageObject messageObject = getMessageUtils().getMessageForTranslate(message, messageGroup);
+                            if (messageObject != null) {
+                                return true;
+                            }
+                        }
+                        break;
                     case Defines.doubleTabReply:
                         return message.getId() > 0 && allowChatActions;
                     case Defines.doubleTabSaveMessages:
                         return !message.isSponsored() && chatMode != MODE_SCHEDULED && (!message.needDrawBluredPreview() || message.hasExtendedMediaPreview()) && !message.isLiveLocation() && message.type != MessageObject.TYPE_PHONE_CALL && !noforwards && message.type != MessageObject.TYPE_GIFT_PREMIUM && !UserObject.isUserSelf(currentUser);
                     case Defines.doubleTabRepeat:
-                        boolean allowRepeat = allowChatActions &&
-                            (!isThreadChat() && !noforwards || getMessageUtils().getMessageForRepeat(message, messageGroup) != null);
-                        return allowChatActions && (!(isThreadChat() && !isTopic) && !noforwards || getMessageUtils().getMessageForRepeat(message,
-                            messageGroup) != null) && !message.isSponsored() && chatMode != MODE_SCHEDULED && (!message.needDrawBluredPreview() ||
-                            message.hasExtendedMediaPreview()) && !message.isLiveLocation() && message.type != MessageObject.TYPE_PHONE_CALL &&
-                            message.type != MessageObject.TYPE_GIFT_PREMIUM && !UserObject.isUserSelf(currentUser);
+                        return allowChatActions && (!(isThreadChat() && !isTopic) && !noforwards || getMessageUtils().getMessageForRepeat(message, messageGroup) != null) && !message.isSponsored() && chatMode != MODE_SCHEDULED && (!message.needDrawBluredPreview() || message.hasExtendedMediaPreview()) && !message.isLiveLocation() && message.type != MessageObject.TYPE_PHONE_CALL && message.type != MessageObject.TYPE_GIFT_PREMIUM && !UserObject.isUserSelf(currentUser);
                     case Defines.doubleTabEdit:
                         return allowEdit;
-                    case Defines.doubleTabTranslate:
-                        MessageObject messageObject = getMessageUtils().getMessageForTranslate(message, messageGroup);
-                        if (messageObject != null) {
-                            return true;
-                        }
-                        return false;
                 }
             }
             return false;
@@ -1767,16 +1765,18 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
 
         @Override
         public void onDoubleTap(View view, int position, float x, float y) {
-            final int currentConfig = Config.getDoubleTab();
-            if (currentConfig == Defines.doubleTabNone || !(view instanceof ChatMessageCell) || getParentActivity() == null) {
+            if (Config.getDoubleTab() == Defines.doubleTabNone || !(view instanceof ChatMessageCell) || getParentActivity() == null || isSecretChat() || isInScheduleMode() || isInPreviewMode() || chatMode == MODE_QUICK_REPLIES) {
                 return;
             }
-            if (currentConfig == Defines.doubleTabReaction) {
+            if (Config.getDoubleTab() == Defines.doubleTabReaction) {
                 if (isSecretChat() || isInScheduleMode()) {
                     return;
                 }
                 ChatMessageCell cell = (ChatMessageCell) view;
                 MessageObject primaryMessage = cell.getPrimaryMessageObject();
+                if (primaryMessage.isSecretMedia() || primaryMessage.isExpiredStory() || primaryMessage.type == MessageObject.TYPE_JOINED_CHANNEL) {
+                    return;
+                }
                 ReactionsEffectOverlay.removeCurrent(false);
                 String reactionString = getMediaDataController().getDoubleTapReaction();
                 if (reactionString.startsWith("animated_")) {
@@ -1787,7 +1787,7 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
                     if (!available) {
                         return;
                     }
-                    selectReaction(primaryMessage, null, null, x, y, ReactionsLayoutInBubble.VisibleReaction.fromEmojicon(reactionString), true, false, false, true);
+                    selectReaction(primaryMessage, null, null, x, y, ReactionsLayoutInBubble.VisibleReaction.fromEmojicon(reactionString), true, false, false, false);
                 } else {
                     TLRPC.TL_availableReaction reaction = getMediaDataController().getReactionsMap().get(reactionString);
                     if (reaction == null || cell.getMessageObject().isSponsored()) {
@@ -1800,14 +1800,21 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
                     if (!available) {
                         return;
                     }
-                    selectReaction(primaryMessage, null, null, x, y, ReactionsLayoutInBubble.VisibleReaction.fromEmojicon(reaction), true, false, false, true);
+                    selectReaction(primaryMessage, null, null, x, y, ReactionsLayoutInBubble.VisibleReaction.fromEmojicon(reaction), true, false, false, false);
                 }
             } else {
                 var cell = (ChatMessageCell) view;
                 var message = cell.getMessageObject();
                 selectedObject = message;
                 selectedObjectGroup = getValidGroupedMessage(message);
-                switch (currentConfig) {
+                switch (Config.getDoubleTab()) {
+                    case Defines.doubleTabTranslate:
+                        var messageObject = getMessageUtils().getMessageForTranslate(selectedObject, selectedObjectGroup);
+                        if (messageObject == null) {
+                            return;
+                        }
+                        translateOrResetMessage(messageObject, null);
+                        break;
                     case Defines.doubleTabReply:
                         processSelectedOption(OPTION_REPLY);
                         break;
@@ -1819,24 +1826,6 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
                         break;
                     case Defines.doubleTabEdit:
                         processSelectedOption(OPTION_EDIT);
-                        break;
-                    case Defines.doubleTabTranslate:
-                        if (!selectedObject.translated && LanguageDetector.hasSupport()) {
-                            final AtomicBoolean waitForLangDetection = new AtomicBoolean(false);
-                            final AtomicReference<Runnable> onLangDetectionDone = new AtomicReference(null);
-                            final String[] fromLang = {null};
-                            LanguageDetectorTimeout.detectLanguage(cell, getMessageUtils().getMessagePlainText(selectedObject), (String lang) -> {
-                                    fromLang[0] = TranslateHelper.stripLanguageCode(lang);
-                                    if (!TranslateHelper.isLanguageRestricted(lang)
-                                        || (currentChat != null && (currentChat.has_link || ChatObject.isPublic(currentChat) || selectedObject.messageOwner.fwd_from != null)) && (
-                                        "uk".equals(fromLang[0]) || "ru".equals(fromLang[0]))) {
-                                        translateOrResetMessage(selectedObject, fromLang[0]);
-                                    }
-                                }, null, waitForLangDetection, onLangDetectionDone
-                            );
-                        } else {
-                            translateOrResetMessage(selectedObject, null);
-                        }
                         break;
                 }
             }
@@ -28719,7 +28708,7 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
         if (isInScheduleMode() || primaryMessage == null) {
             return;
         }
-        
+
         if (getDialogId() == getUserConfig().getClientUserId() && !getUserConfig().isPremium() && primaryMessage.messageOwner != null && (primaryMessage.messageOwner.reactions == null || (primaryMessage.messageOwner.reactions.reactions_as_tags || primaryMessage.messageOwner.reactions.results.isEmpty()))) {
             new PremiumFeatureBottomSheet(ChatActivity.this, PremiumPreviewFragment.PREMIUM_FEATURE_SAVED_TAGS, true).show();
             return;
@@ -33927,7 +33916,7 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
 
         @Override
         public boolean didLongPressBotButton(ChatMessageCell cell, TLRPC.KeyboardButton button) {
-            if (chatMode == MODE_QUICK_REPLIES) return;
+            if (chatMode == MODE_QUICK_REPLIES) return false;
             if (getParentActivity() == null || bottomOverlayChat.getVisibility() == View.VISIBLE &&
                 !(button instanceof TLRPC.TL_keyboardButtonSwitchInline) && !(button instanceof TLRPC.TL_keyboardButtonCallback) &&
                 !(button instanceof TLRPC.TL_keyboardButtonGame) && !(button instanceof TLRPC.TL_keyboardButtonUrl) &&
@@ -37214,7 +37203,10 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
             var messageObject = getMessageUtils().getMessageForRepeat(selectedObject, selectedObjectGroup);
             if (messageObject != null) {
                 if (messageObject.isAnyKindOfSticker() && !messageObject.isAnimatedEmojiStickers() && !messageObject.isAnimatedEmoji() && !messageObject.isDice()) {
-                    getSendMessagesHelper().sendSticker(selectedObject.getDocument(), null, dialog_id, threadMessageObject, threadMessageObject, null, null, null, true, 0, false, null);
+                    Object parent = getMediaDataController().getStickerSetById(MediaDataController.getStickerSetId(selectedObject.getDocument()));
+                    getSendMessagesHelper().sendSticker(
+                        selectedObject.getDocument(), null, dialog_id, threadMessageObject,
+                        threadMessageObject, null, replyingQuote, null, true, 0, false, parent, quickReplyShortcut, getQuickReplyId());
                     return true;
                 } else {
                     var message = messageObject.messageOwner.message;

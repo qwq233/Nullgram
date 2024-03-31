@@ -1,3 +1,22 @@
+/*
+ * Copyright (C) 2019-2024 qwq233 <qwq233@qwq2333.top>
+ * https://github.com/qwq233/Nullgram
+ *
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation; either version 2
+ * of the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along with this software.
+ *  If not, see
+ * <https://www.gnu.org/licenses/>
+ */
+
 package org.telegram.ui;
 
 import static org.telegram.messenger.AndroidUtilities.dp;
@@ -28,7 +47,6 @@ import android.text.TextWatcher;
 import android.text.style.DynamicDrawableSpan;
 import android.text.style.ImageSpan;
 import android.text.style.ReplacementSpan;
-import android.util.Log;
 import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.View;
@@ -131,9 +149,9 @@ public class FilterCreateActivity extends BaseFragment {
     private boolean canCreateLink() {
         return (
             (!TextUtils.isEmpty(newFilterName) || !TextUtils.isEmpty(filter.name)) &&
-            (newFilterFlags & ~(MessagesController.DIALOG_FILTER_FLAG_CHATLIST | MessagesController.DIALOG_FILTER_FLAG_CHATLIST_ADMIN)) == 0 &&
-            newNeverShow.isEmpty() &&
-            !newAlwaysShow.isEmpty()
+                (newFilterFlags & ~(MessagesController.DIALOG_FILTER_FLAG_CHATLIST | MessagesController.DIALOG_FILTER_FLAG_CHATLIST_ADMIN)) == 0 &&
+                newNeverShow.isEmpty() &&
+                !newAlwaysShow.isEmpty()
         );
     }
 
@@ -541,7 +559,7 @@ public class FilterCreateActivity extends BaseFragment {
                 getConnectionsManager().sendRequest(req, (res, err) -> AndroidUtilities.runOnUIThread(() -> {
                     if (
                         processErrors(err, FilterCreateActivity.this, BulletinFactory.of(FilterCreateActivity.this)) &&
-                        res instanceof TL_chatlists.TL_chatlists_exportedChatlistInvite
+                            res instanceof TL_chatlists.TL_chatlists_exportedChatlistInvite
                     ) {
                         FilterCreateActivity.hideNew(0);
 
@@ -1037,7 +1055,7 @@ public class FilterCreateActivity extends BaseFragment {
             }
         }));
         if (!progress) {
-            processAddFilter(filter, newFilterFlags, newFilterEmotico, newFilterName, newFilterColor, newAlwaysShow, newNeverShow, creatingNew, atBegin, hasUserChanged, resetUnreadCounter, fragment, null);
+            processAddFilter(filter, newFilterFlags, newFilterEmoticon, newFilterName, newFilterColor, newAlwaysShow, newNeverShow, creatingNew, atBegin, hasUserChanged, resetUnreadCounter, fragment, null);
         }
     }
 
@@ -1237,17 +1255,17 @@ public class FilterCreateActivity extends BaseFragment {
             if (viewType == VIEW_TYPE_CHAT) {
                 return (
                     did == other.did &&
-                    TextUtils.equals(chatType, other.chatType) &&
-                    flags == other.flags
+                        TextUtils.equals(chatType, other.chatType) &&
+                        flags == other.flags
                 );
             }
             if (viewType == VIEW_TYPE_LINK) {
                 return (
                     link == other.link ||
-                    TextUtils.equals(link.url, other.link.url) &&
-                    link.revoked == other.link.revoked &&
-                    TextUtils.equals(link.title, other.link.title) &&
-                    link.peers.size() == other.link.peers.size()
+                        TextUtils.equals(link.url, other.link.url) &&
+                            link.revoked == other.link.revoked &&
+                            TextUtils.equals(link.title, other.link.title) &&
+                            link.peers.size() == other.link.peers.size()
                 );
             }
             return true;
@@ -1267,10 +1285,10 @@ public class FilterCreateActivity extends BaseFragment {
             int type = holder.getItemViewType();
             return (
                 type != VIEW_TYPE_SHADOW &&
-                type != VIEW_TYPE_HEADER &&
-                type != VIEW_TYPE_EDIT &&
-                type != VIEW_TYPE_HINT &&
-                type != VIEW_TYPE_HEADER_COLOR_PREVIEW
+                    type != VIEW_TYPE_HEADER &&
+                    type != VIEW_TYPE_EDIT &&
+                    type != VIEW_TYPE_HINT &&
+                    type != VIEW_TYPE_HEADER_COLOR_PREVIEW
             );
         }
 
@@ -1300,7 +1318,7 @@ public class FilterCreateActivity extends BaseFragment {
                         adapter.notifyItemChanged(nameRow);
                         checkDoneButton(true);
                     }));
-                    cell.setIcon(FolderIconHelper.getTabIcon(newFilterEmoticon), newFilterEmoticon);
+                    cell.setIcon(FolderIconHelper.getTabIcon(newFilterEmoticon), true);
                     cell.createErrorTextView();
                     cell.setBackgroundColor(Theme.getColor(Theme.key_windowBackgroundWhite));
                     cell.addTextWatcher(new TextWatcher() {
@@ -1497,6 +1515,11 @@ public class FilterCreateActivity extends BaseFragment {
                 case VIEW_TYPE_CREATE_LINK: {
                     createLinkCell = (CreateLinkCell) holder.itemView;
                     createLinkCell.setDivider(divider);
+                    break;
+                }
+                case VIEW_TYPE_EDIT: {
+                    PollEditTextCell cell = (PollEditTextCell) holder.itemView;
+                    cell.setIcon(FolderIconHelper.getTabIcon(newFilterEmoticon), false);
                     break;
                 }
                 case VIEW_TYPE_HEADER_COLOR_PREVIEW: {
@@ -1963,8 +1986,8 @@ public class FilterCreateActivity extends BaseFragment {
             super.onInitializeAccessibilityNodeInfo(info);
             info.setContentDescription(
                 (lastInvite != null && !TextUtils.isEmpty(lastInvite.title) ? lastInvite.title + "\n " : "") +
-                LocaleController.getString("InviteLink", R.string.InviteLink) + ", " + subtitleTextView.getText() +
-                (lastInvite != null && TextUtils.isEmpty(lastInvite.title) ? "\n\n" + lastInvite.url : "")
+                    LocaleController.getString("InviteLink", R.string.InviteLink) + ", " + subtitleTextView.getText() +
+                    (lastInvite != null && TextUtils.isEmpty(lastInvite.title) ? "\n\n" + lastInvite.url : "")
             );
         }
     }
@@ -2122,7 +2145,7 @@ public class FilterCreateActivity extends BaseFragment {
         if (showedUpdateBulletin) {
             return;
         }
-        
+
         if (filter != null && filter.isChatlist() && filter.isMyChatlist()) {
             showedUpdateBulletin = true;
             showBulletinOnResume = () -> {
@@ -2479,7 +2502,7 @@ public class FilterCreateActivity extends BaseFragment {
                 getBaseFragment().getConnectionsManager().sendRequest(req, (res, err) -> AndroidUtilities.runOnUIThread(() -> {
                     if (
                         processErrors(err, getBaseFragment(), BulletinFactory.of(bulletinContainer, null)) &&
-                        res instanceof TL_chatlists.TL_chatlists_exportedChatlistInvite
+                            res instanceof TL_chatlists.TL_chatlists_exportedChatlistInvite
                     ) {
                         FilterCreateActivity.hideNew(0);
                         dismiss();
