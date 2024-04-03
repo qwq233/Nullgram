@@ -62,7 +62,9 @@ object Log {
 
     private fun writeToFile(level: Level, tag: String?, msg: String) {
         CoroutineScope(Dispatchers.IO).launch {
-            logFile.appendText("${SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS", Locale.US).format(Date())} ${level.name} ${tag ?: ""}: $msg\n", Charset.forName("UTF-8"))
+            runCatching {
+                logFile.appendText("${SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS", Locale.US).format(Date())} ${level.name} ${tag ?: ""}: $msg\n", Charset.forName("UTF-8"))
+            }
         }
     }
     @JvmStatic
