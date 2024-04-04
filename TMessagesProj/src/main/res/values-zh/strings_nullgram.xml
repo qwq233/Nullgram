@@ -17,7 +17,6 @@
   ~  If not, see
   ~ <https://www.gnu.org/licenses/>
   -->
-
 <resources>
     <string name="NullgramPushService">Nullgram 推送服务</string>
     <string name="NullSettings">Nullgram 设置</string>
@@ -340,10 +339,11 @@
     <string name="StickerPackNotFound">未找到贴纸包</string>
     <string name="MessageFilter">Message Filter</string>
     <string name="Pattern">Pattern</string>
-    <string name="SaveToDownloadCount_zero">正在保存 %1$d 个文件到下载</string>
-    <string name="SaveToDownloadCount_one">正在保存 %1$d 个文件到下载</string>
-    <string name="SaveToDownloadCount_two">正在保存 %1$d 个文件到下载</string>
-    <string name="SaveToDownloadCount_few">正在保存 %1$d 个文件到下载</string>
-    <string name="SaveToDownloadCount_many">正在保存 %1$d 个文件到下载</string>
-    <string name="SaveToDownloadCount_other">正在保存 %1$d 个文件到下载</string>
+    <string name="MessageFilterDesc">Use regular expressions to match messages, and the matched messages will be hidden.\nLeave it blank to disable it</string>
+    <string name="SaveToDownloadCount_zero">Saving %1$d files to Download</string>
+    <string name="SaveToDownloadCount_one">Saving %1$d file to Download</string>
+    <string name="SaveToDownloadCount_two">Saving %1$d files to Download</string>
+    <string name="SaveToDownloadCount_few">Saving %1$d files to Download</string>
+    <string name="SaveToDownloadCount_many">Saving %1$d files to Download</string>
+    <string name="SaveToDownloadCount_other">Saving %1$d files to Download</string>
 </resources>
