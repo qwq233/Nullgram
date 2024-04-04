@@ -35,29 +35,31 @@ import java.util.Locale
 
 object Log {
     const val TAG = "Nullgram"
-    private val logFile: File
+    private lateinit var logFile: File
 
     enum class Level {
         DEBUG, INFO, WARN, ERROR
     }
 
     init {
-        val parentFile = AndroidUtilities.getLogsDir()
-        CoroutineScope(Dispatchers.IO).launch {
-            parentFile.listFiles()?.forEach {
-                // delete logs older than 1 day
-                if (it.readAttributes().creationTime().toMillis() < System.currentTimeMillis() - 1 * 24 * 60 * 60 * 1000) {
-                    it.delete()
+        runCatching {
+            val parentFile = AndroidUtilities.getLogsDir()
+            CoroutineScope(Dispatchers.IO).launch {
+                parentFile.listFiles()?.forEach {
+                    // delete logs older than 1 day
+                    if (it.readAttributes().creationTime().toMillis() < System.currentTimeMillis() - 1 * 24 * 60 * 60 * 1000) {
+                        it.delete()
+                    }
                 }
             }
-        }
 
-        logFile = File(parentFile, "log-${SimpleDateFormat("yyyy-MM-dd", Locale.US).format(Date())}.txt").also {
-            if (!it.exists()) {
-                it.createNewFile()
+            logFile = File(parentFile, "log-${SimpleDateFormat("yyyy-MM-dd", Locale.US).format(Date())}.txt").also {
+                if (!it.exists()) {
+                    it.createNewFile()
+                }
+                it.setWritable(true)
+                it.appendText(">>>> Log start at ${SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS", Locale.US).format(Date())}\n", Charset.forName("UTF-8"))
             }
-            it.setWritable(true)
-            it.appendText(">>>> Log start at ${SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS", Locale.US).format(Date())}\n", Charset.forName("UTF-8"))
         }
     }
 
@@ -81,10 +83,12 @@ object Log {
     @JvmStatic
     fun refreshLog() {
         synchronized(logFile) {
-            logFile.let {
-                it.delete()
-                it.createNewFile()
-                it.appendText(">>>> Log start at ${SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS", Locale.US).format(Date())}\n", Charset.forName("UTF-8"))
+            runCatching {
+                logFile.let {
+                    it.delete()
+                    it.createNewFile()
+                    it.appendText(">>>> Log start at ${SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS", Locale.US).format(Date())}\n", Charset.forName("UTF-8"))
+                }
             }
         }
     }
