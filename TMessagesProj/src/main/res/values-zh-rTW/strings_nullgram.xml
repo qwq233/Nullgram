@@ -17,7 +17,6 @@
   ~  If not, see
   ~ <https://www.gnu.org/licenses/>
   -->
-
 <resources>
     <string name="NullgramPushService">Nullgram 推送服務</string>
     <string name="NullSettings">Nullgram 設定</string>
@@ -341,10 +340,10 @@
     <string name="MessageFilter">訊息過濾器</string>
     <string name="Pattern">匹配模式</string>
     <string name="MessageFilterDesc">使用正規式來匹配訊息，匹配到的訊息將被隱藏。\n留空則表示禁用此功能</string>
-    <string name="SaveToDownloadCount_zero">正在儲存%1$d到Download</string>
-    <string name="SaveToDownloadCount_one">正在儲存%1$d到Download</string>
-    <string name="SaveToDownloadCount_two">正在儲存%1$d到Download</string>
-    <string name="SaveToDownloadCount_few">正在儲存%1$d到Download</string>
-    <string name="SaveToDownloadCount_many">正在儲存%1$d到Download</string>
-    <string name="SaveToDownloadCount_other">正在儲存%1$d到Download</string>
+    <string name="SaveToDownloadCount_zero">Saving %1$d files to Download</string>
+    <string name="SaveToDownloadCount_one">Saving %1$d file to Download</string>
+    <string name="SaveToDownloadCount_two">Saving %1$d files to Download</string>
+    <string name="SaveToDownloadCount_few">Saving %1$d files to Download</string>
+    <string name="SaveToDownloadCount_many">Saving %1$d files to Download</string>
+    <string name="SaveToDownloadCount_other">Saving %1$d files to Download</string>
 </resources>
