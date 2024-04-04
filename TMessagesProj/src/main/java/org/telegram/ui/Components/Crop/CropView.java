@@ -7,13 +7,11 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
-import android.graphics.Color;
 import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.PointF;
 import android.graphics.RectF;
 import android.os.Build;
-import android.util.Log;
 import android.view.MotionEvent;
 import android.view.ViewTreeObserver;
 import android.widget.FrameLayout;
@@ -30,10 +28,7 @@ import org.telegram.messenger.SharedConfig;
 import org.telegram.messenger.VideoEditedInfo;
 import org.telegram.ui.ActionBar.AlertDialog;
 import org.telegram.ui.BubbleActivity;
-import org.telegram.ui.Components.Paint.Swatch;
-import org.telegram.ui.Components.Paint.Views.TextPaintView;
 import org.telegram.ui.Components.PaintingOverlay;
-import org.telegram.ui.Components.Point;
 import org.telegram.ui.Components.VideoEditTextureView;
 
 import java.io.File;
@@ -714,6 +709,7 @@ public class CropView extends FrameLayout implements CropAreaView.AreaViewListen
         if (videoEditTextureView != null) {
             return videoEditTextureView.getVideoWidth();
         }
+        if (bitmap == null) return 1;
         return bitmapRotation == 90 || bitmapRotation == 270 ? bitmap.getHeight() : bitmap.getWidth();
     }
 
@@ -721,6 +717,7 @@ public class CropView extends FrameLayout implements CropAreaView.AreaViewListen
         if (videoEditTextureView != null) {
             return videoEditTextureView.getVideoHeight();
         }
+        if (bitmap == null) return 1;
         return bitmapRotation == 90 || bitmapRotation == 270 ? bitmap.getWidth() : bitmap.getHeight();
     }
 

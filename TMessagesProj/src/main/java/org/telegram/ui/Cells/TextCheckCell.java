@@ -33,6 +33,7 @@ import android.widget.TextView;
 import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.LocaleController;
 import org.telegram.ui.ActionBar.Theme;
+import org.telegram.ui.AvatarSpan;
 import org.telegram.ui.Components.AnimationProperties;
 import org.telegram.ui.Components.CheckBoxSquare;
 import org.telegram.ui.Components.CubicBezierInterpolator;
@@ -165,6 +166,7 @@ public class TextCheckCell extends FrameLayout {
     }
 
     public void setTextAndCheck(CharSequence text, boolean checked, boolean divider) {
+        AvatarSpan.checkSpansParent(text, this);
         textView.setText(text);
         isMultiline = false;
         checkBox.setVisibility(View.VISIBLE);
@@ -223,6 +225,7 @@ public class TextCheckCell extends FrameLayout {
     }
 
     public void setTextAndValueAndCheck(String text, String value, boolean checked, boolean multiline, boolean divider) {
+        AvatarSpan.checkSpansParent(text, this);
         textView.setText(text);
         valueTextView.setText(value);
         checkBox.setVisibility(View.VISIBLE);
@@ -251,6 +254,7 @@ public class TextCheckCell extends FrameLayout {
     }
 
     public void setTextAndValue(String text, String value, boolean multiline, boolean divider) {
+        AvatarSpan.checkSpansParent(text, this);
         textView.setText(text);
         valueTextView.setText(value);
         checkBox.setVisibility(View.GONE);

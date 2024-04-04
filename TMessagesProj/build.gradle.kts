@@ -82,6 +82,7 @@ dependencies {
     implementation(libs.interpolator)
     implementation(libs.fragment)
     implementation(libs.sharetarget)
+    implementation(libs.biometric)
 
     compileOnly(libs.checker.compat.qual)
     implementation(libs.firebase.messaging)

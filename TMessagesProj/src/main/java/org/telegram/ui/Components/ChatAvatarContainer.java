@@ -53,6 +53,7 @@ import org.telegram.ui.ActionBar.ActionBarPopupWindow;
 import org.telegram.ui.ActionBar.BaseFragment;
 import org.telegram.ui.ActionBar.SimpleTextView;
 import org.telegram.ui.ActionBar.Theme;
+import org.telegram.ui.Business.BusinessLinksController;
 import org.telegram.ui.ChatActivity;
 import org.telegram.ui.ProfileActivity;
 import org.telegram.ui.Stories.StoriesUtilities;
@@ -231,10 +232,10 @@ public class ChatAvatarContainer extends FrameLayout implements NotificationCent
             }
         };
         if (baseFragment instanceof ChatActivity || baseFragment instanceof TopicsFragment) {
-            if (parentFragment == null || parentFragment.getChatMode() != ChatActivity.MODE_QUICK_REPLIES) {
+            if (parentFragment == null || (parentFragment.getChatMode() != ChatActivity.MODE_QUICK_REPLIES && parentFragment.getChatMode() != ChatActivity.MODE_EDIT_BUSINESS_LINK)) {
                 sharedMediaPreloader = new SharedMediaLayout.SharedMediaPreloader(baseFragment);
             }
-            if (parentFragment != null && (parentFragment.isThreadChat() || parentFragment.getChatMode() == ChatActivity.MODE_PINNED || parentFragment.getChatMode() == ChatActivity.MODE_QUICK_REPLIES)) {
+            if (parentFragment != null && (parentFragment.isThreadChat() || parentFragment.getChatMode() == ChatActivity.MODE_PINNED || parentFragment.getChatMode() == ChatActivity.MODE_QUICK_REPLIES || parentFragment.getChatMode() == ChatActivity.MODE_EDIT_BUSINESS_LINK)) {
                 avatarImageView.setVisibility(GONE);
             }
         }
@@ -516,7 +517,7 @@ public class ChatAvatarContainer extends FrameLayout implements NotificationCent
                 args.putBoolean("reportSpam", parentFragment.hasReportSpam());
                 args.putInt("actionBarColor", getThemedColor(Theme.key_actionBarDefault));
                 ProfileActivity fragment = new ProfileActivity(args, sharedMediaPreloader);
-                fragment.setUserInfo(parentFragment.getCurrentUserInfo());
+                fragment.setUserInfo(parentFragment.getCurrentUserInfo(), parentFragment.profileChannelMessageFetcher, parentFragment.birthdayAssetsFetcher);
                 if (fromChatAnimation) {
                     fragment.setPlayProfileAnimation(byAvatar ? 2 : 1);
                 }
@@ -880,6 +881,10 @@ public class ChatAvatarContainer extends FrameLayout implements NotificationCent
 
     public void updateSubtitle(boolean animated) {
         if (parentFragment == null) {
+            return;
+        }
+        if (parentFragment.getChatMode() == ChatActivity.MODE_EDIT_BUSINESS_LINK) {
+            setSubtitle(BusinessLinksController.stripHttps(parentFragment.businessLink.link));
             return;
         }
         TLRPC.User user = parentFragment.getCurrentUser();

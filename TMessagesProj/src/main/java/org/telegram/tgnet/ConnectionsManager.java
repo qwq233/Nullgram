@@ -9,8 +9,6 @@ import android.os.Build;
 import android.os.SystemClock;
 import android.text.TextUtils;
 import android.util.Base64;
-import android.util.LongSparseArray;
-import android.util.SparseIntArray;
 
 import com.google.firebase.remoteconfig.FirebaseRemoteConfig;
 
@@ -23,7 +21,10 @@ import org.telegram.messenger.BaseController;
 import org.telegram.messenger.BuildConfig;
 import org.telegram.messenger.BuildVars;
 import org.telegram.messenger.EmuDetector;
+import org.telegram.messenger.FileLoadOperation;
+import org.telegram.messenger.FileLoader;
 import org.telegram.messenger.FileLog;
+import org.telegram.messenger.FileUploadOperation;
 import org.telegram.messenger.KeepAliveJob;
 import org.telegram.messenger.LocaleController;
 import org.telegram.messenger.MessagesController;
@@ -751,7 +752,6 @@ public class ConnectionsManager extends BaseController {
             buff.reused = true;
             int constructor = buff.readInt32(true);
             final TLObject message = TLClassStore.Instance().TLdeserialize(buff, constructor, true);
-            FileLog.dumpUnparsedMessage(message, messageId);
             if (message instanceof TLRPC.Updates) {
                 if (false) {
                     // FileLog.d("java received " + message);
@@ -1650,5 +1650,33 @@ public class ConnectionsManager extends BaseController {
         protected void onPostExecute(NativeByteBuffer result) {
 
         }
+    }
+
+    public static long lastPremiumFloodWaitShown = 0;
+    public static void onPremiumFloodWait(final int currentAccount, final int requestToken, boolean isUpload) {
+        AndroidUtilities.runOnUIThread(() -> {
+            if (UserConfig.selectedAccount != currentAccount) {
+                return;
+            }
+
+            boolean updated = false;
+            if (isUpload) {
+                FileUploadOperation operation = FileLoader.getInstance(currentAccount).findUploadOperationByRequestToken(requestToken);
+                if (operation != null) {
+                    updated = !operation.caughtPremiumFloodWait;
+                    operation.caughtPremiumFloodWait = true;
+                }
+            } else {
+                FileLoadOperation operation = FileLoader.getInstance(currentAccount).findLoadOperationByRequestToken(requestToken);
+                if (operation != null) {
+                    updated = !operation.caughtPremiumFloodWait;
+                    operation.caughtPremiumFloodWait = true;
+                }
+            }
+
+            if (updated) {
+                NotificationCenter.getInstance(currentAccount).postNotificationName(NotificationCenter.premiumFloodWaitReceived);
+            }
+        });
     }
 }

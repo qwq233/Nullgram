@@ -29,7 +29,6 @@ import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.os.Bundle;
 import android.text.TextUtils;
-import android.util.Log;
 import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.KeyEvent;
@@ -82,6 +81,7 @@ public class BottomSheet extends Dialog {
     public boolean scrollNavBar;
     public boolean occupyNavigationBar;
     protected boolean waitingKeyboard;
+    public FrameLayout topBulletinContainer;
 
     protected boolean useSmoothKeyboard;
 

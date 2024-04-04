@@ -938,15 +938,13 @@ public class PeerStoriesView extends SizeNotifierFrameLayout implements Notifica
                         if (lastFragment == null) {
                             return;
                         }
-                        if (lastFragment.getOrCreateOverlayStoryViewer().isShowing) {
-                            return;
-                        }
-                        storyViewer.setOverlayVisible(true);
                         fwdStoryItem.dialogId = reply.peerId;
-                        lastFragment.getOrCreateOverlayStoryViewer().open(getContext(), fwdStoryItem, null);
-                        lastFragment.getOrCreateOverlayStoryViewer().setOnCloseListener(() -> {
-                            storyViewer.setOverlayVisible(false);
+                        StoryViewer overlayStoryViewer = lastFragment.createOverlayStoryViewer();
+                        overlayStoryViewer.open(getContext(), fwdStoryItem, null);
+                        overlayStoryViewer.setOnCloseListener(() -> {
+                            storyViewer.updatePlayingMode();
                         });
+                        storyViewer.updatePlayingMode();
                     } else {
                         BulletinFactory.of(storyContainer, resourcesProvider)
                             .createSimpleBulletin(R.raw.story_bomb2, LocaleController.getString(R.string.StoryNotFound))
@@ -3014,11 +3012,8 @@ public class PeerStoriesView extends SizeNotifierFrameLayout implements Notifica
                             }
                         }
                     }
-                    if (storyViewer.fragment != null && storyViewer.fragment.overlayStoryViewer != null) {
-                        storyViewer.fragment.overlayStoryViewer.instantClose();
-                    }
-                    if (storyViewer.fragment != null && storyViewer.fragment.storyViewer != null) {
-                        storyViewer.fragment.storyViewer.instantClose();
+                    if (storyViewer.fragment != null) {
+                        storyViewer.fragment.clearStoryViewers();
                     }
                     storyViewer.instantClose();
                     editOpened = false;
@@ -5578,6 +5573,10 @@ public class PeerStoriesView extends SizeNotifierFrameLayout implements Notifica
                     if (storiesController.markStoryAsRead(dialogId, storyItem)) {
                         storyViewer.unreadStateChanged = true;
                     }
+                }
+            } else if (isActive && this.storyItem != null && storyViewer.storiesList != null) {
+                if (storyViewer.storiesList.markAsRead(this.storyItem.id)) {
+                    storyViewer.unreadStateChanged = true;
                 }
             }
         }

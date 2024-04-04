@@ -3,7 +3,6 @@ package org.telegram.ui.Business;
 import static org.telegram.messenger.AndroidUtilities.dp;
 import static org.telegram.messenger.LocaleController.getString;
 
-import android.app.Activity;
 import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.PorterDuff;
@@ -21,39 +20,33 @@ import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.MotionEvent;
 import android.view.View;
-import android.view.inputmethod.EditorInfo;
 import android.widget.FrameLayout;
-import android.widget.LinearLayout;
 
 import androidx.annotation.NonNull;
 
-import org.checkerframework.checker.units.qual.A;
 import org.telegram.messenger.AndroidUtilities;
-import org.telegram.messenger.ApplicationLoader;
 import org.telegram.messenger.BotWebViewVibrationEffect;
 import org.telegram.messenger.DocumentObject;
 import org.telegram.messenger.FileLog;
+import org.telegram.messenger.ImageLocation;
 import org.telegram.messenger.ImageReceiver;
 import org.telegram.messenger.LocaleController;
 import org.telegram.messenger.NotificationCenter;
 import org.telegram.messenger.R;
 import org.telegram.messenger.SvgHelper;
-import org.telegram.messenger.UserConfig;
 import org.telegram.messenger.Utilities;
+import org.telegram.messenger.WebFile;
 import org.telegram.tgnet.TLRPC;
-import org.telegram.tgnet.tl.TL_stories;
 import org.telegram.ui.ActionBar.ActionBar;
 import org.telegram.ui.ActionBar.ActionBarMenuItem;
 import org.telegram.ui.ActionBar.AlertDialog;
 import org.telegram.ui.ActionBar.BaseFragment;
 import org.telegram.ui.ActionBar.Theme;
-import org.telegram.ui.ChatActivity;
 import org.telegram.ui.Components.AnimatedColor;
 import org.telegram.ui.Components.AnimatedTextView;
 import org.telegram.ui.Components.AvatarDrawable;
 import org.telegram.ui.Components.BackupImageView;
 import org.telegram.ui.Components.BulletinFactory;
-import org.telegram.ui.Components.ChatAttachAlert;
 import org.telegram.ui.Components.ChatAttachAlertLocationLayout;
 import org.telegram.ui.Components.CircularProgressDrawable;
 import org.telegram.ui.Components.ClipRoundedDrawable;
@@ -61,12 +54,9 @@ import org.telegram.ui.Components.CrossfadeDrawable;
 import org.telegram.ui.Components.CubicBezierInterpolator;
 import org.telegram.ui.Components.EditTextBoldCursor;
 import org.telegram.ui.Components.LayoutHelper;
-import org.telegram.ui.Components.LoadingDrawable;
-import org.telegram.ui.Components.Paint.Views.LocationView;
 import org.telegram.ui.Components.UItem;
 import org.telegram.ui.Components.UniversalAdapter;
 import org.telegram.ui.Components.UniversalRecyclerView;
-import org.telegram.ui.Stories.recorder.PaintView;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -116,8 +106,6 @@ public class LocationActivity extends BaseFragment implements NotificationCenter
         FrameLayout contentView = new FrameLayout(context);
         contentView.setBackgroundColor(Theme.getColor(Theme.key_windowBackgroundGray));
 
-        LinearLayout content = new LinearLayout(getContext());
-        content.setOrientation(LinearLayout.HORIZONTAL);
         editText = new EditTextBoldCursor(getContext()) {
             AnimatedColor limitColor = new AnimatedColor(this);
             private int limitCount;
@@ -194,8 +182,10 @@ public class LocationActivity extends BaseFragment implements NotificationCenter
         editTextContainer.addView(editText, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, LayoutHelper.MATCH_PARENT, Gravity.TOP, 21, 15, 21, 15));
         editTextContainer.setBackgroundColor(getThemedColor(Theme.key_windowBackgroundWhite));
         if (editText != null) {
+            ignoreEditText = true;
             editText.setText(address);
             editText.setSelection(editText.getText().length());
+            ignoreEditText = false;
         }
 
 //        mapLoadingDrawable = new LoadingDrawable(resourceProvider);
@@ -261,7 +251,7 @@ public class LocationActivity extends BaseFragment implements NotificationCenter
         mapPreviewContainer.addView(mapMarker, LayoutHelper.createFrame(LayoutHelper.WRAP_CONTENT, LayoutHelper.WRAP_CONTENT, Gravity.CENTER, 0, -31, 0, 0));
         updateMapPreview();
 
-        listView = new UniversalRecyclerView(context, currentAccount, this::fillItems, this::onClick, null, getResourceProvider());
+        listView = new UniversalRecyclerView(this, this::fillItems, this::onClick, null);
         contentView.addView(listView, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, LayoutHelper.MATCH_PARENT));
 
         setValue();
@@ -309,8 +299,10 @@ public class LocationActivity extends BaseFragment implements NotificationCenter
         }
 
         if (editText != null) {
+            ignoreEditText = true;
             editText.setText(address);
             editText.setSelection(editText.getText().length());
+            ignoreEditText = false;
         }
         updateMapPreview();
         if (listView != null && listView.adapter != null) {
@@ -326,8 +318,8 @@ public class LocationActivity extends BaseFragment implements NotificationCenter
             mapMarker.setTranslationY(-dp(12));
             final int w = (int) ((mapPreview.getMeasuredWidth() <= 0 ? AndroidUtilities.displaySize.x : mapPreview.getMeasuredWidth()) / AndroidUtilities.density);
             final int h = 240;
-            String url = AndroidUtilities.formapMapUrl(currentAccount, geo.lat, geo._long, w, h, false, 15, -1);
-            mapPreview.setImage(url, w + "_" + h, mapLoadingDrawable);
+            final int scale = Math.min(2, (int) Math.ceil(AndroidUtilities.density));
+            mapPreview.setImage(ImageLocation.getForWebFile(WebFile.createWithGeoPoint(geo.lat, geo._long, 0, scale * w, scale * h, 15, scale)), w + "_" + h, mapLoadingDrawable, 0, null);
         } else {
             mapPreview.setImageBitmap(null);
         }

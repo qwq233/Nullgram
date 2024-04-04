@@ -62,6 +62,9 @@ public class BillingController {
         if (currency == null || currency.isEmpty()) {
             return String.valueOf(amount);
         }
+        if ("TON".equalsIgnoreCase(currency)) {
+            return "TON " + (amount / 1_000_000_000.0);
+        }
         Currency cur = Currency.getInstance(currency);
         if (cur != null) {
             NumberFormat numberFormat = NumberFormat.getCurrencyInstance();

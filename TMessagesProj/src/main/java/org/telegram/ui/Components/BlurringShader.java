@@ -1,12 +1,9 @@
 package org.telegram.ui.Components;
 
-import static org.telegram.messenger.AndroidUtilities.dp;
-
 import android.animation.ValueAnimator;
 import android.graphics.Bitmap;
 import android.graphics.BitmapShader;
 import android.graphics.Canvas;
-import android.graphics.Color;
 import android.graphics.ColorFilter;
 import android.graphics.ColorMatrix;
 import android.graphics.ColorMatrixColorFilter;
@@ -22,7 +19,6 @@ import android.graphics.drawable.Drawable;
 import android.opengl.GLES11Ext;
 import android.opengl.GLES20;
 import android.text.TextUtils;
-import android.util.Log;
 import android.view.View;
 
 import androidx.annotation.NonNull;
@@ -607,7 +603,7 @@ public class BlurringShader {
         }
 
         public Bitmap getBitmap(Bitmap bitmap, String key, int orientation, int invert, boolean recycleAfter) {
-            if (bitmap == null) {
+            if (bitmap == null || bitmap.isRecycled()) {
                 return null;
             }
             if (TextUtils.equals(thumbKey, key)) {
@@ -622,6 +618,9 @@ public class BlurringShader {
             }
             thumbKey = key;
             Utilities.globalQueue.postRunnable(generate = () -> {
+                if (bitmap == null || bitmap.isRecycled()) {
+                    return;
+                }
                 final float aspectRatio = bitmap.getWidth() / (float) bitmap.getHeight();
                 final float scale = 1.5f;
                 final float density = 9 * scale * 16 * scale;

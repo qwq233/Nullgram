@@ -34,9 +34,6 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileWriter;
 import java.text.NumberFormat;
-import java.time.Instant;
-import java.time.ZoneId;
-import java.time.format.TextStyle;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collection;
@@ -1122,7 +1119,7 @@ public class LocaleController {
                     return ApplicationLoader.applicationContext.getString(R.string.NullgramName);
                 }
                 case "TelegramFeaturesUrl":
-                    return ApplicationLoader.applicationContext.getString(R.string.TelegramFeaturesUrl);
+                    return "t.me/NullgramClient";
                 case "UnsupportedMedia":
                     return ApplicationLoader.applicationContext.getString(R.string.UnsupportedMediaNullgram);
                 default:

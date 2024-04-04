@@ -23,14 +23,10 @@ import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.os.Bundle;
-import android.text.SpannableString;
-import android.text.SpannableStringBuilder;
-import android.text.Spanned;
 import android.text.StaticLayout;
 import android.text.TextPaint;
 import android.text.TextUtils;
 import android.text.method.LinkMovementMethod;
-import android.util.Log;
 import android.util.Property;
 import android.util.TypedValue;
 import android.view.GestureDetector;
@@ -103,6 +99,13 @@ public class Bulletin {
 
     public static Bulletin make(@NonNull FrameLayout containerLayout, @NonNull Layout contentLayout, int duration) {
         return new Bulletin(null, containerLayout, contentLayout, duration);
+    }
+
+    public Bulletin setOnClickListener(View.OnClickListener onClickListener) {
+        if (layout != null) {
+            layout.setOnClickListener(onClickListener);
+        }
+        return this;
     }
 
     @SuppressLint("RtlHardcoded")
@@ -662,7 +665,7 @@ public class Bulletin {
 
         protected Bulletin bulletin;
         Drawable background;
-        private boolean top;
+        public boolean top;
 
         public boolean isTransitionRunning() {
             return transitionRunningEnter || transitionRunningExit;
@@ -682,6 +685,12 @@ public class Bulletin {
             updateSize();
             setPadding(AndroidUtilities.dp(8), AndroidUtilities.dp(8), AndroidUtilities.dp(8), AndroidUtilities.dp(8));
             setWillNotDraw(false);
+            ScaleStateListAnimator.apply(this, .02f, 1.5f);
+        }
+
+        @Override
+        protected boolean verifyDrawable(@NonNull Drawable who) {
+            return background == who || super.verifyDrawable(who);
         }
 
         protected void setBackground(int color) {
@@ -723,7 +732,7 @@ public class Bulletin {
             updateSize();
         }
 
-        private void setTop(boolean top) {
+        public void setTop(boolean top) {
             this.top = top;
             updateSize();
         }

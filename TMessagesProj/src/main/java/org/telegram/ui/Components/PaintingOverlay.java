@@ -44,8 +44,8 @@ public class PaintingOverlay extends FrameLayout {
         super(context);
     }
 
-    public void setData(String paintPath, ArrayList<VideoEditedInfo.MediaEntity> entities, boolean isVideo, boolean startAfterSet) {
-        setEntities(entities, isVideo, startAfterSet);
+    public void setData(String paintPath, ArrayList<VideoEditedInfo.MediaEntity> entities, boolean isVideo, boolean startAfterSet, boolean clip) {
+        setEntities(entities, isVideo, startAfterSet, clip);
         if (paintPath != null) {
             paintBitmap = BitmapFactory.decodeFile(paintPath);
             setBackground(backgroundDrawable = new BitmapDrawable(paintBitmap));
@@ -156,7 +156,8 @@ public class PaintingOverlay extends FrameLayout {
         setBackground(null);
     }
 
-    public void setEntities(ArrayList<VideoEditedInfo.MediaEntity> entities, boolean isVideo, boolean startAfterSet) {
+    public void setEntities(ArrayList<VideoEditedInfo.MediaEntity> entities, boolean isVideo, boolean startAfterSet, boolean clip) {
+        setClipChildren(clip);
         reset();
         mediaEntityViews = new HashMap<>();
         if (entities != null && !entities.isEmpty()) {

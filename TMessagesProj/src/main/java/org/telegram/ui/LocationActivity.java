@@ -103,7 +103,6 @@ import org.telegram.ui.Cells.SharingLiveLocationCell;
 import org.telegram.ui.Components.AlertsCreator;
 import org.telegram.ui.Components.AvatarDrawable;
 import org.telegram.ui.Components.BackupImageView;
-import org.telegram.ui.Components.ChatAttachAlert;
 import org.telegram.ui.Components.ChatAttachAlertLocationLayout;
 import org.telegram.ui.Components.CombinedDrawable;
 import org.telegram.ui.Components.CubicBezierInterpolator;
@@ -116,9 +115,7 @@ import org.telegram.ui.Components.RecyclerListView;
 import org.telegram.ui.Components.UndoView;
 
 import java.io.File;
-import java.net.URLEncoder;
 import java.nio.ByteBuffer;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -586,7 +583,7 @@ public class LocationActivity extends BaseFragment implements NotificationCenter
             if (messageObject.isLiveLocation()) {
                 actionBar.setTitle(LocaleController.getString("AttachLiveLocation", R.string.AttachLiveLocation));
                 otherItem = menu.addItem(0, R.drawable.ic_ab_other, getResourceProvider());
-                otherItem.addSubItem(get_directions, R.drawable.navigate, LocaleController.getString("GetDirections", R.string.GetDirections));
+                otherItem.addSubItem(get_directions, R.drawable.filled_directions, LocaleController.getString("GetDirections", R.string.GetDirections));
             } else {
                 if (messageObject.messageOwner.media.title != null && messageObject.messageOwner.media.title.length() > 0) {
                     actionBar.setTitle(LocaleController.getString("SharedPlace", R.string.SharedPlace));
@@ -1074,7 +1071,7 @@ public class LocationActivity extends BaseFragment implements NotificationCenter
                     ActionBarPopupWindow.ActionBarPopupWindowLayout popupLayout = new ActionBarPopupWindow.ActionBarPopupWindowLayout(context);
                     ActionBarMenuSubItem cell = new ActionBarMenuSubItem(getParentActivity(), true, true, getResourceProvider());
                     cell.setMinimumWidth(AndroidUtilities.dp(200));
-                    cell.setTextAndIcon(LocaleController.getString("GetDirections", R.string.GetDirections), R.drawable.navigate);
+                    cell.setTextAndIcon(LocaleController.getString("GetDirections", R.string.GetDirections), R.drawable.filled_directions);
                     cell.setOnClickListener(e -> {
                         openDirections(location);
                         if (popupWindow != null) {

@@ -1,5 +1,6 @@
 [versions]
 agp = "8.3.1"
+biometric = "1.1.0"
 checkerCompatQual = "2.5.6"
 core = "4.6.2"
 dynamicanimation = "1.0.0"
@@ -67,6 +68,7 @@ process-phoenix = { module = "com.jakewharton:process-phoenix", version.ref = "p
 sharetarget = { module = "androidx.sharetarget:sharetarget", version.ref = "sharetarget" }
 fragment = { module = "androidx.fragment:fragment", version.ref = "fragment" }
 interpolator = { module = "androidx.interpolator:interpolator", version.ref = "interpolator" }
+biometric = { module = "androidx.biometric:biometric", version.ref = "biometric" }
 palette-ktx = { module = "androidx.palette:palette-ktx", version.ref = "paletteKtx" }
 ktor-client-core = { module = "io.ktor:ktor-client-core", version.ref = "ktor" }
 ktor-client-okhttp = { module = "io.ktor:ktor-client-okhttp", version.ref = "ktor" }

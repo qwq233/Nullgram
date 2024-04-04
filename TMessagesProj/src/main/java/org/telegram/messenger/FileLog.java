@@ -77,8 +77,6 @@ public class FileLog {
     private static void checkGson() {
     }
 
-
-
     public void init() {
         return;
     }

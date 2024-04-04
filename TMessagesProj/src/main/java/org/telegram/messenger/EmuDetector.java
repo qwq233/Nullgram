@@ -215,6 +215,7 @@ public class EmuDetector {
                         || Build.HARDWARE.toLowerCase().contains("vbox86")
                         || Build.HARDWARE.toLowerCase().contains("android_x86")
                         || Build.HARDWARE.toLowerCase().contains("nox")
+                        || Build.HARDWARE.toLowerCase().contains("ranchu")
                         || Build.PRODUCT.equals("sdk")
                         || Build.PRODUCT.equals("google_sdk")
                         || Build.PRODUCT.equals("sdk_x86")

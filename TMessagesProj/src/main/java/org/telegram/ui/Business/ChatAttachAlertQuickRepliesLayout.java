@@ -6,7 +6,6 @@ import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
 import android.content.Context;
 import android.graphics.Canvas;
-import android.net.Uri;
 import android.os.Build;
 import android.text.TextUtils;
 import android.view.Gravity;
@@ -29,31 +28,25 @@ import org.telegram.messenger.R;
 import org.telegram.messenger.UserConfig;
 import org.telegram.messenger.UserObject;
 import org.telegram.messenger.Utilities;
-import org.telegram.messenger.support.LongSparseIntArray;
-import org.telegram.tgnet.ConnectionsManager;
 import org.telegram.tgnet.TLRPC;
 import org.telegram.ui.ActionBar.AlertDialog;
 import org.telegram.ui.ActionBar.SimpleTextView;
 import org.telegram.ui.ActionBar.Theme;
 import org.telegram.ui.ActionBar.ThemeDescription;
+import org.telegram.ui.Components.AvatarDrawable;
+import org.telegram.ui.Components.BackupImageView;
 import org.telegram.ui.Components.ChatActivityInterface;
 import org.telegram.ui.Components.ChatAttachAlert;
-import org.telegram.ui.Components.EditTextBoldCursor;
-import org.telegram.ui.Components.RecyclerListView;
-import org.telegram.ui.Components.FillLastLinearLayoutManager;
-import org.telegram.ui.Components.EmptyTextProgressView;
-import org.telegram.ui.Components.SearchField;
-import org.telegram.ui.Components.BackupImageView;
-import org.telegram.ui.Components.LayoutHelper;
 import org.telegram.ui.Components.CheckBox2;
-import org.telegram.ui.Components.AvatarDrawable;
-import org.telegram.ui.Components.PhonebookShareAlert;
+import org.telegram.ui.Components.EditTextBoldCursor;
+import org.telegram.ui.Components.EmptyTextProgressView;
+import org.telegram.ui.Components.FillLastLinearLayoutManager;
+import org.telegram.ui.Components.LayoutHelper;
+import org.telegram.ui.Components.RecyclerListView;
+import org.telegram.ui.Components.SearchField;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Locale;
-import java.util.Objects;
 
 public class ChatAttachAlertQuickRepliesLayout extends ChatAttachAlert.AttachAlertLayout implements NotificationCenter.NotificationCenterDelegate {
 
@@ -365,7 +358,7 @@ public class ChatAttachAlertQuickRepliesLayout extends ChatAttachAlert.AttachAle
 //                }
             }
         };
-        NotificationCenter.getInstance(UserConfig.selectedAccount).listen(listView, NotificationCenter.emojiLoaded, args -> {
+        NotificationCenter.getInstance(UserConfig.selectedAccount).listenGlobal(listView, NotificationCenter.emojiLoaded, args -> {
             AndroidUtilities.forEachViews(listView, view -> {
                 if (view instanceof QuickRepliesActivity.QuickReplyView) {
                     ((QuickRepliesActivity.QuickReplyView) view).invalidateEmojis();
@@ -414,16 +407,11 @@ public class ChatAttachAlertQuickRepliesLayout extends ChatAttachAlert.AttachAle
                 object = listAdapter.getItem(section, row);
             }
             if (object instanceof QuickRepliesController.QuickReply) {
-                final int currentAccount = UserConfig.selectedAccount;
-                TLRPC.TL_messages_sendQuickReplyMessages req = new TLRPC.TL_messages_sendQuickReplyMessages();
                 long dialogId;
                 if (parentAlert.baseFragment instanceof ChatActivityInterface) {
                     dialogId = ((ChatActivityInterface) parentAlert.baseFragment).getDialogId();
                 } else return;
-                req.peer = MessagesController.getInstance(currentAccount).getInputPeer(dialogId);
-                if (req.peer == null) return;
-                req.shortcut_id = ((QuickRepliesController.QuickReply) object).id;
-                ConnectionsManager.getInstance(currentAccount).sendRequest(req, null);
+                QuickRepliesController.getInstance(UserConfig.selectedAccount).sendQuickReplyTo(dialogId, (QuickRepliesController.QuickReply) object);
                 parentAlert.dismiss();
             }
         });
