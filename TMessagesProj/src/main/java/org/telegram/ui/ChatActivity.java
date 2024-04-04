@@ -17950,10 +17950,6 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
                 waitingForLoad.remove(index);
             }
             ArrayList<MessageObject> messArr = (ArrayList<MessageObject>) args[2];
-
-//            messages.removeIf(MessageObject::isBlockedMessage);
-//            messArr.removeIf(MessageObject::isBlockedMessage);
-
             if (messages.isEmpty() && messArr.size() == 1 && MessageObject.isSystemSignUp(messArr.get(0))) {
                 forceHistoryEmpty = true;
                 endReached[0] = endReached[1] = true;
@@ -21953,10 +21949,6 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
         boolean updateChat = false;
         boolean hasFromMe = false;
         boolean isAd = false;
-
-//        arr.removeIf((messageObject) -> {
-//            return messageObject.isBlockedMessage();
-//        });
 
         if (chatListItemAnimator != null) {
             chatListItemAnimator.setShouldAnimateEnterFromBottom(true);
@@ -32234,6 +32226,8 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
                 } else {
                     messages = ChatActivity.this.messages;
                 }
+
+                messages.removeIf(MessageObject::isBlockedMessage);
 
                 MessageObject message = messages.get(position - messagesStartRow);
                 View view = holder.itemView;

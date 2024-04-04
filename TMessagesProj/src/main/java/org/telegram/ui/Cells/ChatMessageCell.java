@@ -8936,16 +8936,6 @@ public class ChatMessageCell extends BaseCell implements SeekBar.SeekBarDelegate
             }
             quoteHighlight = null;
         }
-        if (isBlockedUserMessage()) {
-            totalHeight = 0;
-            if (avatarDrawable != null)
-                avatarDrawable.setVisible(false, true);
-            if (avatarImage != null)
-                avatarImage.setVisible(false, false);
-            if (getAvatarImage() != null)
-                getAvatarImage().setVisible(false, false);
-            setVisibility(View.GONE);
-        }
         if (transcribeButton != null) {
             transcribeButton.setOpen(currentMessageObject.messageOwner != null && currentMessageObject.messageOwner.voiceTranscriptionOpen && currentMessageObject.messageOwner.voiceTranscriptionFinal && TranscribeButton.isVideoTranscriptionOpen(currentMessageObject), !messageIdChanged);
             transcribeButton.setLoading(TranscribeButton.isTranscribing(currentMessageObject), !messageIdChanged);
@@ -8969,6 +8959,20 @@ public class ChatMessageCell extends BaseCell implements SeekBar.SeekBarDelegate
         highlightCaptionToSetStart = highlightCaptionToSetEnd = -1;
 
         updateFlagSecure();
+
+        if (isBlockedUserMessage()) {
+            totalHeight = 0;
+            keyboardHeight = 0;
+            layoutHeight = 0;
+            if (avatarDrawable != null)
+                avatarDrawable.setVisible(false, true);
+            if (avatarImage != null)
+                avatarImage.setVisible(false, false);
+            if (getAvatarImage() != null)
+                getAvatarImage().setVisible(false, false);
+            setVisibility(View.GONE);
+        }
+
     }
 
     private boolean loopStickers() {
