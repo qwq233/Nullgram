@@ -188,7 +188,7 @@
     <string name="PasscodeEdit">更改密码锁</string>
     <string name="PasscodeRemove">移除密码锁</string>
     <string name="PasscodeHideAccount">隐藏账户</string>
-    <string name="PasscodeAllowPanic">使用恢复代码登出</string>
+    <string name="PasscodeAllowPanic">使用紧急代码登出</string>
     <string name="PasscodeAbout">为每个账户设置不同的密码，然后通过输入相应的密码来切换。</string>
     <string name="PasscodePanicCode">紧急代码</string>
     <string name="PasscodePanicCodeSet">设置紧急代码</string>
@@ -294,7 +294,7 @@
     <string name="JumpToBeginning">回到顶部</string>
     <string name="DisableQuickSendMediaBottom">禁用快速发送媒体按钮</string>
     <string name="ProviderBaiduTranslate">百度翻译</string>
-    <string name="ProviderTranSmartTranslate">TransSmart 翻译</string>
+    <string name="ProviderTranSmartTranslate">TranSmart 翻译</string>
     <string name="alwaysSendWithoutSound">总是静音发送</string>
     <string name="EditEnableMarkdown">启用 Markdown</string>
     <string name="EditDisableMarkdown">禁用 Markdown</string>
@@ -334,12 +334,12 @@
     <string name="ShowTitle">显示标题</string>
     <string name="HideTitle">隐藏标题</string>
     <string name="showHideTitle">显示隐藏标题</string>
-    <string name="DownloadingStickerSet">Downloading sticker set…</string>
+    <string name="DownloadingStickerSet">正在下载贴图包…</string>
     <string name="IncompleteDownload">下载超时，请检查您的网络</string>
     <string name="StickerPackNotFound">未找到贴纸包</string>
-    <string name="MessageFilter">Message Filter</string>
-    <string name="Pattern">Pattern</string>
-    <string name="MessageFilterDesc">Use regular expressions to match messages, and the matched messages will be hidden.\nLeave it blank to disable it</string>
+    <string name="MessageFilter">消息过滤器</string>
+    <string name="Pattern">正则表达式</string>
+    <string name="MessageFilterDesc">使用正则表达式来匹配消息，匹配的消息将被隐藏。\n留空以禁用它</string>
     <string name="SaveToDownloadCount_zero">Saving %1$d files to Download</string>
     <string name="SaveToDownloadCount_one">Saving %1$d file to Download</string>
     <string name="SaveToDownloadCount_two">Saving %1$d files to Download</string>
