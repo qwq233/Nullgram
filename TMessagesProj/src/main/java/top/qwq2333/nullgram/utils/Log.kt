@@ -66,8 +66,8 @@ object Log {
     private fun writeToFile(level: Level, tag: String?, msg: String) {
         CoroutineScope(Dispatchers.IO).launch {
             runCatching {
-                async {
-                    if (logFile.readAttributes().size() > 1024 * 1024 * 10) { // 10MB
+               synchronized(logFile) {
+                    if (!logFile.exists() || logFile.readAttributes().size() > 1024 * 1024 * 10) { // 10MB
                         refreshLog()
                     }
                 }
