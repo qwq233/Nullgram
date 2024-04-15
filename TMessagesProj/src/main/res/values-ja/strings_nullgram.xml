@@ -155,7 +155,7 @@
     <string name="DarkenAvatarBackground">プロフィール画像を暗くする</string>
     <string name="hideTimeForSticker">ステッカーに時刻を表示しない</string>
     <string name="showMessageID">メッセージIDを表示</string>
-    <string name="hideQuickSendMediaBottom">Hide Quick Send Media Bottom</string>
+    <string name="hideQuickSendMediaBottom">クイックメディア送信の下部を非表示</string>
     <string name="largeAvatarAsBackground">Large Avatar As Background</string>
     <string name="useSystemEmoji">システムの絵文字を使用する</string>
     <string name="Command">コマンド</string>
@@ -329,7 +329,8 @@
     <string name="MonoCode">コード</string>
     <string name="CreateCode">コードを作成</string>
     <string name="CreateCodeLanguage">言語</string>
-    <string name="UnsupportedMediaNullgram">This message is not supported on your version of Nullgram. Update the app to view: https://t.me/NullgramClient</string>
+    <string name="UnsupportedMediaNullgram">このメッセージはお使いのバージョンのNullgram ではサポートされていません。表示するにはアプリをアップデートしてください:
+https://t.me/NullgramClient</string>
     <string name="ignoreUserSpecifiedReplyColor">Ignore user-set reply color</string>
     <string name="ShowTitle">タイトルを表示</string>
     <string name="HideTitle">タイトルを非表示</string>
