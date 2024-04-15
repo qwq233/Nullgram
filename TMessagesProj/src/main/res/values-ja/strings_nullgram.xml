@@ -145,9 +145,9 @@
     <string name="CallbackData">コールバックデータ</string>
     <string name="TestBackend">バックエンドをテスト</string>
     <string name="notAllowedWhenChannelAliasIsEnabled">You cannot disable it when Channel Alias is enabled!</string>
-    <string name="unreadBadgeOnBackButton">Unread Badge on Back Button</string>
-    <string name="keepFormatting">Keep text formatting when copy</string>
-    <string name="showForwardDate">Show date of forwarded message</string>
+    <string name="unreadBadgeOnBackButton">戻るボタンの未読バッジ</string>
+    <string name="keepFormatting">コピー時にテキストの書式を維持</string>
+    <string name="showForwardDate">転送されたメッセージの日付を表示</string>
     <string name="enchantAudio">音質を向上させる</string>
     <string name="enchantAudioDetails">This feature is supported by Android\'s audio system.\nWe do not guarantee major changes in sound quality.</string>
     <string name="AvatarAsBackground">プロフィール画像を背景として表示</string>
@@ -156,14 +156,14 @@
     <string name="hideTimeForSticker">ステッカーに時刻を表示しない</string>
     <string name="showMessageID">メッセージIDを表示</string>
     <string name="hideQuickSendMediaBottom">クイックメディア送信の下部を非表示</string>
-    <string name="largeAvatarAsBackground">Large Avatar As Background</string>
+    <string name="largeAvatarAsBackground">大きなアバターを背景にする</string>
     <string name="useSystemEmoji">システムの絵文字を使用する</string>
     <string name="Command">コマンド</string>
     <string name="setCustomQuickMessage">カスタムクイックメッセージを設定</string>
-    <string name="emptyInput">You can\'t input nothing here</string>
-    <string name="numberInvalid"><![CDATA[Number should be >20 and 150<]]></string>
-    <string name="notANumber">You must input a number!</string>
-    <string name="notACommand">You must input a string!</string>
+    <string name="emptyInput">ここには何も入力できません</string>
+    <string name="numberInvalid"><![CDATA[番号は20文字以上150文字以内です]]></string>
+    <string name="notANumber">番号を入力する必要があります!</string>
+    <string name="notACommand">文字列を入力する必要があります!</string>
     <string name="SendAsReply">返信として送信</string>
     <string name="scrollableChatPreview">スクロール可能なチャットプレビュー</string>
     <string name="disableVibration">バイブレーションを無効化</string>
@@ -178,7 +178,7 @@
     <string name="linkUser">ユーザーをリンク</string>
     <string name="overrideChannelAlias">チャンネルのエイリアスを上書き</string>
     <string name="overrideChannelAliasDetails">If linked user is set it will override channel alias.</string>
-    <string name="labelChannelInChat">Label Linked User In Chat</string>
+    <string name="labelChannelInChat">チャットでリンクされたユーザーにラベル付け</string>
     <string name="Passcode1">パスコード</string>
     <string name="UnknownSettings">不明な設定</string>
     <string name="PasscodeNeeded">最初にパスコードロックを有効にする必要があります</string>
@@ -202,7 +202,7 @@
     <string name="CopyPhoto">写真をコピー</string>
     <string name="hidePremiumStickerAnim">プレミアムステッカーアニメーションを非表示</string>
     <string name="premium">プレミアム</string>
-    <string name="fastSpeedUpload">Fasten upload speed</string>
+    <string name="fastSpeedUpload">アップロード速度を高速化する</string>
     <string name="showTabsOnForward">Show Tabs On Forward</string>
     <string name="TabTitleType">タブに表示する</string>
     <string name="TabTitleTypeTip">アイコンは Telegram Cloud に同期されます。</string>
@@ -313,7 +313,7 @@
     <string name="enablePanguOnReceiving">受信時にPanguを有効化</string>
     <string name="enablePanguOnSending">送信時にPanguを有効化</string>
     <string name="panguInfo">可読性を向上させるために文字間を挿入します。CJK (中国語、日本語、韓国語)、半角英数、記号に自動的に空白を挿入することができます。</string>
-    <string name="showExactTime">Display time in seconds</string>
+    <string name="showExactTime">時間を秒単位で表示</string>
     <string name="keepOnlineStatusAs">オンラインステータスを維持</string>
     <string name="Offline">オフライン</string>
     <string name="Special">スペシャル</string>
@@ -331,7 +331,7 @@
     <string name="CreateCodeLanguage">言語</string>
     <string name="UnsupportedMediaNullgram">このメッセージはお使いのバージョンのNullgram ではサポートされていません。表示するにはアプリをアップデートしてください:
 https://t.me/NullgramClient</string>
-    <string name="ignoreUserSpecifiedReplyColor">Ignore user-set reply color</string>
+    <string name="ignoreUserSpecifiedReplyColor">ユーザーが設定した返信の色を無視</string>
     <string name="ShowTitle">タイトルを表示</string>
     <string name="HideTitle">タイトルを非表示</string>
     <string name="showHideTitle">非表示のタイトルを表示</string>
