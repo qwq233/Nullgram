@@ -24,7 +24,6 @@ import android.util.Log
 import com.google.firebase.crashlytics.FirebaseCrashlytics
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
 import org.telegram.messenger.AndroidUtilities
 import java.io.File
@@ -66,12 +65,17 @@ object Log {
     private fun writeToFile(level: Level, tag: String?, msg: String) {
         CoroutineScope(Dispatchers.IO).launch {
             runCatching {
-                async {
-                    if (!logFile.exists() || logFile.readAttributes().size() > 1024 * 1024 * 10) { // 10MB
+                logFile.apply {
+                    if (!exists()) {
+                        createNewFile()
+                        setWritable(true)
+                        appendText(">>>> Log start at ${SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS", Locale.US).format(Date())}\n", Charset.forName("UTF-8"))
+                    }
+                    if (readAttributes().size() > 1024 * 1024 * 10) { // 10MB
                         refreshLog()
                     }
+                    appendText("${SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS", Locale.US).format(Date())} ${level.name} ${tag ?: ""}: $msg\n", Charset.forName("UTF-8"))
                 }
-                logFile.appendText("${SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS", Locale.US).format(Date())} ${level.name} ${tag ?: ""}: $msg\n", Charset.forName("UTF-8"))
             }
         }
     }
