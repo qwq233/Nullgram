@@ -336,14 +336,14 @@
     <string name="showHideTitle">Başlığı gizleyi göster</string>
     <string name="DownloadingStickerSet">Çıkartma paketi yükleniyor…</string>
     <string name="IncompleteDownload">Bağlantı zaman aşımı, internetini kontrol edin</string>
-    <string name="StickerPackNotFound">Sticker pack not found.</string>
-    <string name="MessageFilter">Message Filter</string>
-    <string name="Pattern">Pattern</string>
-    <string name="MessageFilterDesc">Use regular expressions to match messages, and the matched messages will be hidden.\nLeave it blank to disable it</string>
-    <string name="SaveToDownloadCount_zero">Saving %1$d files to Download</string>
-    <string name="SaveToDownloadCount_one">Saving %1$d file to Download</string>
-    <string name="SaveToDownloadCount_two">Saving %1$d files to Download</string>
-    <string name="SaveToDownloadCount_few">Saving %1$d files to Download</string>
-    <string name="SaveToDownloadCount_many">Saving %1$d files to Download</string>
-    <string name="SaveToDownloadCount_other">Saving %1$d files to Download</string>
+    <string name="StickerPackNotFound">Çıkartma paketi bulunamadı.</string>
+    <string name="MessageFilter">Mesaj filtreleyici</string>
+    <string name="Pattern">Desen</string>
+    <string name="MessageFilterDesc">İletileri eşleştirmek için normal ifadeler kullandığınızda eşleşen iletiler gizlenir.\nDevre dışı bırakmak için boş bırakın</string>
+    <string name="SaveToDownloadCount_zero">%1$d dosyaları Download a kaydediliyor</string>
+    <string name="SaveToDownloadCount_one">%1$d dosyası downloada kaydediliyor</string>
+    <string name="SaveToDownloadCount_two">%1$d dosya Download üzere kaydediliyor</string>
+    <string name="SaveToDownloadCount_few">%1$d dosya İndirilmek üzere kaydediliyor</string>
+    <string name="SaveToDownloadCount_many"></string>
+    <string name="SaveToDownloadCount_other"></string>
 </resources>
