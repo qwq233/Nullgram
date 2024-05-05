@@ -231,7 +231,6 @@
     <string name="ignoreMutedCount">忽略分頁中已靜音的數量</string>
     <string name="disableSharePhoneWithContactByDefault">無法分享電話號碼添加聯絡人</string>
     <string name="disableStickersAutoReorder">停用貼圖包自動重新排序功能</string>
-    <string name="Ban">封鎖</string>
     <string name="autoDisableBuiltInProxy">自動停用內建代理</string>
     <string name="autoDisableBuiltInProxyDesc">當 Nullgram 偵測到您開啟 VPN 時，將自動關閉內建代理</string>
     <string name="NullgramWsDescription">透過 Cloudflare 以 WebSocket 連接至 TELEOFFICIAL。\n由 Nullgram 提供</string>
