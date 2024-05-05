@@ -231,7 +231,6 @@
     <string name="ignoreMutedCount">Sekmedeki Sessiz Sayımı Yok say</string>
     <string name="disableSharePhoneWithContactByDefault">Kişi Eklediğinizde Telefon Numarasını Paylaşmayın</string>
     <string name="disableStickersAutoReorder">Çıkartma paketlerinin otomatik olarak yeniden sıralanmasını devre dışı bırak</string>
-    <string name="Ban">Yasakla</string>
     <string name="autoDisableBuiltInProxy">Otomatik proxyi devre dışı bırak Built-In olanı</string>
     <string name="autoDisableBuiltInProxyDesc">Nullgram, VPN\'yi açtığınızı tespit ettiğinde yerleşik proxy\'yi otomatik olarak kapatacaktır</string>
     <string name="NullgramWsDescription">Cloudflare aracılığıyla WebSocket ile TELEOFFICIAL\'e bağlanın.\nNullgram tarafından sağlanmıştır</string>
