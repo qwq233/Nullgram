@@ -231,7 +231,6 @@
     <string name="ignoreMutedCount">Ignorar Contagem de Silenciados na Aba</string>
     <string name="disableSharePhoneWithContactByDefault">Não compartilhe o número de telefone ao adicionar um contato</string>
     <string name="disableStickersAutoReorder">Desativar a reorganização automática dos pacotes de adesivos</string>
-    <string name="Ban">Banir</string>
     <string name="autoDisableBuiltInProxy">Auto Desativar Proxy integrado</string>
     <string name="autoDisableBuiltInProxyDesc">Ele desligará automaticamente o proxy integrado quando o Nullgram detectar que você ligou a VPN</string>
     <string name="NullgramWsDescription">Connect to TELEOFFICIAL through WebSocket via Cloudflare.\nProvided by Nullgram</string>
