@@ -231,7 +231,6 @@
     <string name="ignoreMutedCount">Abaikan Hitungan Yang Dibisukan di tab</string>
     <string name="disableSharePhoneWithContactByDefault">No Share Phone Number When Add Contact</string>
     <string name="disableStickersAutoReorder">Nonaktifkan susun ulang otomatis paket stiker</string>
-    <string name="Ban">Blokir</string>
     <string name="autoDisableBuiltInProxy">Nonaktifkan otomatis Proxy Bawaan</string>
     <string name="autoDisableBuiltInProxyDesc">Ini akan otomatis menonaktifkan proxy bawaan ketika Nullgram mendeteksi anda mengaktifkan VPN</string>
     <string name="NullgramWsDescription">Connect to TELEOFFICIAL through WebSocket via Cloudflare.\nProvided by Nullgram</string>
