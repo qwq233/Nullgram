@@ -231,7 +231,6 @@
     <string name="ignoreMutedCount">Non contare chat silenziate su schede</string>
     <string name="disableSharePhoneWithContactByDefault">Non condividere numero su aggiunta contatto</string>
     <string name="disableStickersAutoReorder">Disattiva autoriordino stickerpack</string>
-    <string name="Ban">Ban</string>
     <string name="autoDisableBuiltInProxy">Disattiva automaticamente proxy integrato</string>
     <string name="autoDisableBuiltInProxyDesc">Disattiverà automaticamente il proxy integrato in Nullgram non appena riconoscerà la VPN</string>
     <string name="NullgramWsDescription">Connettiti a TELEOFFICIAL attraverso WebSocket via Cloudflare.\nFornito da Nullgram</string>
