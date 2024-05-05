@@ -1,3 +1,22 @@
+/*
+ * Copyright (C) 2019-2024 qwq233 <qwq233@qwq2333.top>
+ * https://github.com/qwq233/Nullgram
+ *
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation; either version 2
+ * of the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along with this software.
+ *  If not, see
+ * <https://www.gnu.org/licenses/>
+ */
+
 package org.telegram.messenger;
 
 import android.app.Activity;
@@ -233,9 +252,9 @@ class ChatsRemoteViewsFactory implements RemoteViewsService.RemoteViewsFactory {
                         if (message.messageOwner.media instanceof TLRPC.TL_messageMediaPoll) {
                             TLRPC.TL_messageMediaPoll mediaPoll = (TLRPC.TL_messageMediaPoll) message.messageOwner.media;
                             if (Build.VERSION.SDK_INT >= 18) {
-                                innerMessage = String.format("\uD83D\uDCCA \u2068%s\u2069", mediaPoll.poll.question);
+                                innerMessage = String.format("\uD83D\uDCCA \u2068%s\u2069", mediaPoll.poll.question.text);
                             } else {
-                                innerMessage = String.format("\uD83D\uDCCA %s", mediaPoll.poll.question);
+                                innerMessage = String.format("\uD83D\uDCCA %s", mediaPoll.poll.question.text);
                             }
                         } else if (message.messageOwner.media instanceof TLRPC.TL_messageMediaGame) {
                             if (Build.VERSION.SDK_INT >= 18) {
@@ -297,7 +316,7 @@ class ChatsRemoteViewsFactory implements RemoteViewsService.RemoteViewsFactory {
                     } else {
                         if (message.messageOwner.media instanceof TLRPC.TL_messageMediaPoll) {
                             TLRPC.TL_messageMediaPoll mediaPoll = (TLRPC.TL_messageMediaPoll) message.messageOwner.media;
-                            messageString = "\uD83D\uDCCA " + mediaPoll.poll.question;
+                            messageString = "\uD83D\uDCCA " + mediaPoll.poll.question.text;
                         } else if (message.messageOwner.media instanceof TLRPC.TL_messageMediaGame) {
                             messageString = "\uD83C\uDFAE " + message.messageOwner.media.game.title;
                         } else if (message.type == MessageObject.TYPE_MUSIC) {

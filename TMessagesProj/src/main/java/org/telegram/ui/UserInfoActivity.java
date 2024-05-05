@@ -1,3 +1,22 @@
+/*
+ * Copyright (C) 2019-2024 qwq233 <qwq233@qwq2333.top>
+ * https://github.com/qwq233/Nullgram
+ *
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation; either version 2
+ * of the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along with this software.
+ *  If not, see
+ * <https://www.gnu.org/licenses/>
+ */
+
 package org.telegram.ui;
 
 import static org.telegram.messenger.AndroidUtilities.dp;
@@ -29,16 +48,14 @@ import org.telegram.tgnet.TLRPC;
 import org.telegram.ui.ActionBar.ActionBar;
 import org.telegram.ui.ActionBar.ActionBarMenuItem;
 import org.telegram.ui.ActionBar.AlertDialog;
-import org.telegram.ui.ActionBar.BaseFragment;
 import org.telegram.ui.ActionBar.Theme;
+import org.telegram.ui.Business.LocationActivity;
+import org.telegram.ui.Business.OpeningHoursActivity;
 import org.telegram.ui.Cells.EditTextCell;
 import org.telegram.ui.Components.AlertsCreator;
-import org.telegram.ui.Components.BottomSheetWithRecyclerListView;
 import org.telegram.ui.Components.BulletinFactory;
-import org.telegram.ui.Components.ChatAttachAlertLocationLayout;
 import org.telegram.ui.Components.CircularProgressDrawable;
 import org.telegram.ui.Components.CrossfadeDrawable;
-import org.telegram.ui.Components.RecyclerListView;
 import org.telegram.ui.Components.UItem;
 import org.telegram.ui.Components.UniversalAdapter;
 import org.telegram.ui.Components.UniversalFragment;
@@ -145,16 +162,18 @@ public class UserInfoActivity extends UniversalFragment implements NotificationC
     private static final int BUTTON_BIRTHDAY = 1;
     private static final int BUTTON_REMOVE_BIRTHDAY = 2;
     private static final int BUTTON_CHANNEL = 3;
+    private static final int BUTTON_HOURS = 4;
+    private static final int BUTTON_LOCATION = 5;
 
     @Override
     protected void fillItems(ArrayList<UItem> items, UniversalAdapter adapter) {
         items.add(UItem.asHeader(getString(R.string.EditProfileName)));
         items.add(UItem.asCustom(firstNameEdit));
         items.add(UItem.asCustom(lastNameEdit));
-        items.add(UItem.asShadow(null));
+        items.add(UItem.asShadow(-1, null));
         items.add(UItem.asHeader(getString(R.string.EditProfileChannel)));
         items.add(UItem.asButton(BUTTON_CHANNEL, getString(R.string.EditProfileChannelTitle), channel == null ? getString(R.string.EditProfileChannelAdd) : channel.title));
-        items.add(UItem.asShadow(null));
+        items.add(UItem.asShadow(-2, null));
         items.add(UItem.asHeader(getString(R.string.EditProfileBio)));
         items.add(UItem.asCustom(bioEdit));
         items.add(UItem.asShadow(bioInfo));
@@ -184,6 +203,15 @@ public class UserInfoActivity extends UniversalFragment implements NotificationC
             }
         }
         items.add(UItem.asShadow(birthdayInfo));
+        if (hadLocation) {
+            items.add(UItem.asButton(BUTTON_HOURS, R.drawable.menu_premium_clock, getString(R.string.EditProfileHours)));
+        }
+        if (hadLocation) {
+            items.add(UItem.asButton(BUTTON_LOCATION, R.drawable.msg_map, getString(R.string.EditProfileLocation)));
+        }
+        if (hadLocation || hadHours) {
+            items.add(UItem.asShadow(-3, null));
+        }
     }
 
     public static String birthdayString(TLRPC.TL_birthday birthday) {
@@ -251,6 +279,10 @@ public class UserInfoActivity extends UniversalFragment implements NotificationC
 //                    listView.adapter.update(true);
 //                }
 //            }));
+        } else if (item.id == BUTTON_LOCATION) {
+            presentFragment(new LocationActivity());
+        } else if (item.id == BUTTON_HOURS) {
+            presentFragment(new OpeningHoursActivity());
         }
     }
 
@@ -295,7 +327,9 @@ public class UserInfoActivity extends UniversalFragment implements NotificationC
     private TLRPC.TL_birthday birthday;
     private TLRPC.Chat channel;
 
-    private AdminedChannelsFetcher channels = new AdminedChannelsFetcher(currentAccount);
+    private boolean hadHours, hadLocation;
+
+    private AdminedChannelsFetcher channels = new AdminedChannelsFetcher(currentAccount, true);
 
     private boolean valueSet;
     private void setValue() {
@@ -328,6 +362,8 @@ public class UserInfoActivity extends UniversalFragment implements NotificationC
             currentChannel = 0;
             channel = null;
         }
+        hadHours = userFull.business_work_hours != null;
+        hadLocation = userFull.business_location != null;
         checkDone(true);
 
         if (listView != null && listView.adapter != null) {
@@ -490,14 +526,16 @@ public class UserInfoActivity extends UniversalFragment implements NotificationC
         NotificationCenter.getInstance(currentAccount).postNotificationName(NotificationCenter.updateInterfaces, MessagesController.UPDATE_MASK_NAME);
     }
 
-    private static class AdminedChannelsFetcher {
+    public static class AdminedChannelsFetcher {
         public final int currentAccount;
-        public AdminedChannelsFetcher(int currentAccount) {
+        public final boolean for_personal;
+        public AdminedChannelsFetcher(int currentAccount, boolean for_personal) {
             this.currentAccount = currentAccount;
+            this.for_personal = for_personal;
         }
 
         public boolean loaded, loading;
-        public ArrayList<TLRPC.Chat> chats = new ArrayList<>();
+        public final ArrayList<TLRPC.Chat> chats = new ArrayList<>();
 
         public void invalidate() {
             loaded = false;
@@ -507,7 +545,7 @@ public class UserInfoActivity extends UniversalFragment implements NotificationC
             if (loaded || loading) return;
             loading = true;
             TLRPC.TL_channels_getAdminedPublicChannels req = new TLRPC.TL_channels_getAdminedPublicChannels();
-            req.for_personal = true;
+            req.for_personal = for_personal;
             ConnectionsManager.getInstance(currentAccount).sendRequest(req, (res, err) -> AndroidUtilities.runOnUIThread(() -> {
                 if (res instanceof TLRPC.messages_Chats) {
                     chats.clear();

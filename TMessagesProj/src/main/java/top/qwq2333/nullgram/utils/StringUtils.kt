@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019-2023 qwq233 <qwq233@qwq2333.top>
+ * Copyright (C) 2019-2024 qwq233 <qwq233@qwq2333.top>
  * https://github.com/qwq233/Nullgram
  *
  * This program is free software; you can redistribute it and/or
@@ -104,6 +104,15 @@ object StringUtils {
         return if (text.length > length) {
             text.substring(0, length - 3) + "..."
         } else text
+    }
+
+    @JvmStatic
+    fun spacingText(message: TLRPC.TL_textWithEntities): TLRPC.TL_textWithEntities {
+        return TLRPC.TL_textWithEntities().apply {
+            val pair = spacingText(message.text, message.entities)
+            text = pair.first
+            entities = pair.second
+        }
     }
 
     @JvmStatic

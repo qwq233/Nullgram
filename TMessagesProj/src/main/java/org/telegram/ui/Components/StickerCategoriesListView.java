@@ -1,3 +1,22 @@
+/*
+ * Copyright (C) 2019-2024 qwq233 <qwq233@qwq2333.top>
+ * https://github.com/qwq233/Nullgram
+ *
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation; either version 2
+ * of the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along with this software.
+ *  If not, see
+ * <https://www.gnu.org/licenses/>
+ */
+
 package org.telegram.ui.Components;
 
 import static org.telegram.messenger.AndroidUtilities.dp;
@@ -50,12 +69,18 @@ import java.util.Set;
 
 public class StickerCategoriesListView extends RecyclerListView {
 
-    @IntDef({CategoriesType.DEFAULT, CategoriesType.STATUS, CategoriesType.PROFILE_PHOTOS})
+    @IntDef({
+        CategoriesType.DEFAULT,
+        CategoriesType.STATUS,
+        CategoriesType.PROFILE_PHOTOS,
+        CategoriesType.STICKERS
+    })
     @Retention(RetentionPolicy.SOURCE)
     public static @interface CategoriesType {
         int DEFAULT = 0;
         int STATUS = 1;
         int PROFILE_PHOTOS = 2;
+        int STICKERS = 3;
     }
 
     private float shownButtonsAtStart = 6.5f;
@@ -98,7 +123,7 @@ public class StickerCategoriesListView extends RecyclerListView {
             if (emojiGroups == null || emojiGroups.groups == null) {
                 return;
             }
-            for (TLRPC.TL_emojiGroup group : emojiGroups.groups) {
+            for (TLRPC.EmojiGroup group : emojiGroups.groups) {
                 AnimatedEmojiDrawable.getDocumentFetcher(account).fetchDocument(group.icon_emoji_id, null);
             }
         });
@@ -150,6 +175,7 @@ public class StickerCategoriesListView extends RecyclerListView {
                     for (int j = 0; j < emojiGroups.groups.size(); ++j) {
                         categories[i + j] = EmojiCategory.remote(emojiGroups.groups.get(j));
                     }
+                    categories = preprocessCategories(categories);
                     adapter.notifyDataSetChanged();
                     setCategoriesShownT(0);
                     updateCategoriesShown(categoriesShouldShow, System.currentTimeMillis() - start > 16);
@@ -157,6 +183,10 @@ public class StickerCategoriesListView extends RecyclerListView {
                 NotificationCenter.getInstance(UserConfig.selectedAccount).doOnIdle(action);
             }
         });
+    }
+
+    protected EmojiCategory[] preprocessCategories(StickerCategoriesListView.EmojiCategory[] categories) {
+        return categories;
     }
 
     public void setShownButtonsAtStart(float buttonsCount) {
@@ -832,6 +862,8 @@ public class StickerCategoriesListView extends RecyclerListView {
         public boolean animated;
         public int iconResId;
         public String emojis;
+        public boolean premium;
+        public boolean greeting;
 
         public boolean remote;
         public long documentId;
@@ -854,11 +886,17 @@ public class StickerCategoriesListView extends RecyclerListView {
             return category;
         }
 
-        public static EmojiCategory remote(TLRPC.TL_emojiGroup group) {
+        public static EmojiCategory remote(TLRPC.EmojiGroup group) {
             EmojiCategory category = new EmojiCategory();
             category.remote = true;
             category.documentId = group.icon_emoji_id;
-            category.emojis = TextUtils.concat(group.emoticons.toArray(new String[0])).toString();
+            if (group instanceof TLRPC.TL_emojiGroupPremium) {
+                category.emojis = "premium";
+                category.premium = true;
+            } else {
+                category.emojis = TextUtils.concat(group.emoticons.toArray(new String[0])).toString();
+            }
+            category.greeting = group instanceof TLRPC.TL_emojiGroupGreeting;
             category.title = group.title;
             return category;
         }
@@ -875,6 +913,9 @@ public class StickerCategoriesListView extends RecyclerListView {
             } else if (type == CategoriesType.PROFILE_PHOTOS) {
                 req = new TLRPC.TL_messages_getEmojiProfilePhotoGroups();
                 ((TLRPC.TL_messages_getEmojiProfilePhotoGroups) req).hash = (int) hash;
+            } else if (type == CategoriesType.STICKERS) {
+                req = new TLRPC.TL_messages_getEmojiStickerGroups();
+                ((TLRPC.TL_messages_getEmojiStickerGroups) req).hash = (int) hash;
             } else {
                 req = new TLRPC.TL_messages_getEmojiGroups();
                 ((TLRPC.TL_messages_getEmojiGroups) req).hash = (int) hash;

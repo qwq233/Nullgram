@@ -1,9 +1,27 @@
+/*
+ * Copyright (C) 2019-2024 qwq233 <qwq233@qwq2333.top>
+ * https://github.com/qwq233/Nullgram
+ *
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation; either version 2
+ * of the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along with this software.
+ *  If not, see
+ * <https://www.gnu.org/licenses/>
+ */
+
 package org.telegram.ui.Stories;
 
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.text.TextUtils;
-import android.util.Log;
 import android.util.SparseArray;
 import android.webkit.MimeTypeMap;
 
@@ -941,7 +959,7 @@ public class StoriesController {
                 if (newStory instanceof TL_stories.TL_storyItemDeleted) {
                     FileLog.d("StoriesController story is not found, but already deleted storyId=" + newStory.id);
                 } else {
-                    FileLog.d(" StoriesController add new story for full peer storyId=" + newStory.id);
+                    FileLog.d("StoriesController add new story for full peer storyId=" + newStory.id);
                     peerStories.stories.add(newStory);
                 }
             }
@@ -1152,6 +1170,31 @@ public class StoriesController {
                 }
             }
             req.id.add(storyItem.id);
+        }
+        if (dialogId >= 0) {
+            TLRPC.UserFull userFull = MessagesController.getInstance(currentAccount).getUserFull(dialogId);
+            if (userFull != null && userFull.stories != null) {
+                stories = userFull.stories;
+            }
+        } else {
+            TLRPC.ChatFull chatFull = MessagesController.getInstance(currentAccount).getChatFull(-dialogId);
+            if (chatFull != null && chatFull.stories != null) {
+                stories = chatFull.stories;
+            }
+        }
+        for (int i = 0; i < storyItems.size(); ++i) {
+            TL_stories.StoryItem storyItem = storyItems.get(i);
+            if (storyItem instanceof TL_stories.TL_storyItemDeleted) {
+                continue;
+            }
+            if (stories != null) {
+                for (int j = 0; j < stories.stories.size(); j++) {
+                    if (stories.stories.get(j).id == storyItem.id) {
+                        stories.stories.remove(j);
+                        break;
+                    }
+                }
+            }
         }
         ConnectionsManager.getInstance(currentAccount).sendRequest(req, (response, error) -> {
             AndroidUtilities.runOnUIThread(this::invalidateStoryLimit);
@@ -2373,6 +2416,7 @@ public class StoriesController {
         public final long dialogId;
         public final int type;
 
+        public final ArrayList<Integer> pinnedIds = new ArrayList<>();
         public final HashMap<Long, TreeSet<Integer>> groupedByDay = new HashMap<>();
 
         public final ArrayList<MessageObject> messageObjects = new ArrayList<>();
@@ -2419,9 +2463,19 @@ public class StoriesController {
 
         private void fill(ArrayList<MessageObject> arrayList, boolean showPhotos, boolean showVideos) {
             tempArr.clear();
+            if (type == TYPE_PINNED) {
+                for (int id : pinnedIds) {
+                    MessageObject msg = messageObjectsMap.get(id);
+                    if (filter(msg, showPhotos, showVideos)) {
+                        tempArr.add(msg);
+                    }
+                }
+            }
             int minId = Integer.MAX_VALUE;
             for (int id : loadedObjects) {
                 MessageObject msg = messageObjectsMap.get(id);
+                if (type == TYPE_PINNED && pinnedIds.contains(id))
+                    continue;
                 if (filter(msg, showPhotos, showVideos)) {
                     tempArr.add(msg);
                 }
@@ -2433,6 +2487,8 @@ public class StoriesController {
                 Iterator<Integer> i = cachedObjects.iterator();
                 while (i.hasNext() && (totalCount == -1 || tempArr.size() < totalCount)) {
                     int id = i.next();
+                    if (type == TYPE_PINNED && pinnedIds.contains(id))
+                        continue;
                     if (minId == Integer.MAX_VALUE || id < minId) {
                         MessageObject msg = messageObjectsMap.get(id);
                         if (filter(msg, showPhotos, showVideos)) {
@@ -2476,6 +2532,7 @@ public class StoriesController {
             final MessagesStorage storage = MessagesStorage.getInstance(currentAccount);
             storage.getStorageQueue().postRunnable(() -> {
                 SQLiteCursor cursor = null;
+                ArrayList<Integer> pins = new ArrayList<>();
                 HashSet<Integer> seen = new HashSet<>();
                 HashSet<Long> loadUserIds = new HashSet<>();
                 HashSet<Long> loadChatIds = new HashSet<>();
@@ -2484,7 +2541,7 @@ public class StoriesController {
                 final ArrayList<TLRPC.Chat> loadedChats = new ArrayList<>();
                 try {
                     SQLiteDatabase database = storage.getDatabase();
-                    cursor = database.queryFinalized(String.format(Locale.US, "SELECT data, seen FROM profile_stories WHERE dialog_id = %d AND type = %d ORDER BY story_id DESC", dialogId, type));
+                    cursor = database.queryFinalized(String.format(Locale.US, "SELECT data, seen, pin FROM profile_stories WHERE dialog_id = %d AND type = %d ORDER BY story_id DESC", dialogId, type));
                     while (cursor.next()) {
                         NativeByteBuffer data = cursor.byteBufferValue(0);
                         if (data != null) {
@@ -2528,6 +2585,10 @@ public class StoriesController {
                             if (cursor.intValue(1) == 1) {
                                 seen.add(storyItem.id);
                             }
+                            int pinIndex = cursor.intValue(2);
+                            if (pinIndex > 0) {
+                                pins.add(Utilities.clamp(pinIndex, pins.size() - 1, 0), storyItem.id);
+                            }
                         }
                     }
                     cursor.dispose();
@@ -2549,6 +2610,10 @@ public class StoriesController {
 
                 AndroidUtilities.runOnUIThread(() -> {
                     FileLog.d("StoriesList "+type+"{"+ dialogId +"} preloadCache {" + storyItemMessageIds(cacheResult) + "}");
+
+                    pinnedIds.clear();
+                    pinnedIds.addAll(pins);
+
                     preloading = false;
                     MessagesController.getInstance(currentAccount).putUsers(loadedUsers, true);
                     MessagesController.getInstance(currentAccount).putChats(loadedChats, true);
@@ -2597,9 +2662,10 @@ public class StoriesController {
                 cachedObjects.remove(storyId);
             }
             loadedObjects.remove(storyId);
+            pinnedIds.remove((Object) storyId);
             if (messageObject != null) {
                 long id = day(messageObject);
-                SortedSet<Integer> group = groupedByDay.get(id);
+                Collection<Integer> group = groupedByDay.get(id);
                 if (group != null) {
                     group.remove(storyId);
                     if (group.isEmpty()) {
@@ -2624,18 +2690,25 @@ public class StoriesController {
             return year * 10000L + month * 100L + day;
         }
 
-        public SortedSet<Integer> getStoryDayGroup(MessageObject messageObject) {
-            return groupedByDay.get(day(messageObject));
-        }
-
         public ArrayList<ArrayList<Integer>> getDays() {
             final ArrayList<Long> keys = new ArrayList<>(groupedByDay.keySet());
             Collections.sort(keys, (a, b) -> (int) (b - a));
             final ArrayList<ArrayList<Integer>> days = new ArrayList<>();
+            if (type == TYPE_PINNED && !pinnedIds.isEmpty()) {
+                days.add(new ArrayList<>(pinnedIds));
+            }
             for (Long key : keys) {
                 TreeSet<Integer> storyIds = groupedByDay.get(key);
                 if (storyIds != null) {
-                    days.add(new ArrayList<>(storyIds));
+                    ArrayList<Integer> ids = new ArrayList<>(storyIds);
+                    if (type == TYPE_PINNED && !pinnedIds.isEmpty()) {
+                        for (int id : pinnedIds) {
+                            ids.remove((Object) id);
+                        }
+                    }
+                    if (!ids.isEmpty()) {
+                        days.add(ids);
+                    }
                 }
             }
             return days;
@@ -2674,6 +2747,7 @@ public class StoriesController {
             saving = true;
 
             final ArrayList<MessageObject> toSave = new ArrayList<>();
+            final ArrayList<Integer> pinnedIds = new ArrayList<>(this.pinnedIds);
             fill(toSave, true, true);
 
             final MessagesStorage storage = MessagesStorage.getInstance(currentAccount);
@@ -2683,7 +2757,7 @@ public class StoriesController {
                 try {
                     SQLiteDatabase database = storage.getDatabase();
                     database.executeFast(String.format(Locale.US, "DELETE FROM profile_stories WHERE dialog_id = %d AND type = %d", dialogId, type)).stepThis().dispose();
-                    state = database.executeFast("REPLACE INTO profile_stories VALUES(?, ?, ?, ?, ?)");
+                    state = database.executeFast("REPLACE INTO profile_stories VALUES(?, ?, ?, ?, ?, ?)");
 
                     for (int i = 0; i < toSave.size(); ++i) {
                         MessageObject messageObject = toSave.get(i);
@@ -2701,6 +2775,7 @@ public class StoriesController {
                         state.bindByteBuffer(3, data);
                         state.bindInteger(4, type);
                         state.bindInteger(5, seenStories.contains(storyItem.id) ? 1 : 0);
+                        state.bindInteger(6, 1 + pinnedIds.indexOf(storyItem.id));
                         state.step();
                         data.reuse();
                     }
@@ -2811,10 +2886,13 @@ public class StoriesController {
                     TL_stories.TL_stories_stories stories = (TL_stories.TL_stories_stories) response;
                     for (int i = 0; i < stories.stories.size(); ++i) {
                         TL_stories.StoryItem storyItem = stories.stories.get(i);
-                        newMessageObjects.add(toMessageObject(storyItem));
+                        newMessageObjects.add(toMessageObject(storyItem, stories));
                     }
                     AndroidUtilities.runOnUIThread(() -> {
                         FileLog.d("StoriesList " + type + "{"+ dialogId +"} loaded {" + storyItemMessageIds(newMessageObjects) + "}");
+
+                        pinnedIds.clear();
+                        pinnedIds.addAll(stories.pinned_to_top);
 
                         MessagesController.getInstance(currentAccount).putUsers(stories.users, false);
                         MessagesController.getInstance(currentAccount).putChats(stories.chats, false);
@@ -2959,7 +3037,7 @@ public class StoriesController {
                         }
                     } else {
                         FileLog.d("StoriesList put story " + storyItem.id);
-                        pushObject(toMessageObject(storyItem), false);
+                        pushObject(toMessageObject(storyItem, null), false);
                         if (totalCount != -1) {
                             totalCount++;
                         }
@@ -2968,7 +3046,7 @@ public class StoriesController {
                     MessageObject messageObject = messageObjectsMap.get(storyItem.id);
                     if (messageObject == null || !equal(messageObject.storyItem, storyItem)) {
                         FileLog.d("StoriesList update story " + storyItem.id);
-                        messageObjectsMap.put(storyItem.id, toMessageObject(storyItem));
+                        messageObjectsMap.put(storyItem.id, toMessageObject(storyItem, null));
                         changed = true;
                     }
                 }
@@ -2998,7 +3076,7 @@ public class StoriesController {
             );
         }
 
-        private MessageObject toMessageObject(TL_stories.StoryItem storyItem) {
+        private MessageObject toMessageObject(TL_stories.StoryItem storyItem, TL_stories.TL_stories_stories stories) {
             storyItem.dialogId = dialogId;
             storyItem.messageId = storyItem.id;
             MessageObject msg = new MessageObject(currentAccount, storyItem);
@@ -3030,6 +3108,86 @@ public class StoriesController {
                 return Math.max(messageObjects.size(), totalCount);
             } else {
                 return messageObjects.size();
+            }
+        }
+
+        public boolean isPinned(int storyId) {
+            if (type != TYPE_PINNED) return false;
+            return pinnedIds.contains(storyId);
+        }
+
+        public boolean updatePinned(ArrayList<Integer> ids, boolean pin) {
+            ArrayList<Integer> newPinnedOrder = new ArrayList<>(pinnedIds);
+            for (int i = ids.size() - 1; i >= 0; --i) {
+                int id = ids.get(i);
+                if (pin && !newPinnedOrder.contains(id))
+                    newPinnedOrder.add(0, id);
+                else if (!pin && newPinnedOrder.contains(id))
+                    newPinnedOrder.remove((Object) id);
+            }
+
+            final int limit = MessagesController.getInstance(currentAccount).storiesPinnedToTopCountMax;
+            boolean hitLimit = newPinnedOrder.size() > limit;
+            if (hitLimit) {
+                return true;
+//                newPinnedOrder.subList(limit, newPinnedOrder.size()).clear();
+            }
+
+            boolean changed = pinnedIds.size() != newPinnedOrder.size();
+            if (!changed) {
+                for (int i = 0; i < pinnedIds.size(); ++i) {
+                    if (pinnedIds.get(i) != newPinnedOrder.get(i)) {
+                        changed = true;
+                        break;
+                    }
+                }
+            }
+
+            if (changed) {
+                pinnedIds.clear();
+                pinnedIds.addAll(newPinnedOrder);
+                fill(true);
+                TL_stories.TL_togglePinnedToTop req = new TL_stories.TL_togglePinnedToTop();
+                req.id.addAll(pinnedIds);
+                req.peer = MessagesController.getInstance(currentAccount).getInputPeer(dialogId);
+                ConnectionsManager.getInstance(currentAccount).sendRequest(req, (res, err) -> AndroidUtilities.runOnUIThread(() -> {
+
+                }));
+            }
+
+            return hitLimit;
+        }
+
+        public void updatePinnedOrder(ArrayList<Integer> ids, boolean apply) {
+            ArrayList<Integer> newPinnedOrder = new ArrayList<>(ids);
+
+            final int limit = MessagesController.getInstance(currentAccount).storiesPinnedToTopCountMax;
+            boolean hitLimit = newPinnedOrder.size() > limit;
+            if (hitLimit) {
+                newPinnedOrder.subList(limit, newPinnedOrder.size()).clear();
+            }
+
+            boolean changed = pinnedIds.size() != newPinnedOrder.size();
+            if (!changed) {
+                for (int i = 0; i < pinnedIds.size(); ++i) {
+                    if (pinnedIds.get(i) != newPinnedOrder.get(i)) {
+                        changed = true;
+                        break;
+                    }
+                }
+            }
+
+            pinnedIds.clear();
+            pinnedIds.addAll(newPinnedOrder);
+            fill(false);
+
+            if (apply) {
+                TL_stories.TL_togglePinnedToTop req = new TL_stories.TL_togglePinnedToTop();
+                req.id.addAll(pinnedIds);
+                req.peer = MessagesController.getInstance(currentAccount).getInputPeer(dialogId);
+                ConnectionsManager.getInstance(currentAccount).sendRequest(req, (res, err) -> AndroidUtilities.runOnUIThread(() -> {
+
+                }));
             }
         }
     }

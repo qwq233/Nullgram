@@ -1,3 +1,22 @@
+/*
+ * Copyright (C) 2019-2024 qwq233 <qwq233@qwq2333.top>
+ * https://github.com/qwq233/Nullgram
+ *
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation; either version 2
+ * of the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along with this software.
+ *  If not, see
+ * <https://www.gnu.org/licenses/>
+ */
+
 package org.telegram.ui.Components;
 
 import static java.lang.annotation.RetentionPolicy.SOURCE;
@@ -623,6 +642,10 @@ public class Bulletin {
             return 0;
         }
 
+        default boolean bottomOffsetAnimated() {
+            return true;
+        }
+
         default int getLeftPadding() {
             return 0;
         }
@@ -871,7 +894,7 @@ public class Bulletin {
         }
 
         public float getBottomOffset() {
-            if (bulletin != null && bulletin.bottomOffsetSpring != null && bulletin.bottomOffsetSpring.isRunning()) {
+            if (bulletin != null && (delegate == null || delegate.bottomOffsetAnimated()) && bulletin.bottomOffsetSpring != null && bulletin.bottomOffsetSpring.isRunning()) {
                 return bulletin.lastBottomOffset;
             }
             return delegate.getBottomOffset(bulletin != null ? bulletin.tag : 0);
@@ -1441,7 +1464,7 @@ public class Bulletin {
             reactionsContainerLayout.setBubbleOffset(-AndroidUtilities.dp(80));
             reactionsContainerLayout.setHint(LocaleController.getString(R.string.SavedTagReactionsHint));
             addView(reactionsContainerLayout, LayoutHelper.createFrame(LayoutHelper.WRAP_CONTENT, 92.5f, Gravity.CENTER_HORIZONTAL, 0, 36, 0, 0));
-            reactionsContainerLayout.setMessage(null, null);
+            reactionsContainerLayout.setMessage(null, null, true);
         }
 
         @Override

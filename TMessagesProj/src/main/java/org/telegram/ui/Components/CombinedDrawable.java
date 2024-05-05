@@ -1,9 +1,20 @@
 /*
- * This is the source code of Telegram for Android v. 5.x.x.
- * It is licensed under GNU GPL v. 2 or later.
- * You should have received a copy of the license in this archive (see LICENSE).
+ * Copyright (C) 2019-2024 qwq233 <qwq233@qwq2333.top>
+ * https://github.com/qwq233/Nullgram
  *
- * Copyright Nikolai Kudashov, 2013-2018.
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation; either version 2
+ * of the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along with this software.
+ *  If not, see
+ * <https://www.gnu.org/licenses/>
  */
 
 package org.telegram.ui.Components;
@@ -11,6 +22,7 @@ package org.telegram.ui.Components;
 import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.ColorFilter;
+import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 
 import androidx.annotation.NonNull;
@@ -25,6 +37,7 @@ public class CombinedDrawable extends Drawable implements Drawable.Callback {
     private int iconHeight;
     private int backWidth;
     private int backHeight;
+    private boolean center;
     private int offsetX;
     private int offsetY;
     private boolean fullSize;
@@ -75,6 +88,10 @@ public class CombinedDrawable extends Drawable implements Drawable.Callback {
     public void setCustomSize(int width, int height) {
         backWidth = width;
         backHeight = height;
+    }
+
+    public void setCenter(boolean value) {
+        center = value;
     }
 
     public void setIconOffset(int x, int y) {
@@ -135,6 +152,15 @@ public class CombinedDrawable extends Drawable implements Drawable.Callback {
 
     @Override
     public void draw(Canvas canvas) {
+        if (center) {
+            Rect bounds = getBounds();
+            setBounds(
+                bounds.centerX() - getIntrinsicWidth() / 2,
+                bounds.centerY() - getIntrinsicHeight() / 2,
+                bounds.centerX() + getIntrinsicWidth() / 2,
+                bounds.centerY() + getIntrinsicHeight() / 2
+            );
+        }
         if (background != null) {
             background.setBounds(getBounds());
             background.draw(canvas);

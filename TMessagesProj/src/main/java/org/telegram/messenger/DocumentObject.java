@@ -1,3 +1,22 @@
+/*
+ * Copyright (C) 2019-2024 qwq233 <qwq233@qwq2333.top>
+ * https://github.com/qwq233/Nullgram
+ *
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation; either version 2
+ * of the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along with this software.
+ *  If not, see
+ * <https://www.gnu.org/licenses/>
+ */
+
 package org.telegram.messenger;
 
 import android.graphics.Paint;
@@ -45,25 +64,40 @@ public class DocumentObject {
         }
     }
 
+    public static boolean containsPhotoSizeType(ArrayList<TLRPC.PhotoSize> sizes, String type) {
+        if (type == null)
+            return false;
+        for (int a = 0, N = sizes.size(); a < N; a++) {
+            TLRPC.PhotoSize photoSize = sizes.get(a);
+            if (type.equalsIgnoreCase(photoSize.type))
+                return true;
+        }
+        return false;
+    }
+
     public static SvgHelper.SvgDrawable getSvgThumb(ArrayList<TLRPC.PhotoSize> sizes, int colorKey, float alpha) {
-        int w = 0;
-        int h = 0;
+        return getSvgThumb(sizes, colorKey, alpha, false);
+    }
+
+    public static SvgHelper.SvgDrawable getSvgThumb(ArrayList<TLRPC.PhotoSize> sizes, int colorKey, float alpha, boolean usePhotoSize) {
+        int w = 512;
+        int h = 512;
         TLRPC.TL_photoPathSize photoPathSize = null;
         for (int a = 0, N = sizes.size(); a < N; a++) {
             TLRPC.PhotoSize photoSize = sizes.get(a);
             if (photoSize instanceof TLRPC.TL_photoPathSize) {
                 photoPathSize = (TLRPC.TL_photoPathSize) photoSize;
-            } else if (photoSize instanceof TLRPC.TL_photoSize) {
+            } else if (photoSize instanceof TLRPC.TL_photoSize && usePhotoSize) {
                 w = photoSize.w;
                 h = photoSize.h;
             }
-            if (photoPathSize != null && w != 0 && h != 0) {
-                SvgHelper.SvgDrawable pathThumb = SvgHelper.getDrawableByPath(photoPathSize.svgPath, w, h);
-                if (pathThumb != null) {
-                    pathThumb.setupGradient(colorKey, alpha, false);
-                }
-                return pathThumb;
+        }
+        if (photoPathSize != null && w != 0 && h != 0) {
+            SvgHelper.SvgDrawable pathThumb = SvgHelper.getDrawableByPath(photoPathSize.svgPath, w, h);
+            if (pathThumb != null) {
+                pathThumb.setupGradient(colorKey, alpha, false);
             }
+            return pathThumb;
         }
         return null;
     }

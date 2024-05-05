@@ -497,7 +497,7 @@ class MessageUtils(num: Int) : BaseController(num) {
             )
         )
         editText.setImeOptions(EditorInfo.IME_ACTION_DONE)
-        editText.setBackgroundDrawable(null)
+        editText.background = null
         editText.requestFocus()
         editText.setPadding(0, 0, 0, 0)
         builder.setView(editText)
@@ -567,7 +567,7 @@ class MessageUtils(num: Int) : BaseController(num) {
     fun getMessagePlainText(messageObject: MessageObject): String {
         val message: String = if (messageObject.isPoll) {
             val poll = (messageObject.messageOwner.media as TLRPC.TL_messageMediaPoll).poll
-            val pollText = StringBuilder(poll.question).append("\n")
+            val pollText = StringBuilder(poll.question.text).append("\n")
             for (answer in poll.answers) {
                 pollText.append("\n\uD83D\uDD18 ")
                 pollText.append(answer.text)
@@ -614,7 +614,6 @@ class MessageUtils(num: Int) : BaseController(num) {
         obj.translated = translated
         if (messageObject.isSponsored) {
             obj.sponsoredId = messageObject.sponsoredId
-            obj.botStartParam = messageObject.botStartParam
         }
         replaceMessagesObject(dialogId, obj)
     }

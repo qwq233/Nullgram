@@ -1,3 +1,22 @@
+/*
+ * Copyright (C) 2019-2024 qwq233 <qwq233@qwq2333.top>
+ * https://github.com/qwq233/Nullgram
+ *
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation; either version 2
+ * of the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along with this software.
+ *  If not, see
+ * <https://www.gnu.org/licenses/>
+ */
+
 package org.telegram.ui.Components;
 
 import static org.telegram.messenger.AndroidUtilities.lerp;
@@ -114,9 +133,9 @@ public class AnimatedTextView extends View {
         private boolean toSetTextMoveDown;
 
         private long animateDelay = 0;
-        private long animateDuration = 450;
+        private long animateDuration = 320;
         private TimeInterpolator animateInterpolator = CubicBezierInterpolator.EASE_OUT_QUINT;
-        private float moveAmplitude = 1f;
+        private float moveAmplitude = .3f;
 
         private float scaleAmplitude = 0;
 
@@ -147,6 +166,8 @@ public class AnimatedTextView extends View {
         private LinearGradient ellipsizeGradient;
         private Matrix ellipsizeGradientMatrix;
         private Paint ellipsizePaint;
+
+        private boolean includeFontPadding = true;
 
         public AnimatedTextDrawable() {
             this(false, false, false);
@@ -313,6 +334,10 @@ public class AnimatedTextView extends View {
         public void setRightPadding(float rightPadding) {
             this.rightPadding = rightPadding;
             invalidateSelf();
+        }
+
+        public float getRightPadding() {
+            return this.rightPadding;
         }
 
         public void cancelAnimation() {
@@ -547,6 +572,7 @@ public class AnimatedTextView extends View {
                         .setAlignment(Layout.Alignment.ALIGN_NORMAL)
                         .setEllipsize(TextUtils.TruncateAt.END)
                         .setEllipsizedWidth(width)
+                        .setIncludePad(includeFontPadding)
                         .build();
             } else {
                 return new StaticLayout(
@@ -557,7 +583,7 @@ public class AnimatedTextView extends View {
                     Layout.Alignment.ALIGN_NORMAL,
                     1,
                     0,
-                    false,
+                    includeFontPadding,
                     TextUtils.TruncateAt.END,
                     width
                 );
@@ -1068,6 +1094,10 @@ public class AnimatedTextView extends View {
         public void setOnWidthUpdatedListener(Runnable listener) {
             widthUpdatedListener = listener;
         }
+
+        public void setIncludeFontPadding(boolean includeFontPadding) {
+            this.includeFontPadding = includeFontPadding;
+        }
     }
 
     private final AnimatedTextDrawable drawable;
@@ -1108,7 +1138,7 @@ public class AnimatedTextView extends View {
         }
         if (lastMaxWidth != width && getLayoutParams().width != 0) {
             drawable.setBounds(getPaddingLeft(), getPaddingTop(), width - getPaddingRight(), height - getPaddingBottom());
-            setText(drawable.getText(), false);
+            drawable.setText(drawable.getText(), false, true);
         }
         lastMaxWidth = width;
         if (adaptWidth && MeasureSpec.getMode(widthMeasureSpec) == MeasureSpec.AT_MOST) {
@@ -1259,8 +1289,16 @@ public class AnimatedTextView extends View {
         drawable.setRightPadding(rightPadding);
     }
 
+    public float getRightPadding() {
+        return drawable.getRightPadding();
+    }
+
     private Runnable widthUpdatedListener;
     public void setOnWidthUpdatedListener(Runnable listener) {
         drawable.setOnWidthUpdatedListener(listener);
+    }
+
+    public void setIncludeFontPadding(boolean includeFontPadding) {
+        this.drawable.setIncludeFontPadding(includeFontPadding);
     }
 }

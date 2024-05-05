@@ -1,9 +1,20 @@
 /*
- * This is the source code of Telegram for Android v. 5.x.x.
- * It is licensed under GNU GPL v. 2 or later.
- * You should have received a copy of the license in this archive (see LICENSE).
+ * Copyright (C) 2019-2024 qwq233 <qwq233@qwq2333.top>
+ * https://github.com/qwq233/Nullgram
  *
- * Copyright Nikolai Kudashov, 2013-2018.
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation; either version 2
+ * of the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along with this software.
+ *  If not, see
+ * <https://www.gnu.org/licenses/>
  */
 
 package org.telegram.ui.Components;
@@ -23,17 +34,14 @@ import android.graphics.Shader;
 import android.graphics.drawable.Animatable;
 import android.graphics.drawable.BitmapDrawable;
 import android.os.Build;
-import android.util.Log;
 import android.view.View;
 
 import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.AnimatedFileDrawableStream;
-import org.telegram.messenger.BuildVars;
 import org.telegram.messenger.DispatchQueue;
 import org.telegram.messenger.DispatchQueuePoolBackground;
 import org.telegram.messenger.FileLoader;
 import org.telegram.messenger.FileLog;
-import org.telegram.messenger.ImageLoader;
 import org.telegram.messenger.ImageLocation;
 import org.telegram.messenger.ImageReceiver;
 import org.telegram.messenger.SharedConfig;
@@ -145,6 +153,7 @@ public class AnimatedFileDrawable extends BitmapDrawable implements Animatable, 
     private volatile boolean isRunning;
     private volatile boolean isRecycled;
     public volatile long nativePtr;
+    private boolean ptrFail;
     private DispatchQueue decodeQueue;
     private float startTime;
     private float endTime;
@@ -356,18 +365,20 @@ public class AnimatedFileDrawable extends BitmapDrawable implements Animatable, 
     }
 
     private int decoderTryCount = 0;
+    private final int MAX_TRIES = 15;
     private Runnable loadFrameRunnable = new Runnable() {
         @Override
         public void run() {
             if (!isRecycled) {
                 if (!decoderCreated && nativePtr == 0) {
                     nativePtr = createDecoder(path.getAbsolutePath(), metaData, currentAccount, streamFileSize, stream, false);
+                    ptrFail = nativePtr == 0 && (!isWebmSticker || decoderTryCount > MAX_TRIES);
                     if (nativePtr != 0 && (metaData[0] > 3840 || metaData[1] > 3840)) {
                         destroyDecoder(nativePtr);
                         nativePtr = 0;
                     }
                     updateScaleFactor();
-                    decoderCreated = !isWebmSticker || nativePtr != 0 || (decoderTryCount++) > 15;
+                    decoderCreated = !isWebmSticker || nativePtr != 0 || (decoderTryCount++) > MAX_TRIES;
                 }
                 try {
                     if (bitmapsCache != null) {
@@ -502,6 +513,7 @@ public class AnimatedFileDrawable extends BitmapDrawable implements Animatable, 
         }
         if (createDecoder && !this.precache) {
             nativePtr = createDecoder(file.getAbsolutePath(), metaData, currentAccount, streamFileSize, stream, preview);
+            ptrFail = nativePtr == 0 && (!isWebmSticker || decoderTryCount > MAX_TRIES);
             if (nativePtr != 0 && (metaData[0] > 3840 || metaData[1] > 3840)) {
                 destroyDecoder(nativePtr);
                 nativePtr = 0;
@@ -511,6 +523,7 @@ public class AnimatedFileDrawable extends BitmapDrawable implements Animatable, 
         }
         if (this.precache) {
             nativePtr = createDecoder(file.getAbsolutePath(), metaData, currentAccount, streamFileSize, stream, preview);
+            ptrFail = nativePtr == 0 && (!isWebmSticker || decoderTryCount > MAX_TRIES);
             if (nativePtr != 0 && (metaData[0] > 3840 || metaData[1] > 3840)) {
                 destroyDecoder(nativePtr);
                 nativePtr = 0;
@@ -1090,7 +1103,11 @@ public class AnimatedFileDrawable extends BitmapDrawable implements Animatable, 
     }
 
     public boolean isRecycled() {
-        return isRecycled || decoderTryCount >= 15;
+        return isRecycled || decoderTryCount >= MAX_TRIES;
+    }
+
+    public boolean decoderFailed() {
+        return decoderCreated && ptrFail;
     }
 
     public Bitmap getNextFrame(boolean loop) {

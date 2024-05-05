@@ -1,3 +1,22 @@
+/*
+ * Copyright (C) 2019-2024 qwq233 <qwq233@qwq2333.top>
+ * https://github.com/qwq233/Nullgram
+ *
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation; either version 2
+ * of the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along with this software.
+ *  If not, see
+ * <https://www.gnu.org/licenses/>
+ */
+
 package org.telegram.ui.Components;
 
 import static org.telegram.messenger.AndroidUtilities.dp;
@@ -21,7 +40,6 @@ import android.graphics.RectF;
 import android.graphics.Shader;
 import android.text.SpannableString;
 import android.text.SpannableStringBuilder;
-import android.util.Log;
 import android.view.Gravity;
 import android.view.MotionEvent;
 import android.view.View;
@@ -46,7 +64,7 @@ public class CacheChart extends View {
     private RectF chartBounds = new RectF();
     private RectF chartInnerBounds = new RectF();
 
-    private static final int DEFAULT_SECTIONS_COUNT = 10;
+    private static final int DEFAULT_SECTIONS_COUNT = 11;
     private static final int[] DEFAULT_COLORS = new int[] {
         Theme.key_statisticChartLine_lightblue,
         Theme.key_statisticChartLine_blue,
@@ -57,6 +75,7 @@ public class CacheChart extends View {
         Theme.key_statisticChartLine_orange,
         Theme.key_statisticChartLine_cyan,
         Theme.key_statisticChartLine_purple,
+        Theme.key_statisticChartLine_golden,
         Theme.key_statisticChartLine_golden
     };
 
@@ -70,7 +89,8 @@ public class CacheChart extends View {
         R.raw.cache_stickers,
         R.raw.cache_profile_photos,
         R.raw.cache_other,
-        R.raw.cache_other
+        R.raw.cache_other,
+        R.raw.cache_documents
     };
 
     private final int sectionsCount;

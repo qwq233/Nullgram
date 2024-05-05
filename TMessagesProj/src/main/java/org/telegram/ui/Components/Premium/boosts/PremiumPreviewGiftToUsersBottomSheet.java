@@ -1,3 +1,22 @@
+/*
+ * Copyright (C) 2019-2024 qwq233 <qwq233@qwq2333.top>
+ * https://github.com/qwq233/Nullgram
+ *
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation; either version 2
+ * of the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along with this software.
+ *  If not, see
+ * <https://www.gnu.org/licenses/>
+ */
+
 package org.telegram.ui.Components.Premium.boosts;
 
 import static org.telegram.messenger.AndroidUtilities.dp;
@@ -41,10 +60,10 @@ import org.telegram.ui.Components.ColoredImageSpan;
 import org.telegram.ui.Components.LayoutHelper;
 import org.telegram.ui.Components.Premium.PremiumGradient;
 import org.telegram.ui.Components.Premium.PremiumPreviewBottomSheet;
-import org.telegram.ui.Components.Premium.StarParticlesView;
 import org.telegram.ui.Components.Premium.boosts.cells.DurationWithDiscountCell;
 import org.telegram.ui.Components.Premium.boosts.cells.selector.SelectorBtnCell;
 import org.telegram.ui.LaunchActivity;
+import org.telegram.ui.PremiumPreviewFragment;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -101,12 +120,13 @@ public class PremiumPreviewGiftToUsersBottomSheet extends PremiumPreviewBottomSh
     @Override
     public void setTitle(boolean animated) {
         titleView[0].setTextSize(TypedValue.COMPLEX_UNIT_DIP, 20);
-        subtitleView.setPadding(dp(30), 0, dp(30), 0);
-        subtitleView.setLineSpacing(AndroidUtilities.dp(2), 1f);
-        titleView[0].setText(getString("GiftTelegramPremiumTitle", R.string.GiftTelegramPremiumTitle));
         ((ViewGroup.MarginLayoutParams) subtitleView.getLayoutParams()).bottomMargin = dp(16);
         ((ViewGroup.MarginLayoutParams) subtitleView.getLayoutParams()).topMargin = dp(4f);
 
+        subtitleView.setPadding(dp(30), 0, dp(30), 0);
+        subtitleView.setLineSpacing(AndroidUtilities.dp(2), 1f);
+
+        titleView[0].setText(getString("GiftTelegramPremiumTitle", R.string.GiftTelegramPremiumTitle));
         String subTitle;
         switch (selectedUsers.size()) {
             case 1: {
@@ -220,7 +240,7 @@ public class PremiumPreviewGiftToUsersBottomSheet extends PremiumPreviewBottomSh
         TLRPC.TL_premiumGiftCodeOption giftCodeOption = getSelectedOption();
         String priceStr = BillingController.getInstance().formatCurrency(giftCodeOption.amount, giftCodeOption.currency);
         if (selectedUsers.size() == 1) {
-            actionBtn.setText(formatString("GiftSubscriptionFor", R.string.GiftSubscriptionFor, priceStr), animated);
+            actionBtn.setText(formatString(R.string.GiftSubscriptionFor, priceStr), animated);
         } else {
             actionBtn.setText(formatPluralString("GiftSubscriptionCountFor", selectedUsers.size(), priceStr), animated);
         }
@@ -251,21 +271,31 @@ public class PremiumPreviewGiftToUsersBottomSheet extends PremiumPreviewBottomSh
                 return;
             }
             actionBtn.setLoading(true);
-            BoostRepository.payGiftCode(new ArrayList<>(selectedUsers), getSelectedOption(), null, getBaseFragment(), result -> {
-                dismiss();
-                NotificationCenter.getInstance(UserConfig.selectedAccount).postNotificationName(NotificationCenter.giftsToUserSent);
-                AndroidUtilities.runOnUIThread(() -> PremiumPreviewGiftSentBottomSheet.show(selectedUsers), 250);
-            }, error -> {
-                actionBtn.setLoading(false);
-                BoostDialogs.showToastError(getContext(), error);
-            });
+            if (isSelf()) {
+                PremiumPreviewFragment.buyPremium(getBaseFragment(), "grace_period");
+            } else {
+                BoostRepository.payGiftCode(new ArrayList<>(selectedUsers), getSelectedOption(), null, getBaseFragment(), result -> {
+                    dismiss();
+                    NotificationCenter.getInstance(UserConfig.selectedAccount).postNotificationName(NotificationCenter.giftsToUserSent);
+                    AndroidUtilities.runOnUIThread(() -> PremiumPreviewGiftSentBottomSheet.show(selectedUsers), 250);
+                }, error -> {
+                    actionBtn.setLoading(false);
+                    BoostDialogs.showToastError(getContext(), error);
+                });
+            }
         });
         buttonContainer.addView(actionBtn, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, 48, Gravity.BOTTOM | Gravity.FILL_HORIZONTAL));
         containerView.addView(buttonContainer, LayoutHelper.createFrameMarginPx(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT, Gravity.BOTTOM | Gravity.FILL_HORIZONTAL, backgroundPaddingLeft, 0, backgroundPaddingLeft, 0));
 
-        overrideTitleIcon = AvatarHolderView.createAvatarsContainer(getContext(), selectedUsers);
+        if (!isSelf()) {
+            overrideTitleIcon = AvatarHolderView.createAvatarsContainer(getContext(), selectedUsers);
+        }
         updateActionButton(false);
         fixNavigationBar();
+    }
+
+    public boolean isSelf() {
+        return selectedUsers.size() == 1 && selectedUsers.get(0) != null && selectedUsers.get(0).id == UserConfig.getInstance(getCurrentAccount()).getClientUserId();
     }
 
     protected void afterCellCreated(int viewType, View view) {

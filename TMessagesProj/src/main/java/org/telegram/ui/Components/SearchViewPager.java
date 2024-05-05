@@ -45,6 +45,8 @@ import org.telegram.messenger.DialogObject;
 import org.telegram.messenger.LocaleController;
 import org.telegram.messenger.MediaController;
 import org.telegram.messenger.MessageObject;
+import org.telegram.messenger.MessagesController;
+import org.telegram.messenger.NotificationCenter;
 import org.telegram.messenger.R;
 import org.telegram.messenger.SendMessagesHelper;
 import org.telegram.messenger.UserConfig;
@@ -78,7 +80,7 @@ import java.util.Set;
 import top.qwq2333.nullgram.config.ConfigManager;
 import top.qwq2333.nullgram.utils.Defines;
 
-public class SearchViewPager extends ViewPagerFixed implements FilteredSearchView.UiCallback {
+public class SearchViewPager extends ViewPagerFixed implements FilteredSearchView.UiCallback, NotificationCenter.NotificationCenterDelegate {
 
     protected final ViewPagerAdapter viewPagerAdapter;
     public FrameLayout searchContainer;
@@ -89,6 +91,13 @@ public class SearchViewPager extends ViewPagerFixed implements FilteredSearchVie
     private LinearLayoutManager searchLayoutManager;
     private RecyclerItemsEnterAnimator itemsEnterAnimator;
     private boolean attached;
+
+    private DefaultItemAnimator channelsItemAnimator;
+    public FrameLayout channelsSearchContainer;
+    public StickerEmptyView channelsEmptyView;
+    private LinearLayoutManager channelsSearchLayoutManager;
+    public RecyclerListView channelsSearchListView;
+    public DialogsChannelsAdapter channelsSearchAdapter;
 
     private NumberTextView selectedMessagesCountTextView;
     private boolean isActionModeShowed;
@@ -237,8 +246,6 @@ public class SearchViewPager extends ViewPagerFixed implements FilteredSearchVie
         noMediaFiltersSearchView.setVisibility(View.GONE);
         noMediaFiltersSearchView.setChatPreviewDelegate(chatPreviewDelegate);
 
-        searchContainer = new FrameLayout(context);
-
         FlickerLoadingView loadingView = new FlickerLoadingView(context);
         loadingView.setViewType(1);
         emptyView = new StickerEmptyView(context, loadingView, StickerEmptyView.STICKER_TYPE_SEARCH) {
@@ -257,6 +264,7 @@ public class SearchViewPager extends ViewPagerFixed implements FilteredSearchVie
         emptyView.addView(loadingView, 0);
         emptyView.showProgress(true, false);
 
+        searchContainer = new FrameLayout(context);
         searchContainer.addView(emptyView);
         searchContainer.addView(searchListView);
         searchContainer.addView(noMediaFiltersSearchView);
@@ -266,6 +274,82 @@ public class SearchViewPager extends ViewPagerFixed implements FilteredSearchVie
             public void onScrolled(@NonNull RecyclerView recyclerView, int dx, int dy) {
                 super.onScrolled(recyclerView, dx, dy);
                 fragmentView.invalidateBlur();
+            }
+        });
+
+        channelsSearchContainer = new FrameLayout(context);
+
+        channelsItemAnimator = new DefaultItemAnimator() {
+            @Override
+            protected void onMoveAnimationUpdate(RecyclerView.ViewHolder holder) {
+                super.onMoveAnimationUpdate(holder);
+                invalidate();
+            }
+        };
+        channelsItemAnimator.setSupportsChangeAnimations(false);
+        channelsItemAnimator.setDelayAnimations(false);
+        channelsItemAnimator.setInterpolator(CubicBezierInterpolator.EASE_OUT_QUINT);
+        channelsItemAnimator.setDurations(350);
+
+        channelsSearchListView = new BlurredRecyclerView(context);
+        channelsSearchListView.setItemAnimator(channelsItemAnimator);
+        channelsSearchListView.setPivotY(0);
+        channelsSearchListView.setVerticalScrollBarEnabled(true);
+        channelsSearchListView.setInstantClick(true);
+        channelsSearchListView.setVerticalScrollbarPosition(LocaleController.isRTL ? RecyclerListView.SCROLLBAR_POSITION_LEFT : RecyclerListView.SCROLLBAR_POSITION_RIGHT);
+        channelsSearchListView.setLayoutManager(channelsSearchLayoutManager = new LinearLayoutManager(context, LinearLayoutManager.VERTICAL, false));
+        channelsSearchListView.setAnimateEmptyView(true, RecyclerListView.EMPTY_VIEW_ANIMATION_TYPE_ALPHA);
+
+        loadingView = new FlickerLoadingView(context);
+        loadingView.setViewType(1);
+        channelsEmptyView = new StickerEmptyView(context, loadingView, StickerEmptyView.STICKER_TYPE_SEARCH) {
+            @Override
+            public void setVisibility(int visibility) {
+                if (noMediaFiltersSearchView.getTag() != null) {
+                    super.setVisibility(View.GONE);
+                    return;
+                }
+                super.setVisibility(visibility);
+            }
+        };
+        channelsEmptyView.title.setText(LocaleController.getString("NoResult", R.string.NoResult));
+        channelsEmptyView.subtitle.setVisibility(View.GONE);
+        channelsEmptyView.setVisibility(View.GONE);
+        channelsEmptyView.addView(loadingView, 0);
+        channelsEmptyView.showProgress(true, false);
+        channelsSearchContainer.addView(channelsEmptyView);
+        channelsSearchContainer.addView(channelsSearchListView);
+        channelsSearchListView.setEmptyView(channelsEmptyView);
+        channelsSearchListView.setAdapter(channelsSearchAdapter = new DialogsChannelsAdapter(channelsSearchListView, context, currentAccount, folderId, null) {
+            @Override
+            public void update(boolean animated) {
+                super.update(animated);
+                channelsEmptyView.showProgress(loadingMessages || loadingChannels || messages == null || !messages.isEmpty() || searchMyChannels == null || !searchMyChannels.isEmpty() || searchChannels == null || !searchChannels.isEmpty() || searchRecommendedChannels == null || !searchRecommendedChannels.isEmpty(), animated);
+                if (TextUtils.isEmpty(query)) {
+                    channelsEmptyView.title.setText(LocaleController.getString(R.string.NoChannelsTitle));
+                    channelsEmptyView.subtitle.setVisibility(View.VISIBLE);
+                    channelsEmptyView.subtitle.setText(LocaleController.getString(R.string.NoChannelsMessage));
+                } else {
+                    channelsEmptyView.title.setText(LocaleController.getString("NoResult", R.string.NoResult));
+                    channelsEmptyView.subtitle.setVisibility(View.GONE);
+                }
+            }
+
+            @Override
+            protected void hideKeyboard() {
+                AndroidUtilities.hideKeyboard(fragment.getParentActivity().getCurrentFocus());
+            }
+        });
+        channelsSearchListView.setOnScrollListener(new RecyclerView.OnScrollListener() {
+            @Override
+            public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
+                if (newState == RecyclerView.SCROLL_STATE_DRAGGING) {
+                    AndroidUtilities.hideKeyboard(fragment.getParentActivity().getCurrentFocus());
+                }
+            }
+            @Override
+            public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
+                channelsSearchAdapter.checkBottom();
             }
         });
 
@@ -325,7 +409,11 @@ public class SearchViewPager extends ViewPagerFixed implements FilteredSearchVie
             }
         }
 
-        if (view == searchContainer) {
+        if (view == channelsSearchContainer) {
+            MessagesController.getInstance(currentAccount).getChannelRecommendations(0);
+            channelsSearchAdapter.search(query);
+            channelsEmptyView.setKeyboardHeight(keyboardSize, false);
+        } else if (view == searchContainer) {
             if (dialogId == 0 && minDate == 0 && maxDate == 0 || forumDialogId != 0) {
                 lastSearchScrolledToTop = false;
                 dialogsSearchAdapter.searchDialogs(query, includeFolder ? 1 : 0);
@@ -790,6 +878,9 @@ public class SearchViewPager extends ViewPagerFixed implements FilteredSearchVie
         if (dialogsSearchAdapter.getItemCount() > 0) {
             searchLayoutManager.scrollToPositionWithOffset(0, 0);
         }
+        if (channelsSearchLayoutManager != null) {
+            channelsSearchLayoutManager.scrollToPositionWithOffset(0, 0);
+        }
         viewsByType.clear();
     }
 
@@ -816,6 +907,8 @@ public class SearchViewPager extends ViewPagerFixed implements FilteredSearchVie
                 noMediaFiltersSearchView.setKeyboardHeight(keyboardSize, animated);
             } else if (getChildAt(i) instanceof SearchDownloadsContainer) {
                 ((SearchDownloadsContainer) getChildAt(i)).setKeyboardHeight(keyboardSize, animated);
+            } else if (getChildAt(i) == channelsSearchContainer) {
+                channelsEmptyView.setKeyboardHeight(keyboardSize, animated);
             }
         }
     }
@@ -883,13 +976,35 @@ public class SearchViewPager extends ViewPagerFixed implements FilteredSearchVie
     @Override
     protected void onAttachedToWindow() {
         super.onAttachedToWindow();
+        NotificationCenter.getInstance(currentAccount).addObserver(this, NotificationCenter.channelRecommendationsLoaded);
+        NotificationCenter.getInstance(currentAccount).addObserver(this, NotificationCenter.dialogDeleted);
+        NotificationCenter.getInstance(currentAccount).addObserver(this, NotificationCenter.dialogsNeedReload);
         attached = true;
+
+        if (channelsSearchAdapter != null) {
+            channelsSearchAdapter.update(false);
+        }
     }
 
     @Override
     protected void onDetachedFromWindow() {
         super.onDetachedFromWindow();
         attached = false;
+        NotificationCenter.getInstance(currentAccount).removeObserver(this, NotificationCenter.channelRecommendationsLoaded);
+        NotificationCenter.getInstance(currentAccount).removeObserver(this, NotificationCenter.dialogDeleted);
+        NotificationCenter.getInstance(currentAccount).removeObserver(this, NotificationCenter.dialogsNeedReload);
+    }
+
+    @Override
+    public void didReceivedNotification(int id, int account, Object... args) {
+        if (id == NotificationCenter.channelRecommendationsLoaded) {
+            channelsEmptyView.showProgress(MessagesController.getInstance(currentAccount).getChannelRecommendations(0) != null, true);
+            channelsSearchAdapter.updateMyChannels();
+            channelsSearchAdapter.update(true);
+        } else if (id == NotificationCenter.dialogDeleted || id == NotificationCenter.dialogsNeedReload) {
+            channelsSearchAdapter.updateMyChannels();
+            channelsSearchAdapter.update(true);
+        }
     }
 
     @Override
@@ -904,7 +1019,7 @@ public class SearchViewPager extends ViewPagerFixed implements FilteredSearchVie
     }
 
     public void showDownloads() {
-        setPosition(2);
+        setPosition(3);
     }
 
     public int getPositionForType(int initialSearchType) {
@@ -921,8 +1036,9 @@ public class SearchViewPager extends ViewPagerFixed implements FilteredSearchVie
         ArrayList<Item> items = new ArrayList<>();
 
         private final static int DIALOGS_TYPE = 0;
-        private final static int DOWNLOADS_TYPE = 1;
-        private final static int FILTER_TYPE = 2;
+        private final static int CHANNELS_TYPE = 1;
+        private final static int DOWNLOADS_TYPE = 2;
+        private final static int FILTER_TYPE = 3;
 
         public ViewPagerAdapter() {
             updateItems();
@@ -931,6 +1047,7 @@ public class SearchViewPager extends ViewPagerFixed implements FilteredSearchVie
         public void updateItems() {
             items.clear();
             items.add(new Item(DIALOGS_TYPE));
+            items.add(new Item(CHANNELS_TYPE));
             if (!showOnlyDialogsAdapter) {
                 Item item = new Item(FILTER_TYPE);
                 item.filterIndex = 0;
@@ -956,9 +1073,11 @@ public class SearchViewPager extends ViewPagerFixed implements FilteredSearchVie
         @Override
         public String getItemTitle(int position) {
             if (items.get(position).type == DIALOGS_TYPE) {
-                return LocaleController.getString("SearchAllChatsShort", R.string.SearchAllChatsShort);
+                return LocaleController.getString(R.string.SearchAllChatsShort);
+            } else if (items.get(position).type == CHANNELS_TYPE) {
+                return LocaleController.getString(R.string.ChannelsTab);
             } else if (items.get(position).type == DOWNLOADS_TYPE) {
-                return LocaleController.getString("DownloadsTabs", R.string.DownloadsTabs);
+                return LocaleController.getString(R.string.DownloadsTabs);
             } else {
                 return FiltersView.filters[items.get(position).filterIndex].getTitle();
             }
@@ -973,6 +1092,8 @@ public class SearchViewPager extends ViewPagerFixed implements FilteredSearchVie
         public View createView(int viewType) {
             if (viewType == 1) {
                 return searchContainer;
+            } else if (viewType == 3) {
+                return channelsSearchContainer;
             } else if (viewType == 2) {
                 downloadsContainer = new SearchDownloadsContainer(parent, currentAccount);
                 downloadsContainer.recyclerListView.addOnScrollListener(new RecyclerView.OnScrollListener() {
@@ -1003,6 +1124,9 @@ public class SearchViewPager extends ViewPagerFixed implements FilteredSearchVie
         public int getItemViewType(int position) {
             if (items.get(position).type == DIALOGS_TYPE) {
                 return 1;
+            }
+            if (items.get(position).type == CHANNELS_TYPE) {
+                return 3;
             }
             if (items.get(position).type == DOWNLOADS_TYPE) {
                 return 2;

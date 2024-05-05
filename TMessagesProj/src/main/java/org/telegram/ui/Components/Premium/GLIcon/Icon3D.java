@@ -1,3 +1,22 @@
+/*
+ * Copyright (C) 2019-2024 qwq233 <qwq233@qwq2333.top>
+ * https://github.com/qwq233/Nullgram
+ *
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation; either version 2
+ * of the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along with this software.
+ *  If not, see
+ * <https://www.gnu.org/licenses/>
+ */
+
 package org.telegram.ui.Components.Premium.GLIcon;
 
 import android.content.Context;
@@ -11,13 +30,11 @@ import android.graphics.Paint;
 import android.graphics.Shader;
 import android.opengl.GLES20;
 import android.opengl.GLUtils;
-import android.util.Log;
 
 import org.telegram.messenger.R;
 import org.telegram.messenger.SvgHelper;
 import org.telegram.messenger.Utilities;
 import org.telegram.ui.ActionBar.Theme;
-import org.telegram.ui.Components.RLottieDrawable;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -88,7 +105,8 @@ public class Icon3D {
     private static final String[] coinModel = new String[] {
         "models/coin_outer.binobj",
         "models/coin_inner.binobj",
-        "models/coin_logo.binobj"
+        "models/coin_logo.binobj",
+        "models/coin_stars.binobj"
     };
 
     public Icon3D(Context context, int type) {

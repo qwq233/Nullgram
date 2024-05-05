@@ -1,3 +1,22 @@
+/*
+ * Copyright (C) 2019-2024 qwq233 <qwq233@qwq2333.top>
+ * https://github.com/qwq233/Nullgram
+ *
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation; either version 2
+ * of the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along with this software.
+ *  If not, see
+ * <https://www.gnu.org/licenses/>
+ */
+
 package org.telegram.ui.Components.Paint;
 
 import static com.google.zxing.common.detector.MathUtils.distance;
@@ -74,7 +93,7 @@ public class Input {
 
     private ValueAnimator fillAnimator;
     private void fill(Brush brush, boolean registerUndo, Runnable onDone) {
-        if (!canFill || lastLocation == null) {
+        if (!canFill || renderView.getPainting().masking || lastLocation == null) {
             return;
         }
 
@@ -245,11 +264,13 @@ public class Input {
                     }
 
                     points[pointsCount] = location;
-                    if ((System.currentTimeMillis() - drawingStart) > 3000) {
-                        detector.clear();
-                        renderView.getPainting().setHelperShape(null);
-                    } else if (renderView.getCurrentBrush() instanceof Brush.Radial || renderView.getCurrentBrush() instanceof Brush.Elliptical) {
-                        detector.append(location.x, location.y, distance > AndroidUtilities.dp(6) / scale);
+                    if (renderView.getPainting() == null || !renderView.getPainting().masking) {
+                        if ((System.currentTimeMillis() - drawingStart) > 3000) {
+                            detector.clear();
+                            renderView.getPainting().setHelperShape(null);
+                        } else if (renderView.getCurrentBrush() instanceof Brush.Radial || renderView.getCurrentBrush() instanceof Brush.Elliptical) {
+                            detector.append(location.x, location.y, distance > AndroidUtilities.dp(6) / scale);
+                        }
                     }
                     pointsCount++;
                     realPointsCount++;
@@ -337,9 +358,7 @@ public class Input {
                             arrowAnimator.addListener(new AnimatorListenerAdapter() {
                                 @Override
                                 public void onAnimationEnd(Animator animation) {
-                                    if (!renderView.getCurrentBrush().isEraser() || renderView.getUndoStore().canUndo()) {
-                                        renderView.getPainting().commitPath(null, renderView.getCurrentColor());
-                                    }
+                                    renderView.getPainting().commitPath(null, renderView.getCurrentColor());
                                     arrowAnimator = null;
                                 }
                             });
@@ -349,7 +368,7 @@ public class Input {
                         }
                     }
 
-                    if (commit && (!renderView.getCurrentBrush().isEraser() || renderView.getUndoStore().canUndo())) {
+                    if (commit) {
                         renderView.getPainting().commitPath(null, renderView.getCurrentColor(), true, () -> {
                             if (switchedBrushByStylusFrom != null) {
                                 renderView.selectBrush(switchedBrushByStylusFrom);

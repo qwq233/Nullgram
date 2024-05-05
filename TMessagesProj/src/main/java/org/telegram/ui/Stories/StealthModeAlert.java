@@ -1,3 +1,22 @@
+/*
+ * Copyright (C) 2019-2024 qwq233 <qwq233@qwq2333.top>
+ * https://github.com/qwq233/Nullgram
+ *
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation; either version 2
+ * of the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along with this software.
+ *  If not, see
+ * <https://www.gnu.org/licenses/>
+ */
+
 package org.telegram.ui.Stories;
 
 import android.content.Context;
@@ -39,11 +58,21 @@ import java.util.Locale;
 
 public class StealthModeAlert extends BottomSheet {
 
-    private final PremiumButtonView button;
-    boolean stealthModeIsActive;
+    public interface Listener {
+        void onButtonClicked(boolean isStealthModeEnabled);
+    }
 
-    public StealthModeAlert(Context context, float topOffset, Theme.ResourcesProvider resourcesProvider) {
+    public static final int TYPE_FROM_STORIES = 0;
+    public static final int TYPE_FROM_DIALOGS = 1;
+
+    private final PremiumButtonView button;
+    private boolean stealthModeIsActive;
+    private int type;
+    private Listener listener;
+
+    public StealthModeAlert(Context context, float topOffset, int type, Theme.ResourcesProvider resourcesProvider) {
         super(context, false, resourcesProvider);
+        this.type = type;
         FrameLayout frameLayout = new FrameLayout(getContext()) {
             @Override
             protected void onAttachedToWindow() {
@@ -142,6 +171,9 @@ public class StealthModeAlert extends BottomSheet {
             } else {
                 if (stealthModeIsActive) {
                     dismiss();
+                    if (listener != null) {
+                        listener.onButtonClicked(false);
+                    }
                     return;
                 }
                 StoriesController storiesController = MessagesController.getInstance(currentAccount).getStoriesController();
@@ -160,9 +192,17 @@ public class StealthModeAlert extends BottomSheet {
                     }));
                     containerView.performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP);
                     dismiss();
-                    showStealthModeEnabledBulletin();
+                    if (type == TYPE_FROM_STORIES) {
+                        showStealthModeEnabledBulletin();
+                    }
+                    if (listener != null) {
+                        listener.onButtonClicked(true);
+                    }
                 } else if (stealthModeIsActive) {
                     dismiss();
+                    if (listener != null) {
+                        listener.onButtonClicked(false);
+                    }
                 } else {
                     BulletinFactory factory = BulletinFactory.of(container, resourcesProvider);
                     if (factory != null) {
@@ -173,6 +213,10 @@ public class StealthModeAlert extends BottomSheet {
                 }
             }
         });
+    }
+
+    public void setListener(Listener listener) {
+        this.listener = listener;
     }
 
     public static void showStealthModeEnabledBulletin() {
@@ -205,7 +249,11 @@ public class StealthModeAlert extends BottomSheet {
             button.setOverlayText(LocaleController.getString("StealthModeIsActive", R.string.StealthModeIsActive), true, animated);
             button.overlayTextView.setTextColor(Theme.getColor(Theme.key_featuredStickers_buttonText));
         } else if (stealthMode == null || ConnectionsManager.getInstance(currentAccount).getCurrentTime() > stealthMode.cooldown_until_date) {
-            button.setOverlayText(LocaleController.getString("EnableStealthMode", R.string.EnableStealthMode), true, animated);
+            if (type == TYPE_FROM_STORIES) {
+                button.setOverlayText(LocaleController.getString("EnableStealthMode", R.string.EnableStealthMode), true, animated);
+            } else if (type == TYPE_FROM_DIALOGS) {
+                button.setOverlayText(LocaleController.getString(R.string.EnableStealthModeAndOpenStory), true, animated);
+            }
             button.overlayTextView.setTextColor(Theme.getColor(Theme.key_featuredStickers_buttonText));
         } else {
             long timeLeft = stealthMode.cooldown_until_date - ConnectionsManager.getInstance(currentAccount).getCurrentTime();

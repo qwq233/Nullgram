@@ -1,26 +1,40 @@
+/*
+ * Copyright (C) 2019-2024 qwq233 <qwq233@qwq2333.top>
+ * https://github.com/qwq233/Nullgram
+ *
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation; either version 2
+ * of the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along with this software.
+ *  If not, see
+ * <https://www.gnu.org/licenses/>
+ */
+
 package org.telegram.ui;
 
 import static org.telegram.messenger.AndroidUtilities.dp;
 
-import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.PointF;
-import android.graphics.drawable.Drawable;
 import android.view.View;
 import android.widget.TextView;
 
 import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.BirthdayController;
-import org.telegram.messenger.BuildVars;
 import org.telegram.messenger.FileLog;
 import org.telegram.messenger.ImageLocation;
 import org.telegram.messenger.ImageReceiver;
 import org.telegram.messenger.LiteMode;
 import org.telegram.messenger.MediaDataController;
-import org.telegram.messenger.MessagesController;
 import org.telegram.messenger.Utilities;
 import org.telegram.tgnet.TLRPC;
-import org.telegram.ui.ActionBar.Theme;
 import org.telegram.ui.Cells.TextDetailCell;
 import org.telegram.ui.Components.CubicBezierInterpolator;
 import org.telegram.ui.Components.RLottieDrawable;
@@ -233,7 +247,7 @@ public class ProfileBirthdayEffect extends View {
                 return null;
             }
             final int age;
-            if ((userInfo.birthday.flags & 1) != 0) {
+            if (userInfo != null && userInfo.birthday != null && (userInfo.birthday.flags & 1) != 0) {
                 age = Period.between(LocalDate.of(userInfo.birthday.year, userInfo.birthday.month, userInfo.birthday.day), LocalDate.now()).getYears();
             } else {
                 age = 0;

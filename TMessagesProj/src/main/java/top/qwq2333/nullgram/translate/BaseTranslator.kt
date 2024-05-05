@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019-2023 qwq233 <qwq233@qwq2333.top>
+ * Copyright (C) 2019-2024 qwq233 <qwq233@qwq2333.top>
  * https://github.com/qwq233/Nullgram
  *
  * This program is free software; you can redistribute it and/or
@@ -177,8 +177,8 @@ abstract class BaseTranslator {
                 }
 
                 // Translate question
-                val translatedQuestion = doTranslateText(source.question, from, to)
-                translatedPoll.question = if (translatedQuestion.error == null) {
+                val translatedQuestion = doTranslateText(source.question.text, from, to)
+                val question = if (translatedQuestion.error == null) {
                     if (TranslateHelper.showOriginal) {
                         """
                         |${source.question}
@@ -193,11 +193,14 @@ abstract class BaseTranslator {
                 } else {
                     return TranslateResult(from, null, translatedQuestion.error)
                 }
+                translatedPoll.question = TLRPC.TL_textWithEntities().apply {
+                    text = question
+                }
                 // Translate options
                 source.answers.forEach {
-                    val translatedAnswer = doTranslateText(it.text, from, to)
+                    val translatedAnswer = doTranslateText(it.text.text, from, to)
                     val translatedPollAnswer = TLRPC.TL_pollAnswer()
-                    translatedPollAnswer.text = if (translatedAnswer.error == null) {
+                    val text = if (translatedAnswer.error == null) {
                         if (TranslateHelper.showOriginal) {
                             "${it.text} | ${translatedAnswer.result!!}"
                         } else {
@@ -205,6 +208,9 @@ abstract class BaseTranslator {
                         }
                     } else {
                         return TranslateResult(from, null, translatedAnswer.error)
+                    }
+                    translatedPollAnswer.text = TLRPC.TL_textWithEntities().apply {
+                        this.text = text
                     }
                     translatedPollAnswer.option = it.option
                     translatedPoll.answers.add(translatedPollAnswer)

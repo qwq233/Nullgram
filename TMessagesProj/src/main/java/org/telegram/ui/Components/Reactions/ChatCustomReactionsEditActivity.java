@@ -1,3 +1,22 @@
+/*
+ * Copyright (C) 2019-2024 qwq233 <qwq233@qwq2333.top>
+ * https://github.com/qwq233/Nullgram
+ *
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation; either version 2
+ * of the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along with this software.
+ *  If not, see
+ * <https://www.gnu.org/licenses/>
+ */
+
 package org.telegram.ui.Components.Reactions;
 
 import static org.telegram.messenger.AndroidUtilities.replaceTags;
@@ -31,6 +50,7 @@ import org.telegram.messenger.LocaleController;
 import org.telegram.messenger.MessagesStorage;
 import org.telegram.messenger.NotificationCenter;
 import org.telegram.messenger.R;
+import org.telegram.messenger.browser.Browser;
 import org.telegram.tgnet.TLRPC;
 import org.telegram.tgnet.tl.TL_stories;
 import org.telegram.ui.ActionBar.ActionBar;
@@ -38,9 +58,9 @@ import org.telegram.ui.ActionBar.AlertDialog;
 import org.telegram.ui.ActionBar.BaseFragment;
 import org.telegram.ui.ActionBar.Theme;
 import org.telegram.ui.Cells.HeaderCell;
+import org.telegram.ui.Cells.SlideIntChooseView;
 import org.telegram.ui.Cells.TextCheckCell;
 import org.telegram.ui.Cells.TextInfoPrivacyCell;
-import org.telegram.ui.ChatActivity;
 import org.telegram.ui.Components.AnimatedEmojiDrawable;
 import org.telegram.ui.Components.AnimatedEmojiSpan;
 import org.telegram.ui.Components.BulletinFactory;
@@ -66,6 +86,7 @@ public class ChatCustomReactionsEditActivity extends BaseFragment implements Not
     private LinearLayout switchLayout;
     private LinearLayout contentLayout;
     private CustomReactionEditText editText;
+    private SlideIntChooseView slideView;
     private UpdateReactionsButton actionButton;
     private ScrollView scrollView;
 
@@ -78,6 +99,7 @@ public class ChatCustomReactionsEditActivity extends BaseFragment implements Not
     private boolean emojiKeyboardVisible = false;
     private final TLRPC.ChatFull info;
     private final long chatId;
+    private int currentReactionsCount, reactionsCount;
     private TLRPC.Chat currentChat;
     private TL_stories.TL_premium_boostsStatus boostsStatus;
     private int selectedCustomReactions;
@@ -205,15 +227,35 @@ public class ChatCustomReactionsEditActivity extends BaseFragment implements Not
 
         TextInfoPrivacyCell infoCell2 = new TextInfoPrivacyCell(context);
         infoCell2.setTextColor(Theme.getColor(Theme.key_windowBackgroundWhiteGrayText4));
-        infoCell2.setTopPadding(12);
-        infoCell2.setBottomPadding(70);
         infoCell2.setText(AndroidUtilities.replaceSingleTag(
-                LocaleController.getString("ReactionCreateOwnPack", R.string.ReactionCreateOwnPack),
+                getString(R.string.ReactionCreateOwnPack),
                 Theme.key_chat_messageLinkIn, 0,
-                () -> presentFragment(ChatActivity.of(429000)),
+                () -> Browser.openUrl(getContext(), "https://t.me/stickers"),
                 getResourceProvider()
         ));
         switchLayout.addView(infoCell2, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT));
+
+        HeaderCell headerCell1 = new HeaderCell(context, resourceProvider);
+        headerCell1.setBackgroundColor(getThemedColor(Theme.key_windowBackgroundWhite));
+        headerCell1.setText(getString(R.string.MaximumReactionsHeader));
+        switchLayout.addView(headerCell1, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT));
+
+        slideView = new SlideIntChooseView(context, resourceProvider);
+        slideView.setBackgroundColor(getThemedColor(Theme.key_windowBackgroundWhite));
+        if (info instanceof TLRPC.TL_chatFull ? (info.flags & 1048576) != 0 : (info.flags2 & 8192) != 0) {
+            currentReactionsCount = reactionsCount = info.reactions_limit;
+        } else {
+            currentReactionsCount = reactionsCount = getMessagesController().reactionsUniqMax;
+        }
+        slideView.set(reactionsCount, SlideIntChooseView.Options.make(0, "MaximumReactionsValue", 1, getMessagesController().reactionsUniqMax), value -> {
+            reactionsCount = value;
+        });
+        switchLayout.addView(slideView, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT));
+        TextInfoPrivacyCell infoCell3 = new TextInfoPrivacyCell(context);
+        infoCell3.setTopPadding(12);
+        infoCell3.setBottomPadding(70);
+        infoCell3.setText(LocaleController.getString(R.string.MaximumReactionsInfo));
+        switchLayout.addView(infoCell3, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT));
 
         actionButton = new UpdateReactionsButton(context, getResourceProvider());
         actionButton.setDefaultState();
@@ -228,7 +270,7 @@ public class ChatCustomReactionsEditActivity extends BaseFragment implements Not
             }
 
             actionButton.setLoading(true);
-            getMessagesController().setCustomChatReactions(chatId, selectedType, grabReactions(false), error -> {
+            getMessagesController().setCustomChatReactions(chatId, selectedType, grabReactions(false), currentReactionsCount = reactionsCount, error -> {
                 if (isFinishing()) {
                     return;
                 }
@@ -576,8 +618,8 @@ public class ChatCustomReactionsEditActivity extends BaseFragment implements Not
     public void onFragmentDestroy() {
         super.onFragmentDestroy();
         AndroidUtilities.cancelRunOnUIThread(checkAfterFastDeleteRunnable);
-        if (selectedType == SELECT_TYPE_NONE) {
-            getMessagesController().setCustomChatReactions(chatId, selectedType, new ArrayList<>(), null, null);
+        if (selectedType == SELECT_TYPE_NONE && reactionsCount != currentReactionsCount) {
+            getMessagesController().setCustomChatReactions(chatId, selectedType, grabReactions(false), reactionsCount, null, null);
         }
     }
 

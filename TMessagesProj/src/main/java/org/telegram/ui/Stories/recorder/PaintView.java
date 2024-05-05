@@ -1,3 +1,22 @@
+/*
+ * Copyright (C) 2019-2024 qwq233 <qwq233@qwq2333.top>
+ * https://github.com/qwq233/Nullgram
+ *
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation; either version 2
+ * of the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along with this software.
+ *  If not, see
+ * <https://www.gnu.org/licenses/>
+ */
+
 package org.telegram.ui.Stories.recorder;
 
 import static org.telegram.messenger.AndroidUtilities.dp;
@@ -42,7 +61,6 @@ import android.view.Gravity;
 import android.view.HapticFeedbackConstants;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
-import android.view.TextureView;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
@@ -67,7 +85,6 @@ import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.ApplicationLoader;
 import org.telegram.messenger.Bitmaps;
 import org.telegram.messenger.BuildVars;
-import org.telegram.messenger.DialogObject;
 import org.telegram.messenger.DispatchQueue;
 import org.telegram.messenger.Emoji;
 import org.telegram.messenger.FileLoader;
@@ -1479,7 +1496,7 @@ public class PaintView extends SizeNotifierFrameLayoutPhoto implements IPhotoPai
                     showReactionsLayout(false);
                 }
             });
-            reactionLayout.setMessage(null, null);
+            reactionLayout.setMessage(null, null, true);
         }
         reactionLayout.setFragment(LaunchActivity.getLastFragment());
         reactionForEntity = entityView;
@@ -1758,7 +1775,7 @@ public class PaintView extends SizeNotifierFrameLayoutPhoto implements IPhotoPai
                 detectFaces();
             }
         }, 350);
-        EmojiBottomSheet alert = emojiPopup = new EmojiBottomSheet(getContext(), false, resourcesProvider) {
+        EmojiBottomSheet alert = emojiPopup = new EmojiBottomSheet(getContext(), false, resourcesProvider, false) {
             @Override
             public void onDismissAnimationStart() {
                 super.onDismissAnimationStart();
@@ -1817,6 +1834,7 @@ public class PaintView extends SizeNotifierFrameLayoutPhoto implements IPhotoPai
                 stickerView.setScale(1.5f);
             }
             appearAnimation(stickerView);
+            return true;
         });
         alert.whenWidgetSelected(widgetId -> {
             if (widgetId == EmojiBottomSheet.WIDGET_LOCATION) {

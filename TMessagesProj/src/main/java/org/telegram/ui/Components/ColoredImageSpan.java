@@ -1,3 +1,22 @@
+/*
+ * Copyright (C) 2019-2024 qwq233 <qwq233@qwq2333.top>
+ * https://github.com/qwq233/Nullgram
+ *
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation; either version 2
+ * of the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along with this software.
+ *  If not, see
+ * <https://www.gnu.org/licenses/>
+ */
+
 package org.telegram.ui.Components;
 
 import android.graphics.Canvas;
@@ -19,13 +38,13 @@ import org.telegram.ui.ActionBar.Theme;
 public class ColoredImageSpan extends ReplacementSpan {
 
     int drawableColor;
-    Drawable drawable;
+    public Drawable drawable;
 
     boolean usePaintColor = true;
     public boolean useLinkPaintColor = false;
     int colorKey;
     private int topOffset = 0;
-    private float translateX, translateY;
+    private float translateX, translateY, rotate;
     private float alpha = 1f;
     private int overrideColor;
 
@@ -91,6 +110,10 @@ public class ColoredImageSpan extends ReplacementSpan {
         translateY = ty;
     }
 
+    public void rotate(float r) {
+        rotate = r;
+    }
+
     public void setWidth(int width) {
         sizeWidth = width;
     }
@@ -108,7 +131,7 @@ public class ColoredImageSpan extends ReplacementSpan {
                 fm.top = fontMetrics.top;
                 fm.bottom = fontMetrics.bottom;
             }
-            return (int) (scaleX * Math.abs(spaceScaleX) * size);
+            return (int) (Math.abs(scaleX) * Math.abs(spaceScaleX) * size);
         }
         if (sizeWidth != 0)
             return (int) (Math.abs(scaleX) * sizeWidth);
@@ -152,6 +175,9 @@ public class ColoredImageSpan extends ReplacementSpan {
         if (drawable != null) {
             if (scaleX != 1f || scaleY != 1f) {
                 canvas.scale(scaleX, scaleY, 0, drawable.getBounds().centerY());
+            }
+            if (rotate != 1f) {
+                canvas.rotate(rotate, drawable.getBounds().centerX(), drawable.getBounds().centerY());
             }
             if (alpha != 1f || paint.getAlpha() != 0xFF) {
                 drawable.setAlpha((int) (alpha * paint.getAlpha()));

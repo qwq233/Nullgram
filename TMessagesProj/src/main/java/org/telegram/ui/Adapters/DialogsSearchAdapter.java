@@ -1,9 +1,20 @@
 /*
- * This is the source code of Telegram for Android v. 5.x.x.
- * It is licensed under GNU GPL v. 2 or later.
- * You should have received a copy of the license in this archive (see LICENSE).
+ * Copyright (C) 2019-2024 qwq233 <qwq233@qwq2333.top>
+ * https://github.com/qwq233/Nullgram
  *
- * Copyright Nikolai Kudashov, 2013-2018.
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation; either version 2
+ * of the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along with this software.
+ *  If not, see
+ * <https://www.gnu.org/licenses/>
  */
 
 package org.telegram.ui.Adapters;
@@ -63,15 +74,15 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class DialogsSearchAdapter extends RecyclerListView.SelectionAdapter {
 
-    private final int VIEW_TYPE_PROFILE_CELL = 0;
-    private final int VIEW_TYPE_GRAY_SECTION = 1;
-    private final int VIEW_TYPE_DIALOG_CELL = 2;
-    private final int VIEW_TYPE_TOPIC_CELL = 3;
-    private final int VIEW_TYPE_LOADING = 4;
-    private final int VIEW_TYPE_HASHTAG_CELL = 5;
-    private final int VIEW_TYPE_CATEGORY_LIST = 6;
-    private final int VIEW_TYPE_ADD_BY_PHONE = 7;
-    private final int VIEW_TYPE_INVITE_CONTACT_CELL = 8;
+    public final static int VIEW_TYPE_PROFILE_CELL = 0;
+    public final static int VIEW_TYPE_GRAY_SECTION = 1;
+    public final int VIEW_TYPE_DIALOG_CELL = 2;
+    public final int VIEW_TYPE_TOPIC_CELL = 3;
+    public final int VIEW_TYPE_LOADING = 4;
+    public final int VIEW_TYPE_HASHTAG_CELL = 5;
+    public final int VIEW_TYPE_CATEGORY_LIST = 6;
+    public final int VIEW_TYPE_ADD_BY_PHONE = 7;
+    public final int VIEW_TYPE_INVITE_CONTACT_CELL = 8;
     private Context mContext;
     private Runnable searchRunnable;
     private Runnable searchRunnable2;
@@ -1336,6 +1347,12 @@ public class DialogsSearchAdapter extends RecyclerListView.SelectionAdapter {
             }
             i -= contactsCount + 1;
         }
+        if (localCount + localServerCount > 0 && (getRecentItemsCount() > 0 || !searchTopics.isEmpty())) {
+            if (i == 0) {
+                return false;
+            }
+            i--;
+        }
         if (i >= 0 && i < localCount) {
             return false;
         }
@@ -1483,12 +1500,23 @@ public class DialogsSearchAdapter extends RecyclerListView.SelectionAdapter {
                 CharSequence username = null;
                 CharSequence name = null;
                 boolean isRecent = false;
+                boolean isGlobal = isGlobalSearch(position);
                 String un = null;
                 Object obj = getItem(position);
 
                 if (obj instanceof TLRPC.User) {
                     user = (TLRPC.User) obj;
                     un = UserObject.getPublicUsername(user);
+                    if (un != null && lastSearchText != null && !un.toLowerCase().contains(lastSearchText.toLowerCase())) {
+                        if (user.usernames != null) {
+                            for (int i = 0; i < user.usernames.size(); ++i) {
+                                TLRPC.TL_username u = user.usernames.get(i);
+                                if (u != null && u.active && u.username.toLowerCase().contains(lastSearchText.toLowerCase())) {
+                                    un = u.username;
+                                }
+                            }
+                        }
+                    }
                 } else if (obj instanceof TLRPC.Chat) {
                     chat = MessagesController.getInstance(currentAccount).getChat(((TLRPC.Chat) obj).id);
                     if (chat == null) {
@@ -1557,7 +1585,7 @@ public class DialogsSearchAdapter extends RecyclerListView.SelectionAdapter {
                             spannableStringBuilder.setSpan(new ForegroundColorSpanThemable(Theme.key_windowBackgroundWhiteBlueText4), index, index + foundUserName.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
                             name = spannableStringBuilder;
                         }
-                        if (un != null && user == null) {
+                        if (un != null && (user == null || isGlobal)) {
                             if (foundUserName.startsWith("@")) {
                                 foundUserName = foundUserName.substring(1);
                             }

@@ -1,3 +1,22 @@
+/*
+ * Copyright (C) 2019-2024 qwq233 <qwq233@qwq2333.top>
+ * https://github.com/qwq233/Nullgram
+ *
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation; either version 2
+ * of the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along with this software.
+ *  If not, see
+ * <https://www.gnu.org/licenses/>
+ */
+
 package org.telegram.ui;
 
 import android.content.ClipData;
@@ -152,6 +171,9 @@ public class NotificationsSoundActivity extends BaseFragment implements ChatAtta
             } else if (currentType == NotificationsController.TYPE_STORIES) {
                 prefPath = "StoriesSoundPath";
                 prefDocId = "StoriesSoundDocId";
+            } else if (currentType == NotificationsController.TYPE_REACTIONS_MESSAGES || currentType == NotificationsController.TYPE_REACTIONS_STORIES) {
+                prefPath = "ReactionSoundPath";
+                prefDocId = "ReactionSoundDocId";
             } else {
                 throw new RuntimeException("Unsupported type");
             }
@@ -294,7 +316,9 @@ public class NotificationsSoundActivity extends BaseFragment implements ChatAtta
             } else if (currentType == NotificationsController.TYPE_CHANNEL) {
                 actionBar.setTitle(LocaleController.getString("NotificationsSoundChannels", R.string.NotificationsSoundChannels));
             } else if (currentType == NotificationsController.TYPE_STORIES) {
-                actionBar.setTitle(LocaleController.getString("NotificationsSoundStories", R.string.NotificationsSoundStories));
+                actionBar.setTitle(LocaleController.getString(R.string.NotificationsSoundStories));
+            } else if (currentType == NotificationsController.TYPE_REACTIONS_STORIES || currentType == NotificationsController.TYPE_REACTIONS_MESSAGES) {
+                actionBar.setTitle(LocaleController.getString(R.string.NotificationsSoundReactions));
             }
         } else {
             avatarContainer = new ChatAvatarContainer(context, null, false, resourcesProvider);
@@ -887,6 +911,10 @@ public class NotificationsSoundActivity extends BaseFragment implements ChatAtta
                     prefName = "StoriesSound";
                     prefPath = "StoriesSoundPath";
                     prefDocId = "StoriesSoundDocId";
+                } else if (currentType == NotificationsController.TYPE_REACTIONS_STORIES || currentType == NotificationsController.TYPE_REACTIONS_MESSAGES) {
+                    prefName = "ReactionSound";
+                    prefPath = "ReactionSoundPath";
+                    prefDocId = "ReactionSoundDocId";
                 } else {
                     throw new RuntimeException("Unsupported type");
                 }

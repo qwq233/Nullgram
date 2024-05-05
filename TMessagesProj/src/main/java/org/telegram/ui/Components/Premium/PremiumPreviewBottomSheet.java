@@ -1,3 +1,22 @@
+/*
+ * Copyright (C) 2019-2024 qwq233 <qwq233@qwq2333.top>
+ * https://github.com/qwq233/Nullgram
+ *
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation; either version 2
+ * of the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along with this software.
+ *  If not, see
+ * <https://www.gnu.org/licenses/>
+ */
+
 package org.telegram.ui.Components.Premium;
 
 import static org.telegram.messenger.LocaleController.getString;
@@ -14,7 +33,6 @@ import android.graphics.ColorFilter;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffColorFilter;
 import android.graphics.drawable.Drawable;
-import android.text.Layout;
 import android.text.SpannableStringBuilder;
 import android.text.Spanned;
 import android.text.TextPaint;
@@ -492,38 +510,14 @@ public class PremiumPreviewBottomSheet extends BottomSheetWithRecyclerListView i
                         titleView = new LinkSpanDrawable.LinksTextView[2];
                         for (int a = 0; a < 2; ++a) {
                             titleView[a] = new LinkSpanDrawable.LinksTextView(context, resourcesProvider) {
-                                private Layout lastLayout;
-                                AnimatedEmojiSpan.EmojiGroupedSpans stack;
-
                                 @Override
-                                protected void onDetachedFromWindow() {
-                                    super.onDetachedFromWindow();
-                                    AnimatedEmojiSpan.release(this, stack);
-                                    lastLayout = null;
-                                }
-
-                                @Override
-                                protected void dispatchDraw(Canvas canvas) {
-                                    super.dispatchDraw(canvas);
-                                    if (lastLayout != getLayout()) {
-                                        stack = AnimatedEmojiSpan.update(AnimatedEmojiDrawable.CACHE_TYPE_ALERT_PREVIEW, this, stack, lastLayout = getLayout());
-                                    }
-                                    AnimatedEmojiSpan.drawAnimatedEmojis(canvas, getLayout(), stack, 0, null, 0, 0, 0, 1f, colorFilter);
-                                }
-
-                                @Override
-                                protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-                                    super.onMeasure(widthMeasureSpec, MeasureSpec.makeMeasureSpec(99999999, MeasureSpec.AT_MOST));
-                                }
-
-                                @Override
-                                public int overrideColor() {
-                                    return accentColor != null ? Theme.multAlpha(accentColor, .10f) : super.overrideColor();
+                                protected int emojiCacheType() {
+                                    return AnimatedEmojiDrawable.CACHE_TYPE_ALERT_PREVIEW;
                                 }
                             };
                             titleView[a].setVisibility(a == 0 ? View.VISIBLE : View.GONE);
                             titleView[a].setTextSize(TypedValue.COMPLEX_UNIT_DIP, 16);
-                            titleView[a].setTypeface(AndroidUtilities.getTypeface("fonts/rmedium.ttf"));
+                            titleView[a].setTypeface(AndroidUtilities.getTypeface(AndroidUtilities.TYPEFACE_ROBOTO_MEDIUM));
                             titleView[a].setGravity(Gravity.CENTER_HORIZONTAL);
                             titleView[a].setTextColor(getThemedColor(Theme.key_windowBackgroundWhiteBlackText));
                             titleView[a].setLinkTextColor(getThemedColor(Theme.key_windowBackgroundWhiteLinkText));

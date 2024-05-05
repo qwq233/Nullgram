@@ -1,3 +1,22 @@
+/*
+ * Copyright (C) 2019-2024 qwq233 <qwq233@qwq2333.top>
+ * https://github.com/qwq233/Nullgram
+ *
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation; either version 2
+ * of the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along with this software.
+ *  If not, see
+ * <https://www.gnu.org/licenses/>
+ */
+
 package org.telegram.ui.Components;
 
 import android.content.Context;
@@ -48,6 +67,8 @@ public class FlickerLoadingView extends View {
     public static final int CHECKBOX_TYPE = 26;
     public final static int STORIES_TYPE = 27;
     public static final int SOTRY_VIEWS_USER_TYPE = 28;
+    public static final int PROFILE_SEARCH_CELL = 29;
+    public static final int GRAY_SECTION = 30;
 
     private int gradientWidth;
     private LinearGradient gradient;
@@ -435,6 +456,41 @@ public class FlickerLoadingView extends View {
                 }
 
                 h += getCellHeight(getMeasuredWidth());
+                k++;
+                if (isSingleCell && k >= itemsCount) {
+                    break;
+                }
+            }
+        } else if (getViewType() == PROFILE_SEARCH_CELL) {
+            int k = 0;
+            while (h <= getMeasuredHeight()) {
+                int r = AndroidUtilities.dp(23);
+                canvas.drawCircle(checkRtl(paddingLeft + AndroidUtilities.dp(9) + r), h + (AndroidUtilities.dp(64) >> 1), r, paint);
+
+                rectF.set(paddingLeft + AndroidUtilities.dp(68), h + AndroidUtilities.dp(17), paddingLeft + AndroidUtilities.dp(260), h + AndroidUtilities.dp(25));
+                checkRtl(rectF);
+                canvas.drawRoundRect(rectF, AndroidUtilities.dp(4), AndroidUtilities.dp(4), paint);
+
+                rectF.set(paddingLeft + AndroidUtilities.dp(68), h + AndroidUtilities.dp(39), paddingLeft + AndroidUtilities.dp(140), h + AndroidUtilities.dp(47));
+                checkRtl(rectF);
+                canvas.drawRoundRect(rectF, AndroidUtilities.dp(4), AndroidUtilities.dp(4), paint);
+
+                h += getCellHeight(getMeasuredWidth());
+                k++;
+                if (isSingleCell && k >= itemsCount) {
+                    break;
+                }
+            }
+        } else if (getViewType() == GRAY_SECTION) {
+            int k = 0;
+            while (h <= getMeasuredHeight()) {
+                int cellHeight = getCellHeight(getMeasuredWidth());
+
+                rectF.set(0, h, getMeasuredWidth(), h + cellHeight);
+                checkRtl(rectF);
+                canvas.drawRect(rectF, paint);
+
+                h += cellHeight;
                 k++;
                 if (isSingleCell && k >= itemsCount) {
                     break;
@@ -869,6 +925,10 @@ public class FlickerLoadingView extends View {
                 return AndroidUtilities.dp(50) + 1;
             case SOTRY_VIEWS_USER_TYPE:
                 return AndroidUtilities.dp(58);
+            case PROFILE_SEARCH_CELL:
+                return AndroidUtilities.dp(60) + 1;
+            case GRAY_SECTION:
+                return AndroidUtilities.dp(32);
         }
         return 0;
     }

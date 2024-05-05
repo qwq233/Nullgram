@@ -1,8 +1,26 @@
+/*
+ * Copyright (C) 2019-2024 qwq233 <qwq233@qwq2333.top>
+ * https://github.com/qwq233/Nullgram
+ *
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation; either version 2
+ * of the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along with this software.
+ *  If not, see
+ * <https://www.gnu.org/licenses/>
+ */
+
 package org.telegram.ui.Components.Premium.boosts.adapters;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
-import android.graphics.Paint;
 import android.text.TextUtils;
 import android.view.View;
 import android.view.ViewGroup;
@@ -21,6 +39,7 @@ import org.telegram.messenger.UserConfig;
 import org.telegram.tgnet.TLRPC;
 import org.telegram.ui.ActionBar.Theme;
 import org.telegram.ui.Cells.GraySectionCell;
+import org.telegram.ui.Cells.TextCell;
 import org.telegram.ui.Components.ListView.AdapterWithDiffUtils;
 import org.telegram.ui.Components.Premium.boosts.BoostRepository;
 import org.telegram.ui.Components.Premium.boosts.cells.selector.SelectorCountryCell;
@@ -28,7 +47,6 @@ import org.telegram.ui.Components.Premium.boosts.cells.selector.SelectorLetterCe
 import org.telegram.ui.Components.Premium.boosts.cells.selector.SelectorUserCell;
 import org.telegram.ui.Components.RecyclerListView;
 import org.telegram.ui.Components.StickerEmptyView;
-import org.telegram.ui.DialogsActivity;
 
 import java.util.HashMap;
 import java.util.List;
@@ -41,6 +59,7 @@ public class SelectorAdapter extends AdapterWithDiffUtils {
     public static final int VIEW_TYPE_COUNTRY = 6;
     public static final int VIEW_TYPE_LETTER = 7;
     public static final int VIEW_TYPE_TOP_SECTION = 8;
+    public static final int VIEW_TYPE_BUTTON = 9;
 
     private final Theme.ResourcesProvider resourcesProvider;
     private final Context context;
@@ -82,7 +101,7 @@ public class SelectorAdapter extends AdapterWithDiffUtils {
 
     @Override
     public boolean isEnabled(RecyclerView.ViewHolder holder) {
-        return (holder.getItemViewType() == VIEW_TYPE_USER || holder.getItemViewType() == VIEW_TYPE_COUNTRY);
+        return (holder.getItemViewType() == VIEW_TYPE_USER || holder.getItemViewType() == VIEW_TYPE_COUNTRY || holder.getItemViewType() == VIEW_TYPE_BUTTON);
     }
 
     @NonNull
@@ -105,6 +124,11 @@ public class SelectorAdapter extends AdapterWithDiffUtils {
             view = new SelectorCountryCell(context, resourcesProvider);
         } else if (viewType == VIEW_TYPE_TOP_SECTION) {
             view = new GraySectionCell(context, resourcesProvider);
+        } else if (viewType == VIEW_TYPE_BUTTON) {
+            TextCell cell = new TextCell(context, resourcesProvider);
+            cell.leftPadding = 23 - 7;
+            cell.imageLeft = 19;
+            view = cell;
         } else {
             view = new View(context);
         }
@@ -157,6 +181,7 @@ public class SelectorAdapter extends AdapterWithDiffUtils {
             if ((position + 1 < items.size()) && items.get(position + 1).viewType == VIEW_TYPE_LETTER) {
                 userCell.setDivider(false);
             }
+            userCell.setOptions(item.options);
         } else if (viewType == VIEW_TYPE_COUNTRY) {
             SelectorCountryCell cell = (SelectorCountryCell) holder.itemView;
             boolean needDivider = (position < items.size() - 1) && (position + 1 < items.size() - 1) && (items.get(position + 1).viewType != VIEW_TYPE_LETTER);
@@ -189,6 +214,10 @@ public class SelectorAdapter extends AdapterWithDiffUtils {
                 }
             }
             topSectionCell = cell;
+        } else if (viewType == VIEW_TYPE_BUTTON) {
+            TextCell cell = (TextCell) holder.itemView;
+            cell.setColors(Theme.key_windowBackgroundWhiteBlueIcon, Theme.key_windowBackgroundWhiteBlueButton);
+            cell.setTextAndIcon(item.text, item.resId, false);
         }
     }
 
@@ -274,9 +303,12 @@ public class SelectorAdapter extends AdapterWithDiffUtils {
         public TLRPC.TL_help_country country;
         public CharSequence text, subtext;
         public int type;
+        public int id;
+        public int resId;
         public boolean checked;
         public int padHeight = -1;
         public View.OnClickListener callback;
+        public View.OnClickListener options;
 
         private Item(int viewType, boolean selectable) {
             super(viewType, selectable);
@@ -288,6 +320,14 @@ public class SelectorAdapter extends AdapterWithDiffUtils {
             return item;
         }
 
+        public static Item asButton(int id, int resId, String text) {
+            Item item = new Item(VIEW_TYPE_BUTTON, false);
+            item.id = id;
+            item.resId = resId;
+            item.text = text;
+            return item;
+        }
+
         public static Item asUser(TLRPC.User user, boolean checked) {
             Item item = new Item(VIEW_TYPE_USER, true);
             item.user = user;
@@ -295,6 +335,11 @@ public class SelectorAdapter extends AdapterWithDiffUtils {
             item.chat = null;
             item.checked = checked;
             return item;
+        }
+
+        public Item withOptions(View.OnClickListener onClickListener) {
+            this.options = onClickListener;
+            return this;
         }
 
         public static Item asLetter(String letter) {
@@ -368,6 +413,8 @@ public class SelectorAdapter extends AdapterWithDiffUtils {
             } else if (viewType == VIEW_TYPE_LETTER && (!TextUtils.equals(text, i.text))) {
                 return false;
             } else if (viewType == VIEW_TYPE_TOP_SECTION && (!TextUtils.equals(text, i.text))) {
+                return false;
+            } else if (viewType == VIEW_TYPE_BUTTON && (!TextUtils.equals(text, i.text) || id != i.id || resId != i.resId)) {
                 return false;
             }
             return true;

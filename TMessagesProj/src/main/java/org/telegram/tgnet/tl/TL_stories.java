@@ -1,3 +1,22 @@
+/*
+ * Copyright (C) 2019-2024 qwq233 <qwq233@qwq2333.top>
+ * https://github.com/qwq233/Nullgram
+ *
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation; either version 2
+ * of the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along with this software.
+ *  If not, see
+ * <https://www.gnu.org/licenses/>
+ */
+
 package org.telegram.tgnet.tl;
 
 import org.telegram.messenger.DialogObject;
@@ -736,10 +755,12 @@ public class TL_stories {
     }
 
     public static class TL_stories_stories extends TLObject {
-        public static final int constructor = 0x5dd8c3c8;
+        public static final int constructor = 0x63c3dd0a;
 
+        public int flags;
         public int count;
         public ArrayList<StoryItem> stories = new ArrayList<>();
+        public ArrayList<Integer> pinned_to_top = new ArrayList<>();
         public ArrayList<TLRPC.Chat> chats = new ArrayList<>();
         public ArrayList<TLRPC.User> users = new ArrayList<>();
 
@@ -757,6 +778,7 @@ public class TL_stories {
         }
 
         public void readParams(AbstractSerializedData stream, boolean exception) {
+            flags = stream.readInt32(exception);
             count = stream.readInt32(exception);
             int magic = stream.readInt32(exception);
             if (magic != 0x1cb5c415) {
@@ -772,6 +794,19 @@ public class TL_stories {
                     return;
                 }
                 stories.add(object);
+            }
+            if ((flags & 1) != 0) {
+                magic = stream.readInt32(exception);
+                if (magic != 0x1cb5c415) {
+                    if (exception) {
+                        throw new RuntimeException(String.format("wrong Vector magic, got %x", magic));
+                    }
+                    return;
+                }
+                count = stream.readInt32(exception);
+                for (int a = 0; a < count; a++) {
+                    pinned_to_top.add(stream.readInt32(exception));
+                }
             }
             magic = stream.readInt32(exception);
             if (magic != 0x1cb5c415) {
@@ -807,12 +842,21 @@ public class TL_stories {
 
         public void serializeToStream(AbstractSerializedData stream) {
             stream.writeInt32(constructor);
+            stream.writeInt32(flags);
             stream.writeInt32(count);
             stream.writeInt32(0x1cb5c415);
             int count = stories.size();
             stream.writeInt32(count);
             for (int a = 0; a < count; a++) {
                 stories.get(a).serializeToStream(stream);
+            }
+            if ((flags & 1) != 0) {
+                stream.writeInt32(0x1cb5c415);
+                count = pinned_to_top.size();
+                stream.writeInt32(count);
+                for (int a = 0; a < count; a++) {
+                    stream.writeInt32(pinned_to_top.get(a));
+                }
             }
             stream.writeInt32(0x1cb5c415);
             count = chats.size();
@@ -3343,6 +3387,28 @@ public class TL_stories {
                 stream.writeString(offset);
             }
             stream.writeInt32(limit);
+        }
+    }
+
+    public static class TL_togglePinnedToTop extends TLObject {
+        public static final int constructor = 0xb297e9b;
+
+        public TLRPC.InputPeer peer;
+        public ArrayList<Integer> id = new ArrayList<>();
+
+        public TLObject deserializeResponse(AbstractSerializedData stream, int constructor, boolean exception) {
+            return TLRPC.Bool.TLdeserialize(stream, constructor, exception);
+        }
+
+        public void serializeToStream(AbstractSerializedData stream) {
+            stream.writeInt32(constructor);
+            peer.serializeToStream(stream);
+            stream.writeInt32(0x1cb5c415);
+            int count = id.size();
+            stream.writeInt32(count);
+            for (int a = 0; a < count; a++) {
+                stream.writeInt32(id.get(a));
+            }
         }
     }
 }

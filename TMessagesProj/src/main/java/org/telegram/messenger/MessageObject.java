@@ -1,9 +1,20 @@
 /*
- * This is the source code of Telegram for Android v. 5.x.x.
- * It is licensed under GNU GPL v. 2 or later.
- * You should have received a copy of the license in this archive (see LICENSE).
+ * Copyright (C) 2019-2024 qwq233 <qwq233@qwq2333.top>
+ * https://github.com/qwq233/Nullgram
  *
- * Copyright Nikolai Kudashov, 2013-2018.
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation; either version 2
+ * of the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along with this software.
+ *  If not, see
+ * <https://www.gnu.org/licenses/>
  */
 
 package org.telegram.messenger;
@@ -165,6 +176,7 @@ public class MessageObject {
     public String customName;
     public boolean reactionsChanged;
     public boolean isReactionPush;
+    public boolean isStoryReactionPush;
     public boolean isStoryPush, isStoryMentionPush, isStoryPushHidden;
     public boolean putInDownloadsStore;
     public boolean isDownloadingFile;
@@ -205,6 +217,7 @@ public class MessageObject {
     public boolean isRestrictedMessage;
     public long loadedFileSize;
     public boolean forceExpired;
+    public long actionDeleteGroupEventId = -1;
 
     public AtomicReference<WeakReference<View>> viewRef = new AtomicReference<>(null);
 
@@ -213,16 +226,14 @@ public class MessageObject {
     public boolean isMediaSpoilersRevealedInSharedMedia;
     public boolean revealingMediaSpoilers;
     public byte[] sponsoredId;
-    public int sponsoredChannelPost;
-    public TLRPC.ChatInvite sponsoredChatInvite;
-    public String sponsoredChatInviteHash;
-    public boolean sponsoredShowPeerPhoto;
+    public String sponsoredTitle, sponsoredUrl;
     public boolean sponsoredRecommended;
+    public TLRPC.Photo sponsoredPhoto;
     public String sponsoredInfo, sponsoredAdditionalInfo;
-    public TLRPC.TL_sponsoredWebPage sponsoredWebPage;
-    public TLRPC.BotApp sponsoredBotApp;
     public String sponsoredButtonText;
+    public TLRPC.TL_peerColor sponsoredColor;
     public boolean sponsoredCanReport;
+
     public boolean replyTextEllipsized;
     public boolean replyTextRevealed;
     public int overrideLinkColor = -1;
@@ -231,8 +242,6 @@ public class MessageObject {
     public boolean channelJoinedExpanded;
 
     public TLRPC.TL_forumTopic replyToForumTopic; // used only for reply message in view all messages
-
-    public String botStartParam;
 
     public boolean animateComments;
 
@@ -261,7 +270,7 @@ public class MessageObject {
         return 0;
     }
 
-    public ArrayList<TLRPC.TL_pollAnswer> checkedVotes;
+    public ArrayList<TLRPC.PollAnswer> checkedVotes;
 
     public CharSequence editingMessage;
     public ArrayList<TLRPC.MessageEntity> editingMessageEntities;
@@ -616,6 +625,7 @@ public class MessageObject {
         public float currentX;
         public float currentY;
         public float timeAlpha;
+        public float progress;
     }
 
     public static class VCardData {
@@ -1488,7 +1498,7 @@ public class MessageObject {
                 backgroundChangeBounds = false;
             }
         }
-        
+
         public boolean contains(int messageId) {
             if (messages == null) {
                 return false;
@@ -1969,6 +1979,7 @@ public class MessageObject {
                 new_participant = action.new_participant;
             }
             messageOwner = new TLRPC.TL_message();
+            messageOwner.realId = -1;
             long peerId = MessageObject.getPeerId(prev_participant.peer);
             TLObject whoUser;
             if (peerId > 0) {
@@ -2036,7 +2047,7 @@ public class MessageObject {
                 }
                 if (o.delete_messages != n.delete_messages) {
                     rights.append('\n').append(n.delete_messages ? '+' : '-').append(' ');
-                    rights.append(LocaleController.getString("EventLogPromotedDeleteMessages", R.string.EventLogPromotedDeleteMessages));
+                    rights.append(LocaleController.getString(R.string.EventLogPromotedDeleteMessages));
                 }
                 if (o.add_admins != n.add_admins) {
                     rights.append('\n').append(n.add_admins ? '+' : '-').append(' ');
@@ -2071,6 +2082,7 @@ public class MessageObject {
         } else if (event.action instanceof TLRPC.TL_channelAdminLogEventActionDefaultBannedRights) {
             TLRPC.TL_channelAdminLogEventActionDefaultBannedRights bannedRights = (TLRPC.TL_channelAdminLogEventActionDefaultBannedRights) event.action;
             messageOwner = new TLRPC.TL_message();
+            messageOwner.realId = -1;
 
             TLRPC.TL_chatBannedRights o = bannedRights.prev_banned_rights;
             TLRPC.TL_chatBannedRights n = bannedRights.new_banned_rights;
@@ -2148,6 +2160,7 @@ public class MessageObject {
         } else if (event.action instanceof TLRPC.TL_channelAdminLogEventActionParticipantToggleBan) {
             TLRPC.TL_channelAdminLogEventActionParticipantToggleBan action = (TLRPC.TL_channelAdminLogEventActionParticipantToggleBan) event.action;
             messageOwner = new TLRPC.TL_message();
+            messageOwner.realId = -1;
             long peerId = getPeerId(action.prev_participant.peer);
             TLObject whoUser;
             if (peerId > 0) {
@@ -2339,9 +2352,9 @@ public class MessageObject {
         } else if (event.action instanceof TLRPC.TL_channelAdminLogEventActionDeleteMessage) {
             message = ((TLRPC.TL_channelAdminLogEventActionDeleteMessage) event.action).message;
             if (fromUser != null && fromUser.id == MessagesController.getInstance(currentAccount).telegramAntispamUserId) {
-                messageText = LocaleController.getString("EventLogDeletedMessages", R.string.EventLogDeletedMessages).replace("un1", UserObject.getUserName(fromUser));
+                messageText = LocaleController.getString(R.string.EventLogDeletedMessages).replace("un1", UserObject.getUserName(fromUser));
             } else {
-                messageText = replaceWithLink(LocaleController.getString("EventLogDeletedMessages", R.string.EventLogDeletedMessages), "un1", fromUser);
+                messageText = replaceWithLink(LocaleController.getString(R.string.EventLogDeletedMessages), "un1", fromUser);
             }
         } else if (event.action instanceof TLRPC.TL_channelAdminLogEventActionChangeLinkedChat) {
             long newChatId = ((TLRPC.TL_channelAdminLogEventActionChangeLinkedChat) event.action).new_value;
@@ -3028,9 +3041,8 @@ public class MessageObject {
             message.out = false;
             message.realId = message.id;
             message.id = mid[0]++;
-            message.flags &= ~TLRPC.MESSAGE_FLAG_REPLY;
-            message.reply_to = null;
             message.flags = message.flags & ~TLRPC.MESSAGE_FLAG_EDITED;
+            message.dialog_id = -chat.id;
             MessageObject messageObject = new MessageObject(currentAccount, message, null, null, true, true, eventId);
             messageObject.currentEvent = event;
             if (messageObject.contentType >= 0) {
@@ -3053,6 +3065,9 @@ public class MessageObject {
                 messageObject.linkDescription = null;
                 messageObject.generateLinkDescription();
             }
+        }
+        if (event.action instanceof TLRPC.TL_channelAdminLogEventActionDeleteMessage) {
+            return;
         }
         if (contentType >= 0) {
             createDateArray(currentAccount, event, messageObjects, messagesByDays, addToEnd);
@@ -5368,13 +5383,13 @@ public class MessageObject {
                     }
                 }
             }
-        } else if (sponsoredWebPage != null && sponsoredWebPage.photo != null) {
+        } else if (sponsoredPhoto != null) {
             if (!update || photoThumbs == null) {
-                photoThumbs = new ArrayList<>(sponsoredWebPage.photo.sizes);
+                photoThumbs = new ArrayList<>(sponsoredPhoto.sizes);
             } else if (!photoThumbs.isEmpty()) {
-                updatePhotoSizeLocations(photoThumbs, sponsoredWebPage.photo.sizes);
+                updatePhotoSizeLocations(photoThumbs, sponsoredPhoto.sizes);
             }
-            photoThumbsObject = sponsoredWebPage.photo;
+            photoThumbsObject = sponsoredPhoto;
             if (strippedThumb == null) {
                 createStrippedThumb();
             }
@@ -5625,7 +5640,7 @@ public class MessageObject {
         if (!TextUtils.isEmpty(linkDescription)) {
             if (containsUrls(linkDescription)) {
                 try {
-                    AndroidUtilities.addLinks((Spannable) linkDescription, Linkify.WEB_URLS);
+                    AndroidUtilities.addLinksSafe((Spannable) linkDescription, Linkify.WEB_URLS, false, true);
                 } catch (Exception e) {
                     FileLog.e(e);
                 }
@@ -5746,7 +5761,7 @@ public class MessageObject {
             if (useManualParse) {
                 if (containsUrls(caption)) {
                     try {
-                        AndroidUtilities.addLinks((Spannable) caption, Linkify.WEB_URLS | Linkify.PHONE_NUMBERS);
+                        AndroidUtilities.addLinksSafe((Spannable) caption, Linkify.WEB_URLS | Linkify.PHONE_NUMBERS, false, true);
                     } catch (Exception e) {
                         FileLog.e(e);
                     }
@@ -5964,13 +5979,13 @@ public class MessageObject {
         if (messageText instanceof Spannable && containsUrls(messageText)) {
             if (messageText.length() < 1000) {
                 try {
-                    AndroidUtilities.addLinks((Spannable) messageText, Linkify.WEB_URLS | Linkify.PHONE_NUMBERS, internalOnly);
+                    AndroidUtilities.addLinksSafe((Spannable) messageText, Linkify.WEB_URLS | Linkify.PHONE_NUMBERS, internalOnly, false);
                 } catch (Exception e) {
                     FileLog.e(e);
                 }
             } else {
                 try {
-                    AndroidUtilities.addLinks((Spannable) messageText, Linkify.WEB_URLS, internalOnly);
+                    AndroidUtilities.addLinksSafe((Spannable) messageText, Linkify.WEB_URLS, internalOnly, false);
                 } catch (Exception e) {
                     FileLog.e(e);
                 }
@@ -8334,6 +8349,39 @@ public class MessageObject {
         return fallback;
     }
 
+
+    public static ArrayList<String> findStickerEmoticons(TLRPC.Document document, Integer currentAccountForFull) {
+        if (document == null) {
+            return null;
+        }
+        ArrayList<String> emojis = new ArrayList<>();
+        for (int a = 0, N = document.attributes.size(); a < N; a++) {
+            TLRPC.DocumentAttribute attribute = document.attributes.get(a);
+            if (attribute instanceof TLRPC.TL_documentAttributeCustomEmoji ||
+                    attribute instanceof TLRPC.TL_documentAttributeSticker) {
+                if (currentAccountForFull != null) {
+                    TLRPC.TL_messages_stickerSet set = MediaDataController.getInstance(currentAccountForFull).getStickerSet(attribute.stickerset, true);
+                    if (set != null && set.packs != null) {
+                        for (int p = 0; p < set.packs.size(); ++p) {
+                            TLRPC.TL_stickerPack pack = set.packs.get(p);
+                            if (pack.documents.contains(document.id) && Emoji.getEmojiDrawable(pack.emoticon) != null) {
+                                emojis.add(pack.emoticon);
+                            }
+                        }
+                    }
+                    if (!emojis.isEmpty()) {
+                        return emojis;
+                    }
+                }
+                if (!TextUtils.isEmpty(attribute.alt) && Emoji.getEmojiDrawable(attribute.alt) != null) {
+                    emojis.add(attribute.alt);
+                    return emojis;
+                }
+            }
+        }
+        return null;
+    }
+
     public static boolean isAnimatedEmoji(TLRPC.Document document) {
         if (document == null) {
             return false;
@@ -9691,7 +9739,12 @@ public class MessageObject {
                 }
             }
         }
+
         if (newReaction == null) {
+            int maxChatReactions = MessagesController.getInstance(currentAccount).getChatMaxUniqReactions(getDialogId());
+            if (messageOwner.reactions.results.size() + 1 > maxChatReactions) {
+                return false;
+            }
             newReaction = new TLRPC.TL_reactionCount();
             newReaction.reaction = visibleReaction.toTLReaction();
             messageOwner.reactions.results.add(newReaction);
@@ -9880,7 +9933,7 @@ public class MessageObject {
     public static CharSequence peerNameWithIcon(int currentAccount, TLRPC.Peer peer) {
         return peerNameWithIcon(currentAccount, peer, !(peer instanceof TLRPC.TL_peerUser));
     }
-    
+
     public static CharSequence peerNameWithIcon(int currentAccount, TLRPC.Peer peer, boolean anotherChat) {
         if (peer instanceof TLRPC.TL_peerUser) {
             TLRPC.User user = MessagesController.getInstance(currentAccount).getUser(peer.user_id);
@@ -10001,7 +10054,7 @@ public class MessageObject {
         return hasLinkPreview && !isGiveawayOrGiveawayResults() &&
             webpage != null && (webpage.photo != null || isVideoDocument(webpage.document)) &&
             !(webpage != null && TextUtils.isEmpty(webpage.description) && TextUtils.isEmpty(webpage.title)) &&
-            !(isSponsored() && sponsoredWebPage == null && sponsoredChannelPost == 0) && // drawInstantViewType = 1
+            !isSponsored() && // drawInstantViewType = 1
             !"telegram_megagroup".equals(webpageType) &&     // drawInstantViewType = 2
             !"telegram_background".equals(webpageType) &&    // drawInstantViewType = 6
             !"telegram_voicechat".equals(webpageType) &&     // drawInstantViewType = 9

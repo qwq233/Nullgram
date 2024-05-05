@@ -1,7 +1,25 @@
+/*
+ * Copyright (C) 2019-2024 qwq233 <qwq233@qwq2333.top>
+ * https://github.com/qwq233/Nullgram
+ *
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation; either version 2
+ * of the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along with this software.
+ *  If not, see
+ * <https://www.gnu.org/licenses/>
+ */
+
 package org.telegram.ui.Cells;
 
 import static org.telegram.messenger.AndroidUtilities.dp;
-import static org.telegram.messenger.LocaleController.formatString;
 import static org.telegram.messenger.LocaleController.getString;
 
 import android.animation.Animator;
@@ -11,17 +29,15 @@ import android.content.Context;
 import android.graphics.Color;
 import android.graphics.ColorMatrix;
 import android.graphics.ColorMatrixColorFilter;
-import android.graphics.PorterDuff;
-import android.graphics.PorterDuffColorFilter;
 import android.graphics.Rect;
 import android.os.Build;
+import android.text.TextUtils;
 import android.view.Gravity;
-import android.view.HapticFeedbackConstants;
 import android.view.MotionEvent;
 import android.widget.FrameLayout;
 
-import org.checkerframework.checker.units.qual.A;
 import org.telegram.messenger.AndroidUtilities;
+import org.telegram.messenger.LocaleController;
 import org.telegram.messenger.Utilities;
 import org.telegram.ui.ActionBar.Theme;
 import org.telegram.ui.ChannelMonetizationLayout;
@@ -92,7 +108,7 @@ public class SlideIntChooseView extends FrameLayout {
                 if (options == null || whenChanged == null) {
                     return;
                 }
-                final int newValue = (int) (options.min + stepsCount * progress);
+                final int newValue = (int) Math.round(options.min + stepsCount * progress);
                 if (value != newValue) {
                     value = newValue;
                     AndroidUtilities.vibrateCursor(seekBarView);
@@ -132,19 +148,26 @@ public class SlideIntChooseView extends FrameLayout {
 
     public void updateTexts(int value, boolean animated) {
         minText.cancelAnimation();
-        minText.setText(processText(options.minStringResId, options.min), animated);
-        int valueResId;
-        if (value <= options.min) {
-            valueResId = options.valueMinStringResId;
-        } else if (value < options.max) {
-            valueResId = options.valueStringResId;
-        } else {
-            valueResId = options.valueMaxStringResId;
-        }
-        valueText.cancelAnimation();
-        valueText.setText(processText(valueResId, value), animated);
         maxText.cancelAnimation();
-        maxText.setText(processText(options.maxStringResId, options.max), animated);
+        if (!TextUtils.isEmpty(options.resId)) {
+            valueText.cancelAnimation();
+            valueText.setText(LocaleController.formatPluralString(options.resId, value), animated);
+            minText.setText("" + options.min, animated);
+            maxText.setText("" + options.max, animated);
+        } else {
+            int valueResId;
+            if (value <= options.min) {
+                valueResId = options.valueMinStringResId;
+            } else if (value < options.max) {
+                valueResId = options.valueStringResId;
+            } else {
+                valueResId = options.valueMaxStringResId;
+            }
+            valueText.cancelAnimation();
+            valueText.setText(processText(valueResId, value), animated);
+            minText.setText(processText(options.minStringResId, options.min), animated);
+            maxText.setText(processText(options.maxStringResId, options.max), animated);
+        }
         maxText.setTextColor(Theme.getColor(value >= options.max ? Theme.key_windowBackgroundWhiteValueText : Theme.key_windowBackgroundWhiteGrayText, resourcesProvider), animated);
         setMaxTextEmojiSaturation(value >= options.max ? 1f : 0f, animated);
     }
@@ -223,6 +246,8 @@ public class SlideIntChooseView extends FrameLayout {
         public int min;
         public int max;
 
+        public String resId;
+
         public int minStringResId;
         public int valueMinStringResId, valueStringResId, valueMaxStringResId;
         public int maxStringResId;
@@ -242,6 +267,18 @@ public class SlideIntChooseView extends FrameLayout {
             o.valueMaxStringResId = valueMaxStringResId;
             o.max = max;
             o.maxStringResId = maxStringResId;
+            return o;
+        }
+
+        public static Options make(
+            int style,
+            String resId, int min, int max
+        ) {
+            Options o = new Options();
+            o.style = style;
+            o.min = min;
+            o.resId = resId;
+            o.max = max;
             return o;
         }
     }

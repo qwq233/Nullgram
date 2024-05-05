@@ -1,9 +1,26 @@
+/*
+ * Copyright (C) 2019-2024 qwq233 <qwq233@qwq2333.top>
+ * https://github.com/qwq233/Nullgram
+ *
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation; either version 2
+ * of the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along with this software.
+ *  If not, see
+ * <https://www.gnu.org/licenses/>
+ */
+
 package org.telegram.ui.Business;
 
 import static org.telegram.messenger.AndroidUtilities.dp;
-import static org.telegram.messenger.AndroidUtilities.dpf2;
 import static org.telegram.messenger.LocaleController.formatPluralString;
-import static org.telegram.messenger.LocaleController.formatString;
 import static org.telegram.messenger.LocaleController.getString;
 
 import android.content.Context;
@@ -11,7 +28,6 @@ import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffColorFilter;
-import android.text.StaticLayout;
 import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.MotionEvent;
@@ -22,27 +38,19 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
-import com.google.android.exoplayer2.source.dash.manifest.Period;
-
-import org.checkerframework.checker.units.qual.A;
 import org.telegram.messenger.LocaleController;
 import org.telegram.messenger.R;
 import org.telegram.messenger.UserConfig;
 import org.telegram.tgnet.TLRPC;
 import org.telegram.ui.ActionBar.Theme;
-import org.telegram.ui.Components.AnimatedTextView;
 import org.telegram.ui.Components.ClickableAnimatedTextView;
 import org.telegram.ui.Components.CubicBezierInterpolator;
 import org.telegram.ui.Components.LayoutHelper;
 
 import java.time.DayOfWeek;
-import java.time.Instant;
-import java.time.ZoneId;
 import java.time.format.TextStyle;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Map;
-import java.util.TimeZone;
 
 public class ProfileHoursCell extends LinearLayout {
 
@@ -204,7 +212,7 @@ public class ProfileHoursCell extends LinearLayout {
         TLRPC.TL_timezone timezone = timezonesController.findTimezone(value.timezone_id);
 
         Calendar calendar = Calendar.getInstance();
-        int currentUtcOffset = calendar.getTimeZone().getRawOffset() / 1000;
+        int currentUtcOffset = calendar.getTimeZone().getOffset(System.currentTimeMillis()) / 1000;
         int valueUtcOffset = timezone == null ? 0 : timezone.utc_offset;
         int utcOffset = (currentUtcOffset - valueUtcOffset) / 60;
         switchText.setVisibility(utcOffset != 0 && !is24x7 ? View.VISIBLE : View.GONE);
@@ -287,15 +295,15 @@ public class ProfileHoursCell extends LinearLayout {
                     TextView textView = k == 0 ? timeText[i][a] : labelTimeText[a];
                     if (i == 0 && !open_now && k == 1) {
                         int opensPeriodTime = -1;
-                        for (int j = 0; j < weekly_open.size(); ++j) {
-                            TLRPC.TL_businessWeeklyOpen weekly = weekly_open.get(j);
+                        for (int j = 0; j < adapted_weekly_open.size(); ++j) {
+                            TLRPC.TL_businessWeeklyOpen weekly = adapted_weekly_open.get(j);
                             if (nowPeriodTime < weekly.start_minute) {
                                 opensPeriodTime = weekly.start_minute;
                                 break;
                             }
                         }
-                        if (opensPeriodTime == -1 && !weekly_open.isEmpty()) {
-                            opensPeriodTime = weekly_open.get(0).start_minute;
+                        if (opensPeriodTime == -1 && !adapted_weekly_open.isEmpty()) {
+                            opensPeriodTime = adapted_weekly_open.get(0).start_minute;
                         }
                         if (opensPeriodTime == -1) {
                             textView.setText(getString(R.string.BusinessHoursProfileClose));

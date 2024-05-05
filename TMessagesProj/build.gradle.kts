@@ -93,6 +93,7 @@ dependencies {
     implementation(libs.play.services.location)
     implementation(libs.play.services.wallet)
     implementation(libs.play.services.mlkit.vision)
+    implementation(libs.play.services.mlkit.imageLabeling)
 //    implementation("com.google.android.gms:play-services-safetynet:18.0.1")
     implementation(libs.isoparser)
     implementation(files("libs/stripe.aar"))

@@ -1,3 +1,22 @@
+/*
+ * Copyright (C) 2019-2024 qwq233 <qwq233@qwq2333.top>
+ * https://github.com/qwq233/Nullgram
+ *
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation; either version 2
+ * of the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along with this software.
+ *  If not, see
+ * <https://www.gnu.org/licenses/>
+ */
+
 package org.telegram.ui.Components.Paint.Views;
 
 import static org.telegram.messenger.AndroidUtilities.dp;
@@ -10,7 +29,6 @@ import android.graphics.Canvas;
 import android.graphics.DashPathEffect;
 import android.graphics.Paint;
 import android.os.Build;
-import android.util.Log;
 import android.view.HapticFeedbackConstants;
 import android.view.MotionEvent;
 import android.view.View;
@@ -187,7 +205,7 @@ public class EntityView extends FrameLayout {
                     scale(d / pd);
                 }
                 double angleDiff = Math.atan2(y1 - y2, x1 - x2) - Math.atan2(previousLocationY - previousLocationY2, previousLocationX - previousLocationX2);
-                rotate(this.angle + (float) Math.toDegrees(angleDiff) - delegate.getCropRotation());
+                rotate(this.angle + (float) Math.toDegrees(angleDiff));
             }
 
             previousLocationX = x1;
@@ -936,7 +954,7 @@ public class EntityView extends FrameLayout {
                                 angle = (float) Math.atan2(y - pos[1], x - pos[0]);
                             }
 
-                            rotate((float) Math.toDegrees(angle) - delegate.getCropRotation());
+                            rotate((float) Math.toDegrees(angle));
 
                             previousLocationX = x;
                             previousLocationY = y;

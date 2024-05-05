@@ -1,9 +1,20 @@
 /*
- * This is the source code of Telegram for Android v. 1.3.x.
- * It is licensed under GNU GPL v. 2 or later.
- * You should have received a copy of the license in this archive (see LICENSE).
+ * Copyright (C) 2019-2024 qwq233 <qwq233@qwq2333.top>
+ * https://github.com/qwq233/Nullgram
  *
- * Copyright Nikolai Kudashov, 2013-2018.
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation; either version 2
+ * of the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along with this software.
+ *  If not, see
+ * <https://www.gnu.org/licenses/>
  */
 
 package org.telegram.ui.Adapters;
@@ -65,6 +76,7 @@ public class SearchAdapter extends RecyclerListView.SelectionAdapter {
     private int searchPointer;
     private ArrayList<ContactEntry> allUnregistredContacts;
     private ArrayList<ContactsController.Contact> unregistredContacts = new ArrayList<>();
+    private String lastQuery;
 
 
     public SearchAdapter(Context context, LongSparseArray<TLRPC.User> arg1, LongSparseArray<TLRPC.User> selected, boolean usernameSearch, boolean mutual, boolean chats, boolean bots, boolean self, boolean phones, int searchChannelId) {
@@ -133,6 +145,7 @@ public class SearchAdapter extends RecyclerListView.SelectionAdapter {
 
     private void processSearch(final String query) {
         AndroidUtilities.runOnUIThread(() -> {
+            lastQuery = query;
             if (allowUsernameSearch) {
                 searchAdapterHelper.queryServerSearch(query, true, allowChats, allowBots, allowSelf, false, channelId, allowPhoneNumbers, -1, 1);
             }
@@ -260,8 +273,8 @@ public class SearchAdapter extends RecyclerListView.SelectionAdapter {
     public int getItemCount() {
         unregistredContactsHeaderRow = -1;
         int count = searchResult.size();
-        unregistredContactsHeaderRow = count;
         if (!unregistredContacts.isEmpty()) {
+            unregistredContactsHeaderRow = count;
             count += unregistredContacts.size() + 1;
         }
 
@@ -359,7 +372,18 @@ public class SearchAdapter extends RecyclerListView.SelectionAdapter {
                     String un = null;
                     boolean self = false;
                     if (object instanceof TLRPC.User) {
-                        un = ((TLRPC.User) object).username;
+                        TLRPC.User user = (TLRPC.User) object;
+                        un = UserObject.getPublicUsername((TLRPC.User) object);
+                        if (un != null && lastQuery != null && !un.toLowerCase().contains(lastQuery.toLowerCase())) {
+                            if (user.usernames != null) {
+                                for (int i = 0; i < user.usernames.size(); ++i) {
+                                    TLRPC.TL_username u = user.usernames.get(i);
+                                    if (u != null && u.active && u.username.toLowerCase().contains(lastQuery.toLowerCase())) {
+                                        un = u.username;
+                                    }
+                                }
+                            }
+                        }
                         id = ((TLRPC.User) object).id;
                         self = ((TLRPC.User) object).self;
                     } else if (object instanceof TLRPC.Chat) {

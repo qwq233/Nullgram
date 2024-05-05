@@ -1,27 +1,33 @@
-package org.telegram.ui.Components;
+/*
+ * Copyright (C) 2019-2024 qwq233 <qwq233@qwq2333.top>
+ * https://github.com/qwq233/Nullgram
+ *
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation; either version 2
+ * of the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along with this software.
+ *  If not, see
+ * <https://www.gnu.org/licenses/>
+ */
 
-import static org.telegram.messenger.LocaleController.formatPluralString;
-import static org.telegram.messenger.LocaleController.getString;
+package org.telegram.ui.Components;
 
 import android.content.Context;
 import android.view.View;
 import android.widget.FrameLayout;
 
-import androidx.recyclerview.widget.LinearLayoutManager;
-
 import org.telegram.messenger.AndroidUtilities;
-import org.telegram.messenger.R;
 import org.telegram.ui.ActionBar.ActionBar;
-import org.telegram.ui.ActionBar.AdjustPanLayoutHelper;
-import org.telegram.ui.ActionBar.AlertDialog;
 import org.telegram.ui.ActionBar.BackDrawable;
 import org.telegram.ui.ActionBar.BaseFragment;
-import org.telegram.ui.ActionBar.INavigationLayout;
 import org.telegram.ui.ActionBar.Theme;
-import org.telegram.ui.Business.QuickRepliesController;
-import org.telegram.ui.ChatActivity;
-import org.telegram.ui.DialogsActivity;
-import org.telegram.ui.LaunchActivity;
 
 import java.util.ArrayList;
 
@@ -44,32 +50,6 @@ public abstract class UniversalFragment extends BaseFragment {
         });
 
         FrameLayout contentView = new SizeNotifierFrameLayout(context) {
-//            private AdjustPanLayoutHelper adjustPanLayoutHelper = new AdjustPanLayoutHelper(this) {
-//                @Override
-//                protected void onTransitionStart(boolean keyboardVisible, int contentHeight) {}
-//                @Override
-//                protected void onTransitionEnd() {}
-//                @Override
-//                protected void onPanTranslationUpdate(float y, float progress, boolean keyboardVisible) {
-//                    if (getParentLayout() != null && getParentLayout().isPreviewOpenAnimationInProgress()) {
-//                        return;
-//                    }
-//                    actionBar.setTranslationY(y);
-//                }
-//            };
-//
-//            @Override
-//            protected void onAttachedToWindow() {
-//                super.onAttachedToWindow();
-//                adjustPanLayoutHelper.onAttach();
-//            }
-//
-//            @Override
-//            protected void onDetachedFromWindow() {
-//                super.onDetachedFromWindow();
-//                adjustPanLayoutHelper.onDetach();
-//            }
-
             @Override
             protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
                 super.onMeasure(

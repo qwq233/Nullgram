@@ -1,3 +1,22 @@
+/*
+ * Copyright (C) 2019-2024 qwq233 <qwq233@qwq2333.top>
+ * https://github.com/qwq233/Nullgram
+ *
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation; either version 2
+ * of the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along with this software.
+ *  If not, see
+ * <https://www.gnu.org/licenses/>
+ */
+
 package org.telegram.ui.Stories.recorder;
 
 import static org.telegram.messenger.AndroidUtilities.dp;
@@ -103,8 +122,6 @@ import org.telegram.messenger.UserObject;
 import org.telegram.messenger.Utilities;
 import org.telegram.messenger.VideoEditedInfo;
 import org.telegram.messenger.camera.CameraController;
-import org.telegram.messenger.camera.CameraSession;
-import org.telegram.messenger.camera.CameraSessionWrapper;
 import org.telegram.tgnet.TLObject;
 import org.telegram.tgnet.TLRPC;
 import org.telegram.ui.ActionBar.ActionBar;
@@ -187,6 +204,7 @@ public class StoryRecorder implements NotificationCenter.NotificationCenterDeleg
     private boolean wasSend;
     private long wasSendPeer = 0;
     private ClosingViewProvider closingSourceProvider;
+    private Runnable closeListener;
 
     public static StoryRecorder getInstance(Activity activity, int currentAccount) {
         if (instance != null && (instance.activity != activity || instance.currentAccount != currentAccount)) {
@@ -432,6 +450,11 @@ public class StoryRecorder implements NotificationCenter.NotificationCenterDeleg
             src.rounding = Math.max(src.screenRect.width(), src.screenRect.height()) / 2f;
             return src;
         }
+    }
+
+    public StoryRecorder whenSent(Runnable listener) {
+        closeListener = listener;
+        return this;
     }
 
     public StoryRecorder closeToWhenSent(ClosingViewProvider closingSourceProvider) {
@@ -2737,6 +2760,10 @@ public class StoryRecorder implements NotificationCenter.NotificationCenterDeleg
                     fromSourceView.show();
                     fromSourceView = null;
                 }
+                if (closeListener != null) {
+                    closeListener.run();
+                    closeListener = null;
+                }
                 fromSourceView = closingSourceProvider != null ? closingSourceProvider.getView(finalSendAsDialogId) : null;
                 if (fromSourceView != null) {
                     openType = fromSourceView.type;
@@ -3045,6 +3072,9 @@ public class StoryRecorder implements NotificationCenter.NotificationCenterDeleg
         }
 
         private void startRecording(boolean byLongPress, Runnable whenStarted) {
+            if (cameraView == null) {
+                return;
+            }
             CameraController.getInstance().recordVideo(cameraView.getCameraSessionObject(), outputFile, false, (thumbPath, duration) -> {
                 if (recordControl != null) {
                     recordControl.stopRecordingLoading(true);

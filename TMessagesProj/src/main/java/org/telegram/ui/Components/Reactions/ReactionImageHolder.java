@@ -1,3 +1,22 @@
+/*
+ * Copyright (C) 2019-2024 qwq233 <qwq233@qwq2333.top>
+ * https://github.com/qwq233/Nullgram
+ *
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation; either version 2
+ * of the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along with this software.
+ *  If not, see
+ * <https://www.gnu.org/licenses/>
+ */
+
 package org.telegram.ui.Components.Reactions;
 
 import android.graphics.Canvas;
@@ -6,10 +25,8 @@ import android.graphics.ColorFilter;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffColorFilter;
 import android.graphics.Rect;
-import android.graphics.RectF;
 import android.view.View;
 
-import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.DocumentObject;
 import org.telegram.messenger.ImageLocation;
 import org.telegram.messenger.ImageReceiver;
@@ -19,6 +36,7 @@ import org.telegram.messenger.UserConfig;
 import org.telegram.tgnet.TLRPC;
 import org.telegram.ui.ActionBar.Theme;
 import org.telegram.ui.Components.AnimatedEmojiDrawable;
+import org.telegram.ui.Components.RLottieDrawable;
 
 import java.util.Objects;
 
@@ -94,6 +112,25 @@ public class ReactionImageHolder {
             imageReceiver.setAlpha(alpha);
             imageReceiver.draw(canvas);
         }
+    }
+
+    public boolean isLoaded() {
+        ImageReceiver imageReceiver;
+        if (animatedEmojiDrawable != null) {
+            imageReceiver = animatedEmojiDrawable.getImageReceiver();
+        } else {
+            imageReceiver = this.imageReceiver;
+        }
+        if (imageReceiver == null) return false;
+        if (!imageReceiver.hasImageSet()) return false;
+        if (!imageReceiver.hasImageLoaded()) return false;
+        RLottieDrawable rLottieDrawable = imageReceiver.getLottieAnimation();
+        if (rLottieDrawable != null) {
+            if (rLottieDrawable.isGeneratingCache()) {
+                return false;
+            }
+        }
+        return true;
     }
 
     public void setBounds(Rect bounds) {

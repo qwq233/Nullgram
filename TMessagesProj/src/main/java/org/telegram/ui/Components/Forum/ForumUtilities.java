@@ -1,3 +1,22 @@
+/*
+ * Copyright (C) 2019-2024 qwq233 <qwq233@qwq2333.top>
+ * https://github.com/qwq233/Nullgram
+ *
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation; either version 2
+ * of the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along with this software.
+ *  If not, see
+ * <https://www.gnu.org/licenses/>
+ */
+
 package org.telegram.ui.Components.Forum;
 
 import android.content.Context;
@@ -201,11 +220,20 @@ public class ForumUtilities {
     }
 
     public static void openTopic(BaseFragment baseFragment, long chatId, TLRPC.TL_forumTopic topic, int fromMessageId) {
+        ChatActivity chatActivity = getChatActivityForTopic(baseFragment, chatId, topic, fromMessageId, new Bundle());
+        if (chatActivity != null) {
+            baseFragment.presentFragment(chatActivity);
+        }
+    }
+
+    public static ChatActivity getChatActivityForTopic(BaseFragment baseFragment, long chatId, TLRPC.TL_forumTopic topic, int fromMessageId, Bundle args) {
         if (baseFragment == null || topic == null) {
-            return;
+            return null;
         }
         TLRPC.Chat chatLocal = baseFragment.getMessagesController().getChat(chatId);
-        Bundle args = new Bundle();
+        if (args == null) {
+            args = new Bundle();
+        }
         args.putLong("chat_id", chatId);
 
         if (fromMessageId != 0) {
@@ -226,7 +254,7 @@ public class ForumUtilities {
             }
         }
         if (message == null) {
-            return;
+            return null;
         }
         ArrayList<MessageObject> messageObjects = new ArrayList<>();
         messageObjects.add(new MessageObject(baseFragment.getCurrentAccount(), message, false, false));
@@ -234,7 +262,7 @@ public class ForumUtilities {
         if (fromMessageId != 0) {
             chatActivity.highlightMessageId = fromMessageId;
         }
-        baseFragment.presentFragment(chatActivity);
+        return chatActivity;
     }
 
     public static CharSequence getTopicSpannedName(TLRPC.ForumTopic topic, Paint paint, boolean isDialog) {

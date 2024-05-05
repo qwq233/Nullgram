@@ -1,3 +1,22 @@
+/*
+ * Copyright (C) 2019-2024 qwq233 <qwq233@qwq2333.top>
+ * https://github.com/qwq233/Nullgram
+ *
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation; either version 2
+ * of the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along with this software.
+ *  If not, see
+ * <https://www.gnu.org/licenses/>
+ */
+
 package org.telegram.ui;
 
 import static org.telegram.messenger.AndroidUtilities.dp;
@@ -8,7 +27,6 @@ import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
-import android.util.Log;
 import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.MotionEvent;
@@ -37,7 +55,6 @@ import org.telegram.ui.Components.CombinedDrawable;
 import org.telegram.ui.Components.CubicBezierInterpolator;
 import org.telegram.ui.Components.LayoutHelper;
 import org.telegram.ui.Components.LinkSpanDrawable;
-import org.telegram.ui.Components.MediaActivity;
 import org.telegram.ui.Components.UItem;
 import org.telegram.ui.Components.UniversalAdapter;
 import org.telegram.ui.Components.UniversalRecyclerView;
@@ -170,6 +187,7 @@ public class ReportAdBottomSheet extends BottomSheet {
                             }
                         }
                     } else if (response instanceof TLRPC.TL_channels_sponsoredMessageReportResultAdsHidden) {
+                        MessagesController.getInstance(currentAccount).disableAds(false);
                         if (listener != null) {
                             listener.onHidden();
                             dismiss();
@@ -382,7 +400,6 @@ public class ReportAdBottomSheet extends BottomSheet {
                 for (int i = 0; i < option.options.size(); i++) {
                     UItem buttonItem = new UItem(UniversalAdapter.VIEW_TYPE_RIGHT_ICON_TEXT, false);
                     buttonItem.text = option.options.get(i).text;
-                    buttonItem.backgroundKey = Theme.key_dialogBackground;
                     buttonItem.iconResId = R.drawable.msg_arrowright;
                     buttonItem.id = i;
                     items.add(buttonItem);

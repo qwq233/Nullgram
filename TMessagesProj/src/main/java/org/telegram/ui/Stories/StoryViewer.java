@@ -1,3 +1,22 @@
+/*
+ * Copyright (C) 2019-2024 qwq233 <qwq233@qwq2333.top>
+ * https://github.com/qwq233/Nullgram
+ *
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation; either version 2
+ * of the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along with this software.
+ *  If not, see
+ * <https://www.gnu.org/licenses/>
+ */
+
 package org.telegram.ui.Stories;
 
 import static android.view.WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON;
@@ -21,7 +40,6 @@ import android.graphics.RectF;
 import android.media.AudioManager;
 import android.net.Uri;
 import android.os.Build;
-import android.util.Log;
 import android.util.LongSparseArray;
 import android.util.SparseArray;
 import android.view.GestureDetector;
@@ -50,7 +68,6 @@ import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.AnimationNotificationsLocker;
 import org.telegram.messenger.BotWebViewVibrationEffect;
 import org.telegram.messenger.BuildVars;
-import org.telegram.messenger.ChatObject;
 import org.telegram.messenger.DialogObject;
 import org.telegram.messenger.FileLoader;
 import org.telegram.messenger.FileLog;
@@ -1710,7 +1727,7 @@ public class StoryViewer implements NotificationCenter.NotificationCenterDelegat
         }
     }
 
-    private void checkSelfStoriesView() {
+    public void checkSelfStoriesView() {
         if (selfStoryViewsView == null) {
             selfStoryViewsView = new SelfStoryViewsView(containerView.getContext(), this);
             containerView.addView(selfStoryViewsView, 0);
@@ -2140,6 +2157,11 @@ public class StoryViewer implements NotificationCenter.NotificationCenterDelegat
         }
     }
 
+    private boolean showViewsAfterOpening;
+    public void showViewsAfterOpening() {
+        showViewsAfterOpening = true;
+    }
+
     private void startOpenAnimation() {
         updateTransitionParams();
         progressToOpen = 0f;
@@ -2189,7 +2211,10 @@ public class StoryViewer implements NotificationCenter.NotificationCenterDelegat
                     peerStoriesView.updatePosition();
                 }
 
-                if (!SharedConfig.storiesIntroShown) {
+                if (showViewsAfterOpening) {
+                    showViewsAfterOpening = false;
+                    openViews();
+                } else if (!SharedConfig.storiesIntroShown) {
                     if (storiesIntro == null) {
                         storiesIntro = new StoriesIntro(containerView.getContext(), windowView);
                         storiesIntro.setAlpha(0f);

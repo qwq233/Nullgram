@@ -21,22 +21,30 @@ public class AvatarSpan extends ReplacementSpan {
     private final Paint shadowPaint;
     private final ImageReceiver imageReceiver;
     private final AvatarDrawable avatarDrawable;
-    private final int sz;
+    private float sz;
     private final int currentAccount;
 
     private View parent;
 
-    public AvatarSpan(View parent, int currentAccount, int sz) {
+    public AvatarSpan(View parent, int currentAccount) {
+        this(parent, currentAccount, 18);
+    }
+
+    public AvatarSpan(View parent, int currentAccount, float sz) {
         this.currentAccount = currentAccount;
         this.imageReceiver = new ImageReceiver(parent);
         this.avatarDrawable = new AvatarDrawable();
-        imageReceiver.setRoundRadius(dp(sz));
-        this.sz = sz;
+        setSize(sz);
 
         this.shadowPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
         shadowPaint.setShadowLayer(dp(1), 0, dp(.66f), 0x33000000);
 
         setParent(parent);
+    }
+
+    public void setSize(float sz) {
+        imageReceiver.setRoundRadius(dp(sz));
+        this.sz = sz;
     }
 
     public void setParent(View parent) {
@@ -86,6 +94,11 @@ public class AvatarSpan extends ReplacementSpan {
     public void setUser(TLRPC.User user) {
         avatarDrawable.setInfo(currentAccount, user);
         imageReceiver.setForUserOrChat(user, avatarDrawable);
+    }
+
+    public void setName(String name) {
+        avatarDrawable.setInfo(0, name, null, null, null, null);
+        imageReceiver.setForUserOrChat(null, avatarDrawable);
     }
 
     @Override

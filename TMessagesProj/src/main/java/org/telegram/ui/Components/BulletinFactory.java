@@ -1,3 +1,22 @@
+/*
+ * Copyright (C) 2019-2024 qwq233 <qwq233@qwq2333.top>
+ * https://github.com/qwq233/Nullgram
+ *
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation; either version 2
+ * of the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along with this software.
+ *  If not, see
+ * <https://www.gnu.org/licenses/>
+ */
+
 package org.telegram.ui.Components;
 
 import android.content.Context;
@@ -25,7 +44,6 @@ import androidx.core.graphics.ColorUtils;
 
 import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.ApplicationLoader;
-import org.telegram.messenger.BuildVars;
 import org.telegram.messenger.ChatObject;
 import org.telegram.messenger.DialogObject;
 import org.telegram.messenger.LocaleController;
@@ -41,6 +59,7 @@ import org.telegram.messenger.Utilities;
 import org.telegram.tgnet.TLObject;
 import org.telegram.tgnet.TLRPC;
 import org.telegram.ui.ActionBar.BaseFragment;
+import org.telegram.ui.ActionBar.BottomSheet;
 import org.telegram.ui.ActionBar.Theme;
 import org.telegram.ui.LaunchActivity;
 import org.telegram.ui.PremiumPreviewFragment;
@@ -71,18 +90,19 @@ public final class BulletinFactory {
         if (baseFragment == null) {
             return BulletinFactory.of(Bulletin.BulletinWindow.make(ApplicationLoader.applicationContext), null);
         }
+        if (baseFragment.visibleDialog instanceof BottomSheet) {
+            return BulletinFactory.of(((BottomSheet) baseFragment.visibleDialog).container, baseFragment.getResourceProvider());
+        }
         return BulletinFactory.of(baseFragment);
     }
 
     public void showForError(TLRPC.TL_error error) {
-        if (BuildVars.DEBUG_VERSION) {
-            createErrorBulletin(error.code + " " + error.text).show();
-        } else {
-            createErrorBulletin(LocaleController.getString(R.string.UnknownError)).show();
-        }
+        if (!LaunchActivity.isActive) return;
+        createErrorBulletin(LocaleController.formatString(R.string.UnknownErrorCode, error.text)).show();
     }
 
     public static void showError(TLRPC.TL_error error) {
+        if (!LaunchActivity.isActive) return;
         global().createErrorBulletin(LocaleController.formatString(R.string.UnknownErrorCode, error.text)).show();
     }
 
@@ -235,9 +255,9 @@ public final class BulletinFactory {
             }
             text = ssb;
         }
-        layout.textView.setText(text);
         layout.textView.setSingleLine(false);
         layout.textView.setMaxLines(maxLines);
+        layout.textView.setText(text);
         return create(layout, text.length() < 20 ? Bulletin.DURATION_SHORT : Bulletin.DURATION_LONG);
     }
 
@@ -357,10 +377,27 @@ public final class BulletinFactory {
     }
 
     public Bulletin createUndoBulletin(CharSequence text, boolean textAndIcon, Runnable onUndo, Runnable onAction) {
-        final Bulletin.LottieLayout layout = new Bulletin.LottieLayout(getContext(), resourcesProvider);
-        layout.textView.setText(text);
-        layout.textView.setSingleLine(false);
-        layout.textView.setMaxLines(2);
+        return this.createUndoBulletin(text, null, textAndIcon, onUndo, onAction);
+    }
+
+    public Bulletin createUndoBulletin(CharSequence text, CharSequence subtitle, Runnable onUndo, Runnable onAction) {
+        return this.createUndoBulletin(text, subtitle, true, onUndo, onAction);
+    }
+
+    public Bulletin createUndoBulletin(CharSequence text, CharSequence subtitle, boolean textAndIcon, Runnable onUndo, Runnable onAction) {
+        final Bulletin.ButtonLayout layout;
+        if (!TextUtils.isEmpty(subtitle)) {
+            final Bulletin.TwoLineLottieLayout twoLineLayout = new Bulletin.TwoLineLottieLayout(getContext(), resourcesProvider);
+            twoLineLayout.titleTextView.setText(text);
+            twoLineLayout.subtitleTextView.setText(subtitle);
+            layout = twoLineLayout;
+        } else {
+            final Bulletin.LottieLayout singleLineLayout = new Bulletin.LottieLayout(getContext(), resourcesProvider);
+            singleLineLayout.textView.setText(text);
+            singleLineLayout.textView.setSingleLine(false);
+            singleLineLayout.textView.setMaxLines(2);
+            layout = singleLineLayout;
+        }
         layout.setTimer();
         layout.setButton(new Bulletin.UndoButton(getContext(), true, textAndIcon, resourcesProvider).setText(LocaleController.getString("Undo", R.string.Undo)).setUndoAction(onUndo).setDelayedAction(onAction));
         return create(layout, Bulletin.DURATION_PROLONG);

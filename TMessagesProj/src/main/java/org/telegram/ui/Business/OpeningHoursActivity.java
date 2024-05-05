@@ -1,6 +1,26 @@
+/*
+ * Copyright (C) 2019-2024 qwq233 <qwq233@qwq2333.top>
+ * https://github.com/qwq233/Nullgram
+ *
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation; either version 2
+ * of the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along with this software.
+ *  If not, see
+ * <https://www.gnu.org/licenses/>
+ */
+
 package org.telegram.ui.Business;
 
 import static org.telegram.messenger.AndroidUtilities.dp;
+import static org.telegram.messenger.LocaleController.formatString;
 import static org.telegram.messenger.LocaleController.getString;
 
 import android.content.Context;
@@ -13,44 +33,32 @@ import android.widget.FrameLayout;
 
 import androidx.annotation.NonNull;
 
-import org.checkerframework.checker.units.qual.A;
 import org.telegram.messenger.AndroidUtilities;
-import org.telegram.messenger.BotWebViewVibrationEffect;
 import org.telegram.messenger.LocaleController;
-import org.telegram.messenger.MessagesController;
 import org.telegram.messenger.NotificationCenter;
 import org.telegram.messenger.R;
-import org.telegram.messenger.Utilities;
-import org.telegram.tgnet.AbstractSerializedData;
-import org.telegram.tgnet.TLObject;
+import org.telegram.messenger.UserObject;
 import org.telegram.tgnet.TLRPC;
 import org.telegram.ui.ActionBar.ActionBar;
 import org.telegram.ui.ActionBar.ActionBarMenuItem;
-import org.telegram.ui.ActionBar.AlertDialog;
 import org.telegram.ui.ActionBar.BaseFragment;
-import org.telegram.ui.ActionBar.BottomSheet;
 import org.telegram.ui.ActionBar.Theme;
 import org.telegram.ui.Cells.NotificationsCheckCell;
 import org.telegram.ui.Cells.TextCell;
 import org.telegram.ui.Cells.TextCheckCell;
-import org.telegram.ui.Components.AlertsCreator;
-import org.telegram.ui.Components.BottomSheetWithRecyclerListView;
 import org.telegram.ui.Components.BulletinFactory;
 import org.telegram.ui.Components.CircularProgressDrawable;
 import org.telegram.ui.Components.CrossfadeDrawable;
 import org.telegram.ui.Components.LayoutHelper;
-import org.telegram.ui.Components.RecyclerListView;
 import org.telegram.ui.Components.UItem;
 import org.telegram.ui.Components.UniversalAdapter;
 import org.telegram.ui.Components.UniversalRecyclerView;
 
 import java.time.DayOfWeek;
-import java.time.ZoneId;
 import java.time.format.TextStyle;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
-import java.util.TimeZone;
 
 public class OpeningHoursActivity extends BaseFragment implements NotificationCenter.NotificationCenterDelegate {
 
@@ -298,8 +306,15 @@ public class OpeningHoursActivity extends BaseFragment implements NotificationCe
                 if (!days[prevDay].isEmpty() && days[prevDay].get(days[prevDay].size() - 1).end >= 24 * 60) {
                     days[prevDay].get(days[prevDay].size() - 1).end = 24 * 60 - 1;
                 }
+
+                int periodEnd = Math.min(m - start - 1, 24 * 60 * 2 - 1);
+                ArrayList<Period> nextDay = days[(7 + i + 1) % 7];
+                if (periodEnd >= 24 * 60 && !nextDay.isEmpty() && nextDay.get(0).start < periodEnd - 24 * 60) {
+                    periodEnd = 24 * 60 + nextDay.get(0).start - 1;
+                }
+
                 days[i].clear();
-                days[i].add(new Period(0, 24 * 60 - 1));
+                days[i].add(new Period(0, periodEnd));
             } else {
                 int nextDay = (i + 1) % 7;
                 if (!days[i].isEmpty() && !days[nextDay].isEmpty()) {
@@ -331,6 +346,44 @@ public class OpeningHoursActivity extends BaseFragment implements NotificationCe
             }
         }
         return hours;
+    }
+
+    public static String toString(int currentAccount, TLRPC.User user, TLRPC.TL_businessWorkHours business_work_hours) {
+        if (business_work_hours == null) return null;
+        ArrayList<OpeningHoursActivity.Period>[] days = OpeningHoursActivity.getDaysHours(business_work_hours.weekly_open);
+        StringBuilder sb = new StringBuilder();
+        if (user != null) {
+            sb.append(formatString(R.string.BusinessHoursCopyHeader, UserObject.getUserName(user))).append("\n");
+        }
+        for (int i = 0; i < days.length; ++i) {
+            ArrayList<OpeningHoursActivity.Period> periods = days[i];
+            String day = DayOfWeek.values()[i].getDisplayName(TextStyle.FULL, LocaleController.getInstance().getCurrentLocale());
+            day = day.substring(0, 1).toUpperCase() + day.substring(1);
+            sb.append(day).append(": ");
+            if (OpeningHoursActivity.isFull(periods)) {
+                sb.append(LocaleController.getString(R.string.BusinessHoursProfileOpen));
+            } else if (periods.isEmpty()) {
+                sb.append(LocaleController.getString(R.string.BusinessHoursProfileClose));
+            } else {
+                for (int j = 0; j < periods.size(); ++j) {
+                    if (j > 0) sb.append(", ");
+                    OpeningHoursActivity.Period p = periods.get(j);
+                    sb.append(OpeningHoursActivity.Period.timeToString(p.start));
+                    sb.append(" - ");
+                    sb.append(OpeningHoursActivity.Period.timeToString(p.end));
+                }
+            }
+            sb.append("\n");
+        }
+        TLRPC.TL_timezone timezone = TimezonesController.getInstance(currentAccount).findTimezone(business_work_hours.timezone_id);
+        Calendar calendar = Calendar.getInstance();
+        int currentUtcOffset = calendar.getTimeZone().getRawOffset() / 1000;
+        int valueUtcOffset = timezone == null ? 0 : timezone.utc_offset;
+        int utcOffset = (currentUtcOffset - valueUtcOffset) / 60;
+        if (utcOffset != 0 && timezone != null) {
+            sb.append(formatString(R.string.BusinessHoursCopyFooter, TimezonesController.getInstance(currentAccount).getTimezoneName(timezone, true)));
+        }
+        return sb.toString();
     }
 
     private void processDone() {
