@@ -17,7 +17,6 @@
   ~  If not, see
   ~ <https://www.gnu.org/licenses/>
   -->
-
 <resources>
     <string name="NullgramPushService">Nullgram 推送服務</string>
     <string name="NullSettings">Nullgram 設定</string>
@@ -232,7 +231,6 @@
     <string name="ignoreMutedCount">忽略分頁中已靜音的數量</string>
     <string name="disableSharePhoneWithContactByDefault">無法分享電話號碼添加聯絡人</string>
     <string name="disableStickersAutoReorder">停用貼圖包自動重新排序功能</string>
-    <string name="Ban">封鎖</string>
     <string name="autoDisableBuiltInProxy">自動停用內建代理</string>
     <string name="autoDisableBuiltInProxyDesc">當 Nullgram 偵測到您開啟 VPN 時，將自動關閉內建代理</string>
     <string name="NullgramWsDescription">透過 Cloudflare 以 WebSocket 連接至 TELEOFFICIAL。\n由 Nullgram 提供</string>
@@ -341,10 +339,10 @@
     <string name="MessageFilter">訊息過濾器</string>
     <string name="Pattern">匹配模式</string>
     <string name="MessageFilterDesc">使用正規式來匹配訊息，匹配到的訊息將被隱藏。\n留空則表示禁用此功能</string>
-    <string name="SaveToDownloadCount_zero">正在儲存%1$d到Download</string>
-    <string name="SaveToDownloadCount_one">正在儲存%1$d到Download</string>
-    <string name="SaveToDownloadCount_two">正在儲存%1$d到Download</string>
-    <string name="SaveToDownloadCount_few">正在儲存%1$d到Download</string>
-    <string name="SaveToDownloadCount_many">正在儲存%1$d到Download</string>
-    <string name="SaveToDownloadCount_other">正在儲存%1$d到Download</string>
+    <string name="SaveToDownloadCount_zero">正在儲存 %1$d 個檔案至下載目錄</string>
+    <string name="SaveToDownloadCount_one">正在儲存 %1$d 個檔案至下載目錄</string>
+    <string name="SaveToDownloadCount_two">正在儲存 %1$d 個檔案至下載目錄</string>
+    <string name="SaveToDownloadCount_few">正在儲存 %1$d 個檔案至下載目錄</string>
+    <string name="SaveToDownloadCount_many">正在儲存 %1$d 個檔案至下載目錄</string>
+    <string name="SaveToDownloadCount_other">正在儲存 %1$d 個檔案至下載目錄</string>
 </resources>

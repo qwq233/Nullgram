@@ -17,7 +17,6 @@
   ~  If not, see
   ~ <https://www.gnu.org/licenses/>
   -->
-
 <resources>
     <string name="NullgramPushService">Nullgram 推送服务</string>
     <string name="NullSettings">Nullgram 设置</string>
@@ -189,7 +188,7 @@
     <string name="PasscodeEdit">更改密码锁</string>
     <string name="PasscodeRemove">移除密码锁</string>
     <string name="PasscodeHideAccount">隐藏账户</string>
-    <string name="PasscodeAllowPanic">使用恢复代码登出</string>
+    <string name="PasscodeAllowPanic">使用紧急代码登出</string>
     <string name="PasscodeAbout">为每个账户设置不同的密码，然后通过输入相应的密码来切换。</string>
     <string name="PasscodePanicCode">紧急代码</string>
     <string name="PasscodePanicCodeSet">设置紧急代码</string>
@@ -232,7 +231,6 @@
     <string name="ignoreMutedCount">忽略标签中的静音计数</string>
     <string name="disableSharePhoneWithContactByDefault">添加联系人时不分享手机号码</string>
     <string name="disableStickersAutoReorder">禁用贴纸自动重新排列</string>
-    <string name="Ban">封禁</string>
     <string name="autoDisableBuiltInProxy">自动关闭内置代理</string>
     <string name="autoDisableBuiltInProxyDesc">当 Nullgram 检测到您打开 VPN 时，它将自动关闭内置代理</string>
     <string name="NullgramWsDescription">通过 Cloudflare 提供的 WebSocket 连接到 TELEOFFICIAL。\n由 Nullgram 提供</string>
@@ -295,7 +293,7 @@
     <string name="JumpToBeginning">回到顶部</string>
     <string name="DisableQuickSendMediaBottom">禁用快速发送媒体按钮</string>
     <string name="ProviderBaiduTranslate">百度翻译</string>
-    <string name="ProviderTranSmartTranslate">TransSmart 翻译</string>
+    <string name="ProviderTranSmartTranslate">TranSmart 翻译</string>
     <string name="alwaysSendWithoutSound">总是静音发送</string>
     <string name="EditEnableMarkdown">启用 Markdown</string>
     <string name="EditDisableMarkdown">禁用 Markdown</string>
@@ -335,15 +333,16 @@
     <string name="ShowTitle">显示标题</string>
     <string name="HideTitle">隐藏标题</string>
     <string name="showHideTitle">显示隐藏标题</string>
-    <string name="DownloadingStickerSet">Downloading sticker set…</string>
+    <string name="DownloadingStickerSet">正在下载贴图包…</string>
     <string name="IncompleteDownload">下载超时，请检查您的网络</string>
     <string name="StickerPackNotFound">未找到贴纸包</string>
-    <string name="MessageFilter">Message Filter</string>
-    <string name="Pattern">Pattern</string>
-    <string name="SaveToDownloadCount_zero">正在保存 %1$d 个文件到下载</string>
-    <string name="SaveToDownloadCount_one">正在保存 %1$d 个文件到下载</string>
-    <string name="SaveToDownloadCount_two">正在保存 %1$d 个文件到下载</string>
-    <string name="SaveToDownloadCount_few">正在保存 %1$d 个文件到下载</string>
-    <string name="SaveToDownloadCount_many">正在保存 %1$d 个文件到下载</string>
-    <string name="SaveToDownloadCount_other">正在保存 %1$d 个文件到下载</string>
+    <string name="MessageFilter">消息过滤器</string>
+    <string name="Pattern">正则表达式</string>
+    <string name="MessageFilterDesc">使用正则表达式来匹配消息，匹配的消息将被隐藏。\n留空以禁用它</string>
+    <string name="SaveToDownloadCount_zero">Saving %1$d files to Download</string>
+    <string name="SaveToDownloadCount_one">Saving %1$d file to Download</string>
+    <string name="SaveToDownloadCount_two">Saving %1$d files to Download</string>
+    <string name="SaveToDownloadCount_few">Saving %1$d files to Download</string>
+    <string name="SaveToDownloadCount_many">Saving %1$d files to Download</string>
+    <string name="SaveToDownloadCount_other">Saving %1$d files to Download</string>
 </resources>

@@ -1,4 +1,22 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!--
+  ~ Copyright (C) 2019-2024 qwq233 <qwq233@qwq2333.top>
+  ~ https://github.com/qwq233/Nullgram
+  ~
+  ~ This program is free software; you can redistribute it and/or
+  ~ modify it under the terms of the GNU General Public License
+  ~ as published by the Free Software Foundation; either version 2
+  ~ of the License, or (at your option) any later version.
+  ~
+  ~ This program is distributed in the hope that it will be useful,
+  ~ but WITHOUT ANY WARRANTY; without even the implied warranty of
+  ~ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  ~ GNU General Public License for more details.
+  ~
+  ~ You should have received a copy of the GNU General Public License along with this software.
+  ~  If not, see
+  ~ <https://www.gnu.org/licenses/>
+  -->
 <resources>
     <string name="NullgramPushService">Nullgram Bildirim Hizmeti</string>
     <string name="NullSettings">Nullgram Ayarları</string>
@@ -213,10 +231,9 @@
     <string name="ignoreMutedCount">Sekmedeki Sessiz Sayımı Yok say</string>
     <string name="disableSharePhoneWithContactByDefault">Kişi Eklediğinizde Telefon Numarasını Paylaşmayın</string>
     <string name="disableStickersAutoReorder">Çıkartma paketlerinin otomatik olarak yeniden sıralanmasını devre dışı bırak</string>
-    <string name="Ban">Yasakla</string>
     <string name="autoDisableBuiltInProxy">Otomatik proxyi devre dışı bırak Built-In olanı</string>
     <string name="autoDisableBuiltInProxyDesc">Nullgram, VPN\'yi açtığınızı tespit ettiğinde yerleşik proxy\'yi otomatik olarak kapatacaktır</string>
-    <string name="NullgramWsDescription">Connect to TELEOFFICIAL through WebSocket via Cloudflare.\nProvided by Nullgram</string>
+    <string name="NullgramWsDescription">Cloudflare aracılığıyla WebSocket ile TELEOFFICIAL\'e bağlanın.\nNullgram tarafından sağlanmıştır</string>
     <string name="NekogramXWsDescription">Nekogram x tarafından sağlandı</string>
     <string name="WsGetHelp">Ayrıca kolayca kendiniz de dağıtabilirsiniz!</string>
     <string name="WsCustomDescription">Cloudflare aracılığıyla WebSocket aracılığıyla TELEOFFICIAL\'e bağlanmak için özel alan adını kullanın.</string>
@@ -276,7 +293,7 @@
     <string name="JumpToBeginning">Başa atla</string>
     <string name="DisableQuickSendMediaBottom">Hızlı Gönderim Medyasını Alttan Devre Dışı Bırak</string>
     <string name="ProviderBaiduTranslate">Baidu çevirmen</string>
-    <string name="ProviderTranSmartTranslate">TranSmart Translator</string>
+    <string name="ProviderTranSmartTranslate">Trans Mart Çeviri motoru</string>
     <string name="alwaysSendWithoutSound">Her zaman sessiz gönder</string>
     <string name="EditEnableMarkdown">Markdown u etkinleştir</string>
     <string name="EditDisableMarkdown">Markdown kapat</string>
@@ -286,40 +303,46 @@
     <string name="MarkdownAbout">Markdown\'ı kullanarak mesajlardaki metni düzenleyin: ^1**bold**^1, ^2__italic__^2, ^3~~strikethrough~~^3, ^4`monospace`^4, ^5||spoiler||^5, ^6text^7url^8.</string>
     <string name="MarkdownAbout2">Markdown\'ı kullanarak mesajlardaki metni düzenleyin: ^1**bold**^1, ^2__italic__^2, ^3~~strikethrough~~^3, ^4`monospace`^4, ^5||spoiler||^5.</string>
     <string name="MarkdownDisableByDefault">Varsayılan olarak kapat</string>
-    <string name="DatacenterStatusShort">Datacenter</string>
+    <string name="DatacenterStatusShort">Veri Merkezi</string>
     <string name="RegistrationDate">Kayıt tarihi</string>
-    <string name="RegistrationDateNewer">Newer than %s</string>
-    <string name="RegistrationDateOlder">Older than %s</string>
-    <string name="RegistrationDateApproximately">Approximately %s</string>
-    <string name="showRPCError">Show RPC Error</string>
-    <string name="enablePanguOnReceiving">Enable Pangu on receiving</string>
-    <string name="enablePanguOnSending">Enable Pangu on sending</string>
-    <string name="panguInfo">Paranoid text spacing for good readability, to automatically insert whitespace between CJK (Chinese, Japanese, Korean), half-width English, digit and symbol characters.</string>
-    <string name="showExactTime">Display time in seconds</string>
-    <string name="keepOnlineStatusAs">Keep online status as</string>
-    <string name="Offline">Offline</string>
-    <string name="Special">Special</string>
-    <string name="BotLoginMessage">Enter the bot token obtained from **@BotFather**.</string>
-    <string name="Stories">Stories</string>
+    <string name="RegistrationDateNewer">%s\'den daha yeni</string>
+    <string name="RegistrationDateOlder">%s\'den daha eski</string>
+    <string name="RegistrationDateApproximately">Yaklaşık olarak %s</string>
+    <string name="showRPCError">RPC hatasını göster</string>
+    <string name="enablePanguOnReceiving">Gelen mesajlarda panguyu etkileştir</string>
+    <string name="enablePanguOnSending">Gönderilen mesajlarda panguyu etkinleştir (önerilmez)</string>
+    <string name="panguInfo">İyi okunabilirlik için paranoyak metin aralığı, CJK (Çince, Japonca, Korece), yarı genişlikli İngilizce, rakam ve sembol karakterleri arasına otomatik olarak boşluk eklemek için.</string>
+    <string name="showExactTime">Saniye cinsinden görüntüleme süresi</string>
+    <string name="keepOnlineStatusAs">Aktfilik durumunu şöyle ayarla:</string>
+    <string name="Offline">Çevrimdışı </string>
+    <string name="Special">Özel</string>
+    <string name="BotLoginMessage">**@BotFather**\'dan aldığınız bot tokenini girin</string>
+    <string name="Stories">Hikayeler</string>
     <string name="HideStories">Hikayeleri Gizler</string>
-    <string name="storyStealthMode">Story Stealth mode</string>
-    <string name="OneMoreThing">One More Thing</string>
+    <string name="storyStealthMode">Hikaye Gizlilik modu</string>
+    <string name="OneMoreThing">Daha fazla şey</string>
     <string name="NotOriginalNullgramInfo">Görünüşe göre Nullgram\'ın bir çatalını kullanıyorsunuz.\nAyrıca Nullgram\'ın Kanalını da takip etmek istiyor musunuz?</string>
-    <string name="Official">Official</string>
-    <string name="Before">Before...</string>
+    <string name="Official">Resmi</string>
+    <string name="Before">Öncesinde...</string>
     <string name="Custom">Özelleştirilmiş</string>
-    <string name="MonoCode">Code</string>
-    <string name="CreateCode">Create Code</string>
-    <string name="CreateCodeLanguage">Language</string>
+    <string name="MonoCode">Kod</string>
+    <string name="CreateCode">Kod Oluştur </string>
+    <string name="CreateCodeLanguage">Dil</string>
     <string name="UnsupportedMediaNullgram">Bu mesaj Nullgram sürümünüzde desteklenmiyor. Görüntülemek için uygulamayı güncelleyin: https://t.me/NullgramClient</string>
     <string name="ignoreUserSpecifiedReplyColor">Kullanıcı tarafından ayarlanan yanıt rengini yoksay</string>
-    <string name="ShowTitle">Show title</string>
-    <string name="HideTitle">Hide title</string>
-    <string name="showHideTitle">Show hide title</string>
-    <string name="DownloadingStickerSet">Downloading sticker set…</string>
-    <string name="IncompleteDownload">Download timed out, please check your network</string>
-    <string name="StickerPackNotFound">Sticker pack not found.</string>
-    <string name="MessageFilter">Message Filter</string>
-    <string name="Pattern">Pattern</string>
-    <string name="MessageFilterDesc">Use regular expressions to match messages, and the matched messages will be hidden.\nLeave it blank to disable it</string>
+    <string name="ShowTitle">Başlığı göster</string>
+    <string name="HideTitle">Başlığı gizle </string>
+    <string name="showHideTitle">Başlığı gizleyi göster</string>
+    <string name="DownloadingStickerSet">Çıkartma paketi yükleniyor…</string>
+    <string name="IncompleteDownload">Bağlantı zaman aşımı, internetini kontrol edin</string>
+    <string name="StickerPackNotFound">Çıkartma paketi bulunamadı.</string>
+    <string name="MessageFilter">Mesaj filtreleyici</string>
+    <string name="Pattern">Desen</string>
+    <string name="MessageFilterDesc">İletileri eşleştirmek için normal ifadeler kullandığınızda eşleşen iletiler gizlenir.\nDevre dışı bırakmak için boş bırakın</string>
+    <string name="SaveToDownloadCount_zero">%1$d dosyaları Download a kaydediliyor</string>
+    <string name="SaveToDownloadCount_one">%1$d dosyası downloada kaydediliyor</string>
+    <string name="SaveToDownloadCount_two">%1$d dosya Download üzere kaydediliyor</string>
+    <string name="SaveToDownloadCount_few">%1$d dosya İndirilmek üzere kaydediliyor</string>
+    <string name="SaveToDownloadCount_many"></string>
+    <string name="SaveToDownloadCount_other"></string>
 </resources>
