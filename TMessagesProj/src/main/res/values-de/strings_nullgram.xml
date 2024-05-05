@@ -231,7 +231,6 @@
     <string name="ignoreMutedCount">Ignore Muted Count in tab</string>
     <string name="disableSharePhoneWithContactByDefault">No Share Phone Number When Add Contact</string>
     <string name="disableStickersAutoReorder">Disable sticker packs auto-reorder</string>
-    <string name="Ban">Ban</string>
     <string name="autoDisableBuiltInProxy">Auto Disable Built-In Proxy</string>
     <string name="autoDisableBuiltInProxyDesc">It will automatically turn off the built-in proxy when Nullgram detected you turn on the VPN</string>
     <string name="NullgramWsDescription">Connect to TELEOFFICIAL through WebSocket via Cloudflare.\nProvided by Nullgram</string>
