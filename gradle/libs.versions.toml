@@ -34,7 +34,7 @@ mlkitVision = "16.0.0-beta1"
 processPhoenix = "3.0.0"
 sharetarget = "1.2.0"
 paletteKtx = "1.0.0"
-rust = "0.9.3"
+rust = "0.9.4"
 
 [libraries]
 checker-compat-qual = { module = "org.checkerframework:checker-compat-qual", version.ref = "checkerCompatQual" }
