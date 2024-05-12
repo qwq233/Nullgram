@@ -15135,23 +15135,14 @@ public class ChatMessageCell extends BaseCell implements SeekBar.SeekBarDelegate
                         includeAvatar = false;
                     }
 
+                    currentForwardNameString = Utils.showForwardDate(messageObject, currentForwardNameString);
                     forwardedNameWidth = getMaxNameWidth();
                     forwardedString = getForwardedMessageText(messageObject);
                     if (hasPsaHint) {
                         forwardedNameWidth -= dp(36);
                     }
-                    currentForwardNameString = Utils.showForwardDate(messageObject, currentForwardNameString);
-                    String from = LocaleController.getString("From", R.string.From);
-                    String fromFormattedString = LocaleController.getString("FromFormatted", R.string.FromFormatted);
-                    int idx = fromFormattedString.indexOf("%1$s");
-                    int fromWidth = (int) Math.ceil(Theme.chat_forwardNamePaint.measureText(from + " "));
                     CharSequence name = TextUtils.ellipsize((includeAvatar ? "A " : "") + currentForwardNameString.replace('\n', ' '), Theme.chat_replyNamePaint, forwardedNameWidth - viaWidth - dp(includeAvatar ? 17.33f : 0), TextUtils.TruncateAt.END);
-                    String fromString;
-                    try {
-                        fromString = String.format(fromFormattedString, name);
-                    } catch (Exception e) {
-                        fromString = name.toString();
-                    }
+                    String fromString = name.toString();
 
                     SpannableStringBuilder stringBuilder;
                     if (viaString != null) {
