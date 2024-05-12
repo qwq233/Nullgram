@@ -94,7 +94,6 @@ dependencies {
     implementation(libs.play.services.wallet)
     implementation(libs.play.services.mlkit.vision)
     implementation(libs.play.services.mlkit.imageLabeling)
-//    implementation("com.google.android.gms:play-services-safetynet:18.0.1")
     implementation(libs.isoparser)
     implementation(files("libs/stripe.aar"))
     implementation(libs.language.id)
@@ -175,7 +174,6 @@ android {
             proguardFiles(File(projectDir, "proguard-rules.pro"))
 
             the<CrashlyticsExtension>().nativeSymbolUploadEnabled = true
-            the<CrashlyticsExtension>().mappingFileUploadEnabled = true
         }
 
         getByName("debug") {
