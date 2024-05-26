@@ -333,16 +333,16 @@
     <string name="ShowTitle">Mostra titolo</string>
     <string name="HideTitle">Nascondi titolo</string>
     <string name="showHideTitle">Mostra nascondi titolo</string>
-    <string name="DownloadingStickerSet">Downloading sticker set…</string>
+    <string name="DownloadingStickerSet">Download sticker pack...</string>
     <string name="IncompleteDownload">Download scaduto, controlla la tua connessione</string>
     <string name="StickerPackNotFound">Pacchetto sticker non trovato.</string>
-    <string name="MessageFilter">Message Filter</string>
-    <string name="Pattern">Pattern</string>
-    <string name="MessageFilterDesc">Use regular expressions to match messages, and the matched messages will be hidden.\nLeave it blank to disable it</string>
-    <string name="SaveToDownloadCount_zero">Saving %1$d files to Download</string>
-    <string name="SaveToDownloadCount_one">Saving %1$d file to Download</string>
-    <string name="SaveToDownloadCount_two">Saving %1$d files to Download</string>
-    <string name="SaveToDownloadCount_few">Saving %1$d files to Download</string>
-    <string name="SaveToDownloadCount_many">Saving %1$d files to Download</string>
-    <string name="SaveToDownloadCount_other">Saving %1$d files to Download</string>
+    <string name="MessageFilter">Filtro messaggi</string>
+    <string name="Pattern">Modello</string>
+    <string name="MessageFilterDesc">Usa le espressioni regolari per filtrare i messaggi da nascondere.\nLascialo vuoto per disattivarlo.</string>
+    <string name="SaveToDownloadCount_zero">Sto salvando %1$d file nei download</string>
+    <string name="SaveToDownloadCount_one">Sto salvando %1$d file nei download</string>
+    <string name="SaveToDownloadCount_two">Sto salvando %1$d file nei download</string>
+    <string name="SaveToDownloadCount_few">Sto salvando %1$d file nei download</string>
+    <string name="SaveToDownloadCount_many">Sto salvando %1$d file nei download</string>
+    <string name="SaveToDownloadCount_other">Sto salvando %1$d file nei download</string>
 </resources>

@@ -52,9 +52,9 @@
     <string name="blockSponsorAds">スポンサー広告をブロック</string>
     <string name="DeleteAllFromSelfAdmin">管理者権限で</string>
     <string name="DeleteAllFromSelf">自分のメッセージを削除</string>
-    <string name="DeleteAllFromSelfAlert">警告！これはこのチャットの **すべての人** が **あなたが送った全部のメッセージ** を削除します。</string>
-    <string name="MutualContactDescription">この接触は相互接触である。</string>
-    <string name="MutualContact">お互いの連絡先</string>
+    <string name="DeleteAllFromSelfAlert">警告! これはこのチャット内で **すべての人** へ **あなたが送ったメッセージ** をすべて削除します。</string>
+    <string name="MutualContactDescription">この連絡先は相互の連絡先です。</string>
+    <string name="MutualContact">相互の連絡先</string>
     <string name="SelectBetween">選択範囲:</string>
     <string name="StickerSavedHint">ステッカーをギャラリーに保存しました</string>
     <string name="MessageDetails">詳細</string>
