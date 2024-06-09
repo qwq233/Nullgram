@@ -29,7 +29,7 @@
     <string name="ViewSourceCode">View Source Code</string>
     <string name="Categories">Categories</string>
     <string name="About">About</string>
-    <string name="OfficialChannelName">NullgramClient</string>
+    <string name="OfficialChannelName" translatable="false">NullgramClient</string>
     <string name="noAvailableUpdate">No Update.</string>
     <string name="updateAvailable">New Update Available</string>
     <string name="variantsNotFound">Release variants fail to match automatically.\nPlease download manually from GitHub.</string>
@@ -115,7 +115,7 @@
     <string name="customDoubleTap">Custom Double Tap</string>
     <string name="OpenSource">OpenSource Software Licenses</string>
     <string name="disableCustomAPI">Don\'t use custom API</string>
-    <string name="useOfficialAPI">TELEOFFICIAL</string>
+    <string name="useOfficialAPI" translatable="false">TELEOFFICIAL</string>
     <string name="customAPI">Custom API</string>
     <string name="useCustomApiNotice">Log in using the custom api, if you are unable to register or log in, this may help.\n\nNote: fcm will not work if you are using the release version.</string>
     <string name="useCustomAPI">Manual input</string>
