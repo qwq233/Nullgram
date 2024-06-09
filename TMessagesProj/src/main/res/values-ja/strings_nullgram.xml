@@ -27,7 +27,6 @@
     <string name="ViewSourceCode">ソースコードを表示</string>
     <string name="Categories">カテゴリー</string>
     <string name="About">Nullgramについて</string>
-    <string name="OfficialChannelName">Nullgramクライアント</string>
     <string name="noAvailableUpdate">アップデートはありません。</string>
     <string name="updateAvailable">新しいバージョンが利用可能です。</string>
     <string name="variantsNotFound">リリースバリアントを自動でチェックしましたが一致しませんでした。\nGitHubから手動でダウンロードしてください。</string>
@@ -113,7 +112,6 @@
     <string name="customDoubleTap">ダブルタップをカスタム</string>
     <string name="OpenSource">オープンソースソフトウェアライセンス</string>
     <string name="disableCustomAPI">カスタムAPIを使用しない</string>
-    <string name="useOfficialAPI">TELEOFFICIAL</string>
     <string name="customAPI">カスタムAPI</string>
     <string name="useCustomApiNotice">登録またはログインができない場合、カスタムAPI の使用が役立つかもしれません。\n\n注意: リリースバージョンを使用している場合、fcmは動作しません。</string>
     <string name="useCustomAPI">手動で入力</string>
