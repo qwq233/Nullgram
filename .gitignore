@@ -1,5 +1,6 @@
 .idea/
 .gradle/
+.kotlin/
 build/
 obj/
 TMessagesProj/.cxx
