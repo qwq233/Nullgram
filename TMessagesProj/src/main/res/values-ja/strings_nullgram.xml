@@ -131,7 +131,7 @@
     <string name="ignoreReactionMentionInfo">未読のリアクションを自動的に既読にします。\nTELEOFFICIALサーバーで管理しているため、通知は表示されたままになります。</string>
     <string name="StickerSize">ステッカーのサイズ</string>
     <string name="StickerSizeDialogMessageReplyTo">にゃ</string>
-    <string name="StickerSizeDialogMessage">カワイイ黒猫!</string>
+    <string name="StickerSizeDialogMessage">おぉ、かわいい女の子だ!</string>
     <string name="ResetStickerSize">ステッカーのサイズをリセット</string>
     <string name="EditUndo">元に戻す</string>
     <string name="EditRedo">やり直し</string>
@@ -229,7 +229,7 @@
     <string name="ignoreMutedCount">タブ内のミュート数を無視</string>
     <string name="disableSharePhoneWithContactByDefault">連絡先の追加時に電話番号を共有しない</string>
     <string name="disableStickersAutoReorder">ステッカーバックの自動リローダーを無効化</string>
-    <string name="autoDisableBuiltInProxy">内蔵のプロキシを自動で無効化する</string>
+    <string name="autoDisableBuiltInProxy">内蔵のプロキシを自動で無効化</string>
     <string name="autoDisableBuiltInProxyDesc">NullgramがVPNのONを検出すると、内蔵のプロキシを自動的にOFFにします</string>
     <string name="NullgramWsDescription">Cloudflare経由でWebSocketを介して TELEOFFICIALに接続をします。\n提供: Nullgram</string>
     <string name="NekogramXWsDescription">提供: Nekogram X</string>
