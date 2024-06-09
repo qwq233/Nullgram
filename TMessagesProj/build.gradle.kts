@@ -188,6 +188,10 @@ android {
         }
     }
 
+    buildFeatures {
+        buildConfig = true
+    }
+
     defaultConfig {
         externalNativeBuild {
             cmake {
@@ -210,7 +214,7 @@ android {
 
     androidComponents {
         onVariants { variant ->
-            variant.buildConfigFields.put("isPlay", BuildConfigField("boolean", variant.name == "play", null))
+            variant.buildConfigFields.put("isPlay", BuildConfigField("boolean", variant.name.lowercase() == "play", null))
         }
     }
 
