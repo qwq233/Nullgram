@@ -347,3 +347,8 @@ internal inline fun LinearLayout.addView(view: View, init: LinearLayout.LayoutPa
     addView(view, LayoutHelper.createLinear(LayoutHelper.WRAP_CONTENT, LayoutHelper.WRAP_CONTENT) // default params
         .apply(init))
 }
+
+internal inline fun createLinear(init: LinearLayout.LayoutParams.() -> Unit): LinearLayout.LayoutParams {
+    return LayoutHelper.createLinear(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT)
+        .apply(init)
+}

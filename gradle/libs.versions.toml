@@ -1,5 +1,6 @@
 [versions]
 agp = "8.4.1"
+aboutlibraries = "11.1.1"
 biometric = "1.1.0"
 checkerCompatQual = "2.5.6"
 core = "4.6.2"
@@ -91,3 +92,4 @@ google-services = { id = "com.google.gms.google-services", version.ref = "gms" }
 triplet-play = { id = "com.github.triplet.play", version = "3.9.1" }
 ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
 rust = { id = "org.mozilla.rust-android-gradle.rust-android", version.ref = "rust" }
+aboutlibraries = { id = "com.mikepenz.aboutlibraries.plugin" , version.ref = "aboutlibraries" }
