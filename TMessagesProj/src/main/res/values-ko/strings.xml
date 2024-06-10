@@ -1,4 +1,23 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!--
+  ~ Copyright (C) 2019-2024 qwq233 <qwq233@qwq2333.top>
+  ~ https://github.com/qwq233/Nullgram
+  ~
+  ~ This program is free software; you can redistribute it and/or
+  ~ modify it under the terms of the GNU General Public License
+  ~ as published by the Free Software Foundation; either version 2
+  ~ of the License, or (at your option) any later version.
+  ~
+  ~ This program is distributed in the hope that it will be useful,
+  ~ but WITHOUT ANY WARRANTY; without even the implied warranty of
+  ~ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  ~ GNU General Public License for more details.
+  ~
+  ~ You should have received a copy of the GNU General Public License along with this software.
+  ~  If not, see
+  ~ <https://www.gnu.org/licenses/>
+  -->
+
 <resources>
     <string name="AppName">텔레그램</string>
     <string name="AppNameBeta">Telegram Beta</string>
@@ -715,8 +734,6 @@
     <string name="EventLogAllEvents">모든 활동</string>
     <string name="EventLogSelectedEvents">선택한 활동</string>
     <string name="EventLogAllAdmins">모든 관리자</string>
-    <string name="EventLogEmpty">**활동 없음**\n\n지난 48시간 사이에\n그룹 참가자와 관리자의\n서비스 활동이 없었습니다.</string>
-    <string name="EventLogEmptyChannel">**활동 없음**\n\n지난 48시간 사이에\n채널 관리자가 취한\n서비스 활동이 없습니다.</string>
     <string name="EventLogEmptySearch">**검색하신 활동이 없습니다**\n\n검색어에 해당하는 최근 활동을 찾지 못했습니다.</string>
     <string name="EventLogEmptyTextSearch">\'**%1$s**\'에 관한 최근 활동을 찾지 못했습니다.</string>
     <string name="EventLogInfoTitle">최근 활동이란 무엇인가요?</string>
@@ -933,7 +950,6 @@
     <string name="DeleteThisChat">대화방 삭제</string>
     <string name="DeleteThisChatBothSides">이 대화방 삭제</string>
     <string name="DeleteTheseChatsBothSides">대화방 삭제</string>
-    <string name="SlideToCancel">밀어서 취소</string>
     <string name="SaveToDownloads">다운로드 폴더에 저장</string>
     <string name="SaveToGIFs">GIF에 저장</string>
     <string name="DeleteGif">이 섹션에서 GIF를 삭제할까요?</string>
@@ -992,7 +1008,6 @@
     <string name="PinMessageAlertChannel">채널에 이 메시지를 고정하시겠습니까?</string>
     <string name="PinMessageAlertChat">이 메시지를 대화방 위쪽에 고정하시겠습니까?</string>
     <string name="UnpinMessageAlert">메시지를 고정 해제하시겠습니까?</string>
-    <string name="DeleteBanUser">사용자 차단</string>
     <string name="DeleteReportSpam">스팸 신고</string>
     <string name="DeleteAllFrom">%1$s 님의 메시지 모두 삭제</string>
     <string name="ClearRecentEmojiTitle">최근에 사용한 이모지를 비울까요</string>
@@ -2183,7 +2198,6 @@
     <string name="LocalCache">다른 파일</string>
     <string name="CacheEmpty">비어 있음</string>
     <string name="KeepMedia">미디어 저장 기간</string>
-    <string name="KeepMediaInfo">이 기간 동안 회원님이 **접근하지 않으신** 클라우드 대화방의 사진, 동영상과 그 밖의 파일들이 디스크 공간 확보를 위해 이 기기에서 제거됩니다.\n\n모든 미디어는 텔레그램 클라우드에 남으며 필요할 때 다시 다운로드하실 수 있습니다.</string>
     <string name="KeepMediaForever">무기한</string>
     <string name="AudioAutodownload">음성 메시지</string>
     <string name="VideoMessagesAutodownload">동영상 메시지</string>
@@ -2895,7 +2909,6 @@
     <string name="PrivacyProfilePhoto">프로필 사진</string>
     <string name="PrivacyProfilePhotoTitle">누가 내 프로필 사진과 영상을 볼 수 있나요?</string>
     <string name="PrivacyProfilePhotoInfo">회원님의 프로필 사진을 볼 수 있는 사람을 세세하게 제한하실 수 있습니다.</string>
-    <string name="PrivacyProfilePhotoInfo2">사용자나 그룹 전체를 예외로 추가하여 앞선 설정을 무시하실 수 있습니다.</string>
     <string name="PrivacyPhone">전화번호</string>
     <string name="PrivacyPhoneTitle">내 전화번호를 볼 수 있는 사람</string>
     <string name="PrivacyPhoneTitle2">내 번호로 나를 찾을 수 있는 사람</string>
@@ -2963,7 +2976,6 @@
     <string name="EmpryUsersPlaceholder">사용자 추가</string>
     <string name="PrivacyFloodControlError">죄송합니다. 개인 정보 설정을 너무 많이 바꾸셨습니다. 잠시 기다리세요.</string>
     <string name="RemoveFromListText">사용자를 삭제하려면 길게 누르세요.</string>
-    <string name="GroupsAndChannels">그룹</string>
     <string name="WhoCanAddMe">나를 그룹 대화방에 추가할 수 있는 사람</string>
     <string name="WhoCanAddMeInfo">회원님을 그룹과 채널에 추가할 수 있는 사람을 세세하게 제한하실 수 있습니다.</string>
     <string name="AlwaysAllow">항상 허용</string>
@@ -3107,7 +3119,6 @@
     <string name="ActionBotDocumentRentalAgreement">임대 계약서</string>
     <string name="ActionBotDocumentPhone">전화번호</string>
     <string name="ActionBotDocumentEmail">이메일 주소</string>
-    <string name="UnsupportedMedia">이 메시지는 현재 사용하고 있는 텔레그램 버전에서 지원되지 않습니다.\n메시지를 보시려면 http://telegram.org/update 에서 앱을 업데이트하세요.</string>
     <string name="AttachPhoto">사진</string>
     <string name="AttachVideo">동영상</string>
     <string name="AttachDestructingPhoto">자동 삭제되는 사진</string>

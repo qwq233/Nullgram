@@ -734,8 +734,6 @@
     <string name="EventLogAllEvents">كل الأحداث</string>
     <string name="EventLogSelectedEvents">الأحداث المحددة</string>
     <string name="EventLogAllAdmins">كل المشرفين</string>
-    <string name="EventLogEmpty">**لا توجد أحداث هنا بعد**\n\nلم يَقم أعضاءُ المجموعة أو\nمشرفوها باتخاذ أيِّ إجراءات\nخلال الـ 48 ساعة الماضية.</string>
-    <string name="EventLogEmptyChannel">**ما من أحداث هنا بعد**\n\nلم يقم مشرفو القناة\nباتخاذ أي إجراءات خلال\nالـ 48 ساعة الماضية.</string>
     <string name="EventLogEmptySearch">**لم يتم العثور على أحداث**\n\nلا توجد نتائج تطابق ما بحثت عنه\nضمن الأحداث الأخيرة.</string>
     <string name="EventLogEmptyTextSearch">لم يتم العثور على أحداث أخيرة تحوي «**%1$s**».</string>
     <string name="EventLogInfoTitle">ما هي آخر الأحداث؟</string>
@@ -952,7 +950,6 @@
     <string name="DeleteThisChat">حذف هذه المحادثة</string>
     <string name="DeleteThisChatBothSides">حذف هذه المحادثة</string>
     <string name="DeleteTheseChatsBothSides">حذف المحادثات</string>
-    <string name="SlideToCancel">اسحب للإلغاء</string>
     <string name="SaveToDownloads">حفظ في الجهاز</string>
     <string name="SaveToGIFs">حفظ في الصور المتحركة</string>
     <string name="DeleteGif">إزالة الصورة المتحركة من هنا؟</string>
@@ -1011,7 +1008,6 @@
     <string name="PinMessageAlertChannel">هل ترغب في تثبيت هذه الرسالة في هذه القناة؟</string>
     <string name="PinMessageAlertChat">هل ترغب في تثبيت هذه الرسالة أعلى هذه المحادثة؟</string>
     <string name="UnpinMessageAlert">إلغاء تثبيت هذه الرسالة؟</string>
-    <string name="DeleteBanUser">حظر المستخدم</string>
     <string name="DeleteReportSpam">إبلاغ عن إزعاج</string>
     <string name="DeleteAllFrom">حذف جميع مشاركات %1$s</string>
     <string name="ClearRecentEmojiTitle">مسح الرموز التعبيرية الأخيرة</string>
@@ -2202,7 +2198,6 @@
     <string name="LocalCache">الملفات الأخرى</string>
     <string name="CacheEmpty">فارغة</string>
     <string name="KeepMedia">الاحتفاظ بالوسائط</string>
-    <string name="KeepMediaInfo">سيتم حذف جميع الصور، المقاطع المرئية، وجميع الملفات المحفوظة في خوادمنا والتي **لم تقم باستخدامها** خلال هذه المدة لتوفير المساحة على هذا الجهاز.\n\nمع ذلك ستبقى جميع الملفات في خوادم تيليجرام، ويمكنك إعادة تنزيلها مرة أخرى متى ما احتجتها.</string>
     <string name="KeepMediaForever">للأبد</string>
     <string name="AudioAutodownload">الرسائل الصوتية</string>
     <string name="VideoMessagesAutodownload">الرسائل المرئية</string>
@@ -2914,7 +2909,6 @@
     <string name="PrivacyProfilePhoto">الصور الشخصية</string>
     <string name="PrivacyProfilePhotoTitle">من يمْكنه رؤية صور ومقاطع ملفّي التعريفي؟</string>
     <string name="PrivacyProfilePhotoInfo">بإمكانك تخصيص من يمْكنه رؤية صورتك الشخصية بدقة انتقائية.</string>
-    <string name="PrivacyProfilePhotoInfo2">يمكنك إضافة مستخدمين أو مجموعات بأكملها كاستثناءات تتجاوز القيم في الأعلى.</string>
     <string name="PrivacyPhone">رقم الهاتف</string>
     <string name="PrivacyPhoneTitle">من يمْكنه رؤية رقم هاتفي؟</string>
     <string name="PrivacyPhoneTitle2">من يمْكنه إيجادي عبر رقم هاتفي؟</string>
@@ -2982,7 +2976,6 @@
     <string name="EmpryUsersPlaceholder">إضافة مستخدمين</string>
     <string name="PrivacyFloodControlError">عذرًا، لقد قمت بطلبات كثيرة جدًا. لا يمكنك تغيير إعدادات الخصوصية الآن، يرجى الانتظار.</string>
     <string name="RemoveFromListText">اضغط باستمرار على المستخدم لإزالته</string>
-    <string name="GroupsAndChannels">المجموعات</string>
     <string name="WhoCanAddMe">من يمْكنه إضافتي للمجموعات؟</string>
     <string name="WhoCanAddMeInfo">بإمكانك تحديد الأشخاص المسموح لهم بإضافتك إلى المجموعات والقنوات بشكل تفصيلي.</string>
     <string name="AlwaysAllow">السماح دائمًا</string>
@@ -3126,7 +3119,6 @@
     <string name="ActionBotDocumentRentalAgreement">عقد الإيجار</string>
     <string name="ActionBotDocumentPhone">رقم الهاتف</string>
     <string name="ActionBotDocumentEmail">بريد إلكتروني</string>
-    <string name="UnsupportedMedia">نسخة تيليجرام التي لديك لاتدعم هذه الرسالة. حدّث التطبيق لعرضها: https://telegram.org/update</string>
     <string name="AttachPhoto">صورة</string>
     <string name="AttachVideo">مقطع مرئي</string>
     <string name="AttachDestructingPhoto">صورة ذاتية التدمير</string>

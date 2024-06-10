@@ -1,4 +1,23 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!--
+  ~ Copyright (C) 2019-2024 qwq233 <qwq233@qwq2333.top>
+  ~ https://github.com/qwq233/Nullgram
+  ~
+  ~ This program is free software; you can redistribute it and/or
+  ~ modify it under the terms of the GNU General Public License
+  ~ as published by the Free Software Foundation; either version 2
+  ~ of the License, or (at your option) any later version.
+  ~
+  ~ This program is distributed in the hope that it will be useful,
+  ~ but WITHOUT ANY WARRANTY; without even the implied warranty of
+  ~ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  ~ GNU General Public License for more details.
+  ~
+  ~ You should have received a copy of the GNU General Public License along with this software.
+  ~  If not, see
+  ~ <https://www.gnu.org/licenses/>
+  -->
+
 <resources>
     <string name="AppName">Telegram</string>
     <string name="AppNameBeta">Telegram Beta</string>
@@ -715,8 +734,6 @@
     <string name="EventLogAllEvents">Alle gebeurtenissen</string>
     <string name="EventLogSelectedEvents">geselecteerde gebeurtenissen</string>
     <string name="EventLogAllAdmins">Alle beheerders</string>
-    <string name="EventLogEmpty">**Nog geen gebeurtenissen**\n\nBeheerders en leden\nhebben geen acties uitgevoerd\nin de afgelopen 48 uur.</string>
-    <string name="EventLogEmptyChannel">**Nog geen gebeurtenissen**\n\nBeheerders\nhebben geen acties uitgevoerd\nin de afgelopen 48 uur.</string>
     <string name="EventLogEmptySearch">**Geen gebeurtenissen**\n\nGeen recente gebeurtenissen gevonden\nvoor je zoekopdracht.</string>
     <string name="EventLogEmptyTextSearch">Geen recente gebeurtenissen met inhoud \'**%1$s**\' gevonden</string>
     <string name="EventLogInfoTitle">Wat is een logboek?</string>
@@ -933,7 +950,6 @@
     <string name="DeleteThisChat">Chat verwijderen</string>
     <string name="DeleteThisChatBothSides">Deze chat verwijderen</string>
     <string name="DeleteTheseChatsBothSides">Chats verwijderen</string>
-    <string name="SlideToCancel">SLEEP OM TE ANNULEREN</string>
     <string name="SaveToDownloads">Opslaan in Downloads</string>
     <string name="SaveToGIFs">GIF opslaan</string>
     <string name="DeleteGif">GIF verwijderen van deze sectie?</string>
@@ -992,7 +1008,6 @@
     <string name="PinMessageAlertChannel">Wil je dit bericht vastzetten?</string>
     <string name="PinMessageAlertChat">Wil je dit bericht vastzetten bovenaan de chat?</string>
     <string name="UnpinMessageAlert">Wil je dit bericht losmaken?</string>
-    <string name="DeleteBanUser">Blokkeer gebruiker</string>
     <string name="DeleteReportSpam">Spam melden</string>
     <string name="DeleteAllFrom">Alles verwijderen van %1$s</string>
     <string name="ClearRecentEmojiTitle">Recente emoji\'s wissen</string>
@@ -2183,7 +2198,6 @@
     <string name="LocalCache">Overige bestanden</string>
     <string name="CacheEmpty">Leeg</string>
     <string name="KeepMedia">Media bewaren</string>
-    <string name="KeepMediaInfo">Foto\'s, video\'s en andere bestanden uit cloudchats die je gedurende deze periode niet hebt  **geopend** zullen worden verwijderd van dit apparaat om ruimte te besparen.\n\nAlle media zal in de Telegram-cloud bewaard blijven en kan opnieuw worden gedownload als je het weer nodig hebt.</string>
     <string name="KeepMediaForever">Voor altijd</string>
     <string name="AudioAutodownload">Spraakberichten</string>
     <string name="VideoMessagesAutodownload">Videoberichten</string>
@@ -2895,7 +2909,6 @@
     <string name="PrivacyProfilePhoto">Profielfoto\'s</string>
     <string name="PrivacyProfilePhotoTitle">Wie kan mijn profielfotos en -video\'s zien?</string>
     <string name="PrivacyProfilePhotoInfo">Je kunt nauwkeurig beperken wie je profielfoto kan zien.</string>
-    <string name="PrivacyProfilePhotoInfo2">Je kunt gebruikers of groepen toevoegen als uitzondering op de instelling hierboven.</string>
     <string name="PrivacyPhone">Telefoonnummer</string>
     <string name="PrivacyPhoneTitle">Wie kan mijn telefoonnummer zien?</string>
     <string name="PrivacyPhoneTitle2">Wie kan me vinden via mijn nummer?</string>
@@ -2963,7 +2976,6 @@
     <string name="EmpryUsersPlaceholder">Toevoegen</string>
     <string name="PrivacyFloodControlError">Sorry, te veel verzoeken. Momenteel is het niet mogelijk om de privacyinstellingen te wijzigen, even geduld alsjeblieft.</string>
     <string name="RemoveFromListText">Gebruiker vasthouden om te verwijderen.</string>
-    <string name="GroupsAndChannels">Groepen</string>
     <string name="WhoCanAddMe">Wie kan me toevoegen aan groepchats?</string>
     <string name="WhoCanAddMeInfo">Je kunt nauwkeurig bepalen wie je aan groepen en kanalen mag toevoegen.</string>
     <string name="AlwaysAllow">Altijd toestaan</string>
@@ -3107,7 +3119,6 @@
     <string name="ActionBotDocumentRentalAgreement">Huurovereenkomst</string>
     <string name="ActionBotDocumentPhone">Telefoonnummer</string>
     <string name="ActionBotDocumentEmail">E-mailadres</string>
-    <string name="UnsupportedMedia">Dit bericht wordt niet ondersteund door jouw versie van Telegram. Update om dit bericht te bekijken: https://telegram.org/update</string>
     <string name="AttachPhoto">Foto</string>
     <string name="AttachVideo">Video</string>
     <string name="AttachDestructingPhoto">Zelfvernietigende foto</string>

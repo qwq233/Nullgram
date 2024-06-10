@@ -1,4 +1,23 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!--
+  ~ Copyright (C) 2019-2024 qwq233 <qwq233@qwq2333.top>
+  ~ https://github.com/qwq233/Nullgram
+  ~
+  ~ This program is free software; you can redistribute it and/or
+  ~ modify it under the terms of the GNU General Public License
+  ~ as published by the Free Software Foundation; either version 2
+  ~ of the License, or (at your option) any later version.
+  ~
+  ~ This program is distributed in the hope that it will be useful,
+  ~ but WITHOUT ANY WARRANTY; without even the implied warranty of
+  ~ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  ~ GNU General Public License for more details.
+  ~
+  ~ You should have received a copy of the GNU General Public License along with this software.
+  ~  If not, see
+  ~ <https://www.gnu.org/licenses/>
+  -->
+
 <resources>
     <string name="AppName">Telegram</string>
     <string name="AppNameBeta">Telegram Beta</string>
@@ -715,8 +734,6 @@
     <string name="EventLogAllEvents">Todas as ações</string>
     <string name="EventLogSelectedEvents">ações selecionadas</string>
     <string name="EventLogAllAdmins">Todos os admins</string>
-    <string name="EventLogEmpty">**Nenhuma ação ainda**\n\nOs membros e admins do grupo\nainda não tomaram nenhuma ação\nnas últimas 48 horas.</string>
-    <string name="EventLogEmptyChannel">**Nenhuma ação ainda**\n\nOs admins do canal não fizeram nenhuma ação de serviço nas últimas 48 horas.</string>
     <string name="EventLogEmptySearch">**Nenhuma ação encontrada**\n\nNenhuma ação recente corresponde à sua busca.</string>
     <string name="EventLogEmptyTextSearch">Nenhuma ação recente que contenha \"**%1$s**\" foi encontrada.</string>
     <string name="EventLogInfoTitle">O que são as Ações Recentes?</string>
@@ -933,7 +950,6 @@
     <string name="DeleteThisChat">Apagar este chat</string>
     <string name="DeleteThisChatBothSides">Apagar este chat</string>
     <string name="DeleteTheseChatsBothSides">Apagar chats</string>
-    <string name="SlideToCancel">DESLIZE PARA CANCELAR</string>
     <string name="SaveToDownloads">Salvar em downloads</string>
     <string name="SaveToGIFs">Salvar em GIFs</string>
     <string name="DeleteGif">Apagar GIF desta seção?</string>
@@ -992,7 +1008,6 @@
     <string name="PinMessageAlertChannel">Deseja fixar essa mensagem no canal?</string>
     <string name="PinMessageAlertChat">Deseja fixar essa mensagem no topo do chat?</string>
     <string name="UnpinMessageAlert">Desafixar essa mensagem?</string>
-    <string name="DeleteBanUser">Banir usuário</string>
     <string name="DeleteReportSpam">Denunciar spam</string>
     <string name="DeleteAllFrom">Apagar tudo de %1$s</string>
     <string name="ClearRecentEmojiTitle">Limpar emojis recentes</string>
@@ -2183,7 +2198,6 @@
     <string name="LocalCache">Outros arquivos</string>
     <string name="CacheEmpty">Vazio</string>
     <string name="KeepMedia">Manter Mídias</string>
-    <string name="KeepMediaInfo">Fotos, vídeos e outros arquivos da nuvem que você **não acessou** durante esse período serão removidos deste dispositivo para economizar espaço em disco.\n\nTodas as mídias permanecerão na nuvem do Telegram e poderão ser baixadas novamente conforme necessário.</string>
     <string name="KeepMediaForever">Sempre</string>
     <string name="AudioAutodownload">Mensagens de voz</string>
     <string name="VideoMessagesAutodownload">Mensagens de vídeo</string>
@@ -2895,7 +2909,6 @@
     <string name="PrivacyProfilePhoto">Fotos de Perfil</string>
     <string name="PrivacyProfilePhotoTitle">Quem pode ver minhas fotos e vídeos de perfil?</string>
     <string name="PrivacyProfilePhotoInfo">Você pode restringir quem pode ver sua foto de perfil com precisão granular.</string>
-    <string name="PrivacyProfilePhotoInfo2">Você pode adicionar usuários ou grupos inteiros como exceções que substituirão as configurações acima.</string>
     <string name="PrivacyPhone">Número de Telefone</string>
     <string name="PrivacyPhoneTitle">Quem pode ver meu número?</string>
     <string name="PrivacyPhoneTitle2">Quem pode me encontrar pelo meu número?</string>
@@ -2963,7 +2976,6 @@
     <string name="EmpryUsersPlaceholder">Adicionar Usuários</string>
     <string name="PrivacyFloodControlError">Desculpe, muitas solicitações. Impossível alterar os ajustes de privacidade agora, por favor aguarde.</string>
     <string name="RemoveFromListText">Toque e segure no usuário para remover.</string>
-    <string name="GroupsAndChannels">Grupos e Canais</string>
     <string name="WhoCanAddMe">Quem pode me adicionar em grupos?</string>
     <string name="WhoCanAddMeInfo">Você pode restringir quem pode te adicionar em grupos ou canais com precisão.</string>
     <string name="AlwaysAllow">Sempre Permitir</string>
@@ -3107,7 +3119,6 @@
     <string name="ActionBotDocumentRentalAgreement">Contrato de Aluguel</string>
     <string name="ActionBotDocumentPhone">Número de Telefone</string>
     <string name="ActionBotDocumentEmail">Endereço de Email</string>
-    <string name="UnsupportedMedia">Esta mensagem não é compatível com a sua versão do Telegram. Atualize o aplicativo para visualizar: https://telegram.org/update</string>
     <string name="AttachPhoto">Foto</string>
     <string name="AttachVideo">Vídeo</string>
     <string name="AttachDestructingPhoto">Foto Autodestrutiva</string>
