@@ -233,6 +233,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import top.qwq2333.gen.Config;
 import top.qwq2333.nullgram.config.ConfigManager;
 import top.qwq2333.nullgram.utils.Defines;
+import top.qwq2333.nullgram.utils.Log;
 import top.qwq2333.nullgram.utils.StringUtils;
 import top.qwq2333.nullgram.utils.Utils;
 
@@ -2385,6 +2386,7 @@ public class ChatMessageCell extends BaseCell implements SeekBar.SeekBarDelegate
                 }
             } else if (event.getAction() == MotionEvent.ACTION_UP) {
                 if (instantPressed) {
+                    Log.d("cell", "trigger instant press");
                     if (documentAttachType == DOCUMENT_ATTACH_TYPE_ROUND) {
                         if (!MediaController.getInstance().isPlayingMessage(currentMessageObject) || MediaController.getInstance().isMessagePaused()) {
                             delegate.needPlayMessage(this, currentMessageObject, false);
@@ -2392,16 +2394,23 @@ public class ChatMessageCell extends BaseCell implements SeekBar.SeekBarDelegate
                             MediaController.getInstance().pauseMessage(currentMessageObject);
                         }
                     } else if (drawInstantView) {
+                        Log.d("cell", "trigger drawInstantView");
                         if (delegate != null) {
                             delegate.didPressInstantButton(this, drawInstantViewType);
                         }
                     } else if (drawPhotoImage && (documentAttachType == DOCUMENT_ATTACH_TYPE_GIF || documentAttachType == DOCUMENT_ATTACH_TYPE_VIDEO || authorLayout == null && titleLayout == null && descriptionLayout == null && siteNameLayout == null)) {
+                        Log.d("cell", "trigger draw pic");
                         if (delegate != null) {
                             delegate.didPressImage(this, lastTouchX, lastTouchY);
                         }
                     } else if (!currentMessageObject.preview) {
+                        Log.d("cell", "trigger !currentMessageObject.preview");
                         TLRPC.WebPage webPage = MessageObject.getMedia(currentMessageObject.messageOwner).webpage;
-                        if (webPage != null && !TextUtils.isEmpty(webPage.embed_url)) {
+                        if (webPage != null && webPage.photo != null) {
+                            if (delegate != null) {
+                                delegate.didPressImage(this, lastTouchX, lastTouchY);
+                            }
+                        } else if (webPage != null && !TextUtils.isEmpty(webPage.embed_url)) {
                             if (delegate != null) {
                                 delegate.needOpenWebView(currentMessageObject, webPage.embed_url, webPage.site_name, webPage.title, webPage.url, webPage.embed_width, webPage.embed_height);
                             }
@@ -5761,7 +5770,7 @@ public class ChatMessageCell extends BaseCell implements SeekBar.SeekBarDelegate
                             stickersTextColor = attr.text_color;
                         }
                     }
-                } else if (siteName != null) {
+                }/* else if (siteName != null) {
                     siteName = siteName.toLowerCase();
                     if ((siteName.equals("instagram") || siteName.equals("twitter") || "telegram_album".equals(webpageType)) && webpage.cached_page instanceof TLRPC.TL_page &&
                             (webpage.photo instanceof TLRPC.TL_photo || MessageObject.isVideoDocument(webpage.document))) {
@@ -5783,7 +5792,7 @@ public class ChatMessageCell extends BaseCell implements SeekBar.SeekBarDelegate
                         photosCountWidth = (int) Math.ceil(Theme.chat_durationPaint.measureText(str));
                         photosCountLayout = new StaticLayout(str, Theme.chat_durationPaint, photosCountWidth, Layout.Alignment.ALIGN_NORMAL, 1.0f, 0.0f, false);
                     }
-                }
+                }*/
                 if (messageObject.isRepostPreview) {
                     drawInstantView = false;
                 }
