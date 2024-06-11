@@ -1,6 +1,6 @@
 [versions]
 agp = "8.4.1"
-aboutlibraries = "11.1.1"
+aboutlibraries = "11.2.1"
 biometric = "1.1.0"
 checkerCompatQual = "2.5.6"
 core = "4.6.2"
