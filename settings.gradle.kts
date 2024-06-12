@@ -19,15 +19,16 @@ dependencyResolutionManagement {
 }
 
 plugins {
-    `gradle-enterprise`
+    id("com.gradle.develocity") version "3.17"
 }
 
-gradleEnterprise {
+develocity {
     buildScan {
-        termsOfServiceUrl = "https://gradle.com/terms-of-service"
-        termsOfServiceAgree = "yes"
-        publishAlwaysIf(System.getenv("GITHUB_ACTIONS") == "true")
-        publishOnFailure()
+        publishing.onlyIf {
+            System.getenv("GITHUB_ACTIONS") == "true" || it.buildResult.failures.isNotEmpty()
+        }
+        termsOfUseAgree.set("yes")
+        termsOfUseUrl.set("https://gradle.com/terms-of-service")
     }
 }
 

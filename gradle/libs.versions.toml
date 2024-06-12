@@ -1,6 +1,6 @@
 [versions]
-agp = "8.4.1"
-aboutlibraries = "11.1.1"
+agp = "8.4.2"
+aboutlibraries = "11.2.1"
 biometric = "1.1.0"
 checkerCompatQual = "2.5.6"
 core = "4.6.2"
@@ -82,6 +82,7 @@ ktor-client-contentNegotiation = { module = "io.ktor:ktor-client-content-negotia
 ktor-serialization-json = { module = "io.ktor:ktor-serialization-kotlinx-json-jvm", version.ref = "ktor" }
 
 [plugins]
+aboutlibraries = { id = "com.mikepenz.aboutlibraries.plugin" , version.ref = "aboutlibraries" }
 android-application = { id = "com.android.application", version.ref = "agp" }
 android-library = { id = "com.android.library", version.ref = "agp" }
 kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
@@ -92,4 +93,3 @@ google-services = { id = "com.google.gms.google-services", version.ref = "gms" }
 triplet-play = { id = "com.github.triplet.play", version = "3.9.1" }
 ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
 rust = { id = "org.mozilla.rust-android-gradle.rust-android", version.ref = "rust" }
-aboutlibraries = { id = "com.mikepenz.aboutlibraries.plugin" , version.ref = "aboutlibraries" }
