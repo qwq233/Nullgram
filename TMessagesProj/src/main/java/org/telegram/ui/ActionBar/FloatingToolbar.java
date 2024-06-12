@@ -1314,7 +1314,7 @@ public final class FloatingToolbar {
         textView.setGravity(Gravity.CENTER);
         textView.setSingleLine(true);
         textView.setEllipsize(TextUtils.TruncateAt.END);
-        textView.setTypeface(AndroidUtilities.getTypeface("fonts/rmedium.ttf"));
+        textView.setTypeface(AndroidUtilities.bold());
         textView.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 14);
         textView.setFocusable(false);
         textView.setImportantForAccessibility(View.IMPORTANT_FOR_ACCESSIBILITY_NO);

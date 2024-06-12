@@ -12,6 +12,7 @@ import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
+import android.app.Activity;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -81,6 +82,7 @@ public class AlertDialog extends Dialog implements Drawable.Callback, Notificati
     public static final int ALERT_TYPE_SPINNER = 3;
 
     private int customWidth = -1;
+    private boolean customMaxHeight;
     private View customView;
     private View bottomView;
     private View aboveMessageView;
@@ -295,6 +297,7 @@ public class AlertDialog extends Dialog implements Drawable.Callback, Notificati
 
     @Override
     public void show() {
+        if (!AndroidUtilities.isSafeToShow(getContext())) return;
         super.show();
         if (progressViewContainer != null && progressViewStyle == ALERT_TYPE_SPINNER) {
             progressViewContainer.setScaleX(0);
@@ -683,7 +686,7 @@ public class AlertDialog extends Dialog implements Drawable.Callback, Notificati
             titleTextView.setText(title);
             titleTextView.setTextColor(getThemedColor(Theme.key_dialogTextBlack));
             titleTextView.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 20);
-            titleTextView.setTypeface(AndroidUtilities.getTypeface("fonts/rmedium.ttf"));
+            titleTextView.setTypeface(AndroidUtilities.bold());
             titleTextView.setGravity((topAnimationIsNew ? Gravity.CENTER_HORIZONTAL : LocaleController.isRTL ? Gravity.RIGHT : Gravity.LEFT) | Gravity.TOP);
             titleContainer.addView(titleTextView, LayoutHelper.createFrame(LayoutHelper.WRAP_CONTENT, LayoutHelper.WRAP_CONTENT, (topAnimationIsNew ? Gravity.CENTER_HORIZONTAL : LocaleController.isRTL ? Gravity.RIGHT : Gravity.LEFT) | Gravity.TOP, 0, 19, 0, topAnimationIsNew ? 4 : (subtitle != null ? 2 : (items != null ? 14 : 10))));
         }
@@ -759,7 +762,7 @@ public class AlertDialog extends Dialog implements Drawable.Callback, Notificati
             containerView.addView(lineProgressView, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, 4, Gravity.LEFT | Gravity.CENTER_VERTICAL, 24, 0, 24, 0));
 
             lineProgressViewPercent = new TextView(getContext());
-            lineProgressViewPercent.setTypeface(AndroidUtilities.getTypeface("fonts/rmedium.ttf"));
+            lineProgressViewPercent.setTypeface(AndroidUtilities.bold());
             lineProgressViewPercent.setGravity((LocaleController.isRTL ? Gravity.RIGHT : Gravity.LEFT) | Gravity.TOP);
             lineProgressViewPercent.setTextColor(getThemedColor(Theme.key_dialogTextGray2));
             lineProgressViewPercent.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 14);
@@ -955,7 +958,7 @@ public class AlertDialog extends Dialog implements Drawable.Callback, Notificati
                 textView.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 16);
                 textView.setTextColor(getThemedColor(dialogButtonColorKey));
                 textView.setGravity(Gravity.CENTER);
-                textView.setTypeface(AndroidUtilities.getTypeface("fonts/rmedium.ttf"));
+                textView.setTypeface(AndroidUtilities.bold());
 //                textView.setLines(1);
 //                textView.setSingleLine(true); //TODO
                 textView.setText(positiveButtonText.toString());
@@ -995,7 +998,7 @@ public class AlertDialog extends Dialog implements Drawable.Callback, Notificati
                 textView.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 16);
                 textView.setTextColor(getThemedColor(dialogButtonColorKey));
                 textView.setGravity(Gravity.CENTER);
-                textView.setTypeface(AndroidUtilities.getTypeface("fonts/rmedium.ttf"));
+                textView.setTypeface(AndroidUtilities.bold());
                 textView.setEllipsize(TextUtils.TruncateAt.END);
                 textView.setSingleLine(true);
                 textView.setText(negativeButtonText.toString());
@@ -1035,7 +1038,7 @@ public class AlertDialog extends Dialog implements Drawable.Callback, Notificati
                 textView.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 16);
                 textView.setTextColor(getThemedColor(dialogButtonColorKey));
                 textView.setGravity(Gravity.CENTER);
-                textView.setTypeface(AndroidUtilities.getTypeface("fonts/rmedium.ttf"));
+                textView.setTypeface(AndroidUtilities.bold());
                 textView.setEllipsize(TextUtils.TruncateAt.END);
                 textView.setSingleLine(true);
                 textView.setText(neutralButtonText.toString());
@@ -1742,6 +1745,11 @@ public class AlertDialog extends Dialog implements Drawable.Callback, Notificati
 
         public Builder setAdditionalHorizontalPadding(int padding) {
             alertDialog.additioanalHorizontalPadding = padding;
+            return this;
+        }
+
+        public Builder makeCustomMaxHeight() {
+            alertDialog.customMaxHeight = true;
             return this;
         }
     }

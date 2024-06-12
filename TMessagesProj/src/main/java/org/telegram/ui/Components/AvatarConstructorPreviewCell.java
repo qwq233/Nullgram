@@ -129,7 +129,7 @@ public class AvatarConstructorPreviewCell extends FrameLayout {
         textView = new TextView(context);
         textView.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 12);
         textView.setTextColor(Theme.getColor(Theme.key_avatar_text));
-        textView.setTypeface(AndroidUtilities.getTypeface("fonts/rmedium.ttf"));
+        textView.setTypeface(AndroidUtilities.bold());
         textView.setGravity(Gravity.CENTER);
         textView.setText(LocaleController.getString("UseEmoji", R.string.UseEmoji));
 

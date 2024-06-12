@@ -276,8 +276,8 @@ public class MediaActivity extends BaseFragment implements SharedMediaLayout.Sha
             }
 
             @Override
-            protected void drawList(Canvas blurCanvas, boolean top) {
-                sharedMediaLayout.drawListForBlur(blurCanvas);
+            protected void drawList(Canvas blurCanvas, boolean top, ArrayList<IViewWithInvalidateCallback> views) {
+                sharedMediaLayout.drawListForBlur(blurCanvas, views);
             }
         };
         fragmentView.needBlur = true;
@@ -371,7 +371,7 @@ public class MediaActivity extends BaseFragment implements SharedMediaLayout.Sha
 
             nameTextView[i].setTextSize(18);
             nameTextView[i].setGravity(Gravity.LEFT);
-            nameTextView[i].setTypeface(AndroidUtilities.getTypeface("fonts/rmedium.ttf"));
+            nameTextView[i].setTypeface(AndroidUtilities.bold());
             nameTextView[i].setLeftDrawableTopPadding(-dp(1.3f));
             nameTextView[i].setScrollNonFitText(true);
             nameTextView[i].setImportantForAccessibility(View.IMPORTANT_FOR_ACCESSIBILITY_NO);
@@ -419,7 +419,7 @@ public class MediaActivity extends BaseFragment implements SharedMediaLayout.Sha
         selectedTextView.setTextSize(dp(20));
         selectedTextView.setGravity(Gravity.LEFT);
         selectedTextView.setTextColor(getThemedColor(Theme.key_windowBackgroundWhiteBlackText));
-        selectedTextView.setTypeface(AndroidUtilities.getTypeface("fonts/rmedium.ttf"));
+        selectedTextView.setTypeface(AndroidUtilities.bold());
         avatarContainer.addView(selectedTextView, LayoutHelper.createFrame(LayoutHelper.WRAP_CONTENT, LayoutHelper.MATCH_PARENT, Gravity.FILL_HORIZONTAL | Gravity.CENTER_VERTICAL, 72 + (hasAvatar ? 48 : 0), -2, 72, 0));
 
         if (type == TYPE_STORIES) {

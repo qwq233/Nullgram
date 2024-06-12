@@ -38,6 +38,7 @@ import android.graphics.BitmapFactory;
 import android.graphics.Matrix;
 import android.graphics.Point;
 import android.graphics.SurfaceTexture;
+import android.graphics.drawable.BitmapDrawable;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
@@ -411,6 +412,7 @@ public class MediaController implements AudioManager.OnAudioFocusChangeListener,
         public boolean isPainted;
         public boolean isCropped;
         public int ttl;
+        public long effectId;
 
         public CropState cropState;
 
@@ -481,11 +483,15 @@ public class MediaController implements AudioManager.OnAudioFocusChangeListener,
         public boolean hasSpoiler;
         public String emoji;
 
+        public int videoOrientation = -1;
+
         public boolean isChatPreviewSpoilerRevealed;
         public boolean isAttachSpoilerRevealed;
         public TLRPC.VideoSize emojiMarkup;
 
         public int gradientTopColor, gradientBottomColor;
+
+        public BitmapDrawable thumb;
 
         public PhotoEntry(int bucketId, int imageId, long dateTaken, String path, int orientationOrDuration, boolean isVideo, int width, int height, long size) {
             this.bucketId = bucketId;
@@ -500,6 +506,19 @@ public class MediaController implements AudioManager.OnAudioFocusChangeListener,
             } else {
                 this.orientation = orientationOrDuration;
             }
+            this.isVideo = isVideo;
+        }
+
+        public PhotoEntry(int bucketId, int imageId, long dateTaken, String path, int orientation, int duration, boolean isVideo, int width, int height, long size) {
+            this.bucketId = bucketId;
+            this.imageId = imageId;
+            this.dateTaken = dateTaken;
+            this.path = path;
+            this.width = width;
+            this.height = height;
+            this.size = size;
+            this.duration = duration;
+            this.orientation = orientation;
             this.isVideo = isVideo;
         }
 
@@ -522,7 +541,7 @@ public class MediaController implements AudioManager.OnAudioFocusChangeListener,
         }
 
         public PhotoEntry clone() {
-            PhotoEntry photoEntry = new PhotoEntry(bucketId, imageId, dateTaken, path, isVideo ? duration : orientation, isVideo, width, height, size);
+            PhotoEntry photoEntry = new PhotoEntry(bucketId, imageId, dateTaken, path, orientation, duration, isVideo, width, height, size);
             photoEntry.invert = invert;
             photoEntry.isMuted = isMuted;
             photoEntry.canDeleteAfter = canDeleteAfter;
@@ -5153,7 +5172,7 @@ public class MediaController implements AudioManager.OnAudioFocusChangeListener,
                             int height = cursor.getInt(heightColumn);
                             long size = cursor.getLong(sizeColumn);
 
-                            PhotoEntry photoEntry = new PhotoEntry(bucketId, imageId, dateTaken, path, orientation, false, width, height, size);
+                            PhotoEntry photoEntry = new PhotoEntry(bucketId, imageId, dateTaken, path, orientation, 0, false, width, height, size);
 
                             if (allPhotosAlbum == null) {
                                 allPhotosAlbum = new AlbumEntry(0, LocaleController.getString("AllPhotos", R.string.AllPhotos), photoEntry);
@@ -5219,6 +5238,7 @@ public class MediaController implements AudioManager.OnAudioFocusChangeListener,
                         int widthColumn = cursor.getColumnIndex(MediaStore.Video.Media.WIDTH);
                         int heightColumn = cursor.getColumnIndex(MediaStore.Video.Media.HEIGHT);
                         int sizeColumn = cursor.getColumnIndex(MediaStore.Video.Media.SIZE);
+                        int orientationColumn = cursor.getColumnIndex(MediaStore.Video.Media.ORIENTATION);
 
                         while (cursor.moveToNext()) {
                             String path = cursor.getString(dataColumn);
@@ -5234,8 +5254,9 @@ public class MediaController implements AudioManager.OnAudioFocusChangeListener,
                             int width = cursor.getInt(widthColumn);
                             int height = cursor.getInt(heightColumn);
                             long size = cursor.getLong(sizeColumn);
+                            int orientation = 0;
 
-                            PhotoEntry photoEntry = new PhotoEntry(bucketId, imageId, dateTaken, path, (int) (duration / 1000), true, width, height, size);
+                            PhotoEntry photoEntry = new PhotoEntry(bucketId, imageId, dateTaken, path, orientation, (int) (duration / 1000), true, width, height, size);
 
                             if (allVideosAlbum == null) {
                                 allVideosAlbum = new AlbumEntry(0, LocaleController.getString("AllVideos", R.string.AllVideos), photoEntry);

@@ -65,7 +65,7 @@ public class ExpiredStoryView {
         CharSequence subtitle = String.format(fromString, fromName);
         if (idx >= 0) {
             SpannableStringBuilder spannableStringBuilder = new SpannableStringBuilder(subtitle);
-            spannableStringBuilder.setSpan(new TypefaceSpan(AndroidUtilities.getTypeface("fonts/rmedium.ttf")), idx, idx + fromName.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+            spannableStringBuilder.setSpan(new TypefaceSpan(AndroidUtilities.bold()), idx, idx + fromName.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
             subtitle = spannableStringBuilder;
         }
         TextPaint titlePaint = Theme.chat_replyTextPaint;

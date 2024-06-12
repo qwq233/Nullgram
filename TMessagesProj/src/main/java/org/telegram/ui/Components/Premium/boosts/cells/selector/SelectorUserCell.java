@@ -61,7 +61,7 @@ public class SelectorUserCell extends BaseCell {
     public SelectorUserCell(Context context, Theme.ResourcesProvider resourcesProvider, boolean isGreen) {
         super(context, resourcesProvider);
         statusBadgeComponent = new StatusBadgeComponent(this);
-        titleTextView.setTypeface(AndroidUtilities.getTypeface(AndroidUtilities.TYPEFACE_ROBOTO_MEDIUM));
+        titleTextView.setTypeface(AndroidUtilities.bold());
         radioButton.setVisibility(View.GONE);
         checkBox = new CheckBox2(context, 21, resourcesProvider);
         if (isGreen) {

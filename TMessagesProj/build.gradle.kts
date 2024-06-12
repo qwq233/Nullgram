@@ -102,9 +102,8 @@ dependencies {
     implementation(libs.kotlinx.coroutines.android)
     implementation(libs.gson)
     implementation(libs.process.phoenix)
-    implementation(libs.licensesdialog)
-    implementation(libs.markwon.core)
     implementation(libs.hiddenapibypass)
+    implementation(libs.lottie)
 
     implementation(libs.kotlin.stdlib.common)
     implementation(libs.kotlin.stdlib)

@@ -563,7 +563,7 @@ public abstract class TextSelectionHelper<Cell extends TextSelectionHelper.Selec
                         deleteView.setGravity(Gravity.CENTER_VERTICAL);
                         deleteView.setPadding(dp(20), 0, dp(20), 0);
                         deleteView.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 15);
-                        deleteView.setTypeface(AndroidUtilities.getTypeface("fonts/rmedium.ttf"));
+                        deleteView.setTypeface(AndroidUtilities.bold());
                         deleteView.setText(textSelectionOverlay.getContext().getString(android.R.string.copy));
                         deleteView.setTextColor(getThemedColor(Theme.key_actionBarDefaultSubmenuItem));
                         deleteView.setOnClickListener(v -> {
@@ -1419,7 +1419,9 @@ public abstract class TextSelectionHelper<Cell extends TextSelectionHelper.Selec
                 }
                 if (selectedView != null) {
                     CharSequence charSequence = getText(selectedView, false);
-                    if (multiselect || selectionStart <= 0 && selectionEnd >= charSequence.length() - 1) {
+                    if (!canCopy()) {
+                        menu.getItem(2).setVisible(false);
+                    } else if (multiselect || selectionStart <= 0 && selectionEnd >= charSequence.length() - 1) {
                         menu.getItem(2).setVisible(false);
                     } else {
                         menu.getItem(2).setVisible(true);
@@ -1895,10 +1897,13 @@ public abstract class TextSelectionHelper<Cell extends TextSelectionHelper.Selec
         SparseArray<Animator> animatorSparseArray = new SparseArray<>();
         public boolean isDescription;
         private boolean maybeIsDescription;
+        public boolean isFactCheck;
+        private boolean maybeIsFactCheck;
 
         public static int TYPE_MESSAGE = 0;
         public static int TYPE_CAPTION = 1;
         public static int TYPE_DESCRIPTION = 2;
+        public static int TYPE_FACTCHECK = 3;
 
         public void select(ChatMessageCell cell, int start, int end) {
             if (cell == null) {
@@ -1929,6 +1934,8 @@ public abstract class TextSelectionHelper<Cell extends TextSelectionHelper.Selec
                 StaticLayout layout = null;
                 if (isDescription) {
                     layout = selectedView.getDescriptionlayout();
+                } else if (isFactCheck) {
+                    layout = selectedView.getFactCheckLayout();
                 } else if (selectedView.hasCaptionLayout()) {
                     layout = selectedView.getCaptionLayout().textLayoutBlocks.get(0).textLayout;
                 } else if (object.textLayoutBlocks != null) {
@@ -1954,20 +1961,26 @@ public abstract class TextSelectionHelper<Cell extends TextSelectionHelper.Selec
                     maybeTextX + chatMessageCell.getDescriptionlayout().getWidth(),
                     maybeTextY + chatMessageCell.getDescriptionlayout().getHeight()
                 );
+            } else if (maybeIsFactCheck && chatMessageCell.getFactCheckLayout() != null) {
+                textArea.set(
+                        maybeTextX, maybeTextY,
+                        maybeTextX + chatMessageCell.getFactCheckLayout().getWidth(),
+                        maybeTextY + chatMessageCell.getFactCheckLayout().getHeight()
+                );
             } else if (chatMessageCell.hasCaptionLayout() && chatMessageCell.getCaptionLayout().textLayoutBlocks.size() > 0) {
                 MessageObject.TextLayoutBlocks captionLayout = chatMessageCell.getCaptionLayout();
                 MessageObject.TextLayoutBlock block = captionLayout.textLayoutBlocks.get(captionLayout.textLayoutBlocks.size() - 1);
                 textArea.set(
-                    maybeTextX, maybeTextY,
-                    maybeTextX + block.textLayout.getWidth(),
-                    (int) (maybeTextY + block.textYOffset + block.padTop + block.textLayout.getHeight())
+                        maybeTextX, maybeTextY,
+                        maybeTextX + block.textLayout.getWidth(),
+                        (int) (maybeTextY + block.textYOffset(chatMessageCell.getCaptionLayout().textLayoutBlocks, chatMessageCell.transitionParams) + block.padTop + block.textLayout.getHeight())
                 );
             } else if (messageObject != null && messageObject.textLayoutBlocks != null && messageObject.textLayoutBlocks.size() > 0) {
                 MessageObject.TextLayoutBlock block = messageObject.textLayoutBlocks.get(messageObject.textLayoutBlocks.size() - 1);
                 textArea.set(
-                    maybeTextX, maybeTextY,
-                    maybeTextX + block.textLayout.getWidth(),
-                    (int) (maybeTextY + block.textYOffset + block.padTop + block.textLayout.getHeight())
+                        maybeTextX, maybeTextY,
+                        maybeTextX + block.textLayout.getWidth(),
+                        (int) (maybeTextY + block.textYOffset(messageObject.textLayoutBlocks, chatMessageCell.transitionParams) + block.padTop + block.textLayout.getHeight())
                 );
             } else {
                 this.maybeSelectedView = null;
@@ -1981,6 +1994,9 @@ public abstract class TextSelectionHelper<Cell extends TextSelectionHelper.Selec
             }
             if (maybe ? maybeIsDescription : isDescription) {
                 return cell.getDescriptionlayout().getText();
+            }
+            if (maybe ? maybeIsFactCheck : isFactCheck) {
+                return cell.getFactCheckLayout().getText();
             }
             if (cell.hasCaptionLayout()) {
                 return cell.getCaptionLayout().text;
@@ -1999,6 +2015,7 @@ public abstract class TextSelectionHelper<Cell extends TextSelectionHelper.Selec
             }
             enterProgress = 0;
             isDescription = maybeIsDescription;
+            isFactCheck = maybeIsFactCheck;
 
             Animator oldAnimator = animatorSparseArray.get(selectedCellId);
             if (oldAnimator != null) {
@@ -2030,7 +2047,7 @@ public abstract class TextSelectionHelper<Cell extends TextSelectionHelper.Selec
 
 
         public void draw(MessageObject messageObject, MessageObject.TextLayoutBlock block, Canvas canvas) {
-            if (selectedView == null || selectedView.getMessageObject() == null || isDescription) {
+            if (selectedView == null || selectedView.getMessageObject() == null || isDescription || isFactCheck) {
                 return;
             }
 
@@ -2069,7 +2086,7 @@ public abstract class TextSelectionHelper<Cell extends TextSelectionHelper.Selec
             if (messageObject == null) {
                 return;
             }
-            if (isDescription || selectedView == null || selectedView.getMessageObject() == null || selectedView.getMessageObject().getId() != messageObject.getId()) {
+            if (isDescription || isFactCheck || selectedView == null || selectedView.getMessageObject() == null || selectedView.getMessageObject().getId() != messageObject.getId()) {
                 return;
             }
 
@@ -2109,16 +2126,19 @@ public abstract class TextSelectionHelper<Cell extends TextSelectionHelper.Selec
             float yOffset = 0;
 
             boolean isDescription = maybe ? maybeIsDescription : this.isDescription;
+            boolean isFactCheck = maybe ? maybeIsFactCheck : this.isFactCheck;
             if (isDescription) {
                 lastLayout = cell.getDescriptionlayout();
+            } else if (isFactCheck) {
+                lastLayout = cell.getFactCheckLayout();
             } else if (cell.hasCaptionLayout()) {
                 MessageObject.TextLayoutBlock lastBlock = cell.getCaptionLayout().textLayoutBlocks.get(cell.getCaptionLayout().textLayoutBlocks.size() - 1);
                 lastLayout = lastBlock.textLayout;
-                yOffset = lastBlock.textYOffset + lastBlock.padTop;
+                yOffset = lastBlock.textYOffset(cell.getCaptionLayout().textLayoutBlocks) + lastBlock.padTop;
             } else {
                 MessageObject.TextLayoutBlock lastBlock = cell.getMessageObject().textLayoutBlocks.get(cell.getMessageObject().textLayoutBlocks.size() - 1);
                 lastLayout = lastBlock.textLayout;
-                yOffset = lastBlock.textYOffset + lastBlock.padTop;
+                yOffset = lastBlock.textYOffset(cell.getMessageObject().textLayoutBlocks) + lastBlock.padTop;
             }
 
             if (lastLayout == null) {
@@ -2168,13 +2188,19 @@ public abstract class TextSelectionHelper<Cell extends TextSelectionHelper.Selec
                 layoutBlock.charOffset = 0;
                 return;
             }
+            if (maybe ? maybeIsFactCheck : isFactCheck) {
+                layoutBlock.layout = cell.getFactCheckLayout();
+                layoutBlock.yOffset = layoutBlock.xOffset = 0;
+                layoutBlock.charOffset = 0;
+                return;
+            }
             if (cell.hasCaptionLayout()) {
                 MessageObject.TextLayoutBlocks captionLayout = cell.getCaptionLayout();
                 for (int i = 0; i < captionLayout.textLayoutBlocks.size(); i++) {
                     MessageObject.TextLayoutBlock block = captionLayout.textLayoutBlocks.get(i);
-                    if (y >= block.textYOffset && y <= block.textYOffset + block.padTop + block.height) {
+                    if (y >= block.textYOffset(captionLayout.textLayoutBlocks) && y <= block.textYOffset(captionLayout.textLayoutBlocks) + block.padTop + block.height) {
                         layoutBlock.layout = block.textLayout;
-                        layoutBlock.yOffset = block.textYOffset + block.padTop;
+                        layoutBlock.yOffset = block.textYOffset(captionLayout.textLayoutBlocks) + block.padTop;
                         int offsetX = 0;
                         if (block.quote) {
                             offsetX = dp(10);
@@ -2192,9 +2218,9 @@ public abstract class TextSelectionHelper<Cell extends TextSelectionHelper.Selec
 
             for (int i = 0; i < messageObject.textLayoutBlocks.size(); i++) {
                 MessageObject.TextLayoutBlock block = messageObject.textLayoutBlocks.get(i);
-                if (y >= block.textYOffset && y <= block.textYOffset + block.padTop + block.height) {
+                if (y >= block.textYOffset(messageObject.textLayoutBlocks) && y <= block.textYOffset(messageObject.textLayoutBlocks) + block.padTop + block.height) {
                     layoutBlock.layout = block.textLayout;
-                    layoutBlock.yOffset = block.textYOffset + block.padTop;
+                    layoutBlock.yOffset = block.textYOffset(messageObject.textLayoutBlocks) + block.padTop;
                     int offsetX = 0;
                     if (block.quote) {
                         offsetX = dp(10);
@@ -2226,6 +2252,12 @@ public abstract class TextSelectionHelper<Cell extends TextSelectionHelper.Selec
                 layoutBlock.charOffset = 0;
                 return;
             }
+            if (isFactCheck) {
+                layoutBlock.layout = selectedView.getFactCheckLayout();
+                layoutBlock.xOffset = layoutBlock.yOffset = 0;
+                layoutBlock.charOffset = 0;
+                return;
+            }
 
             if (selectedView.hasCaptionLayout()) {
                 MessageObject.TextLayoutBlocks captionLayout = selectedView.getCaptionLayout();
@@ -2251,7 +2283,7 @@ public abstract class TextSelectionHelper<Cell extends TextSelectionHelper.Selec
                     int blockOffset = offset - block.charactersOffset;
                     if (blockOffset >= 0 && blockOffset <= block.textLayout.getText().length()) {
                         layoutBlock.layout = block.textLayout;
-                        layoutBlock.yOffset = block.textYOffset + block.padTop;
+                        layoutBlock.yOffset = block.textYOffset(captionLayout.textLayoutBlocks) + block.padTop;
                         int offsetX = 0;
                         if (block.quote) {
                             offsetX = dp(10);
@@ -2295,7 +2327,7 @@ public abstract class TextSelectionHelper<Cell extends TextSelectionHelper.Selec
                 int blockOffset = offset - block.charactersOffset;
                 if (blockOffset >= 0 && blockOffset <= block.textLayout.getText().length()) {
                     layoutBlock.layout = block.textLayout;
-                    layoutBlock.yOffset = block.textYOffset + block.padTop;
+                    layoutBlock.yOffset = block.textYOffset(messageObject.textLayoutBlocks) + block.padTop;
                     int offsetX = 0;
                     if (block.quote) {
                         offsetX = dp(10);
@@ -2355,7 +2387,7 @@ public abstract class TextSelectionHelper<Cell extends TextSelectionHelper.Selec
         }
 
         public void drawCaption(boolean isOut, StaticLayout captionLayout, Canvas canvas) {
-            if (isDescription) {
+            if (isDescription || isFactCheck) {
                 return;
             }
             if (isOut) {
@@ -2382,11 +2414,28 @@ public abstract class TextSelectionHelper<Cell extends TextSelectionHelper.Selec
             drawSelection(canvas, layout, selectionStart, selectionEnd, true, true, 0);
         }
 
+        public void drawFactCheck(boolean isOut, StaticLayout layout, Canvas canvas) {
+            if (!isFactCheck) {
+                return;
+            }
+            if (isOut) {
+                selectionPaint.setColor(getThemedColor(Theme.key_chat_outTextSelectionHighlight));
+                selectionHandlePaint.setColor(getThemedColor(Theme.key_chat_outTextSelectionHighlight));
+            } else {
+                selectionPaint.setColor(getThemedColor(key_chat_inTextSelectionHighlight));
+                selectionHandlePaint.setColor(getThemedColor(key_chat_inTextSelectionHighlight));
+            }
+            drawSelection(canvas, layout, selectionStart, selectionEnd, true, true, 0);
+        }
+
         @Override
         public void invalidate() {
             super.invalidate();
             if (selectedView != null && selectedView.getCurrentMessagesGroup() != null) {
                 parentView.invalidate();
+            }
+            if (selectedView != null && (isFactCheck || maybeIsFactCheck)) {
+                selectedView.invalidateOutbounds();
             }
         }
 
@@ -2402,15 +2451,23 @@ public abstract class TextSelectionHelper<Cell extends TextSelectionHelper.Selec
             maybeIsDescription = b;
         }
 
+        public void setIsFactCheck(boolean b) {
+            maybeIsFactCheck = b;
+        }
+
         @Override
         public void clear(boolean instant) {
             super.clear(instant);
             isDescription = false;
+            isFactCheck = false;
         }
 
         public int getTextSelectionType(ChatMessageCell cell) {
             if (isDescription) {
                 return TYPE_DESCRIPTION;
+            }
+            if (isFactCheck) {
+                return TYPE_FACTCHECK;
             }
             if (cell.hasCaptionLayout()) {
                 return TYPE_CAPTION;

@@ -1171,6 +1171,7 @@ public class ChannelColorActivity extends BaseFragment implements NotificationCe
                     profilePreview.backgroundView.setColor(currentAccount, selectedProfileColor, false);
                     profilePreview.profileView.setColor(selectedProfileColor, false);
                     profilePreview.profileView.setEmoji(selectedProfileEmoji, false);
+                    profilePreview.profileView.setForum(isForum());
                     profilePreview.profileView.setStatusEmoji(DialogObject.getEmojiStatusDocumentId(selectedStatusEmoji), false);
                     profilePreview.profileView.overrideAvatarColor(selectedReplyColor);
                     break;
@@ -1190,6 +1191,7 @@ public class ChannelColorActivity extends BaseFragment implements NotificationCe
                 ProfilePreview profilePreview = (ProfilePreview) holder.itemView;
                 profilePreview.profileView.setColor(selectedProfileColor, false);
                 profilePreview.profileView.setEmoji(selectedProfileEmoji, false);
+                profilePreview.profileView.setForum(isForum());
                 profilePreview.profileView.setStatusEmoji(DialogObject.getEmojiStatusDocumentId(selectedStatusEmoji), false);
                 profilePreview.profileView.overrideAvatarColor(selectedReplyColor);
             } else if (holder.itemView instanceof ThemePreviewMessagesCell) {
@@ -1397,7 +1399,7 @@ public class ChannelColorActivity extends BaseFragment implements NotificationCe
                 title = new SimpleTextView(getContext());
                 title.setGravity(Gravity.LEFT | Gravity.CENTER_VERTICAL);
                 title.setTextColor(getThemedColor(Theme.key_actionBarDefaultTitle));
-                title.setTypeface(AndroidUtilities.getTypeface(AndroidUtilities.TYPEFACE_ROBOTO_MEDIUM));
+                title.setTypeface(AndroidUtilities.bold());
                 title.setText(LocaleController.getString(R.string.ChangeChannelNameColor2));
                 title.setAlpha(0f);
                 setTitleSize();
@@ -2532,4 +2534,9 @@ public class ChannelColorActivity extends BaseFragment implements NotificationCe
             updateButton(true);
         }
     }
+
+    protected boolean isForum() {
+        return false;
+    }
+
 }

@@ -165,7 +165,7 @@ public class MaskPaintView extends FrameLayout {
 
         cancelButton = new TextView(context);
         cancelButton.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 15);
-        cancelButton.setTypeface(AndroidUtilities.getTypeface(AndroidUtilities.TYPEFACE_ROBOTO_MEDIUM));
+        cancelButton.setTypeface(AndroidUtilities.bold());
         cancelButton.setBackground(Theme.createSelectorDrawable(Theme.multAlpha(Color.WHITE, .15f), Theme.RIPPLE_MASK_CIRCLE_TO_BOUND_EDGE));
         cancelButton.setPadding(dp(28), 0, dp(28), 0);
         cancelButton.setText(LocaleController.getString(R.string.Cancel).toUpperCase());
@@ -175,7 +175,7 @@ public class MaskPaintView extends FrameLayout {
 
         doneButton = new TextView(context);
         doneButton.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 15);
-        doneButton.setTypeface(AndroidUtilities.getTypeface(AndroidUtilities.TYPEFACE_ROBOTO_MEDIUM));
+        doneButton.setTypeface(AndroidUtilities.bold());
         doneButton.setBackground(Theme.createSelectorDrawable(Theme.multAlpha(Theme.getColor(Theme.key_chat_editMediaButton), .15f), Theme.RIPPLE_MASK_CIRCLE_TO_BOUND_EDGE));
         doneButton.setPadding(dp(28), 0, dp(28), 0);
         doneButton.setText(LocaleController.getString(R.string.Save).toUpperCase());

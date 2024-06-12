@@ -63,7 +63,9 @@ public class ScaleStateListAnimator {
     }
 
     public static void reset(View view) {
-        view.setStateListAnimator(null);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            view.setStateListAnimator(null);
+        }
     }
 
 }

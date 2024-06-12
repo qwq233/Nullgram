@@ -78,7 +78,7 @@ public class ProfileChannelCell extends FrameLayout {
         addView(headerLayout, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT, Gravity.FILL_HORIZONTAL | Gravity.TOP, 22, 16.6f, 22, 0));
 
         headerView = new TextView(context);
-        headerView.setTypeface(AndroidUtilities.getTypeface(AndroidUtilities.TYPEFACE_ROBOTO_MEDIUM));
+        headerView.setTypeface(AndroidUtilities.bold());
         headerView.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 15);
         headerView.setText(LocaleController.getString(R.string.ProfileChannel));
         headerLayout.addView(headerView, LayoutHelper.createLinear(LayoutHelper.WRAP_CONTENT, LayoutHelper.WRAP_CONTENT, Gravity.LEFT | Gravity.TOP));
@@ -86,7 +86,7 @@ public class ProfileChannelCell extends FrameLayout {
         subscribersView = new ClickableAnimatedTextView(context);
         subscribersView.getDrawable().setHacks(true, true, true);
         subscribersView.setAnimationProperties(.3f, 0, 165, CubicBezierInterpolator.EASE_OUT_QUINT);
-        subscribersView.setTypeface(AndroidUtilities.getTypeface(AndroidUtilities.TYPEFACE_ROBOTO_MEDIUM));
+        subscribersView.setTypeface(AndroidUtilities.bold());
         subscribersView.setTextSize(dp(11));
         subscribersView.setPadding(dp(4.33f), 0, dp(4.33f), 0);
         subscribersView.setGravity(Gravity.LEFT);
@@ -298,7 +298,7 @@ public class ProfileChannelCell extends FrameLayout {
                 SQLiteCursor cursor = null;
                 try {
                     if (message_id <= 0) {
-                        cursor = storage.getDatabase().queryFinalized("SELECT data, mid FROM messages_v2 WHERE uid = ? ORDER BY mid DESC LIMTI 1", -channel_id);
+                        cursor = storage.getDatabase().queryFinalized("SELECT data, mid FROM messages_v2 WHERE uid = ? ORDER BY mid DESC LIMIT 1", -channel_id);
                     } else {
                         cursor = storage.getDatabase().queryFinalized("SELECT data, mid FROM messages_v2 WHERE uid = ? AND mid = ? LIMIT 1", -channel_id, message_id);
                     }
@@ -320,7 +320,7 @@ public class ProfileChannelCell extends FrameLayout {
                     if (message != null) {
 
                         if (!usersToLoad.isEmpty()) {
-                            storage.getUsersInternal(TextUtils.join(",", usersToLoad), users);
+                            storage.getUsersInternal(usersToLoad, users);
                         }
                         if (!chatsToLoad.isEmpty()) {
                             storage.getChatsInternal(TextUtils.join(",", chatsToLoad), chats);

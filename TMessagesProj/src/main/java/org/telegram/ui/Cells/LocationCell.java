@@ -14,18 +14,13 @@ import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffColorFilter;
-import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.ShapeDrawable;
 import android.os.SystemClock;
 import android.text.TextUtils;
-import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
-import android.widget.TextView;
-
-import androidx.core.graphics.ColorUtils;
 
 import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.Emoji;
@@ -66,7 +61,7 @@ public class LocationCell extends FrameLayout {
         nameTextView.setTextSize(AndroidUtilities.dp(16));
         nameTextView.setEllipsizeByGradient(true);
         nameTextView.setTextColor(getThemedColor(Theme.key_windowBackgroundWhiteBlackText));
-        nameTextView.setTypeface(AndroidUtilities.getTypeface("fonts/rmedium.ttf"));
+        nameTextView.setTypeface(AndroidUtilities.bold());
         nameTextView.setGravity(LocaleController.isRTL ? Gravity.RIGHT : Gravity.LEFT);
         nameTextView.getDrawable().setOverrideFullWidth(AndroidUtilities.displaySize.x);
         NotificationCenter.listenEmojiLoading(nameTextView);

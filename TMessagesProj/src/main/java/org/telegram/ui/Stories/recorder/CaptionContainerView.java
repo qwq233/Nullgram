@@ -153,6 +153,16 @@ public class CaptionContainerView extends FrameLayout {
             }
 
             @Override
+            protected void updatedEmojiExpanded() {
+                keyboardNotifier.fire();
+            }
+
+            @Override
+            protected boolean allowSearch() {
+                return true;
+            }
+
+            @Override
             protected void onEmojiKeyboardUpdate() {
                 keyboardNotifier.fire();
             }
@@ -323,7 +333,7 @@ public class CaptionContainerView extends FrameLayout {
         limitTextView.setTextSize(dp(15));
         limitTextView.setTextColor(0xffffffff);
         limitTextView.setAnimationProperties(.4f, 0, 320, CubicBezierInterpolator.EASE_OUT_QUINT);
-        limitTextView.setTypeface(AndroidUtilities.getTypeface(AndroidUtilities.TYPEFACE_ROBOTO_MEDIUM));
+        limitTextView.setTypeface(AndroidUtilities.bold());
         limitTextContainer = new FrameLayout(context);
         limitTextContainer.setTranslationX(dp(2));
         limitTextContainer.addView(limitTextView, LayoutHelper.createFrame(52, 16, Gravity.RIGHT | Gravity.BOTTOM));
@@ -738,6 +748,14 @@ public class CaptionContainerView extends FrameLayout {
     private Paint blurPaint;
 
     public boolean onBackPressed() {
+        if (editText.emojiExpanded && editText.getEmojiView() != null) {
+            if (keyboardNotifier.keyboardVisible()) {
+                editText.getEmojiView().hideSearchKeyboard();
+            } else {
+                editText.collapseEmojiView();
+            }
+            return true;
+        }
         if (editText.isPopupShowing()) {
             editText.hidePopup(true);
             return true;
@@ -772,7 +790,7 @@ public class CaptionContainerView extends FrameLayout {
         } else {
             hasReply = true;
 
-            replyTitle = new Text(title == null ? "" : title, 14, AndroidUtilities.getTypeface(AndroidUtilities.TYPEFACE_ROBOTO_MEDIUM));
+            replyTitle = new Text(title == null ? "" : title, 14, AndroidUtilities.bold());
             replyText = new Text(text == null ? "" : text, 14);
         }
     }

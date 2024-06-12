@@ -2973,7 +2973,7 @@ public class ContactsController extends BaseController {
             TLRPC.Chat chat = (TLRPC.Chat) object;
             return chat.title;
         } else {
-            return "DELETED";
+            return LocaleController.getString(R.string.HiddenName);
         }
     }
 

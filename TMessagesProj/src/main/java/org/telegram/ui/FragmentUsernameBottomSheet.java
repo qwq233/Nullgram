@@ -143,7 +143,7 @@ public class FragmentUsernameBottomSheet {
         CharSequence messageSpanned = AndroidUtilities.replaceCharSequence("TON", AndroidUtilities.replaceTags(message), tonIcon);
 
         TextView headerView = new LinkSpanDrawable.LinksTextView(context);
-        headerView.setTypeface(AndroidUtilities.getTypeface(AndroidUtilities.TYPEFACE_ROBOTO_MEDIUM));
+        headerView.setTypeface(AndroidUtilities.bold());
         headerView.setGravity(Gravity.CENTER);
         headerView.setTextColor(Theme.getColor(Theme.key_dialogTextBlack, resourcesProvider));
         headerView.setLinkTextColor(Theme.getColor(Theme.key_windowBackgroundWhiteBlueText2, resourcesProvider));

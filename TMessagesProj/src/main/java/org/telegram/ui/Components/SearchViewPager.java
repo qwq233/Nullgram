@@ -70,6 +70,7 @@ import org.telegram.ui.Cells.SharedDocumentCell;
 import org.telegram.ui.Cells.SharedLinkCell;
 import org.telegram.ui.Cells.SharedPhotoVideoCell;
 import org.telegram.ui.ChatActivity;
+import org.telegram.ui.Components.Premium.PremiumFeatureBottomSheet;
 import org.telegram.ui.DialogsActivity;
 import org.telegram.ui.FilteredSearchView;
 
@@ -511,7 +512,7 @@ public class SearchViewPager extends ViewPagerFixed implements FilteredSearchVie
 
             selectedMessagesCountTextView = new NumberTextView(actionMode.getContext());
             selectedMessagesCountTextView.setTextSize(18);
-            selectedMessagesCountTextView.setTypeface(AndroidUtilities.getTypeface("fonts/rmedium.ttf"));
+            selectedMessagesCountTextView.setTypeface(AndroidUtilities.bold());
             selectedMessagesCountTextView.setTextColor(Theme.getColor(Theme.key_actionBarActionModeDefaultIcon));
             actionMode.addView(selectedMessagesCountTextView, LayoutHelper.createLinear(0, LayoutHelper.MATCH_PARENT, 1.0f, 72, 0, 0, 0));
             selectedMessagesCountTextView.setOnTouchListener((v, event) -> true);

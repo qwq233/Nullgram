@@ -31,7 +31,7 @@ public class SponsoredMessageInfoView extends FrameLayout {
 
         TextView textView = new TextView(context);
         textView.setText(LocaleController.getString("SponsoredMessageInfo", R.string.SponsoredMessageInfo));
-        textView.setTypeface(AndroidUtilities.getTypeface("fonts/rmedium.ttf"));
+        textView.setTypeface(AndroidUtilities.bold());
         textView.setTextColor(Theme.getColor(Theme.key_windowBackgroundWhiteBlackText, resourcesProvider));
         textView.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 20);
 

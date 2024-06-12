@@ -108,7 +108,7 @@ public class ActionBarMenuSlider extends FrameLayout {
             }
         };
         textDrawable.setCallback(this);
-        textDrawable.setTypeface(AndroidUtilities.getTypeface(AndroidUtilities.TYPEFACE_ROBOTO_MEDIUM));
+        textDrawable.setTypeface(AndroidUtilities.bold());
         textDrawable.setAnimationProperties(.3f, 0, 165, CubicBezierInterpolator.EASE_OUT_QUINT);
         textDrawable.setTextSize(AndroidUtilities.dpf2(14));
         textDrawable.getPaint().setStyle(Paint.Style.FILL_AND_STROKE);

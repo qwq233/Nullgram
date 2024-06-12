@@ -203,6 +203,11 @@ public abstract class BottomSheetWithRecyclerListView extends BottomSheet {
                 applyScrolledPosition();
                 super.onLayout(changed, l, t, r, b);
             }
+
+            @Override
+            protected boolean canHighlightChildAt(View child, float x, float y) {
+                return BottomSheetWithRecyclerListView.this.canHighlightChildAt(child, x, y);
+            }
         };
         layoutManager = new LinearLayoutManager(context);
         if (stackFromEnd) {
@@ -510,6 +515,10 @@ public abstract class BottomSheetWithRecyclerListView extends BottomSheet {
 
     }
 
+    protected boolean canHighlightChildAt(View child, float x, float y) {
+        return true;
+    }
+
     protected abstract CharSequence getTitle();
 
     protected abstract RecyclerListView.SelectionAdapter createAdapter(RecyclerListView listView);
@@ -538,6 +547,12 @@ public abstract class BottomSheetWithRecyclerListView extends BottomSheet {
     public void updateTitle() {
         if (actionBar != null) {
             actionBar.setTitle(getTitle());
+        }
+    }
+
+    public void updateTitleAnimated() {
+        if (actionBar != null) {
+            actionBar.setTitleAnimated(getTitle(), false, 350, CubicBezierInterpolator.EASE_OUT_QUINT);
         }
     }
 

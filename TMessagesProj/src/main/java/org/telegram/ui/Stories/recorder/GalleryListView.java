@@ -241,7 +241,7 @@ public class GalleryListView extends FrameLayout implements NotificationCenter.N
         dropDown.setMaxLines(1);
         dropDown.setEllipsize(TextUtils.TruncateAt.END);
         dropDown.setTextColor(0xFFFFFFFF);
-        dropDown.setTypeface(AndroidUtilities.getTypeface("fonts/rmedium.ttf"));
+        dropDown.setTypeface(AndroidUtilities.bold());
         dropDownDrawable = context.getResources().getDrawable(R.drawable.ic_arrow_drop_down).mutate();
         dropDownDrawable.setColorFilter(new PorterDuffColorFilter(0xFFFFFFFF, PorterDuff.Mode.MULTIPLY));
         dropDown.setCompoundDrawablePadding(AndroidUtilities.dp(4));
@@ -683,7 +683,7 @@ public class GalleryListView extends FrameLayout implements NotificationCenter.N
             bgPaint.setColor(0x10ffffff);
 
             durationBackgroundPaint.setColor(0x4c000000);
-            durationTextPaint.setTypeface(AndroidUtilities.getTypeface(AndroidUtilities.TYPEFACE_ROBOTO_MEDIUM));
+            durationTextPaint.setTypeface(AndroidUtilities.bold());
             durationTextPaint.setTextSize(dpf2(12.66f));
             durationTextPaint.setColor(0xffffffff);
             draftTextPaint.setTextSize(AndroidUtilities.dp(11.33f));
@@ -1165,7 +1165,7 @@ public class GalleryListView extends FrameLayout implements NotificationCenter.N
             textView = new TextView(context);
             textView.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 16);
             textView.setTextColor(0xFFFFFFFF);
-            textView.setTypeface(AndroidUtilities.getTypeface(AndroidUtilities.TYPEFACE_ROBOTO_MEDIUM));
+            textView.setTypeface(AndroidUtilities.bold());
             textView.setText(LocaleController.getString(onlyPhotos ? R.string.AddImage : R.string.ChoosePhotoOrVideo));
             addView(textView, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, LayoutHelper.MATCH_PARENT, Gravity.FILL, 0, 0, onlyPhotos ? 32 : 0, 0));
         }

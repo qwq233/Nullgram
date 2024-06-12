@@ -85,6 +85,7 @@ import static org.telegram.ui.ActionBar.Theme.key_calls_callReceivedGreenIcon;
 import static org.telegram.ui.ActionBar.Theme.key_calls_callReceivedRedIcon;
 import static org.telegram.ui.ActionBar.Theme.key_changephoneinfo_image2;
 import static org.telegram.ui.ActionBar.Theme.key_chat_BlurAlpha;
+import static org.telegram.ui.ActionBar.Theme.key_chat_BlurAlphaSlow;
 import static org.telegram.ui.ActionBar.Theme.key_chat_TextSelectionCursor;
 import static org.telegram.ui.ActionBar.Theme.key_chat_addContact;
 import static org.telegram.ui.ActionBar.Theme.key_chat_attachActiveTab;
@@ -616,6 +617,8 @@ import static org.telegram.ui.ActionBar.Theme.key_sharedMedia_photoPlaceholder;
 import static org.telegram.ui.ActionBar.Theme.key_sharedMedia_startStopLoadIcon;
 import static org.telegram.ui.ActionBar.Theme.key_sheet_other;
 import static org.telegram.ui.ActionBar.Theme.key_sheet_scrollUp;
+import static org.telegram.ui.ActionBar.Theme.key_starsGradient1;
+import static org.telegram.ui.ActionBar.Theme.key_starsGradient2;
 import static org.telegram.ui.ActionBar.Theme.key_statisticChartActiveLine;
 import static org.telegram.ui.ActionBar.Theme.key_statisticChartActivePickerChart;
 import static org.telegram.ui.ActionBar.Theme.key_statisticChartBackZoomColor;
@@ -654,6 +657,8 @@ import static org.telegram.ui.ActionBar.Theme.key_switchTrackBlueSelectorChecked
 import static org.telegram.ui.ActionBar.Theme.key_switchTrackBlueThumb;
 import static org.telegram.ui.ActionBar.Theme.key_switchTrackBlueThumbChecked;
 import static org.telegram.ui.ActionBar.Theme.key_switchTrackChecked;
+import static org.telegram.ui.ActionBar.Theme.key_table_background;
+import static org.telegram.ui.ActionBar.Theme.key_table_border;
 import static org.telegram.ui.ActionBar.Theme.key_text_RedBold;
 import static org.telegram.ui.ActionBar.Theme.key_text_RedRegular;
 import static org.telegram.ui.ActionBar.Theme.key_topics_unreadCounter;
@@ -952,8 +957,10 @@ public class ThemeColors {
         defaultColors[key_actionBarTabUnactiveText] = 0xffd5e8f7;
         defaultColors[key_actionBarTabLine] = 0xffffffff;
         defaultColors[key_actionBarTabSelector] = 0xff406d94;
-
         defaultColors[key_actionBarBrowser] = 0xffffffff;
+
+        defaultColors[key_table_background] = 0xfff7f7f7;
+        defaultColors[key_table_border] = 0xffE0E0E0;
 
         defaultColors[key_actionBarDefaultArchived] = 0xff6f7a87;
         defaultColors[key_actionBarDefaultArchivedSelector] = 0xff5e6772;
@@ -1525,6 +1532,8 @@ public class ThemeColors {
         defaultColors[key_premiumGradientBottomSheet3] = 0xffE794BE;
         defaultColors[key_topics_unreadCounter] = 0xff4ecc5e;
         defaultColors[key_topics_unreadCounterMuted] = 0xff8b8d8f;
+        defaultColors[key_starsGradient1] = 0xffFEC846;
+        defaultColors[key_starsGradient2] = 0xffEC920A;
 
         defaultColors[key_stories_circle1] = 0xFF39DF3C;
         defaultColors[key_stories_circle2] = 0xFF4DBBFF;
@@ -1731,6 +1740,8 @@ public class ThemeColors {
         colorKeysMap.put(key_actionBarTabUnactiveText, "actionBarTabUnactiveText");
         colorKeysMap.put(key_actionBarTabLine, "actionBarTabLine");
         colorKeysMap.put(key_actionBarTabSelector, "actionBarTabSelector");
+        colorKeysMap.put(key_table_background, "table_background");
+        colorKeysMap.put(key_table_border, "table_border");
         colorKeysMap.put(key_actionBarDefaultArchived, "actionBarDefaultArchived");
         colorKeysMap.put(key_actionBarDefaultArchivedSelector, "actionBarDefaultArchivedSelector");
         colorKeysMap.put(key_actionBarDefaultArchivedIcon, "actionBarDefaultArchivedIcon");
@@ -2073,6 +2084,7 @@ public class ThemeColors {
         colorKeysMap.put(key_chat_inBubbleLocationPlaceholder, "chat_inBubbleLocationPlaceholder");
         colorKeysMap.put(key_chat_outBubbleLocationPlaceholder, "chat_outBubbleLocationPlaceholder");
         colorKeysMap.put(key_chat_BlurAlpha, "chat_BlurAlpha");
+        colorKeysMap.put(key_chat_BlurAlphaSlow, "chat_BlurAlphaSlow");
         colorKeysMap.put(key_chat_editMediaButton, "chat_editMediaButton");
 
         colorKeysMap.put(key_voipgroup_listSelector, "voipgroup_listSelector");

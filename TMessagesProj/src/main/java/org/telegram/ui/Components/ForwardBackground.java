@@ -40,7 +40,6 @@ public class ForwardBackground {
     public final Rect bounds = new Rect();
     public final ButtonBounce bounce;
     private final RectF r = new RectF();
-    public float cx, cy;
 
     public ForwardBackground(View view) {
         this.view = view;
@@ -135,6 +134,7 @@ public class ForwardBackground {
             } else {
                 Theme.setSelectorDrawableColor(rippleDrawable, color, true);
             }
+            rippleDrawable.setCallback(view);
             rippleDrawableColor = color;
         }
     }
@@ -145,15 +145,13 @@ public class ForwardBackground {
 
     public void setPressed(boolean pressed, float x, float y) {
         bounce.setPressed(pressed);
-        if (rippleDrawable != null) {
-            rippleDrawable.setState(pressed ? new int[]{android.R.attr.state_enabled, android.R.attr.state_pressed} : new int[]{});
-        }
         if (pressed) {
-            cx = x;
-            cy = y;
             if (rippleDrawable != null && Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
                 rippleDrawable.setHotspot(x, y);
             }
+        }
+        if (rippleDrawable != null) {
+            rippleDrawable.setState(pressed ? new int[]{android.R.attr.state_enabled, android.R.attr.state_pressed} : new int[]{});
         }
         view.invalidate();
     }

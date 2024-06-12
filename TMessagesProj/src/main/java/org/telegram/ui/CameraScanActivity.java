@@ -629,7 +629,7 @@ public class CameraScanActivity extends BaseFragment {
                             index1 += 1;
                             index2 += 1;
                             spanned.setSpan(new URLSpanNoUnderline(links[i], true), index1, index2 - 1, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
-                            spanned.setSpan(new TypefaceSpan(AndroidUtilities.getTypeface("fonts/rmedium.ttf")), index1, index2 - 1, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+                            spanned.setSpan(new TypefaceSpan(AndroidUtilities.bold()), index1, index2 - 1, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
                         } else {
                             break;
                         }
@@ -675,7 +675,7 @@ public class CameraScanActivity extends BaseFragment {
                     ChatAttachAlert chatAttachAlert = new ChatAttachAlert(getParentActivity(), this, true, false, false, null);
                     chatAttachAlert.drawNavigationBar = true;
                     chatAttachAlert.setupPhotoPicker(LocaleController.getString("ChoosePhoto", R.string.ChoosePhoto));
-                    chatAttachAlert.setDelegate((button, arg, notify, scheduleDate, forceDocument) -> {
+                    chatAttachAlert.setDelegate((button, arg, notify, scheduleDate, effectId, invertMedia, forceDocument) -> {
                         try {
                             HashMap<Object, Object> photos = chatAttachAlert.getPhotoLayout().getSelectedPhotos();
                             if (!photos.isEmpty()) {

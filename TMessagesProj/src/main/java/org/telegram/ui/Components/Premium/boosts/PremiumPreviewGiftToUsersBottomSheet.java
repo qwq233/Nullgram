@@ -416,7 +416,7 @@ public class PremiumPreviewGiftToUsersBottomSheet extends PremiumPreviewBottomSh
                 paint.setColor(Theme.getColor(Theme.key_dialogBackground));
             }
             paint.setTextSize(dp(11.5f));
-            paint.setTypeface(AndroidUtilities.getTypeface(AndroidUtilities.TYPEFACE_ROBOTO_MEDIUM));
+            paint.setTypeface(AndroidUtilities.bold());
         }
 
         @Override

@@ -127,7 +127,7 @@ public class CheckBoxCell extends FrameLayout {
             animatedTextView.setTag(getThemedColor(type == TYPE_CHECK_BOX_DEFAULT || type == TYPE_CHECK_BOX_URL ? Theme.key_dialogTextBlack : Theme.key_windowBackgroundWhiteBlackText));
             animatedTextView.setTextSize(dp(16));
             if (type == TYPE_CHECK_BOX_USER) {
-                animatedTextView.setTypeface(AndroidUtilities.getTypeface(AndroidUtilities.TYPEFACE_ROBOTO_MEDIUM));
+                animatedTextView.setTypeface(AndroidUtilities.bold());
             }
             if (type == TYPE_CHECK_BOX_UNKNOWN) {
                 animatedTextView.setGravity(Gravity.LEFT | Gravity.CENTER_VERTICAL);
@@ -169,7 +169,7 @@ public class CheckBoxCell extends FrameLayout {
             linksTextView.setSingleLine(true);
             linksTextView.setEllipsize(TextUtils.TruncateAt.END);
             if (type == TYPE_CHECK_BOX_USER) {
-                linksTextView.setTypeface(AndroidUtilities.getTypeface(AndroidUtilities.TYPEFACE_ROBOTO_MEDIUM));
+                linksTextView.setTypeface(AndroidUtilities.bold());
             }
             if (type == TYPE_CHECK_BOX_UNKNOWN) {
                 linksTextView.setGravity(Gravity.LEFT | Gravity.CENTER_VERTICAL);
@@ -563,6 +563,11 @@ public class CheckBoxCell extends FrameLayout {
         super.onInitializeAccessibilityNodeInfo(info);
         info.setClassName("android.widget.CheckBox");
         info.setCheckable(true);
+        if (animatedTextView != null) {
+            info.setText(animatedTextView.getText());
+        } else if (linksTextView != null) {
+            info.setText(linksTextView.getText());
+        }
         info.setChecked(isChecked());
     }
 
@@ -610,7 +615,7 @@ public class CheckBoxCell extends FrameLayout {
             textView.setTextSize(dp(13));
             textView.setTextColor(color);
             textView.setIncludeFontPadding(false);
-            textView.setTypeface(AndroidUtilities.getTypeface(AndroidUtilities.TYPEFACE_ROBOTO_MEDIUM));
+            textView.setTypeface(AndroidUtilities.bold());
 
             collapsedArrow = new View(context);
             Drawable drawable = getContext().getResources().getDrawable(R.drawable.arrow_more).mutate();

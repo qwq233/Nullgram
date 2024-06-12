@@ -344,7 +344,7 @@ public abstract class BaseActivity extends BaseFragment {
         }
 
         @Override
-        protected void drawList(Canvas blurCanvas, boolean top) {
+        protected void drawList(Canvas blurCanvas, boolean top, ArrayList<IViewWithInvalidateCallback> views) {
             for (int j = 0; j < listView.getChildCount(); j++) {
                 View child = listView.getChildAt(j);
                 if (child.getY() < listView.blurTopPadding + AndroidUtilities.dp(100)) {

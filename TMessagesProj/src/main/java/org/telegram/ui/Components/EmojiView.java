@@ -721,7 +721,9 @@ public class EmojiView extends FrameLayout implements
             addView(shadowView, new LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, AndroidUtilities.getShadowHeight(), Gravity.BOTTOM | Gravity.LEFT));
 
             backgroundView = new View(context);
-            backgroundView.setBackgroundColor(getThemedColor(Theme.key_chat_emojiPanelBackground));
+            if (shouldDrawBackground) {
+                backgroundView.setBackgroundColor(getThemedColor(Theme.key_chat_emojiPanelBackground));
+            }
             addView(backgroundView, new LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, searchFieldHeight));
 
             box = new FrameLayout(context);
@@ -2542,24 +2544,26 @@ public class EmojiView extends FrameLayout implements
                 backspaceButton.setBackground(Theme.createSelectorDrawable(color, Theme.RIPPLE_MASK_CIRCLE_20DP, AndroidUtilities.dp(18)));
             }
 
-            stickerSettingsButton = new ImageView(context);
-            stickerSettingsButton.setImageResource(R.drawable.smiles_tab_settings);
-            stickerSettingsButton.setColorFilter(new PorterDuffColorFilter(getThemedColor(Theme.key_chat_emojiPanelBackspace), PorterDuff.Mode.MULTIPLY));
-            stickerSettingsButton.setScaleType(ImageView.ScaleType.CENTER);
-            stickerSettingsButton.setFocusable(true);
-            if (Build.VERSION.SDK_INT >= 21) {
-                stickerSettingsButton.setBackground(Theme.createSelectorDrawable(color, Theme.RIPPLE_MASK_CIRCLE_20DP, AndroidUtilities.dp(18)));
-            }
-            stickerSettingsButton.setContentDescription(LocaleController.getString("Settings", R.string.Settings));
-            bottomTabContainer.addView(stickerSettingsButton, LayoutHelper.createFrame(47, 40, Gravity.BOTTOM | Gravity.RIGHT));
-            stickerSettingsButton.setOnClickListener(new OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    if (delegate != null) {
-                        delegate.onStickersSettingsClick();
-                    }
+            if (needStickers) {
+                stickerSettingsButton = new ImageView(context);
+                stickerSettingsButton.setImageResource(R.drawable.smiles_tab_settings);
+                stickerSettingsButton.setColorFilter(new PorterDuffColorFilter(getThemedColor(Theme.key_chat_emojiPanelBackspace), PorterDuff.Mode.MULTIPLY));
+                stickerSettingsButton.setScaleType(ImageView.ScaleType.CENTER);
+                stickerSettingsButton.setFocusable(true);
+                if (Build.VERSION.SDK_INT >= 21) {
+                    stickerSettingsButton.setBackground(Theme.createSelectorDrawable(color, Theme.RIPPLE_MASK_CIRCLE_20DP, AndroidUtilities.dp(18)));
                 }
-            });
+                stickerSettingsButton.setContentDescription(LocaleController.getString("Settings", R.string.Settings));
+                bottomTabContainer.addView(stickerSettingsButton, LayoutHelper.createFrame(47, 40, Gravity.BOTTOM | Gravity.RIGHT));
+                stickerSettingsButton.setOnClickListener(new OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        if (delegate != null) {
+                            delegate.onStickersSettingsClick();
+                        }
+                    }
+                });
+            }
 
             typeTabs = new PagerSlidingTabStrip(context, resourcesProvider);
             typeTabs.setViewPager(pager);
@@ -3515,7 +3519,7 @@ public class EmojiView extends FrameLayout implements
             addButtonTextView = new AnimatedTextView(getContext());
             addButtonTextView.setAnimationProperties(.3f, 0, 250, CubicBezierInterpolator.EASE_OUT_QUINT);
             addButtonTextView.setTextSize(AndroidUtilities.dp(14));
-            addButtonTextView.setTypeface(AndroidUtilities.getTypeface("fonts/rmedium.ttf"));
+            addButtonTextView.setTypeface(AndroidUtilities.bold());
             addButtonTextView.setTextColor(getThemedColor(Theme.key_featuredStickers_buttonText));
             addButtonTextView.setGravity(Gravity.CENTER);
 
@@ -3654,7 +3658,7 @@ public class EmojiView extends FrameLayout implements
             headerView = new SimpleTextView(context);
             headerView.setTextSize(15);
             headerView.setTextColor(getThemedColor(Theme.key_chat_emojiPanelStickerSetName));
-            headerView.setTypeface(AndroidUtilities.getTypeface("fonts/rmedium.ttf"));
+            headerView.setTypeface(AndroidUtilities.bold());
             headerView.setOnClickListener(e -> {
                 if (this.pack != null && this.pack.set != null) {
                     openEmojiPackAlert(this.pack.set);
@@ -3663,7 +3667,7 @@ public class EmojiView extends FrameLayout implements
             markView = new TextView(context);
             markView.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 11);
             markView.setTextColor(getThemedColor(Theme.key_chat_emojiPanelStickerSetName));
-            markView.setTypeface(AndroidUtilities.getTypeface(AndroidUtilities.TYPEFACE_ROBOTO_MEDIUM));
+            markView.setTypeface(AndroidUtilities.bold());
             markView.setBackground(Theme.createRoundRectDrawable(dp(8), Theme.multAlpha(getThemedColor(Theme.key_chat_emojiPanelIcon), .12f)));
             markView.setPadding(dp(6), dp(1.5f), dp(6), dp(1.5f));
             markView.setText(LocaleController.getString(R.string.GroupEmoji));
@@ -3688,7 +3692,7 @@ public class EmojiView extends FrameLayout implements
 
             addButtonView = new TextView(context);
             addButtonView.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 14);
-            addButtonView.setTypeface(AndroidUtilities.getTypeface("fonts/rmedium.ttf"));
+            addButtonView.setTypeface(AndroidUtilities.bold());
             addButtonView.setText(LocaleController.getString("Add", R.string.Add));
             addButtonView.setTextColor(getThemedColor(Theme.key_featuredStickers_buttonText));
             addButtonView.setBackground(Theme.AdaptiveRipple.createRect(getThemedColor(Theme.key_featuredStickers_addButton), getThemedColor(Theme.key_featuredStickers_addButtonPressed), 16));
@@ -3743,7 +3747,7 @@ public class EmojiView extends FrameLayout implements
 
             removeButtonView = new TextView(context);
             removeButtonView.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 14);
-            removeButtonView.setTypeface(AndroidUtilities.getTypeface("fonts/rmedium.ttf"));
+            removeButtonView.setTypeface(AndroidUtilities.bold());
             removeButtonView.setText(LocaleController.getString("StickersRemove", R.string.StickersRemove));
             removeButtonView.setTextColor(getThemedColor(Theme.key_featuredStickers_removeButtonText));
             removeButtonView.setBackground(Theme.AdaptiveRipple.createRect(0, getThemedColor(Theme.key_featuredStickers_addButton) & 0x1affffff, 16));
@@ -4982,10 +4986,10 @@ public class EmojiView extends FrameLayout implements
     }
 
     public void scrollEmojiToTop() {
-        try {
-            emojiTabs.scrollTo(0, 0);
-            emojiTabs.onTabClick(0);
-        } catch (Exception ignore) {}
+        emojiGridView.stopScroll();
+        emojiTabs.scrollTo(0, 0);
+        resetTabsY(Type.EMOJIS);
+        emojiLayoutManager.scrollToPositionWithOffset(0, 0);
     }
 
     private void checkEmojiSearchFieldScroll(boolean isLayout) {
@@ -6763,7 +6767,7 @@ public class EmojiView extends FrameLayout implements
             textView.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 13);
             textView.setTextColor(Theme.getColor(Theme.key_windowBackgroundWhite, resourcesProvider));
             textView.setBackground(Theme.createRoundRectDrawable(AndroidUtilities.dp(11), ColorUtils.setAlphaComponent(Theme.getColor(Theme.key_chat_emojiPanelStickerSetName, resourcesProvider), 99)));
-            textView.setTypeface(AndroidUtilities.getTypeface("fonts/rmedium.ttf"));
+            textView.setTypeface(AndroidUtilities.bold());
             textView.setPadding(AndroidUtilities.dp(6), AndroidUtilities.dp(1.66f), AndroidUtilities.dp(6), AndroidUtilities.dp(2f));
             addView(textView, LayoutHelper.createFrame(LayoutHelper.WRAP_CONTENT, LayoutHelper.WRAP_CONTENT, Gravity.CENTER));
         }
@@ -7545,7 +7549,7 @@ public class EmojiView extends FrameLayout implements
                             textView.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 15);
                             textView.setTextColor(getThemedColor(Theme.key_dialogTextBlue2));
                             textView.setGravity(LocaleController.isRTL ? Gravity.RIGHT : Gravity.LEFT);
-                            textView.setTypeface(AndroidUtilities.getTypeface("fonts/rmedium.ttf"));
+                            textView.setTypeface(AndroidUtilities.bold());
                             linearLayout.addView(textView, LayoutHelper.createLinear(LayoutHelper.WRAP_CONTENT, LayoutHelper.WRAP_CONTENT, Gravity.LEFT | Gravity.TOP, 0, 24, 0, 0));
 
                             textView = new TextView(getContext());

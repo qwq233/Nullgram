@@ -14,6 +14,7 @@ import android.graphics.PorterDuff;
 import android.graphics.PorterDuffXfermode;
 import android.graphics.Rect;
 import android.graphics.RectF;
+import android.graphics.RenderNode;
 import android.graphics.Shader;
 import android.graphics.drawable.Drawable;
 import android.opengl.GLES11Ext;
@@ -709,6 +710,9 @@ public class BlurringShader {
         private final BlurManager manager;
         private final View view;
 
+        public RenderNode renderNode;
+        public final ColorMatrix colorMatrix;
+
         private boolean animateBitmapChange;
         private boolean oldPaintSet;
         private float oldPaintAlpha;
@@ -727,7 +731,7 @@ public class BlurringShader {
             this.type = type;
             this.animateBitmapChange = animateBitmapChange;
 
-            final ColorMatrix colorMatrix = new ColorMatrix();
+            colorMatrix = new ColorMatrix();
             if (type == BLUR_TYPE_BACKGROUND) {
                 AndroidUtilities.adjustSaturationColorMatrix(colorMatrix, +.45f);
             } else if (type == BLUR_TYPE_MENU_BACKGROUND) {

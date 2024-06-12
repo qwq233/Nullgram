@@ -32,10 +32,8 @@ import android.view.MotionEvent;
 import android.widget.LinearLayout;
 
 import org.telegram.messenger.AndroidUtilities;
-import org.telegram.messenger.ContactsController;
 import org.telegram.messenger.LocaleController;
 import org.telegram.messenger.MessageObject;
-import org.telegram.messenger.MessagesController;
 import org.telegram.messenger.R;
 import org.telegram.messenger.UserConfig;
 import org.telegram.tgnet.TLRPC;
@@ -129,7 +127,7 @@ public class StickerSizePreviewMessagesCell extends LinearLayout {
         messageObjects[1].replyMessageObject = messageObjects[0];
 
         for (int a = 0; a < cells.length; a++) {
-            cells[a] = new ChatMessageCell(context, false, null, resourcesProvider);
+            cells[a] = new ChatMessageCell(context, UserConfig.selectedAccount, false, null, resourcesProvider);
             cells[a].setDelegate(new ChatMessageCell.ChatMessageCellDelegate() {
             });
             cells[a].isChat = false;

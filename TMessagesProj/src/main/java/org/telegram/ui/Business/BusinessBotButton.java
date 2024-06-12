@@ -67,7 +67,7 @@ public class BusinessBotButton extends FrameLayout {
         titleView = new AnimatedTextView(context);
         titleView.adaptWidth = false;
         titleView.getDrawable().setHacks(true, true, false);
-        titleView.setTypeface(AndroidUtilities.getTypeface(AndroidUtilities.TYPEFACE_ROBOTO_MEDIUM));
+        titleView.setTypeface(AndroidUtilities.bold());
         titleView.setTextSize(dp(14));
         titleView.setText(UserObject.getUserName(user));
         titleView.setTextColor(Theme.getColor(Theme.key_windowBackgroundWhiteBlackText, resourcesProvider));
@@ -89,7 +89,7 @@ public class BusinessBotButton extends FrameLayout {
         pauseButton.getDrawable().setHacks(true, true, true);
         pauseButton.setAnimationProperties(.75f, 0, 350, CubicBezierInterpolator.EASE_OUT_QUINT);
         pauseButton.setScaleProperty(.6f);
-        pauseButton.setTypeface(AndroidUtilities.getTypeface(AndroidUtilities.TYPEFACE_ROBOTO_MEDIUM));
+        pauseButton.setTypeface(AndroidUtilities.bold());
         pauseButton.setBackgroundDrawable(Theme.createSimpleSelectorRoundRectDrawable(dp(14), Theme.getColor(Theme.key_featuredStickers_addButton, resourcesProvider), Theme.blendOver(Theme.getColor(Theme.key_featuredStickers_addButton, resourcesProvider), Theme.multAlpha(Color.WHITE, .12f))));
         pauseButton.setTextSize(dp(14));
         pauseButton.setGravity(Gravity.RIGHT);

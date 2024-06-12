@@ -41,7 +41,7 @@ public class SpeedIconDrawable extends Drawable {
         textDrawable.setCallback(callback);
         textDrawable.setAnimationProperties(.3f, 0, 165, CubicBezierInterpolator.EASE_OUT_QUINT);
         textDrawable.setGravity(Gravity.CENTER_HORIZONTAL);
-        textDrawable.setTypeface(AndroidUtilities.getTypeface(AndroidUtilities.TYPEFACE_ROBOTO_MEDIUM));
+        textDrawable.setTypeface(AndroidUtilities.bold());
         textDrawable.setTextSize(AndroidUtilities.dp(10));
         textDrawable.getPaint().setStyle(Paint.Style.FILL_AND_STROKE);
         textDrawable.getPaint().setStrokeWidth(AndroidUtilities.dpf2(.6f));
