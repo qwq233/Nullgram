@@ -26,6 +26,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import org.telegram.messenger.AndroidUtilities
+import org.telegram.ui.LaunchActivity
 import java.io.File
 import java.nio.charset.Charset
 import java.text.SimpleDateFormat
@@ -61,6 +62,10 @@ object Log {
                 it.setWritable(true)
                 it.appendText(">>>> Log start at ${SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS", Locale.US).format(Date())}\n", Charset.forName("UTF-8"))
             }
+        }.onFailure {
+            if (it is Exception && AndroidUtilities.isENOSPC(it)) {
+                LaunchActivity.checkFreeDiscSpaceStatic(1)
+            }
         }
     }
 
@@ -77,6 +82,10 @@ object Log {
                         refreshLog()
                     }
                     appendText("${SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS", Locale.US).format(Date())} ${level.name} ${tag ?: ""}: $msg\n", Charset.forName("UTF-8"))
+                }
+            }.onFailure {
+                if (it is Exception && AndroidUtilities.isENOSPC(it)) {
+                    LaunchActivity.checkFreeDiscSpaceStatic(1)
                 }
             }
         }
