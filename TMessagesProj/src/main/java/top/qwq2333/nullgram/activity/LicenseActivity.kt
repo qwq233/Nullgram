@@ -45,8 +45,8 @@ import org.telegram.ui.Components.LayoutHelper
 import org.telegram.ui.Components.RecyclerListView
 import org.telegram.ui.Components.RecyclerListView.SelectionAdapter
 import org.telegram.ui.Components.SizeNotifierFrameLayout
+import top.qwq2333.nullgram.createLinear
 import top.qwq2333.nullgram.utils.Log
-import top.qwq2333.nullgram.utils.createLinear
 
 class LicenseActivity : BaseFragment() {
     private var listView: ListView? = null

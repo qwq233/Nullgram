@@ -36,6 +36,8 @@ object Log {
     const val TAG = "Nullgram"
     private lateinit var logFile: File
 
+    val enable_rc_log = false
+
     enum class Level {
         DEBUG, INFO, WARN, ERROR
     }
@@ -103,6 +105,7 @@ object Log {
      */
     @JvmStatic
     fun d(tag: String, msg: String) {
+        if (msg.contains("{rc}") && !enable_rc_log) return
         Log.d(TAG, "$tag: $msg")
         writeToFile(Level.DEBUG, tag, msg)
     }
@@ -147,6 +150,7 @@ object Log {
     @JvmStatic
     @JvmOverloads
     fun d(msg: String, throwable: Throwable? = null) {
+        if (msg.contains("{rc}") && !enable_rc_log) return
         Log.d(TAG, msg, throwable)
         writeToFile(Level.DEBUG, null, msg)
         if (throwable != null) writeToFile(Level.DEBUG, null, throwable.stackTraceToString())

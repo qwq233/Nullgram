@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019-2023 qwq233 <qwq233@qwq2333.top>
+ * Copyright (C) 2019-2024 qwq233 <qwq233@qwq2333.top>
  * https://github.com/qwq233/Nullgram
  *
  * This program is free software; you can redistribute it and/or
@@ -38,6 +38,7 @@ import org.telegram.tgnet.TLObject
 import org.telegram.tgnet.TLRPC
 import org.telegram.tgnet.TLRPC.Chat
 import org.telegram.ui.ActionBar.AlertDialog
+import top.qwq2333.nullgram.cacheUsersAndChats
 import top.qwq2333.nullgram.config.ConfigManager
 import java.util.Arrays
 
@@ -182,15 +183,7 @@ object UpdateUtils {
                     val res = resp as TLRPC.messages_Messages
                     var targetMetadata: UpdateMetadata? = null
                     val metas = ArrayList<UpdateMetadata>().apply {
-                        res.messages.forEach { msg ->
-                            if (msg !is TLRPC.TL_message) {
-                                Log.i("checkUpdate", "CheckUpdate: Not TL_message")
-                                return@forEach
-                            }
-                            if (!msg.message.startsWith("v")) {
-                                Log.i("checkUpdate", "CheckUpdate: Not startsWith v")
-                                return@forEach
-                            }
+                        res.messages.filter { it is TLRPC.TL_message && it.message.startsWith("v") }.forEach { msg ->
                             msg.message.split(",").dropLastWhile { split -> split.isEmpty() }.toTypedArray().let { split ->
                                 if (split.size < 5) {
                                     Log.i("checkUpdate", "CheckUpdate: Not enough split")
@@ -234,6 +227,7 @@ object UpdateUtils {
                                 break
                             }
                         }
+                        Log.i("checkUpdate", "Version Code: $localVersionCode ${BuildConfig.VERSION_CODE} ${BuildConfig.VERSION_NAME}")
                         Log.i("checkUpdate", "Found Update Metadata: ${targetMetadata.versionName} ${targetMetadata.versionCode}")
                         callback.invoke(targetMetadata, true)
                     } else {
@@ -310,8 +304,8 @@ object UpdateUtils {
                         callback.invoke(null, true)
                         return@sendRequest
                     }
-                    val res = resp as TLRPC.messages_Messages
-                    for (msg in res.messages) {
+                    resp as TLRPC.messages_Messages
+                    for (msg in resp.messages) {
                         if (msg.media == null) {
                             Log.d("checkUpdate", "res.messages.get(i).media == null")
                             continue
@@ -345,33 +339,34 @@ object UpdateUtils {
                 TLRPC.TL_contacts_resolveUsername().apply {
                     username = apksChannelName
                 }.let { req2 ->
-                    accountInstance.connectionsManager.sendRequest(req2) { resp: TLObject?, error: TLRPC.TL_error? ->
-                        if (error != null || resp == null) {
-                            Log.e("checkUpdate", "Error when retrieving update metadata from channel ${error?.text}")
-                            callback.invoke(null, true)
-                            return@sendRequest
+                    accountInstance.apply {
+                        connectionsManager.sendRequest(req2) { resp: TLObject?, error: TLRPC.TL_error? ->
+                            if (error != null || resp == null) {
+                                Log.e("checkUpdate", "Error when retrieving update metadata from channel ${error?.text}")
+                                callback.invoke(null, true)
+                                return@sendRequest
+                            }
+                            val res = if (resp is TLRPC.TL_contacts_resolvedPeer) {
+                                resp
+                            } else {
+                                Log.e("checkUpdate", "Error when checking update, unable to resolve apk channel, unexpected responseType ${resp::class.java.name}")
+                                callback.invoke(null, true)
+                                return@sendRequest
+                            }
+                            cacheUsersAndChats(res.users, res.chats)
+                            if (res.chats == null || res.chats.isEmpty()) {
+                                Log.e("checkUpdate", "Error when checking update, unable to resolve apk channel, chats is null or empty")
+                                callback.invoke(null, true)
+                                return@sendRequest
+                            }
+                            req.peer = TLRPC.TL_inputPeerChannel().apply {
+                                channel_id = res.chats[0].id
+                                access_hash = res.chats[0].access_hash
+                            }
+                            sendReq.run()
                         }
-                        val res = if (resp is TLRPC.TL_contacts_resolvedPeer) {
-                            resp
-                        } else {
-                            Log.e("checkUpdate", "Error when checking update, unable to resolve apk channel, unexpected responseType ${resp::class.java.name}")
-                            callback.invoke(null, true)
-                            return@sendRequest
-                        }
-                        accountInstance.messagesController.putUsers(res.users, false)
-                        accountInstance.messagesController.putChats(res.chats, false)
-                        accountInstance.messagesStorage.putUsersAndChats(res.users, res.chats, false, true)
-                        if (res.chats == null || res.chats.isEmpty()) {
-                            Log.e("checkUpdate", "Error when checking update, unable to resolve apk channel, chats is null or empty")
-                            callback.invoke(null, true)
-                            return@sendRequest
-                        }
-                        req.peer = TLRPC.TL_inputPeerChannel().apply {
-                            channel_id = res.chats[0].id
-                            access_hash = res.chats[0].access_hash
-                        }
-                        sendReq.run()
                     }
+
                 }
             }
         }

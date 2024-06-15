@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019-2023 qwq233 <qwq233@qwq2333.top>
+ * Copyright (C) 2019-2024 qwq233 <qwq233@qwq2333.top>
  * https://github.com/qwq233/Nullgram
  *
  * This program is free software; you can redistribute it and/or
@@ -20,6 +20,8 @@
 package top.qwq2333.nullgram.activity;
 
 import android.app.Dialog;
+import android.content.ClipData;
+import android.content.ClipboardManager;
 import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.PorterDuff;
@@ -42,6 +44,7 @@ import org.telegram.messenger.AccountInstance;
 import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.ApplicationLoader;
 import org.telegram.messenger.ContactsController;
+import org.telegram.messenger.Emoji;
 import org.telegram.messenger.LocaleController;
 import org.telegram.messenger.NotificationCenter;
 import org.telegram.messenger.R;
@@ -67,6 +70,7 @@ import java.util.Locale;
 import top.qwq2333.nullgram.helpers.PasscodeHelper;
 
 public class PasscodeSettingActivity extends BaseActivity {
+
     private boolean passcodeSet;
 
     private int showInSettingsRow;
@@ -99,19 +103,19 @@ public class PasscodeSettingActivity extends BaseActivity {
     @Override
     protected void onItemClick(View view, int position, float x, float y) {
         if (!passcodeSet) {
-            BulletinFactory.of(this).createErrorBulletin(LocaleController.getString("PasscodeNeeded", R.string.PasscodeNeeded)).show();
+            makePasscodeBulletin();
             return;
         }
         if (position > accountsStartRow && position < accountsEndRow) {
             var account = accounts.get(position - accountsStartRow - 1);
-            var builder = new AlertDialog.Builder(getParentActivity());
+            var builder = new AlertDialog.Builder(getParentActivity(), resourcesProvider);
 
             var linearLayout = new LinearLayout(getParentActivity());
             linearLayout.setOrientation(LinearLayout.VERTICAL);
 
             if (PasscodeHelper.hasPasscodeForAccount(account)) {
-                TextCheckCell hideAccount = new TextCheckCell(getParentActivity(), 23, true);
-                hideAccount.setTextAndCheck(LocaleController.getString("PasscodeHideAccount", R.string.PasscodeHideAccount), PasscodeHelper.isAccountHidden(account), false);
+                TextCheckCell hideAccount = new TextCheckCell(getParentActivity(), 23, true, resourcesProvider);
+                hideAccount.setTextAndCheck(LocaleController.getString(R.string.PasscodeHideAccount), PasscodeHelper.isAccountHidden(account), false);
                 hideAccount.setOnClickListener(view13 -> {
                     boolean hide = !hideAccount.isChecked();
                     PasscodeHelper.setHideAccount(account, hide);
@@ -122,8 +126,8 @@ public class PasscodeSettingActivity extends BaseActivity {
                 linearLayout.addView(hideAccount, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT));
             }
 
-            TextCheckCell allowPanic = new TextCheckCell(getParentActivity(), 23, true);
-            allowPanic.setTextAndCheck(LocaleController.getString("PasscodeAllowPanic", R.string.PasscodeAllowPanic), PasscodeHelper.isAccountAllowPanic(account), false);
+            TextCheckCell allowPanic = new TextCheckCell(getParentActivity(), 23, true, resourcesProvider);
+            allowPanic.setTextAndCheck(LocaleController.getString(R.string.PasscodeAllowPanic), PasscodeHelper.isAccountAllowPanic(account), false);
             allowPanic.setOnClickListener(view13 -> {
                 boolean hide = !allowPanic.isChecked();
                 PasscodeHelper.setAccountAllowPanic(account, hide);
@@ -132,8 +136,8 @@ public class PasscodeSettingActivity extends BaseActivity {
             allowPanic.setBackground(Theme.getSelectorDrawable(false));
             linearLayout.addView(allowPanic, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT));
 
-            AlertDialog.AlertDialogCell editPasscode = new AlertDialog.AlertDialogCell(getParentActivity(), null);
-            editPasscode.setTextAndIcon(PasscodeHelper.hasPasscodeForAccount(account) ? LocaleController.getString("PasscodeEdit", R.string.PasscodeEdit) : LocaleController.getString("PasscodeSet", R.string.PasscodeSet), 0);
+            AlertDialog.AlertDialogCell editPasscode = new AlertDialog.AlertDialogCell(getParentActivity(), resourcesProvider);
+            editPasscode.setTextAndIcon(PasscodeHelper.hasPasscodeForAccount(account) ? LocaleController.getString(R.string.PasscodeEdit) : LocaleController.getString(R.string.PasscodeSet), 0);
             editPasscode.setOnClickListener(view1 -> {
                 builder.getDismissRunnable().run();
                 presentFragment(new PasscodeActivity(PasscodeActivity.TYPE_SETUP_CODE, account));
@@ -142,10 +146,10 @@ public class PasscodeSettingActivity extends BaseActivity {
             linearLayout.addView(editPasscode, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT));
 
             if (PasscodeHelper.hasPasscodeForAccount(account)) {
-                AlertDialog.AlertDialogCell removePasscode = new AlertDialog.AlertDialogCell(getParentActivity(), null);
-                removePasscode.setTextAndIcon(LocaleController.getString("PasscodeRemove", R.string.PasscodeRemove), 0);
+                AlertDialog.AlertDialogCell removePasscode = new AlertDialog.AlertDialogCell(getParentActivity(), resourcesProvider);
+                removePasscode.setTextAndIcon(LocaleController.getString(R.string.PasscodeRemove), 0);
                 removePasscode.setOnClickListener(view12 -> {
-                    AlertDialog alertDialog = new AlertDialog.Builder(getParentActivity())
+                    AlertDialog alertDialog = new AlertDialog.Builder(getParentActivity(), resourcesProvider)
                         .setTitle(LocaleController.getString(R.string.PasscodeRemove))
                         .setMessage(LocaleController.getString(R.string.PasscodeRemoveConfirmMessage))
                         .setNegativeButton(LocaleController.getString(R.string.Cancel), null)
@@ -158,7 +162,7 @@ public class PasscodeSettingActivity extends BaseActivity {
                             }
                         }).create();
                     showDialog(alertDialog);
-                    ((TextView) alertDialog.getButton(Dialog.BUTTON_POSITIVE)).setTextColor(Theme.getColor(Theme.key_text_RedRegular));
+                    ((TextView) alertDialog.getButton(Dialog.BUTTON_POSITIVE)).setTextColor(getThemedColor(Theme.key_text_RedBold));
                 });
                 removePasscode.setBackground(Theme.getSelectorDrawable(false));
                 linearLayout.addView(removePasscode, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT));
@@ -172,7 +176,7 @@ public class PasscodeSettingActivity extends BaseActivity {
         } else if (position == setPanicCodeRow) {
             presentFragment(new PasscodeActivity(PasscodeActivity.TYPE_SETUP_CODE, Integer.MAX_VALUE));
         } else if (position == removePanicCodeRow) {
-            AlertDialog alertDialog = new AlertDialog.Builder(getParentActivity())
+            AlertDialog alertDialog = new AlertDialog.Builder(getParentActivity(), resourcesProvider)
                 .setTitle(LocaleController.getString(R.string.PasscodePanicCodeRemove))
                 .setMessage(LocaleController.getString(R.string.PasscodePanicCodeRemoveConfirmMessage))
                 .setNegativeButton(LocaleController.getString(R.string.Cancel), null)
@@ -183,7 +187,7 @@ public class PasscodeSettingActivity extends BaseActivity {
                     updateRows();
                 }).create();
             showDialog(alertDialog);
-            ((TextView) alertDialog.getButton(Dialog.BUTTON_POSITIVE)).setTextColor(Theme.getColor(Theme.key_text_RedRegular));
+            ((TextView) alertDialog.getButton(Dialog.BUTTON_POSITIVE)).setTextColor(getThemedColor(Theme.key_text_RedBold));
         } else if (position == showInSettingsRow) {
             PasscodeHelper.setHideSettings(!PasscodeHelper.isSettingsHidden());
             if (view instanceof TextCheckCell) {
@@ -198,28 +202,32 @@ public class PasscodeSettingActivity extends BaseActivity {
     }
 
     @Override
-    protected String getKey() {
-        return PasscodeHelper.getSettingsKey();
-    }
-
-    @Override
     protected BaseListAdapter createAdapter(Context context) {
         return new ListAdapter(context);
     }
 
     @Override
     protected String getActionBarTitle() {
-        return LocaleController.getString("Passcode1", R.string.Passcode1);
+        return LocaleController.getString(R.string.Passcode1);
+    }
+
+    @Override
+    protected String getKey() {
+        return PasscodeHelper.getSettingsKey();
     }
 
     @Override
     public void onResume() {
         passcodeSet = SharedConfig.passcodeHash.length() > 0;
         if (!passcodeSet) {
-            BulletinFactory.of(this).createErrorBulletin(LocaleController.getString("PasscodeNeeded", R.string.PasscodeNeeded)).show();
+            makePasscodeBulletin();
         }
         updateRows();
         super.onResume();
+    }
+
+    private void makePasscodeBulletin() {
+        BulletinFactory.of(this).createSimpleBulletin(R.raw.info, LocaleController.getString(R.string.PasscodeNeeded), LocaleController.getString(R.string.Passcode), () -> presentFragment(PasscodeActivity.determineOpenFragment())).show();
     }
 
     @Override
@@ -242,8 +250,13 @@ public class PasscodeSettingActivity extends BaseActivity {
         }
         panicCode2Row = rowCount++;
 
-        clearPasscodesRow = -1;
-        clearPasscodes2Row = -1;
+        if (false) {
+            clearPasscodesRow = rowCount++;
+            clearPasscodes2Row = rowCount++;
+        } else {
+            clearPasscodesRow = -1;
+            clearPasscodes2Row = -1;
+        }
     }
 
     private class ListAdapter extends BaseListAdapter {
@@ -254,68 +267,57 @@ public class PasscodeSettingActivity extends BaseActivity {
 
         @Override
         public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
+            boolean divider = true;
             switch (holder.getItemViewType()) {
-                case 1: {
-                    if (position == clearPasscodes2Row) {
-                        holder.itemView.setBackground(Theme.getThemedDrawable(mContext, R.drawable.greydivider_bottom, Theme.key_windowBackgroundGrayShadow));
-                    } else {
-                        holder.itemView.setBackground(Theme.getThemedDrawable(mContext, R.drawable.greydivider, Theme.key_windowBackgroundGrayShadow));
-                    }
-                    break;
-                }
-                case 2: {
+                case TYPE_SETTINGS: {
                     TextSettingsCell textCell = (TextSettingsCell) holder.itemView;
                     textCell.setCanDisable(true);
-                    textCell.setTextColor(Theme.getColor(Theme.key_windowBackgroundWhiteBlackText));
+                    textCell.setTextColor(getThemedColor(Theme.key_windowBackgroundWhiteBlackText));
                     if (position == setPanicCodeRow) {
-                        textCell.setText(PasscodeHelper.hasPanicCode() ? LocaleController.getString("PasscodePanicCodeEdit", R.string.PasscodePanicCodeEdit) : LocaleController.getString("PasscodePanicCodeSet", R.string.PasscodePanicCodeSet), removePanicCodeRow != -1);
+                        textCell.setText(PasscodeHelper.hasPanicCode() ? LocaleController.getString(R.string.PasscodePanicCodeEdit) : LocaleController.getString(R.string.PasscodePanicCodeSet), removePanicCodeRow != -1);
                     } else if (position == clearPasscodesRow) {
-                        textCell.setTextColor(Theme.getColor(Theme.key_text_RedRegular));
-                        textCell.setText("Clear passcodes", false);
+                        textCell.setTextColor(getThemedColor(Theme.key_text_RedRegular));
+                        textCell.setText("Clear passcodes", divider);
                     } else if (position == removePanicCodeRow) {
-                        textCell.setTextColor(Theme.getColor(Theme.key_text_RedRegular));
-                        textCell.setText(LocaleController.getString("PasscodePanicCodeRemove", R.string.PasscodePanicCodeRemove), false);
+                        textCell.setTextColor(getThemedColor(Theme.key_text_RedRegular));
+                        textCell.setText(LocaleController.getString(R.string.PasscodePanicCodeRemove), divider);
                     }
                     break;
                 }
-                case 3: {
+                case TYPE_CHECK: {
                     TextCheckCell textCell = (TextCheckCell) holder.itemView;
                     textCell.setEnabled(passcodeSet, null);
                     if (position == showInSettingsRow) {
-                        textCell.setTextAndCheck(LocaleController.getString("PasscodeShowInSettings", R.string.PasscodeShowInSettings), !PasscodeHelper.isSettingsHidden(), false);
+                        textCell.setTextAndCheck(LocaleController.getString(R.string.PasscodeShowInSettings), !PasscodeHelper.isSettingsHidden(), divider);
                     }
                     break;
                 }
-                case 4: {
+                case TYPE_HEADER: {
                     HeaderCell cell = (HeaderCell) holder.itemView;
                     cell.setEnabled(passcodeSet, null);
                     if (position == accountsStartRow) {
-                        cell.setText(LocaleController.getString("Account", R.string.Account));
+                        cell.setText(LocaleController.getString(R.string.Account));
                     } else if (position == panicCodeRow) {
-                        cell.setText(LocaleController.getString("PasscodePanicCode", R.string.PasscodePanicCode));
+                        cell.setText(LocaleController.getString(R.string.PasscodePanicCode));
                     }
                     break;
                 }
-                case 7: {
+                case TYPE_INFO_PRIVACY: {
                     TextInfoPrivacyCell cell = (TextInfoPrivacyCell) holder.itemView;
                     cell.setEnabled(passcodeSet, null);
-                    cell.setBackground(Theme.getThemedDrawable(mContext, R.drawable.greydivider, Theme.key_windowBackgroundGrayShadow));
                     if (position == accountsEndRow) {
-                        cell.setText(LocaleController.getString("PasscodeAbout", R.string.PasscodeAbout));
+                        cell.setText(LocaleController.getString(R.string.PasscodeAbout));
                     } else if (position == panicCode2Row) {
-                        cell.setText(LocaleController.getString("PasscodePanicCodeAbout", R.string.PasscodePanicCodeAbout));
-                        if (clearPasscodesRow == -1) {
-                            cell.setBackground(Theme.getThemedDrawable(mContext, R.drawable.greydivider_bottom, Theme.key_windowBackgroundGrayShadow));
-                        }
+                        cell.setText(LocaleController.getString(R.string.PasscodePanicCodeAbout));
                     } else if (position == showInSettings2Row) {
-                        var link = String.format(Locale.ENGLISH, "https://t.me/nullsetting/%s", PasscodeHelper.getSettingsKey());
-                        var stringBuilder = new SpannableStringBuilder(AndroidUtilities.replaceTags(LocaleController.getString("PasscodeShowInSettingsAbout", R.string.PasscodeShowInSettingsAbout)));
+                        var link = String.format(Locale.ENGLISH, "https://t.me/nekosettings/%s", PasscodeHelper.getSettingsKey());
+                        var stringBuilder = new SpannableStringBuilder(AndroidUtilities.replaceTags(LocaleController.getString(R.string.PasscodeShowInSettingsAbout)));
                         stringBuilder.append("\n").append(link);
                         stringBuilder.setSpan(new URLSpanNoUnderline(null) {
                             @Override
                             public void onClick(@NonNull View view) {
-                                android.content.ClipboardManager clipboard = (android.content.ClipboardManager) ApplicationLoader.applicationContext.getSystemService(Context.CLIPBOARD_SERVICE);
-                                android.content.ClipData clip = android.content.ClipData.newPlainText("label", link);
+                                ClipboardManager clipboard = (ClipboardManager) ApplicationLoader.applicationContext.getSystemService(Context.CLIPBOARD_SERVICE);
+                                ClipData clip = ClipData.newPlainText("label", link);
                                 clipboard.setPrimaryClip(clip);
                                 BulletinFactory.of(PasscodeSettingActivity.this).createCopyLinkBulletin().show();
                             }
@@ -324,11 +326,11 @@ public class PasscodeSettingActivity extends BaseActivity {
                     }
                     break;
                 }
-                case 11: {
+                case TYPE_ACCOUNT: {
                     AccountCell cell = (AccountCell) holder.itemView;
                     cell.setEnabled(passcodeSet);
                     int account = accounts.get(position - accountsStartRow - 1);
-                    cell.setAccount(account, PasscodeHelper.hasPasscodeForAccount(account), position + 1 != accountsEndRow);
+                    cell.setAccount(account, PasscodeHelper.hasPasscodeForAccount(account), divider);
                     break;
                 }
             }
@@ -342,22 +344,21 @@ public class PasscodeSettingActivity extends BaseActivity {
         @Override
         public int getItemViewType(int position) {
             if (position == clearPasscodes2Row) {
-                return 1;
+                return TYPE_SHADOW;
             } else if (position == clearPasscodesRow || position == setPanicCodeRow || position == removePanicCodeRow) {
-                return 2;
+                return TYPE_SETTINGS;
             } else if (position == showInSettingsRow) {
-                return 3;
+                return TYPE_CHECK;
             } else if (position == accountsStartRow || position == panicCodeRow) {
-                return 4;
+                return TYPE_HEADER;
             } else if (position == showInSettings2Row || position == accountsEndRow || position == panicCode2Row) {
-                return 7;
+                return TYPE_INFO_PRIVACY;
             } else if (position > accountsStartRow && position < accountsEndRow) {
-                return 11;
+                return TYPE_ACCOUNT;
             }
-            return 2;
+            return TYPE_SETTINGS;
         }
     }
-
 
     public static class AccountCell extends FrameLayout {
 
@@ -369,7 +370,7 @@ public class PasscodeSettingActivity extends BaseActivity {
 
         private int accountNumber;
 
-        public AccountCell(Context context) {
+        public AccountCell(Context context, Theme.ResourcesProvider resourcesProvider) {
             super(context);
 
             avatarDrawable = new AvatarDrawable();
@@ -381,24 +382,24 @@ public class PasscodeSettingActivity extends BaseActivity {
 
             textView = new TextView(context);
             textView.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 15);
-            textView.setTypeface(AndroidUtilities.getTypeface("fonts/rmedium.ttf"));
+            textView.setTypeface(AndroidUtilities.getTypeface(AndroidUtilities.TYPEFACE_ROBOTO_MEDIUM));
             textView.setLines(1);
             textView.setMaxLines(1);
             textView.setSingleLine(true);
             textView.setGravity(Gravity.LEFT | Gravity.CENTER_VERTICAL);
             textView.setEllipsize(TextUtils.TruncateAt.END);
-            textView.setTextColor(Theme.getColor(Theme.key_windowBackgroundWhiteBlackText));
+            textView.setTextColor(Theme.getColor(Theme.key_windowBackgroundWhiteBlackText, resourcesProvider));
             addView(textView, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, LayoutHelper.MATCH_PARENT, Gravity.LEFT | Gravity.TOP, 68, 0, 56, 0));
 
             checkImageView = new ImageView(context);
             checkImageView.setImageResource(R.drawable.account_check);
             checkImageView.setScaleType(ImageView.ScaleType.CENTER);
-            checkImageView.setColorFilter(new PorterDuffColorFilter(Theme.getColor(Theme.key_switchTrackChecked), PorterDuff.Mode.MULTIPLY));
+            checkImageView.setColorFilter(new PorterDuffColorFilter(Theme.getColor(Theme.key_switchTrackChecked, resourcesProvider), PorterDuff.Mode.MULTIPLY));
             addView(checkImageView, LayoutHelper.createFrame(40, LayoutHelper.MATCH_PARENT, Gravity.RIGHT | Gravity.TOP, 0, 0, 6, 0));
         }
 
         @Override
-        protected void onDraw(Canvas canvas) {
+        protected void onDraw(@NonNull Canvas canvas) {
             if (needDivider) {
                 canvas.drawLine(LocaleController.isRTL ? 0 : AndroidUtilities.dp(68), getMeasuredHeight() - 1, getMeasuredWidth(), getMeasuredHeight() - 1, Theme.dividerPaint);
             }
@@ -421,7 +422,7 @@ public class PasscodeSettingActivity extends BaseActivity {
             accountNumber = account;
             TLRPC.User user = UserConfig.getInstance(accountNumber).getCurrentUser();
             avatarDrawable.setInfo(user);
-            textView.setText(ContactsController.formatName(user.first_name, user.last_name));
+            textView.setText(Emoji.replaceEmoji(ContactsController.formatName(user.first_name, user.last_name), textView.getPaint().getFontMetricsInt(), AndroidUtilities.dp(15), false));
             imageView.getImageReceiver().setCurrentAccount(account);
             imageView.setForUserOrChat(user, avatarDrawable);
             checkImageView.setVisibility(check ? VISIBLE : INVISIBLE);

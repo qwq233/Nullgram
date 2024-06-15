@@ -144,11 +144,6 @@
     public static *** d(...);
 }
 
--assumenosideeffects class top.qwq2333.nullgram.utils.Log {
-    public static *** v(...);
-    public static *** d(...);
-}
-
 -dontwarn org.slf4j.impl.StaticMDCBinder
 -keep class io.ktor.client.** { *; }
 -keep class io.ktor.serialization.** { *; }

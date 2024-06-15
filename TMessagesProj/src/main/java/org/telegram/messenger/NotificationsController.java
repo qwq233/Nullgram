@@ -103,6 +103,7 @@ import java.util.concurrent.CountDownLatch;
 import java.util.function.Consumer;
 
 import top.qwq2333.gen.Config;
+import top.qwq2333.nullgram.helpers.PasscodeHelper;
 
 public class NotificationsController extends BaseController {
 
@@ -3816,7 +3817,7 @@ public class NotificationsController extends BaseController {
     }
 
     private void showOrUpdateNotification(boolean notifyAboutLast) {
-        if (!getUserConfig().isClientActivated() || pushMessages.isEmpty() && storyPushMessages.isEmpty() || !SharedConfig.showNotificationsForAllAccounts && currentAccount != UserConfig.selectedAccount) {
+        if (!getUserConfig().isClientActivated() || pushMessages.isEmpty() && storyPushMessages.isEmpty()|| PasscodeHelper.isAccountHidden(currentAccount) ||  !SharedConfig.showNotificationsForAllAccounts && currentAccount != UserConfig.selectedAccount) {
             dismissNotification();
             return;
         }
