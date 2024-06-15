@@ -307,6 +307,7 @@ import java.util.zip.ZipOutputStream;
 
 import kotlin.Unit;
 import top.qwq2333.gen.Config;
+import top.qwq2333.nullgram.InlinesKt;
 import top.qwq2333.nullgram.activity.MainSettingActivity;
 import top.qwq2333.nullgram.config.ConfigManager;
 import top.qwq2333.nullgram.helpers.TranslateHelper;
@@ -319,7 +320,6 @@ import top.qwq2333.nullgram.utils.Defines;
 import top.qwq2333.nullgram.utils.Log;
 import top.qwq2333.nullgram.utils.StringUtils;
 import top.qwq2333.nullgram.utils.Utils;
-import top.qwq2333.nullgram.utils.UtilsKt;
 
 public class ProfileActivity extends BaseFragment implements NotificationCenter.NotificationCenterDelegate, DialogsActivity.DialogsActivityDelegate, SharedMediaLayout.SharedMediaPreloaderDelegate, ImageUpdater.ImageUpdaterDelegate, SharedMediaLayout.Delegate {
     private final static int PHONE_OPTION_CALL = 0,
@@ -6734,7 +6734,7 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
             if (StringUtils.isBlank(editText.getText().toString())) {
                 ConfigManager.deleteValue(Defines.linkedUserPrefix + getCurrentChat().id);
             } else {
-                if (UtilsKt.isNumber(editText.getText().toString())) {
+                if (InlinesKt.isNumber(editText.getText().toString())) {
                     long id = Long.parseLong(editText.getText().toString());
                     if (id < 0L) {
                         id = Utils.getUserIDFromBotID(id, true);

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019-2023 qwq233 <qwq233@qwq2333.top>
+ * Copyright (C) 2019-2024 qwq233 <qwq233@qwq2333.top>
  * https://github.com/qwq233/Nullgram
  *
  * This program is free software; you can redistribute it and/or
@@ -28,8 +28,8 @@ import io.ktor.http.contentType
 import io.ktor.http.userAgent
 import org.json.JSONObject
 import org.telegram.messenger.Utilities
+import top.qwq2333.nullgram.encodeUrl
 import top.qwq2333.nullgram.translate.BaseTranslator
-import top.qwq2333.nullgram.utils.encodeUrl
 import java.util.Locale
 import java.util.UUID
 

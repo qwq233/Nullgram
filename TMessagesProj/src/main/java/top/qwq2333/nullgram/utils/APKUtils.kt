@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019-2023 qwq233 <qwq233@qwq2333.top>
+ * Copyright (C) 2019-2024 qwq233 <qwq233@qwq2333.top>
  * https://github.com/qwq233/Nullgram
  *
  * This program is free software; you can redistribute it and/or
@@ -57,6 +57,7 @@ import org.telegram.ui.Components.BulletinFactory
 import org.telegram.ui.Components.LayoutHelper
 import org.telegram.ui.Components.RLottieImageView
 import org.telegram.ui.LaunchActivity
+import top.qwq2333.nullgram.addView
 import java.io.File
 import java.io.FileInputStream
 import java.io.IOException

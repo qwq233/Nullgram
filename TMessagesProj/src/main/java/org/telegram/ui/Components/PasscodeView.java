@@ -1,3 +1,22 @@
+/*
+ * Copyright (C) 2019-2024 qwq233 <qwq233@qwq2333.top>
+ * https://github.com/qwq233/Nullgram
+ *
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation; either version 2
+ * of the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along with this software.
+ *  If not, see
+ * <https://www.gnu.org/licenses/>
+ */
+
 package org.telegram.ui.Components;
 
 import static org.telegram.messenger.AndroidUtilities.dp;
@@ -68,7 +87,6 @@ import org.telegram.messenger.LocaleController;
 import org.telegram.messenger.NotificationCenter;
 import org.telegram.messenger.R;
 import org.telegram.messenger.SharedConfig;
-import org.telegram.messenger.support.fingerprint.FingerprintManagerCompat;
 import org.telegram.ui.ActionBar.Theme;
 import org.telegram.ui.LaunchActivity;
 import org.telegram.ui.Stories.recorder.KeyboardNotifier;
@@ -495,18 +513,18 @@ public class PasscodeView extends FrameLayout implements NotificationCenter.Noti
 
     private static final @IdRes
     int[] ids = {
-            R.id.passcode_btn_0,
-            R.id.passcode_btn_1,
-            R.id.passcode_btn_2,
-            R.id.passcode_btn_3,
-            R.id.passcode_btn_4,
-            R.id.passcode_btn_5,
-            R.id.passcode_btn_6,
-            R.id.passcode_btn_7,
-            R.id.passcode_btn_8,
-            R.id.passcode_btn_9,
-            R.id.passcode_btn_backspace,
-            R.id.passcode_btn_fingerprint
+        R.id.passcode_btn_0,
+        R.id.passcode_btn_1,
+        R.id.passcode_btn_2,
+        R.id.passcode_btn_3,
+        R.id.passcode_btn_4,
+        R.id.passcode_btn_5,
+        R.id.passcode_btn_6,
+        R.id.passcode_btn_7,
+        R.id.passcode_btn_8,
+        R.id.passcode_btn_9,
+        R.id.passcode_btn_backspace,
+        R.id.passcode_btn_fingerprint
     };
 
     public PasscodeView(final Context context) {
@@ -905,9 +923,9 @@ public class PasscodeView extends FrameLayout implements NotificationCenter.Noti
         FloatValueHolder animationValue = new FloatValueHolder(0);
         motionBackgroundDrawable.setAnimationProgressProvider(obj -> animationValue.getValue() / 100f);
         backgroundAnimationSpring = new SpringAnimation(animationValue)
-                .setSpring(new SpringForce(100)
-                        .setStiffness(BACKGROUND_SPRING_STIFFNESS)
-                        .setDampingRatio(SpringForce.DAMPING_RATIO_NO_BOUNCY));
+            .setSpring(new SpringForce(100)
+                .setStiffness(BACKGROUND_SPRING_STIFFNESS)
+                .setDampingRatio(SpringForce.DAMPING_RATIO_NO_BOUNCY));
         backgroundAnimationSpring.addEndListener((animation, canceled, value, velocity) -> {
             backgroundAnimationSpring = null;
             motionBackgroundDrawable.setAnimationProgressProvider(null);
@@ -1211,10 +1229,10 @@ public class PasscodeView extends FrameLayout implements NotificationCenter.Noti
                         }
                     });
                     final BiometricPrompt.PromptInfo promptInfo = new BiometricPrompt.PromptInfo.Builder()
-                            .setTitle(LocaleController.getString(R.string.UnlockToUse))
-                            .setNegativeButtonText(LocaleController.getString(R.string.UsePIN))
-                            .setAllowedAuthenticators(BiometricManager.Authenticators.BIOMETRIC_STRONG)
-                            .build();
+                        .setTitle(LocaleController.getString(R.string.UnlockToUse))
+                        .setNegativeButtonText(LocaleController.getString(R.string.UsePIN))
+                        .setAllowedAuthenticators(BiometricManager.Authenticators.BIOMETRIC_STRONG)
+                        .build();
                     prompt.authenticate(promptInfo);
                     showPin(false);
                 }
@@ -1230,10 +1248,9 @@ public class PasscodeView extends FrameLayout implements NotificationCenter.Noti
 
     private boolean hasFingerprint() {
         Activity parentActivity = (Activity) getContext();
-        if (Build.VERSION.SDK_INT >= 23 && parentActivity != null && SharedConfig.useFingerprintLock) {
+        if (parentActivity != null && SharedConfig.useFingerprintLock) {
             try {
-                FingerprintManagerCompat fingerprintManager = FingerprintManagerCompat.from(ApplicationLoader.applicationContext);
-                return fingerprintManager.isHardwareDetected() && fingerprintManager.hasEnrolledFingerprints() && FingerprintController.isKeyReady() && !FingerprintController.checkDeviceFingerprintsChanged();
+                return BiometricManager.from(getContext()).canAuthenticate(BiometricManager.Authenticators.BIOMETRIC_STRONG) == BiometricManager.BIOMETRIC_SUCCESS && FingerprintController.isKeyReady() && !FingerprintController.checkDeviceFingerprintsChanged();
             } catch (Throwable e) {
                 FileLog.e(e);
             }
@@ -1244,10 +1261,9 @@ public class PasscodeView extends FrameLayout implements NotificationCenter.Noti
     private void checkFingerprintButton() {
         boolean hasFingerprint = false;
         Activity parentActivity = (Activity) getContext();
-        if (Build.VERSION.SDK_INT >= 23 && parentActivity != null && SharedConfig.useFingerprintLock) {
+        if (parentActivity != null && SharedConfig.useFingerprintLock) {
             try {
-                FingerprintManagerCompat fingerprintManager = FingerprintManagerCompat.from(ApplicationLoader.applicationContext);
-                if (fingerprintManager.isHardwareDetected() && fingerprintManager.hasEnrolledFingerprints() && FingerprintController.isKeyReady() && !FingerprintController.checkDeviceFingerprintsChanged()) {
+                if (BiometricManager.from(getContext()).canAuthenticate(BiometricManager.Authenticators.BIOMETRIC_STRONG) == BiometricManager.BIOMETRIC_SUCCESS && FingerprintController.isKeyReady() && !FingerprintController.checkDeviceFingerprintsChanged()) {
                     hasFingerprint = true;
                     fingerprintView.setVisibility(VISIBLE);
                 } else {
@@ -1407,8 +1423,8 @@ public class PasscodeView extends FrameLayout implements NotificationCenter.Noti
                             if (a != -1) {
                                 animatorSetInner = new AnimatorSet();
                                 animatorSetInner.playTogether(
-                                        ObjectAnimator.ofFloat(child, View.SCALE_X, 1.0f),
-                                        ObjectAnimator.ofFloat(child, View.SCALE_Y, 1.0f));
+                                    ObjectAnimator.ofFloat(child, View.SCALE_X, 1.0f),
+                                    ObjectAnimator.ofFloat(child, View.SCALE_Y, 1.0f));
                                 animatorSetInner.setDuration(140);
                                 animatorSetInner.setInterpolator(new DecelerateInterpolator());
                             } else {

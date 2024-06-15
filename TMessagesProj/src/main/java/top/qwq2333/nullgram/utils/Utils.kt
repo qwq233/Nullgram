@@ -28,11 +28,7 @@ import android.net.Network
 import android.net.NetworkCapabilities
 import android.util.Base64
 import android.view.View
-import android.widget.LinearLayout
 import android.widget.Toast
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
 import org.telegram.messenger.AndroidUtilities
 import org.telegram.messenger.ApplicationLoader
 import org.telegram.messenger.LocaleController
@@ -46,14 +42,12 @@ import org.telegram.ui.ActionBar.ActionBarPopupWindow.ActionBarPopupWindowLayout
 import org.telegram.ui.ActionBar.BaseFragment
 import org.telegram.ui.Components.AlertsCreator
 import org.telegram.ui.Components.BulletinFactory
-import org.telegram.ui.Components.LayoutHelper
 import top.qwq2333.gen.Config
 import top.qwq2333.nullgram.activity.DatacenterActivity
 import top.qwq2333.nullgram.remote.NicegramController
 import java.io.BufferedReader
 import java.io.File
 import java.io.FileReader
-import java.net.URLEncoder
 import java.security.MessageDigest
 import java.security.NoSuchAlgorithmException
 import java.security.SecureRandom
@@ -321,34 +315,4 @@ object Utils {
         }
     }
 
-}
-
-fun String.encodeUrl(): String = URLEncoder.encode(this, "UTF-8")
-fun String.isNumber(): Boolean = try {
-    this.toLong()
-    true
-} catch (e: NumberFormatException) {
-    false
-}
-
-internal inline fun tryOrLog(block: () -> Unit) = runCatching {
-    block()
-}.onFailure {
-    Log.e(it)
-}
-
-internal inline fun runOnIoDispatcher(crossinline block: ()->Unit) {
-    CoroutineScope(Dispatchers.IO).launch {
-        block()
-    }
-}
-
-internal inline fun LinearLayout.addView(view: View, init: LinearLayout.LayoutParams.() -> Unit) {
-    addView(view, LayoutHelper.createLinear(LayoutHelper.WRAP_CONTENT, LayoutHelper.WRAP_CONTENT) // default params
-        .apply(init))
-}
-
-internal inline fun createLinear(init: LinearLayout.LayoutParams.() -> Unit): LinearLayout.LayoutParams {
-    return LayoutHelper.createLinear(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT)
-        .apply(init)
 }

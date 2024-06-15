@@ -92,6 +92,7 @@ import org.telegram.ui.Components.LayoutHelper
 import org.telegram.ui.Components.TranscribeButton
 import top.qwq2333.nullgram.helpers.QrHelper
 import top.qwq2333.nullgram.helpers.QrHelper.readQr
+import top.qwq2333.nullgram.tryOrLog
 import java.io.File
 import java.io.FileOutputStream
 import java.nio.ByteBuffer

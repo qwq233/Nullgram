@@ -191,6 +191,7 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import kotlin.Unit;
 import top.qwq2333.gen.Config;
+import top.qwq2333.nullgram.InlinesKt;
 import top.qwq2333.nullgram.config.ConfigManager;
 import top.qwq2333.nullgram.helpers.PasscodeHelper;
 import top.qwq2333.nullgram.ui.BottomBuilder;
@@ -200,7 +201,6 @@ import top.qwq2333.nullgram.utils.AlertUtil;
 import top.qwq2333.nullgram.utils.Defines;
 import top.qwq2333.nullgram.utils.Log;
 import top.qwq2333.nullgram.utils.StringUtils;
-import top.qwq2333.nullgram.utils.UtilsKt;
 
 @SuppressLint("HardwareIds")
 public class LoginActivity extends BaseFragment implements NotificationCenter.NotificationCenterDelegate {
@@ -796,7 +796,7 @@ public class LoginActivity extends BaseFragment implements NotificationCenter.No
                     public void onTextChanged(CharSequence s, int start, int before, int count) {
                         if (StringUtils.isBlank(s.toString())) {
                             Config.setCustomAppId(0);
-                        } else if (!UtilsKt.isNumber(s.toString())) {
+                        } else if (!InlinesKt.isNumber(s.toString())) {
                             inputs[0].setText("0");
                         } else {
                             Config.setCustomAppId(Integer.parseInt(s.toString()));
