@@ -339,13 +339,13 @@ object ConfigManager {
      * 将SharePreference的数据转换成json
      *
      * @param sp     SharePreferences name
-     * @param object 传入的JsonObject将会被传入SharePreferences中的配置
+     * @param obj 传入的JsonObject将会被传入SharePreferences中的配置
      * @param filter 过滤 只接收哪些key
      * @throws JSONException Ignore 一般不会发生
      */
     @Throws(JSONException::class)
     private fun SharedPreferenceToJSON(
-        sp: String, `object`: JSONObject,
+        sp: String, obj: JSONObject,
         filter: Function<String, Boolean>?
     ) {
         val preferences = ApplicationLoader.applicationContext.getSharedPreferences(
@@ -361,10 +361,12 @@ object ConfigManager {
                 key += "_long"
             } else if (entry.value is Float) {
                 key += "_float"
+            } else if (entry.value is Set<*>) {
+                continue
             }
             jsonConfig.put(key, entry.value)
         }
-        `object`.put(sp, jsonConfig)
+        obj.put(sp, jsonConfig)
     }
 
     /**
