@@ -120,6 +120,8 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import top.qwq2333.nullgram.helpers.StickerHelper;
+
 public class StickersAlert extends BottomSheet implements NotificationCenter.NotificationCenterDelegate {
 
     public final static boolean DISABLE_STICKER_EDITOR = false;
@@ -1126,6 +1128,7 @@ public class StickersAlert extends BottomSheet implements NotificationCenter.Not
         containerView.addView(optionsButton, LayoutHelper.createFrame(40, 40, Gravity.TOP | Gravity.RIGHT, 0, 5, 5, 0));
         optionsButton.addSubItem(1, R.drawable.msg_share, LocaleController.getString("StickersShare", R.string.StickersShare));
         optionsButton.addSubItem(2, R.drawable.msg_link, LocaleController.getString("CopyLink", R.string.CopyLink));
+        optionsButton.addSubItem(3, R.drawable.media_download, LocaleController.getString("Save", R.string.Save));
 
         optionsButton.setOnClickListener(v -> {
             checkOptions();
@@ -1234,10 +1237,10 @@ public class StickersAlert extends BottomSheet implements NotificationCenter.Not
         final MediaDataController mediaDataController = MediaDataController.getInstance(currentAccount);
         boolean notInstalled = stickerSet == null || !mediaDataController.isStickerPackInstalled(stickerSet.set.id);
         if (stickerSet != null && stickerSet.set != null && stickerSet.set.creator && deleteItem == null && !DISABLE_STICKER_EDITOR) {
-            optionsButton.addSubItem(3, R.drawable.tabs_reorder, LocaleController.getString(R.string.StickersReorder));
-            optionsButton.addSubItem(4, R.drawable.msg_edit, LocaleController.getString(R.string.EditName));
+            optionsButton.addSubItem(4, R.drawable.tabs_reorder, LocaleController.getString(R.string.StickersReorder));
+            optionsButton.addSubItem(5, R.drawable.msg_edit, LocaleController.getString(R.string.EditName));
             if (notInstalled) {
-                deleteItem = optionsButton.addSubItem(5, R.drawable.msg_delete, LocaleController.getString(R.string.Delete));
+                deleteItem = optionsButton.addSubItem(6, R.drawable.msg_delete, LocaleController.getString(R.string.Delete));
             } else {
                 ActionBarPopupWindow.ActionBarPopupWindowLayout moreDeleteOptions = new ActionBarPopupWindow.ActionBarPopupWindowLayout(getContext(), 0, resourcesProvider);
                 moreDeleteOptions.setFitItems(true);
@@ -1397,12 +1400,14 @@ public class StickersAlert extends BottomSheet implements NotificationCenter.Not
                 FileLog.e(e);
             }
         } else if (id == 3) {
+            StickerHelper.saveStickerSet(getContext(), inputStickerSet);
+        } else if (id == 4) {
             if (isEditModeEnabled) {
                 disableEditMode();
             } else {
                 enableEditMode();
             }
-        } else if (id == 4) {
+        } else if (id == 5) {
             StickersDialogs.showNameEditorDialog(stickerSet.set, resourcesProvider, getContext(), (text, whenDone) -> {
                 titleTextView.setText(text);
                 TLRPC.TL_stickers_renameStickerSet req = new TLRPC.TL_stickers_renameStickerSet();
@@ -1421,7 +1426,7 @@ public class StickersAlert extends BottomSheet implements NotificationCenter.Not
                     whenDone.run(success);
                 }));
             });
-        } else if (id == 5) {
+        } else if (id == 6) {
             StickersDialogs.showDeleteForEveryOneDialog(stickerSet.set, resourcesProvider, getContext(), () -> {
                 dismiss();
                 MediaDataController.getInstance(currentAccount).toggleStickerSet(getContext(), stickerSet, 1, parentFragment, false, false);
