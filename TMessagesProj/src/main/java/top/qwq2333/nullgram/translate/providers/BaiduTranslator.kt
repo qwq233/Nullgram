@@ -42,19 +42,19 @@ object BaiduTranslator : BaseTranslator()  {
         }
         return String(buf)
     }
-    private val targetLanguages: List<String> = mutableListOf(
+    private val targetLanguages: List<String> = listOf(
         "zh", "en", "ja", "ko", "fr", "es", "th", "ar",
         "ru", "pt", "de", "it", "el", "nl", "pl", "bg",
         "et", "da", "fi", "cs", "ro", "sl", "sv", "hu",
         "zh-TW", "vi"
     )
-    private val baiduLanguages: List<String> = mutableListOf(
+    private val baiduLanguages: List<String> = listOf(
         "zh", "en", "jp", "kor", "fra", "spa", "th", "ara",
         "ru", "pt", "de", "it", "el", "nl", "pl", "bul",
         "est", "dan", "fin", "cs", "rom", "slo", "swe", "hu",
         "cht", "vie"
     )
-    private val cuid = UUID.randomUUID().toString().uppercase(Locale.getDefault()).replace("-", "") + "|" + randomString()
+    private val cuid = UUID.randomUUID().toString().uppercase(Locale.US).replace("-", "") + "|" + randomString()
 
     override fun convertLanguageCode(code: String, reverse: Boolean): String {
         val index = if (reverse) baiduLanguages.indexOf(code) else targetLanguages.indexOf(code)
@@ -66,8 +66,8 @@ object BaiduTranslator : BaseTranslator()  {
 
     override fun convertLanguageCode(language: String, country: String?): String {
         val languageLowerCase = language.lowercase(Locale.getDefault())
-        val code = if (!TextUtils.isEmpty(country)) {
-            val countryUpperCase = country!!.uppercase(Locale.getDefault())
+        val code = if (!country.isNullOrEmpty()) {
+            val countryUpperCase = country.uppercase(Locale.getDefault())
             if (targetLanguages.contains("$languageLowerCase-$countryUpperCase")) {
                 "$languageLowerCase-$countryUpperCase"
             } else if (languageLowerCase == "zh") {
@@ -96,7 +96,7 @@ object BaiduTranslator : BaseTranslator()  {
             if (TextUtils.isEmpty(it.bodyAsText())) {
                 return RequestResult(from,null,it.status)
             } else {
-                val json: JSONObject = JSONObject(it.bodyAsText())
+                val json = JSONObject(it.bodyAsText())
                 val array = json.getJSONArray("fanyi_list")
                 buildString {
                     for (i in 0 until array.length()) {

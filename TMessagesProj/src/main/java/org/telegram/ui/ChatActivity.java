@@ -6631,6 +6631,7 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
         emojiStatusSpamHint = null;
         topViewSeparator1 = null;
         topViewSeparator2 = null;
+        topViewSeparator3 = null;
         addToContactsButton = null;
         restartTopicButton = null;
         closeReportSpam = null;
@@ -9387,6 +9388,11 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
         topViewSeparator2.setVisibility(View.GONE);
         topViewSeparator2.setBackgroundColor(getThemedColor(Theme.key_divider));
         topChatPanelView.addView(topViewSeparator2, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, 1f / AndroidUtilities.density, Gravity.LEFT | Gravity.TOP, 10, 48, 10, 1));
+        topViewSeparator3 = new View(getContext());
+        topViewSeparator3.setVisibility(View.GONE);
+        topViewSeparator3.setBackgroundColor(getThemedColor(Theme.key_divider));
+        topChatPanelView.addView(topViewSeparator3, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, 1f / AndroidUtilities.density, Gravity.LEFT | Gravity.BOTTOM, 0, 0, 0, 38));
+
 
         addToContactsButton = new TextView(getContext());
         addToContactsButton.setTextColor(getThemedColor(Theme.key_chat_addContact));
