@@ -253,7 +253,7 @@
     <string name="ProviderYandexTranslate">Yandex翻訳</string>
     <string name="ProviderTelegramTranslate">TELEOFFICIAL翻訳</string>
     <string name="ProviderMicrosoftTranslate">Microsoft翻訳</string>
-    <string name="ProviderDeepLTranslate">DeepL 翻訳</string>
+    <string name="ProviderDeepLTranslate">DeepL翻訳</string>
     <string name="ProviderLingoTranslate">Lingo翻訳</string>
     <string name="TranslationProvider">翻訳プロバイダー</string>
     <string name="TranslateApiUnsupported">選択した翻訳プロバイダーはあなたの言語をサポートしていません.</string>
