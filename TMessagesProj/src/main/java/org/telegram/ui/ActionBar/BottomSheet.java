@@ -202,6 +202,7 @@ public class BottomSheet extends Dialog {
 
     private ValueAnimator keyboardContentAnimator;
     public boolean smoothKeyboardAnimationEnabled;
+    public boolean smoothKeyboardByBottom;
     private boolean openNoDelay;
 
     private float hideSystemVerticalInsetsProgress;
@@ -598,8 +599,8 @@ public class BottomSheet extends Dialog {
                 if (lastInsets != null && Build.VERSION.SDK_INT >= 21) {
                     l += getLeftInset();
                 }
-                if (smoothKeyboardAnimationEnabled && startAnimationRunnable == null && keyboardChanged && !dismissed && containerView.getTop() != t || smoothContainerViewLayoutUntil > 0 && System.currentTimeMillis() < smoothContainerViewLayoutUntil) {
-                    containerView.setTranslationY(containerView.getTop() - t);
+                if (smoothKeyboardAnimationEnabled && startAnimationRunnable == null && keyboardChanged && !dismissed && (smoothKeyboardByBottom ? containerView.getBottom() != t + containerView.getMeasuredHeight() : containerView.getTop() != t) || smoothContainerViewLayoutUntil > 0 && System.currentTimeMillis() < smoothContainerViewLayoutUntil) {
+                    containerView.setTranslationY(smoothKeyboardByBottom ? containerView.getBottom() - (t + containerView.getMeasuredHeight()) : containerView.getTop() - t);
                     onSmoothContainerViewLayout(containerView.getTranslationY());
                     if (keyboardContentAnimator != null) {
                         keyboardContentAnimator.cancel();

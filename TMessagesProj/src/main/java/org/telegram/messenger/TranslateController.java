@@ -23,6 +23,7 @@ import android.content.Context;
 import android.content.res.Resources;
 import android.icu.text.Collator;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.inputmethod.InputMethodInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.view.inputmethod.InputMethodSubtype;
@@ -262,6 +263,7 @@ public class TranslateController extends BaseController {
         synchronized (this) {
             if (hidden) {
                 hideTranslateDialogs.add(dialogId);
+                translatingDialogs.remove(dialogId);
             } else {
                 hideTranslateDialogs.remove(dialogId);
             }
@@ -297,6 +299,7 @@ public class TranslateController extends BaseController {
         synchronized (this) {
             if (hide) {
                 hideTranslateDialogs.add(dialogId);
+                translatingDialogs.remove(dialogId);
             } else {
                 hideTranslateDialogs.remove(dialogId);
             }
@@ -517,6 +520,10 @@ public class TranslateController extends BaseController {
 
         if (!isTranslatingDialog(dialogId)) {
             checkLanguage(messageObject);
+            return;
+        }
+
+        if (isTranslateDialogHidden(dialogId)) {
             return;
         }
 
@@ -847,6 +854,9 @@ public class TranslateController extends BaseController {
                         toggleTranslatingDialog(dialogId, false);
                         NotificationCenter.getGlobalInstance().postNotificationName(NotificationCenter.showBulletin, Bulletin.TYPE_ERROR, LocaleController.getString("TranslationFailedAlert2", R.string.TranslationFailedAlert2));
                     } else {
+                        if (err != null && "QUOTA_EXCEEDED".equals(err.text)) {
+                            NotificationCenter.getGlobalInstance().postNotificationName(NotificationCenter.showBulletin, Bulletin.TYPE_ERROR, LocaleController.getString(R.string.TranslationFailedAlert1));
+                        }
                         for (int i = 0; i < callbacks.size(); ++i) {
                             callbacks.get(i).run(ids.get(i), null, pendingTranslation1.language);
                         }

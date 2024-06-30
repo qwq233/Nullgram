@@ -1919,7 +1919,9 @@ public class LoginActivity extends BaseFragment implements NotificationCenter.No
                 final String phone = params.getString("phoneFormated");
                 if (r.play_integrity_nonce != null) {
                     IntegrityManager integrityManager = IntegrityManagerFactory.create(getContext());
-                    Task<IntegrityTokenResponse> integrityTokenResponse = integrityManager.requestIntegrityToken(IntegrityTokenRequest.builder().setNonce(Utilities.bytesToHex(r.play_integrity_nonce)).setCloudProjectNumber(760348033671L).build());
+                    final String nonce = new String(Base64.encode(r.play_integrity_nonce, Base64.URL_SAFE));
+                    FileLog.d("getting classic integrity with nonce = " + nonce);
+                    Task<IntegrityTokenResponse> integrityTokenResponse = integrityManager.requestIntegrityToken(IntegrityTokenRequest.builder().setNonce(nonce).setCloudProjectNumber(r.play_integrity_project_id).build());
                     integrityTokenResponse
                         .addOnSuccessListener(result -> {
                             final String token = result.token();
@@ -10012,7 +10014,7 @@ public class LoginActivity extends BaseFragment implements NotificationCenter.No
             }
             actionBar = null;
         }
-        clearStoryViewers();
+        clearSheets();
         parentLayout = null;
     }
 }

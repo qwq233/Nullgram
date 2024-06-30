@@ -1592,7 +1592,7 @@ public class ConnectionsManager extends BaseController {
         });
     }
 
-    public static void onIntegrityCheckClassic(final int currentAccount, final int requestToken, final String nonce) {
-        return;
+    public static void onIntegrityCheckClassic(final int currentAccount, final int requestToken, final String project, final String nonce) {
+        native_receivedIntegrityCheckClassic(currentAccount, requestToken, nonce, "PLAYINTEGRITY_FAILED_EXCEPTION_NULL");
     }
 }

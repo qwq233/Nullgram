@@ -27,7 +27,6 @@
     <string name="ViewSourceCode">ソースコードを表示</string>
     <string name="Categories">カテゴリー</string>
     <string name="About">Nullgramについて</string>
-    <string name="OfficialChannelName">Nullgramクライアント</string>
     <string name="noAvailableUpdate">アップデートはありません。</string>
     <string name="updateAvailable">新しいバージョンが利用可能です。</string>
     <string name="variantsNotFound">リリースバリアントを自動でチェックしましたが一致しませんでした。\nGitHubから手動でダウンロードしてください。</string>
@@ -113,7 +112,6 @@
     <string name="customDoubleTap">ダブルタップをカスタム</string>
     <string name="OpenSource">オープンソースソフトウェアライセンス</string>
     <string name="disableCustomAPI">カスタムAPIを使用しない</string>
-    <string name="useOfficialAPI">TELEOFFICIAL</string>
     <string name="customAPI">カスタムAPI</string>
     <string name="useCustomApiNotice">登録またはログインができない場合、カスタムAPI の使用が役立つかもしれません。\n\n注意: リリースバージョンを使用している場合、fcmは動作しません。</string>
     <string name="useCustomAPI">手動で入力</string>
@@ -133,7 +131,7 @@
     <string name="ignoreReactionMentionInfo">未読のリアクションを自動的に既読にします。\nTELEOFFICIALサーバーで管理しているため、通知は表示されたままになります。</string>
     <string name="StickerSize">ステッカーのサイズ</string>
     <string name="StickerSizeDialogMessageReplyTo">にゃ</string>
-    <string name="StickerSizeDialogMessage">カワイイ黒猫!</string>
+    <string name="StickerSizeDialogMessage">おぉ、かわいい女の子だ!</string>
     <string name="ResetStickerSize">ステッカーのサイズをリセット</string>
     <string name="EditUndo">元に戻す</string>
     <string name="EditRedo">やり直し</string>
@@ -231,7 +229,7 @@
     <string name="ignoreMutedCount">タブ内のミュート数を無視</string>
     <string name="disableSharePhoneWithContactByDefault">連絡先の追加時に電話番号を共有しない</string>
     <string name="disableStickersAutoReorder">ステッカーバックの自動リローダーを無効化</string>
-    <string name="autoDisableBuiltInProxy">内蔵のプロキシを自動で無効化する</string>
+    <string name="autoDisableBuiltInProxy">内蔵のプロキシを自動で無効化</string>
     <string name="autoDisableBuiltInProxyDesc">NullgramがVPNのONを検出すると、内蔵のプロキシを自動的にOFFにします</string>
     <string name="NullgramWsDescription">Cloudflare経由でWebSocketを介して TELEOFFICIALに接続をします。\n提供: Nullgram</string>
     <string name="NekogramXWsDescription">提供: Nekogram X</string>
