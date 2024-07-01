@@ -487,10 +487,10 @@ public class LaunchActivity extends BasePermissionsActivity implements INavigati
                     themeSwitchSunDrawable.draw(canvas);
                     invalidate();
                 }
-                frameLayout.addView(themeSwitchSunView, LayoutHelper.createFrame(48, 48));
-                themeSwitchSunView.setVisibility(View.GONE);
             }
         };
+        frameLayout.addView(themeSwitchSunView, LayoutHelper.createFrame(48, 48));
+        themeSwitchSunView.setVisibility(View.GONE);
         frameLayout.addView(themeSwitchSunView, LayoutHelper.createFrame(48, 48));
         themeSwitchSunView.setVisibility(View.GONE);
         frameLayout.addView(fireworksOverlay = new FireworksOverlay(this) {
