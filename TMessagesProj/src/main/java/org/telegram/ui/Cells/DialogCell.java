@@ -1604,7 +1604,7 @@ public class DialogCell extends BaseCell implements StoriesListPlaceProvider.Ava
                                         messageString = new SpannableStringBuilder(emoji).append(text);
                                     } else {
                                         SpannableStringBuilder msgBuilder = new SpannableStringBuilder(message.caption);
-                                        if (Config.displaySpoilerMsgDirectly && message != null && message.messageOwner != null) {
+                                        if (message != null && message.messageOwner != null) {
                                             if (message != null) {
                                                 message.spoilLoginCode();
                                             }
@@ -1683,11 +1683,11 @@ public class DialogCell extends BaseCell implements StoriesListPlaceProvider.Ava
                                             messageString = AndroidUtilities.ellipsizeCenterEnd(messageString, message.highlightedWords.get(0), w, currentMessagePaint, 130);
                                         } else {
                                             SpannableStringBuilder stringBuilder = new SpannableStringBuilder(msgText);
-                                            if (Config.displaySpoilerMsgDirectly && message != null) {
+                                            if (message != null) {
                                                 message.spoilLoginCode();
                                             }
                                             MediaDataController.addTextStyleRuns(message, stringBuilder, TextStyleSpan.FLAG_STYLE_SPOILER | TextStyleSpan.FLAG_STYLE_STRIKE);
-                                            if (Config.displaySpoilerMsgDirectly && message != null && message.messageOwner != null) {
+                                            if (message != null && message.messageOwner != null) {
                                                 MediaDataController.addAnimatedEmojiSpans(message.messageOwner.entities, stringBuilder, currentMessagePaint == null ? null : currentMessagePaint.getFontMetricsInt());
                                             }
                                             messageString = stringBuilder;
@@ -2350,7 +2350,7 @@ public class DialogCell extends BaseCell implements StoriesListPlaceProvider.Ava
             }
             spoilersPool.addAll(spoilers);
             spoilers.clear();
-            if (Config.displaySpoilerMsgDirectly) {
+            if (!Config.displaySpoilerMsgDirectly) {
                 SpoilerEffect.addSpoilers(this, messageLayout, -2, -2, spoilersPool, spoilers);
             }
         } catch (Exception e) {
