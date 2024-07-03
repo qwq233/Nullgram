@@ -28709,47 +28709,29 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
                                     icons.add(R.drawable.msg_download);
                                 }
                             }
-                        } else if (type == 3 && !noforwardsOrPaidMedia) {
+                        } else if (type == 3 && !noforwards) {
                             if (selectedObject.messageOwner.media instanceof TLRPC.TL_messageMediaWebPage && MessageObject.isNewGifDocument(selectedObject.messageOwner.media.webpage.document)) {
                                 items.add(LocaleController.getString("SaveToGIFs", R.string.SaveToGIFs));
                                 options.add(OPTION_ADD_TO_GIFS);
                                 icons.add(R.drawable.msg_gif);
                             }
-                        } else if (type == 4) {
-                            if (!selectedObject.hasRevealedExtendedMedia()) {
-                                if (ConfigManager.getBooleanOrFalse(Defines.showDeleteDownloadFiles) && selectedObject.getDocument() != null) {
-                                    items.add(LocaleController.getString("DeleteDownloadedFile", R.string.DeleteDownloadedFile));
-                                    options.add(OPTION_DELETE_DOWNLOADED_FILE);
-                                    icons.add(R.drawable.msg_clear);
-                                }
-                                if (selectedObject.isVideo()) {
-                                    if (!selectedObject.needDrawBluredPreview()) {
-                                        items.add(LocaleController.getString("SaveToGallery", R.string.SaveToGallery));
-                                        options.add(OPTION_SAVE_TO_GALLERY);
-                                        icons.add(R.drawable.msg_gallery);
-                                        items.add(LocaleController.getString("ShareFile", R.string.ShareFile));
-                                        options.add(OPTION_SHARE);
-                                        icons.add(R.drawable.msg_shareout);
-                                    }
-                                } else if (selectedObject.isMusic() && !selectedObject.isVoiceOnce() && !selectedObject.isRoundOnce()) {
-                                    items.add(LocaleController.getString("SaveToMusic", R.string.SaveToMusic));
-                                    options.add(OPTION_SAVE_TO_DOWNLOADS_OR_MUSIC);
-                                    icons.add(R.drawable.msg_download);
-                                    items.add(LocaleController.getString("ShareFile", R.string.ShareFile));
-                                    options.add(OPTION_SHARE);
-                                    icons.add(R.drawable.msg_shareout);
-                                } else {
-                                    items.add(LocaleController.getString("SaveToGallery", R.string.SaveToGallery));
+                        } else if (type == 4 && !selectedObject.hasRevealedExtendedMedia()) {
+                            if (ConfigManager.getBooleanOrFalse(Defines.showDeleteDownloadFiles) && selectedObject.getDocument() != null) {
+                                items.add(LocaleController.getString("DeleteDownloadedFile",
+                                    R.string.DeleteDownloadedFile));
+                                options.add(OPTION_DELETE_DOWNLOADED_FILE);
+                                icons.add(R.drawable.msg_clear);
+                            }
+                            if (selectedObject.isVideo()) {
+                                if (!selectedObject.needDrawBluredPreview()) {
+                                    items.add(LocaleController.getString("SaveToGallery",
+                                        R.string.SaveToGallery));
                                     options.add(OPTION_SAVE_TO_GALLERY);
                                     icons.add(R.drawable.msg_gallery);
-                                    items.add(LocaleController.getString("ShareFile", R.string.ShareFile));
+                                    items.add(LocaleController.getString("ShareFile",
+                                        R.string.ShareFile));
                                     options.add(OPTION_SHARE);
                                     icons.add(R.drawable.msg_shareout);
-                                    if (ConfigManager.getBooleanOrFalse(Defines.showCopyPhoto)) {
-                                        items.add(LocaleController.getString("CopyPhoto", R.string.CopyPhoto));
-                                        options.add(OPTION_COPY_PHOTO);
-                                        icons.add(R.drawable.msg_copy);
-                                    }
                                 }
                             } else if (selectedObject.isMusic()) {
                                 items.add(LocaleController.getString("SaveToMusic", R.string.SaveToMusic));
@@ -28758,7 +28740,7 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
                                 items.add(LocaleController.getString("ShareFile", R.string.ShareFile));
                                 options.add(OPTION_SHARE);
                                 icons.add(R.drawable.msg_shareout);
-                            } else if (selectedObject.getDocument() != null && !selectedObject.isVoiceOnce() && !selectedObject.isRoundOnce()) {
+                            } else if (selectedObject.getDocument() != null) {
                                 if (MessageObject.isNewGifDocument(selectedObject.getDocument())) {
                                     items.add(LocaleController.getString("SaveToGIFs", R.string.SaveToGIFs));
                                     options.add(OPTION_ADD_TO_GIFS);
@@ -28770,6 +28752,7 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
                                 items.add(LocaleController.getString("ShareFile", R.string.ShareFile));
                                 options.add(OPTION_SHARE);
                                 icons.add(R.drawable.msg_shareout);
+                            } else {
                                 if (!selectedObject.needDrawBluredPreview()) {
                                     items.add(LocaleController.getString("SaveToGallery", R.string.SaveToGallery));
                                     options.add(OPTION_SAVE_TO_GALLERY);
@@ -28781,14 +28764,14 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
                                     }
                                 }
                             }
-                        } else if (type == 5) {
+                        }else if (type == 5) {
                             items.add(LocaleController.getString("ApplyLocalizationFile", R.string.ApplyLocalizationFile));
                             options.add(OPTION_APPLY_LOCALIZATION_OR_THEME);
                             icons.add(R.drawable.msg_language);
+                            items.add(LocaleController.getString("SaveToDownloads", R.string.SaveToDownloads));
+                            options.add(OPTION_SAVE_TO_DOWNLOADS_OR_MUSIC);
+                            icons.add(R.drawable.msg_download);
                             if (!selectedObject.isVoiceOnce() && !selectedObject.isRoundOnce()) {
-                                items.add(LocaleController.getString("SaveToDownloads", R.string.SaveToDownloads));
-                                options.add(OPTION_SAVE_TO_DOWNLOADS_OR_MUSIC);
-                                icons.add(R.drawable.msg_download);
                                 items.add(LocaleController.getString("ShareFile", R.string.ShareFile));
                                 options.add(OPTION_SHARE);
                                 icons.add(R.drawable.msg_shareout);
@@ -28797,10 +28780,10 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
                             items.add(LocaleController.getString("ApplyThemeFile", R.string.ApplyThemeFile));
                             options.add(OPTION_APPLY_LOCALIZATION_OR_THEME);
                             icons.add(R.drawable.msg_theme);
+                            items.add(LocaleController.getString("SaveToDownloads", R.string.SaveToDownloads));
+                            options.add(OPTION_SAVE_TO_DOWNLOADS_OR_MUSIC);
+                            icons.add(R.drawable.msg_download);
                             if (!selectedObject.isVoiceOnce() && !selectedObject.isRoundOnce()) {
-                                items.add(LocaleController.getString("SaveToDownloads", R.string.SaveToDownloads));
-                                options.add(OPTION_SAVE_TO_DOWNLOADS_OR_MUSIC);
-                                icons.add(R.drawable.msg_download);
                                 items.add(LocaleController.getString("ShareFile", R.string.ShareFile));
                                 options.add(OPTION_SHARE);
                                 icons.add(R.drawable.msg_shareout);
