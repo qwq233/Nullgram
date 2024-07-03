@@ -13078,6 +13078,7 @@ public class TLRPC {
         public int boosts_unrestrict;
         public StickerSet emojiset;
         public boolean can_view_revenue;
+        public boolean can_view_stars_revenue;
         public boolean paid_media_allowed;
         public long inviterId; //custom
         public int invitesCount; //custom
@@ -15721,6 +15722,7 @@ public class TLRPC {
             view_forum_as_messages = (flags2 & 64) != 0;
             restricted_sponsored = (flags2 & 2048) != 0;
             can_view_revenue = (flags2 & 4096) != 0;
+            can_view_stars_revenue = (flags2 & 32768) != 0;
             paid_media_allowed = (flags2 & 16384) != 0;
             id = stream.readInt64(exception);
             about = stream.readString(exception);
@@ -15883,6 +15885,7 @@ public class TLRPC {
             flags2 = restricted_sponsored ? (flags2 | 2048) : (flags2 &~ 2048);
             flags2 = can_view_revenue ? (flags2 | 4096) : (flags2 &~ 4096);
             flags2 = paid_media_allowed ? (flags2 | 16384) : (flags2 &~ 16384);
+            flags2 = can_view_stars_revenue ? (flags2 | 32768) : (flags2 &~ 32768);
             stream.writeInt32(flags2);
             stream.writeInt64(id);
             stream.writeString(about);
@@ -16030,6 +16033,7 @@ public class TLRPC {
             view_forum_as_messages = (flags2 & 64) != 0;
             restricted_sponsored = (flags2 & 2048) != 0;
             can_view_revenue = (flags2 & 4096) != 0;
+            can_view_stars_revenue = (flags2 & 32768) != 0;
             id = stream.readInt64(exception);
             about = stream.readString(exception);
             if ((flags & 1) != 0) {
@@ -16187,6 +16191,7 @@ public class TLRPC {
             flags2 = view_forum_as_messages ? (flags2 | 64) : (flags2 &~ 64);
             flags2 = restricted_sponsored ? (flags2 | 2048) : (flags2 &~ 2048);
             flags2 = can_view_revenue ? (flags2 | 4096) : (flags2 &~ 4096);
+            flags2 = can_view_stars_revenue ? (flags2 | 32768) : (flags2 &~ 32768);
             stream.writeInt32(flags2);
             stream.writeInt64(id);
             stream.writeString(about);

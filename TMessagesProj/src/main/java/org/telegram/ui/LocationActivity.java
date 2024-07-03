@@ -2698,7 +2698,6 @@ public class LocationActivity extends BaseFragment implements NotificationCenter
         } else if (id == NotificationCenter.liveLocationsChanged) {
             if (adapter != null) {
                 adapter.notifyDataSetChanged();
-                adapter.updateLiveLocationCell();
             }
         } else if (id == NotificationCenter.didReceiveNewMessages) {
             boolean scheduled = (Boolean) args[2];
@@ -2770,7 +2769,7 @@ public class LocationActivity extends BaseFragment implements NotificationCenter
                 }
             }
             if (updated && adapter != null) {
-                adapter.updateLiveLocations();
+                adapter.notifyDataSetChanged();
                 if (proximitySheet != null) {
                     proximitySheet.updateText(true, true);
                 }

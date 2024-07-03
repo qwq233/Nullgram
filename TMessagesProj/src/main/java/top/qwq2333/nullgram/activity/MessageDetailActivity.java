@@ -580,7 +580,9 @@ public class MessageDetailActivity extends BaseActivity implements NotificationC
             if (timestamp == 0x7ffffffe) {
                 return "When online";
             } else {
-                return timestamp + "\n" + LocaleController.formatString("formatDateAtTime", R.string.formatDateAtTime, LocaleController.getInstance().formatterYear.format(new Date(timestamp * 1000L)), LocaleController.getInstance().formatterDayWithSeconds.format(new Date(timestamp * 1000L)));
+                return timestamp + "\n" + LocaleController.formatString("formatDateAtTime", R.string.formatDateAtTime,
+                    LocaleController.getInstance().getFormatterYear().format(new Date(timestamp * 1000L)),
+                    LocaleController.getInstance().getFormatterDayWithSeconds().format(new Date(timestamp * 1000L)));
             }
         }
     }
