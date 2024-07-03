@@ -228,7 +228,7 @@
     <string name="hideAllTab">「すべてのチャット」タブを非表示</string>
     <string name="ignoreMutedCount">タブ内のミュート数を無視</string>
     <string name="disableSharePhoneWithContactByDefault">連絡先の追加時に電話番号を共有しない</string>
-    <string name="disableStickersAutoReorder">ステッカーバックの自動リローダーを無効化</string>
+    <string name="disableStickersAutoReorder">ステッカーパックの再読込みを無効化</string>
     <string name="autoDisableBuiltInProxy">内蔵のプロキシを自動で無効化</string>
     <string name="autoDisableBuiltInProxyDesc">NullgramがVPNのONを検出すると、内蔵のプロキシを自動的にOFFにします</string>
     <string name="NullgramWsDescription">Cloudflare経由でWebSocketを介して TELEOFFICIALに接続をします。\n提供: Nullgram</string>
