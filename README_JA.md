@@ -2,7 +2,7 @@
 
 [![Telegram](https://img.shields.io/static/v1?label=Telegram&message=@NullgramClient&color=0088cc)](https://t.me/NullgramClient)[![CI build](https://github.com/qwq233/Nullgram/actions/workflows/ci.yml/badge.svg?branch=master)](https://github.com/qwq233/Nullgram/actions/workflows/ci.yml/)[![Crowdin](https://badges.crowdin.net/nullgram/localized.svg)](https://crowdin.com/project/nullgram)
 
-[英語](README.md)[中国語](README_CN.md)
+[英語](README.md)  [中国語](README_CN.md)
 
 Nullgramは、[Telegram App for Android](https://play.google.com/store/apps/details?id=org.telegram.messenger)の公式ソースコードをベースとした **無料でオープンソース** なサードパーティー製のTelegramクライアントです。
 
