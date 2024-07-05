@@ -2,7 +2,7 @@
 
 [![Telegram](https://img.shields.io/static/v1?label=Telegram&message=@NullgramClient&color=0088cc)](https://t.me/NullgramClient)[![Debug build](https://github.com/qwq233/Nullgram/actions/workflows/debug.yml/badge.svg?branch=master)](https://github.com/qwq233/Nullgram/actions/workflows/debug.yml)[![Crowdin](https://badges.crowdin.net/nullgram/localized.svg)](https://crowdin.com/project/nullgram)
 
-[English](README.md)[日本語](README_JA.md)
+[English](README.md)  [日本語](README_JA.md)
 
 Nullgram 是一款**自由且开源**的Telegram第三方客户端，基于[Telegram Android](https://play.google.com/store/apps/details?id=org.telegram.messenger)制作。
 
