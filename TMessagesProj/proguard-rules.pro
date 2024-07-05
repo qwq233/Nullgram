@@ -38,7 +38,11 @@
 
 -keepnames class org.telegram.tgnet.TLRPC$TL_* {}
 # https://developers.google.com/ml-kit/known-issues#android_issues
+-keep class com.google.mlkit.nl.languageid.internal.ThickLanguageIdentifier { *; }
 -keep class com.google.mlkit.nl.languageid.internal.LanguageIdentificationJni { *; }
+-keepclasseswithmembernames class com.google.mlkit.nl.languageid.internal.LanguageIdentificationJni {
+  native <methods>;
+}
 
 # Constant folding for resource integers may mean that a resource passed to this method appears to be unused. Keep the method to prevent this from happening.
 -keep class com.google.android.exoplayer2.upstream.RawResourceDataSource {
@@ -119,11 +123,20 @@
  -keep,allowshrinking,allowobfuscation class org.telegram.ui.Components.Premium.GLIcon.ObjLoader {
      public <init>();
   }
+-keep class org.telegram.ui.Stars.StarsIntroActivity$* {
+    <init>();
+}
+-keep class org.telegram.ui.Stars.StarsIntroActivity$*$* {
+    <init>();
+}
+-keep class org.telegram.ui.Stories.recorder.StoryLinkSheet$WebpagePreviewView {
+    <init>();
+}
 -keepclassmembernames class top.qwq2333.nullgram.activity.DatacenterActivity$DatacenterCell { <fields>; }
 -keepclassmembernames class top.qwq2333.nullgram.activity.DatacenterActivity$DatacenterHeaderCell { <fields>; }
--keepclassmembernames class top.qwq2333.nullgram.activity.MessageDetailsActivity$TextDetailSimpleCell { <fields>; }
+-keepclassmembernames class top.qwq2333.nullgram.activity.MessageDetailActivity$TextDetailSimpleCell { <fields>; }
 -keepclassmembernames class top.qwq2333.nullgram.activity.PasscodeSettingActivity$AccountCell { <fields>; }
--keepclassmembernames class top.qwq2333.nullgram.activityChatSettingsActivity$StickerSizeCell { <fields>; }
+-keepclassmembernames class top.qwq2333.nullgram.activity.ChatSettingActivity$StickerSizeCell { <fields>; }
 
 -keepclassmembernames class androidx.core.widget.NestedScrollView {
     private android.widget.OverScroller mScroller;
