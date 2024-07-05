@@ -181,7 +181,7 @@
     <string name="UnknownSettings">不明な設定</string>
     <string name="PasscodeNeeded">最初にパスコードロックを有効にする必要があります</string>
     <string name="PasscodeShowInSettings">Nullgramの設定で表示</string>
-    <string name="PasscodeShowInSettingsAbout">非表示にすると、 **のみ** のリンクでこのページを開くことができます:</string>
+    <string name="PasscodeShowInSettingsAbout">非表示にすると **のみ** のリンクでこのページを開くことができます:</string>
     <string name="PasscodeSet">パスコードを設定する</string>
     <string name="PasscodeEdit">パスコードを変更</string>
     <string name="PasscodeRemove">パスコードを削除</string>
