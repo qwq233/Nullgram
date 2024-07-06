@@ -40,7 +40,7 @@ Android NDK rev.21とAndroid SDK 14が必要です。
 
 1. Telegramのソースコードを https://github.com/qwq233/Nullgram からダウンロードしてください。
 2. [こちら](https://ccache.dev/)からccacheをダウンロードして`PATH`にあることを確認してください。
-3. RTMessagesProj/configのrelease.keystoreを自分のものに置換してください。
+3. TMessagesProj/configのrelease.keystoreを自分のものに置換してください。
 4. gradle.properties内のRELEASE_KEY_PASSWORD、RELEASE_KEY_ALIAS、RELEASE_STORE_PASSWORDでrelease.keystoreにアクセスします。
 5. https://console.firebase.google.com/ にアクセスしてアプリIDを`top.qwq2333.nullgram`でAndroidアプリを1つ作成してfirebase messagingをONにし、google-services.jsonをダウンロードしてTMessagesProjと同じフォルダにコピーしてください。
 6. ターミナルを開いて`./gradlew assembleRelease`を実行してAPKをビルドしてください。
