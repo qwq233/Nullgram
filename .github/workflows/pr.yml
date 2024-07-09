@@ -66,9 +66,8 @@ jobs:
             df -h
             
             sudo apt-get install bison gcc make curl ninja-build ccache -y
-            echo "y" | sdkmanager --install "ndk;23.2.8568313" --sdk_root=${ANDROID_SDK_ROOT} &> /dev/null
+            echo "y" | sdkmanager --install "ndk;26.3.11579264" --sdk_root=${ANDROID_SDK_ROOT} &> /dev/null
             echo "sdk.dir=${ANDROID_HOME}" >> local.properties
-            echo "ndk.dir=${ANDROID_HOME}/ndk/23.2.8568313" >> local.properties
       - name: Debug Build
         run: |
           sed '/signingConfig =/d' TMessagesProj/build.gradle.kts > TMessagesProj/build.gradle.kts.tmp
