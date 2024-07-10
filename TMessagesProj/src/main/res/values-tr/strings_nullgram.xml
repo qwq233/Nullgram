@@ -343,4 +343,5 @@
     <string name="SaveToDownloadCount_few">%1$d dosya İndirilmek üzere kaydediliyor</string>
     <string name="SaveToDownloadCount_many"></string>
     <string name="SaveToDownloadCount_other"></string>
+    <string name="InvalidPattern">Invalid Pattern</string>
 </resources>
