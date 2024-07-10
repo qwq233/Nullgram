@@ -29052,15 +29052,16 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
                                 items.add(LocaleController.getString("SaveToDownloads", R.string.SaveToDownloads));
                                 options.add(OPTION_SAVE_TO_DOWNLOADS_OR_MUSIC);
                                 icons.add(R.drawable.msg_download);
-                                if (!noforwards) {
-                                    items.add(LocaleController.getString("ShareFile", R.string.ShareFile));
-                                    options.add(OPTION_SHARE);
-                                    icons.add(R.drawable.msg_shareout);
-                                }
+                                items.add(LocaleController.getString("ShareFile", R.string.ShareFile));
+                                options.add(OPTION_SHARE);
+                                icons.add(R.drawable.msg_shareout);
                             } else {
                                 items.add(LocaleController.getString("SaveToGallery", R.string.SaveToGallery));
                                 options.add(OPTION_SAVE_TO_GALLERY);
                                 icons.add(R.drawable.msg_gallery);
+                                items.add(LocaleController.getString("ShareFile", R.string.ShareFile));
+                                options.add(OPTION_SHARE);
+                                icons.add(R.drawable.msg_shareout);
                                 if (ConfigManager.getBooleanOrFalse(Defines.showCopyPhoto)) {
                                     items.add(LocaleController.getString("CopyPhoto", R.string.CopyPhoto));
                                     options.add(OPTION_COPY_PHOTO);
