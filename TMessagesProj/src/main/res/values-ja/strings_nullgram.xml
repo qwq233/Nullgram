@@ -344,4 +344,5 @@ https://t.me/NullgramClient</string>
     <string name="SaveToDownloadCount_few">%1$d ファイルをダウンロードに保存しています</string>
     <string name="SaveToDownloadCount_many">%1$d ファイルをダウンロードに保存しています</string>
     <string name="SaveToDownloadCount_other">%1$d ファイルをダウンロードに保存しています</string>
+    <string name="InvalidPattern">Invalid Pattern</string>
 </resources>
