@@ -7192,11 +7192,7 @@ public class DialogsActivity extends BaseFragment implements NotificationCenter.
     }
 
     private void showSearch(boolean show, boolean startFromDownloads, boolean animated, boolean forceNotOnlyDialogs) {
-        if (!show) {
-            // updateSpeedItem(false);
-        } else {
-            createSearchViewPager();
-        }
+        createSearchViewPager();
         if (initialDialogsType != 0 && initialDialogsType != 3) {
             animated = false;
         }

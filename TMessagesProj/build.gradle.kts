@@ -88,8 +88,6 @@ dependencies {
     compileOnly(libs.checker.compat.qual)
     implementation(libs.firebase.messaging)
     implementation(libs.firebase.config)
-    implementation(libs.firebase.datatransport)
-    implementation(libs.firebase.appindexing)
     implementation(libs.play.services.vision)
     implementation(libs.play.services.location)
     implementation(libs.play.services.wallet)

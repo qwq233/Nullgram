@@ -257,16 +257,16 @@ object Log {
         AnalyticsUtils.trackCrashes(throwable)
     }
 
-    private const val ENABLE_NATIVE_LOG = false
+    private const val ENABLE_NATIVE_LOG = true
 
     @JvmStatic
     fun nativeLog(level: Int, tag: String, msg: String) {
         if (!ENABLE_NATIVE_LOG) return
         when(level) {
-            0 -> d(tag, msg)
-            1 -> i(tag, msg)
-            2 -> w(tag, msg)
-            3 -> e(tag, msg)
+            0 -> Log.d("tgnet", msg)
+            1 -> Log.i("tgnet", msg)
+            2 -> Log.w("tgnet", msg)
+            3 -> Log.e("tgnet", msg)
         }
     }
 }

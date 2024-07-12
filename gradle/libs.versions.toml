@@ -9,9 +9,7 @@ exifinterface = "1.3.7"
 coreKtx = "1.13.1"
 fragment = "1.8.1"
 firebase = "33.1.1"
-firebaseAppindexing = "20.0.0"
 firebaseConfig = "22.0.0"
-firebaseDatatransport = "19.0.0"
 firebaseMessaging = "24.0.0"
 gms = "4.4.2"
 gson = "2.11.0"
@@ -31,7 +29,7 @@ osmdroidAndroid = "6.1.18"
 playServicesLocation = "21.3.0"
 playServicesVision = "20.1.3"
 playServicesWallet = "19.4.0"
-poet = "1.17.0"
+poet = "1.18.0"
 mlkitVision = "16.0.0-beta1"
 processPhoenix = "3.0.0"
 sharetarget = "1.2.0"
@@ -43,11 +41,9 @@ checker-compat-qual = { module = "org.checkerframework:checker-compat-qual", ver
 dynamicanimation = { module = "androidx.dynamicanimation:dynamicanimation", version.ref = "dynamicanimation" }
 exifinterface = { module = "androidx.exifinterface:exifinterface", version.ref = "exifinterface" }
 core-ktx = { module = "androidx.core:core-ktx", version.ref = "coreKtx" }
-firebase-appindexing = { module = "com.google.firebase:firebase-appindexing", version.ref = "firebaseAppindexing" }
 firebase-bom = { module = "com.google.firebase:firebase-bom", version.ref = "firebase" }
 firebase-config = { module = "com.google.firebase:firebase-config", version.ref = "firebaseConfig" }
 firebase-crashlytics-ndk = { module = "com.google.firebase:firebase-crashlytics-ndk" }
-firebase-datatransport = { module = "com.google.firebase:firebase-datatransport", version.ref = "firebaseDatatransport" }
 firebase-messaging = { module = "com.google.firebase:firebase-messaging", version.ref = "firebaseMessaging" }
 gson = { module = "com.google.code.gson:gson", version.ref = "gson" }
 guava = { module = "com.google.guava:guava", version.ref = "guava" }

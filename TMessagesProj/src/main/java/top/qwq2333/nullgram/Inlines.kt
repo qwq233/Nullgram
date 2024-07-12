@@ -64,7 +64,7 @@ internal inline fun createLinear(init: LinearLayout.LayoutParams.() -> Unit): Li
 }
 
 internal fun AccountInstance.cacheUsersAndChats(users: ArrayList<TLRPC.User>? = null, chats: ArrayList<TLRPC.Chat>? = null) {
-    this.messagesStorage?.putUsersAndChats(users, chats, false, true)
+    this.messagesStorage.putUsersAndChats(users, chats, false, true)
     this.messagesController.apply {
         putUsers(users, false)
         putChats(chats, false)

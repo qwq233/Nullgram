@@ -23,6 +23,7 @@ import android.content.Context
 import android.util.TypedValue
 import android.widget.LinearLayout
 import android.widget.TextView
+import android.widget.Toast
 import org.telegram.messenger.AndroidUtilities
 import org.telegram.messenger.LocaleController
 import org.telegram.messenger.R
@@ -33,6 +34,7 @@ import org.telegram.ui.Components.EditTextBoldCursor
 import org.telegram.ui.Components.LayoutHelper
 import top.qwq2333.gen.Config
 import top.qwq2333.nullgram.activity.ChatSettingActivity
+import java.util.regex.Pattern
 
 fun ChatSettingActivity.createMessageFilterSetter(context: Context, resourcesProvider: Theme.ResourcesProvider? = null) {
     AlertDialog.Builder(context, resourcesProvider).apply {
@@ -86,7 +88,13 @@ fun ChatSettingActivity.createMessageFilterSetter(context: Context, resourcesPro
 
         setNegativeButton(LocaleController.getString("Cancel", R.string.Cancel), null)
         setPositiveButton(LocaleController.getString("Save", R.string.Save)) { _, _ ->
-            Config.messageFilter = editText.text.toString()
+            runCatching {
+                if (!editText.text.isNullOrEmpty()) Pattern.compile(editText.text.toString())
+            }.onSuccess {
+                Config.messageFilter = editText.text.toString()
+            }.onFailure {
+                Toast.makeText(context, LocaleController.getString("InvalidPattern", R.string.InvalidPattern), Toast.LENGTH_SHORT).show()
+            }
         }
     }.show()
 }
