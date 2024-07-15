@@ -123,15 +123,7 @@
  -keep,allowshrinking,allowobfuscation class org.telegram.ui.Components.Premium.GLIcon.ObjLoader {
      public <init>();
   }
--keep class org.telegram.ui.Stars.StarsIntroActivity$* {
-    <init>();
-}
--keep class org.telegram.ui.Stars.StarsIntroActivity$*$* {
-    <init>();
-}
--keep class org.telegram.ui.Stories.recorder.StoryLinkSheet$WebpagePreviewView {
-    <init>();
-}
+-keep class * extends org.telegram.ui.Components.UItem$UItemFactory { public <init>(...); }
 -keepclassmembernames class top.qwq2333.nullgram.activity.DatacenterActivity$DatacenterCell { <fields>; }
 -keepclassmembernames class top.qwq2333.nullgram.activity.DatacenterActivity$DatacenterHeaderCell { <fields>; }
 -keepclassmembernames class top.qwq2333.nullgram.activity.MessageDetailActivity$TextDetailSimpleCell { <fields>; }
