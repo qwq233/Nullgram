@@ -69,8 +69,15 @@ jobs:
             sudo apt-get install bison gcc make curl ninja-build -y
             echo "y" | sdkmanager --install "ndk;26.3.11579264" --sdk_root=${ANDROID_SDK_ROOT} &> /dev/null
             echo "sdk.dir=${ANDROID_HOME}" >> local.properties
-
-
+      - name: Debug Build
+        run: |
+          echo -e "RELEASE_KEY_PASSWORD=${{ secrets.RELEASE_KEY_PASSWORD }}\nRELEASE_KEY_ALIAS=${{ secrets.RELEASE_KEY_ALIAS }}\nRELEASE_STORE_PASSWORD=${{ secrets.RELEASE_STORE_PASSWORD }}">>local.properties
+          cat > service_account_credentials.json << EOF
+          ${{ secrets.ANDROID_PUBLISHER_CREDENTIALS }}"
+          EOF
+          ./gradlew :TMessagesProj:assembleRelease :TMessagesProj:uploadCrashlyticsSymbolFileRelease
+          echo "APK_FILE=$(find TMessagesProj/build/outputs/apk -name '*arm64*.apk')" >> $GITHUB_ENV
+          echo "APK_FILE_ARMV7=$(find TMessagesProj/build/outputs/apk -name '*arm32*.apk')" >> $GITHUB_ENV
       - uses: actions/upload-artifact@v2
         name: Upload apk (arm64-v8a)
         with:
@@ -84,8 +91,62 @@ jobs:
 
 
 
- 
-
+  play-build:
+    name: Gradle Build (play store)
+    runs-on: ubuntu-latest
+    if: ${{ github.event_name != 'pull_request' && success() && github.ref == 'refs/heads/master' }}
+    env:
+      CCACHE_COMPILERCHECK: "%compiler% -dumpmachine; %compiler% -dumpversion"
+      CCACHE_NOHASHDIR: "true"
+      CCACHE_MAXSIZE: "5G"
+      CCACHE_HARDLINK: "true"
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          submodules: 'recursive'
+          fetch-depth: 0
+      - name: Setup cmake
+        uses: jwlawson/actions-setup-cmake@v1.12
+        with:
+          cmake-version: '3.22.1'
+      - name: Setup Java
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+          cache: 'gradle'
+      - name: Setup Gradle
+        uses: gradle/gradle-build-action@v2.4.2
+      - name: Set up ccache
+        uses: hendrikmuhs/ccache-action@v1.2
+        with:
+          key: ccache
+          restore-keys: ccache
+      - name: Setup Android SDK Tools
+        uses: android-actions/setup-android@v2
+      - name: Prepare Environment
+        run: |
+            echo "Removing large packages"
+            sudo apt-get remove -y '^dotnet-.*' aspnetcore-targeting-pack-6.0 aspnetcore-targeting-pack-7.0
+            sudo apt-get remove -y '^llvm-.*'
+            sudo apt-get remove -y 'php.*'
+            sudo apt-get remove -y '^mongodb-.*'
+            sudo apt-get remove -y '^mysql-.*'
+            sudo apt-get remove -y azure-cli google-chrome-stable firefox powershell mono-devel libgl1-mesa-dri
+            sudo apt-get autoremove -y
+            sudo apt-get clean
+            echo "Removing large directories"
+            sudo rm -rf /usr/share/dotnet/
+            sudo rm -rf /usr/local/graalvm/
+            sudo rm -rf /usr/local/.ghcup/
+            sudo rm -rf /usr/local/share/powershell
+            sudo rm -rf /usr/local/share/chromium
+            sudo rm -rf /usr/local/lib/node_modules
+            df -h
+            
+            sudo apt-get install bison gcc make curl ninja-build -y
+            echo "y" | sdkmanager --install "ndk;26.3.11579264" --sdk_root=${ANDROID_SDK_ROOT} &> /dev/null
+            echo "sdk.dir=${ANDROID_HOME}" >> local.properties
       - name: Debug Build
         run: |
           echo -e "RELEASE_KEY_PASSWORD=${{ secrets.RELEASE_KEY_PASSWORD }}\nRELEASE_KEY_ALIAS=${{ secrets.RELEASE_KEY_ALIAS }}\nRELEASE_STORE_PASSWORD=${{ secrets.RELEASE_STORE_PASSWORD }}">>local.properties
@@ -93,8 +154,6 @@ jobs:
           ${{ secrets.ANDROID_PUBLISHER_CREDENTIALS }}"
           EOF
           ./gradlew :TMessagesProj:publishPlayBundle
-
-
           
   upload:
     name: Upload Release
