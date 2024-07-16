@@ -2,7 +2,7 @@
 
 [![Telegram](https://img.shields.io/static/v1?label=Telegram&message=@NullgramClient&color=0088cc)](https://t.me/NullgramClient)  [![CI build](https://github.com/qwq233/Nullgram/actions/workflows/ci.yml/badge.svg?branch=master)](https://github.com/qwq233/Nullgram/actions/workflows/ci.yml/)  [![Crowdin](https://badges.crowdin.net/nullgram/localized.svg)](https://crowdin.com/project/nullgram)
 
-[英語](README.md)  [中国語](README_CN.md)
+[English](README.md)  [中文](README_CN.md)
 
 Nullgramは、[Telegram App for Android](https://play.google.com/store/apps/details?id=org.telegram.messenger)の公式ソースコードをベースとした **無料でオープンソース** なサードパーティー製のTelegramクライアントです。
 
@@ -18,7 +18,7 @@ Nullgramの名前には、悪意のある物は存在しないことを表す意
 ### 新しい機能を追加したい
 素晴らしいですね!
 
-まずは開発ドキュメントを完全に理解していることを確認してください。
+まずは[開発ドキュメント](docs/CONTRIBUTING.md)を完全に理解していることを確認してください。
 もしも未読の場合はドキュメントをお読みください。**必ず読んでください。**
 
 その後に新規のPull Requestを作成してください。
@@ -40,7 +40,7 @@ Android NDK rev.21とAndroid SDK 14が必要です。
 
 1. Telegramのソースコードを https://github.com/qwq233/Nullgram からダウンロードしてください。
 2. [こちら](https://ccache.dev/)からccacheをダウンロードして`PATH`にあることを確認してください。
-3. RTMessagesProj/configのrelease.keystoreを自分のものに置換してください。
+3. TMessagesProj/configのrelease.keystoreを自分のものに置換してください。
 4. gradle.properties内のRELEASE_KEY_PASSWORD、RELEASE_KEY_ALIAS、RELEASE_STORE_PASSWORDでrelease.keystoreにアクセスします。
 5. https://console.firebase.google.com/ にアクセスしてアプリIDを`top.qwq2333.nullgram`でAndroidアプリを1つ作成してfirebase messagingをONにし、google-services.jsonをダウンロードしてTMessagesProjと同じフォルダにコピーしてください。
 6. ターミナルを開いて`./gradlew assembleRelease`を実行してAPKをビルドしてください。
