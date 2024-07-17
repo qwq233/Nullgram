@@ -40,6 +40,7 @@ plugins {
 
 configurations {
     all {
+        exclude(group = "com.google.firebase", module = "firebase-core")
         exclude(group = "androidx.recyclerview", module = "recyclerview")
     }
 }
@@ -74,7 +75,6 @@ cargo {
 dependencies {
     implementation(platform(libs.firebase.bom))
     implementation(libs.firebase.crashlytics.ndk)
-    implementation(libs.firebase.analytics)
 
     implementation(libs.core.ktx)
     implementation(libs.palette.ktx)

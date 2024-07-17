@@ -20,21 +20,15 @@ package top.qwq2333.nullgram.utils
 
 import android.app.Application
 import android.util.Base64
-import com.google.firebase.analytics.FirebaseAnalytics
-import com.google.firebase.analytics.ktx.analytics
 import com.google.firebase.crashlytics.FirebaseCrashlytics
-import com.google.firebase.ktx.Firebase
 import org.telegram.messenger.BuildConfig
 import org.telegram.messenger.UserConfig
-import top.qwq2333.gen.Config
 import java.util.Arrays
 
 
 object AnalyticsUtils {
     private var isInit = false
     private val isEnabled = BuildConfig.APPLICATION_ID != Base64.decode("dG9wLnF3cTIzMzMubnVsbGdyYW0=", Base64.DEFAULT).contentToString()
-    private lateinit var firebaseAnalytics: FirebaseAnalytics
-    private lateinit var crashlytics: FirebaseCrashlytics
 
     @JvmStatic
     fun start(app: Application) {
@@ -43,27 +37,18 @@ object AnalyticsUtils {
 
         if (isInit && UserConfig.getActivatedAccountsCount() < 1) return // stop analytics if no user login
         try {
-            firebaseAnalytics = Firebase.analytics
-            crashlytics = FirebaseCrashlytics.getInstance()
             val currentUser = UserConfig.getInstance(UserConfig.selectedAccount)
             Log.d("FirebaseCrashlytics start: set user id: " + currentUser.getClientUserId())
-            currentUser.getClientUserId().toString().run {
-                crashlytics.setUserId(this)
-                firebaseAnalytics.setUserId(this)
-            }
+            val crashlytics = FirebaseCrashlytics.getInstance()
+            crashlytics.setUserId(currentUser.getClientUserId().toString())
             crashlytics.setCustomKey("Build Time", BuildConfig.BUILD_TIME)
-            for (i in 0..UserConfig.MAX_ACCOUNT_COUNT) {
+            for (i in 0 ..  UserConfig.MAX_ACCOUNT_COUNT) {
                 UserConfig.getInstance(i)?.let {
                     if (!it.isClientActivated) return@let
                     crashlytics.setCustomKey("User $i", it.getClientUserId().toString())
                 }
             }
-            Config.showHiddenSettings.run {
-                firebaseAnalytics.setUserProperty("isEnabledHiddenFeature", this.toString())
-                crashlytics.setCustomKey("isEnabledHiddenFeature", this)
-            }
-        } catch (ignored: Exception) {
-        }
+        } catch (ignored: Exception) { }
 
         if (isEnabled) {
             isInit = true
@@ -76,15 +61,12 @@ object AnalyticsUtils {
     fun setUserId(id: Long) {
         if (isEnabled) return
         Log.d("FirebaseCrashlytics reset: set user id: $id")
-        id.toString().run {
-            crashlytics.setUserId(this)
-            firebaseAnalytics.setUserId(this)
-        }
+        FirebaseCrashlytics.getInstance().setUserId(id.toString())
     }
 
     @JvmStatic
     fun trackCrashes(thr: Throwable) {
         if (isEnabled) return
-        crashlytics.recordException(thr)
+        FirebaseCrashlytics.getInstance().recordException(thr)
     }
 }

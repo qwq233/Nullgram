@@ -40,7 +40,6 @@ dynamicanimation = { module = "androidx.dynamicanimation:dynamicanimation", vers
 exifinterface = { module = "androidx.exifinterface:exifinterface", version.ref = "exifinterface" }
 core-ktx = { module = "androidx.core:core-ktx", version.ref = "coreKtx" }
 firebase-bom = { module = "com.google.firebase:firebase-bom", version.ref = "firebase" }
-firebase-analytics = { module = "com.google.firebase:firebase-analytics" }
 firebase-config = { module = "com.google.firebase:firebase-config" }
 firebase-crashlytics-ndk = { module = "com.google.firebase:firebase-crashlytics-ndk" }
 firebase-messaging = { module = "com.google.firebase:firebase-messaging" }
