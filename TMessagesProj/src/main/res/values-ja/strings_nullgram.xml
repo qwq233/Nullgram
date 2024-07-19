@@ -144,7 +144,7 @@
     <string name="TestBackend">バックエンドをテスト</string>
     <string name="notAllowedWhenChannelAliasIsEnabled">チャンネルのエイリアスが有効化されている場合は無効化できません!</string>
     <string name="unreadBadgeOnBackButton">戻るボタンの未読バッジ</string>
-    <string name="keepFormatting">コピー時にテキストの書式を維持</string>
+    <string name="keepFormatting">コピー時にテキストの書式を保持</string>
     <string name="showForwardDate">転送されたメッセージの日付を表示</string>
     <string name="enchantAudio">音質を向上させる</string>
     <string name="enchantAudioDetails">この機能はAndroidのオーディオシステムでサポートされています。\n音質に大きな変化があるかは保証をしません。</string>
@@ -202,7 +202,7 @@
     <string name="premium">プレミアム</string>
     <string name="fastSpeedUpload">アップロード速度を高速化する</string>
     <string name="showTabsOnForward">転送時にタブを表示</string>
-    <string name="TabTitleType">タブに表示する</string>
+    <string name="TabTitleType">タブの表示</string>
     <string name="TabTitleTypeTip">アイコンはTELEOFFICIALにクラウドで同期されます。</string>
     <string name="TabTitleTypeText">タイトル</string>
     <string name="TabTitleTypeIcon">アイコン</string>
@@ -228,7 +228,7 @@
     <string name="hideAllTab">「すべてのチャット」タブを非表示</string>
     <string name="ignoreMutedCount">タブ内のミュート数を無視</string>
     <string name="disableSharePhoneWithContactByDefault">連絡先の追加時に電話番号を共有しない</string>
-    <string name="disableStickersAutoReorder">ステッカーパックの再読込みを無効化</string>
+    <string name="disableStickersAutoReorder">ステッカーの再読込みを無効化</string>
     <string name="autoDisableBuiltInProxy">内蔵のプロキシを自動で無効化</string>
     <string name="autoDisableBuiltInProxyDesc">NullgramがVPNのONを検出すると、内蔵のプロキシを自動的にOFFにします。</string>
     <string name="NullgramWsDescription">Cloudflare経由でWebSocketを介して TELEOFFICIALに接続をします。\n提供: Nullgram</string>
@@ -311,7 +311,7 @@
     <string name="enablePanguOnSending">送信時にPanguを有効化</string>
     <string name="panguInfo">可読性を向上させるために文字間を挿入します。CJK (中国語、日本語、韓国語)、半角英数、記号に自動的に空白を挿入することができます。</string>
     <string name="showExactTime">時間を秒単位で表示</string>
-    <string name="keepOnlineStatusAs">オンラインステータスを維持</string>
+    <string name="keepOnlineStatusAs">オンラインステータスを保持</string>
     <string name="Offline">オフライン</string>
     <string name="Special">スペシャル</string>
     <string name="BotLoginMessage">**@BotFather** から取得したBotトークンを入力してください。</string>
