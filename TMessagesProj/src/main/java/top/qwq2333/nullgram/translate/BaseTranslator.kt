@@ -181,7 +181,7 @@ abstract class BaseTranslator {
                 val question = if (translatedQuestion.error == null) {
                     if (TranslateHelper.showOriginal) {
                         """
-                        |${source.question}
+                        |${source.question.text}
                         |
                         |--------
                         |
@@ -202,7 +202,7 @@ abstract class BaseTranslator {
                     val translatedPollAnswer = TLRPC.TL_pollAnswer()
                     val text = if (translatedAnswer.error == null) {
                         if (TranslateHelper.showOriginal) {
-                            "${it.text} | ${translatedAnswer.result!!}"
+                            "${it.text.text} | ${translatedAnswer.result!!}"
                         } else {
                             translatedAnswer.result
                         }
