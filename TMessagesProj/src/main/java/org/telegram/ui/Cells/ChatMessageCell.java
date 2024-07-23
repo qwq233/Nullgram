@@ -2602,7 +2602,7 @@ public class ChatMessageCell extends BaseCell implements SeekBar.SeekBarDelegate
                     } else if (!currentMessageObject.preview) {
                         Log.d("cell", "trigger !currentMessageObject.preview");
                         TLRPC.WebPage webPage = MessageObject.getMedia(currentMessageObject.messageOwner).webpage;
-                        if (webPage != null && webPage.photo != null) {
+                        if (webPage != null && webPage.photo != null && (lastTouchX < photoImage.getCenterX() + photoImage.getImageWidth() / 2 && lastTouchX > photoImage.getCenterX() - photoImage.getImageWidth() / 2)) {
                             if (delegate != null) {
                                 delegate.didPressImage(this, lastTouchX, lastTouchY);
                             }
