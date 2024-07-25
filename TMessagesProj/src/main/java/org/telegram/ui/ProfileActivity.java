@@ -325,7 +325,8 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
     private final static int PHONE_OPTION_CALL = 0,
         PHONE_OPTION_COPY = 1,
         PHONE_OPTION_TELEGRAM_CALL = 2,
-        PHONE_OPTION_TELEGRAM_VIDEO_CALL = 3;
+        PHONE_OPTION_TELEGRAM_VIDEO_CALL = 3,
+        PHONE_OPTION_HIDE = 4;
 
     private RecyclerListView listView;
     private RecyclerListView searchListView;
@@ -6312,6 +6313,9 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
             icons.add(R.drawable.msg_copy);
             items.add(LocaleController.getString("Copy", R.string.Copy));
             actions.add(PHONE_OPTION_COPY);
+            icons.add(R.drawable.msg_block2);
+            items.add(LocaleController.getString("Hide", R.string.Hide));
+            actions.add(PHONE_OPTION_HIDE);
 
             AtomicReference<ActionBarPopupWindow> popupWindowRef = new AtomicReference<>();
             ActionBarPopupWindow.ActionBarPopupWindowLayout popupLayout = new ActionBarPopupWindow.ActionBarPopupWindowLayout(getContext(), R.drawable.popup_fixed_alert, resourcesProvider) {
@@ -6363,6 +6367,10 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
                                 return;
                             }
                             VoIPHelper.startCall(user, action == PHONE_OPTION_TELEGRAM_VIDEO_CALL, userInfo != null && userInfo.video_calls_available, getParentActivity(), userInfo, getAccountInstance());
+                            break;
+                        case PHONE_OPTION_HIDE:
+                            hidePhone = true;
+                            updateListAnimated(false);
                             break;
                     }
                 });
@@ -7866,6 +7874,11 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
                 if (sharedMediaLayout != null) {
                     sharedMediaLayout.setChatInfo(chatInfo);
                 }
+
+                if (chatFull.stats_dc != 0) {
+                    updateIdText(false, true);
+                }
+
                 if (chatInfo != null && (chatInfo.call == null && !hasVoiceChatItem || chatInfo.call != null && hasVoiceChatItem)) {
                     createActionBarMenu(false);
                 }
@@ -9027,7 +9040,7 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
                 infoStartRow = rowCount;
                 infoHeaderRow = rowCount++;
                 if (!isBot && (hasPhone || !hasInfo)) {
-                    phoneRow = rowCount++;
+                    phoneRow = hidePhone ? -1 : rowCount++;
                 }
                 if (userInfo != null && !TextUtils.isEmpty(userInfo.about)) {
                     userInfoRow = rowCount++;
