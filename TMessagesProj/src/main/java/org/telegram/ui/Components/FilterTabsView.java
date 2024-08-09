@@ -130,6 +130,9 @@ public class FilterTabsView extends FrameLayout {
         public boolean isLocked;
 
         public Tab(int i, String t, String e) {
+            if (t == null) {
+                t = "";
+            }
             id = i;
             title = Config.getTabMenu() != Defines.tabMenuIcon ? t : "";
             realTitle = t;
