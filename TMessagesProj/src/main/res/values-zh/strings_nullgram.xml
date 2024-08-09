@@ -344,4 +344,5 @@
     <string name="SaveToDownloadCount_many">正在保存 %1$d 个文件至下载目录</string>
     <string name="SaveToDownloadCount_other">正在保存 %1$d 个文件至下载目录</string>
     <string name="InvalidPattern">Invalid Pattern</string>
+    <string name="sendLargePhoto">Send large photo</string>
 </resources>
