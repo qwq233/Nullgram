@@ -2676,7 +2676,7 @@ public class AndroidUtilities {
 
     public static int getPhotoSize() {
         if (photoSize == null) {
-            photoSize = 1280;
+            photoSize = SharedConfig.deviceIsHigh() || Config.sendLargePhoto ? 2560 : 1280;
         }
         return photoSize;
     }

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019-2023 qwq233 <qwq233@qwq2333.top>
+ * Copyright (C) 2019-2024 qwq233 <qwq233@qwq2333.top>
  * https://github.com/qwq233/Nullgram
  *
  * This program is free software; you can redistribute it and/or
@@ -103,6 +103,7 @@ object Defines {
     @BooleanConfig const val hideTitle = "hideTitle"
     @BooleanConfig const val showHideTitle = "showHideTitle"
     @StringConfig("") const val messageFilter = "messageFilter1"
+    @BooleanConfig const val sendLargePhoto = "sendLargePhoto"
 
     /**
      * 0 default 1 online 2 offline
