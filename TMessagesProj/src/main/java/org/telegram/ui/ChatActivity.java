@@ -9997,7 +9997,9 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
             searchFilterButton.setImageResource(R.drawable.menu_tag_filter);
             searchFilterButton.setColorFilter(new PorterDuffColorFilter(getThemedColor(Theme.key_chat_searchPanelIcons), PorterDuff.Mode.MULTIPLY));
             searchFilterButton.setBackground(Theme.createSelectorDrawable(getThemedColor(Theme.key_actionBarActionModeDefaultSelector), 1));
-            searchContainer.addView(searchFilterButton, LayoutHelper.createFrame(48, 48, Gravity.LEFT | Gravity.TOP, searchUserButton != null ? (96 - 2.66f) : 48, 0, 0, 0));
+            searchContainer.addView(searchFilterButton, LayoutHelper.createFrame(48, 48, Gravity.LEFT | Gravity.TOP,
+                (searchUserButton != null && searchUserButton.getVisibility() != View.GONE) ? (96 - 2.66f) : 48, 0, 0,
+                0));
             searchFilterButton.setOnClickListener(view -> {
                 if (getParentActivity() == null) {
                     return;
@@ -22069,14 +22071,6 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
                 if (jumpToMessage) {
                     int messageId = (Integer) args[1];
                     long did = (Long) args[3];
-
-                    TLRPC.MessagesFilter searchFilter;
-                    if (args.length > 8) {
-                        searchFilter = (TLRPC.MessagesFilter) args[8];
-                    } else {
-                        searchFilter = null;
-                    }
-
                     if (searchingReaction != null && searchingFiltered) {
                         if (chatAdapter.isFiltered) {
                             updateFilteredMessages(true);
@@ -32567,6 +32561,9 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
         }
         if (searchUserButton != null) {
             searchUserButton.setVisibility(View.GONE);
+        }
+        if (searchFilterButton != null) {
+            searchFilterButton.setVisibility(View.GONE);
         }
         if (ChatObject.isChannelAndNotMegaGroup(currentChat) && ChatObject.isPublic(currentChat) && searchingHashtag != null) {
             defaultSearchPage = 2;
