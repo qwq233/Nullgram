@@ -27,7 +27,6 @@
     <string name="ViewSourceCode">Kaynak Kodunu Görüntüle</string>
     <string name="Categories">Kategoriler</string>
     <string name="About">Hakkında</string>
-    <string name="OfficialChannelName">NullgramClient</string>
     <string name="noAvailableUpdate">Güncelleme Yok.</string>
     <string name="updateAvailable">Yeni Güncelleştirme Mevcut</string>
     <string name="variantsNotFound">Sürüm varyantları otomatik olarak eşleşmiyor.\nLütfen GitHub\'dan manuel olarak indirin.</string>
@@ -113,7 +112,6 @@
     <string name="customDoubleTap">Özel Çift Dokunma</string>
     <string name="OpenSource">Açık Kaynak Yazılım Lisansları</string>
     <string name="disableCustomAPI">Özel API kullanmayın</string>
-    <string name="useOfficialAPI">TELERESMİ</string>
     <string name="customAPI">Özel API</string>
     <string name="useCustomApiNotice">Özel api\'yi kullanarak oturum açın, kaydolamıyorsanız veya oturum açamıyorsanız bu yardımcı olabilir.\n\nNot: Yayın sürümünü kullanıyorsanız fcm çalışmayacaktır.</string>
     <string name="useCustomAPI">Manuel giriş</string>
@@ -191,7 +189,7 @@
     <string name="PasscodeAllowPanic">Panik koduyla çıkış yapın</string>
     <string name="PasscodeAbout">Her hesap için farklı şifreler belirleyin ve ilgili şifreyi girerek bunlar arasında geçiş yapın.</string>
     <string name="PasscodePanicCode">Panik şifrekod</string>
-    <string name="PasscodePanicCodeSet">Panşk kodu belirle</string>
+    <string name="PasscodePanicCodeSet">Panik kodunu belirle</string>
     <string name="PasscodePanicCodeEdit">Panik kodunu yenile</string>
     <string name="disableSendTyping">Gönderirken yazıyoru devre dışı bırak</string>
     <string name="PasscodePanicCodeRemove">Panik kodunu kapat</string>
@@ -345,4 +343,6 @@
     <string name="SaveToDownloadCount_few">%1$d dosya İndirilmek üzere kaydediliyor</string>
     <string name="SaveToDownloadCount_many"></string>
     <string name="SaveToDownloadCount_other"></string>
+    <string name="InvalidPattern">Invalid Pattern</string>
+    <string name="sendLargePhoto">Send large photo</string>
 </resources>

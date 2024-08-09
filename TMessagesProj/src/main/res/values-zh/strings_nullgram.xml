@@ -27,7 +27,6 @@
     <string name="ViewSourceCode">查看源代码</string>
     <string name="Categories">类别</string>
     <string name="About">关于</string>
-    <string name="OfficialChannelName">NullgramClient</string>
     <string name="noAvailableUpdate">无可用更新</string>
     <string name="updateAvailable">新更新可用</string>
     <string name="variantsNotFound">发布变量无法自动匹配。\n请从GitHub 手动下载。</string>
@@ -113,7 +112,6 @@
     <string name="customDoubleTap">自定义双击模式</string>
     <string name="OpenSource">开源软件许可协议</string>
     <string name="disableCustomAPI">不使用自定义 API</string>
-    <string name="useOfficialAPI">TELEOFFICIAL</string>
     <string name="customAPI">自定义 API</string>
     <string name="useCustomApiNotice">使用自定义api登录，如果您不能注册或登录，这可能会有所帮助。\n\n注意：fcm 将无法工作。</string>
     <string name="useCustomAPI">手动输入</string>
@@ -345,4 +343,6 @@
     <string name="SaveToDownloadCount_few">正在保存 %1$d 个文件至下载目录</string>
     <string name="SaveToDownloadCount_many">正在保存 %1$d 个文件至下载目录</string>
     <string name="SaveToDownloadCount_other">正在保存 %1$d 个文件至下载目录</string>
+    <string name="InvalidPattern">Invalid Pattern</string>
+    <string name="sendLargePhoto">Send large photo</string>
 </resources>

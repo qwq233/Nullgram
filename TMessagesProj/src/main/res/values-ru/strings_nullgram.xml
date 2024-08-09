@@ -27,7 +27,6 @@
     <string name="ViewSourceCode">Показать исходный код</string>
     <string name="Categories">Категории</string>
     <string name="About">О нас</string>
-    <string name="OfficialChannelName">NullgramClient</string>
     <string name="noAvailableUpdate">Новые обновления отсутствуют.</string>
     <string name="updateAvailable">Доступно обновление</string>
     <string name="variantsNotFound">Версия приложения не совпадает с последней \nПожалуйста скачайте вручную с GitHub.</string>
@@ -113,7 +112,6 @@
     <string name="customDoubleTap">Пользовательский двойной тап</string>
     <string name="OpenSource">Лицензии на ПО с открытым исходным кодом</string>
     <string name="disableCustomAPI">Не использовать пользовательский API</string>
-    <string name="useOfficialAPI">TELEOFFICIAL</string>
     <string name="customAPI">Пользовательский API</string>
     <string name="useCustomApiNotice">Войдите в систему, используя пользовательский api, если вы не можете зарегистрироваться или войти, это может помочь.\n
 \nПримечание: FCM не будет работать, если вы используете публичную версию.</string>
@@ -346,4 +344,6 @@
     <string name="SaveToDownloadCount_few">Saving %1$d files to Download</string>
     <string name="SaveToDownloadCount_many">Saving %1$d files to Download</string>
     <string name="SaveToDownloadCount_other">Saving %1$d files to Download</string>
+    <string name="InvalidPattern">Invalid Pattern</string>
+    <string name="sendLargePhoto">Send large photo</string>
 </resources>
