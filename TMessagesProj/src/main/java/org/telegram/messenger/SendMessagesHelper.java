@@ -7186,7 +7186,11 @@ public class SendMessagesHelper extends BaseController implements NotificationCe
     }
 
     public TLRPC.TL_photo generatePhotoSizes(TLRPC.TL_photo photo, String path, Uri imageUri) {
-        int maxSize = Config.sendLargePhoto ? 2560 : 1280;
+        return generatePhotoSizes(null, path, imageUri, false);
+    }
+
+    public TLRPC.TL_photo generatePhotoSizes(TLRPC.TL_photo photo, String path, Uri imageUri, boolean isSecretChat) {
+        int maxSize = Config.sendLargePhoto && !isSecretChat ? AndroidUtilities.getPhotoSize() : 1280;
         Bitmap bitmap = ImageLoader.loadBitmap(path, imageUri, maxSize, maxSize, true);
         if (bitmap == null && Config.sendLargePhoto) {
             bitmap = ImageLoader.loadBitmap(path, imageUri, 1280, 1280, true);
@@ -8404,7 +8408,7 @@ public class SendMessagesHelper extends BaseController implements NotificationCe
                         } else {
                             worker.sync = new CountDownLatch(1);
                             mediaSendThreadPool.execute(() -> {
-                                worker.photo = accountInstance.getSendMessagesHelper().generatePhotoSizes(info.path, info.uri);
+                                worker.photo = accountInstance.getSendMessagesHelper().generatePhotoSizes(null, info.path, info.uri, isEncrypted);
                                 if (isEncrypted && info.canDeleteAfter) {
                                     new File(info.path).delete();
                                 }
@@ -8562,7 +8566,7 @@ public class SendMessagesHelper extends BaseController implements NotificationCe
                             String md5 = Utilities.MD5(info.searchImage.imageUrl) + "." + ImageLoader.getHttpUrlExtension(info.searchImage.imageUrl, "jpg");
                             File cacheFile = new File(FileLoader.getDirectory(FileLoader.MEDIA_DIR_CACHE), md5);
                             if (cacheFile.exists() && cacheFile.length() != 0) {
-                                photo = accountInstance.getSendMessagesHelper().generatePhotoSizes(cacheFile.toString(), null);
+                                photo = accountInstance.getSendMessagesHelper().generatePhotoSizes(null, cacheFile.toString(), null, isEncrypted);
                                 if (photo != null) {
                                     needDownloadHttp = false;
                                 }
@@ -8571,7 +8575,7 @@ public class SendMessagesHelper extends BaseController implements NotificationCe
                                 md5 = Utilities.MD5(info.searchImage.thumbUrl) + "." + ImageLoader.getHttpUrlExtension(info.searchImage.thumbUrl, "jpg");
                                 cacheFile = new File(FileLoader.getDirectory(FileLoader.MEDIA_DIR_CACHE), md5);
                                 if (cacheFile.exists()) {
-                                    photo = accountInstance.getSendMessagesHelper().generatePhotoSizes(cacheFile.toString(), null);
+                                    photo = accountInstance.getSendMessagesHelper().generatePhotoSizes(null, cacheFile.toString(), null, isEncrypted);
                                 }
                                 if (photo == null) {
                                     photo = new TLRPC.TL_photo();
@@ -8961,7 +8965,7 @@ public class SendMessagesHelper extends BaseController implements NotificationCe
                                     ensureMediaThumbExists(accountInstance, isEncrypted, photo, info.path, info.uri, 0);
                                 }
                                 if (photo == null) {
-                                    photo = accountInstance.getSendMessagesHelper().generatePhotoSizes(info.path, info.uri);
+                                    photo = accountInstance.getSendMessagesHelper().generatePhotoSizes(null, info.path, info.uri, isEncrypted);
                                     if (isEncrypted && info.canDeleteAfter) {
                                         new File(info.path).delete();
                                     }
