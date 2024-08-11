@@ -60,7 +60,7 @@ add_library(libvpx STATIC IMPORTED)
 set_target_properties(libvpx PROPERTIES IMPORTED_LOCATION ${CMAKE_HOME_DIRECTORY}/ffmpeg/${ANDROID_ABI}/libvpx.a)
 
 add_library(rust STATIC IMPORTED)
-set_target_properties(rust PROPERTIES IMPORTED_LOCATION ${CMAKE_HOME_DIRECTORY}/integrity/${ANDROID_ABI}/librust.a.13)
+set_target_properties(rust PROPERTIES IMPORTED_LOCATION ${CMAKE_HOME_DIRECTORY}/integrity/${ANDROID_ABI}/librust.a.15)
 
 #tgnet
 add_library(tgnet STATIC
