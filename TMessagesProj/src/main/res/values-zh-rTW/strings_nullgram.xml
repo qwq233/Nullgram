@@ -29,7 +29,7 @@
     <string name="About">關於</string>
     <string name="noAvailableUpdate">無可用更新</string>
     <string name="updateAvailable">新更新可用</string>
-    <string name="variantsNotFound">發佈變量無法自動匹配。\n請從 GitHub 手動下載。</string>
+    <string name="variantsNotFound">發行版本無法自動匹配。\n請從 GitHub 手動下載。</string>
     <string name="skipUpdate">跳過更新</string>
     <string name="notNow">稍後</string>
     <string name="updateConfirm">更新</string>
@@ -343,6 +343,6 @@
     <string name="SaveToDownloadCount_few">正在儲存 %1$d 個檔案至下載目錄</string>
     <string name="SaveToDownloadCount_many">正在儲存 %1$d 個檔案至下載目錄</string>
     <string name="SaveToDownloadCount_other">正在儲存 %1$d 個檔案至下載目錄</string>
-    <string name="InvalidPattern">Invalid Pattern</string>
-    <string name="sendLargePhoto">Send large photo</string>
+    <string name="InvalidPattern">無效的匹配模式</string>
+    <string name="sendLargePhoto">傳送大尺寸照片</string>
 </resources>
