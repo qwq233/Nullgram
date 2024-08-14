@@ -1,3 +1,22 @@
+/*
+ * Copyright (C) 2019-2024 qwq233 <qwq233@qwq2333.top>
+ * https://github.com/qwq233/Nullgram
+ *
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation; either version 2
+ * of the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along with this software.
+ *  If not, see
+ * <https://www.gnu.org/licenses/>
+ */
+
 package org.telegram.ui.Stories.recorder;
 
 import static org.telegram.messenger.AndroidUtilities.dp;
@@ -14,7 +33,6 @@ import android.text.SpannableString;
 import android.text.Spanned;
 import android.text.TextUtils;
 import android.text.TextWatcher;
-import android.util.Log;
 import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.View;
@@ -61,6 +79,7 @@ public class StoryLinkSheet extends BottomSheetWithRecyclerListView implements N
     private ButtonWithCounterView button;
 
     private boolean ignoreUrlEdit;
+    private boolean needRemoveDefPrefix;
 
     private Utilities.Callback<LinkPreview.WebPagePreview> whenDone;
 
@@ -122,14 +141,37 @@ public class StoryLinkSheet extends BottomSheetWithRecyclerListView implements N
         urlEditText.editText.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+
             @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {}
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                if (ignoreUrlEdit) {
+                    return;
+                }
+                needRemoveDefPrefix = s != null
+                        && start == def.length()
+                        && s.subSequence(0, start).toString().equals(def)
+                        && s.length() >= start + count
+                        && s.subSequence(start, start + count).toString().startsWith(def);
+            }
+
             @Override
             public void afterTextChanged(Editable s) {
                 checkPaste.run();
-                if (!ignoreUrlEdit) {
-                    checkEditURL(s == null ? null : s.toString());
+                if (ignoreUrlEdit) {
+                    return;
                 }
+                if (needRemoveDefPrefix && s != null) {
+                    String text = s.toString();
+                    String fixedLink = text.substring(def.length());
+                    ignoreUrlEdit = true;
+                    urlEditText.editText.setText(fixedLink);
+                    urlEditText.editText.setSelection(0, urlEditText.editText.getText().length());
+                    ignoreUrlEdit = false;
+                    needRemoveDefPrefix = false;
+                    checkEditURL(fixedLink);
+                    return;
+                }
+                checkEditURL(s == null ? null : s.toString());
             }
         });
 

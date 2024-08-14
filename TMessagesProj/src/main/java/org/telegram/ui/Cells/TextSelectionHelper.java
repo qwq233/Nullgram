@@ -1,3 +1,22 @@
+/*
+ * Copyright (C) 2019-2024 qwq233 <qwq233@qwq2333.top>
+ * https://github.com/qwq233/Nullgram
+ *
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation; either version 2
+ * of the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along with this software.
+ *  If not, see
+ * <https://www.gnu.org/licenses/>
+ */
+
 package org.telegram.ui.Cells;
 
 import static com.google.zxing.common.detector.MathUtils.distance;
@@ -2734,28 +2753,31 @@ public abstract class TextSelectionHelper<Cell extends TextSelectionHelper.Selec
             if (!arrayList.isEmpty()) {
                 TextLayoutBlock layoutBlock = arrayList.get(i);
 
-                int endOffset = endViewOffset;
-                int textLen = layoutBlock.getLayout().getText().length();
+                if (layoutBlock != null && layoutBlock.getLayout() != null && layoutBlock.getLayout().getText() != null) {
 
-                if (endOffset > textLen) {
-                    endOffset = textLen;
-                }
-                if (position == startViewPosition && position == endViewPosition) {
-                    if (startViewChildPosition == endViewChildPosition && startViewChildPosition == i) {
-                        drawSelection(canvas, layoutBlock.getLayout(), startViewOffset, endOffset, true, true, 0);
-                    } else if (i == startViewChildPosition) {
+                    int endOffset = endViewOffset;
+                    int textLen = layoutBlock.getLayout().getText().length();
+
+                    if (endOffset > textLen) {
+                        endOffset = textLen;
+                    }
+                    if (position == startViewPosition && position == endViewPosition) {
+                        if (startViewChildPosition == endViewChildPosition && startViewChildPosition == i) {
+                            drawSelection(canvas, layoutBlock.getLayout(), startViewOffset, endOffset, true, true, 0);
+                        } else if (i == startViewChildPosition) {
+                            drawSelection(canvas, layoutBlock.getLayout(), startViewOffset, textLen, true, false, 0);
+                        } else if (i == endViewChildPosition) {
+                            drawSelection(canvas, layoutBlock.getLayout(), 0, endOffset, false, true, 0);
+                        } else if (i > startViewChildPosition && i < endViewChildPosition) {
+                            drawSelection(canvas, layoutBlock.getLayout(), 0, textLen, false, false, 0);
+                        }
+                    } else if (position == startViewPosition && startViewChildPosition == i) {
                         drawSelection(canvas, layoutBlock.getLayout(), startViewOffset, textLen, true, false, 0);
-                    } else if (i == endViewChildPosition) {
+                    } else if (position == endViewPosition && endViewChildPosition == i) {
                         drawSelection(canvas, layoutBlock.getLayout(), 0, endOffset, false, true, 0);
-                    } else if (i > startViewChildPosition && i < endViewChildPosition) {
+                    } else if (position > startViewPosition && position < endViewPosition || (position == startViewPosition && i > startViewChildPosition) || (position == endViewPosition && i < endViewChildPosition)) {
                         drawSelection(canvas, layoutBlock.getLayout(), 0, textLen, false, false, 0);
                     }
-                } else if (position == startViewPosition && startViewChildPosition == i) {
-                    drawSelection(canvas, layoutBlock.getLayout(), startViewOffset, textLen, true, false, 0);
-                } else if (position == endViewPosition && endViewChildPosition == i) {
-                    drawSelection(canvas, layoutBlock.getLayout(), 0, endOffset, false, true, 0);
-                } else if (position > startViewPosition && position < endViewPosition || (position == startViewPosition && i > startViewChildPosition) || (position == endViewPosition && i < endViewChildPosition)) {
-                    drawSelection(canvas, layoutBlock.getLayout(), 0, textLen, false, false, 0);
                 }
             }
         }

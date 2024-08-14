@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019-2023 qwq233 <qwq233@qwq2333.top>
+ * Copyright (C) 2019-2024 qwq233 <qwq233@qwq2333.top>
  * https://github.com/qwq233/Nullgram
  *
  * This program is free software; you can redistribute it and/or
@@ -268,7 +268,7 @@ public class MessageDetailActivity extends BaseActivity implements NotificationC
                 presentFragment(fragment);
             }
         } else if (position == restrictionReasonRow) {
-            ArrayList<TLRPC.TL_restrictionReason> reasons = messageObject.messageOwner.restriction_reason;
+            ArrayList<TLRPC.RestrictionReason> reasons = messageObject.messageOwner.restriction_reason;
             LinearLayout ll = new LinearLayout(getParentActivity());
             ll.setOrientation(LinearLayout.VERTICAL);
 
@@ -276,7 +276,7 @@ public class MessageDetailActivity extends BaseActivity implements NotificationC
                 .setView(ll)
                 .create();
 
-            for (TLRPC.TL_restrictionReason reason : reasons) {
+            for (TLRPC.RestrictionReason reason : reasons) {
                 TextDetailSettingsCell cell = new TextDetailSettingsCell(getParentActivity(), resourcesProvider);
                 cell.setBackground(Theme.getSelectorDrawable(false));
                 cell.setMultilineDetail(true);
@@ -483,9 +483,9 @@ public class MessageDetailActivity extends BaseActivity implements NotificationC
                     } else if (position == dcRow) {
                         textCell.setTextAndValue("DC", String.format(Locale.US, "DC%d %s, %s", dc, MessageUtils.getDCName(dc), MessageUtils.getDCLocation(dc)), divider);
                     } else if (position == restrictionReasonRow) {
-                        ArrayList<TLRPC.TL_restrictionReason> reasons = messageObject.messageOwner.restriction_reason;
+                        ArrayList<TLRPC.RestrictionReason> reasons = messageObject.messageOwner.restriction_reason;
                         StringBuilder value = new StringBuilder();
-                        for (TLRPC.TL_restrictionReason reason : reasons) {
+                        for (TLRPC.RestrictionReason reason : reasons) {
                             value.append(reason.reason);
                             value.append("-");
                             value.append(reason.platform);

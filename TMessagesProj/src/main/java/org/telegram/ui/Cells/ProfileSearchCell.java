@@ -1,9 +1,20 @@
 /*
- * This is the source code of Telegram for Android v. 5.x.x.
- * It is licensed under GNU GPL v. 2 or later.
- * You should have received a copy of the license in this archive (see LICENSE).
+ * Copyright (C) 2019-2024 qwq233 <qwq233@qwq2333.top>
+ * https://github.com/qwq233/Nullgram
  *
- * Copyright Nikolai Kudashov, 2013-2018.
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation; either version 2
+ * of the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along with this software.
+ *  If not, see
+ * <https://www.gnu.org/licenses/>
  */
 
 package org.telegram.ui.Cells;
@@ -58,7 +69,7 @@ import org.telegram.ui.Stories.StoriesUtilities;
 
 import java.util.Locale;
 
-public class ProfileSearchCell extends BaseCell implements NotificationCenter.NotificationCenterDelegate {
+public class ProfileSearchCell extends BaseCell implements NotificationCenter.NotificationCenterDelegate, Theme.Colorable {
 
     private CharSequence currentName;
     public ImageReceiver avatarImage;
@@ -491,9 +502,11 @@ public class ProfileSearchCell extends BaseCell implements NotificationCenter.No
             } else if (user != null) {
                 if (MessagesController.isSupportUser(user)) {
                     statusString = LocaleController.getString("SupportStatus", R.string.SupportStatus);
+                } else if (user.bot && user.bot_active_users != 0) {
+                    statusString = LocaleController.formatPluralStringComma("BotUsers", user.bot_active_users, ' ');
                 } else if (user.bot) {
                     statusString = LocaleController.getString("Bot", R.string.Bot);
-                } else if (user.id == 333000 || user.id == 777000) {
+                } else if (UserObject.isService(user.id)) {
                     statusString = LocaleController.getString("ServiceNotifications", R.string.ServiceNotifications);
                 } else {
                     if (isOnline == null) {
@@ -912,5 +925,12 @@ public class ProfileSearchCell extends BaseCell implements NotificationCenter.No
             return true;
         }
         return super.onTouchEvent(event);
+    }
+
+    @Override
+    public void updateColors() {
+        if (nameLayout != null && getMeasuredWidth() > 0) {
+            buildLayout();
+        }
     }
 }

@@ -1,9 +1,20 @@
 /*
- * This is the source code of Telegram for Android v. 6.x.x.
- * It is licensed under GNU GPL v. 2 or later.
- * You should have received a copy of the license in this archive (see LICENSE).
+ * Copyright (C) 2019-2024 qwq233 <qwq233@qwq2333.top>
+ * https://github.com/qwq233/Nullgram
  *
- * Copyright Nikolai Kudashov, 2013-2020.
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation; either version 2
+ * of the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along with this software.
+ *  If not, see
+ * <https://www.gnu.org/licenses/>
  */
 
 package org.telegram.messenger.video;
@@ -20,8 +31,8 @@ import android.graphics.PorterDuffXfermode;
 import android.graphics.RectF;
 import android.graphics.SurfaceTexture;
 import android.graphics.Typeface;
-import android.graphics.text.LineBreaker;
 import android.graphics.drawable.Drawable;
+import android.graphics.text.LineBreaker;
 import android.opengl.GLES11Ext;
 import android.opengl.GLES20;
 import android.opengl.GLES30;
@@ -32,8 +43,6 @@ import android.os.Build.VERSION_CODES;
 import android.text.SpannableString;
 import android.text.Spanned;
 import android.text.TextUtils;
-import android.text.style.ReplacementSpan;
-import android.util.Log;
 import android.util.Pair;
 import android.util.TypedValue;
 import android.view.Gravity;
@@ -66,7 +75,6 @@ import org.telegram.ui.Components.Paint.Views.LinkPreview;
 import org.telegram.ui.Components.Paint.Views.LocationMarker;
 import org.telegram.ui.Components.Paint.Views.PaintTextOptionsView;
 import org.telegram.ui.Components.RLottieDrawable;
-import org.telegram.ui.Components.Rect;
 import org.telegram.ui.Stories.recorder.PreviewView;
 import org.telegram.ui.Stories.recorder.StoryEntry;
 
@@ -1336,9 +1344,14 @@ public class TextureRenderer {
     }
 
     private void initLocationEntity(VideoEditedInfo.MediaEntity entity) {
-        LocationMarker marker = new LocationMarker(ApplicationLoader.applicationContext, entity.density, 0);
+        final int variant = entity.type == VideoEditedInfo.MediaEntity.TYPE_LOCATION ? LocationMarker.VARIANT_LOCATION : LocationMarker.VARIANT_WEATHER;
+        LocationMarker marker = new LocationMarker(ApplicationLoader.applicationContext, variant, entity.density, 0);
+        marker.setIsVideo(true);
         marker.setText(entity.text);
         marker.setType(entity.subType, entity.color);
+        if (entity.weather != null && entity.entities.isEmpty()) {
+            marker.setCodeEmoji(UserConfig.selectedAccount, entity.weather.getEmoji());
+        }
         marker.setMaxWidth(entity.viewWidth);
         if (entity.entities.size() == 1) {
             marker.forceEmoji();

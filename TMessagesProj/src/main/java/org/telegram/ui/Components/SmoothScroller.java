@@ -1,3 +1,22 @@
+/*
+ * Copyright (C) 2019-2024 qwq233 <qwq233@qwq2333.top>
+ * https://github.com/qwq233/Nullgram
+ *
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation; either version 2
+ * of the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along with this software.
+ *  If not, see
+ * <https://www.gnu.org/licenses/>
+ */
+
 package org.telegram.ui.Components;
 
 import android.content.Context;
@@ -14,6 +33,9 @@ public class SmoothScroller extends LinearSmoothScroller {
 
     private Interpolator interpolator = CubicBezierInterpolator.DEFAULT;
 
+    private int offset;
+    private float durationScale = 1f;
+
     public SmoothScroller(Context context) {
         super(context);
     }
@@ -25,6 +47,14 @@ public class SmoothScroller extends LinearSmoothScroller {
 
     protected void onEnd() {
 
+    }
+
+    public void setOffset(int offset) {
+        this.offset = offset;
+    }
+
+    public void setDurationScale(float scale) {
+        this.durationScale = scale;
     }
 
     @Override
@@ -63,10 +93,15 @@ public class SmoothScroller extends LinearSmoothScroller {
         AndroidUtilities.runOnUIThread(this::onEnd, Math.max(0, time));
     }
 
+    @Override
+    public int calculateDyToMakeVisible(View view, int snapPreference) {
+        return super.calculateDyToMakeVisible(view, snapPreference) - offset;
+    }
+
     protected int calculateTimeForDeceleration(int dx) {
-        return Math.min(super.calculateTimeForDeceleration(dx), 500);
+        return Math.round(Math.min(super.calculateTimeForDeceleration(dx), 500) * durationScale);
     }
     protected int calculateTimeForScrolling(int dx) {
-        return Math.min(super.calculateTimeForScrolling(dx), 150);
+        return Math.round(Math.min(super.calculateTimeForScrolling(dx), 150) * durationScale);
     }
 }

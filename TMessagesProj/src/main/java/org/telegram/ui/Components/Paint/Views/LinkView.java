@@ -1,3 +1,22 @@
+/*
+ * Copyright (C) 2019-2024 qwq233 <qwq233@qwq2333.top>
+ * https://github.com/qwq233/Nullgram
+ *
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation; either version 2
+ * of the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along with this software.
+ *  If not, see
+ * <https://www.gnu.org/licenses/>
+ */
+
 package org.telegram.ui.Components.Paint.Views;
 
 import android.content.Context;
@@ -10,7 +29,6 @@ import android.view.Gravity;
 import android.view.ViewGroup;
 
 import org.telegram.messenger.AndroidUtilities;
-import org.telegram.tgnet.TLRPC;
 import org.telegram.tgnet.tl.TL_stories;
 import org.telegram.ui.Components.LayoutHelper;
 import org.telegram.ui.Components.Point;
@@ -21,6 +39,7 @@ public class LinkView extends EntityView {
     public final LinkPreview marker;
     private int currentColor;
     private int currentType;
+    private boolean hasColor;
 
     public LinkPreview.WebPagePreview link;
     public TL_stories.MediaArea mediaArea;
@@ -45,13 +64,13 @@ public class LinkView extends EntityView {
         return marker.pady;
     }
 
-    public LinkView(Context context, Point position, int currentAccount, LinkPreview.WebPagePreview link, TL_stories.MediaArea mediaArea, float density, int maxWidth, int type, int color) {
+    public LinkView(Context context, Point position, int currentAccount, LinkPreview.WebPagePreview link, TL_stories.MediaArea mediaArea, float density, int maxWidth, int type) {
         super(context, position);
 
         marker = new LinkPreview(context, density);
         marker.setMaxWidth(maxWidth);
         setLink(currentAccount, link, mediaArea);
-        marker.setType(currentType = type, currentColor = color);
+        marker.setType(currentType = type, currentColor);
         addView(marker, LayoutHelper.createFrame(LayoutHelper.WRAP_CONTENT, LayoutHelper.WRAP_CONTENT, Gravity.LEFT | Gravity.TOP));
 
         setClipChildren(false);
@@ -87,12 +106,14 @@ public class LinkView extends EntityView {
         marker.setType(currentType = type, currentColor);
     }
 
-    public void setType(int type, int color) {
-        marker.setType(currentType = type, currentColor = color);
-    }
 
     public void setColor(int color) {
-        setType(currentType, color);
+        hasColor = true;
+        currentColor = color;
+    }
+
+    public boolean hasColor() {
+        return hasColor;
     }
 
     public int getColor() {
@@ -101,6 +122,14 @@ public class LinkView extends EntityView {
 
     public int getType() {
         return currentType;
+    }
+
+    public int getNextType() {
+        int nextType = currentType + 1;
+        if (nextType == 4) {
+            return hasColor ? 0 : 1;
+        }
+        return nextType;
     }
 
     @Override

@@ -1,3 +1,22 @@
+/*
+ * Copyright (C) 2019-2024 qwq233 <qwq233@qwq2333.top>
+ * https://github.com/qwq233/Nullgram
+ *
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation; either version 2
+ * of the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along with this software.
+ *  If not, see
+ * <https://www.gnu.org/licenses/>
+ */
+
 package org.telegram.ui.Stories.recorder;
 
 import android.text.SpannableString;
@@ -516,6 +535,10 @@ public class DraftsController {
 
         public TLRPC.InputPeer peer;
 
+        public long botId;
+        public String botLang;
+        public TLRPC.InputMedia botEdit;
+
         public StoryDraft(@NonNull StoryEntry entry) {
             this.id = entry.draftId;
             this.date = entry.draftDate;
@@ -572,6 +595,9 @@ public class DraftsController {
             this.videoVolume = entry.videoVolume;
 
             this.peer = entry.peer;
+            this.botId = entry.botId;
+            this.botLang = entry.botLang;
+            this.botEdit = entry.editingBotPreview;
         }
 
         public StoryEntry toEntry() {
@@ -666,6 +692,10 @@ public class DraftsController {
             entry.videoVolume = videoVolume;
 
             entry.peer = peer;
+            entry.botId = botId;
+            entry.botLang = botLang;
+            entry.editingBotPreview = botEdit;
+
             return entry;
         }
 
@@ -791,6 +821,15 @@ public class DraftsController {
             }
 
             stream.writeFloat(videoVolume);
+
+            stream.writeInt64(botId);
+            stream.writeString(botLang == null ? "" : botLang);
+            if (botEdit == null) {
+                stream.writeInt32(TLRPC.TL_null.constructor);
+            } else {
+                botEdit.serializeToStream(stream);
+            }
+
         }
 
         public int getObjectSize() {
@@ -975,6 +1014,14 @@ public class DraftsController {
             }
             if (stream.remaining() > 0) {
                 videoVolume = stream.readFloat(exception);
+            }
+            if (stream.remaining() > 0) {
+                botId = stream.readInt64(exception);
+                botLang = stream.readString(exception);
+                magic = stream.readInt32(exception);
+                if (magic != TLRPC.TL_null.constructor) {
+                    botEdit = TLRPC.InputMedia.TLdeserialize(stream, magic, exception);
+                }
             }
         }
     }

@@ -1,10 +1,31 @@
+/*
+ * Copyright (C) 2019-2024 qwq233 <qwq233@qwq2333.top>
+ * https://github.com/qwq233/Nullgram
+ *
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation; either version 2
+ * of the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along with this software.
+ *  If not, see
+ * <https://www.gnu.org/licenses/>
+ */
+
 package org.telegram.ui.Components;
+
+import static org.telegram.messenger.LocaleController.formatString;
+import static org.telegram.messenger.LocaleController.getString;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.content.Context;
 import android.content.DialogInterface;
-import android.content.Intent;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
@@ -25,6 +46,7 @@ import android.widget.ScrollView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.collection.LongSparseArray;
 import androidx.core.content.ContextCompat;
 import androidx.core.graphics.ColorUtils;
 
@@ -177,10 +199,23 @@ public class LinkActionView extends LinearLayout {
                 if (link == null) {
                     return;
                 }
-                Intent intent = new Intent(Intent.ACTION_SEND);
-                intent.setType("text/plain");
-                intent.putExtra(Intent.EXTRA_TEXT, link);
-                fragment.startActivityForResult(Intent.createChooser(intent, LocaleController.getString("InviteToGroupByLink", R.string.InviteToGroupByLink)), 500);
+                fragment.showDialog(new ShareAlert(getContext(), null, link, false, link, false, fragment.getResourceProvider()) {
+                    @Override
+                    protected void onSend(LongSparseArray<TLRPC.Dialog> dids, int count, TLRPC.TL_forumTopic topic) {
+                        final String str;
+                        if (dids != null && dids.size() == 1) {
+                            long did = dids.valueAt(0).id;
+                            if (did == 0 || did == UserConfig.getInstance(currentAccount).getClientUserId()) {
+                                str = getString(R.string.InvLinkToSavedMessages);
+                            } else {
+                                str = formatString(R.string.InvLinkToUser, MessagesController.getInstance(currentAccount).getPeerName(did, true));
+                            }
+                        } else {
+                            str = formatString(R.string.InvLinkToChats, LocaleController.formatPluralString("Chats", count));
+                        }
+                        showBulletin(R.raw.forward, AndroidUtilities.replaceTags(str));
+                    }
+                });
             } catch (Exception e) {
                 FileLog.e(e);
             }
@@ -331,6 +366,12 @@ public class LinkActionView extends LinearLayout {
             }
         });
         updateColors();
+    }
+
+    public void showBulletin(int resId, CharSequence str) {
+        Bulletin b = BulletinFactory.of(fragment).createSimpleBulletin(resId, str);
+        b.hideAfterBottomSheet = false;
+        b.show(true);
     }
 
     private void getPointOnScreen(FrameLayout frameLayout, FrameLayout finalContainer, float[] point) {

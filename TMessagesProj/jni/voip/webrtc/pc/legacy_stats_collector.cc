@@ -89,8 +89,9 @@ struct TypeForAdd {
 
 typedef TypeForAdd<bool> BoolForAdd;
 typedef TypeForAdd<float> FloatForAdd;
+typedef TypeForAdd<double> DoubleForAdd;
 typedef TypeForAdd<int64_t> Int64ForAdd;
-typedef TypeForAdd<int> IntForAdd;
+typedef TypeForAdd<int32_t> IntForAdd;
 
 StatsReport* AddTrackReport(StatsCollection* reports,
                             const std::string& track_id) {
@@ -177,7 +178,7 @@ void ExtractStats(const cricket::VoiceReceiverInfo& info,
                   StatsReport* report,
                   bool use_standard_bytes_stats) {
   ExtractCommonReceiveProperties(info, report);
-  const FloatForAdd floats[] = {
+  const DoubleForAdd floats[] = {
       {StatsReport::kStatsValueNameExpandRate, info.expand_rate},
       {StatsReport::kStatsValueNameSecondaryDecodedRate,
        info.secondary_decoded_rate},
@@ -242,7 +243,7 @@ void ExtractStats(const cricket::VoiceSenderInfo& info,
 
   SetAudioProcessingStats(report, info.apm_statistics);
 
-  const FloatForAdd floats[] = {
+  const DoubleForAdd floats[] = {
       {StatsReport::kStatsValueNameTotalAudioEnergy, info.total_input_energy},
       {StatsReport::kStatsValueNameTotalSamplesDuration,
        info.total_input_duration}};
@@ -339,7 +340,7 @@ void ExtractStats(const cricket::VideoReceiverInfo& info,
       {StatsReport::kStatsValueNamePlisSent, info.plis_sent},
       {StatsReport::kStatsValueNameRenderDelayMs, info.render_delay_ms},
       {StatsReport::kStatsValueNameTargetDelayMs, info.target_delay_ms},
-      {StatsReport::kStatsValueNameFramesDecoded, info.frames_decoded},
+      {StatsReport::kStatsValueNameFramesDecoded, (int32_t) info.frames_decoded},
   };
 
   for (const auto& i : ints)
@@ -383,15 +384,15 @@ void ExtractStats(const cricket::VideoSenderInfo& info,
        info.encode_usage_percent},
       {StatsReport::kStatsValueNameFirsReceived, info.firs_rcvd},
       {StatsReport::kStatsValueNameFrameHeightSent, info.send_frame_height},
-      {StatsReport::kStatsValueNameFrameRateInput, round(info.framerate_input)},
+      {StatsReport::kStatsValueNameFrameRateInput, (int32_t) round(info.framerate_input)},
       {StatsReport::kStatsValueNameFrameRateSent, info.framerate_sent},
       {StatsReport::kStatsValueNameFrameWidthSent, info.send_frame_width},
-      {StatsReport::kStatsValueNameNacksReceived, info.nacks_rcvd},
+      {StatsReport::kStatsValueNameNacksReceived, (int32_t) info.nacks_rcvd},
       {StatsReport::kStatsValueNamePacketsLost, info.packets_lost},
       {StatsReport::kStatsValueNamePacketsSent, info.packets_sent},
       {StatsReport::kStatsValueNamePlisReceived, info.plis_rcvd},
-      {StatsReport::kStatsValueNameFramesEncoded, info.frames_encoded},
-      {StatsReport::kStatsValueNameHugeFramesSent, info.huge_frames_sent},
+      {StatsReport::kStatsValueNameFramesEncoded, (int32_t) info.frames_encoded},
+      {StatsReport::kStatsValueNameHugeFramesSent, (int32_t) info.huge_frames_sent},
   };
 
   for (const auto& i : ints)
@@ -780,19 +781,20 @@ StatsReport* LegacyStatsCollector::AddConnectionInfoReport(
                 AddCandidateReport(remote_candidate_stats, false)->id());
 
   const Int64ForAdd int64s[] = {
-      {StatsReport::kStatsValueNameBytesReceived, info.recv_total_bytes},
-      {StatsReport::kStatsValueNameBytesSent, info.sent_total_bytes},
-      {StatsReport::kStatsValueNamePacketsSent, info.sent_total_packets},
-      {StatsReport::kStatsValueNameRtt, info.rtt},
+      {StatsReport::kStatsValueNameBytesReceived,
+       (int64_t) info.recv_total_bytes},
+      {StatsReport::kStatsValueNameBytesSent, (int64_t) info.sent_total_bytes},
+      {StatsReport::kStatsValueNamePacketsSent, (int64_t) info.sent_total_packets},
+      {StatsReport::kStatsValueNameRtt, (int64_t) info.rtt},
       {StatsReport::kStatsValueNameSendPacketsDiscarded,
-       info.sent_discarded_packets},
+       (int64_t) info.sent_discarded_packets},
       {StatsReport::kStatsValueNameSentPingRequestsTotal,
-       info.sent_ping_requests_total},
+       (int64_t) info.sent_ping_requests_total},
       {StatsReport::kStatsValueNameSentPingRequestsBeforeFirstResponse,
-       info.sent_ping_requests_before_first_response},
-      {StatsReport::kStatsValueNameSentPingResponses, info.sent_ping_responses},
-      {StatsReport::kStatsValueNameRecvPingRequests, info.recv_ping_requests},
-      {StatsReport::kStatsValueNameRecvPingResponses, info.recv_ping_responses},
+       (int64_t) info.sent_ping_requests_before_first_response},
+      {StatsReport::kStatsValueNameSentPingResponses, (int64_t) info.sent_ping_responses},
+      {StatsReport::kStatsValueNameRecvPingRequests, (int64_t) info.recv_ping_requests},
+      {StatsReport::kStatsValueNameRecvPingResponses, (int64_t) info.recv_ping_responses},
   };
   for (const auto& i : int64s)
     report->AddInt64(i.name, i.value);

@@ -1,9 +1,20 @@
 /*
- * This is the source code of Telegram for Android v. 5.x.x.
- * It is licensed under GNU GPL v. 2 or later.
- * You should have received a copy of the license in this archive (see LICENSE).
+ * Copyright (C) 2019-2024 qwq233 <qwq233@qwq2333.top>
+ * https://github.com/qwq233/Nullgram
  *
- * Copyright Nikolai Kudashov, 2013-2018.
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation; either version 2
+ * of the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along with this software.
+ *  If not, see
+ * <https://www.gnu.org/licenses/>
  */
 
 package org.telegram.ui.Components;
@@ -55,7 +66,6 @@ import org.telegram.ui.ActionBar.SimpleTextView;
 import org.telegram.ui.ActionBar.Theme;
 import org.telegram.ui.Business.BusinessLinksController;
 import org.telegram.ui.ChatActivity;
-import org.telegram.ui.LaunchActivity;
 import org.telegram.ui.ProfileActivity;
 import org.telegram.ui.Stories.StoriesUtilities;
 import org.telegram.ui.TopicsFragment;
@@ -75,6 +85,7 @@ public class ChatAvatarContainer extends FrameLayout implements NotificationCent
     private AnimatedTextView animatedSubtitleTextView;
     private AtomicReference<SimpleTextView> subtitleTextLargerCopyView = new AtomicReference<>();
     private ImageView timeItem;
+    private ImageView starBgItem, starFgItem;
     private TimerDrawable timerDrawable;
     private ChatActivity parentFragment;
     private StatusDrawable[] statusDrawables = new StatusDrawable[6];
@@ -309,6 +320,21 @@ public class ChatAvatarContainer extends FrameLayout implements NotificationCent
             } else {
                 timeItem.setContentDescription(LocaleController.getString("AccAutoDeleteTimer", R.string.AccAutoDeleteTimer));
             }
+
+            starBgItem = new ImageView(context);
+            starBgItem.setImageResource(R.drawable.star_small_outline);
+            starBgItem.setColorFilter(new PorterDuffColorFilter(getThemedColor(Theme.key_actionBarDefault), PorterDuff.Mode.SRC_IN));
+            starBgItem.setAlpha(0.0f);
+            starBgItem.setScaleY(0.0f);
+            starBgItem.setScaleX(0.0f);
+            addView(starBgItem);
+
+            starFgItem = new ImageView(context);
+            starFgItem.setImageResource(R.drawable.star_small_inner);
+            starFgItem.setAlpha(0.0f);
+            starFgItem.setScaleY(0.0f);
+            starFgItem.setScaleX(0.0f);
+            addView(starFgItem);
         }
 
         if (parentFragment != null && (parentFragment.getChatMode() == 0 || parentFragment.getChatMode() == ChatActivity.MODE_SAVED)) {
@@ -574,6 +600,12 @@ public class ChatAvatarContainer extends FrameLayout implements NotificationCent
         if (timeItem != null) {
             timeItem.measure(MeasureSpec.makeMeasureSpec(AndroidUtilities.dp(34), MeasureSpec.EXACTLY), MeasureSpec.makeMeasureSpec(AndroidUtilities.dp(34), MeasureSpec.EXACTLY));
         }
+        if (starBgItem != null) {
+            starBgItem.measure(MeasureSpec.makeMeasureSpec(AndroidUtilities.dp(20), MeasureSpec.EXACTLY), MeasureSpec.makeMeasureSpec(AndroidUtilities.dp(20), MeasureSpec.EXACTLY));
+        }
+        if (starFgItem != null) {
+            starFgItem.measure(MeasureSpec.makeMeasureSpec(AndroidUtilities.dp(20), MeasureSpec.EXACTLY), MeasureSpec.makeMeasureSpec(AndroidUtilities.dp(20), MeasureSpec.EXACTLY));
+        }
         setMeasuredDimension(width, MeasureSpec.getSize(heightMeasureSpec));
         if (lastWidth != -1 && lastWidth != width && lastWidth > width) {
             fadeOutToLessWidth(lastWidth);
@@ -664,6 +696,12 @@ public class ChatAvatarContainer extends FrameLayout implements NotificationCent
         if (timeItem != null) {
             timeItem.layout(leftPadding + AndroidUtilities.dp(16), viewTop + AndroidUtilities.dp(15), leftPadding + AndroidUtilities.dp(16 + 34), viewTop + AndroidUtilities.dp(15 + 34));
         }
+        if (starBgItem != null) {
+            starBgItem.layout(leftPadding + AndroidUtilities.dp(28), viewTop + AndroidUtilities.dp(24), leftPadding + AndroidUtilities.dp(28) + starBgItem.getMeasuredWidth(), viewTop + AndroidUtilities.dp(24) + starBgItem.getMeasuredHeight());
+        }
+        if (starFgItem != null) {
+            starFgItem.layout(leftPadding + AndroidUtilities.dp(28), viewTop + AndroidUtilities.dp(24), leftPadding + AndroidUtilities.dp(28) + starFgItem.getMeasuredWidth(), viewTop + AndroidUtilities.dp(24) + starFgItem.getMeasuredHeight());
+        }
         if (subtitleTextView != null) {
             subtitleTextView.layout(l, viewTop + AndroidUtilities.dp(24), l + subtitleTextView.getMeasuredWidth(), viewTop + subtitleTextView.getTextHeight() + AndroidUtilities.dp(24));
         } else if (animatedSubtitleTextView != null) {
@@ -725,7 +763,7 @@ public class ChatAvatarContainer extends FrameLayout implements NotificationCent
         if (timerDrawable == null) {
             return;
         }
-        boolean show = true;
+        boolean show = !stars;
         if (value == 0 && !secretChatTimer) {
             show = false;
             return;
@@ -735,6 +773,23 @@ public class ChatAvatarContainer extends FrameLayout implements NotificationCent
             timerDrawable.setTime(value);
         } else {
             hideTimeItem(animated);
+        }
+    }
+
+    public boolean stars;
+    public void setStars(boolean stars, boolean animated) {
+        if (starBgItem == null || starFgItem == null) return;
+        this.stars = stars;
+        if (!animated) {
+            starBgItem.setAlpha(stars ? 1f : 0f);
+            starBgItem.setScaleX(stars ? 1.1f : 0f);
+            starBgItem.setScaleY(stars ? 1.1f : 0f);
+            starFgItem.setAlpha(stars ? 1f : 0f);
+            starFgItem.setScaleX(stars ? 1f : 0f);
+            starFgItem.setScaleY(stars ? 1f : 0f);
+        } else {
+            starBgItem.animate().alpha(stars ? 1f : 0f).scaleX(stars ? 1.1f : 0f).scaleY(stars ? 1.1f : 0f).start();
+            starFgItem.animate().alpha(stars ? 1f : 0f).scaleX(stars ? 1f : 0f).scaleY(stars ? 1f : 0f).start();
         }
     }
 
@@ -981,6 +1036,8 @@ public class ChatAvatarContainer extends FrameLayout implements NotificationCent
                     newStatus = LocaleController.getString("ServiceNotifications", R.string.ServiceNotifications);
                 } else if (MessagesController.isSupportUser(user)) {
                     newStatus = LocaleController.getString("SupportStatus", R.string.SupportStatus);
+                } else if (user.bot && user.bot_active_users != 0) {
+                    newStatus = LocaleController.formatPluralStringComma("BotUsers", user.bot_active_users, ',');
                 } else if (user.bot) {
                     newStatus = LocaleController.getString("Bot", R.string.Bot);
                 } else {

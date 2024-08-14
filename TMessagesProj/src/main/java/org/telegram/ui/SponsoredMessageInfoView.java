@@ -1,6 +1,25 @@
+/*
+ * Copyright (C) 2019-2024 qwq233 <qwq233@qwq2333.top>
+ * https://github.com/qwq233/Nullgram
+ *
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation; either version 2
+ * of the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along with this software.
+ *  If not, see
+ * <https://www.gnu.org/licenses/>
+ */
+
 package org.telegram.ui;
 
-import android.app.Activity;
+import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.util.TypedValue;
@@ -23,7 +42,7 @@ public class SponsoredMessageInfoView extends FrameLayout {
 
     LinearLayout linearLayout;
 
-    public SponsoredMessageInfoView(Activity context, Theme.ResourcesProvider resourcesProvider) {
+    public SponsoredMessageInfoView(Context context, Runnable close, Theme.ResourcesProvider resourcesProvider) {
         super(context);
 
         LinearLayout linearLayout = new LinearLayout(context);
@@ -41,18 +60,30 @@ public class SponsoredMessageInfoView extends FrameLayout {
         description1.setTextColor(Theme.getColor(Theme.key_windowBackgroundWhiteBlackText, resourcesProvider));
         description1.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 14);
         description1.setLineSpacing(AndroidUtilities.dp(2), 1f);
+        description1.setOnLinkPressListener(link -> {
+            if (close != null) close.run();
+            link.onClick(this);
+        });
 
         LinkSpanDrawable.LinksTextView description2 = new LinkSpanDrawable.LinksTextView(context);
         description2.setText(AndroidUtilities.replaceLinks(LocaleController.getString("SponsoredMessageInfo2Description2"), resourcesProvider));
         description2.setTextColor(Theme.getColor(Theme.key_windowBackgroundWhiteBlackText, resourcesProvider));
         description2.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 14);
         description2.setLineSpacing(AndroidUtilities.dp(2), 1f);
+        description2.setOnLinkPressListener(link -> {
+            if (close != null) close.run();
+            link.onClick(this);
+        });
 
         LinkSpanDrawable.LinksTextView description3 = new LinkSpanDrawable.LinksTextView(context);
         description3.setText(AndroidUtilities.replaceLinks(LocaleController.getString("SponsoredMessageInfo2Description3"), resourcesProvider));
         description3.setTextColor(Theme.getColor(Theme.key_windowBackgroundWhiteBlackText, resourcesProvider));
         description3.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 14);
         description3.setLineSpacing(AndroidUtilities.dp(2), 1f);
+        description3.setOnLinkPressListener(link -> {
+            if (close != null) close.run();
+            link.onClick(this);
+        });
 
         Paint buttonPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
         buttonPaint.setStyle(Paint.Style.STROKE);
@@ -70,7 +101,8 @@ public class SponsoredMessageInfoView extends FrameLayout {
         button.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View view) {
-                Browser.openUrl(context, LocaleController.getString("SponsoredMessageAlertLearnMoreUrl", R.string.SponsoredMessageAlertLearnMoreUrl));
+                if (close != null) close.run();
+                Browser.openUrl(context, LocaleController.getString(R.string.SponsoredMessageAlertLearnMoreUrl));
             }
         });
 

@@ -1,3 +1,22 @@
+/*
+ * Copyright (C) 2019-2024 qwq233 <qwq233@qwq2333.top>
+ * https://github.com/qwq233/Nullgram
+ *
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation; either version 2
+ * of the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along with this software.
+ *  If not, see
+ * <https://www.gnu.org/licenses/>
+ */
+
 package org.telegram.ui.Components.Premium.GLIcon;
 
 import android.animation.Animator;
@@ -244,6 +263,7 @@ public class GLIconTextureView extends TextureView implements TextureView.Surfac
 
     @Override
     public boolean onSurfaceTextureDestroyed(SurfaceTexture surface) {
+        ready = false;
         stopThread();
         return false;
     }
@@ -251,11 +271,11 @@ public class GLIconTextureView extends TextureView implements TextureView.Surfac
     public void stopThread() {
         if (thread != null) {
             isRunning = false;
-            try {
-                thread.join();
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
+//            try {
+//                thread.join();
+//            } catch (InterruptedException e) {
+//                e.printStackTrace();
+//            }
             thread = null;
         }
 
@@ -267,6 +287,13 @@ public class GLIconTextureView extends TextureView implements TextureView.Surfac
 
     public void setBackgroundBitmap(Bitmap gradientTextureBitmap) {
         mRenderer.setBackground(gradientTextureBitmap);
+    }
+
+    private volatile boolean ready;
+    private volatile Runnable readyListener;
+    public void whenReady(Runnable whenReady) {
+        if (ready) whenReady.run();
+        else readyListener = whenReady;
     }
 
 
@@ -299,6 +326,11 @@ public class GLIconTextureView extends TextureView implements TextureView.Surfac
                     float dt = (now - lastFrameTime) / 1000f;
                     lastFrameTime = now;
                     drawSingleFrame(dt);
+                    if (!ready) {
+                        ready = true;
+                        AndroidUtilities.runOnUIThread(readyListener);
+                        readyListener = null;
+                    }
                 }
 
                 try {
@@ -564,7 +596,7 @@ public class GLIconTextureView extends TextureView implements TextureView.Surfac
     }
 
 
-    private void startIdleAnimation() {
+    protected void startIdleAnimation() {
         if (!attached) {
             return;
         }

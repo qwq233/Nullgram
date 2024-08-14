@@ -61,7 +61,6 @@ import android.os.Build.VERSION_CODES;
 import android.os.Environment;
 import android.os.PowerManager;
 import android.os.SystemClock;
-import android.provider.DocumentsContract;
 import android.provider.MediaStore;
 import android.provider.OpenableColumns;
 import android.telephony.PhoneStateListener;
@@ -75,8 +74,6 @@ import android.view.View;
 import android.view.WindowManager;
 import android.webkit.MimeTypeMap;
 import android.widget.FrameLayout;
-
-import androidx.core.content.FileProvider;
 
 import com.google.android.exoplayer2.C;
 import com.google.android.exoplayer2.ExoPlayer;
@@ -5046,6 +5043,36 @@ public class MediaController implements AudioManager.OnAudioFocusChangeListener,
             FileLog.e(e);
         }
         return "";
+    }
+
+    public static File createFileInCache(String name, String ext) {
+        File f = null;
+        try {
+            f = AndroidUtilities.getSharingDirectory();
+            f.mkdirs();
+            if (AndroidUtilities.isInternalUri(Uri.fromFile(f))) {
+                return null;
+            }
+            int count = 0;
+            do {
+                f = AndroidUtilities.getSharingDirectory();
+                if (count == 0) {
+                    f = new File(f, name);
+                } else {
+                    int lastDotIndex = name.lastIndexOf(".");
+                    if (lastDotIndex > 0) {
+                        f = new File(f, name.substring(0, lastDotIndex) + " (" + count + ")" + name.substring(lastDotIndex));
+                    } else {
+                        f = new File(f, name + " (" + count + ")");
+                    }
+                }
+                count++;
+            } while (f.exists());
+            return f;
+        } catch (Exception e) {
+            FileLog.e(e);
+        }
+        return null;
     }
 
     public static String copyFileToCache(Uri uri, String ext) {

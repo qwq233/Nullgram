@@ -1,3 +1,22 @@
+/*
+ * Copyright (C) 2019-2024 qwq233 <qwq233@qwq2333.top>
+ * https://github.com/qwq233/Nullgram
+ *
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation; either version 2
+ * of the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along with this software.
+ *  If not, see
+ * <https://www.gnu.org/licenses/>
+ */
+
 package org.telegram.ui.Components;
 
 import static org.telegram.messenger.AndroidUtilities.dp;
@@ -47,7 +66,6 @@ import org.telegram.messenger.ChatMessageSharedResources;
 import org.telegram.messenger.ChatObject;
 import org.telegram.messenger.ContactsController;
 import org.telegram.messenger.FileLog;
-import org.telegram.messenger.MessagePreviewParams;
 import org.telegram.messenger.LocaleController;
 import org.telegram.messenger.MessageObject;
 import org.telegram.messenger.MessagePreviewParams;
@@ -383,7 +401,7 @@ public class MessagePreviewView extends FrameLayout {
                         cell.drawMessageText(canvas);
                         if ((cell.getCurrentMessagesGroup() == null || cell.getCurrentPosition() != null && ((cell.getCurrentPosition().flags & cell.captionFlag()) != 0 && (cell.getCurrentPosition().flags & MessageObject.POSITION_FLAG_LEFT) != 0 || cell.getCurrentMessagesGroup() != null && cell.getCurrentMessagesGroup().isDocuments)) || cell.getTransitionParams().animateBackgroundBoundsInner) {
                             cell.drawCaptionLayout(canvas, false, cell.getAlpha());
-                            cell.drawReactionsLayout(canvas, cell.getAlpha());
+                            cell.drawReactionsLayout(canvas, cell.getAlpha(), null);
                         }
                         if (cell.getCurrentMessagesGroup() != null || cell.getTransitionParams().animateBackgroundBoundsInner) {
                             cell.drawNamesLayout(canvas, cell.getAlpha());
@@ -1472,11 +1490,11 @@ public class MessagePreviewView extends FrameLayout {
                 chatPreviewContainer.setTranslationY(0);
                 menu.setTranslationY(0);
             } else {
-                actionBar.setTranslationY(chatTopOffset);
+                actionBar.setTranslationY(Math.max(0, chatTopOffset));
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
                     chatPreviewContainer.invalidateOutline();
                 }
-                chatPreviewContainer.setTranslationY(yOffset);
+                chatPreviewContainer.setTranslationY(Math.max(0, yOffset));
                 menu.setTranslationY(yOffset + chatPreviewContainer.getMeasuredHeight() - dp(2));
             }
 

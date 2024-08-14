@@ -1,4 +1,25 @@
+/*
+ * Copyright (C) 2019-2024 qwq233 <qwq233@qwq2333.top>
+ * https://github.com/qwq233/Nullgram
+ *
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation; either version 2
+ * of the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along with this software.
+ *  If not, see
+ * <https://www.gnu.org/licenses/>
+ */
+
 package org.telegram.ui;
+
+import static org.telegram.messenger.LocaleController.getString;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
@@ -438,6 +459,15 @@ public class FilteredSearchView extends FrameLayout implements NotificationCente
         if (messageObject.isQuickReply()) {
             QuickRepliesController.QuickReply reply = QuickRepliesController.getInstance(messageObject.currentAccount).findReply(messageObject.getQuickReplyId());
             return reply == null ? "" : reply.name;
+        }
+        if (messageObject.isSponsored()) {
+            if (messageObject.sponsoredCanReport) {
+                return getString(R.string.SponsoredMessageAd);
+            } else if (messageObject.sponsoredRecommended) {
+                return getString(R.string.SponsoredMessage2Recommended);
+            } else {
+                return getString(R.string.SponsoredMessage2);
+            }
         }
         if (arrowSpan[arrowType] == null) {
             arrowSpan[arrowType] = new SpannableStringBuilder(">");
@@ -1102,8 +1132,10 @@ public class FilteredSearchView extends FrameLayout implements NotificationCente
                 String link = null;
                 if (webPage != null && !(webPage instanceof TLRPC.TL_webPageEmpty)) {
                     if (webPage.cached_page != null) {
-                        ArticleViewer.getInstance().setParentActivity(parentActivity, parentFragment);
-                        ArticleViewer.getInstance().open(message);
+                        if (LaunchActivity.instance != null && LaunchActivity.instance.getBottomSheetTabs() != null && LaunchActivity.instance.getBottomSheetTabs().tryReopenTab(message) != null) {
+                            return;
+                        }
+                        parentFragment.createArticleViewer(false).open(message);
                         return;
                     } else if (webPage.embed_url != null && webPage.embed_url.length() != 0) {
                         openWebView(webPage, message);

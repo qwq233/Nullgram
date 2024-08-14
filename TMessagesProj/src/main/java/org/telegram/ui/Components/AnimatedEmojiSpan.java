@@ -35,7 +35,6 @@ import android.text.Spanned;
 import android.text.TextUtils;
 import android.text.style.CharacterStyle;
 import android.text.style.ReplacementSpan;
-import android.util.Log;
 import android.util.LongSparseArray;
 import android.view.Gravity;
 import android.view.View;
@@ -66,7 +65,7 @@ public class AnimatedEmojiSpan extends ReplacementSpan {
     public TLRPC.Document document;
     public String emoji;
     private float scale;
-    private float extraScale = 1f;
+    public float extraScale = 1f;
     public boolean standard;
     public boolean full = false;
     public boolean top = false;
@@ -98,7 +97,6 @@ public class AnimatedEmojiSpan extends ReplacementSpan {
     public void setAdded() {
         isAdded = true;
         extraScale = 0f;
-        lockPositionChanging = true;
     }
 
     public void setAnimateChanges() {
@@ -113,8 +111,13 @@ public class AnimatedEmojiSpan extends ReplacementSpan {
 
     public float getExtraScale() {
         if (isAdded) {
+            lockPositionChanging = true;
             isAdded = false;
             extraScale = 0f;
+            if (scaleAnimator != null) {
+                scaleAnimator.removeAllListeners();
+                scaleAnimator.cancel();
+            }
             scaleAnimator = ValueAnimator.ofFloat(extraScale, 1f);
             scaleAnimator.addUpdateListener(animator -> {
                 extraScale = (float) animator.getAnimatedValue();
@@ -125,6 +128,7 @@ public class AnimatedEmojiSpan extends ReplacementSpan {
                 @Override
                 public void onAnimationEnd(Animator animation) {
                     scaleAnimator = null;
+                    lockPositionChanging = false;
                 }
             });
             scaleAnimator.setDuration(130);
@@ -540,7 +544,7 @@ public class AnimatedEmojiSpan extends ReplacementSpan {
                     if (clone && textLayout.getText() instanceof Spannable) {
                         int start = spanned.getSpanStart(span), end = spanned.getSpanEnd(span);
                         ((Spannable) spanned).removeSpan(span);
-                        ((Spannable) spanned).setSpan(span = cloneSpan(span), start, end, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+                        ((Spannable) spanned).setSpan(span = cloneSpan(span, null), start, end, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
                     }
                     AnimatedEmojiHolder holder = null;
                     if (prev == null) {
@@ -991,12 +995,15 @@ public class AnimatedEmojiSpan extends ReplacementSpan {
         }
     }
 
-    public static AnimatedEmojiSpan cloneSpan(AnimatedEmojiSpan span) {
+    public static AnimatedEmojiSpan cloneSpan(AnimatedEmojiSpan span, Paint.FontMetricsInt fontMetricsInt) {
         AnimatedEmojiSpan animatedEmojiSpan;
         if (span.document != null) {
-            animatedEmojiSpan = new AnimatedEmojiSpan(span.document, span.fontMetrics);
+            animatedEmojiSpan = new AnimatedEmojiSpan(span.document, fontMetricsInt != null ? fontMetricsInt : span.fontMetrics);
         } else {
-            animatedEmojiSpan = new AnimatedEmojiSpan(span.documentId, span.scale, span.fontMetrics);
+            animatedEmojiSpan = new AnimatedEmojiSpan(span.documentId, span.scale, fontMetricsInt != null ? fontMetricsInt : span.fontMetrics);
+        }
+        if (fontMetricsInt != null) {
+            animatedEmojiSpan.size = span.size;
         }
         animatedEmojiSpan.fromEmojiKeyboard = span.fromEmojiKeyboard;
         animatedEmojiSpan.isAdded = span.isAdded;
@@ -1005,10 +1012,14 @@ public class AnimatedEmojiSpan extends ReplacementSpan {
     }
 
     public static CharSequence cloneSpans(CharSequence text) {
-        return cloneSpans(text, -1);
+        return cloneSpans(text, -1, null);
     }
 
     public static CharSequence cloneSpans(CharSequence text, int newCacheType) {
+        return cloneSpans(text, newCacheType, null);
+    }
+
+    public static CharSequence cloneSpans(CharSequence text, int newCacheType, Paint.FontMetricsInt fontMetricsInt) {
         if (!(text instanceof Spanned)) {
             return text;
         }
@@ -1033,7 +1044,7 @@ public class AnimatedEmojiSpan extends ReplacementSpan {
 
                 AnimatedEmojiSpan oldSpan = (AnimatedEmojiSpan) spans[i];
                 newText.removeSpan(oldSpan);
-                AnimatedEmojiSpan newSpan = cloneSpan(oldSpan);
+                AnimatedEmojiSpan newSpan = cloneSpan(oldSpan, fontMetricsInt);
                 if (newCacheType != -1) {
                     newSpan.cacheType = newCacheType;
                 }

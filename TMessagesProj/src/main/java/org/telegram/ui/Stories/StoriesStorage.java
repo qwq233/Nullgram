@@ -1,3 +1,22 @@
+/*
+ * Copyright (C) 2019-2024 qwq233 <qwq233@qwq2333.top>
+ * https://github.com/qwq233/Nullgram
+ *
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation; either version 2
+ * of the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along with this software.
+ *  If not, see
+ * <https://www.gnu.org/licenses/>
+ */
+
 package org.telegram.ui.Stories;
 
 import android.text.TextUtils;
@@ -17,6 +36,7 @@ import org.telegram.messenger.FileLog;
 import org.telegram.messenger.MessageObject;
 import org.telegram.messenger.MessagesController;
 import org.telegram.messenger.MessagesStorage;
+import org.telegram.messenger.Timer;
 import org.telegram.messenger.UserConfig;
 import org.telegram.messenger.support.LongSparseIntArray;
 import org.telegram.tgnet.ConnectionsManager;
@@ -556,10 +576,10 @@ public class StoriesStorage {
     }
 
     //storage queue
-    public void fillMessagesWithStories(LongSparseArray<ArrayList<MessageObject>> messagesWithUnknownStories, Runnable runnable, int classGuid) {
-        fillMessagesWithStories(messagesWithUnknownStories, runnable, classGuid, true);
+    public void fillMessagesWithStories(LongSparseArray<ArrayList<MessageObject>> messagesWithUnknownStories, Runnable runnable, int classGuid, Timer timer) {
+        fillMessagesWithStories(messagesWithUnknownStories, runnable, classGuid, true, timer);
     }
-    public void fillMessagesWithStories(LongSparseArray<ArrayList<MessageObject>> messagesWithUnknownStories, Runnable runnable, int classGuid, boolean updateDatabase) {
+    public void fillMessagesWithStories(LongSparseArray<ArrayList<MessageObject>> messagesWithUnknownStories, Runnable runnable, int classGuid, boolean updateDatabase, Timer timer) {
         if (runnable == null) {
             return;
         }
@@ -568,6 +588,7 @@ public class StoriesStorage {
             return;
         }
         ArrayList<MessageObject> updatedMessages = new ArrayList<>();
+        Timer.Task t1 = Timer.start(timer, "fillMessagesWithStories: applying stories for existing array");
         for (int i = 0; i < messagesWithUnknownStories.size(); i++) {
             long dialogId = messagesWithUnknownStories.keyAt(i);
             ArrayList<MessageObject> messageObjects = messagesWithUnknownStories.valueAt(i);
@@ -588,6 +609,7 @@ public class StoriesStorage {
                 }
             }
         }
+        Timer.done(t1);
 
         if (updateDatabase) {
             updateMessagesWithStories(updatedMessages);
@@ -603,7 +625,9 @@ public class StoriesStorage {
                 for (int j = 0; j < messageObjects.size(); j++) {
                     request.id.add(getStoryId(messageObjects.get(j)));
                 }
+                Timer.Task t2 = Timer.start(timer, "fillMessagesWithStories: getStoriesByID did=" + dialogId + " ids=" + TextUtils.join(",", request.id));
                 int reqId = ConnectionsManager.getInstance(currentAccount).sendRequest(request, (response, error) -> {
+                    Timer.done(t2);
                     if (response != null) {
                         TL_stories.TL_stories_stories stories = (TL_stories.TL_stories_stories) response;
                         for (int j = 0; j < messageObjects.size(); j++) {
@@ -627,6 +651,8 @@ public class StoriesStorage {
                                 });
                             }
                         }
+                    } else if (error != null) {
+                        Timer.log(timer, "fillMessagesWithStories: getStoriesByID error " + error.code + " " + error.text);
                     }
                     requestsCount[0]--;
                     if (requestsCount[0] == 0) {

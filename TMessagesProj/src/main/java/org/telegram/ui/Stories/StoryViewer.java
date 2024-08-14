@@ -743,13 +743,16 @@ public class StoryViewer implements NotificationCenter.NotificationCenterDelegat
                             if (isClosed && animateAvatar) {
                                 rect2.set(outFromRectAvatar);
                             } else {
-                                while (child != this) {
+                                while (child != this && child != null) {
                                     if (child.getParent() == this) {
                                         toX += child.getLeft();
                                         toY += child.getTop();
                                     } else if (child.getParent() != storiesViewPager) {
                                         toX += child.getX();
                                         toY += child.getY();
+                                    }
+                                    if (!(child.getParent() instanceof View)) {
+                                        break;
                                     }
                                     child = (View) child.getParent();
                                 }
@@ -1075,7 +1078,7 @@ public class StoryViewer implements NotificationCenter.NotificationCenterDelegat
                     }
 
                     if (event != null && event.getKeyCode() == KeyEvent.KEYCODE_BACK && event.getAction() == KeyEvent.ACTION_UP) {
-                        onBackPressed();
+                        onAttachedBackPressed();
                         return true;
                     }
                     return super.dispatchKeyEventPreIme(event);
@@ -2461,8 +2464,8 @@ public class StoryViewer implements NotificationCenter.NotificationCenterDelegat
         MessagesController.getInstance(currentAccount).getStoriesController().stopAllPollers();
         if (ATTACH_TO_FRAGMENT) {
             lockOrientation(false);
-            if (fragment != null && fragment.sheetsStack != null) {
-                fragment.sheetsStack.remove(this);
+            if (fragment != null) {
+                fragment.removeSheet(this);
             }
         }
 
@@ -2499,12 +2502,17 @@ public class StoryViewer implements NotificationCenter.NotificationCenterDelegat
         return ColorUtils.blendARGB(currentColor, Color.BLACK, getBlackoutAlpha());
     }
 
+    @Override
+    public boolean isAttachedLightStatusBar() {
+        return false;
+    }
+
     private float getBlackoutAlpha() {
         return progressToOpen * (0.5f + 0.5f * (1f - progressToDismiss));
     }
 
     @Override
-    public boolean onBackPressed() {
+    public boolean onAttachedBackPressed() {
         if (selfStoriesViewsOffset != 0) {
             if (selfStoryViewsView.onBackPressed()) {
                 return true;

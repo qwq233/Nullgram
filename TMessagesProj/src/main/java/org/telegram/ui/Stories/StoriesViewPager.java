@@ -1,9 +1,27 @@
+/*
+ * Copyright (C) 2019-2024 qwq233 <qwq233@qwq2333.top>
+ * https://github.com/qwq233/Nullgram
+ *
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation; either version 2
+ * of the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along with this software.
+ *  If not, see
+ * <https://www.gnu.org/licenses/>
+ */
+
 package org.telegram.ui.Stories;
 
 import android.content.Context;
 import android.graphics.Canvas;
 import android.os.Build;
-import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
@@ -18,11 +36,9 @@ import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.FileLog;
 import org.telegram.messenger.MessageObject;
 import org.telegram.messenger.UserConfig;
-import org.telegram.tgnet.TLRPC;
 import org.telegram.ui.ActionBar.Theme;
 
 import java.util.ArrayList;
-import java.util.TreeSet;
 
 public class StoriesViewPager extends ViewPager {
 
@@ -260,6 +276,9 @@ public class StoriesViewPager extends ViewPager {
     }
 
     public void setDays(long dialogId, ArrayList<ArrayList<Integer>> days, int currentAccount) {
+        if (this.daysDialogId == dialogId && eqA(this.days, days) && this.currentAccount == currentAccount) {
+            return;
+        }
         this.daysDialogId = dialogId;
         this.days = days;
         this.currentAccount = currentAccount;
@@ -276,6 +295,27 @@ public class StoriesViewPager extends ViewPager {
         }
         setCurrentItem(position);
         updateDelegate = true;
+    }
+
+    private static boolean eqA(ArrayList<ArrayList<Integer>> a, ArrayList<ArrayList<Integer>> b) {
+        if (a == null && b == null) return true;
+        if (a == null || b == null) return false;
+        if (a.size() != b.size()) return false;
+        for (int i = 0; i < a.size(); ++i) {
+            if (!eq(a.get(i), b.get(i)))
+                return false;
+        }
+        return true;
+    }
+    private static boolean eq(ArrayList<Integer> a, ArrayList<Integer> b) {
+        if (a == null && b == null) return true;
+        if (a == null || b == null) return false;
+        if (a.size() != b.size()) return false;
+        for (int i = 0; i < a.size(); ++i) {
+            if (a.get(i) != b.get(i))
+                return false;
+        }
+        return true;
     }
 
     @Override

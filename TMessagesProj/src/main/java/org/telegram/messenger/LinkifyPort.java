@@ -1,3 +1,22 @@
+/*
+ * Copyright (C) 2019-2024 qwq233 <qwq233@qwq2333.top>
+ * https://github.com/qwq233/Nullgram
+ *
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation; either version 2
+ * of the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along with this software.
+ *  If not, see
+ * <https://www.gnu.org/licenses/>
+ */
+
 package org.telegram.messenger;
 
 import java.util.regex.Pattern;
@@ -6,7 +25,7 @@ public class LinkifyPort {
 
     private static String IANA_TOP_LEVEL_DOMAINS =
             "(?:"
-                    + "(?:aaa|aarp|abb|abbott|abogado|academy|accenture|accountant|accountants|aco|active"
+                    + "(?:aaa|adnl|aarp|abb|abbott|abogado|academy|accenture|accountant|accountants|aco|active"
                     + "|actor|ads|adult|aeg|aero|afl|agency|aig|airforce|airtel|allfinanz|alsace|amica|amsterdam"
                     + "|android|apartments|app|apple|aquarelle|aramco|archi|army|arpa|arte|asia|associates"
                     + "|attorney|auction|audio|auto|autos|axa|azure|a[cdefgilmoqrstuwxz])"
@@ -67,7 +86,7 @@ public class LinkifyPort {
                     + "|sky|skype|sncf|soccer|social|software|sohu|solar|solutions|sony|soy|space|spiegel|spreadbetting"
                     + "|srl|stada|starhub|statoil|stc|stcgroup|stockholm|studio|study|style|sucks|supplies"
                     + "|supply|support|surf|surgery|suzuki|swatch|swiss|sydney|systems|s[abcdeghijklmnortuvxyz])"
-                    + "|(?:tab|taipei|tatamotors|tatar|tattoo|tax|taxi|team|tech|technology|tel|telefonica"
+                    + "|(?:ton|tab|taipei|tatamotors|tatar|tattoo|tax|taxi|team|tech|technology|tel|telefonica"
                     + "|temasek|tennis|thd|theater|theatre|tickets|tienda|tips|tires|tirol|today|tokyo|tools"
                     + "|top|toray|toshiba|tours|town|toyota|toys|trade|trading|training|travel|trust|tui|t[cdfghjklmnortvwz])"
                     + "|(?:ubs|university|uno|uol|u[agksyz])"
@@ -168,13 +187,13 @@ public class LinkifyPort {
     private static final String LABEL_CHAR = "a-zA-Z0-9" + UCS_CHAR_FIXED;
     private static final String IRI_LABEL = "[" + LABEL_CHAR + "](?:[" + LABEL_CHAR + "_\\-]{0,61}[" + LABEL_CHAR + "]){0,1}";
     private static String STRICT_TLD = "(?:" + IANA_TOP_LEVEL_DOMAINS + "|" + PUNYCODE_TLD + ")";
-    private static final String STRICT_HOST_NAME = "(?:(?:" + IRI_LABEL + "\\.)+" + STRICT_TLD + ")";
+    public static final String STRICT_HOST_NAME = "(?:(?:" + IRI_LABEL + "\\.)+" + STRICT_TLD + ")";
     private static final String STRICT_DOMAIN_NAME = "(?:" + STRICT_HOST_NAME + "|" + IP_ADDRESS_STRING + ")";
     private static final String TLD = "(" + PUNYCODE_TLD + "|" + "[" + TLD_CHAR + "]{2,63}" + ")";
     private static final String HOST_NAME = "(" + IRI_LABEL + "\\.)+" + TLD;
     private static final String DOMAIN_NAME_STR = "(" + HOST_NAME + "|" + IP_ADDRESS_STRING + ")";
     private static final Pattern DOMAIN_NAME = Pattern.compile(DOMAIN_NAME_STR);
-    private static final String PROTOCOL = "(?i:http|https|ton|tg)://";
+    private static final String PROTOCOL = "(?i:http|https|ton|tg|tonsite)://";
     private static final String WORD_BOUNDARY = "(?:\\b|$|^)";
     private static final String USER_INFO = "(?:[a-zA-Z0-9\\$\\-\\_\\.\\+\\!\\*\\'\\(\\)"
             + "\\,\\;\\?\\&\\=]|(?:\\%[a-fA-F0-9]{2})){1,64}(?:\\:(?:[a-zA-Z0-9\\$\\-\\_"

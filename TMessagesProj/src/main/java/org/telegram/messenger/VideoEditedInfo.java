@@ -37,6 +37,7 @@ import org.telegram.ui.Components.PhotoFilterView;
 import org.telegram.ui.Components.Point;
 import org.telegram.ui.Components.Reactions.ReactionsLayoutInBubble;
 import org.telegram.ui.Stories.recorder.StoryEntry;
+import org.telegram.ui.Stories.recorder.Weather;
 
 import java.util.ArrayList;
 import java.util.Locale;
@@ -138,6 +139,7 @@ public class VideoEditedInfo {
         public static final byte TYPE_ROUND = 5;
         public static final byte TYPE_MESSAGE = 6;
         public static final byte TYPE_LINK = 7;
+        public static final byte TYPE_WEATHER = 8;
 
         public byte type;
         public byte subType;
@@ -186,6 +188,7 @@ public class VideoEditedInfo {
 
         public TL_stories.MediaArea mediaArea;
         public TLRPC.MessageMedia media;
+        public Weather.State weather;
         public float density;
 
         public long roundOffset;
@@ -266,6 +269,11 @@ public class VideoEditedInfo {
                 roundDuration = data.readInt64(exception);
             } else if (type == TYPE_PHOTO) {
                 segmentedPath = data.readString(exception);
+            } else if (type == TYPE_WEATHER) {
+                int magic = data.readInt32(exception);
+                if (magic == 0x7EA7539) {
+                    weather = Weather.State.TLdeserialize(data);
+                }
             }
         }
 
@@ -332,6 +340,13 @@ public class VideoEditedInfo {
                 data.writeInt64(roundDuration);
             } else if (type == TYPE_PHOTO) {
                 data.writeString(segmentedPath);
+            } else if (type == TYPE_WEATHER) {
+                if (weather == null) {
+                    data.writeInt32(0xdeadbeef);
+                } else {
+                    data.writeInt32(0x7EA7539);
+                    weather.serializeToStream(data);
+                }
             }
         }
 
@@ -385,6 +400,7 @@ public class VideoEditedInfo {
             entity.roundLeft = roundLeft;
             entity.roundRight = roundRight;
             entity.linkSettings = linkSettings;
+            entity.weather = weather;
             return entity;
         }
     }

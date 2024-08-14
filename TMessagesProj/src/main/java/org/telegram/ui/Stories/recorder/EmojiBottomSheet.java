@@ -45,6 +45,8 @@ import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.text.Editable;
 import android.text.Layout;
+import android.text.SpannableStringBuilder;
+import android.text.Spanned;
 import android.text.StaticLayout;
 import android.text.TextPaint;
 import android.text.TextUtils;
@@ -116,6 +118,7 @@ import org.telegram.ui.Components.EmojiTabsStrip;
 import org.telegram.ui.Components.EmojiView;
 import org.telegram.ui.Components.ExtendedGridLayoutManager;
 import org.telegram.ui.Components.LayoutHelper;
+import org.telegram.ui.Components.LoadingSpan;
 import org.telegram.ui.Components.Premium.PremiumFeatureBottomSheet;
 import org.telegram.ui.Components.RLottieDrawable;
 import org.telegram.ui.Components.Reactions.ReactionImageHolder;
@@ -2802,6 +2805,7 @@ public class EmojiBottomSheet extends BottomSheet implements NotificationCenter.
     public static final int WIDGET_PHOTO = 2;
     public static final int WIDGET_REACTION = 3;
     public static final int WIDGET_LINK = 4;
+    public static final int WIDGET_WEATHER = 5;
 
     private class StoryWidgetsCell extends View {
 
@@ -2819,14 +2823,30 @@ public class EmojiBottomSheet extends BottomSheet implements NotificationCenter.
         public StoryWidgetsCell(Context context) {
             super(context);
             setPadding(0, 0, 0, 0);
+            if (canShowWidget(WIDGET_LINK))
+                widgets.add(new Button(WIDGET_LINK, R.drawable.msg_limit_links, LocaleController.getString(R.string.StoryWidgetLink)).needsPremium());
             if (canShowWidget(WIDGET_LOCATION))
                 widgets.add(new Button(WIDGET_LOCATION, R.drawable.map_pin3, LocaleController.getString(R.string.StoryWidgetLocation)));
+            if (canShowWidget(WIDGET_WEATHER)) {
+                Weather.State weather = Weather.getCached();
+                Button[] btn = new Button[] { null };
+                CharSequence text = Emoji.replaceEmoji((weather == null ? "🌤" : weather.getEmoji()) + " " + (weather == null ? (Weather.isDefaultCelsius() ? "24°C" : "72°F") : weather.getTemperature()), textPaint.getFontMetricsInt(), false);
+                if (MessagesController.getInstance(currentAccount).storyWeatherPreload && Weather.hasLocationPermission() && weather == null) {
+                    text = new SpannableStringBuilder("___");
+                    ((SpannableStringBuilder) text).setSpan(new LoadingSpan(this, dp(68)), 0, text.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+                    btn[0] = new Button(this, WIDGET_WEATHER, text);
+                    Weather.fetch(false, state -> {
+                        btn[0].setText(Emoji.replaceEmoji((state == null ? "🌤" : state.getEmoji()) + " " + (state == null ? (Weather.isDefaultCelsius() ? "24°C" : "72°F") : state.getTemperature()), textPaint.getFontMetricsInt(), false));
+                        invalidate();
+                        requestLayout();
+                    });
+                }
+                widgets.add(btn[0] == null ? new Button(this, WIDGET_WEATHER, text) : btn[0]);
+            }
             if (canShowWidget(WIDGET_AUDIO))
                 widgets.add(new Button(WIDGET_AUDIO, R.drawable.filled_widget_music, LocaleController.getString(R.string.StoryWidgetAudio)));
             if (canShowWidget(WIDGET_PHOTO))
                 widgets.add(new Button(WIDGET_PHOTO, R.drawable.filled_premium_camera, LocaleController.getString(R.string.StoryWidgetPhoto)));
-            if (canShowWidget(WIDGET_LINK))
-                widgets.add(new Button(WIDGET_LINK, R.drawable.msg_limit_links, LocaleController.getString(R.string.StoryWidgetLink)).needsPremium());
             if (canShowWidget(WIDGET_REACTION))
                 widgets.add(new ReactionWidget());
         }
@@ -2838,6 +2858,7 @@ public class EmojiBottomSheet extends BottomSheet implements NotificationCenter.
             int layoutLine = 0;
             RectF bounds = new RectF();
             ButtonBounce bounce = new ButtonBounce(StoryWidgetsCell.this);
+            public AnimatedFloat animatedWidth = new AnimatedFloat(StoryWidgetsCell.this, 350, CubicBezierInterpolator.EASE_OUT_QUINT);
 
             abstract void draw(Canvas canvas, float left, float top);
 
@@ -2848,12 +2869,15 @@ public class EmojiBottomSheet extends BottomSheet implements NotificationCenter.
         }
 
         private class Button extends BaseWidget {
+
+            String emojiDrawable;
             Drawable drawable;
             Drawable lockDrawable;
             StaticLayout layout;
             float textWidth;
             float textLeft;
             Paint lockPaint;
+
 
             public Button(int id, int iconId, String string) {
                 this.id = id;
@@ -2865,6 +2889,25 @@ public class EmojiBottomSheet extends BottomSheet implements NotificationCenter.
                 this.textWidth = this.layout.getLineCount() > 0 ? this.layout.getLineWidth(0) : 0;
                 this.textLeft = this.layout.getLineCount() > 0 ? this.layout.getLineLeft(0) : 0;
                 this.width = dpf2(6 + 24 + 4 + 11.6f) + this.textWidth;
+                this.height = dpf2(36);
+            }
+
+            public Button(View view, int id, CharSequence text) {
+                this.id = id;
+                text = TextUtils.ellipsize(text, textPaint, AndroidUtilities.displaySize.x * .8f, TextUtils.TruncateAt.END);
+                this.layout = new StaticLayout(text, textPaint, 99999, Layout.Alignment.ALIGN_NORMAL, 1f, 0f, false);
+                this.textWidth = this.layout.getLineCount() > 0 ? this.layout.getLineWidth(0) : 0;
+                this.textLeft = this.layout.getLineCount() > 0 ? this.layout.getLineLeft(0) : 0;
+                this.width = dpf2(6 + 6) + this.textWidth;
+                this.height = dpf2(36);
+            }
+
+            public void setText(CharSequence text) {
+                text = TextUtils.ellipsize(text, textPaint, AndroidUtilities.displaySize.x * .8f, TextUtils.TruncateAt.END);
+                this.layout = new StaticLayout(text, textPaint, 99999, Layout.Alignment.ALIGN_NORMAL, 1f, 0f, false);
+                this.textWidth = this.layout.getLineCount() > 0 ? this.layout.getLineWidth(0) : 0;
+                this.textLeft = this.layout.getLineCount() > 0 ? this.layout.getLineLeft(0) : 0;
+                this.width = dpf2(6 + 11.6f) + this.textWidth;
                 this.height = dpf2(36);
             }
 
@@ -2887,13 +2930,22 @@ public class EmojiBottomSheet extends BottomSheet implements NotificationCenter.
                 if (lockDrawable != null) {
                     canvas.saveLayerAlpha(bounds, 0xFF, Canvas.ALL_SAVE_FLAG);
                 }
-                drawable.setBounds(
-                    (int) (bounds.left + dp(6)),
-                    (int) (bounds.top + height / 2 - dp(24) / 2),
-                    (int) (bounds.left + dp(6 + 24)),
-                    (int) (bounds.top + height / 2 + dp(24) / 2)
-                );
-                drawable.draw(canvas);
+                if (drawable == null) {
+                    drawable = Emoji.getEmojiBigDrawable(emojiDrawable);
+                    if (this.drawable instanceof Emoji.EmojiDrawable) {
+                        ((Emoji.EmojiDrawable) this.drawable).fullSize = false;
+                    }
+                }
+                if (drawable != null) {
+                    int sz = dp(emojiDrawable == null ? 24 : 22);
+                    drawable.setBounds(
+                            (int) (bounds.left + dp(6 + 12) - sz / 2),
+                            (int) (bounds.top + height / 2 - sz / 2),
+                            (int) (bounds.left + dp(6 + 12) + sz / 2),
+                            (int) (bounds.top + height / 2 + sz / 2)
+                    );
+                    drawable.draw(canvas);
+                }
                 if (lockDrawable != null) {
                     AndroidUtilities.rectTmp.set(
                         bounds.left + dp(6 + 24 - 12 + .55f),
@@ -2915,7 +2967,7 @@ public class EmojiBottomSheet extends BottomSheet implements NotificationCenter.
                     lockDrawable.draw(canvas);
                     canvas.restore();
                 }
-                canvas.translate(bounds.left + dp(6 + 24 + 4) - textLeft, bounds.top + height / 2 - layout.getHeight() / 2f);
+                canvas.translate(bounds.left + dp(6 + (drawable == null && emojiDrawable == null ? 0 : 24 + 4)) - textLeft, bounds.top + height / 2 - layout.getHeight() / 2f);
                 layout.draw(canvas);
                 canvas.restore();
             }
@@ -3032,7 +3084,7 @@ public class EmojiBottomSheet extends BottomSheet implements NotificationCenter.
             float x = 0;
 
             final int width = MeasureSpec.getSize(widthMeasureSpec);
-            final int availableWidth = (int) ((width - getPaddingLeft() - getPaddingRight()) * 0.8f);
+            final int availableWidth = (int) (width - getPaddingLeft() - getPaddingRight());
 
             for (final BaseWidget widget : widgets) {
                 widget.layoutX = x;
@@ -3064,6 +3116,19 @@ public class EmojiBottomSheet extends BottomSheet implements NotificationCenter.
 
         @Override
         protected void dispatchDraw(Canvas canvas) {
+            try {
+                for (int i = 0; i < lineWidths.length; ++i) {
+                    lineWidths[i] = 0;
+                }
+                for (final BaseWidget widget : widgets) {
+                    final int i = widget.layoutLine - 1;
+                    if (lineWidths[i] > 0)
+                        lineWidths[i] += dp(10);
+                    lineWidths[i] += widget.animatedWidth.set(widget.width);
+                }
+            } catch (Exception e) {
+                FileLog.e(e);
+            }
             for (final BaseWidget widget : widgets) {
                 final float left = getPaddingLeft() + ((getMeasuredWidth() - getPaddingLeft() - getPaddingRight() - lineWidths[widget.layoutLine - 1]) / 2f) + widget.layoutX;
                 final float top = dp(12) + (widget.layoutLine - 1) * dp(36 + 12);

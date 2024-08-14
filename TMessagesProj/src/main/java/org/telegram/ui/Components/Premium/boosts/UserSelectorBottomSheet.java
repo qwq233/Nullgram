@@ -82,6 +82,7 @@ import org.telegram.ui.Components.RecyclerListView;
 import org.telegram.ui.LaunchActivity;
 import org.telegram.ui.PrivacyControlActivity;
 import org.telegram.ui.ProfileActivity;
+import org.telegram.ui.Stars.StarsIntroActivity;
 import org.telegram.ui.Stories.recorder.ButtonWithCounterView;
 
 import java.util.ArrayList;
@@ -92,6 +93,12 @@ import java.util.List;
 import java.util.Map;
 
 public class UserSelectorBottomSheet extends BottomSheetWithRecyclerListView implements NotificationCenter.NotificationCenterDelegate {
+
+    public int type;
+
+    public static final int TYPE_PREMIUM = 0;
+    public static final int TYPE_STARS = 1;
+
     private static UserSelectorBottomSheet instance;
 
     public static void open() {
@@ -99,6 +106,10 @@ public class UserSelectorBottomSheet extends BottomSheetWithRecyclerListView imp
     }
 
     public static void open(long userId, BirthdayController.BirthdayState birthdayState) {
+        open(TYPE_PREMIUM, userId, birthdayState);
+    }
+
+    public static void open(int type, long userId, BirthdayController.BirthdayState birthdayState) {
         BaseFragment fragment = LaunchActivity.getLastFragment();
         if (fragment == null) {
             return;
@@ -106,8 +117,17 @@ public class UserSelectorBottomSheet extends BottomSheetWithRecyclerListView imp
         if (instance != null) {
             return;
         }
-        UserSelectorBottomSheet sheet = new UserSelectorBottomSheet(fragment, userId, birthdayState, true);
+        final int finalType = type;
+        UserSelectorBottomSheet sheet = new UserSelectorBottomSheet(fragment, userId, birthdayState, type, true) {
+            @Override
+            protected int getType() {
+                return finalType;
+            }
+        };
         if (fragment != null) {
+            if (!AndroidUtilities.isTablet() && !AndroidUtilities.hasDialogOnTop(fragment)) {
+                sheet.makeAttached(fragment);
+            }
             fragment.showDialog(sheet);
         } else {
             sheet.show();
@@ -192,15 +212,15 @@ public class UserSelectorBottomSheet extends BottomSheetWithRecyclerListView imp
     }
 
     private void checkEditTextHint() {
-        if (selectedIds.size() > 0) {
+        if (!selectedIds.isEmpty() || type == TYPE_STARS) {
             if (!isHintSearchText) {
                 isHintSearchText = true;
-                AndroidUtilities.runOnUIThread(() -> searchField.setHintText(getString("Search", R.string.Search), true), 10);
+                AndroidUtilities.runOnUIThread(() -> searchField.setHintText(getString(R.string.Search), true), 10);
             }
         } else {
             if (isHintSearchText) {
                 isHintSearchText = false;
-                AndroidUtilities.runOnUIThread(() -> searchField.setHintText(getString("GiftPremiumUsersSearchHint", R.string.GiftPremiumUsersSearchHint), true), 10);
+                AndroidUtilities.runOnUIThread(() -> searchField.setHintText(getString(R.string.GiftPremiumUsersSearchHint), true), 10);
             }
         }
     }
@@ -219,11 +239,12 @@ public class UserSelectorBottomSheet extends BottomSheetWithRecyclerListView imp
         };
     }
 
-    public UserSelectorBottomSheet(BaseFragment fragment, long userId, BirthdayController.BirthdayState state, boolean needFocus) {
+    public UserSelectorBottomSheet(BaseFragment fragment, long userId, BirthdayController.BirthdayState state, int type, boolean needFocus) {
         super(fragment, needFocus, false, false, fragment.getResourceProvider());
 
+        this.type = type;
         this.birthdays = state;
-        if (birthdays != null && !birthdays.today.isEmpty()) {
+        if (birthdays != null && !birthdays.today.isEmpty() && type == TYPE_PREMIUM) {
             for (TLRPC.User user : birthdays.today) {
                 selectedIds.add(user.id);
                 allSelectedObjects.put(user.id, user);
@@ -271,7 +292,7 @@ public class UserSelectorBottomSheet extends BottomSheetWithRecyclerListView imp
         };
         searchField.setBackgroundColor(getThemedColor(Theme.key_dialogBackground));
         searchField.setOnSearchTextChange(this::onSearch);
-        searchField.setHintText(getString(!selectedIds.isEmpty() ? R.string.Search : R.string.GiftPremiumUsersSearchHint), false);
+        searchField.setHintText(getString(!selectedIds.isEmpty() || type == TYPE_STARS ? R.string.Search : R.string.GiftPremiumUsersSearchHint), false);
 
         sectionCell = new View(getContext()) {
             @Override
@@ -303,13 +324,15 @@ public class UserSelectorBottomSheet extends BottomSheetWithRecyclerListView imp
         };
         actionButton.setOnClickListener(v -> next());
         buttonContainer.addView(actionButton, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, 48, Gravity.BOTTOM | Gravity.FILL_HORIZONTAL));
-        containerView.addView(buttonContainer, LayoutHelper.createFrameMarginPx(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT, Gravity.BOTTOM | Gravity.FILL_HORIZONTAL, backgroundPaddingLeft, 0, backgroundPaddingLeft, 0));
+        if (type != TYPE_STARS) {
+            containerView.addView(buttonContainer, LayoutHelper.createFrameMarginPx(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT, Gravity.BOTTOM | Gravity.FILL_HORIZONTAL, backgroundPaddingLeft, 0, backgroundPaddingLeft, 0));
+        }
 
         bulletinContainer = new FrameLayout(getContext());
         containerView.addView(bulletinContainer, LayoutHelper.createFrameMarginPx(LayoutHelper.MATCH_PARENT, 300, Gravity.BOTTOM | Gravity.FILL_HORIZONTAL, backgroundPaddingLeft, 0, backgroundPaddingLeft, dp(68)));
 
         selectorAdapter.setData(items, recyclerListView);
-        recyclerListView.setPadding(backgroundPaddingLeft, 0, backgroundPaddingLeft, dp(BOTTOM_HEIGHT_DP));
+        recyclerListView.setPadding(backgroundPaddingLeft, 0, backgroundPaddingLeft, dp(type != TYPE_STARS ? BOTTOM_HEIGHT_DP : 0));
         recyclerListView.addOnScrollListener(new RecyclerView.OnScrollListener() {
             @Override
             public void onScrollStateChanged(@NonNull RecyclerView recyclerView, int newState) {
@@ -325,6 +348,17 @@ public class UserSelectorBottomSheet extends BottomSheetWithRecyclerListView imp
             }
             if (view instanceof SelectorUserCell) {
                 TLRPC.User user = ((SelectorUserCell) view).getUser();
+                if (type == TYPE_STARS) {
+                    if (searchField != null) {
+                        AndroidUtilities.hideKeyboard(searchField.getEditText());
+                    }
+                    StarsIntroActivity.GiftStarsSheet sheet = new StarsIntroActivity.GiftStarsSheet(getContext(), resourcesProvider, user, this::dismiss);
+                    if (!AndroidUtilities.isTablet()) {
+                        sheet.makeAttached(attachedFragment);
+                    }
+                    sheet.show();
+                    return;
+                }
                 long id = user.id;
                 if (selectedIds.contains(id)) {
                     selectedIds.remove(id);
@@ -375,10 +409,12 @@ public class UserSelectorBottomSheet extends BottomSheetWithRecyclerListView imp
         initHints(false);
         updateList(false, true);
         fixNavigationBar();
-        BoostRepository.loadGiftOptions(null, arg -> {
-            paymentOptions.clear();
-            paymentOptions.addAll(arg);
-        });
+        if (type == TYPE_PREMIUM) {
+            BoostRepository.loadGiftOptions(null, arg -> {
+                paymentOptions.clear();
+                paymentOptions.addAll(arg);
+            });
+        }
     }
 
     private void initContacts(boolean needUpdate) {
@@ -422,9 +458,13 @@ public class UserSelectorBottomSheet extends BottomSheetWithRecyclerListView imp
             }
         }
         AndroidUtilities.hideKeyboard(searchField.getEditText());
-        List<TLRPC.TL_premiumGiftCodeOption> options = BoostRepository.filterGiftOptions(paymentOptions, selectedUsers.size());
-        options = BoostRepository.filterGiftOptionsByBilling(options);
-        PremiumPreviewGiftToUsersBottomSheet.show(selectedUsers, options);
+        if (type == TYPE_STARS) {
+
+        } else {
+            List<TLRPC.TL_premiumGiftCodeOption> options = BoostRepository.filterGiftOptions(paymentOptions, selectedUsers.size());
+            options = BoostRepository.filterGiftOptionsByBilling(options);
+            PremiumPreviewGiftToUsersBottomSheet.show(selectedUsers, options);
+        }
     }
 
     public void scrollToTop(boolean animate) {
@@ -555,6 +595,7 @@ public class UserSelectorBottomSheet extends BottomSheetWithRecyclerListView imp
         int count = 0;
         boolean allSelected = true;
         for (TLRPC.User user : users) {
+            if (user == null || user.bot || UserObject.isService(user.id)) continue;
             if (user.id == userId) {
                 continue;
             }
@@ -609,6 +650,7 @@ public class UserSelectorBottomSheet extends BottomSheetWithRecyclerListView imp
         int h = 0;
         if (isSearching()) {
             for (TLRPC.User foundedUser : foundedUsers) {
+                if (foundedUser == null || foundedUser.bot || UserObject.isService(foundedUser.id)) continue;
                 h += dp(56);
                 items.add(Item.asUser(foundedUser, selectedIds.contains(foundedUser.id)).withOptions(openOptions(foundedUser)));
             }
@@ -665,8 +707,9 @@ public class UserSelectorBottomSheet extends BottomSheetWithRecyclerListView imp
                     if (birthdays != null && birthdays.contains(contact.user_id)) {
                         continue;
                     }
-                    h += dp(56);
                     TLRPC.User user = MessagesController.getInstance(currentAccount).getUser(contact.user_id);
+                    if (user == null || user.bot || UserObject.isService(user.id)) continue;
+                    h += dp(56);
                     if (selectedIds.contains(user.id)) selected.add(user.id);
                     userItems.add(Item.asUser(user, selectedIds.contains(user.id)).withOptions(openOptions(user)));
                 }
@@ -716,22 +759,24 @@ public class UserSelectorBottomSheet extends BottomSheetWithRecyclerListView imp
                 .add(R.drawable.profile_discuss, LocaleController.getString(R.string.SendMessage), () -> {
                     BaseFragment fragment = getBaseFragment();
                     if (user == null || fragment == null) return;
-                    BaseFragment.BottomSheetParams bottomSheetParams = new BaseFragment.BottomSheetParams();
-                    bottomSheetParams.transitionFromLeft = true;
-                    bottomSheetParams.allowNestedScroll = false;
+//                    BaseFragment.BottomSheetParams bottomSheetParams = new BaseFragment.BottomSheetParams();
+//                    bottomSheetParams.transitionFromLeft = true;
+//                    bottomSheetParams.allowNestedScroll = false;
                     Bundle args = new Bundle();
                     args.putLong("user_id", user.id);
-                    fragment.showAsSheet(new ChatActivity(args), bottomSheetParams);
+//                    fragment.showAsSheet(new ChatActivity(args), bottomSheetParams);
+                    fragment.presentFragment(new ChatActivity(args));
                 })
                 .add(R.drawable.msg_openprofile, LocaleController.getString(R.string.OpenProfile), () -> {
                     BaseFragment fragment = getBaseFragment();
                     if (user == null || fragment == null) return;
-                    BaseFragment.BottomSheetParams bottomSheetParams = new BaseFragment.BottomSheetParams();
-                    bottomSheetParams.transitionFromLeft = true;
-                    bottomSheetParams.allowNestedScroll = false;
+//                    BaseFragment.BottomSheetParams bottomSheetParams = new BaseFragment.BottomSheetParams();
+//                    bottomSheetParams.transitionFromLeft = true;
+//                    bottomSheetParams.allowNestedScroll = false;
                     Bundle args = new Bundle();
                     args.putLong("user_id", user.id);
-                    fragment.showAsSheet(new ProfileActivity(args), bottomSheetParams);
+//                    fragment.showAsSheet(new ProfileActivity(args), bottomSheetParams);
+                    fragment.presentFragment(new ProfileActivity(args));
                 })
                 .show();
         };
@@ -745,14 +790,21 @@ public class UserSelectorBottomSheet extends BottomSheetWithRecyclerListView imp
 
     @Override
     protected CharSequence getTitle() {
-        return getString("GiftTelegramPremiumTitle", R.string.GiftTelegramPremiumTitle);
+        if (getType() == TYPE_STARS) {
+            return getString(R.string.GiftStarsTitle);
+        }
+        return getString(R.string.GiftTelegramPremiumTitle);
     }
 
     @Override
     protected RecyclerListView.SelectionAdapter createAdapter(RecyclerListView listView) {
-        selectorAdapter = new SelectorAdapter(getContext(), resourcesProvider);
+        selectorAdapter = new SelectorAdapter(getContext(), getType() != TYPE_STARS, resourcesProvider);
         selectorAdapter.setGreenSelector(true);
         return selectorAdapter;
+    }
+
+    protected int getType() {
+        return TYPE_PREMIUM;
     }
 
     @Override
@@ -817,6 +869,7 @@ public class UserSelectorBottomSheet extends BottomSheetWithRecyclerListView imp
                 }
             }), ConnectionsManager.RequestFlagDoNotWaitFloodWait);
 
+            MessagesController.getInstance(currentAccount).invalidateContentSettings();
             MessagesController.getInstance(currentAccount).removeSuggestion(0, "BIRTHDAY_SETUP");
             NotificationCenter.getInstance(currentAccount).postNotificationName(NotificationCenter.newSuggestionsAvailable);
             updateItems(true, true);

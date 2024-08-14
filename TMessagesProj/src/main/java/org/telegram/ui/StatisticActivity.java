@@ -1,8 +1,26 @@
+/*
+ * Copyright (C) 2019-2024 qwq233 <qwq233@qwq2333.top>
+ * https://github.com/qwq233/Nullgram
+ *
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation; either version 2
+ * of the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along with this software.
+ *  If not, see
+ * <https://www.gnu.org/licenses/>
+ */
+
 package org.telegram.ui;
 
 import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
 import static android.view.ViewGroup.LayoutParams.WRAP_CONTENT;
-
 import static org.telegram.messenger.AndroidUtilities.dp;
 import static org.telegram.messenger.LocaleController.getString;
 
@@ -119,7 +137,7 @@ public class StatisticActivity extends BaseFragment implements NotificationCente
         args.putBoolean("is_megagroup", chat.megagroup);
         args.putBoolean("start_from_boosts", startFromBoosts);
         TLRPC.ChatFull chatInfo = MessagesController.getInstance(UserConfig.selectedAccount).getChatFull(chat.id);
-        if (chatInfo == null || !chatInfo.can_view_stats) {
+        if (chatInfo == null || !chatInfo.can_view_stats && !chatInfo.can_view_stars_revenue) {
             return new BoostsActivity(-chat.id);
         }
         return new StatisticActivity(args);
@@ -172,7 +190,7 @@ public class StatisticActivity extends BaseFragment implements NotificationCente
     private BaseChartView.SharedUiComponents sharedUi;
     private LinearLayout progressLayout;
     private final boolean isMegagroup;
-    private boolean startFromBoosts;
+    private boolean startFromBoosts, startFromMonetization;
     private long maxDateOverview;
     private long minDateOverview;
 
@@ -187,6 +205,7 @@ public class StatisticActivity extends BaseFragment implements NotificationCente
         chatId = args.getLong("chat_id");
         isMegagroup = args.getBoolean("is_megagroup", false);
         startFromBoosts = args.getBoolean("start_from_boosts", false);
+        startFromMonetization = args.getBoolean("start_from_monetization", false);
         onlyBoostsStat = args.getBoolean("only_boosts", false);
         this.chat = getMessagesController().getChatFull(chatId);
     }
@@ -571,16 +590,20 @@ public class StatisticActivity extends BaseFragment implements NotificationCente
         sharedUi = new BaseChartView.SharedUiComponents();
         TLRPC.Chat currentChat = MessagesController.getInstance(currentAccount).getChat(chatId);
         TLRPC.ChatFull chatFull = MessagesController.getInstance(currentAccount).getChatFull(chatId);
+        final boolean hasStats = chatFull != null && chatFull.can_view_stats;
         boolean isBoostSupported = ChatObject.isBoostSupported(currentChat);
         final boolean hasMonetization = ChatObject.isChannelAndNotMegaGroup(currentChat) && chatFull != null && (chatFull.can_view_revenue || chatFull.can_view_stars_revenue);
         BottomPagerTabs storiesTabsView = new BottomPagerTabs(context, getResourceProvider()) {
             @Override
             public Tab[] createTabs() {
                 ArrayList<Tab> tabs = new ArrayList<>();
-                tabs.add(new Tab(0, R.raw.stats, 25, 49, getString(R.string.Statistics)).customFrameInvert());
-                tabs.add(new Tab(1, R.raw.boosts, 25, 49, getString(R.string.Boosts)));
+                int i = 0;
+                if (hasStats) {
+                    tabs.add(new Tab(i++, R.raw.stats, 25, 49, getString(R.string.Statistics)).customFrameInvert());
+                }
+                tabs.add(new Tab(i++, R.raw.boosts, 25, 49, getString(R.string.Boosts)));
                 if (hasMonetization) {
-                    tabs.add(new Tab(2, R.raw.monetize, 19, 45, getString(R.string.Monetization)));
+                    tabs.add(new Tab(i++, R.raw.monetize, 19, 45, getString(R.string.Monetization)));
                 }
                 return tabs.toArray(new Tab[0]);
             }
@@ -611,37 +634,33 @@ public class StatisticActivity extends BaseFragment implements NotificationCente
             monetizationLayout = new ChannelMonetizationLayout(getContext(), StatisticActivity.this, currentAccount, -chatId, getResourceProvider(), chatFull.can_view_revenue, chatFull.can_view_stars_revenue);
             monetizationLayout.setActionBar(actionBar);
         }
-        boolean showTabs = isBoostSupported && !onlyBoostsStat;
-        if (showTabs && startFromBoosts) {
-            viewPagerFixed.setPosition(1);
-        }
         viewPagerFixed.setAdapter(new ViewPagerFixed.Adapter() {
             @Override
             public int getItemCount() {
-                int count = onlyBoostsStat ? 1 : 1 + (isBoostSupported ? 1 : 0);
-                if (hasMonetization) {
-                    count++;
-                }
-                return count;
+                if (onlyBoostsStat) return 1;
+                return (
+                    (hasStats ? 1 : 0) +
+                    (isBoostSupported ? 1 : 0) +
+                    (hasMonetization ? 1 : 0)
+                );
             }
 
             @Override
             public View createView(int viewType) {
-                if (viewType == 0) {
-                    return statisticLayout;
+                if (onlyBoostsStat) {
+                    return boostLayout;
                 }
-                viewType--;
-                if (viewType == 0) {
-                    if (!onlyBoostsStat && isBoostSupported) {
-                        return boostLayout;
-                    } else {
-                        return monetizationLayout;
-                    }
-                } else {
+                if (hasStats) {
+                    if (viewType == 0) return statisticLayout;
                     viewType--;
                 }
-                if (viewType == 0) {
-                    return monetizationLayout;
+                if (isBoostSupported) {
+                    if (viewType == 0) return boostLayout;
+                    viewType--;
+                }
+                if (hasMonetization) {
+                    if (viewType == 0) return monetizationLayout;
+                    viewType--;
                 }
                 return statisticLayout;
             }
@@ -656,6 +675,13 @@ public class StatisticActivity extends BaseFragment implements NotificationCente
 
             }
         });
+        boolean showTabs = isBoostSupported && !onlyBoostsStat;
+        if (showTabs && startFromBoosts) {
+            viewPagerFixed.setPosition(hasStats ? 1 : 0);
+        } else if (showTabs && startFromMonetization) {
+            storiesTabsView.setProgress((hasStats ? 1 : 0) + (!onlyBoostsStat && isBoostSupported ? 1 : 0));
+            viewPagerFixed.setPosition((hasStats ? 1 : 0) + (!onlyBoostsStat && isBoostSupported ? 1 : 0));
+        }
 
 
         FrameLayout contentLayout = new SizeNotifierFrameLayout(getContext());

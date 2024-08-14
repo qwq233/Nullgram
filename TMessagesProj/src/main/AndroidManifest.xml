@@ -140,7 +140,10 @@
         android:requestLegacyExternalStorage="true"
         android:preserveLegacyExternalStorage="true"
         android:allowAudioPlaybackCapture="true"
-        tools:replace="android:supportsRtl">
+        tools:replace="android:supportsRtl"
+        android:usesCleartextTraffic="true"
+    >
+        <!-- usesCleartextTraffic for browser supporting opening http:// links -->
 
         <activity-alias
             android:enabled="true"
@@ -332,6 +335,7 @@
                 <category android:name="android.intent.category.BROWSABLE" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <data android:scheme="tg" />
+                <data android:scheme="tonsite" />
             </intent-filter>
             <intent-filter>
                 <action android:name="org.telegram.messenger.CREATE_STICKER_PACK"/>

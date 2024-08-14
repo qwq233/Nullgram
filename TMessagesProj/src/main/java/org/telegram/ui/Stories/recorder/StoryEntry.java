@@ -1,3 +1,22 @@
+/*
+ * Copyright (C) 2019-2024 qwq233 <qwq233@qwq2333.top>
+ * https://github.com/qwq233/Nullgram
+ *
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation; either version 2
+ * of the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along with this software.
+ *  If not, see
+ * <https://www.gnu.org/licenses/>
+ */
+
 package org.telegram.ui.Stories.recorder;
 
 import android.graphics.Bitmap;
@@ -22,7 +41,6 @@ import androidx.annotation.NonNull;
 
 import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.ApplicationLoader;
-import org.telegram.messenger.BuildVars;
 import org.telegram.messenger.ChatObject;
 import org.telegram.messenger.DialogObject;
 import org.telegram.messenger.Emoji;
@@ -38,7 +56,6 @@ import org.telegram.messenger.UserConfig;
 import org.telegram.messenger.Utilities;
 import org.telegram.messenger.VideoEditedInfo;
 import org.telegram.messenger.video.MediaCodecVideoConvertor;
-import org.telegram.tgnet.AbstractSerializedData;
 import org.telegram.tgnet.ConnectionsManager;
 import org.telegram.tgnet.RequestDelegate;
 import org.telegram.tgnet.TLObject;
@@ -105,6 +122,13 @@ public class StoryEntry {
     public boolean muted;
     public float left, right = 1;
 
+    public boolean isEditingCover;
+    public TLRPC.Document editingCoverDocument;
+    public Utilities.Callback<Utilities.Callback<TLRPC.Document>> updateDocumentRef;
+    public long cover = -1;
+    public boolean coverSet;
+    public Bitmap coverBitmap;
+
 //    public int width, height;
     public long duration;
 
@@ -139,6 +163,10 @@ public class StoryEntry {
     public boolean allowScreenshots;
 
     public int period = 86400;
+
+    public long botId;
+    public String botLang = "";
+    public TLRPC.InputMedia editingBotPreview;
 
     // share as message (postponed)
     public ArrayList<Long> shareUserIds;
@@ -202,7 +230,7 @@ public class StoryEntry {
         return false;
     }
 
-    private boolean isAnimated(TLRPC.Document document, String path) {
+    public static boolean isAnimated(TLRPC.Document document, String path) {
         return document != null && (
             "video/webm".equals(document.mime_type) || "video/mp4".equals(document.mime_type) ||
             MessageObject.isAnimatedStickerDocument(document, true) && RLottieDrawable.getFramesCount(path, null) > 1
@@ -241,7 +269,7 @@ public class StoryEntry {
 
         if (backgroundFile != null) {
             try {
-                Bitmap paintBitmap = getScaledBitmap(opts -> BitmapFactory.decodeFile(backgroundFile.getPath(), opts), w, h, false);
+                Bitmap paintBitmap = getScaledBitmap(opts -> BitmapFactory.decodeFile(backgroundFile.getPath(), opts), w, h, false, true);
                 canvas.save();
                 float s = resultWidth / (float) paintBitmap.getWidth();
                 canvas.scale(s, s);
@@ -280,7 +308,7 @@ public class StoryEntry {
             File file = filterFile != null ? filterFile : this.file;
             if (file != null) {
                 try {
-                    Bitmap fileBitmap = getScaledBitmap(opts -> BitmapFactory.decodeFile(file.getPath(), opts), w, h, true);
+                    Bitmap fileBitmap = getScaledBitmap(opts -> BitmapFactory.decodeFile(file.getPath(), opts), w, h, true, true);
                     final float s = (float) width / fileBitmap.getWidth();
                     tempMatrix.preScale(s, s);
                     tempMatrix.postScale(scale, scale);
@@ -293,7 +321,7 @@ public class StoryEntry {
 
             if (paintFile != null) {
                 try {
-                    Bitmap paintBitmap = getScaledBitmap(opts -> BitmapFactory.decodeFile(paintFile.getPath(), opts), w, h, false);
+                    Bitmap paintBitmap = getScaledBitmap(opts -> BitmapFactory.decodeFile(paintFile.getPath(), opts), w, h, false, true);
                     canvas.save();
                     float s = resultWidth / (float) paintBitmap.getWidth();
                     canvas.scale(s, s);
@@ -308,7 +336,7 @@ public class StoryEntry {
 
             if (messageFile != null) {
                 try {
-                    Bitmap paintBitmap = getScaledBitmap(opts -> BitmapFactory.decodeFile(messageFile.getPath(), opts), w, h, false);
+                    Bitmap paintBitmap = getScaledBitmap(opts -> BitmapFactory.decodeFile(messageFile.getPath(), opts), w, h, false, true);
                     canvas.save();
                     float s = resultWidth / (float) paintBitmap.getWidth();
                     canvas.scale(s, s);
@@ -323,7 +351,7 @@ public class StoryEntry {
 
             if (paintEntitiesFile != null) {
                 try {
-                    Bitmap paintBitmap = getScaledBitmap(opts -> BitmapFactory.decodeFile(paintEntitiesFile.getPath(), opts), w, h, false);
+                    Bitmap paintBitmap = getScaledBitmap(opts -> BitmapFactory.decodeFile(paintEntitiesFile.getPath(), opts), w, h, false, true);
                     canvas.save();
                     float s = resultWidth / (float) paintBitmap.getWidth();
                     canvas.scale(s, s);
@@ -361,7 +389,7 @@ public class StoryEntry {
         public Bitmap decode(BitmapFactory.Options options);
     }
 
-    public static Bitmap getScaledBitmap(DecodeBitmap decode, int maxWidth, int maxHeight, boolean allowBlur) {
+    public static Bitmap getScaledBitmap(DecodeBitmap decode, int maxWidth, int maxHeight, boolean allowBlur, boolean scale) {
         BitmapFactory.Options opts = new BitmapFactory.Options();
         opts.inJustDecodeBounds = true;
         decode.decode(opts);
@@ -377,15 +405,15 @@ public class StoryEntry {
             return decode.decode(opts);
         }
 
-        if (enoughMemory && SharedConfig.getDevicePerformanceClass() >= SharedConfig.PERFORMANCE_CLASS_AVERAGE) {
+        if (scale && enoughMemory && SharedConfig.getDevicePerformanceClass() >= SharedConfig.PERFORMANCE_CLASS_AVERAGE) {
             Bitmap bitmap = decode.decode(opts);
 
             final float scaleX = maxWidth / (float) bitmap.getWidth(), scaleY = maxHeight / (float) bitmap.getHeight();
-            float scale = Math.max(scaleX, scaleY);
+            float s = Math.max(scaleX, scaleY);
 //            if (SharedConfig.getDevicePerformanceClass() >= SharedConfig.PERFORMANCE_CLASS_HIGH) {
 //                scale = Math.min(scale * 2, 1);
 //            }
-            final int w = (int) (bitmap.getWidth() * scale), h = (int) (bitmap.getHeight() * scale);
+            final int w = (int) (bitmap.getWidth() * s), h = (int) (bitmap.getHeight() * s);
 
             Bitmap scaledBitmap = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888);
             Canvas canvas = new Canvas(scaledBitmap);
@@ -395,10 +423,10 @@ public class StoryEntry {
             final Paint paint = new Paint(Paint.ANTI_ALIAS_FLAG | Paint.FILTER_BITMAP_FLAG);
             paint.setShader(shader);
 
-            int blurRadius = Utilities.clamp(Math.round(1f / scale), 8, 0);
+            int blurRadius = Utilities.clamp(Math.round(1f / s), 8, 0);
 
             matrix.reset();
-            matrix.postScale(scale, scale);
+            matrix.postScale(s, s);
             shader.setLocalMatrix(matrix);
             canvas.drawRect(0, 0, w, h, paint);
 
@@ -892,7 +920,9 @@ public class StoryEntry {
             matrix.postTranslate(width / 2f, height / 2f);
         }
         float scale = (float) resultWidth / width;
-        if ((float) height / (float) width > 1.29f) {
+        if (botId != 0) {
+            scale = Math.min(scale, (float) resultHeight / height);
+        } else if ((float) height / (float) width > 1.29f) {
             scale = Math.max(scale, (float) resultHeight / height);
         }
         matrix.postScale(scale, scale);
@@ -1384,6 +1414,26 @@ public class StoryEntry {
         newEntry.roundThumb = roundThumb;
         newEntry.roundOffset = roundOffset;
         newEntry.roundVolume = roundVolume;
+        newEntry.isEditingCover = isEditingCover;
+        newEntry.botId = botId;
+        newEntry.botLang = botLang;
+        newEntry.editingBotPreview = editingBotPreview;
+        newEntry.cover = cover;
         return newEntry;
+    }
+
+    public static long getCoverTime(TL_stories.StoryItem storyItem) {
+        if (storyItem == null) return 0;
+        if (storyItem.media == null || storyItem.media.document == null) return 0;
+        TLRPC.Document doc = storyItem.media.document;
+        TLRPC.TL_documentAttributeVideo attr = null;
+        for (int i = 0; i < doc.attributes.size(); ++i) {
+            if (doc.attributes.get(i) instanceof TLRPC.TL_documentAttributeVideo) {
+                attr = (TLRPC.TL_documentAttributeVideo) doc.attributes.get(i);
+                break;
+            }
+        }
+        if (attr == null) return 0;
+        return (long) (attr.video_start_ts * 1000L);
     }
 }

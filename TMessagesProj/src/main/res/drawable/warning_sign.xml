@@ -1,0 +1,32 @@
+<!--
+  ~ Copyright (C) 2019-2024 qwq233 <qwq233@qwq2333.top>
+  ~ https://github.com/qwq233/Nullgram
+  ~
+  ~ This program is free software; you can redistribute it and/or
+  ~ modify it under the terms of the GNU General Public License
+  ~ as published by the Free Software Foundation; either version 2
+  ~ of the License, or (at your option) any later version.
+  ~
+  ~ This program is distributed in the hope that it will be useful,
+  ~ but WITHOUT ANY WARRANTY; without even the implied warranty of
+  ~ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  ~ GNU General Public License for more details.
+  ~
+  ~ You should have received a copy of the GNU General Public License along with this software.
+  ~  If not, see
+  ~ <https://www.gnu.org/licenses/>
+  -->
+
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:viewportWidth="960"
+    android:viewportHeight="960"
+    android:width="24dp"
+    android:height="24dp">
+    <group
+        android:translateX="-0"
+        android:translateY="960">
+        <path
+            android:pathData="M80 -78q-15 0 -27 -8t-19 -19q-7 -11 -7.5 -25t7.5 -28l400 -689q8 -14 20 -20t26 -6q14 0 26 6t20 20l400 689q8 14 7.5 28t-7.5 25q-7 11 -19 19t-27 8H80Zm401 -135q22 0 37.5 -15.5T534 -266q0 -22 -15.5 -37.5T481 -319q-22 0 -37.5 15.5T428 -266q0 22 15.5 37.5T481 -213Zm0 -143q22 0 37.5 -15.5T534 -409v-98q0 -22 -15.5 -37.5T481 -560q-22 0 -37.5 15.5T428 -507v98q0 22 15.5 37.5T481 -356Z"
+            android:fillColor="#FFFFFF" />
+    </group>
+</vector>

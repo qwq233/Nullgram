@@ -1,3 +1,22 @@
+/*
+ * Copyright (C) 2019-2024 qwq233 <qwq233@qwq2333.top>
+ * https://github.com/qwq233/Nullgram
+ *
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation; either version 2
+ * of the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along with this software.
+ *  If not, see
+ * <https://www.gnu.org/licenses/>
+ */
+
 package org.telegram.ui.Components.Paint.Views;
 
 import android.content.Context;
@@ -36,7 +55,6 @@ import org.telegram.ui.Cells.ChatMessageCell;
 import org.telegram.ui.Components.AnimatedFloat;
 import org.telegram.ui.Components.CubicBezierInterpolator;
 import org.telegram.ui.Components.Text;
-import org.telegram.ui.Stories.recorder.HintView2;
 
 public class LinkPreview extends View {
 
@@ -105,17 +123,17 @@ public class LinkPreview extends View {
     public int type, color;
     private WebPagePreview webpage;
 
-    private float w, h;
+    public float w, h;
     private float previewHeight;
     private float photoHeight;
 
-    private void setupLayout() {
+    public void setupLayout() {
         if (!relayout || webpage == null) {
             return;
         }
 
-        final String text = TextUtils.isEmpty(webpage.name) ? fromUrl(webpage.url) : webpage.name;
         if (withPreview()) {
+            final String text = TextUtils.isEmpty(webpage.name) ? fromUrl(webpage.url) : webpage.name;
             final TLRPC.WebPage preview = this.webpage.webpage;
             float maxWidth = this.maxWidth - padx - padx;
 
@@ -213,7 +231,7 @@ public class LinkPreview extends View {
             h += 11 * density;
 
         } else {
-
+            final String text = TextUtils.isEmpty(webpage.name) ? fromUrlWithoutSchema(webpage.url).toUpperCase() : webpage.name;
             float maxWidth = this.maxWidth - padx - padx - (padding.left + iconSize + iconPadding + padding.right) * density;
             textScale = 1f;
             layout = new StaticLayout(TextUtils.ellipsize(text, layoutPaint, (int) Math.ceil(maxWidth), TextUtils.TruncateAt.END), layoutPaint, (int) Math.ceil(maxWidth), Layout.Alignment.ALIGN_NORMAL, 1f, 0f, false);
@@ -300,6 +318,13 @@ public class LinkPreview extends View {
     }
 
     public static String fromUrl(String url) {
+        return url;
+    }
+
+    public static String fromUrlWithoutSchema(String url) {
+        if (url.startsWith("https://")) {
+            return url.substring(8);
+        }
         return url;
     }
 

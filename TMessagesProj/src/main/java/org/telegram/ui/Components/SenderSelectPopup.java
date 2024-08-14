@@ -1,3 +1,22 @@
+/*
+ * Copyright (C) 2019-2024 qwq233 <qwq233@qwq2333.top>
+ * https://github.com/qwq233/Nullgram
+ *
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation; either version 2
+ * of the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along with this software.
+ *  If not, see
+ * <https://www.gnu.org/licenses/>
+ */
+
 package org.telegram.ui.Components;
 
 import android.animation.Animator;
@@ -53,8 +72,6 @@ import java.util.Arrays;
 import java.util.List;
 
 import top.qwq2333.gen.Config;
-import top.qwq2333.nullgram.config.ConfigManager;
-import top.qwq2333.nullgram.utils.Defines;
 
 public class SenderSelectPopup extends ActionBarPopupWindow {
     public final static float SPRING_STIFFNESS = 750f;
@@ -70,6 +87,7 @@ public class SenderSelectPopup extends ActionBarPopupWindow {
 
     private TLRPC.ChatFull chatFull;
     private TLRPC.TL_channels_sendAsPeers sendAsPeers;
+    private final int currentAccount;
 
     private FrameLayout scrimPopupContainerLayout;
     private View headerShadow;
@@ -96,6 +114,7 @@ public class SenderSelectPopup extends ActionBarPopupWindow {
 
         this.chatFull = chatFull;
         this.sendAsPeers = sendAsPeers;
+        this.currentAccount = parentFragment == null ? UserConfig.selectedAccount : parentFragment.getCurrentAccount();
 
         scrimPopupContainerLayout = new BackButtonFrameLayout(context);
         scrimPopupContainerLayout.setLayoutParams(LayoutHelper.createFrame(LayoutHelper.WRAP_CONTENT, LayoutHelper.WRAP_CONTENT));
@@ -321,7 +340,9 @@ public class SenderSelectPopup extends ActionBarPopupWindow {
                     windowManager.addView(bulletinContainer, params);
                 }
 
-                Bulletin bulletin = Bulletin.make(bulletinContainer, new SelectSendAsPremiumHintBulletinLayout(context, parentFragment.themeDelegate, ()->{
+                final TLRPC.Chat chat = chatFull == null ? null : MessagesController.getInstance(currentAccount).getChat(chatFull.id);
+                final boolean toChannel = ChatObject.isChannelAndNotMegaGroup(chat);
+                Bulletin bulletin = Bulletin.make(bulletinContainer, new SelectSendAsPremiumHintBulletinLayout(context, parentFragment.themeDelegate, toChannel, () -> {
                     if (parentFragment != null) {
                         parentFragment.presentFragment(new PremiumPreviewFragment("select_sender"));
                         dismiss();

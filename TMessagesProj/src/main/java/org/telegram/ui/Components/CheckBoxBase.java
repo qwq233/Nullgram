@@ -1,3 +1,22 @@
+/*
+ * Copyright (C) 2019-2024 qwq233 <qwq233@qwq2333.top>
+ * https://github.com/qwq233/Nullgram
+ *
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation; either version 2
+ * of the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along with this software.
+ *  If not, see
+ * <https://www.gnu.org/licenses/>
+ */
+
 package org.telegram.ui.Components;
 
 import android.animation.Animator;
@@ -61,6 +80,8 @@ public class CheckBoxBase {
     private int checkColorKey = Theme.key_checkboxCheck;
     private int backgroundColorKey = Theme.key_chat_serviceBackground;
     private int background2ColorKey = Theme.key_chat_serviceBackground;
+
+    private int backgroundColor;
 
     private boolean useDefaultCheck;
 
@@ -221,6 +242,11 @@ public class CheckBoxBase {
         invalidate();
     }
 
+    public void setBackgroundColor(int backgroundColor) {
+        this.backgroundColor = backgroundColor;
+        invalidate();
+    }
+
     public void setBackgroundDrawable(Theme.MessageDrawable drawable) {
         messageDrawable = drawable;
     }
@@ -307,6 +333,8 @@ public class CheckBoxBase {
                 } else {
                     backgroundPaint.setColor(AndroidUtilities.getOffsetColor(0xffffffff, getThemedColor(checkColorKey), progress, backgroundAlpha));
                 }
+            } else if (backgroundColor != 0) {
+                backgroundPaint.setColor(0);
             } else {
                 backgroundPaint.setColor(AndroidUtilities.getOffsetColor(0x00ffffff, getThemedColor(background2ColorKey >= 0 ? background2ColorKey : checkColorKey), progress, backgroundAlpha));
             }
@@ -383,7 +411,9 @@ public class CheckBoxBase {
                 paint.setColor(getThemedColor(background2ColorKey));
             } else if (backgroundType == 11 || backgroundType == 6 || backgroundType == 7 || backgroundType == 10 || !drawUnchecked && backgroundColorKey >= 0 || backgroundType == 14) {
                 paint.setColor(getThemedColor(backgroundColorKey));
-            } else {
+            } else if (backgroundColor != 0) {
+                paint.setColor(backgroundColor);
+            } else  {
                 paint.setColor(getThemedColor(enabled ? Theme.key_checkbox : Theme.key_checkboxDisabled));
             }
             if (forbidden) {

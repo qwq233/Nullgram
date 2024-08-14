@@ -43,6 +43,8 @@ public class CombinedDrawable extends Drawable implements Drawable.Callback {
     private boolean fullSize;
     private boolean both;
 
+    public float translateX, translateY;
+
     public CombinedDrawable(Drawable backgroundDrawable, Drawable iconDrawable, int leftOffset, int topOffset) {
         background = backgroundDrawable;
         icon = iconDrawable;
@@ -152,6 +154,8 @@ public class CombinedDrawable extends Drawable implements Drawable.Callback {
 
     @Override
     public void draw(Canvas canvas) {
+        canvas.save();
+        canvas.translate(translateX, translateY);
         if (center) {
             Rect bounds = getBounds();
             setBounds(
@@ -188,6 +192,7 @@ public class CombinedDrawable extends Drawable implements Drawable.Callback {
             }
             icon.draw(canvas);
         }
+        canvas.restore();
     }
 
     @Override

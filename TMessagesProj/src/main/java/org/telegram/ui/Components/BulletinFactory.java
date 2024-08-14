@@ -26,10 +26,6 @@ import android.graphics.PorterDuff;
 import android.graphics.PorterDuffColorFilter;
 import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
-import android.net.Uri;
-import android.os.Bundle;
-import android.os.Environment;
-import android.provider.MediaStore;
 import android.text.Spannable;
 import android.text.SpannableString;
 import android.text.SpannableStringBuilder;
@@ -37,7 +33,6 @@ import android.text.Spanned;
 import android.text.TextPaint;
 import android.text.TextUtils;
 import android.text.style.ClickableSpan;
-import android.util.Log;
 import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.HapticFeedbackConstants;
@@ -47,7 +42,6 @@ import android.widget.FrameLayout;
 
 import androidx.annotation.CheckResult;
 import androidx.annotation.NonNull;
-import androidx.core.content.FileProvider;
 import androidx.core.graphics.ColorUtils;
 
 import org.telegram.messenger.AndroidUtilities;
@@ -73,7 +67,6 @@ import org.telegram.ui.LaunchActivity;
 import org.telegram.ui.PremiumPreviewFragment;
 import org.telegram.ui.Stories.recorder.HintView2;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -424,6 +417,10 @@ public final class BulletinFactory {
        return createUsersBulletin(users, text, null, null);
     }
 
+    public Bulletin createUsersBulletin(List<? extends TLObject> users, CharSequence text, CharSequence subtitle) {
+        return createUsersBulletin(users, text, subtitle, null);
+    }
+
     public Bulletin createUsersBulletin(List<? extends TLObject> users, CharSequence text, CharSequence subtitle, UndoObject undoObject) {
         final Bulletin.UsersLayout layout = new Bulletin.UsersLayout(getContext(), subtitle != null, resourcesProvider);
         int count = 0;
@@ -454,8 +451,8 @@ public final class BulletinFactory {
             layout.textView.setMaxLines(1);
             layout.textView.setText(text);
             layout.subtitleView.setText(subtitle);
-            layout.subtitleView.setSingleLine(true);
-            layout.subtitleView.setMaxLines(1);
+            layout.subtitleView.setSingleLine(false);
+            layout.subtitleView.setMaxLines(3);
             if (layout.linearLayout.getLayoutParams() instanceof ViewGroup.MarginLayoutParams) {
                 int margin = AndroidUtilities.dp(12 + 56 + 2 - (3 - count) * 12);
                 if (count == 1) {
@@ -897,7 +894,7 @@ public final class BulletinFactory {
         return create(layout, Bulletin.DURATION_SHORT);
     }
 
-    private Bulletin create(Bulletin.Layout layout, int duration) {
+    public Bulletin create(Bulletin.Layout layout, int duration) {
         if (fragment != null) {
             return Bulletin.make(fragment, layout, duration);
         } else {

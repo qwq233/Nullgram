@@ -1104,7 +1104,7 @@ public class ThanosEffect extends TextureView {
                 } else if (type == 2) {
                     cell.drawCaptionLayout(canvas, cell.getCurrentPosition() != null && (cell.getCurrentPosition().flags & MessageObject.POSITION_FLAG_LEFT) == 0, alpha);
                 } else if (!(cell.getCurrentPosition() != null && (cell.getCurrentPosition().flags & MessageObject.POSITION_FLAG_LEFT) == 0)) {
-                    cell.drawReactionsLayout(canvas, alpha);
+                    cell.drawReactionsLayout(canvas, alpha, null);
                 }
                 cell.setInvalidatesParent(false);
                 canvas.restore();

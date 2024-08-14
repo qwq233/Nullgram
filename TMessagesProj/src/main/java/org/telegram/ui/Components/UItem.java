@@ -21,12 +21,10 @@ package org.telegram.ui.Components;
 
 
 import android.content.Context;
+import android.graphics.drawable.Drawable;
 import android.text.TextUtils;
 import android.util.LongSparseArray;
-import android.util.SparseIntArray;
-import android.util.SparseLongArray;
 import android.view.View;
-import android.widget.FrameLayout;
 
 import org.telegram.messenger.FileLog;
 import org.telegram.messenger.MessageObject;
@@ -43,7 +41,6 @@ import org.telegram.ui.ChannelMonetizationLayout;
 import org.telegram.ui.Components.ListView.AdapterWithDiffUtils;
 import org.telegram.ui.StatisticActivity;
 
-import java.lang.reflect.Constructor;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Objects;
@@ -75,6 +72,7 @@ public class UItem extends AdapterWithDiffUtils.Item {
     public View.OnClickListener clickCallback;
 
     public Object object;
+    public Object object2;
 
     public boolean withUsername = true;
 
@@ -167,6 +165,14 @@ public class UItem extends AdapterWithDiffUtils.Item {
         UItem i = new UItem(UniversalAdapter.VIEW_TYPE_TEXT, false);
         i.id = id;
         i.iconResId = iconResId;
+        i.text = text;
+        return i;
+    }
+
+    public static UItem asButton(int id, Drawable icon, CharSequence text) {
+        UItem i = new UItem(UniversalAdapter.VIEW_TYPE_TEXT, false);
+        i.id = id;
+        i.object = icon;
         i.text = text;
         return i;
     }
@@ -585,7 +591,8 @@ public class UItem extends AdapterWithDiffUtils.Item {
             view == item.view &&
             intValue == item.intValue &&
             longValue == item.longValue &&
-            Objects.equals(object, item.object)
+            Objects.equals(object, item.object) &&
+            Objects.equals(object2, item.object2)
         );
     }
 

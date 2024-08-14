@@ -215,7 +215,8 @@ public class PremiumPreviewBottomSheet extends BottomSheetWithRecyclerListView i
         return this;
     }
 
-    private void showDialog(Dialog dialog) {
+    @Override
+    public boolean showDialog(Dialog dialog) {
         if (iconTextureView != null) {
             iconTextureView.setDialogVisible(true);
         }
@@ -227,6 +228,7 @@ public class PremiumPreviewBottomSheet extends BottomSheetWithRecyclerListView i
             starParticlesView.setPaused(false);
         });
         dialog.show();
+        return true;
     }
 
     @Override

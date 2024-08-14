@@ -1,16 +1,41 @@
+/*
+ * Copyright (C) 2019-2024 qwq233 <qwq233@qwq2333.top>
+ * https://github.com/qwq233/Nullgram
+ *
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation; either version 2
+ * of the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along with this software.
+ *  If not, see
+ * <https://www.gnu.org/licenses/>
+ */
+
 package org.telegram.ui.ActionBar;
 
 import static org.telegram.messenger.AndroidUtilities.dp;
 import static org.telegram.messenger.AndroidUtilities.lerp;
+import static org.telegram.messenger.LocaleController.getString;
 
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
+import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Path;
+import android.graphics.PorterDuff;
+import android.graphics.PorterDuffColorFilter;
 import android.graphics.RectF;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
+import android.text.TextPaint;
+import android.text.TextUtils;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.FrameLayout;
@@ -21,14 +46,17 @@ import androidx.core.graphics.ColorUtils;
 
 import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.ContactsController;
+import org.telegram.messenger.Emoji;
 import org.telegram.messenger.FileLog;
 import org.telegram.messenger.LocaleController;
+import org.telegram.messenger.MessageObject;
 import org.telegram.messenger.MessagesController;
 import org.telegram.messenger.R;
 import org.telegram.messenger.UserConfig;
 import org.telegram.messenger.UserObject;
 import org.telegram.messenger.Utilities;
 import org.telegram.tgnet.TLRPC;
+import org.telegram.ui.ArticleViewer;
 import org.telegram.ui.ChatActivity;
 import org.telegram.ui.Components.AnimatedColor;
 import org.telegram.ui.Components.AnimatedFloat;
@@ -36,8 +64,9 @@ import org.telegram.ui.Components.CubicBezierInterpolator;
 import org.telegram.ui.Components.Text;
 import org.telegram.ui.LaunchActivity;
 import org.telegram.ui.bots.BotWebViewAttachedSheet;
-import org.telegram.ui.bots.BotWebViewContainer;
 import org.telegram.ui.bots.BotWebViewSheet;
+import org.telegram.ui.bots.WebViewRequestProps;
+import org.telegram.ui.web.BotWebViewContainer;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -61,7 +90,10 @@ public class BottomSheetTabs extends FrameLayout {
             final int count = tabs.size();
             if (count == 0) return;
             WebTabData lastTab = tabs.get(tabs.size() - 1);
-            BottomSheetTabsOverlay overlay = LaunchActivity.instance.getBottomSheetTabsOverlay();
+            BottomSheetTabsOverlay overlay = LaunchActivity.instance == null ? null : LaunchActivity.instance.getBottomSheetTabsOverlay();
+            if (overlay != null) {
+                overlay.stopAnimations();
+            }
 
             if (count == 1 || overlay == null) {
                 openTab(lastTab);
@@ -82,6 +114,18 @@ public class BottomSheetTabs extends FrameLayout {
                 ((ChatActivity) lastFragment).getChatActivityEnterView().hidePopup(true, false);
             }
         }
+        if (tab.articleViewer != null) {
+            BaseFragment fragment = actionBarLayout.getSheetFragment();
+            final ArticleViewer articleViewer = tab.articleViewer;
+            BottomSheetTabDialog.checkSheet(articleViewer.sheet);
+            fragment.addSheet(articleViewer.sheet);
+            articleViewer.sheet.reset();
+            articleViewer.setParentActivity(fragment.getParentActivity(), fragment);
+            articleViewer.sheet.attachInternal(fragment);
+            articleViewer.sheet.animateOpen(true, true, null);
+            removeTab(tab, false);
+            return;
+        }
         boolean closed = closeAttachedSheets();
         Utilities.Callback<BaseFragment> open = fragment -> {
             if (fragment == null) return;
@@ -91,10 +135,10 @@ public class BottomSheetTabs extends FrameLayout {
                     ((ChatActivity) fragment).getChatActivityEnterView().hidePopup(true, false);
                 }
             }
-            if (fragment.getContext() == null) {
+            if (fragment.getContext() == null || fragment.getParentActivity() == null) {
                 return;
             }
-            if (AndroidUtilities.isTablet()) {
+            if (AndroidUtilities.isTablet() && !tab.isWeb) {
                 BotWebViewSheet sheet = new BotWebViewSheet(fragment.getContext(), fragment.getResourceProvider());
                 sheet.setParentActivity(fragment.getParentActivity());
                 if (sheet.restoreState(fragment, tab)) {
@@ -102,30 +146,26 @@ public class BottomSheetTabs extends FrameLayout {
                     sheet.show();
                 }
             } else {
-                BottomSheetTabsOverlay overlay = LaunchActivity.instance.getBottomSheetTabsOverlay();
-                BotWebViewAttachedSheet webViewSheet = fragment.createBotViewer();
+                BaseFragment sheetFragment = actionBarLayout.getSheetFragment();
+                if (sheetFragment == null) return;
+                BotWebViewAttachedSheet webViewSheet = sheetFragment.createBotViewer();
                 webViewSheet.setParentActivity(fragment.getParentActivity());
                 if (webViewSheet.restoreState(fragment, tab)) {
-//                    if (overlay != null && overlay.isOpened() && overlay.openSheet(webViewSheet, tab, null)) {
-//                        removeTab(tab, false);
-//                        webViewSheet.show(closed, true);
-//                    } else {
-                        removeTab(tab, false);
-                        webViewSheet.show(closed);
-//                    }
+                    removeTab(tab, false);
+                    webViewSheet.show(closed);
                 }
             }
         };
+        open.run(lastFragment);
         if (tab.needsContext && (!(lastFragment instanceof ChatActivity) || ((ChatActivity) lastFragment).getDialogId() != tab.props.botId)) {
             BaseFragment chatActivity = ChatActivity.of(tab.props.botId);
-            chatActivity.whenFullyVisible(() -> open.run(chatActivity));
-            lastFragment.presentFragment(chatActivity);
-        } else {
-            open.run(lastFragment);
+            AndroidUtilities.runOnUIThread(() -> {
+                lastFragment.presentFragment(chatActivity);
+            }, 220);
         }
     }
 
-    public WebTabData tryReopenTab(BotWebViewAttachedSheet.WebViewRequestProps props) {
+    public WebTabData tryReopenTab(WebViewRequestProps props) {
         ArrayList<WebTabData> tabs = this.tabs.get(currentAccount);
         if (tabs == null) this.tabs.put(currentAccount, tabs = new ArrayList<>());
 
@@ -138,6 +178,63 @@ public class BottomSheetTabs extends FrameLayout {
             }
         }
         return null;
+    }
+
+    public static String urlWithoutFragment(String url) {
+        if (url == null) return null;
+        int index = url.indexOf('#');
+        if (index >= 0) return url.substring(0, index + 1);
+        return url;
+    }
+
+    public WebTabData tryReopenTab(String url) {
+        if (TextUtils.isEmpty(url)) return null;
+        final ArrayList<WebTabData> tabs = getTabs();
+        for (int i = 0; i < tabs.size(); ++i) {
+            WebTabData tab = tabs.get(i);
+            if (tab.articleViewer != null && !tab.articleViewer.pagesStack.isEmpty()) {
+                Object lastPage = tab.articleViewer.pagesStack.get(tab.articleViewer.pagesStack.size() - 1);
+                if (lastPage instanceof ArticleViewer.CachedWeb) {
+                    ArticleViewer.CachedWeb web = (ArticleViewer.CachedWeb) lastPage;
+                    BotWebViewContainer.MyWebView webView = web.webView;
+                    if (webView == null && tab.articleViewer.pages != null && tab.articleViewer.pages[0] != null) {
+                        webView = tab.articleViewer.pages[0].getWebView();
+                    }
+                    if (webView != null && TextUtils.equals(urlWithoutFragment(webView.canGoBack() ? webView.getUrl() : webView.getOpenURL()), urlWithoutFragment(url))) {
+                        openTab(tab);
+                        return tab;
+                    }
+                }
+            }
+        }
+        return null;
+    }
+
+    public WebTabData tryReopenTab(TLRPC.WebPage webpage) {
+        if (webpage == null) return null;
+        final ArrayList<WebTabData> tabs = getTabs();
+        for (int i = 0; i < tabs.size(); ++i) {
+            WebTabData tab = tabs.get(i);
+            if (tab.articleViewer != null && !tab.articleViewer.pagesStack.isEmpty()) {
+                Object lastPage = tab.articleViewer.pagesStack.get(tab.articleViewer.pagesStack.size() - 1);
+                if (lastPage instanceof TLRPC.WebPage) {
+                    TLRPC.WebPage pageWebPage = (TLRPC.WebPage) lastPage;
+                    if (pageWebPage != null && pageWebPage.id == webpage.id) {
+                        openTab(tab);
+                        return tab;
+                    }
+                }
+            }
+        }
+        return null;
+    }
+
+    public WebTabData tryReopenTab(MessageObject messageObject) {
+        if (messageObject == null) return null;
+        if (messageObject.messageOwner == null) return null;
+        if (messageObject.messageOwner.media == null) return null;
+        if (messageObject.messageOwner.media.webpage == null) return null;
+        return tryReopenTab(messageObject.messageOwner.media.webpage);
     }
 
     public boolean closeAttachedSheets() {
@@ -221,12 +318,20 @@ public class BottomSheetTabs extends FrameLayout {
     }
 
     public ArrayList<WebTabData> getTabs() {
+        return getTabs(this.currentAccount);
+    }
+
+    public ArrayList<TabDrawable> getTabDrawables() {
+        return getTabDrawables(this.currentAccount);
+    }
+
+    public ArrayList<WebTabData> getTabs(int currentAccount) {
         ArrayList<WebTabData> tabs = this.tabs.get(currentAccount);
         if (tabs == null) this.tabs.put(currentAccount, tabs = new ArrayList<>());
         return tabs;
     }
 
-    public ArrayList<TabDrawable> getTabDrawables() {
+    public ArrayList<TabDrawable> getTabDrawables(int currentAccount) {
         ArrayList<TabDrawable> tabDrawables = this.tabDrawables.get(currentAccount);
         if (tabDrawables == null) this.tabDrawables.put(currentAccount, tabDrawables = new ArrayList<>());
         return tabDrawables;
@@ -274,21 +379,31 @@ public class BottomSheetTabs extends FrameLayout {
         return super.verifyDrawable(who) || true;
     }
 
+    private static TextPaint textPaint;
+    private static TextPaint getTextPaint() {
+        if (textPaint == null) {
+            textPaint = new TextPaint(Paint.ANTI_ALIAS_FLAG);
+            textPaint.setTypeface(AndroidUtilities.bold());
+            textPaint.setTextSize(AndroidUtilities.dp(17));
+        }
+        return textPaint;
+    }
+
     private void updateMultipleTitle() {
         final ArrayList<WebTabData> tabs = getTabs();
         final ArrayList<TabDrawable> tabDrawables = getTabDrawables();
 
-        String title = null;
+        CharSequence title = null;
         for (int i = 0; i < tabDrawables.size(); ++i) {
             TabDrawable drawable = tabDrawables.get(i);
 
             if (tabs.size() > 1 && drawable.position == 0) {
-                TLRPC.User user = MessagesController.getInstance(drawable.tab.props.currentAccount).getUser(drawable.tab.props.botId);
-                title = LocaleController.formatPluralString("BotMoreTabs", tabs.size() - 1, UserObject.getUserName(user));
+                title = LocaleController.formatPluralString("BotMoreTabs", tabs.size() - 1, drawable.tab.getTitle());
+                title = Emoji.replaceEmoji(title, getTextPaint().getFontMetricsInt(), false);
                 drawable.setOverrideTitle(title);
             } else {
-                TLRPC.User user = MessagesController.getInstance(drawable.tab.props.currentAccount).getUser(drawable.tab.props.botId);
-                title = UserObject.getUserName(user);
+                title = drawable.tab.getTitle();
+                title = Emoji.replaceEmoji(title, getTextPaint().getFontMetricsInt(), false);
                 drawable.setOverrideTitle(null);
             }
         }
@@ -320,6 +435,20 @@ public class BottomSheetTabs extends FrameLayout {
         return tabs.isEmpty();
     }
 
+    public boolean tryRemoveTabWith(ArticleViewer articleViewer) {
+        for (int account = 0; account < this.tabs.size(); ++account) {
+            ArrayList<WebTabData> tabs = this.tabs.get(account);
+            if (tabs != null) {
+                for (WebTabData tab : tabs) {
+                    if (tab.articleViewer == articleViewer) {
+                        return removeTab(account, tab, true);
+                    }
+                }
+            }
+        }
+        return false;
+    }
+
     public void removeTab(WebTabData tab, Utilities.Callback<Boolean> callback) {
         if (tab == null) {
             callback.run(true);
@@ -341,14 +470,14 @@ public class BottomSheetTabs extends FrameLayout {
         final AlertDialog[] dialog = new AlertDialog[1];
         dialog[0] = new AlertDialog.Builder(getContext())
             .setTitle(botName)
-            .setMessage(LocaleController.getString(R.string.BotWebViewChangesMayNotBeSaved))
-            .setPositiveButton(LocaleController.getString(R.string.BotWebViewCloseAnyway), (d, w) -> {
+            .setMessage(getString(R.string.BotWebViewChangesMayNotBeSaved))
+            .setPositiveButton(getString(R.string.BotWebViewCloseAnyway), (d, w) -> {
                 clicked[0] = true;
                 removeTab(tab, true);
                 callback.run(true);
                 dialog[0].dismiss();
             })
-            .setNegativeButton(LocaleController.getString(R.string.Cancel), (d, w) -> {
+            .setNegativeButton(getString(R.string.Cancel), (d, w) -> {
                 clicked[0] = true;
                 callback.run(false);
                 dialog[0].dismiss();
@@ -366,8 +495,12 @@ public class BottomSheetTabs extends FrameLayout {
     }
 
     public boolean removeTab(WebTabData tab, boolean destroy) {
-        final ArrayList<WebTabData> tabs = getTabs();
-        final ArrayList<TabDrawable> tabDrawables = getTabDrawables();
+        return removeTab(currentAccount, tab, destroy);
+    }
+
+    public boolean removeTab(int currentAccount, WebTabData tab, boolean destroy) {
+        final ArrayList<WebTabData> tabs = getTabs(currentAccount);
+        final ArrayList<TabDrawable> tabDrawables = getTabDrawables(currentAccount);
 
         tabs.remove(tab);
         if (destroy) {
@@ -495,7 +628,9 @@ public class BottomSheetTabs extends FrameLayout {
         public final AnimatedFloat animatedAlpha;
 
         private final Paint backgroundPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+        private final Paint progressPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
         private final Paint iconPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+        private final Paint faviconPaint = new Paint(Paint.ANTI_ALIAS_FLAG | Paint.FILTER_BITMAP_FLAG);
 
         public int closeRippleColor;
         public final Drawable closeRipple = Theme.createSelectorDrawable(0x30ffffff, Theme.RIPPLE_MASK_CIRCLE_20DP);
@@ -504,7 +639,12 @@ public class BottomSheetTabs extends FrameLayout {
         private int backgroundColor, tabColor;
         private boolean backgroundIsDark, tabIsDark;
 
-        private Text title;
+        private float progress;
+
+        private Bitmap favicon;
+        private Drawable iconDrawable;
+        private int iconDrawableColor = Color.WHITE;
+        private final Text title;
         private Text overrideTitle;
 
         public TabDrawable(View view, WebTabData tab) {
@@ -519,10 +659,15 @@ public class BottomSheetTabs extends FrameLayout {
             animatedPosition = new AnimatedFloat(view, 320, CubicBezierInterpolator.EASE_OUT_QUINT);
             animatedAlpha = new AnimatedFloat(view, 320, CubicBezierInterpolator.EASE_OUT_QUINT);
 
-            TLRPC.User user = MessagesController.getInstance(tab.props.currentAccount).getUser(tab.getBotId());
-            this.title = new Text(UserObject.getUserName(user), 17, AndroidUtilities.bold());
+            this.favicon = tab.favicon;
+            CharSequence title = Emoji.replaceEmoji(tab.getTitle(), getTextPaint().getFontMetricsInt(), false);
+            this.title = new Text(title, 17, AndroidUtilities.bold());
             this.tabColor = tab.actionBarColor;
             this.tabIsDark = AndroidUtilities.computePerceivedBrightness(tabColor) < .721f;
+            if (tab.isArticle()) {
+                iconDrawable = view.getContext().getResources().getDrawable(R.drawable.msg_instant).mutate();
+            }
+            progress = tab.articleProgress;
 
             closePath.rewind();
             closePath.moveTo(0, 0);
@@ -536,7 +681,7 @@ public class BottomSheetTabs extends FrameLayout {
             expandPath.lineTo(dp(12.66f), dp(6.33f) / 2f);
         }
 
-        public void setOverrideTitle(String title) {
+        public void setOverrideTitle(CharSequence title) {
             if (title == null) {
                 overrideTitle = null;
             } else {
@@ -595,6 +740,14 @@ public class BottomSheetTabs extends FrameLayout {
             rectPath.addRoundRect(bounds, radii, Path.Direction.CW);
             canvas.drawPath(rectPath, backgroundPaint);
 
+            if (progress > 0 && expandProgress > 0 && alpha > 0) {
+                canvas.save();
+                canvas.clipPath(rectPath);
+                progressPaint.setColor(Theme.multAlpha(AndroidUtilities.computePerceivedBrightness(backgroundColor) > .721f ? Color.BLACK : Color.WHITE, .07f * alpha * expandProgress));
+                canvas.drawRect(bounds.left, bounds.top, bounds.left + bounds.width() * progress, bounds.bottom, progressPaint);
+                canvas.restore();
+            }
+
             final float isDark = lerp(backgroundIsDark ? 1f : 0f, tabIsDark ? 1f : 0f, expandProgress);
             final int iconColor = ColorUtils.blendARGB(0xFF000000, 0xFFFFFFFF, isDark);
 
@@ -628,28 +781,69 @@ public class BottomSheetTabs extends FrameLayout {
             canvas.drawPath(expandPath, iconPaint);
             canvas.restore();
 
+            int leftPadding = 0;
+            if (favicon != null) {
+                final int sz = dp(24);
+
+                canvas.save();
+                AndroidUtilities.rectTmp2.set(
+                    (int) (bounds.left + dp(56)),
+                    (int) (bounds.centerY() - sz / 2f),
+                    (int) (bounds.left + dp(56) + sz),
+                    (int) (bounds.centerY() + sz / 2f)
+                );
+                faviconPaint.setAlpha((int) (0xFF * alpha * contentAlpha));
+                canvas.drawBitmap(favicon, null, AndroidUtilities.rectTmp2, faviconPaint);
+                canvas.restore();
+
+                leftPadding = sz + dp(4);
+            } else if (iconDrawable != null) {
+                final int sz = dp(24);
+
+                final int h = sz;
+                final int w = (int) (sz / (float) iconDrawable.getIntrinsicHeight() * iconDrawable.getIntrinsicWidth());
+                final float s = .7f;
+
+                AndroidUtilities.rectTmp2.set(
+                    (int) (bounds.left + dp(56)),
+                    (int) (bounds.centerY() - h / 2f * s),
+                    (int) (bounds.left + dp(56) + w * s),
+                    (int) (bounds.centerY() + h / 2f * s)
+                );
+                if (iconColor != iconDrawableColor) {
+                    iconDrawable.setColorFilter(new PorterDuffColorFilter(iconDrawableColor = iconColor, PorterDuff.Mode.SRC_IN));
+                }
+                iconDrawable.setAlpha((int) (0xFF * alpha * contentAlpha));
+                iconDrawable.setBounds(AndroidUtilities.rectTmp2);
+                iconDrawable.draw(canvas);
+
+                leftPadding = w - dp(2);
+            }
+
             if (overrideTitle != null) {
                 overrideTitle
-                    .ellipsize((int) (bounds.width() - dp(100)))
-                    .draw(canvas, bounds.left + dp(60), bounds.centerY(), iconColor, (1f - expandProgress) * alpha * contentAlpha);
+                    .ellipsize((int) (bounds.width() - dp(100) - leftPadding))
+                    .draw(canvas, bounds.left + dp(60) + leftPadding, bounds.centerY(), iconColor, (1f - expandProgress) * alpha * contentAlpha);
             }
             title
-                .ellipsize((int) (bounds.width() - dp(100)))
-                .draw(canvas, bounds.left + dp(60), bounds.centerY(), iconColor, (overrideTitle == null ? 1f : expandProgress) * alpha * contentAlpha);
+                .ellipsize((int) (bounds.width() - dp(100) - leftPadding))
+                .draw(canvas, bounds.left + dp(60) + leftPadding, bounds.centerY(), iconColor, (overrideTitle == null ? 1f : expandProgress) * alpha * contentAlpha);
         }
 
     }
 
     public static class WebTabData {
 
-        public BotWebViewAttachedSheet.WebViewRequestProps props;
+        public WebViewRequestProps props;
         public Bundle webViewState;
         public BotWebViewContainer.MyWebView webView;
-        public BotWebViewContainer.WebViewProxy webViewProxy;
-        public int webViewWidth, webViewHeight;
-        public int webViewScroll;
+        public View view2;
+        public Object proxy;
+        public int viewWidth, viewHeight;
+        public int viewScroll;
         public boolean expanded;
         public float expandedOffset = Float.MAX_VALUE;
+        public boolean allowSwipes = true;
 
         public Bitmap previewBitmap;
         public Object previewNode;
@@ -671,6 +865,19 @@ public class BottomSheetTabs extends FrameLayout {
 
         public boolean themeIsDark;
 
+        public boolean isWeb;
+        public String title;
+        public Bitmap favicon;
+        public String startUrl;
+        public String currentUrl;
+
+        public boolean error;
+        public int errorCode;
+        public String errorDescription;
+
+        public float articleProgress;
+        public ArticleViewer articleViewer;
+
         public long getBotId() {
             if (props == null) return 0;
             return props.botId;
@@ -682,9 +889,27 @@ public class BottomSheetTabs extends FrameLayout {
                     webView.destroy();
                     webView = null;
                 }
+                if (articleViewer != null) {
+                    articleViewer.destroy();
+                }
             } catch (Exception e) {
                 FileLog.e(e);
             }
+        }
+
+        public boolean isArticle() {
+            return articleViewer != null && articleViewer.isLastArticle();
+        }
+
+        public String getTitle() {
+            if (isWeb || articleViewer != null) {
+                if (TextUtils.isEmpty(title))
+                    return getString(R.string.WebEmpty);
+                return title;
+            }
+            if (props == null) return "";
+            TLRPC.User user = MessagesController.getInstance(props.currentAccount).getUser(props.botId);
+            return UserObject.getUserName(user);
         }
 
     }

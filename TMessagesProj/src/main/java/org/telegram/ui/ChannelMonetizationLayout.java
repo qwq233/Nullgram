@@ -21,8 +21,6 @@ package org.telegram.ui;
 
 import static org.telegram.messenger.AndroidUtilities.REPLACING_TAG_TYPE_LINK_NBSP;
 import static org.telegram.messenger.AndroidUtilities.dp;
-import static org.telegram.messenger.AndroidUtilities.dpf2;
-import static org.telegram.messenger.AndroidUtilities.makeBlurBitmap;
 import static org.telegram.messenger.LocaleController.formatPluralString;
 import static org.telegram.messenger.LocaleController.formatString;
 import static org.telegram.messenger.LocaleController.getString;
@@ -46,7 +44,6 @@ import android.text.TextUtils;
 import android.text.TextWatcher;
 import android.text.style.RelativeSizeSpan;
 import android.util.Base64;
-import android.util.Log;
 import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.MotionEvent;
@@ -72,7 +69,6 @@ import org.telegram.messenger.ChatObject;
 import org.telegram.messenger.FileLog;
 import org.telegram.messenger.LocaleController;
 import org.telegram.messenger.MessagesController;
-import org.telegram.messenger.NotificationCenter;
 import org.telegram.messenger.R;
 import org.telegram.messenger.UserConfig;
 import org.telegram.messenger.UserObject;
@@ -110,7 +106,6 @@ import org.telegram.ui.Components.UniversalRecyclerView;
 import org.telegram.ui.Components.ViewPagerFixed;
 import org.telegram.ui.Stars.BotStarsActivity;
 import org.telegram.ui.Stars.BotStarsController;
-import org.telegram.ui.Stars.StarsController;
 import org.telegram.ui.Stars.StarsIntroActivity;
 import org.telegram.ui.Stories.recorder.ButtonWithCounterView;
 
@@ -213,8 +208,10 @@ public class ChannelMonetizationLayout extends SizeNotifierFrameLayout implement
         balanceInfo = AndroidUtilities.replaceArrows(AndroidUtilities.replaceSingleTag(getString(MessagesController.getInstance(currentAccount).channelRevenueWithdrawalEnabled ? R.string.MonetizationBalanceInfo : R.string.MonetizationBalanceInfoNotAvailable), -1, REPLACING_TAG_TYPE_LINK_NBSP, () -> {
             Browser.openUrl(getContext(), getString(R.string.MonetizationBalanceInfoLink));
         }), true);
-        proceedsInfo = AndroidUtilities.replaceArrows(AndroidUtilities.replaceSingleTag(getString(R.string.MonetizationProceedsInfo), -1, REPLACING_TAG_TYPE_LINK_NBSP, () -> {
-            Browser.openUrl(getContext(), getString(R.string.MonetizationProceedsInfoLink));
+        final int proceedsInfoText = starsRevenueAvailable && tonRevenueAvailable ? R.string.MonetizationProceedsStarsTONInfo : starsRevenueAvailable ? R.string.MonetizationProceedsStarsInfo : R.string.MonetizationProceedsTONInfo;
+        final int proceedsInfoLink = starsRevenueAvailable && tonRevenueAvailable ? R.string.MonetizationProceedsStarsTONInfoLink : starsRevenueAvailable ? R.string.MonetizationProceedsStarsInfoLink : R.string.MonetizationProceedsTONInfoLink;
+        proceedsInfo = AndroidUtilities.replaceArrows(AndroidUtilities.replaceSingleTag(getString(proceedsInfoText), -1, REPLACING_TAG_TYPE_LINK_NBSP, () -> {
+            Browser.openUrl(getContext(), getString(proceedsInfoLink));
         }, resourcesProvider), true);
         starsBalanceInfo = AndroidUtilities.replaceArrows(AndroidUtilities.replaceSingleTag(getString(R.string.MonetizationStarsInfo), () -> {
             Browser.openUrl(getContext(), getString(R.string.MonetizationStarsInfoLink));
@@ -428,7 +425,7 @@ public class ChannelMonetizationLayout extends SizeNotifierFrameLayout implement
         });
 
         starsAdsButton = new ButtonWithCounterView(context, resourcesProvider);
-        starsAdsButton.setEnabled(true);
+        starsAdsButton.setEnabled(false);
         starsAdsButton.setText(getString(R.string.MonetizationStarsAds), false);
         starsAdsButton.setOnClickListener(v -> {
             if (!v.isEnabled() || starsAdsButton.isLoading()) return;
@@ -701,6 +698,9 @@ public class ChannelMonetizationLayout extends SizeNotifierFrameLayout implement
 
             starsBalanceButton.setEnabled(starsBalanceEditTextValue > 0);
         }
+        if (starsAdsButton != null) {
+            starsAdsButton.setEnabled(amount > 0);
+        }
         starsBalanceBlockedUntil = blockedUntil;
 
         AndroidUtilities.cancelRunOnUIThread(setStarsBalanceButtonText);
@@ -716,32 +716,43 @@ public class ChannelMonetizationLayout extends SizeNotifierFrameLayout implement
 
     private void loadStarsStats() {
         if (!starsRevenueAvailable) return;
-        TLRPC.TL_payments_getStarsRevenueStats req2 = new TLRPC.TL_payments_getStarsRevenueStats();
-        req2.peer = MessagesController.getInstance(currentAccount).getInputPeer(dialogId);
-        req2.dark = Theme.isCurrentThemeDark();
-        ConnectionsManager.getInstance(currentAccount).sendRequest(req2, (res2, err) -> AndroidUtilities.runOnUIThread(() -> {
-            if (res2 instanceof TLRPC.TL_payments_starsRevenueStats) {
-                TLRPC.TL_payments_starsRevenueStats stats = (TLRPC.TL_payments_starsRevenueStats) res2;
 
-                stars_rate = stats.usd_rate;
-                starsRevenueChart = StatisticActivity.createViewData(stats.revenue_graph, getString(R.string.MonetizationGraphStarsRevenue), 2);
-                if (starsRevenueChart != null && starsRevenueChart.chartData != null && starsRevenueChart.chartData.lines != null && !starsRevenueChart.chartData.lines.isEmpty() && starsRevenueChart.chartData.lines.get(0) != null) {
-                    starsRevenueChart.chartData.lines.get(0).colorKey = Theme.key_statisticChartLine_golden;
-                    starsRevenueChart.chartData.yRate = (float) (1.0 / stars_rate / 100.0);
+        TLRPC.TL_payments_starsRevenueStats cachedStats = BotStarsController.getInstance(currentAccount).getRevenueStats(dialogId);
+        if (cachedStats != null) {
+            AndroidUtilities.runOnUIThread(() -> {
+                applyStarsStats(cachedStats);
+            });
+        } else {
+            TLRPC.TL_payments_getStarsRevenueStats req2 = new TLRPC.TL_payments_getStarsRevenueStats();
+            req2.peer = MessagesController.getInstance(currentAccount).getInputPeer(dialogId);
+            req2.dark = Theme.isCurrentThemeDark();
+            ConnectionsManager.getInstance(currentAccount).sendRequest(req2, (res2, err) -> AndroidUtilities.runOnUIThread(() -> {
+                if (res2 instanceof TLRPC.TL_payments_starsRevenueStats) {
+                    TLRPC.TL_payments_starsRevenueStats stats = (TLRPC.TL_payments_starsRevenueStats) res2;
+                    applyStarsStats(stats);
                 }
-                setupBalances(stats.status);
+            }));
+        }
+    }
 
-                if (!tonRevenueAvailable) {
-                    progress.animate().alpha(0).setDuration(380).setInterpolator(CubicBezierInterpolator.EASE_OUT_QUINT).withEndAction(() -> {
-                        progress.setVisibility(View.GONE);
-                    }).start();
-                }
+    private void applyStarsStats(TLRPC.TL_payments_starsRevenueStats stats) {
+        stars_rate = stats.usd_rate;
+        starsRevenueChart = StatisticActivity.createViewData(stats.revenue_graph, getString(R.string.MonetizationGraphStarsRevenue), 2);
+        if (starsRevenueChart != null && starsRevenueChart.chartData != null && starsRevenueChart.chartData.lines != null && !starsRevenueChart.chartData.lines.isEmpty() && starsRevenueChart.chartData.lines.get(0) != null) {
+            starsRevenueChart.chartData.lines.get(0).colorKey = Theme.key_statisticChartLine_golden;
+            starsRevenueChart.chartData.yRate = (float) (1.0 / stars_rate / 100.0);
+        }
+        setupBalances(stats.status);
 
-                if (listView != null) {
-                    listView.adapter.update(true);
-                }
-            }
-        }));
+        if (!tonRevenueAvailable && progress != null) {
+            progress.animate().alpha(0).setDuration(380).setInterpolator(CubicBezierInterpolator.EASE_OUT_QUINT).withEndAction(() -> {
+                progress.setVisibility(View.GONE);
+            }).start();
+        }
+
+        if (listView != null) {
+            listView.adapter.update(true);
+        }
     }
 
     private void initLevel() {
@@ -846,7 +857,9 @@ public class ChannelMonetizationLayout extends SizeNotifierFrameLayout implement
         lifetimeValue.amount2 = (long) (lifetimeValue.crypto_amount2 * stars_rate * 100.0);
         lifetimeValue.currency = "USD";
         proceedsAvailable = true;
-        starsBalanceButton.setVisibility(balances.available_balance > 0 || BuildVars.DEBUG_PRIVATE_VERSION ? View.VISIBLE : View.GONE);
+        if (starsBalanceButton != null) {
+            starsBalanceButton.setVisibility(balances.available_balance > 0 || BuildVars.DEBUG_PRIVATE_VERSION ? View.VISIBLE : View.GONE);
+        }
 
         if (listView != null && listView.adapter != null) {
             listView.adapter.update(true);
@@ -879,7 +892,7 @@ public class ChannelMonetizationLayout extends SizeNotifierFrameLayout implement
     }
 
     private void checkLearnSheet() {
-        if (isAttachedToWindow() && proceedsAvailable && MessagesController.getGlobalMainSettings().getBoolean("monetizationadshint", true)) {
+        if (isAttachedToWindow() && tonRevenueAvailable && proceedsAvailable && MessagesController.getGlobalMainSettings().getBoolean("monetizationadshint", true)) {
             showLearnSheet();
             MessagesController.getGlobalMainSettings().edit().putBoolean("monetizationadshint", false).apply();
         }
@@ -1747,11 +1760,14 @@ public class ChannelMonetizationLayout extends SizeNotifierFrameLayout implement
             }
         }
 
-        private void updateLists(boolean animated) {
+        private void updateLists(boolean animated, boolean checkMore) {
             for (int i = 0; i < viewPager.getViewPages().length; ++i) {
                 View page = viewPager.getViewPages()[i];
                 if (page instanceof Page) {
                     ((Page) page).listView.adapter.update(animated);
+                    if (checkMore) {
+                        ((Page) page).checkMore();
+                    }
                 }
             }
         }
@@ -1785,7 +1801,7 @@ public class ChannelMonetizationLayout extends SizeNotifierFrameLayout implement
                         tonTransactionsTotalCount = r.count;
                         tonTransactions.addAll(r.transactions);
 
-                        updateLists(true);
+                        updateLists(true, true);
                         loadingTransactions[type] = false;
                     } else if (err != null) {
                         BulletinFactory.showError(err);
@@ -1811,7 +1827,7 @@ public class ChannelMonetizationLayout extends SizeNotifierFrameLayout implement
                         MessagesController.getInstance(currentAccount).putChats(r.chats, false);
                         starsTransactions.addAll(r.history);
                         starsLastOffset = r.next_offset;
-                        updateLists(true);
+                        updateLists(true, true);
                         loadingTransactions[type] = false;
                     } else if (err != null) {
                         BulletinFactory.showError(err);
@@ -1849,16 +1865,25 @@ public class ChannelMonetizationLayout extends SizeNotifierFrameLayout implement
                 listView.setOnScrollListener(new RecyclerView.OnScrollListener() {
                     @Override
                     public void onScrolled(@NonNull RecyclerView recyclerView, int dx, int dy) {
-                        scheduleLoadTransactions();
+                        if (!Page.this.listView.canScrollVertically(1) || isLoadingVisible()) {
+                            loadMore.run();
+                        }
                     }
                 });
             }
 
-            private void scheduleLoadTransactions() {
-                if (!Page.this.listView.canScrollVertically(1)) {
-                    AndroidUtilities.cancelRunOnUIThread(loadMore);
-                    AndroidUtilities.runOnUIThread(loadMore, 250);
+            public void checkMore() {
+                if (!Page.this.listView.canScrollVertically(1) || isLoadingVisible()) {
+                    loadMore.run();
                 }
+            }
+
+            public boolean isLoadingVisible() {
+                for (int i = 0; i < listView.getChildCount(); ++i) {
+                    if (listView.getChildAt(i) instanceof FlickerLoadingView)
+                        return true;
+                }
+                return false;
             }
 
             @Override
@@ -1989,6 +2014,12 @@ public class ChannelMonetizationLayout extends SizeNotifierFrameLayout implement
                     }
                     if (innerListView != null && consumed[1] > 0) {
                         innerListView.scrollBy(0, consumed[1]);
+                    }
+                } else if (dy > 0) {
+                    RecyclerListView innerListView = transactionsLayout.getCurrentListView();
+                    if (listView.getHeight() - bottom >= 0 && innerListView != null && !innerListView.canScrollVertically(1)) {
+                        consumed[1] = dy;
+                        listView.stopScroll();
                     }
                 }
             }

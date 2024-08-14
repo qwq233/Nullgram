@@ -1,3 +1,22 @@
+/*
+ * Copyright (C) 2019-2024 qwq233 <qwq233@qwq2333.top>
+ * https://github.com/qwq233/Nullgram
+ *
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation; either version 2
+ * of the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along with this software.
+ *  If not, see
+ * <https://www.gnu.org/licenses/>
+ */
+
 package org.telegram.ui.ActionBar;
 
 import static org.telegram.messenger.AndroidUtilities.dp;
@@ -15,7 +34,6 @@ import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.LocaleController;
 import org.telegram.ui.Components.CheckBox2;
 import org.telegram.ui.Components.LayoutHelper;
@@ -24,7 +42,7 @@ import org.telegram.ui.Components.RLottieImageView;
 public class ActionBarMenuSubItem extends FrameLayout {
 
     private TextView textView;
-    private TextView subtextView;
+    public TextView subtextView;
     public RLottieImageView imageView;
     private boolean checkViewLeft;
     private CheckBox2 checkView;
@@ -236,7 +254,9 @@ public class ActionBarMenuSubItem extends FrameLayout {
     }
 
     public void setSubtextColor(int color) {
-        subtextView.setTextColor(color);
+        if (subtextView != null) {
+            subtextView.setTextColor(color);
+        }
     }
 
     public void setSubtext(String text) {
