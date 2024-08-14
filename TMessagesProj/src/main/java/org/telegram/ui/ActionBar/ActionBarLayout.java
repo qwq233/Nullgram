@@ -124,8 +124,8 @@ public class ActionBarLayout extends FrameLayout implements INavigationLayout, F
         public LayoutContainer(Context context) {
             super(context);
             setWillNotDraw(false);
-            if (Config.scrollableChatPreview)
-                setClickable(true);
+//            if (Config.scrollableChatPreview)
+//                setClickable(true);
         }
 
         @Override
