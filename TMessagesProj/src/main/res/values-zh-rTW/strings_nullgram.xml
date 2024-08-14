@@ -27,10 +27,9 @@
     <string name="ViewSourceCode">檢視原始碼</string>
     <string name="Categories">分類</string>
     <string name="About">關於</string>
-    <string name="OfficialChannelName">NullgramClient</string>
     <string name="noAvailableUpdate">無可用更新</string>
     <string name="updateAvailable">新更新可用</string>
-    <string name="variantsNotFound">發佈變量無法自動匹配。\n請從 GitHub 手動下載。</string>
+    <string name="variantsNotFound">發行版本無法自動匹配。\n請從 GitHub 手動下載。</string>
     <string name="skipUpdate">跳過更新</string>
     <string name="notNow">稍後</string>
     <string name="updateConfirm">更新</string>
@@ -113,7 +112,6 @@
     <string name="customDoubleTap">自訂雙點擊功能</string>
     <string name="OpenSource">開源軟體授權</string>
     <string name="disableCustomAPI">不使用自訂 API</string>
-    <string name="useOfficialAPI">TELEOFFICIAL 官方版</string>
     <string name="customAPI">自訂 API</string>
     <string name="useCustomApiNotice">如果無法註冊或登入，請嘗試使用自訂 API 登入。\n\n請注意：如果您使用的是釋出版本，API 將無法運作。</string>
     <string name="useCustomAPI">手動輸入</string>
@@ -345,4 +343,6 @@
     <string name="SaveToDownloadCount_few">正在儲存 %1$d 個檔案至下載目錄</string>
     <string name="SaveToDownloadCount_many">正在儲存 %1$d 個檔案至下載目錄</string>
     <string name="SaveToDownloadCount_other">正在儲存 %1$d 個檔案至下載目錄</string>
+    <string name="InvalidPattern">無效的匹配模式</string>
+    <string name="sendLargePhoto">傳送大尺寸照片</string>
 </resources>

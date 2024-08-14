@@ -27,7 +27,6 @@
     <string name="ViewSourceCode">عرض كود المصدر</string>
     <string name="Categories">الفئات</string>
     <string name="About">عن التطبيق</string>
-    <string name="OfficialChannelName">عميل Nullgram</string>
     <string name="noAvailableUpdate">لا يوجد تحديث.</string>
     <string name="updateAvailable">يوجد تحديث جديد</string>
     <string name="variantsNotFound">متغيرات الإصدار لا تتطابق تلقائيا.\nالرجاء التحميل يدوياً من GitHub.</string>
@@ -113,7 +112,6 @@
     <string name="customDoubleTap">النقر المزدوج المخصص</string>
     <string name="OpenSource">تراخيص برمجيات مفتوحة المصدر</string>
     <string name="disableCustomAPI">لا تستخدم API مخصص</string>
-    <string name="useOfficialAPI">TELEOFFICIAL</string>
     <string name="customAPI">API مخصص</string>
     <string name="useCustomApiNotice">قم بتسجيل الدخول باستخدام واجهة برمجة التطبيقات المخصصة ، إذا كنت غير قادر على التسجيل أو تسجيل الدخول ، فقد يساعدك ذلك.
 \n
@@ -347,4 +345,6 @@
     <string name="SaveToDownloadCount_few">Saving %1$d files to Download</string>
     <string name="SaveToDownloadCount_many">Saving %1$d files to Download</string>
     <string name="SaveToDownloadCount_other">Saving %1$d files to Download</string>
+    <string name="InvalidPattern">Invalid Pattern</string>
+    <string name="sendLargePhoto">Send large photo</string>
 </resources>

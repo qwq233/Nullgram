@@ -27,7 +27,6 @@
     <string name="ViewSourceCode">Codice sorgente</string>
     <string name="Categories">Categorie</string>
     <string name="About">Info su</string>
-    <string name="OfficialChannelName">NullgramClient</string>
     <string name="noAvailableUpdate">Nessun nuovo aggiornamento.</string>
     <string name="updateAvailable">Nuovo aggiornamento disponibile</string>
     <string name="variantsNotFound">Impossibile trovare una variante di release corrispondente.\nScarica l\'aggiornamento manualmente da GitHub.</string>
@@ -113,7 +112,6 @@
     <string name="customDoubleTap">Personalizza doppio tap</string>
     <string name="OpenSource">Licenze open source</string>
     <string name="disableCustomAPI">Non utilizzare API personalizzate</string>
-    <string name="useOfficialAPI">API ufficiale</string>
     <string name="customAPI">API custom</string>
     <string name="useCustomApiNotice">Nel caso non sei in grado di registrarti o effettuare il login, puoi usare le API custom.\n\nNota bene: FCM non funzionerà se utilizzi la versione release.</string>
     <string name="useCustomAPI">Inserimento manuale</string>
@@ -345,4 +343,6 @@
     <string name="SaveToDownloadCount_few">Sto salvando %1$d file nei download</string>
     <string name="SaveToDownloadCount_many">Sto salvando %1$d file nei download</string>
     <string name="SaveToDownloadCount_other">Sto salvando %1$d file nei download</string>
+    <string name="InvalidPattern">Invalid Pattern</string>
+    <string name="sendLargePhoto">Send large photo</string>
 </resources>

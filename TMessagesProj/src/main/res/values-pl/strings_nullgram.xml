@@ -27,7 +27,6 @@
     <string name="ViewSourceCode">Zobacz kod źródłowy</string>
     <string name="Categories">Kategorie</string>
     <string name="About">O Nullgramie</string>
-    <string name="OfficialChannelName">Klient Nullgram</string>
     <string name="noAvailableUpdate">Brak aktualizacji.</string>
     <string name="updateAvailable">Dostępna nowa aktualizacja</string>
     <string name="variantsNotFound">Release variants fail to match automatically.\nPlease download manually from GitHub.</string>
@@ -113,7 +112,6 @@
     <string name="customDoubleTap">Custom Double Tap</string>
     <string name="OpenSource">OpenSource Software Licenses</string>
     <string name="disableCustomAPI">Don\'t use custom API</string>
-    <string name="useOfficialAPI">TELEOFFICIAL</string>
     <string name="customAPI">Custom API</string>
     <string name="useCustomApiNotice">Log in using the custom api, if you are unable to register or log in, this may help.\n\nNote: fcm will not work if you are using the release version.</string>
     <string name="useCustomAPI">Manual input</string>
@@ -345,4 +343,6 @@
     <string name="SaveToDownloadCount_few">Saving %1$d files to Download</string>
     <string name="SaveToDownloadCount_many">Saving %1$d files to Download</string>
     <string name="SaveToDownloadCount_other">Saving %1$d files to Download</string>
+    <string name="InvalidPattern">Invalid Pattern</string>
+    <string name="sendLargePhoto">Send large photo</string>
 </resources>

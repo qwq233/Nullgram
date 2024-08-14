@@ -27,7 +27,6 @@
     <string name="ViewSourceCode">Lihat Kode Sumber</string>
     <string name="Categories">Kategori</string>
     <string name="About">Tentang</string>
-    <string name="OfficialChannelName">NullgramClient</string>
     <string name="noAvailableUpdate">Tidak Ada Pembaruan.</string>
     <string name="updateAvailable">Pembaruan Terbaru Tersedia</string>
     <string name="variantsNotFound">Varian rilis gagal dicocokkan secara otomatis.\nHarap unduh secara manual dari GitHub.</string>
@@ -113,7 +112,6 @@
     <string name="customDoubleTap">Tekan Dua Kali Kustom</string>
     <string name="OpenSource">Lisensi Perangkat Lunak Sumber Terbuka</string>
     <string name="disableCustomAPI">Jamgan gunakan API kustom</string>
-    <string name="useOfficialAPI">Telegram Resmi</string>
     <string name="customAPI">API Kustom</string>
     <string name="useCustomApiNotice">Masuk menggunakan API kustom, jika anda tidak dapat mendaftar atau masuk, ini mungkin bisa membantu.\n\nCatatan: FCM tidak akan bekerja jika anda menggunakan versi rilis.</string>
     <string name="useCustomAPI">Input manual</string>
@@ -345,4 +343,6 @@
     <string name="SaveToDownloadCount_few">Saving %1$d files to Download</string>
     <string name="SaveToDownloadCount_many">Saving %1$d files to Download</string>
     <string name="SaveToDownloadCount_other">Saving %1$d files to Download</string>
+    <string name="InvalidPattern">Invalid Pattern</string>
+    <string name="sendLargePhoto">Send large photo</string>
 </resources>
