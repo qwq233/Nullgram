@@ -310,7 +310,7 @@ public class PasscodeSettingActivity extends BaseActivity {
                     } else if (position == panicCode2Row) {
                         cell.setText(LocaleController.getString(R.string.PasscodePanicCodeAbout));
                     } else if (position == showInSettings2Row) {
-                        var link = String.format(Locale.ENGLISH, "https://t.me/nekosettings/%s", PasscodeHelper.getSettingsKey());
+                        var link = String.format(Locale.ENGLISH, "https://t.me/nullsettings/%s", PasscodeHelper.getSettingsKey());
                         var stringBuilder = new SpannableStringBuilder(AndroidUtilities.replaceTags(LocaleController.getString(R.string.PasscodeShowInSettingsAbout)));
                         stringBuilder.append("\n").append(link);
                         stringBuilder.setSpan(new URLSpanNoUnderline(null) {
