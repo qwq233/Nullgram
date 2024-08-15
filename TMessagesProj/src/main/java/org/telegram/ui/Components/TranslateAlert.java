@@ -1,3 +1,22 @@
+/*
+ * Copyright (C) 2019-2024 qwq233 <qwq233@qwq2333.top>
+ * https://github.com/qwq233/Nullgram
+ *
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation; either version 2
+ * of the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along with this software.
+ *  If not, see
+ * <https://www.gnu.org/licenses/>
+ */
+
 package org.telegram.ui.Components;
 
 import static org.telegram.messenger.AndroidUtilities.displayMetrics;
@@ -71,9 +90,7 @@ import java.util.Locale;
 
 import kotlin.Unit;
 import top.qwq2333.gen.Config;
-import top.qwq2333.nullgram.config.ConfigManager;
 import top.qwq2333.nullgram.helpers.TranslateHelper;
-import top.qwq2333.nullgram.utils.Defines;
 
 public class TranslateAlert extends Dialog {
 
@@ -1100,10 +1117,7 @@ public class TranslateAlert extends Dialog {
                     onSuccess.run((String) translation, sourceLanguage);
             });
             return Unit.INSTANCE;
-        },e->{
-            TranslateHelper.handleTranslationError(getContext(), e, () -> fetchTranslation(text, minDuration, onSuccess, onFail), null);
-            return Unit.INSTANCE;
-        });
+        },e-> null);
     }
 
     public static TranslateAlert showAlert(Context context, BaseFragment fragment, int currentAccount, TLRPC.InputPeer peer, int msgId, String fromLanguage, String toLanguage, CharSequence text, boolean noforwards, OnLinkPress onLinkPress, Runnable onDismiss) {

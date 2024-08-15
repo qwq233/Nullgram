@@ -31041,7 +31041,7 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
             getMessageUtils().resetMessageContent(dialog_id, messageObject, true, original, false, Pair.create(TextUtils.isEmpty(sourceLanguageT) ? sourceLanguage : sourceLanguageT, targetLanguageT));
             return Unit.INSTANCE;
         }, e -> {
-            TranslateHelper.handleTranslationError(getParentActivity(), e, () -> translateMessage(messageObject, sourceLanguage, autoTranslate), themeDelegate);
+            TranslateHelper.handleTranslationError(ChatActivity.this, e, () -> translateMessage(messageObject, sourceLanguage, autoTranslate), themeDelegate);
             getMessageUtils().resetMessageContent(dialog_id, messageObject, false, false);
             return Unit.INSTANCE;
         });

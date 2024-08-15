@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019-2023 qwq233 <qwq233@qwq2333.top>
+ * Copyright (C) 2019-2024 qwq233 <qwq233@qwq2333.top>
  * https://github.com/qwq233/Nullgram
  *
  * This program is free software; you can redistribute it and/or
@@ -39,6 +39,7 @@ import org.telegram.messenger.R
 import org.telegram.ui.ActionBar.AlertDialog
 import org.telegram.ui.ActionBar.BaseFragment
 import org.telegram.ui.ActionBar.Theme.ResourcesProvider
+import org.telegram.ui.Components.BulletinFactory
 import org.telegram.ui.Components.TranslateAlert
 import top.qwq2333.gen.Config
 import top.qwq2333.nullgram.activity.LanguageSelectActivity
@@ -366,47 +367,66 @@ object TranslateHelper {
         try {
             context.startActivity(intent)
         } catch (e: ActivityNotFoundException) {
-            AlertDialog.Builder(context).setTitle(LocaleController.getString("AppName", R.string.AppName))
-                .setMessage(LocaleController.getString("NoTranslatorAppInstalled", R.string.NoTranslatorAppInstalled)).show()
+            AlertDialog.Builder(context)
+                .setTitle(LocaleController.getString("AppName", R.string.AppName))
+                .setMessage(LocaleController.getString("NoTranslatorAppInstalled", R.string.NoTranslatorAppInstalled))
+                .show()
         }
     }
 
     @JvmStatic
-    fun handleTranslationError(context: Context?, e: Exception?, onRetry: Runnable?, resourcesProvider: ResourcesProvider?) {
-        if (context == null) {
+    fun handleTranslationError(baseFragment: BaseFragment?, e: Exception?, onRetry: Runnable?, resourcesProvider: ResourcesProvider?) {
+        if (baseFragment == null) {
             return
         }
-        val builder = AlertDialog.Builder(context, resourcesProvider)
-        if (e is UnsupportedTargetLanguageException) {
-            builder.setMessage(LocaleController.getString("TranslateApiUnsupported", R.string.TranslateApiUnsupported))
-            builder.setPositiveButton(
-                LocaleController.getString("TranslationProviderShort", R.string.TranslationProviderShort)
-            ) { _: DialogInterface?, _: Int ->
-                showTranslationProviderSelector(context, null, resourcesProvider) {}
-            }
-        } else {
-            if (e is TooManyRequestException) {
-                builder.setTitle(LocaleController.getString("TranslateFailed", R.string.TranslateFailed))
-                builder.setMessage(LocaleController.getString("FloodWait", R.string.FloodWait))
-            } else if (e != null) {
-                builder.setTitle(LocaleController.getString("TranslateFailed", R.string.TranslateFailed))
-                builder.setMessage(e.message)
-            } else {
-                builder.setMessage(LocaleController.getString("TranslateFailed", R.string.TranslateFailed))
-            }
-            if (onRetry != null) {
-                builder.setPositiveButton(
-                    LocaleController.getString("Retry", R.string.Retry)
-                ) { _: DialogInterface?, _: Int -> onRetry.run() }
-            }
-            builder.setNeutralButton(
-                LocaleController.getString("TranslationProviderShort", R.string.TranslationProviderShort)
-            ) { _: DialogInterface?, _: Int ->
-                showTranslationProviderSelector(context, null, resourcesProvider) {}
-            }
+        val context = baseFragment.context
+        BulletinFactory.of(baseFragment).createSimpleBulletin(
+            R.drawable.warning_sign,
+            LocaleController.getString("FailedToTranslate", R.string.TranslationFailedAlert2),
+            LocaleController.getString("Details", R.string.Details)
+        ) {
+            AlertDialog.Builder(context, resourcesProvider).apply {
+                when (e) {
+                    is UnsupportedTargetLanguageException -> {
+                        setMessage(LocaleController.getString("TranslateApiUnsupported", R.string.TranslateApiUnsupported))
+                        setPositiveButton(
+                            LocaleController.getString("TranslationProviderShort", R.string.TranslationProviderShort)
+                        ) { _, _ ->
+                            showTranslationProviderSelector(context, null, resourcesProvider) {}
+                        }
+                    }
+
+                    is TooManyRequestException -> {
+                        setTitle(LocaleController.getString("TranslateFailed", R.string.TranslateFailed))
+                        setMessage(LocaleController.getString("FloodWait", R.string.FloodWait))
+                    }
+
+                    else -> {
+                        if (e == null) {
+                            setMessage(LocaleController.getString("TranslateFailed", R.string.TranslateFailed))
+                        } else {
+                            setTitle(LocaleController.getString("TranslateFailed", R.string.TranslateFailed))
+                            setMessage(e.message)
+                        }
+                    }
+                }
+
+                if (onRetry != null) {
+                    setPositiveButton(LocaleController.getString("Retry", R.string.Retry)) { _, _ ->
+                        onRetry.run()
+                    }
+                }
+
+                setNeutralButton(
+                    LocaleController.getString("TranslationProviderShort", R.string.TranslationProviderShort)
+                ) { _, _ ->
+                    showTranslationProviderSelector(context, null, resourcesProvider) {}
+                }
+
+                setNegativeButton(LocaleController.getString("Cancel", R.string.Cancel), null)
+            }.also { it.show() }
         }
-        builder.setNegativeButton(LocaleController.getString("Cancel", R.string.Cancel), null)
-        builder.show()
+
     }
 
     private class UnsupportedTargetLanguageException : IllegalArgumentException()
