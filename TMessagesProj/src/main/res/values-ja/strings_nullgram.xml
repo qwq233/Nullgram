@@ -346,4 +346,5 @@ https://t.me/NullgramClient</string>
     <string name="SaveToDownloadCount_other">%1$d ファイルをダウンロードに保存しています</string>
     <string name="InvalidPattern">無効なパターン</string>
     <string name="sendLargePhoto">大きな写真を送信</string>
+    <string name="Details">Details</string>
 </resources>
