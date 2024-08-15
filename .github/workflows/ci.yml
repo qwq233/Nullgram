@@ -75,6 +75,7 @@ jobs:
           cat > service_account_credentials.json << EOF
           ${{ secrets.ANDROID_PUBLISHER_CREDENTIALS }}"
           EOF
+          mkdir TMessagesProj/config/
           echo ${{ secrets.KEYSTORE }} | base64 -d > TMessagesProj/config/release.keystore
           echo ${{ secrets.GOOGLE_SERVICES_JSON }} | base64 -d > TMessagesProj/google-services.json
           ./gradlew :TMessagesProj:assembleRelease :TMessagesProj:uploadCrashlyticsSymbolFileRelease
@@ -161,6 +162,7 @@ jobs:
           cat > service_account_credentials.json << EOF
           ${{ secrets.ANDROID_PUBLISHER_CREDENTIALS }}"
           EOF
+          mkdir TMessagesProj/config/
           echo ${{ secrets.KEYSTORE }} | base64 -d > TMessagesProj/config/release.keystore
           echo ${{ secrets.GOOGLE_SERVICES_JSON }} | base64 -d > TMessagesProj/google-services.json
           ./gradlew :TMessagesProj:publishPlayBundle
