@@ -1,0 +1,5 @@
+.cxx
+.cargo
+.gradle
+google-services.json
+config/release.keystore

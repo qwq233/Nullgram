@@ -3,8 +3,6 @@
 .kotlin/
 build/
 obj/
-TMessagesProj/.cxx
-TMessagesProj/.cargo
 *.iml
 local.properties
 service_account_credentials.json

@@ -75,6 +75,8 @@ jobs:
           cat > service_account_credentials.json << EOF
           ${{ secrets.ANDROID_PUBLISHER_CREDENTIALS }}"
           EOF
+          echo ${{ secrets.KEYSTORE }} | base64 -d > TMessagesProj/config/release.keystore
+          echo ${{ secrets.GOOGLE_SERVICES_JSON }} | base64 -d > TMessagesProj/google-services.json
           ./gradlew :TMessagesProj:assembleRelease :TMessagesProj:uploadCrashlyticsSymbolFileRelease
           echo "APK_FILE=$(find TMessagesProj/build/outputs/apk -name '*arm64*.apk')" >> $GITHUB_ENV
           echo "APK_FILE_ARMV7=$(find TMessagesProj/build/outputs/apk -name '*arm32*.apk')" >> $GITHUB_ENV
@@ -159,6 +161,8 @@ jobs:
           cat > service_account_credentials.json << EOF
           ${{ secrets.ANDROID_PUBLISHER_CREDENTIALS }}"
           EOF
+          echo ${{ secrets.KEYSTORE }} | base64 -d > TMessagesProj/config/release.keystore
+          echo ${{ secrets.GOOGLE_SERVICES_JSON }} | base64 -d > TMessagesProj/google-services.json
           ./gradlew :TMessagesProj:publishPlayBundle
 
 
