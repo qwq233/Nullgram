@@ -24,8 +24,10 @@ jobs:
     steps:
       - uses: actions/checkout@v2
         with:
-          submodules: 'recursive'
           fetch-depth: 0
+      - name: Check out submodules
+        run: |
+          git -c submodule."libs/rust".update=none submodule update --init --recursive
       - name: Setup cmake
         uses: jwlawson/actions-setup-cmake@v1.12
         with:
