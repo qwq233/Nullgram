@@ -194,7 +194,12 @@ android {
             cmake {
                 version = "3.22.1"
                 arguments += listOf(
-                    "-DANDROID_STL=c++_static", "-DANDROID_PLATFORM=android-24", "-DCMAKE_C_COMPILER_LAUNCHER=ccache", "-DCMAKE_CXX_COMPILER_LAUNCHER=ccache", "-DNDK_CCACHE=ccache"
+                    "-DANDROID_STL=c++_static",
+                    "-DANDROID_PLATFORM=android-27",
+                    "-DCMAKE_C_COMPILER_LAUNCHER=ccache",
+                    "-DCMAKE_CXX_COMPILER_LAUNCHER=ccache",
+                    "-DNDK_CCACHE=ccache",
+                    "-DANDROID_SUPPORT_FLEXIBLE_PAGE_SIZES=ON",
                 )
             }
         }
