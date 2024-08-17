@@ -10331,12 +10331,12 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
             }
             if (ChatObject.isChannel(chat)) {
                 if (isTopic) {
-                    createAutoTranslateItem(chatId, topicId);
+                    createAutoTranslateItem(chat.id, topicId);
                     if (ChatObject.canManageTopic(currentAccount, chat, topicId)) {
                         editItemVisible = true;
                     }
                 } else {
-                    createAutoTranslateItem(chatId);
+                    createAutoTranslateItem(chat.id);
                     if ((ChatObject.hasAdminRights(chat) || chat.megagroup && ChatObject.canChangeChatInfo(chat)) || chat.megagroup) {
                         editItemVisible = true;
                     }

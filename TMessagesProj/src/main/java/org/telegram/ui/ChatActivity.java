@@ -35100,7 +35100,7 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
                     }
                 }
 
-                if (DialogConfig.isAutoTranslateEnable(dialog_id, getTopicId()) && LanguageDetector.hasSupport() && TranslateHelper.getCurrentStatus() != TranslateHelper.Status.External) {
+                if (DialogConfig.isAutoTranslateEnable(currentChat.id, getTopicId()) && LanguageDetector.hasSupport() && TranslateHelper.getCurrentStatus() != TranslateHelper.Status.External) {
                     final var messageObject = messageCell.getMessageObject();
                     if (getMessageUtils().isMessageObjectAutoTranslatable(messageObject)) {
                         messageObject.translating = true;
