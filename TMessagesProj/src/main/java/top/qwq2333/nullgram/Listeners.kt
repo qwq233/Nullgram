@@ -121,3 +121,19 @@ class SaveToDownloadReceiver : BroadcastReceiver() {
         }
     }
 }
+
+object CrashListener : Thread.UncaughtExceptionHandler {
+    private var uncaughtExceptionHandler: Thread.UncaughtExceptionHandler? = null
+    fun init() {
+        uncaughtExceptionHandler = Thread.getDefaultUncaughtExceptionHandler()
+        Log.i("CrashListener", "${uncaughtExceptionHandler?.javaClass?.name}")
+        Thread.setDefaultUncaughtExceptionHandler(this)
+        Log.i("CrashListener", "${uncaughtExceptionHandler?.javaClass?.name}")
+    }
+
+    override fun uncaughtException(t: Thread, e: Throwable) {
+        uncaughtExceptionHandler?.uncaughtException(t, e)
+        Log.e(e)
+    }
+
+}

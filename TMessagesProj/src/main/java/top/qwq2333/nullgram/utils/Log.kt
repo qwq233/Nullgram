@@ -20,12 +20,15 @@
 package top.qwq2333.nullgram.utils
 
 import android.content.Context
+import android.os.Build
 import android.util.Log
 import com.google.firebase.crashlytics.FirebaseCrashlytics
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import org.telegram.messenger.AndroidUtilities
+import org.telegram.messenger.BuildConfig
+import org.telegram.messenger.UserConfig
 import org.telegram.ui.LaunchActivity
 import java.io.File
 import java.nio.charset.Charset
@@ -37,7 +40,7 @@ object Log {
     const val TAG = "Nullgram"
     private lateinit var logFile: File
 
-    val enable_rc_log = false
+    const val ENABLE_RC_LOG = false
 
     enum class Level {
         DEBUG, INFO, WARN, ERROR
@@ -55,12 +58,21 @@ object Log {
                 }
             }
 
-            logFile = File(parentFile, "log-${SimpleDateFormat("yyyy-MM-dd", Locale.US).format(Date())}.txt").also {
-                if (!it.exists()) {
-                    it.createNewFile()
+            logFile = File(parentFile, "log-${SimpleDateFormat("yyyy-MM-dd", Locale.US).format(Date())}.txt").apply {
+                if (!exists()) {
+                    createNewFile()
                 }
-                it.setWritable(true)
-                it.appendText(">>>> Log start at ${SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS", Locale.US).format(Date())}\n", Charset.forName("UTF-8"))
+                setWritable(true)
+                appendText("Current version: ${BuildConfig.VERSION_NAME}")
+                appendText("Device: ${Build.DEVICE}")
+                appendText("OS: ${Build.VERSION.SDK_INT}")
+                for (i in 0 ..  UserConfig.MAX_ACCOUNT_COUNT) {
+                    UserConfig.getInstance(i)?.let {
+                        if (!it.isClientActivated) return@let
+                        appendText("User $i: ${it.getClientUserId()}")
+                    }
+                }
+                appendText(">>>> Log start at ${SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS", Locale.US).format(Date())}\n", Charset.forName("UTF-8"))
             }
         }.onFailure {
             if (it is Exception && AndroidUtilities.isENOSPC(it)) {
@@ -76,6 +88,15 @@ object Log {
                     if (!exists()) {
                         createNewFile()
                         setWritable(true)
+                        appendText("Current version: ${BuildConfig.VERSION_NAME}")
+                        appendText("Device: ${Build.DEVICE}")
+                        appendText("OS: ${Build.VERSION.SDK_INT}")
+                        for (i in 0 ..  UserConfig.MAX_ACCOUNT_COUNT) {
+                            UserConfig.getInstance(i)?.let {
+                                if (!it.isClientActivated) return@let
+                                appendText("User $i: ${it.getClientUserId()}")
+                            }
+                        }
                         appendText(">>>> Log start at ${SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS", Locale.US).format(Date())}\n", Charset.forName("UTF-8"))
                     }
                     if (readAttributes().size() > 1024 * 1024 * 10) { // 10MB
@@ -99,10 +120,19 @@ object Log {
     fun refreshLog() {
         synchronized(logFile) {
             runCatching {
-                logFile.let {
-                    it.delete()
-                    it.createNewFile()
-                    it.appendText(">>>> Log start at ${SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS", Locale.US).format(Date())}\n", Charset.forName("UTF-8"))
+                logFile.apply {
+                    delete()
+                    createNewFile()
+                    appendText("Current version: ${BuildConfig.VERSION_NAME}")
+                    appendText("Device: ${Build.DEVICE}")
+                    appendText("OS: ${Build.VERSION.SDK_INT}")
+                    for (i in 0 ..  UserConfig.MAX_ACCOUNT_COUNT) {
+                        UserConfig.getInstance(i)?.let {
+                            if (!it.isClientActivated) return@let
+                            appendText("User $i: ${it.getClientUserId()}")
+                        }
+                    }
+                    appendText(">>>> Log start at ${SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS", Locale.US).format(Date())}\n", Charset.forName("UTF-8"))
                 }
             }
         }
@@ -114,7 +144,7 @@ object Log {
      */
     @JvmStatic
     fun d(tag: String, msg: String) {
-        if (msg.contains("{rc}") && !enable_rc_log) return
+        if (msg.contains("{rc}") && !ENABLE_RC_LOG) return
         Log.d(TAG, "$tag: $msg")
         writeToFile(Level.DEBUG, tag, msg)
     }
@@ -159,7 +189,7 @@ object Log {
     @JvmStatic
     @JvmOverloads
     fun d(msg: String, throwable: Throwable? = null) {
-        if (msg.contains("{rc}") && !enable_rc_log) return
+        if (msg.contains("{rc}") && !ENABLE_RC_LOG) return
         Log.d(TAG, msg, throwable)
         writeToFile(Level.DEBUG, null, msg)
         if (throwable != null) writeToFile(Level.DEBUG, null, throwable.stackTraceToString())

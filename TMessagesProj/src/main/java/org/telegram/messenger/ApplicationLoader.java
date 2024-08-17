@@ -64,6 +64,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.concurrent.CountDownLatch;
 
+import top.qwq2333.nullgram.CrashListener;
 import top.qwq2333.nullgram.utils.AnalyticsUtils;
 
 public class ApplicationLoader extends Application {
@@ -264,6 +265,7 @@ public class ApplicationLoader extends Application {
         BillingController.getInstance().startConnection();
 
         AnalyticsUtils.start(applicationLoaderInstance);
+        CrashListener.INSTANCE.init();
 
     }
 
