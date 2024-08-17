@@ -179,7 +179,7 @@
     <string name="labelChannelInChat">チャットでリンクされたユーザーにラベル付け</string>
     <string name="Passcode1">パスコード</string>
     <string name="UnknownSettings">不明な設定</string>
-    <string name="PasscodeNeeded">最初にパスコードロックを有効化する必要があります。</string>
+    <string name="PasscodeNeeded">最初にパスコードを有効化する必要があります。</string>
     <string name="PasscodeShowInSettings">Nullgramの設定で表示</string>
     <string name="PasscodeShowInSettingsAbout">非表示にすると **リンクのみ** でこのページを開くことができます:</string>
     <string name="PasscodeSet">パスコードを設定する</string>
@@ -346,5 +346,5 @@ https://t.me/NullgramClient</string>
     <string name="SaveToDownloadCount_other">%1$d ファイルをダウンロードに保存しています</string>
     <string name="InvalidPattern">無効なパターン</string>
     <string name="sendLargePhoto">大きな写真を送信</string>
-    <string name="Details">Details</string>
+    <string name="Details">詳細</string>
 </resources>
