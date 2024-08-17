@@ -43,7 +43,7 @@ object Log {
     const val ENABLE_RC_LOG = false
 
     enum class Level {
-        DEBUG, INFO, WARN, ERROR
+        DEBUG, INFO, WARN, ERROR, FATAL
     }
 
     init {
@@ -231,8 +231,16 @@ object Log {
     fun e(msg: String, throwable: Throwable? = null) {
         Log.e(TAG, msg, throwable)
         writeToFile(Level.ERROR, null, msg)
-        if (throwable != null) writeToFile(Level.ERROR, null, throwable.stackTraceToString())
         if (throwable != null) {
+            writeToFile(Level.ERROR, null, throwable.stackTraceToString())
+            AnalyticsUtils.trackCrashes(throwable)
+        }
+    }
+
+    @JvmStatic
+    fun fatal(throwable: Throwable?) {
+        if (throwable != null) {
+            writeToFile(Level.FATAL, null, throwable.stackTraceToString())
             AnalyticsUtils.trackCrashes(throwable)
         }
     }
