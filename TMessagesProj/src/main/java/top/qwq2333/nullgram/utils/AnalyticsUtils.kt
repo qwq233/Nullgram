@@ -42,7 +42,7 @@ object AnalyticsUtils {
             val crashlytics = FirebaseCrashlytics.getInstance()
             crashlytics.setUserId(currentUser.getClientUserId().toString())
             crashlytics.setCustomKey("Build Time", BuildConfig.BUILD_TIME)
-            for (i in 0 ..  UserConfig.MAX_ACCOUNT_COUNT) {
+            for (i in 0 until  UserConfig.MAX_ACCOUNT_COUNT) {
                 UserConfig.getInstance(i)?.let {
                     if (!it.isClientActivated) return@let
                     crashlytics.setCustomKey("User $i", it.getClientUserId().toString())

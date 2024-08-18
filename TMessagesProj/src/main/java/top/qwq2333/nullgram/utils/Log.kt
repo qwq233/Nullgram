@@ -38,9 +38,32 @@ import java.util.Locale
 
 object Log {
     const val TAG = "Nullgram"
-    private lateinit var logFile: File
+    private val logFile: File by lazy {
+        File(AndroidUtilities.getLogsDir(), "log-${SimpleDateFormat("yyyy-MM-dd", Locale.US).format(Date())}.txt").also { f ->
+            if (!f.exists()) {
+                f.createNewFile()
+                f.init()
+            }
+        }
+    }
 
-    const val ENABLE_RC_LOG = false
+    private fun File.init() {
+        appendText("Current version: ${BuildConfig.VERSION_NAME}\n")
+        appendText("Device Brand: ${Build.BRAND}\n")
+        appendText("Device: ${Build.MODEL}\n")
+        appendText("Manufacturer: ${Build.MANUFACTURER}\n")
+        appendText("OS: ${Build.VERSION.SDK_INT}\n")
+        appendText("isPlay: ${BuildConfig.isPlay}\n")
+        appendText("ABI: ${Utils.abi}\n")
+        for (i in 0 until  UserConfig.MAX_ACCOUNT_COUNT) {
+            UserConfig.getInstance(i)?.let {
+                if (!it.isClientActivated) return@let
+                appendText("User $i: ${it.getClientUserId()}\n")
+            }
+        }
+    }
+
+    private const val ENABLE_RC_LOG = false
 
     enum class Level {
         DEBUG, INFO, WARN, ERROR, FATAL
@@ -57,27 +80,15 @@ object Log {
                     }
                 }
             }
+            logFile.appendText(">>>> Log start at ${SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS", Locale.US).format(Date())}\n", Charset.forName("UTF-8"))
+            logFile.appendText("Current version: ${BuildConfig.VERSION_NAME}\n")
 
-            logFile = File(parentFile, "log-${SimpleDateFormat("yyyy-MM-dd", Locale.US).format(Date())}.txt").apply {
-                if (!exists()) {
-                    createNewFile()
-                }
-                setWritable(true)
-                appendText("Current version: ${BuildConfig.VERSION_NAME}")
-                appendText("Device: ${Build.DEVICE}")
-                appendText("OS: ${Build.VERSION.SDK_INT}")
-                for (i in 0 ..  UserConfig.MAX_ACCOUNT_COUNT) {
-                    UserConfig.getInstance(i)?.let {
-                        if (!it.isClientActivated) return@let
-                        appendText("User $i: ${it.getClientUserId()}")
-                    }
-                }
-                appendText(">>>> Log start at ${SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS", Locale.US).format(Date())}\n", Charset.forName("UTF-8"))
-            }
+
         }.onFailure {
             if (it is Exception && AndroidUtilities.isENOSPC(it)) {
                 LaunchActivity.checkFreeDiscSpaceStatic(1)
             }
+            Log.e(TAG, "Logger crashes", it)
         }
     }
 
@@ -88,16 +99,10 @@ object Log {
                     if (!exists()) {
                         createNewFile()
                         setWritable(true)
-                        appendText("Current version: ${BuildConfig.VERSION_NAME}")
-                        appendText("Device: ${Build.DEVICE}")
-                        appendText("OS: ${Build.VERSION.SDK_INT}")
-                        for (i in 0 ..  UserConfig.MAX_ACCOUNT_COUNT) {
-                            UserConfig.getInstance(i)?.let {
-                                if (!it.isClientActivated) return@let
-                                appendText("User $i: ${it.getClientUserId()}")
-                            }
-                        }
+                        init()
                         appendText(">>>> Log start at ${SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS", Locale.US).format(Date())}\n", Charset.forName("UTF-8"))
+                        appendText("Current version: ${BuildConfig.VERSION_NAME}\n")
+
                     }
                     if (readAttributes().size() > 1024 * 1024 * 10) { // 10MB
                         refreshLog()
@@ -123,16 +128,9 @@ object Log {
                 logFile.apply {
                     delete()
                     createNewFile()
-                    appendText("Current version: ${BuildConfig.VERSION_NAME}")
-                    appendText("Device: ${Build.DEVICE}")
-                    appendText("OS: ${Build.VERSION.SDK_INT}")
-                    for (i in 0 ..  UserConfig.MAX_ACCOUNT_COUNT) {
-                        UserConfig.getInstance(i)?.let {
-                            if (!it.isClientActivated) return@let
-                            appendText("User $i: ${it.getClientUserId()}")
-                        }
-                    }
+                    init()
                     appendText(">>>> Log start at ${SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS", Locale.US).format(Date())}\n", Charset.forName("UTF-8"))
+                    appendText("Current version: ${BuildConfig.VERSION_NAME}\n")
                 }
             }
         }
@@ -300,11 +298,19 @@ object Log {
     @JvmStatic
     fun nativeLog(level: Int, tag: String, msg: String) {
         if (!ENABLE_NATIVE_LOG) return
+        if (tag == "Nullgram") {
+            when(level) {
+                0 -> d("tgnet", msg)
+                1 -> i("tgnet", msg)
+                2 -> w("tgnet", msg)
+                3 -> e("tgnet", msg)
+            }
+        }
         when(level) {
-            0 -> Log.d("tgnet", msg)
-            1 -> Log.i("tgnet", msg)
-            2 -> Log.w("tgnet", msg)
-            3 -> Log.e("tgnet", msg)
+            0 -> Log.d("tgnet", "$tag: $msg")
+            1 -> Log.i("tgnet", "$tag: $msg")
+            2 -> Log.w("tgnet", "$tag: $msg")
+            3 -> Log.e("tgnet", "$tag: $msg")
         }
     }
 }
