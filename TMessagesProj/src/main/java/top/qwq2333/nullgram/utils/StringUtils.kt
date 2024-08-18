@@ -125,7 +125,7 @@ object StringUtils {
         if (panguText.length == text.length) return Pair(panguText, entities) // processed or unnecessary
 
         var skip = 0
-        for (i in 0 until text.lastIndex) {
+        for (i in text.indices) {
             if (i + skip >= panguText.length) break
             if (text[i] == panguText[i + skip]) continue
 
