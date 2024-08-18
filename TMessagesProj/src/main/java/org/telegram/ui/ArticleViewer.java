@@ -13721,7 +13721,8 @@ public class ArticleViewer implements NotificationCenter.NotificationCenterDeleg
             dismissing = true;
             dismissingIntoTabs = tabs;
             if (tabs) {
-                LaunchActivity.instance.getBottomSheetTabsOverlay().dismissSheet(this);
+                if (LaunchActivity.instance.getBottomSheetTabsOverlay() != null)
+                    LaunchActivity.instance.getBottomSheetTabsOverlay().dismissSheet(this);
             } else {
                 animateDismiss(true, true, () -> {
                     release();
