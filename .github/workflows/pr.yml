@@ -74,7 +74,7 @@ jobs:
         run: |
           sed '/signingConfig =/d' TMessagesProj/build.gradle.kts > TMessagesProj/build.gradle.kts.tmp
           sed '/google.services/d' TMessagesProj/build.gradle.kts.tmp > TMessagesProj/build.gradle.kts
-          sed '/google.services/d' build.gradle.kts.tmp > build.gradle.kts
+          sed '/google.services/d' build.gradle.kts > build.gradle.kts.tmp
           cp build.gradle.kts.tmp build.gradle.kts
           ./gradlew TMessagesProj:assembleDebug
         
