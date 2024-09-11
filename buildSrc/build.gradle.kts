@@ -31,7 +31,7 @@ repositories {
 
     dependencies {
         //noinspection UseTomlInstead
-        implementation("org.eclipse.jgit:org.eclipse.jgit:6.10.0.202406032230-r")
+        implementation("org.eclipse.jgit:org.eclipse.jgit:7.0.0.202409031743-r")
     }
 }
 
