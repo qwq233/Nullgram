@@ -345,4 +345,5 @@
     <string name="SaveToDownloadCount_other">Sto salvando %1$d file nei download</string>
     <string name="InvalidPattern">Invalid Pattern</string>
     <string name="sendLargePhoto">Send large photo</string>
+    <string name="Details">Details</string>
 </resources>

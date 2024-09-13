@@ -68,7 +68,7 @@
     <string name="allowScreenshotOnNoForwardChat">スクリーンショットの制限を回避</string>
     <string name="allowScreenshotOnNoForwardChatWarning">セキュアチャットでスクリーンショットの制限を回避することもできます!</string>
     <string name="labelChannelUser">チャンネルユーザーのラベル</string>
-    <string name="labelChannelUserDetails">メッセージの送信者がチャンネルの場合、「チャンネル」というラベルが付きます</string>
+    <string name="labelChannelUserDetails">メッセージの送信者がチャンネルの場合、「チャンネル」というラベルが付きます。</string>
     <string name="displaySpoilerDirectly">ネタバレメッセージを直接表示</string>
     <string name="StorageResetInfo">このアプリのすべてのデータは永久に削除されます (まずすべてのアカウントからログアウトしてください)。</string>
     <string name="SendLogsNoSuchThings">ログを手動で取得するにはlogcatを使用してください</string>
@@ -179,7 +179,7 @@
     <string name="labelChannelInChat">チャットでリンクされたユーザーにラベル付け</string>
     <string name="Passcode1">パスコード</string>
     <string name="UnknownSettings">不明な設定</string>
-    <string name="PasscodeNeeded">最初にパスコードロックを有効化する必要があります。</string>
+    <string name="PasscodeNeeded">最初にパスコードを有効化する必要があります。</string>
     <string name="PasscodeShowInSettings">Nullgramの設定で表示</string>
     <string name="PasscodeShowInSettingsAbout">非表示にすると **リンクのみ** でこのページを開くことができます:</string>
     <string name="PasscodeSet">パスコードを設定する</string>
@@ -216,8 +216,8 @@
     <string name="icon_5">アイコン 5</string>
     <string name="disablePremiumSticker">プレミアムステッカータブを無効化</string>
     <string name="hideProxySponsorChannel">プロキシスポンサーチャンネルを非表示</string>
-    <string name="disablePreviewVideoSoundShortcut">プレビュー動画のサウンドショートカットを無効化</string>
-    <string name="disablePreviewVideoSoundShortcutNotice">音量ボタンを無効化してプレビュー動画のサウンドを有効化</string>
+    <string name="disablePreviewVideoSoundShortcut">プレビュー動画の音量ボタンを無効化</string>
+    <string name="disablePreviewVideoSoundShortcutNotice">音量ボタンを無効化してプレビュー動画のサウンドを有効化します。</string>
     <string name="quickToggleAnonymous">すぐに匿名に切り替え</string>
     <string name="quickToggleAnonymousNotice">グループの管理者の場合</string>
     <string name="Anonymous">匿名</string>
@@ -346,4 +346,5 @@ https://t.me/NullgramClient</string>
     <string name="SaveToDownloadCount_other">%1$d ファイルをダウンロードに保存しています</string>
     <string name="InvalidPattern">無効なパターン</string>
     <string name="sendLargePhoto">大きな写真を送信</string>
+    <string name="Details">詳細</string>
 </resources>
