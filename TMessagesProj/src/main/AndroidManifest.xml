@@ -133,7 +133,7 @@
         android:icon="@mipmap/ic_launcher_icon"
         android:roundIcon="@mipmap/ic_launcher_icon"
         android:largeHeap="true"
-        android:label="@string/AppName"
+        android:label="@string/NullgramName"
         android:theme="@style/Theme.TMessages.Start"
         android:manageSpaceActivity="org.telegram.ui.ExternalActionActivity"
         android:supportsRtl="false"
