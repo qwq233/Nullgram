@@ -72,9 +72,11 @@ import org.telegram.ui.Cells.SharedPhotoVideoCell;
 import org.telegram.ui.ChatActivity;
 import org.telegram.ui.DialogsActivity;
 import org.telegram.ui.FilteredSearchView;
+import org.telegram.ui.FilteredSearchView.MessageHashId;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Set;
 
 import top.qwq2333.nullgram.config.ConfigManager;
@@ -265,7 +267,7 @@ public class SearchViewPager extends ViewPagerFixed implements FilteredSearchVie
                 super.setVisibility(visibility);
             }
         };
-        emptyView.title.setText(LocaleController.getString("NoResult", R.string.NoResult));
+        emptyView.title.setText(LocaleController.getString(R.string.NoResult));
         emptyView.subtitle.setVisibility(View.GONE);
         emptyView.setVisibility(View.GONE);
         emptyView.addView(loadingView, 0);
@@ -319,7 +321,7 @@ public class SearchViewPager extends ViewPagerFixed implements FilteredSearchVie
                 super.setVisibility(visibility);
             }
         };
-        channelsEmptyView.title.setText(LocaleController.getString("NoResult", R.string.NoResult));
+        channelsEmptyView.title.setText(LocaleController.getString(R.string.NoResult));
         channelsEmptyView.subtitle.setVisibility(View.GONE);
         channelsEmptyView.setVisibility(View.GONE);
         channelsEmptyView.addView(loadingView, 0);
@@ -337,7 +339,7 @@ public class SearchViewPager extends ViewPagerFixed implements FilteredSearchVie
                     channelsEmptyView.subtitle.setVisibility(View.VISIBLE);
                     channelsEmptyView.subtitle.setText(LocaleController.getString(R.string.NoChannelsMessage));
                 } else {
-                    channelsEmptyView.title.setText(LocaleController.getString("NoResult", R.string.NoResult));
+                    channelsEmptyView.title.setText(LocaleController.getString(R.string.NoResult));
                     channelsEmptyView.subtitle.setVisibility(View.GONE);
                 }
             }
@@ -396,7 +398,7 @@ public class SearchViewPager extends ViewPagerFixed implements FilteredSearchVie
                 super.setVisibility(visibility);
             }
         };
-        botsEmptyView.title.setText(LocaleController.getString("NoResult", R.string.NoResult));
+        botsEmptyView.title.setText(LocaleController.getString(R.string.NoResult));
         botsEmptyView.subtitle.setVisibility(View.GONE);
         botsEmptyView.setVisibility(View.GONE);
         botsEmptyView.addView(loadingView, 0);
@@ -409,7 +411,7 @@ public class SearchViewPager extends ViewPagerFixed implements FilteredSearchVie
             public void update(boolean animated) {
                 super.update(animated);
                 botsEmptyView.showProgress(loadingMessages || loadingBots || searchMessages == null || !searchMessages.isEmpty(), animated);
-                botsEmptyView.title.setText(LocaleController.getString("NoResult", R.string.NoResult));
+                botsEmptyView.title.setText(LocaleController.getString(R.string.NoResult));
                 botsEmptyView.subtitle.setVisibility(View.GONE);
             }
 
@@ -495,6 +497,9 @@ public class SearchViewPager extends ViewPagerFixed implements FilteredSearchVie
 //            MessagesController.getInstance(currentAccount).getChannelRecommendations(0);
             botsSearchAdapter.search(query);
             botsEmptyView.setKeyboardHeight(keyboardSize, false);
+            if (TextUtils.isEmpty(query)) {
+                botsSearchAdapter.checkBottom();
+            }
         } else if (view == searchContainer) {
             if (dialogId == 0 && minDate == 0 && maxDate == 0 || forumDialogId != 0) {
                 lastSearchScrolledToTop = false;
@@ -675,13 +680,13 @@ public class SearchViewPager extends ViewPagerFixed implements FilteredSearchVie
 
             SpannableStringBuilder spannableStringBuilder = new SpannableStringBuilder();
             spannableStringBuilder
-                .append(AndroidUtilities.replaceTags(LocaleController.formatPluralString("RemoveDocumentsMessage", selectedFiles.size())))
-                .append("\n\n")
-                .append(LocaleController.getString("RemoveDocumentsAlertMessage", R.string.RemoveDocumentsAlertMessage));
+                    .append(AndroidUtilities.replaceTags(LocaleController.formatPluralString("RemoveDocumentsMessage", selectedFiles.size())))
+                    .append("\n\n")
+                    .append(LocaleController.getString(R.string.RemoveDocumentsAlertMessage));
 
             builder.setMessage(spannableStringBuilder);
-            builder.setNegativeButton(LocaleController.getString("Cancel", R.string.Cancel), (dialogInterface, i) -> dialogInterface.dismiss());
-            builder.setPositiveButton(LocaleController.getString("Delete", R.string.Delete), (dialogInterface, i) -> {
+            builder.setNegativeButton(LocaleController.getString(R.string.Cancel), (dialogInterface, i) -> dialogInterface.dismiss());
+            builder.setPositiveButton(LocaleController.getString(R.string.Delete), (dialogInterface, i) -> {
                 dialogInterface.dismiss();
                 parent.getDownloadController().deleteRecentFiles(messageObjects);
                 hideActionMode();
@@ -718,7 +723,7 @@ public class SearchViewPager extends ViewPagerFixed implements FilteredSearchVie
             fragment.forwardContext = () -> fmessages;
             var forwardParams = fragment.forwardContext.getForwardParams();
             forwardParams.noQuote = id == forwardNoQuoteItemId;
-            fragment.setDelegate((fragment1, dids, message, param, topicsFragment) -> {
+            fragment.setDelegate((fragment1, dids, message, param, notify, scheduleDate, topicsFragment) -> {
                 selectedFiles.clear();
 
                 showActionMode(false);

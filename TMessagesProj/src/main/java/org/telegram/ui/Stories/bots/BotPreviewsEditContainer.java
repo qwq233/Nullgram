@@ -91,6 +91,7 @@ import org.telegram.ui.Components.UItem;
 import org.telegram.ui.Components.UniversalAdapter;
 import org.telegram.ui.Components.ViewPagerFixed;
 import org.telegram.ui.ProfileActivity;
+import org.telegram.ui.Stars.StarsIntroActivity;
 import org.telegram.ui.Stories.StoriesController;
 import org.telegram.ui.Stories.StoriesListPlaceProvider;
 import org.telegram.ui.Stories.recorder.ButtonWithCounterView;
@@ -1991,6 +1992,7 @@ public class BotPreviewsEditContainer extends FrameLayout implements Notificatio
             }
 
             public static class Factory extends UItem.UItemFactory<LanguageView> {
+                static { setup(new Factory()); }
                 @Override
                 public LanguageView createView(Context context, int currentAccount, int classGuid, Theme.ResourcesProvider resourcesProvider) {
                     return new LanguageView(context);

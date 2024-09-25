@@ -92,6 +92,7 @@ public class BotCommandsMenuContainer extends FrameLayout implements NestedScrol
     }
 
     public float clipBottom() {
+        if (dismissed) return 0;
         return Math.max(0, getMeasuredHeight() - (containerY + listView.getTranslationY()));
     }
 

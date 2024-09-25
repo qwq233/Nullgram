@@ -29,7 +29,6 @@ import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.ImageReceiver;
 import org.telegram.messenger.R;
 import org.telegram.messenger.Utilities;
-import org.telegram.ui.ActionBar.Theme;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
@@ -163,8 +162,8 @@ public class BlurringShader {
         uvBuffer.put(texCoords);
         uvBuffer.position(0);
 
-        String vertexShaderSource = RLottieDrawable.readRes(null, R.raw.blur_vrt);
-        String fragmentShaderSource = RLottieDrawable.readRes(null, R.raw.blur_frg);
+        String vertexShaderSource = AndroidUtilities.readRes(R.raw.blur_vrt);
+        String fragmentShaderSource = AndroidUtilities.readRes(R.raw.blur_frg);
         if (vertexShaderSource == null || fragmentShaderSource == null) {
             return false;
         }

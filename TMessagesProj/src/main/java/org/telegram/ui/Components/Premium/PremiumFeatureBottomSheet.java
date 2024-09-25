@@ -60,7 +60,6 @@ import org.telegram.ui.ActionBar.Theme;
 import org.telegram.ui.ChatActivity;
 import org.telegram.ui.Components.BottomPagesView;
 import org.telegram.ui.Components.LayoutHelper;
-import org.telegram.ui.Components.RLottieDrawable;
 import org.telegram.ui.LaunchActivity;
 import org.telegram.ui.PremiumPreviewFragment;
 import org.telegram.ui.ThemePreviewActivity;
@@ -125,7 +124,7 @@ public class PremiumFeatureBottomSheet extends BottomSheet implements Notificati
         this.startType = startType;
         this.onlySelectedType = onlySelectedType;
 
-        String svg = RLottieDrawable.readRes(null, R.raw.star_loader);
+        String svg = AndroidUtilities.readRes(R.raw.star_loader);
         svgIcon = SvgHelper.getDrawable(svg);
         FrameLayout frameLayout = new FrameLayout(getContext()) {
             @Override
@@ -324,10 +323,10 @@ public class PremiumFeatureBottomSheet extends BottomSheet implements Notificati
             @Override
             public void onPageSelected(int i) {
                 if (premiumFeatures.get(i).type == PremiumPreviewFragment.PREMIUM_FEATURE_LIMITS) {
-                    actionBar.setTitle(LocaleController.getString("DoubledLimits", R.string.DoubledLimits));
+                    actionBar.setTitle(LocaleController.getString(R.string.DoubledLimits));
                     actionBar.requestLayout();
                 } else if (premiumFeatures.get(i).type == PremiumPreviewFragment.PREMIUM_FEATURE_STORIES) {
-                    actionBar.setTitle(LocaleController.getString("UpgradedStories", R.string.UpgradedStories));
+                    actionBar.setTitle(LocaleController.getString(R.string.UpgradedStories));
                     actionBar.requestLayout();
                 } else if (premiumFeatures.get(i).type == PremiumPreviewFragment.PREMIUM_FEATURE_BUSINESS) {
                     actionBar.setTitle(LocaleController.getString(R.string.TelegramBusiness));
@@ -435,7 +434,7 @@ public class PremiumFeatureBottomSheet extends BottomSheet implements Notificati
         linearLayout.addView(buttonContainer, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, 68, Gravity.BOTTOM));
 
         if (UserConfig.getInstance(currentAccount).isPremium()) {
-            premiumButtonView.setOverlayText(LocaleController.getString("OK", R.string.OK), false, false);
+            premiumButtonView.setOverlayText(LocaleController.getString(R.string.OK), false, false);
         }
 
         ScrollView scrollView = new ScrollView(getContext());
@@ -612,13 +611,13 @@ public class PremiumFeatureBottomSheet extends BottomSheet implements Notificati
         AndroidUtilities.updateViewVisibilityAnimated(actionBar, false, 1f, false);
 
         if (premiumFeatures.get(selectedPosition).type == PremiumPreviewFragment.PREMIUM_FEATURE_STORIES) {
-            actionBar.setTitle(LocaleController.getString("UpgradedStories", R.string.UpgradedStories));
+            actionBar.setTitle(LocaleController.getString(R.string.UpgradedStories));
             actionBar.requestLayout();
         } else if (premiumFeatures.get(selectedPosition).type == PremiumPreviewFragment.PREMIUM_FEATURE_BUSINESS) {
             actionBar.setTitle(LocaleController.getString(R.string.TelegramBusiness));
             actionBar.requestLayout();
         }  else {
-            actionBar.setTitle(LocaleController.getString("DoubledLimits", R.string.DoubledLimits));
+            actionBar.setTitle(LocaleController.getString(R.string.DoubledLimits));
             actionBar.requestLayout();
         }
     }
@@ -640,7 +639,7 @@ public class PremiumFeatureBottomSheet extends BottomSheet implements Notificati
             setButtonText();
         } else if (id == NotificationCenter.currentUserPremiumStatusChanged) {
             if (UserConfig.getInstance(currentAccount).isPremium()) {
-                premiumButtonView.setOverlayText(LocaleController.getString("OK", R.string.OK), false, true);
+                premiumButtonView.setOverlayText(LocaleController.getString(R.string.OK), false, true);
             } else {
                 premiumButtonView.clearOverlayText();
             }
@@ -738,8 +737,8 @@ public class PremiumFeatureBottomSheet extends BottomSheet implements Notificati
                 topViewOnFullHeight = true;
             } else if (onlySelectedType) {
                 if (startType == PremiumPreviewFragment.PREMIUM_FEATURE_REACTIONS) {
-                    title.setText(LocaleController.getString("AdditionalReactions", R.string.AdditionalReactions));
-                    description.setText(AndroidUtilities.replaceTags(LocaleController.getString("AdditionalReactionsDescription", R.string.AdditionalReactionsDescription)));
+                    title.setText(LocaleController.getString(R.string.AdditionalReactions));
+                    description.setText(AndroidUtilities.replaceTags(LocaleController.getString(R.string.AdditionalReactionsDescription)));
                 } else if (startType == PremiumPreviewFragment.PREMIUM_FEATURE_ADS) {
                     title.setText(LocaleController.getString(R.string.PremiumPreviewNoAds));
                     description.setText(AndroidUtilities.replaceTags(LocaleController.getString(R.string.PremiumPreviewNoAdsDescription2)));

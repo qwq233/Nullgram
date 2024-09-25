@@ -480,7 +480,7 @@ public class DialogStoriesCell extends FrameLayout implements NotificationCenter
 
         if (storiesController.hasOnlySelfStories()) {
             if (storiesController.hasUploadingStories(UserConfig.getInstance(currentAccount).getClientUserId())) {
-                String str = LocaleController.getString("UploadingStory", R.string.UploadingStory);
+                String str = LocaleController.getString(R.string.UploadingStory);
                 int index = str.indexOf("…");
                 if (index > 0) {
                     if (uploadingString == null) {
@@ -495,7 +495,7 @@ public class DialogStoriesCell extends FrameLayout implements NotificationCenter
                     currentTitle = str;
                 }
             } else {
-                currentTitle = LocaleController.getString("MyStory", R.string.MyStory);
+                currentTitle = LocaleController.getString(R.string.MyStory);
             }
         } else {
             currentTitle = LocaleController.formatPluralString("Stories", totalCount);

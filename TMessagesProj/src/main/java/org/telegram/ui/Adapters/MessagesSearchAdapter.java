@@ -326,7 +326,7 @@ public class MessagesSearchAdapter extends RecyclerListView.SelectionAdapter imp
             avatarsDrawable.setCount(actualCount);
             avatarsDrawable.commitTransition(false);
 
-            titleTextView.setText(LocaleController.formatPluralString("HashtagStoriesFound", list.getCount()));
+            titleTextView.setText(LocaleController.formatPluralStringSpaced("HashtagStoriesFound", list.getCount()));
             subtitleTextView.setText(LocaleController.formatString(R.string.HashtagStoriesFoundSubtitle, list.query));
         }
 

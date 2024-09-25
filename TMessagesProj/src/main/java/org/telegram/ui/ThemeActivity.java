@@ -103,6 +103,7 @@ import org.telegram.ui.Cells.ThemesHorizontalListCell;
 import org.telegram.ui.Components.AlertsCreator;
 import org.telegram.ui.Components.CubicBezierInterpolator;
 import org.telegram.ui.Components.LayoutHelper;
+import org.telegram.ui.Components.PermissionRequest;
 import org.telegram.ui.Components.RLottieDrawable;
 import org.telegram.ui.Components.RecyclerListView;
 import org.telegram.ui.Components.SeekBarView;
@@ -115,6 +116,7 @@ import org.telegram.ui.web.WebBrowserSettings;
 
 import java.io.File;
 import java.io.FileOutputStream;
+import java.security.Permission;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
@@ -1247,6 +1249,22 @@ public class ThemeActivity extends BaseFragment implements NotificationCenter.No
                 cell.setBackground(Theme.createSelectorDrawable(Theme.getColor(Theme.key_listSelector), Theme.RIPPLE_MASK_ALL));
                 linearLayout.addView(cell);
                 cell.setOnClickListener(v -> {
+                    PermissionRequest.ensurePermission(R.raw.permission_request_microphone, R.string.PermissionNoBluetoothWithHint, Manifest.permission.BLUETOOTH_CONNECT, granted -> {
+                        if (!granted) {
+                            SharedConfig.recordViaSco = false;
+                            SharedConfig.saveConfig();
+                            updateRecordViaSco = true;
+                            dialogRef.get().dismiss();
+
+                            if (listView != null && listView.isAttachedToWindow()) {
+                                RecyclerView.ViewHolder holder = listView.findViewHolderForAdapterPosition(bluetoothScoRow);
+                                if (holder != null) {
+                                    listAdapter.onBindViewHolder(holder, bluetoothScoRow);
+                                }
+                            }
+                        }
+                    });
+
                     SharedConfig.recordViaSco = true;
                     SharedConfig.saveConfig();
                     updateRecordViaSco = true;

@@ -36,7 +36,6 @@ import com.google.zxing.common.detector.MathUtils;
 import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.R;
 import org.telegram.ui.Components.CubicBezierInterpolator;
-import org.telegram.ui.Components.RLottieDrawable;
 
 import java.util.ArrayList;
 
@@ -82,7 +81,7 @@ public class SuperRipple extends ISuperRipple {
     public SuperRipple(View view) {
         super(view);
 
-        final String code = RLottieDrawable.readRes(null, R.raw.superripple_effect);
+        final String code = AndroidUtilities.readRes(R.raw.superripple_effect);
         shader = new RuntimeShader(code);
         setupSizeUniforms(true);
 

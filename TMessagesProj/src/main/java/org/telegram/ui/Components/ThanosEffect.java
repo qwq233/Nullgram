@@ -531,7 +531,7 @@ public class ThanosEffect extends TextureView {
                 killInternal();
                 return;
             }
-            GLES31.glShaderSource(vertexShader, RLottieDrawable.readRes(null, R.raw.thanos_vertex) + "\n// " + Math.random());
+            GLES31.glShaderSource(vertexShader, AndroidUtilities.readRes(R.raw.thanos_vertex) + "\n// " + Math.random());
             GLES31.glCompileShader(vertexShader);
             int[] status = new int[1];
             GLES31.glGetShaderiv(vertexShader, GLES31.GL_COMPILE_STATUS, status, 0);
@@ -541,7 +541,7 @@ public class ThanosEffect extends TextureView {
                 killInternal();
                 return;
             }
-            GLES31.glShaderSource(fragmentShader, RLottieDrawable.readRes(null, R.raw.thanos_fragment) + "\n// " + Math.random());
+            GLES31.glShaderSource(fragmentShader, AndroidUtilities.readRes(R.raw.thanos_fragment) + "\n// " + Math.random());
             GLES31.glCompileShader(fragmentShader);
             GLES31.glGetShaderiv(fragmentShader, GLES31.GL_COMPILE_STATUS, status, 0);
             if (status[0] != GLES31.GL_TRUE) {
@@ -887,7 +887,7 @@ public class ThanosEffect extends TextureView {
                 ArrayList<ChatMessageCell> drawNamesAfter = new ArrayList<>();
                 ArrayList<ChatMessageCell> drawCaptionAfter = new ArrayList<>();
                 ArrayList<ChatMessageCell> drawReactionsAfter = new ArrayList<>();
-                canvas.save();
+                int saveCount = canvas.save();
                 for (int k = 0; k < 3; k++) {
                     drawingGroups.clear();
                     if (k == 2 && !chatListView.isFastScrollAnimationRunning()) {
@@ -1082,7 +1082,11 @@ public class ThanosEffect extends TextureView {
                     }
                     drawReactionsAfter.clear();
                 }
-                canvas.restore();
+                try {
+                    canvas.restoreToCount(saveCount);
+                } catch (Exception e) {
+                    FileLog.e(e);
+                }
 
                 for (int i = 0; i < views.size(); ++i) {
                     if (views.get(i) instanceof ChatMessageCell) {
@@ -1105,6 +1109,7 @@ public class ThanosEffect extends TextureView {
                     cell.drawCaptionLayout(canvas, cell.getCurrentPosition() != null && (cell.getCurrentPosition().flags & MessageObject.POSITION_FLAG_LEFT) == 0, alpha);
                 } else if (!(cell.getCurrentPosition() != null && (cell.getCurrentPosition().flags & MessageObject.POSITION_FLAG_LEFT) == 0)) {
                     cell.drawReactionsLayout(canvas, alpha, null);
+                    cell.drawCommentLayout(canvas, alpha);
                 }
                 cell.setInvalidatesParent(false);
                 canvas.restore();
@@ -1179,7 +1184,7 @@ public class ThanosEffect extends TextureView {
 
                 bitmap = Bitmap.createBitmap(viewWidth, viewHeight, Bitmap.Config.ARGB_8888);
                 final Canvas canvas = new Canvas(bitmap);
-                canvas.save();
+                int saveCount = canvas.save();
                 canvas.translate(-left, 0);
                 if (view instanceof ChatMessageCell) {
                     ((ChatMessageCell) view).drawingToBitmap = true;
@@ -1205,7 +1210,11 @@ public class ThanosEffect extends TextureView {
                 } else if (view instanceof ChatActionCell) {
                     ((ChatActionCell) view).drawOutboundsContent(canvas);
                 }
-                canvas.restore();
+                try {
+                    canvas.restoreToCount(saveCount);
+                } catch (Exception e) {
+                    FileLog.e(e);
+                }
 
                 left += view.getX();
             }

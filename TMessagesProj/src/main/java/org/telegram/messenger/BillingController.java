@@ -314,7 +314,8 @@ public class BillingController {
                 || purpose instanceof TLRPC.TL_inputStorePaymentPremiumGiftCode
                 || purpose instanceof TLRPC.TL_inputStorePaymentStarsTopup
                 || purpose instanceof TLRPC.TL_inputStorePaymentStarsGift
-                || purpose instanceof TLRPC.TL_inputStorePaymentPremiumGiveaway) {
+                || purpose instanceof TLRPC.TL_inputStorePaymentPremiumGiveaway
+                || purpose instanceof TLRPC.TL_inputStorePaymentStarsGiveaway) {
             billingClient.consumeAsync(
                     ConsumeParams.newBuilder()
                             .setPurchaseToken(purchase.getPurchaseToken())

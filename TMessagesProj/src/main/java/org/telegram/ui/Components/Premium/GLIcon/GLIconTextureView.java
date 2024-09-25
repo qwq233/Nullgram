@@ -302,7 +302,13 @@ public class GLIconTextureView extends TextureView implements TextureView.Surfac
         public void run() {
             isRunning = true;
 
-            initGL();
+            try {
+                initGL();
+            } catch (Exception e) {
+                FileLog.e(e);
+                isRunning = false;
+                return;
+            }
             checkGlError();
 
             long lastFrameTime = System.currentTimeMillis();
@@ -321,16 +327,21 @@ public class GLIconTextureView extends TextureView implements TextureView.Surfac
                     rendererChanged = false;
                 }
 
-                if (!shouldSleep()) {
-                    final long now = System.currentTimeMillis();
-                    float dt = (now - lastFrameTime) / 1000f;
-                    lastFrameTime = now;
-                    drawSingleFrame(dt);
-                    if (!ready) {
-                        ready = true;
-                        AndroidUtilities.runOnUIThread(readyListener);
-                        readyListener = null;
+                try {
+                    if (!shouldSleep()) {
+                        final long now = System.currentTimeMillis();
+                        float dt = (now - lastFrameTime) / 1000f;
+                        lastFrameTime = now;
+                        drawSingleFrame(dt);
+                        if (!ready) {
+                            ready = true;
+                            AndroidUtilities.runOnUIThread(readyListener);
+                            readyListener = null;
+                        }
                     }
+                } catch (Exception e) {
+                    FileLog.e(e);
+                    break;
                 }
 
                 try {
@@ -505,7 +516,7 @@ public class GLIconTextureView extends TextureView implements TextureView.Surfac
         return gestureDetector.onTouchEvent(event);
     }
 
-    private void startBackAnimation() {
+    public void startBackAnimation() {
         cancelAnimatons();
         float fromX = mRenderer.angleX;
         float fromY = mRenderer.angleY;
@@ -528,7 +539,7 @@ public class GLIconTextureView extends TextureView implements TextureView.Surfac
         scheduleIdleAnimation(idleDelay);
     }
 
-    private void cancelAnimatons() {
+    public void cancelAnimatons() {
         if (backAnimation != null) {
             backAnimation.removeAllListeners();
             backAnimation.cancel();
@@ -587,12 +598,16 @@ public class GLIconTextureView extends TextureView implements TextureView.Surfac
         mRenderer.angleY = (float) valueAnimator.getAnimatedValue();
     };
 
-    private void scheduleIdleAnimation(long time) {
+    public void scheduleIdleAnimation(long time) {
         AndroidUtilities.cancelRunOnUIThread(idleAnimation);
         if (dialogIsVisible) {
             return;
         }
         AndroidUtilities.runOnUIThread(idleAnimation, time);
+    }
+
+    public void cancelIdleAnimation() {
+        AndroidUtilities.cancelRunOnUIThread(idleAnimation);
     }
 
 

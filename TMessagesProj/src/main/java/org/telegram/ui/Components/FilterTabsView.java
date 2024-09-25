@@ -770,7 +770,7 @@ public class FilterTabsView extends FrameLayout {
             info.setSelected(currentTab != null && selectedTabId != -1 && currentTab.id == selectedTabId);
             info.addAction(AccessibilityNodeInfo.ACTION_CLICK);
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                info.addAction(new AccessibilityNodeInfo.AccessibilityAction(AccessibilityNodeInfo.ACTION_LONG_CLICK, LocaleController.getString("AccDescrOpenMenu2", R.string.AccDescrOpenMenu2)));
+                info.addAction(new AccessibilityNodeInfo.AccessibilityAction(AccessibilityNodeInfo.ACTION_LONG_CLICK, LocaleController.getString(R.string.AccDescrOpenMenu2)));
             } else {
                 info.addAction(AccessibilityNodeInfo.ACTION_LONG_CLICK);
             }

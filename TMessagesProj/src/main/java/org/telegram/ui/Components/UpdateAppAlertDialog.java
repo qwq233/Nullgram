@@ -274,7 +274,7 @@ public class UpdateAppAlertDialog extends BottomSheet {
         changelogTextView.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 14);
         changelogTextView.setLinkTextColor(Theme.getColor(Theme.key_dialogTextLink));
         if (TextUtils.isEmpty(appUpdate.text)) {
-            changelogTextView.setText(AndroidUtilities.replaceTags(LocaleController.getString("AppUpdateChangelogEmpty", R.string.AppUpdateChangelogEmpty)));
+            changelogTextView.setText(AndroidUtilities.replaceTags(LocaleController.getString(R.string.AppUpdateChangelogEmpty)));
         } else {
             SpannableStringBuilder builder = new SpannableStringBuilder(appUpdate.text);
             MessageObject.addEntitiesToText(builder, update.entities, false, false, false, false);

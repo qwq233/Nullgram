@@ -19,6 +19,8 @@
 
 package org.telegram.ui.bots;
 
+import static org.telegram.messenger.LocaleController.getString;
+
 import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Color;
@@ -87,7 +89,7 @@ public class BotCommandsMenuView extends View {
     public boolean expanded;
     float expandProgress;
 
-    private String menuText = LocaleController.getString(R.string.BotsMenuTitle);
+    private String menuText = getString(R.string.BotsMenuTitle);
     StaticLayout menuTextLayout;
     private float menuTextWidth;
     boolean isOpened;
@@ -109,7 +111,7 @@ public class BotCommandsMenuView extends View {
         backDrawable.setRoundCap();
         backgroundDrawable = Theme.createSimpleSelectorRoundRectDrawable(AndroidUtilities.dp(16), Color.TRANSPARENT, Theme.getColor(Theme.key_featuredStickers_addButtonPressed));
         backgroundDrawable.setCallback(this);
-        setContentDescription(LocaleController.getString("AccDescrBotMenu", R.string.AccDescrBotMenu));
+        setContentDescription(getString("AccDescrBotMenu", R.string.AccDescrBotMenu));
     }
 
     public void setDrawBackgroundDrawable(boolean drawBackgroundDrawable) {
@@ -241,7 +243,7 @@ public class BotCommandsMenuView extends View {
 
     public boolean setMenuText(String menuText) {
         if (menuText == null) {
-            menuText = LocaleController.getString(R.string.BotsMenuTitle);
+            menuText = getString(R.string.BotsMenuTitle);
         }
         boolean changed = this.menuText == null || !this.menuText.equals(menuText);
         this.menuText = menuText;

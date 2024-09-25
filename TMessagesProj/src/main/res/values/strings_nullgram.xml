@@ -351,4 +351,11 @@
   <string name="InvalidPattern">Invalid Pattern</string>
   <string name="sendLargePhoto">Send large photo</string>
   <string name="Details">Details</string>
+  <string name="DontAskAgain">Don\'t ask again</string>
+    <string name="NoFilesFound">No files found</string>
+    <string name="NoFilesInfo">No file\'s info</string>
+    <string name="SearchRecentFiles">Search recent files</string>
+    <string name="FileUploadLimit">File must not exceed %1$s</string>
+    <string name="ViewStats">View stats</string>
+    <string name="NoFilesFoundInfo">No results for **%1$s** in the current folder.</string>
 </resources>

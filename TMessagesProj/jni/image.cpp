@@ -7,9 +7,12 @@
 #include <unistd.h>
 #include <android/bitmap.h>
 #include <string>
+//#include <mozjpeg/java/org_libjpegturbo_turbojpeg_TJ.h>
+//#include <mozjpeg/jpeglib.h>
 #include <tgnet/FileLog.h>
 #include <vector>
 #include <algorithm>
+//#include "mozjpeg/turbojpeg.h"
 #include "c_utils.h"
 
 extern "C" {

@@ -40,7 +40,6 @@ import org.telegram.messenger.VideoEditedInfo;
 import org.telegram.messenger.video.audio_input.AudioInput;
 import org.telegram.messenger.video.audio_input.BlankAudioInput;
 import org.telegram.messenger.video.audio_input.GeneralAudioInput;
-import org.telegram.ui.Components.RLottieDrawable;
 import org.telegram.ui.Stories.recorder.StoryEntry;
 
 import java.io.File;
@@ -992,6 +991,7 @@ public class MediaCodecVideoConvertor {
     }
 
     private static void applyAudioInputs(ArrayList<MixedSoundInfo> soundInfos, ArrayList<AudioInput> audioInputs) throws IOException {
+        if (soundInfos == null) return;
         for (int i = 0; i < soundInfos.size(); i++) {
             MixedSoundInfo soundInfo = soundInfos.get(i);
             GeneralAudioInput secondAudio = new GeneralAudioInput(soundInfo.audioFile);
@@ -1316,9 +1316,9 @@ public class MediaCodecVideoConvertor {
         if (external) {
             String shaderCode;
             if (hdrInfo.getHDRType() == 1) {
-                shaderCode = RLottieDrawable.readRes(null, R.raw.hdr2sdr_hlg);
+                shaderCode = AndroidUtilities.readRes(R.raw.hdr2sdr_hlg);
             } else {
-                shaderCode = RLottieDrawable.readRes(null, R.raw.hdr2sdr_pq);
+                shaderCode = AndroidUtilities.readRes(R.raw.hdr2sdr_pq);
             }
             shaderCode = shaderCode.replace("$dstWidth", dstWidth + ".0");
             shaderCode = shaderCode.replace("$dstHeight", dstHeight + ".0");

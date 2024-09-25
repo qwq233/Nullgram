@@ -12,6 +12,7 @@ import static org.telegram.messenger.AndroidUtilities.dp;
 import static org.telegram.messenger.LocaleController.getString;
 
 import android.annotation.SuppressLint;
+import android.app.Activity;
 import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Context;
@@ -413,7 +414,7 @@ public class EditTextCaption extends EditTextBoldCursor {
         } else {
             builder = new AlertDialog.Builder(getContext(), resourcesProvider);
         }
-        builder.setTitle(LocaleController.getString("CreateLink", R.string.CreateLink));
+        builder.setTitle(LocaleController.getString(R.string.CreateLink));
 
         FrameLayout container = new FrameLayout(getContext());
         final EditTextBoldCursor editText = new EditTextBoldCursor(getContext()) {
@@ -426,7 +427,7 @@ public class EditTextCaption extends EditTextBoldCursor {
         editText.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 18);
         editText.setText(def);
         editText.setTextColor(getThemedColor(Theme.key_dialogTextBlack));
-        editText.setHintText(LocaleController.getString("URL", R.string.URL));
+        editText.setHintText(LocaleController.getString(R.string.URL));
         editText.setHeaderHintColor(getThemedColor(Theme.key_windowBackgroundWhiteBlueHeader));
         editText.setSingleLine(true);
         editText.setFocusable(true);
@@ -556,7 +557,7 @@ public class EditTextCaption extends EditTextBoldCursor {
                 delegate.onSpansChanged();
             }
         });
-        builder.setNegativeButton(LocaleController.getString("Cancel", R.string.Cancel), null);
+        builder.setNegativeButton(LocaleController.getString(R.string.Cancel), null);
         if (adaptiveCreateLinkDialog) {
             creationLinkDialog = builder.create();
             creationLinkDialog.setOnDismissListener(dialog -> {
@@ -934,10 +935,14 @@ public class EditTextCaption extends EditTextBoldCursor {
             int end = Math.min(getText().length(), getSelectionEnd());
             try {
                 AndroidUtilities.addToClipboard(getText().subSequence(start, end));
+                Activity activity = AndroidUtilities.findActivity(getContext());
+                activity.closeContextMenu();
+                if (floatingActionMode != null) {
+                    floatingActionMode.finish();
+                }
+                setSelection(start, end);
                 return true;
-            } catch (Exception e) {
-
-            }
+            } catch (Exception e) {}
         } else if (id == android.R.id.cut) {
             int start = Math.max(0, getSelectionStart());
             int end = Math.min(getText().length(), getSelectionEnd());
@@ -953,9 +958,7 @@ public class EditTextCaption extends EditTextBoldCursor {
                 setText(stringBuilder);
                 setSelection(start, start);
                 return true;
-            } catch (Exception e) {
-
-            }
+            } catch (Exception e) {}
         }
         return super.onTextContextMenuItem(id);
     }

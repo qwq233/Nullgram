@@ -611,6 +611,7 @@ import static org.telegram.ui.ActionBar.Theme.key_profile_verifiedCheck;
 import static org.telegram.ui.ActionBar.Theme.key_progressCircle;
 import static org.telegram.ui.ActionBar.Theme.key_radioBackground;
 import static org.telegram.ui.ActionBar.Theme.key_radioBackgroundChecked;
+import static org.telegram.ui.ActionBar.Theme.key_reactionStarSelector;
 import static org.telegram.ui.ActionBar.Theme.key_returnToCallBackground;
 import static org.telegram.ui.ActionBar.Theme.key_returnToCallMutedBackground;
 import static org.telegram.ui.ActionBar.Theme.key_returnToCallText;
@@ -1561,6 +1562,8 @@ public class ThemeColors {
         defaultColors[key_iv_ab_progress] = 0xff50a8eb;
         defaultColors[key_iv_navigationBackground] = 0xfff0f0f0;
 
+        defaultColors[key_reactionStarSelector] = 0x40F0AB1F;
+
         return defaultColors;
     }
 
@@ -2313,6 +2316,7 @@ public class ThemeColors {
         colorKeysMap.put(key_iv_backgroundGray, "iv_backgroundGray");
         colorKeysMap.put(key_iv_navigationBackground, "iv_navigationBackground");
         colorKeysMap.put(key_iv_ab_progress, "iv_ab_progress");
+        colorKeysMap.put(key_reactionStarSelector, "reactionStarSelector");
         return colorKeysMap;
     }
 
