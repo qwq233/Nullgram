@@ -5544,11 +5544,15 @@ public class PhotoViewer implements NotificationCenter.NotificationCenterDelegat
         menuItem.addSubItem(gallery_menu_reply, R.drawable.menu_reply, getString(R.string.Reply)).setColors(0xfffafafa, 0xfffafafa);
         menuItem.addSubItem(gallery_menu_share, R.drawable.msg_shareout, getString("ShareFile", R.string.ShareFile)).setColors(0xfffafafa, 0xfffafafa);
         menuItem.addSubItem(gallery_menu_masks2, R.drawable.msg_sticker, getString("ShowStickers", R.string.ShowStickers)).setColors(0xfffafafa, 0xfffafafa);
-        //menuItem.addSubItem(gallery_menu_edit_avatar, R.drawable.photo_paint, LocaleController.getString(R.string.EditPhoto)).setColors(0xfffafafa, 0xfffafafa);
-        menuItem.addSubItem(gallery_menu_set_as_main, R.drawable.msg_openprofile, getString("SetAsMain", R.string.SetAsMain)).setColors(0xfffafafa, 0xfffafafa);
-        menuItem.addSubItem(gallery_menu_translate, R.drawable.msg_translate, getString(R.string.TranslateMessage)).setColors(0xfffafafa, 0xfffafafa);
-        menuItem.addSubItem(gallery_menu_delete, R.drawable.msg_delete, getString("Delete", R.string.Delete)).setColors(0xfffafafa, 0xfffafafa);
-        menuItem.addSubItem(gallery_menu_cancel_loading, R.drawable.msg_cancel, getString("StopDownload", R.string.StopDownload)).setColors(0xfffafafa, 0xfffafafa);
+        //menuItem.addSubItem(gallery_menu_edit_avatar, R.drawable.photo_paint, LocaleController.getString("EditPhoto", R.string.EditPhoto)).setColors(0xfffafafa, 0xfffafafa);
+        menuItem.addSubItem(gallery_menu_set_as_main, R.drawable.msg_openprofile, LocaleController.getString("SetAsMain", R.string.SetAsMain)).setColors(0xfffafafa, 0xfffafafa);
+        menuItem.addSubItem(gallery_menu_delete, R.drawable.msg_delete, LocaleController.getString("Delete", R.string.Delete)).setColors(0xfffafafa, 0xfffafafa);
+        menuItem.addSubItem(gallery_menu_cancel_loading, R.drawable.msg_cancel, LocaleController.getString("StopDownload", R.string.StopDownload)).setColors(0xfffafafa, 0xfffafafa);
+        translateItem = menuItem.addSubItem(gallery_menu_translate, R.drawable.msg_translate, LocaleController.getString("TranslateMessage", R.string.TranslateMessage));
+        translateItem.setColors(0xfffafafa, 0xfffafafa);
+        qrItem = menuItem.addSubItem(gallery_menu_qr, R.drawable.msg_qrcode, LocaleController.getString("QrCode", R.string.QrCode));
+        qrItem.setColors(0xfffafafa, 0xfffafafa);
+
         menuItem.redrawPopup(0xf9222222);
         setMenuItemIcon(false, true);
         menuItem.setPopupItemsSelectorColor(0x0fffffff);

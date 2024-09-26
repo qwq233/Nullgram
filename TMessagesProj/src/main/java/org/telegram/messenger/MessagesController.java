@@ -1600,7 +1600,7 @@ public class MessagesController extends BaseController implements NotificationCe
         starsSubscriptionAmountMax = mainPreferences.getLong("starsSubscriptionAmountMax", 2500L);
         starsUsdSellRate1000 = mainPreferences.getFloat("starsUsdSellRate1000", 2000);
         starsUsdWithdrawRate1000 = mainPreferences.getFloat("starsUsdWithdrawRate1000", 1200);
-        sponsoredLinksInappAllow = mainPreferences.getBoolean("sponsoredLinksInappAllow", false);
+        sponsoredLinksInappAllow = false;
         paidReactionsAnonymousTime = mainPreferences.getLong("paidReactionsAnonymousTime", 0);
         paidReactionsAnonymous = mainPreferences.contains("paidReactionsAnonymous") && (System.currentTimeMillis() - paidReactionsAnonymousTime) < 1000 * 60 * 60 * 2 ? mainPreferences.getBoolean("paidReactionsAnonymous", false) : null;
         scheduleTranscriptionUpdate();
