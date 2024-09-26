@@ -31161,12 +31161,12 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
                 if (selectedObject.isDice()) {
                     AndroidUtilities.addToClipboard(selectedObject.getDiceEmoji());
                 } else {
-                    /*CharSequence caption = getMessageCaption(selectedObject, selectedObjectGroup);
+                    CharSequence caption = getMessageCaption(selectedObject, selectedObjectGroup);
                     if (caption != null) {
                         AndroidUtilities.addToClipboard(caption);
-                    } else {*/
-                    AndroidUtilities.addToClipboard(getMessageContent(selectedObject, 0, false));
-                    //}
+                    } else {
+                        AndroidUtilities.addToClipboard(getMessageContent(selectedObject, 0, false));
+                    }
                 }
                 createUndoView();
                 if (undoView == null) {
