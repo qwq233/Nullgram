@@ -65,11 +65,11 @@
     <string name="ViewHistory">Перегляд історії</string>
     <string name="NoQuoteForward">Переслати без цитування</string>
     <string name="MessageMenu">Меню повідомлення</string>
-    <string name="allowScreenshotOnNoForwardChat">Bypass Screenshot Limit</string>
-    <string name="allowScreenshotOnNoForwardChatWarning">It will also allow you to bypass screenshot limit in SecureChat!</string>
-    <string name="labelChannelUser">Label Channel User</string>
-    <string name="labelChannelUserDetails">If message sender is Channel,it will label it as \"Channel\"</string>
-    <string name="displaySpoilerDirectly">Display Spoiler Messages Directly</string>
+    <string name="allowScreenshotOnNoForwardChat">Обійти ліміт знімків екрана</string>
+    <string name="allowScreenshotOnNoForwardChatWarning">Це також дозволить вам обійти ліміт знімків екрана в SecureChat!</string>
+    <string name="labelChannelUser">Мітка користувача каналу</string>
+    <string name="labelChannelUserDetails">Якщо відправником повідомлення є канал, його буде позначено як \"канал\"</string>
+    <string name="displaySpoilerDirectly">Показувати приховані повідомлення напряму</string>
     <string name="StorageResetInfo">All data of this application will be permanently deleted (and try to log out of all accounts first).</string>
     <string name="SendLogsNoSuchThings">Please use logcat to catch logs manually</string>
     <string name="StorageReset">Clear Storage</string>
