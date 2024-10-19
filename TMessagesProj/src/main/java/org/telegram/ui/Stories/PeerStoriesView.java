@@ -157,6 +157,7 @@ import org.telegram.ui.Components.LoadingDrawable;
 import org.telegram.ui.Components.MediaActivity;
 import org.telegram.ui.Components.MentionsContainerView;
 import org.telegram.ui.Components.Premium.LimitReachedBottomSheet;
+import org.telegram.ui.Components.Premium.PremiumFeatureBottomSheet;
 import org.telegram.ui.Components.RLottieDrawable;
 import org.telegram.ui.Components.RLottieImageView;
 import org.telegram.ui.Components.RadialProgress;
@@ -185,6 +186,8 @@ import org.telegram.ui.NotificationsCustomSettingsActivity;
 import org.telegram.ui.PinchToZoomHelper;
 import org.telegram.ui.PremiumPreviewFragment;
 import org.telegram.ui.ProfileActivity;
+import org.telegram.ui.ReportBottomSheet;
+import org.telegram.ui.Stories.recorder.ButtonWithCounterView;
 import org.telegram.ui.Stories.recorder.CaptionContainerView;
 import org.telegram.ui.Stories.recorder.HintView2;
 import org.telegram.ui.Stories.recorder.StoryEntry;
@@ -1683,12 +1686,40 @@ public class PeerStoriesView extends SizeNotifierFrameLayout implements Notifica
                         }
 
                         if (!unsupported && allowShare) {
-                            ActionBarMenuItem.addItem(popupLayout, R.drawable.msg_gallery, LocaleController.getString("SaveToGallery", R.string.SaveToGallery), false, resourcesProvider).setOnClickListener(v -> {
-                                saveToGallery();
-                                if (popupMenu != null) {
-                                    popupMenu.dismiss();
-                                }
-                            });
+                            if (UserConfig.getInstance(currentAccount).isPremium()) {
+                                ActionBarMenuItem.addItem(popupLayout, R.drawable.msg_gallery, LocaleController.getString(R.string.SaveToGallery), false, resourcesProvider).setOnClickListener(v -> {
+                                    saveToGallery();
+                                    if (popupMenu != null) {
+                                        popupMenu.dismiss();
+                                    }
+                                });
+                            } else if (!MessagesController.getInstance(currentAccount).premiumFeaturesBlocked()) {
+                                Drawable lockIcon = ContextCompat.getDrawable(context, R.drawable.msg_gallery_locked2);
+                                lockIcon.setColorFilter(new PorterDuffColorFilter(ColorUtils.blendARGB(Color.WHITE, Color.BLACK, 0.5f), PorterDuff.Mode.MULTIPLY));
+                                CombinedDrawable combinedDrawable = new CombinedDrawable(
+                                        ContextCompat.getDrawable(context, R.drawable.msg_gallery_locked1),
+                                        lockIcon
+                                ) {
+                                    @Override
+                                    public void setColorFilter(ColorFilter colorFilter) {
+
+                                    }
+                                };
+                                ActionBarMenuSubItem item = ActionBarMenuItem.addItem(popupLayout, R.drawable.msg_gallery, LocaleController.getString(R.string.SaveToGallery), false, resourcesProvider);
+                                item.setIcon(combinedDrawable);
+                                item.setOnClickListener(v -> {
+                                    item.performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP);
+                                    BulletinFactory bulletinFactory = BulletinFactory.global();
+                                    if (bulletinFactory != null) {
+                                        bulletinFactory.createSimpleBulletin(R.raw.ic_save_to_gallery, AndroidUtilities.replaceSingleTag(
+                                                LocaleController.getString(R.string.SaveStoryToGalleryPremiumHint),
+                                                () -> {
+                                                    PremiumFeatureBottomSheet sheet = new PremiumFeatureBottomSheet(storyViewer.fragment, PremiumPreviewFragment.PREMIUM_FEATURE_STORIES, false);
+                                                    delegate.showDialog(sheet);
+                                                })).show();
+                                    }
+                                });
+                            }
                         }
 
                         if (!MessagesController.getInstance(currentAccount).premiumFeaturesBlocked() && !isChannel) {
@@ -1756,7 +1787,10 @@ public class PeerStoriesView extends SizeNotifierFrameLayout implements Notifica
                         if (!unsupported) {
                             if (!UserObject.isService(dialogId) && !isBotsPreview()) {
                                 ActionBarMenuItem.addItem(popupLayout, R.drawable.msg_report, LocaleController.getString(R.string.ReportChat), false, resourcesProvider).setOnClickListener(v -> {
-                                    AlertsCreator.createReportAlert(getContext(), dialogId, 0, currentStory.storyItem.id, storyViewer.fragment, resourcesProvider, null);
+                                    if (storyViewer != null) storyViewer.setOverlayVisible(true);
+                                    ReportBottomSheet.openStory(currentAccount, getContext(), currentStory.storyItem, BulletinFactory.of(storyContainer, resourcesProvider), resourcesProvider, status -> {
+                                        if (storyViewer != null) storyViewer.setOverlayVisible(false);
+                                    });
                                     if (popupMenu != null) {
                                         popupMenu.dismiss();
                                     }

@@ -1488,26 +1488,18 @@ public class LocaleController {
         return getString(key, res);
     }
 
-    // deprecated: String key is no longer necessary
-    @Deprecated
     public static String getString(String key, @StringRes int res) {
         return getInstance().getStringInternal(key, res);
     }
 
-    // deprecated: String key is no longer necessary
-    @Deprecated
     public static String getString(String key, String fallback, int fallbackRes, int res) {
         return getInstance().getStringInternal(key, fallback, fallbackRes, res);
     }
 
-    // deprecated: String key is no longer necessary
-    @Deprecated
     public static String getString(String key, String fallback, int res) {
         return getInstance().getStringInternal(key, fallback, 0, res);
     }
 
-    // deprecated: String key is no longer necessary
-    @Deprecated
     public static String getString(String key) {
         if (TextUtils.isEmpty(key)) {
             return "LOC_ERR:" + key;

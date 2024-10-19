@@ -1386,7 +1386,7 @@ public class StickerMakerView extends FrameLayout implements NotificationCenter.
                 stickerUploader.finalPath = message.attachPath = StoryEntry.makeCacheFile(UserConfig.selectedAccount, "webm").getAbsolutePath();
                 stickerUploader.messageObject = new MessageObject(UserConfig.selectedAccount, message, (MessageObject) null, false, false);
                 stickerUploader.messageObject.videoEditedInfo = videoEditedInfo;
-                MediaController.getInstance().scheduleVideoConvert(stickerUploader.messageObject, false, false);
+                MediaController.getInstance().scheduleVideoConvert(stickerUploader.messageObject, false, false, false);
             } else {
                 FileLoader.getInstance(currentAccount).uploadFile(path, false, true, ConnectionsManager.FileTypeFile);
             }

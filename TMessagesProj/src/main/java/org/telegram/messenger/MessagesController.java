@@ -647,6 +647,7 @@ public class MessagesController extends BaseController implements NotificationCe
     public String weatherSearchUsername;
     public boolean storyWeatherPreload;
     public boolean starsGiftsEnabled;
+    public boolean stargiftsBlocked;
     public long starsPaidReactionAmountMax;
     public long starsSubscriptionAmountMax;
     public float starsUsdSellRate1000;
@@ -707,6 +708,9 @@ public class MessagesController extends BaseController implements NotificationCe
     public int chatlistJoinedLimitPremium;
     public String storiesPosting;
     public String storiesEntities;
+    public int stargiftsMessageLengthMax;
+    public int stargiftsConvertPeriodMax;
+    public boolean videoIgnoreAltDocuments;
 
     public int checkResetLangpack;
     public LongSparseArray<MessageObject> dialogMessageFromUnblocked = new LongSparseArray<>();
@@ -832,7 +836,7 @@ public class MessagesController extends BaseController implements NotificationCe
     }
 
     public boolean isPremiumUser(TLRPC.User currentUser) {
-        return !premiumFeaturesBlocked() && currentUser.premium;
+        return !premiumFeaturesBlocked() && currentUser.premium && !isSupportUser(currentUser);
     }
 
     public boolean didPressTranscribeButtonEnough() {
@@ -976,6 +980,7 @@ public class MessagesController extends BaseController implements NotificationCe
         public Integer posts_between;
         public long loadTime;
         public boolean loading;
+        public boolean faked;
     }
 
     private class SendAsPeersInfo {
@@ -1551,6 +1556,9 @@ public class MessagesController extends BaseController implements NotificationCe
         chatlistInvitesLimitPremium = mainPreferences.getInt("chatlistInvitesLimitPremium",  isTest ? 5 : 20);
         chatlistJoinedLimitDefault = mainPreferences.getInt("chatlistJoinedLimitDefault", 2);
         chatlistJoinedLimitPremium = mainPreferences.getInt("chatlistJoinedLimitPremium",  isTest ? 5 : 20);
+        stargiftsMessageLengthMax = mainPreferences.getInt("stargiftsMessageLengthMax", 255);
+        stargiftsConvertPeriodMax = mainPreferences.getInt("stargiftsConvertPeriodMax", isTest ? 300 : 90 * 86400);
+        videoIgnoreAltDocuments = mainPreferences.getBoolean("videoIgnoreAltDocuments", false);
         storiesPosting = mainPreferences.getString("storiesPosting", "enabled");
         storiesEntities = mainPreferences.getString("storiesEntities", "premium");
         storiesExportNopublicLink = mainPreferences.getBoolean("storiesExportNopublicLink", false);
@@ -1596,6 +1604,7 @@ public class MessagesController extends BaseController implements NotificationCe
         weatherSearchUsername = mainPreferences.getString("weatherSearchUsername", "izweatherbot");
         storyWeatherPreload = mainPreferences.getBoolean("storyWeatherPreload", true);
         starsGiftsEnabled = mainPreferences.getBoolean("starsGiftsEnabled", true);
+        stargiftsBlocked = mainPreferences.getBoolean("stargiftsBlocked", true); // !BuildVars.DEBUG_VERSION);
         starsPaidReactionAmountMax = mainPreferences.getLong("starsPaidReactionAmountMax", 10_000L);
         starsSubscriptionAmountMax = mainPreferences.getLong("starsSubscriptionAmountMax", 2500L);
         starsUsdSellRate1000 = mainPreferences.getFloat("starsUsdSellRate1000", 2000);
@@ -3702,6 +3711,39 @@ public class MessagesController extends BaseController implements NotificationCe
                     }
                     break;
                 }
+                case "stargifts_message_length_max": {
+                    if (value.value instanceof TLRPC.TL_jsonNumber) {
+                        TLRPC.TL_jsonNumber num = (TLRPC.TL_jsonNumber) value.value;
+                        if (num.value != stargiftsMessageLengthMax) {
+                            stargiftsMessageLengthMax = (int) num.value;
+                            editor.putInt("stargiftsMessageLengthMax", stargiftsMessageLengthMax);
+                            changed = true;
+                        }
+                    }
+                    break;
+                }
+                case "stargifts_convert_period_max": {
+                    if (value.value instanceof TLRPC.TL_jsonNumber) {
+                        TLRPC.TL_jsonNumber num = (TLRPC.TL_jsonNumber) value.value;
+                        if (num.value != stargiftsConvertPeriodMax) {
+                            stargiftsConvertPeriodMax = (int) num.value;
+                            editor.putInt("stargiftsConvertPeriodMax", stargiftsConvertPeriodMax);
+                            changed = true;
+                        }
+                    }
+                    break;
+                }
+                case "video_ignore_alt_documents": {
+                    if (value.value instanceof TLRPC.TL_jsonBool) {
+                        TLRPC.TL_jsonBool bool = (TLRPC.TL_jsonBool) value.value;
+                        if (bool.value != videoIgnoreAltDocuments) {
+                            videoIgnoreAltDocuments = bool.value;
+                            editor.putBoolean("videoIgnoreAltDocuments", videoIgnoreAltDocuments);
+                            changed = true;
+                        }
+                    }
+                    break;
+                }
                 case "stories_posting": {
                     if (value.value instanceof TLRPC.TL_jsonString) {
                         TLRPC.TL_jsonString str = (TLRPC.TL_jsonString) value.value;
@@ -4268,6 +4310,17 @@ public class MessagesController extends BaseController implements NotificationCe
                         if (bool.value != starsGiftsEnabled) {
                             starsGiftsEnabled = bool.value;
                             editor.putBoolean("starsGiftsEnabled", starsGiftsEnabled);
+                            changed = true;
+                        }
+                    }
+                    break;
+                }
+                case "stargifts_blocked": {
+                    if (value.value instanceof TLRPC.TL_jsonBool) {
+                        TLRPC.TL_jsonBool bool = (TLRPC.TL_jsonBool) value.value;
+                        if (bool.value != stargiftsBlocked) {
+                            stargiftsBlocked = bool.value;
+                            editor.putBoolean("stargiftsBlocked", stargiftsBlocked);
                             changed = true;
                         }
                     }
@@ -6813,6 +6866,7 @@ public class MessagesController extends BaseController implements NotificationCe
                     }
                     fullUsers.put(user.id, userFull);
                     getTranslateController().updateDialogFull(user.id);
+                    StarsController.getInstance(currentAccount).invalidateProfileGifts(userFull);
                     loadingFullUsers.remove(user.id);
                     loadedFullUsers.put(user.id, System.currentTimeMillis());
                     String names = user.first_name + user.last_name + UserObject.getPublicUsername(user);
@@ -7966,8 +8020,10 @@ public class MessagesController extends BaseController implements NotificationCe
                         }
 
                         TLRPC.UserFull userFull = getUserFull(dialogId);
-                        userFull.profile_photo = photos_photo.photo;
-                        getMessagesStorage().updateUserInfo(userFull, false);
+                        if (userFull != null) {
+                            userFull.profile_photo = photos_photo.photo;
+                            getMessagesStorage().updateUserInfo(userFull, false);
+                        }
 
                         getUserConfig().getCurrentUser().photo = user1.photo;
                         putUser(user1, false);
@@ -9163,6 +9219,7 @@ public class MessagesController extends BaseController implements NotificationCe
                 if (fullUsers.get(user.id) == null) {
                     fullUsers.put(user.id, info);
                     getTranslateController().updateDialogFull(user.id);
+                    StarsController.getInstance(currentAccount).invalidateProfileGifts(info);
 
                     int index = blockePeers.indexOfKey(user.id);
                     if (info.blocked) {
@@ -18016,6 +18073,8 @@ public class MessagesController extends BaseController implements NotificationCe
                         message.localType = 1;
                         if (user != null && !UserObject.isDeleted(user)) {
                             message.localUserName = UserObject.getFirstName(user);
+                        } else {
+                            message.localUserName = LocaleController.getString(R.string.PushReactStoryHiddenSender);
                         }
                         messageObjects.add(message);
                         getNotificationsController().processNewMessages(messageObjects, true, false, null);
@@ -19281,6 +19340,22 @@ public class MessagesController extends BaseController implements NotificationCe
     }
 
     public SponsoredMessagesInfo getSponsoredMessages(long dialogId) {
+//        for (int i = 0; i < sponsoredMessages.size(); ++i) {
+//            if (sponsoredMessages.valueAt(i).messages != null && !sponsoredMessages.valueAt(i).messages.isEmpty()) {
+//                SponsoredMessagesInfo info = sponsoredMessages.valueAt(i);
+//                if (info.faked) {
+//                    return info;
+//                }
+//                info.loading = true;
+//                info.faked = true;
+//                AndroidUtilities.runOnUIThread(() -> {
+//                    info.loading = false;
+//                    getNotificationCenter().postNotificationName(NotificationCenter.didLoadSponsoredMessages, dialogId, info.messages);
+//                    AndroidUtilities.runOnUIThread(() -> { info.faked = false; }, 500);
+//                }, 1500);
+//                return null;
+//            }
+//        }
         SponsoredMessagesInfo info = sponsoredMessages.get(dialogId);
         if (info != null && (info.loading || Math.abs(SystemClock.elapsedRealtime() - info.loadTime) <= 5 * 60 * 1000)) {
             return info;
@@ -19985,7 +20060,7 @@ public class MessagesController extends BaseController implements NotificationCe
                         dialogsGroupsOnly.add(d);
                     } else if (d.id != selfId) {
                         dialogsUsersOnly.add(d);
-                        if (!UserObject.isReplyUser(d.id)) {
+                        if (!UserObject.isReplyUser(d.id) && d.id != UserObject.VERIFY) {
                             dialogsForBlock.add(d);
                         }
                     }
@@ -21915,9 +21990,9 @@ public class MessagesController extends BaseController implements NotificationCe
     }
 
     public void openApp(TLRPC.User bot, int classGuid) {
-        openApp(null, bot, classGuid, null);
+        openApp(null, bot, null, classGuid, null);
     }
-    public void openApp(BaseFragment _fragment, TLRPC.User bot, int classGuid, Browser.Progress progress) {
+    public void openApp(BaseFragment _fragment, TLRPC.User bot, String param, int classGuid, Browser.Progress progress) {
         if (bot == null) return;
 
         boolean[] cancelled = new boolean[] { false };
@@ -21939,7 +22014,7 @@ public class MessagesController extends BaseController implements NotificationCe
                     fragment = ((ActionBarLayout) fragment.getParentLayout()).getSheetFragment();
                 }
                 AndroidUtilities.hideKeyboard(fragment.getFragmentView());
-                WebViewRequestProps props = WebViewRequestProps.of(currentAccount, bot.id, bot.id, null, null, BotWebViewAttachedSheet.TYPE_WEB_VIEW_BOT_MAIN, 0, false, null, false, null, bot, 0, false);
+                WebViewRequestProps props = WebViewRequestProps.of(currentAccount, bot.id, bot.id, null, null, BotWebViewAttachedSheet.TYPE_WEB_VIEW_BOT_MAIN, 0, false, null, false, param, bot, 0, false);
                 if (LaunchActivity.instance != null && LaunchActivity.instance.getBottomSheetTabs() != null && LaunchActivity.instance.getBottomSheetTabs().tryReopenTab(props) != null) {
                     return;
                 }
@@ -21964,7 +22039,7 @@ public class MessagesController extends BaseController implements NotificationCe
                 }
                 TL_bots.TL_botMenuButton btn = (TL_bots.TL_botMenuButton) botInfo[0].menu_button;
                 AndroidUtilities.hideKeyboard(fragment.getFragmentView());
-                WebViewRequestProps props = WebViewRequestProps.of(currentAccount, bot.id, bot.id, btn.text, btn.url, BotWebViewAttachedSheet.TYPE_BOT_MENU_BUTTON, 0, false, null, false, null, bot, 0, false);
+                WebViewRequestProps props = WebViewRequestProps.of(currentAccount, bot.id, bot.id, btn.text, btn.url, BotWebViewAttachedSheet.TYPE_BOT_MENU_BUTTON, 0, false, null, false, param, bot, 0, false);
                 if (LaunchActivity.instance != null && LaunchActivity.instance.getBottomSheetTabs() != null && LaunchActivity.instance.getBottomSheetTabs().tryReopenTab(props) != null) {
                     return;
                 }

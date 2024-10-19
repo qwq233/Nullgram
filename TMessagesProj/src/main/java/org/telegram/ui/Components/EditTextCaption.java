@@ -518,18 +518,7 @@ public class EditTextCaption extends EditTextBoldCursor {
             end = getSelectionEnd();
         }
 
-        var urlSpans = getText().getSpans(start, end, URLSpanReplacement.class);
-        if (urlSpans != null) {
-            for (var span : urlSpans) {
-                var url = span.getURL();
-                if (!TextUtils.isEmpty(url)) {
-                    editText.setText(url);
-                    break;
-                }
-            }
-        }
-
-        builder.setPositiveButton(LocaleController.getString("OK", R.string.OK), (dialogInterface, i) -> {
+        builder.setPositiveButton(LocaleController.getString(R.string.OK), (dialogInterface, i) -> {
             Editable editable = getText();
             CharacterStyle[] spans = editable.getSpans(start, end, CharacterStyle.class);
             if (spans != null && spans.length > 0) {

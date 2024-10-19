@@ -1,6 +1,7 @@
 package org.telegram.ui.Components.Premium.boosts;
 
 import android.os.Build;
+import android.text.TextUtils;
 import android.util.Pair;
 
 import org.json.JSONObject;
@@ -94,15 +95,16 @@ public class BoostRepository {
         return peers;
     }
 
-    public static void payGiftCode(List<TLObject> users, TLRPC.TL_premiumGiftCodeOption option, TLRPC.Chat chat, BaseFragment baseFragment, Utilities.Callback<Void> onSuccess, Utilities.Callback<TLRPC.TL_error> onError) {
-        payGiftCodeByInvoice(users, option, chat, baseFragment, onSuccess, onError);
+    public static void payGiftCode(List<TLObject> users, TLRPC.TL_premiumGiftCodeOption option, TLRPC.Chat chat, TLRPC.TL_textWithEntities message, BaseFragment baseFragment, Utilities.Callback<Void> onSuccess, Utilities.Callback<TLRPC.TL_error> onError) {
+        invalidateGiftOptionsToCache(UserConfig.selectedAccount);
+        payGiftCodeByInvoice(users, option, chat, message, baseFragment, onSuccess, onError);
     }
 
     public static boolean isGoogleBillingAvailable() {
         return false;
     }
 
-    public static void payGiftCodeByInvoice(List<TLObject> users, TLRPC.TL_premiumGiftCodeOption option, TLRPC.Chat chat, BaseFragment baseFragment, Utilities.Callback<Void> onSuccess, Utilities.Callback<TLRPC.TL_error> onError) {
+    public static void payGiftCodeByInvoice(List<TLObject> users, TLRPC.TL_premiumGiftCodeOption option, TLRPC.Chat chat, TLRPC.TL_textWithEntities message, BaseFragment baseFragment, Utilities.Callback<Void> onSuccess, Utilities.Callback<TLRPC.TL_error> onError) {
         MessagesController controller = MessagesController.getInstance(UserConfig.selectedAccount);
         ConnectionsManager connection = ConnectionsManager.getInstance(UserConfig.selectedAccount);
 
@@ -116,9 +118,13 @@ public class BoostRepository {
                 payload.users.add(controller.getInputUser((TLRPC.User) user));
             }
         }
+        if (message != null && !TextUtils.isEmpty(message.text)) {
+            payload.flags |= 2;
+            payload.message = message;
+        }
 
         if (chat != null) {
-            payload.flags = 1;
+            payload.flags |= 1;
             payload.boost_peer = controller.getInputPeer(-chat.id);
         }
 
@@ -417,9 +423,38 @@ public class BoostRepository {
         });
     }
 
-    public static int loadGiftOptions(TLRPC.Chat chat, Utilities.Callback<List<TLRPC.TL_premiumGiftCodeOption>> onDone) {
-        MessagesController controller = MessagesController.getInstance(UserConfig.selectedAccount);
-        ConnectionsManager connection = ConnectionsManager.getInstance(UserConfig.selectedAccount);
+    private static HashMap<Integer, Pair<Long, List<TLRPC.TL_premiumGiftCodeOption>>> cachedGiftOptions;
+    public static List<TLRPC.TL_premiumGiftCodeOption> getCachedGiftOptions(int currentAccount) {
+        if (cachedGiftOptions == null) return null;
+        Pair<Long, List<TLRPC.TL_premiumGiftCodeOption>> pair = cachedGiftOptions.get(currentAccount);
+        if (pair != null && System.currentTimeMillis() - pair.first < 1000 * 60 * 30) {
+            return pair.second;
+        }
+        return null;
+    }
+
+    public static void saveGiftOptionsToCache(int currentAccount, List<TLRPC.TL_premiumGiftCodeOption> options) {
+        if (cachedGiftOptions == null) cachedGiftOptions = new HashMap<>();
+        cachedGiftOptions.put(currentAccount, new Pair<>(System.currentTimeMillis(), options));
+    }
+
+    public static void invalidateGiftOptionsToCache(int currentAccount) {
+        if (cachedGiftOptions != null) {
+            cachedGiftOptions.remove(currentAccount);
+        }
+    }
+
+    public static int loadGiftOptions(int currentAccount, TLRPC.Chat chat, Utilities.Callback<List<TLRPC.TL_premiumGiftCodeOption>> onDone) {
+        if (chat == null) {
+            List<TLRPC.TL_premiumGiftCodeOption> cached = getCachedGiftOptions(currentAccount);
+            if (cached != null) {
+                onDone.run(cached);
+                return -1;
+            }
+        }
+
+        MessagesController controller = MessagesController.getInstance(currentAccount);
+        ConnectionsManager connection = ConnectionsManager.getInstance(currentAccount);
         TLRPC.TL_payments_getPremiumGiftCodeOptions req = new TLRPC.TL_payments_getPremiumGiftCodeOptions();
         if (chat != null) {
             req.flags = 1;

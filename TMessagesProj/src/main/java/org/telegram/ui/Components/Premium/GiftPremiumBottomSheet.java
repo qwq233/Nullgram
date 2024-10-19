@@ -490,6 +490,7 @@ public class GiftPremiumBottomSheet extends BottomSheetWithRecyclerListView impl
 
     public final static class GiftTier {
         public final TLRPC.TL_premiumGiftOption giftOption;
+        public final TLRPC.TL_premiumGiftCodeOption giftCodeOption;
         private int discount;
         private long pricePerMonth;
 
@@ -499,14 +500,27 @@ public class GiftPremiumBottomSheet extends BottomSheetWithRecyclerListView impl
 
         public GiftTier(TLRPC.TL_premiumGiftOption giftOption) {
             this.giftOption = giftOption;
+            this.giftCodeOption = null;
+        }
+        public GiftTier(TLRPC.TL_premiumGiftCodeOption giftCodeOption) {
+            this.giftOption = null;
+            this.giftCodeOption = giftCodeOption;
         }
 
         public void setPricePerMonthRegular(long pricePerMonthRegular) {
             this.pricePerMonthRegular = pricePerMonthRegular;
         }
 
+        public String getStoreProduct() {
+            if (giftOption != null) return giftOption.store_product;
+            if (giftCodeOption != null) return giftCodeOption.store_product;
+            return null;
+        }
+
         public int getMonths() {
-            return giftOption.months;
+            if (giftOption != null) return giftOption.months;
+            if (giftCodeOption != null) return giftCodeOption.months;
+            return 1;
         }
 
         public int getDiscount() {
@@ -530,27 +544,52 @@ public class GiftPremiumBottomSheet extends BottomSheetWithRecyclerListView impl
             if (pricePerMonth == 0) {
                 long price = getPrice();
                 if (price != 0) {
-                    pricePerMonth = price / giftOption.months;
+                    pricePerMonth = price / getMonths();
                 }
             }
             return pricePerMonth;
         }
 
         public String getFormattedPricePerMonth() {
-            return BillingController.getInstance().formatCurrency(getPricePerMonth(), getCurrency());
+            if (BuildVars.useInvoiceBilling() || giftOption != null && giftOption.store_product == null || giftCodeOption != null && giftCodeOption.store_product == null) {
+                return BillingController.getInstance().formatCurrency(getPricePerMonth(), getCurrency());
+            }
+
+            return "";
         }
 
         public String getFormattedPrice() {
-            return BillingController.getInstance().formatCurrency(getPrice(), getCurrency());        }
+            if (BuildVars.useInvoiceBilling() || giftOption != null && giftOption.store_product == null || giftCodeOption != null && giftCodeOption.store_product == null) {
+                return BillingController.getInstance().formatCurrency(getPrice(), getCurrency());
+            }
+
+            return "";
+        }
 
         public long getPrice() {
-            return giftOption.amount;
-            //return googlePlayProductDetails == null ? 0 : googlePlayProductDetails.getOneTimePurchaseOfferDetails().getPriceAmountMicros();
+            if (giftOption != null) {
+                if (BuildVars.useInvoiceBilling() || giftOption.store_product == null) {
+                    return giftOption.amount;
+                }
+            } else if (giftCodeOption != null) {
+                if (BuildVars.useInvoiceBilling() || giftCodeOption.store_product == null) {
+                    return giftCodeOption.amount;
+                }
+            }
+            return 0;
         }
 
         public String getCurrency() {
-            return giftOption.currency;
-            //return googlePlayProductDetails == null ? "" : googlePlayProductDetails.getOneTimePurchaseOfferDetails().getPriceCurrencyCode();
+            if (giftOption != null) {
+                if (BuildVars.useInvoiceBilling() || giftOption.store_product == null) {
+                    return giftOption.currency;
+                }
+            } else if (giftCodeOption != null) {
+                if (BuildVars.useInvoiceBilling() || giftCodeOption.store_product == null) {
+                    return giftCodeOption.currency;
+                }
+            }
+            return "";
         }
     }
 }

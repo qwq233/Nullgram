@@ -54,7 +54,7 @@ public class StarAppsSheet extends BottomSheetWithRecyclerListView {
             position--;
             Object obj = adapter.getObject(position);
             if (obj instanceof TLRPC.User) {
-                MessagesController.getInstance(currentAccount).openApp(attachedFragment, (TLRPC.User) obj, 0, null);
+                MessagesController.getInstance(currentAccount).openApp(attachedFragment, (TLRPC.User) obj, null, 0, null);
             }
         });
     }

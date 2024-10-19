@@ -57,6 +57,7 @@ import org.telegram.messenger.ContactsController;
 import org.telegram.messenger.FileLoader;
 import org.telegram.messenger.FileLog;
 import org.telegram.messenger.LocaleController;
+import org.telegram.messenger.MediaController;
 import org.telegram.messenger.MessageObject;
 import org.telegram.messenger.NotificationCenter;
 import org.telegram.messenger.NotificationsController;
@@ -86,6 +87,7 @@ import org.telegram.ui.Components.RecyclerListView;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -973,6 +975,9 @@ public class NotificationsSoundActivity extends BaseFragment implements ChatAtta
                 if (data.getData() != null) {
                     String path = AndroidUtilities.getPath(data.getData());
                     if (path != null) {
+                        if (path.startsWith("content://")) {
+                            path = MediaController.copyFileToCache(data.getData(), "mp3");
+                        }
                         File file = new File(path);
                         if (chatAttachAlert.getDocumentLayout().isRingtone(file)) {
                             apply = true;
@@ -983,8 +988,13 @@ public class NotificationsSoundActivity extends BaseFragment implements ChatAtta
                 } else if (data.getClipData() != null) {
                     ClipData clipData = data.getClipData();
                     for (int i = 0; i < clipData.getItemCount(); i++) {
-                        String path = clipData.getItemAt(i).getUri().toString();
-                        if (chatAttachAlert.getDocumentLayout().isRingtone(new File(path))) {
+                        Uri uri = clipData.getItemAt(i).getUri();
+                        String path = uri.toString();
+                        if (path.startsWith("content://")) {
+                            path = MediaController.copyFileToCache(uri, "mp3");
+                        }
+                        final File file = new File(path);
+                        if (chatAttachAlert.getDocumentLayout().isRingtone(file)) {
                             apply = true;
                             getMediaDataController().uploadRingtone(path);
                             getNotificationCenter().postNotificationName(NotificationCenter.onUserRingtonesUpdated);

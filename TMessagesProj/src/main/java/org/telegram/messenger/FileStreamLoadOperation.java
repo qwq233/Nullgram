@@ -37,6 +37,8 @@ public class FileStreamLoadOperation extends BaseDataSource implements FileLoadO
 
     private Uri uri;
     private long bytesRemaining;
+    private long bytesTransferred;
+    private long requestedLength;
     private boolean opened;
     private long currentOffset;
     private CountDownLatch countDownLatch;
@@ -93,10 +95,13 @@ public class FileStreamLoadOperation extends BaseDataSource implements FileLoadO
             document.attributes.add(new TLRPC.TL_documentAttributeAudio());
         }
         allStreams.put(document.id, this);
-        loadOperation = FileLoader.getInstance(currentAccount).loadStreamFile(this, document, null, parentObject, currentOffset = dataSpec.position, false, getCurrentPriority());
-        bytesRemaining = dataSpec.length == C.LENGTH_UNSET ? document.size - dataSpec.position : dataSpec.length;
-        if (bytesRemaining < 0) {
-            throw new EOFException();
+        currentOffset = dataSpec.position;
+        requestedLength = dataSpec.length;
+        loadOperation = FileLoader.getInstance(currentAccount).loadStreamFile(this, document, null, parentObject, currentOffset, false, getCurrentPriority());
+        bytesTransferred = 0;
+        bytesRemaining = document.size - dataSpec.position;
+        if (requestedLength != C.LENGTH_UNSET) {
+            bytesRemaining = Math.min(bytesRemaining, requestedLength - bytesTransferred);
         }
         opened = true;
         transferStarted(dataSpec);
@@ -108,6 +113,9 @@ public class FileStreamLoadOperation extends BaseDataSource implements FileLoadO
                     file.seek(currentOffset);
                     if (loadOperation.isFinished()) {
                         bytesRemaining = currentFile.length() - currentOffset;
+                        if (requestedLength != C.LENGTH_UNSET) {
+                            bytesRemaining = Math.min(bytesRemaining, requestedLength - bytesTransferred);
+                        }
                     }
                 } catch (Throwable e) {
                 }
@@ -177,6 +185,9 @@ public class FileStreamLoadOperation extends BaseDataSource implements FileLoadO
                                 file.seek(currentOffset);
                                 if (loadOperation.isFinished()) {
                                     bytesRemaining = currentFile.length() - currentOffset;
+                                    if (requestedLength != C.LENGTH_UNSET) {
+                                        bytesRemaining = Math.min(bytesRemaining, requestedLength - bytesTransferred);
+                                    }
                                 }
                             } catch (Throwable e) {
 
@@ -194,6 +205,7 @@ public class FileStreamLoadOperation extends BaseDataSource implements FileLoadO
                 if (bytesRead > 0) {
                     currentOffset += bytesRead;
                     bytesRemaining -= bytesRead;
+                    bytesTransferred += bytesRead;
                     bytesTransferred(bytesRead);
                 }
             } catch (Exception e) {
@@ -238,9 +250,10 @@ public class FileStreamLoadOperation extends BaseDataSource implements FileLoadO
     @Override
     public void newDataAvailable() {
 //        FileLog.e("FileStreamLoadOperation " + document.id + " newDataAvailable me=" + this);
-        if (countDownLatch != null) {
-            countDownLatch.countDown();
-            countDownLatch = null;
+        CountDownLatch latch = countDownLatch;
+        countDownLatch = null;
+        if (latch != null) {
+            latch.countDown();
         }
     }
 

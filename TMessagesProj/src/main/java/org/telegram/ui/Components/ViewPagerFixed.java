@@ -446,6 +446,7 @@ public class ViewPagerFixed extends FrameLayout {
         getParent().requestDisallowInterceptTouchEvent(true);
         maybeStartTracking = false;
         startedTracking = true;
+        onStartTracking();
         startedTrackingX = (int) (ev.getX() + additionalOffset);
         if (tabsView != null) {
             tabsView.setEnabled(false);
@@ -464,6 +465,10 @@ public class ViewPagerFixed extends FrameLayout {
         }
         onTabAnimationUpdate(false);
         return true;
+    }
+
+    public void onStartTracking() {
+
     }
 
     public boolean onInterceptTouchEvent(MotionEvent ev) {
@@ -502,6 +507,7 @@ public class ViewPagerFixed extends FrameLayout {
         }
         if (ev != null && ev.getAction() == MotionEvent.ACTION_DOWN && checkTabsAnimationInProgress()) {
             startedTracking = true;
+            onStartTracking();
             startedTrackingPointerId = ev.getPointerId(0);
             startedTrackingX = (int) ev.getX();
             if (animatingForward) {

@@ -6613,9 +6613,9 @@ public class EmojiView extends FrameLayout implements
                         } else if (object == recentStickers) {
                             cell.setText(LocaleController.getString(R.string.RecentStickers), R.drawable.msg_close, LocaleController.getString(R.string.ClearRecentStickersAlertTitle));
                         } else if (object == favouriteStickers) {
-                            cell.setText(LocaleController.getString("FavoriteStickers", R.string.FavoriteStickers), 0);
-                        } else if (object == premiumStickers && !Config.disablePremiumSticker) {
-                            cell.setText(LocaleController.getString("PremiumStickers", R.string.PremiumStickers), 0);
+                            cell.setText(LocaleController.getString(R.string.FavoriteStickers), 0);
+                        } else if (object == premiumStickers) {
+                            cell.setText(LocaleController.getString(R.string.PremiumStickers), 0);
                         }
                     }
                     break;
