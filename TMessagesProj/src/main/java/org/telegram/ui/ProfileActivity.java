@@ -5188,8 +5188,13 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
                 writeButton.setContentDescription(LocaleController.getString(R.string.AccDescrOpenChat));
             }
         } else {
-            writeButton.setImageResource(R.drawable.profile_discuss);
-            writeButton.setContentDescription(LocaleController.getString(R.string.ViewDiscussion));
+            if (currentChat.megagroup) {
+                writeButton.setImageResource(R.drawable.msg_channel);
+                writeButton.setContentDescription(LocaleController.getString("OpenChannel2", R.string.OpenChannel2));
+            } else {
+                writeButton.setImageResource(R.drawable.profile_discuss);
+                writeButton.setContentDescription(LocaleController.getString("ViewDiscussion", R.string.ViewDiscussion));
+            }
         }
         writeButton.setScaleType(ImageView.ScaleType.CENTER);
 
@@ -10399,10 +10404,14 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
                 if (chat.megagroup) {
                     if (chatInfo == null || !chatInfo.participants_hidden || ChatObject.hasAdminRights(chat)) {
                         canSearchMembers = true;
+                        otherItem.addSubItem(event_log, R.drawable.msg_log, LocaleController.getString("EventLog", R.string.EventLog));
                         otherItem.addSubItem(search_members, R.drawable.msg_search, LocaleController.getString(R.string.SearchMembers));
                     }
                     if (!chat.creator && !chat.left && !chat.kicked && !isTopic) {
                         otherItem.addSubItem(leave_group, R.drawable.msg_leave, LocaleController.getString(R.string.LeaveMegaMenu));
+                    }
+                    if (chatInfo != null && chatInfo.linked_chat_id != 0) {
+                        otherItem.addSubItem(view_discussion, R.drawable.msg_channel, LocaleController.getString("OpenChannel2", R.string.OpenChannel2));
                     }
                     if (isTopic && ChatObject.canDeleteTopic(currentAccount, chat, topicId)) {
                         otherItem.addSubItem(delete_topic, R.drawable.msg_delete, LocaleController.getPluralString("DeleteTopics", 1));
