@@ -7,7 +7,6 @@
 Nullgramは、[Telegram App for Android](https://play.google.com/store/apps/details?id=org.telegram.messenger)の公式ソースコードをベースとした **無料でオープンソース** なサードパーティー製のTelegramクライアントです。
 
 ## 何故Nullgramなのか
-NekoXとNekogramのコミュニティが分断[^1]され、NekoXとNekogramの主要となる開発者が深刻な問題を抱えている状態のため、これらの問題を回避するために両者の機能を統合したNullgramを開発することにしました。
 
 コンピュータープログラミングにおいて、初期化されていないまたは定義されていない、空の状態、あるいは意味がない値という意味で使用されるNull。
 

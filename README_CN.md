@@ -7,7 +7,6 @@
 Nullgram 是一款**自由且开源**的Telegram第三方客户端，基于[Telegram Android](https://play.google.com/store/apps/details?id=org.telegram.messenger)制作。
 
 ## 为何选择 Nullgram
-天下苦社区分裂久矣。由于很多原因，NekoX和Nekogram社区彻底分裂，再加之Nekogram[^1]和NekoX的主要开发均存在较大问题，我便决定整合两款app的功能，然后便做了Nullgram。
 
 Null的意思是*未初始化、未定义或者不存在*。以Nullgram为名，主要就是为了表达Nullgram没有那么多脑瘫事情。Nullgram不会给你FCM推送"nmsl"[^2]或者其他什么东西，不会发什么乞讨二维码或者机场广告[^4]到频道，不会恶意竞争[^5]捏造事实。
 
