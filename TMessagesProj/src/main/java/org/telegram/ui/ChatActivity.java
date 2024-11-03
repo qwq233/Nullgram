@@ -28766,9 +28766,11 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
 //                            icons.add(R.drawable.menu_feature_paid);
 //                        }
                         if (selectedObject.contentType == 0 && !selectedObject.isMediaEmptyWebpage() && selectedObject.getId() > 0 && !selectedObject.isOut() && (currentChat != null || currentUser != null && currentUser.bot)) {
-                            items.add(LocaleController.getString(R.string.ReportChat));
-                            options.add(OPTION_REPORT_CHAT);
-                            icons.add(R.drawable.msg_report);
+                            if (Config.showReport) {
+                                items.add(LocaleController.getString(R.string.ReportChat));
+                                options.add(OPTION_REPORT_CHAT);
+                                icons.add(R.drawable.msg_report);
+                            }
                         }
                     } else {
                         if (selectedObject.getId() > 0 && allowChatActions && !isInsideContainer) {
@@ -29129,9 +29131,11 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
                                 options.add(OPTION_REPORT_CHAT);
                                 icons.add(R.drawable.msg_block2);
                             } else {
-                                items.add(LocaleController.getString(R.string.ReportChat));
-                                options.add(OPTION_REPORT_CHAT);
-                                icons.add(R.drawable.msg_report);
+                                if (Config.showReport) {
+                                    items.add(LocaleController.getString(R.string.ReportChat));
+                                    options.add(OPTION_REPORT_CHAT);
+                                    icons.add(R.drawable.msg_report);
+                                }
                             }
                         }
                         if (message.canDeleteMessage(chatMode == MODE_SCHEDULED, currentChat) && (threadMessageObjects == null || !threadMessageObjects.contains(message))) {
