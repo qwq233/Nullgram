@@ -67,9 +67,13 @@ jobs:
             sudo rm -rf /usr/local/share/chromium
             sudo rm -rf /usr/local/lib/node_modules
             df -h
+
+            export ndkversion="27.0.12077973"
             
-            sudo apt-get install bison gcc make curl ninja-build -y
-            echo "y" | sdkmanager --install "ndk;27.0.12077973" --sdk_root=${ANDROID_SDK_ROOT} &> /dev/null
+            sudo apt-get install wget bison gcc make curl ninja-build -y
+            echo "y" | sdkmanager --install "ndk;$ndkversion" --sdk_root=${ANDROID_SDK_ROOT} &> /dev/null
+            wget https://github.com/qwq233/ollvm-bin/releases/download/18.0.0/clang-18 -O ${ANDROID_SDK_ROOT}/ndk/$ndkversion/toolchains/llvm/prebuilt/linux-x86_64/bin/oclang
+            chmod +x ${ANDROID_SDK_ROOT}/ndk/$ndkversion/toolchains/llvm/prebuilt/linux-x86_64/bin/oclang
             echo "sdk.dir=${ANDROID_HOME}" >> local.properties
       - name: Debug Build
         run: |
@@ -155,9 +159,13 @@ jobs:
             sudo rm -rf /usr/local/share/chromium
             sudo rm -rf /usr/local/lib/node_modules
             df -h
+
+            export ndkversion="27.0.12077973"
             
-            sudo apt-get install bison gcc make curl ninja-build -y
-            echo "y" | sdkmanager --install "ndk;27.0.12077973" --sdk_root=${ANDROID_SDK_ROOT} &> /dev/null
+            sudo apt-get install bison gcc make wget curl ninja-build -y
+            echo "y" | sdkmanager --install "ndk;$ndkversion" --sdk_root=${ANDROID_SDK_ROOT} &> /dev/null
+            wget https://github.com/qwq233/ollvm-bin/releases/download/18.0.0/clang-18 -O ${ANDROID_SDK_ROOT}/ndk/$ndkversion/toolchains/llvm/prebuilt/linux-x86_64/bin/oclang
+            chmod +x ${ANDROID_SDK_ROOT}/ndk/$ndkversion/toolchains/llvm/prebuilt/linux-x86_64/bin/oclang
             echo "sdk.dir=${ANDROID_HOME}" >> local.properties
 
       - name: Debug Build
