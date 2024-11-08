@@ -16,7 +16,7 @@ jobs:
   build:
     name: Gradle Build
     if: ${{ github.event_name != 'pull_request' && success() && github.ref == 'refs/heads/master' }}
-    runs-on:	ubuntu-24.04
+    runs-on: ubuntu-24.04
     env:
       CCACHE_COMPILERCHECK: "%compiler% -dumpmachine; %compiler% -dumpversion"
       CCACHE_NOHASHDIR: "true"
