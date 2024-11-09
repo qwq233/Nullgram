@@ -129,8 +129,8 @@
         android:restoreAnyVersion="true"
         android:backupAgent=".BackupAgent"
         android:hardwareAccelerated="@bool/useHardwareAcceleration"
-        android:icon="@mipmap/ic_launcher_icon"
-        android:roundIcon="@mipmap/ic_launcher_icon"
+        android:icon="@mipmap/ic_launcher"
+        android:roundIcon="@mipmap/ic_launcher"
         android:largeHeap="true"
         android:label="@string/NullgramName"
         android:theme="@style/Theme.TMessages.Start"
@@ -163,8 +163,8 @@
             android:enabled="false"
             android:name="org.telegram.messenger.MainIcon"
             android:targetActivity="org.telegram.ui.LaunchActivity"
-            android:icon="@mipmap/ic_launcher_mainicon"
-            android:roundIcon="@mipmap/ic_launcher_mainicon"
+            android:icon="@mipmap/ic_launcher"
+            android:roundIcon="@mipmap/ic_launcher"
             android:exported="true">
 
             <intent-filter>
@@ -329,7 +329,7 @@
                 <data android:host="t.me" android:scheme="http" />
                 <data android:host="t.me" android:scheme="https" />
             </intent-filter>
-            <intent-filter android:icon="@drawable/icon" android:roundIcon="@drawable/icon" android:priority="1">
+            <intent-filter android:icon="@mipmap/ic_launcher" android:roundIcon="@mipmap/ic_launcher" android:priority="1">
                 <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.BROWSABLE" />
                 <category android:name="android.intent.category.DEFAULT" />
@@ -377,7 +377,7 @@
             android:stateNotNeeded="true"
             android:theme="@style/Theme.TMessages.Transparent"
             android:exported="true">
-            <intent-filter android:icon="@drawable/icon" android:roundIcon="@drawable/icon" android:priority="1">
+            <intent-filter android:icon="@mipmap/ic_launcher" android:roundIcon="@mipmap/ic_launcher" android:priority="1">
                 <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.BROWSABLE" />
                 <category android:name="android.intent.category.DEFAULT" />
@@ -390,7 +390,7 @@
             android:hardwareAccelerated="@bool/useHardwareAcceleration"
             android:exported="true"
             android:windowSoftInputMode="adjustPan">
-            <intent-filter android:icon="@drawable/icon" android:roundIcon="@drawable/icon">
+            <intent-filter android:icon="@mipmap/ic_launcher" android:roundIcon="@mipmap/ic_launcher">
                 <action android:name="org.telegram.passport.AUTHORIZE"/>
                 <category android:name="android.intent.category.DEFAULT"/>
             </intent-filter>
@@ -401,7 +401,7 @@
             android:hardwareAccelerated="@bool/useHardwareAcceleration"
             android:exported="true"
             android:windowSoftInputMode="adjustPan">
-            <intent-filter android:icon="@drawable/icon" android:roundIcon="@drawable/icon">
+            <intent-filter android:icon="@mipmap/ic_launcher" android:roundIcon="@mipmap/ic_launcher">
                 <action android:name="android.appwidget.action.APPWIDGET_CONFIGURE"/>
             </intent-filter>
         </activity>
@@ -411,7 +411,7 @@
             android:hardwareAccelerated="@bool/useHardwareAcceleration"
             android:exported="true"
             android:windowSoftInputMode="adjustPan">
-            <intent-filter android:icon="@drawable/icon" android:roundIcon="@drawable/icon">
+            <intent-filter android:icon="@mipmap/ic_launcher" android:roundIcon="@mipmap/ic_launcher">
                 <action android:name="android.appwidget.action.APPWIDGET_CONFIGURE"/>
             </intent-filter>
         </activity>
@@ -420,7 +420,7 @@
 <!--            android:configChanges="keyboard|keyboardHidden|orientation|screenSize|uiMode"-->
 <!--            android:hardwareAccelerated="@bool/useHardwareAcceleration"-->
 <!--            android:windowSoftInputMode="adjustPan">-->
-<!--            <intent-filter android:icon="@drawable/icon" android:roundIcon="@drawable/icon_round">-->
+<!--            <intent-filter android:icon="@mipmap/ic_launcher" android:roundIcon="@mipmap/ic_launcher_round">-->
 <!--                <action android:name="android.appwidget.action.APPWIDGET_CONFIGURE"/>-->
 <!--            </intent-filter>-->
 <!--        </activity>-->
