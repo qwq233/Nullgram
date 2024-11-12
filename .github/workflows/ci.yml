@@ -104,7 +104,8 @@ jobs:
   play-build:
     name: Gradle Build (play store)
     runs-on: ubuntu-latest
-    if: ${{ github.event_name != 'pull_request' && success() && github.ref == 'refs/heads/master' }}
+    # if: ${{ github.event_name != 'pull_request' && success() && github.ref == 'refs/heads/master' }}
+    if: false
     env:
       CCACHE_COMPILERCHECK: "%compiler% -dumpmachine; %compiler% -dumpversion"
       CCACHE_NOHASHDIR: "true"
