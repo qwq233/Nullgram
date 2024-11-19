@@ -3638,7 +3638,7 @@ public class ChatActivityEnterView extends BlurredFrameLayout implements Notific
                     if (senderSelectPopupWindow == null) return;
                     if (chatFull != null) {
                         var chat = controller.getChat(chatFull.id);
-                        if (chat != null && chat.creator) {
+                        if (chat != null && ChatObject.isMegagroup(chat) && chat.creator) {
                             var self = UserConfig.getInstance(currentAccount).getCurrentUser();
 
                             if (peer.channel_id == chat.id) {
@@ -9555,7 +9555,7 @@ public class ChatActivityEnterView extends BlurredFrameLayout implements Notific
 
         }
 
-        boolean isVisible =  ((chat != null && chat.creator) || UserConfig.getInstance(currentAccount).isPremium()) 
+        boolean isVisible =  (((chat != null && chat.creator) || UserConfig.getInstance(currentAccount).isPremium()) || ChatObject.isChannel(chat)) 
             && defPeer != null && (delegate.getSendAsPeers() == null || delegate.getSendAsPeers().peers.size() > 1) &&
             !isEditingMessage() && !isRecordingAudioVideo() && (recordedAudioPanel == null || recordedAudioPanel.getVisibility() != View.VISIBLE) &&
             (!ChatObject.isChannelAndNotMegaGroup(chat) || ChatObject.canSendAsPeers(chat));
