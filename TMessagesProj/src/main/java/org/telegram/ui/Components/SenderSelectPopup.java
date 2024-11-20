@@ -254,7 +254,7 @@ public class SenderSelectPopup extends ActionBarPopupWindow {
 
                         senderView.title.setText(UserObject.getUserName(user));
                         final String text;
-                        if (currentChat.creator && ChatObject.isMegagroup(chat) && isQuickToggleAnonymousEnabled) {
+                        if (currentChat.creator && isQuickToggleAnonymousEnabled) {
                             text = LocaleController.getString("SwitchToPersonalAccount", R.string.SwitchToPersonalAccount);
                         } else {
                             text = LocaleController.getString("VoipGroupPersonalAccount", R.string.VoipGroupPersonalAccount);
