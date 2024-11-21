@@ -78,6 +78,7 @@ import org.telegram.messenger.UserConfig;
 import org.telegram.messenger.UserObject;
 import org.telegram.messenger.Utilities;
 import org.telegram.messenger.browser.Browser;
+import org.telegram.messenger.browser.Browser.Progress;
 import org.telegram.tgnet.ConnectionsManager;
 import org.telegram.tgnet.TLRPC;
 import org.telegram.ui.ActionBar.ActionBar;
@@ -1037,9 +1038,10 @@ public class PremiumPreviewFragment extends BaseFragment implements Notification
                 if (selectedTier == null || selectedTier.subscriptionOption == null || selectedTier.subscriptionOption.bot_url == null) {
                     if (!TextUtils.isEmpty(fragment.getMessagesController().premiumBotUsername)) {
                         launchActivity.setNavigateToPremiumBot(true);
-                        launchActivity.onNewIntent(new Intent(Intent.ACTION_VIEW, Uri.parse("https://t.me/" + fragment.getMessagesController().premiumBotUsername + "?start=" + source)), null);
+                        launchActivity.onNewIntent(new Intent(Intent.ACTION_VIEW, Uri.parse("https://t.me/" + fragment.getMessagesController().premiumBotUsername + "?start=" + source)),
+                            (Progress) null);
                     } else if (!TextUtils.isEmpty(fragment.getMessagesController().premiumInvoiceSlug)) {
-                        launchActivity.onNewIntent(new Intent(Intent.ACTION_VIEW, Uri.parse("https://t.me/$" + fragment.getMessagesController().premiumInvoiceSlug)), null);
+                        launchActivity.onNewIntent(new Intent(Intent.ACTION_VIEW, Uri.parse("https://t.me/$" + fragment.getMessagesController().premiumInvoiceSlug)), (Progress) null);
                     }
                 } else {
                     Uri uri = Uri.parse(selectedTier.subscriptionOption.bot_url);
