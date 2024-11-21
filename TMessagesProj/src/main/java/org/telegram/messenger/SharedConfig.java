@@ -307,7 +307,7 @@ public class SharedConfig {
     public static boolean adaptableColorInBrowser = true;
     public static boolean onlyLocalInstantView = false;
     public static boolean directShare = true;
-    public static boolean inappCamera = true;
+    public static boolean inappCamera = !Config.disableInstantCamera;
     public static boolean roundCamera16to9 = true;
     public static boolean noSoundHintShowed = false;
     public static boolean streamMedia = true;
@@ -866,7 +866,7 @@ public class SharedConfig {
             directShare = preferences.getBoolean("direct_share", true);
             shuffleMusic = preferences.getBoolean("shuffleMusic", false);
             playOrderReversed = !shuffleMusic && preferences.getBoolean("playOrderReversed", false);
-            inappCamera = preferences.getBoolean("inappCamera", true);
+            inappCamera = !Config.disableInstantCamera;
             hasCameraCache = preferences.contains("cameraCache");
             roundCamera16to9 = true;
             repeatMode = preferences.getInt("repeatMode", 0);
@@ -1619,10 +1619,7 @@ public class SharedConfig {
 
     public static void toggleInappCamera() {
         inappCamera = !inappCamera;
-        SharedPreferences preferences = MessagesController.getGlobalMainSettings();
-        SharedPreferences.Editor editor = preferences.edit();
-        editor.putBoolean("inappCamera", inappCamera);
-        editor.apply();
+        Config.toggleDisableInstantCamera();
     }
 
     public static void toggleRoundCamera16to9() {
