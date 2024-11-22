@@ -64,6 +64,7 @@ import org.telegram.ui.Stories.recorder.PreviewView;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Calendar;
 import java.util.Collections;
 import java.util.List;
 
@@ -448,6 +449,11 @@ public class SendGiftSheet extends BottomSheetWithRecyclerListView {
                 dismiss();
                 NotificationCenter.getInstance(UserConfig.selectedAccount).postNotificationName(NotificationCenter.giftsToUserSent);
                 AndroidUtilities.runOnUIThread(() -> PremiumPreviewGiftSentBottomSheet.show(new ArrayList<>(Arrays.asList(user))), 250);
+
+                MessagesController.getInstance(currentAccount).getMainSettings().edit()
+                    .putBoolean("show_gift_for_" + dialogId, true)
+                    .putBoolean(Calendar.getInstance().get(Calendar.YEAR) + "show_gift_for_" + dialogId, true)
+                    .apply();
             }, error -> {
                 BoostDialogs.showToastError(getContext(), error);
             });

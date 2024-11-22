@@ -1028,11 +1028,11 @@ public class TL_stats {
     }
 
     public static class TL_getBroadcastRevenueStats extends TLObject {
-        public static final int constructor = 0x75dfb671;
+        public static final int constructor = 0xf788ee19;
 
         public int flags;
         public boolean dark;
-        public TLRPC.InputChannel channel;
+        public TLRPC.InputPeer peer;
 
         @Override
         public TLObject deserializeResponse(AbstractSerializedData stream, int constructor, boolean exception) {
@@ -1044,14 +1044,14 @@ public class TL_stats {
             stream.writeInt32(constructor);
             flags = dark ? (flags | 1) : (flags & ~1);
             stream.writeInt32(flags);
-            channel.serializeToStream(stream);
+            peer.serializeToStream(stream);
         }
     }
 
     public static class TL_getBroadcastRevenueWithdrawalUrl extends TLObject {
-        public static final int constructor = 0x2a65ef73;
+        public static final int constructor = 0x9df4faad;
 
-        public TLRPC.InputChannel channel;
+        public TLRPC.InputPeer peer;
         public TLRPC.InputCheckPasswordSRP password;
 
         @Override
@@ -1062,15 +1062,15 @@ public class TL_stats {
         @Override
         public void serializeToStream(AbstractSerializedData stream) {
             stream.writeInt32(constructor);
-            channel.serializeToStream(stream);
+            peer.serializeToStream(stream);
             password.serializeToStream(stream);
         }
     }
 
     public static class TL_getBroadcastRevenueTransactions extends TLObject {
-        public static final int constructor = 0x69280f;
+        public static final int constructor = 0x70990b6d;
 
-        public TLRPC.InputChannel channel;
+        public TLRPC.InputPeer peer;
         public int offset;
         public int limit;
 
@@ -1082,7 +1082,7 @@ public class TL_stats {
         @Override
         public void serializeToStream(AbstractSerializedData stream) {
             stream.writeInt32(constructor);
-            channel.serializeToStream(stream);
+            peer.serializeToStream(stream);
             stream.writeInt32(offset);
             stream.writeInt32(limit);
         }

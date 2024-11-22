@@ -2226,11 +2226,11 @@ public class StatisticActivity extends BaseFragment implements NotificationCente
         final int graphType;
         final String title;
 
-        boolean loading;
-        boolean isEmpty;
-        boolean isLanguages;
-        boolean useHourFormat;
-        boolean useWeekFormat;
+        public boolean loading;
+        public boolean isEmpty;
+        public boolean isLanguages;
+        public boolean useHourFormat;
+        public boolean useWeekFormat;
 
         public ChartViewData(String title, int grahType) {
             this.title = title;

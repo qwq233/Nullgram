@@ -1391,11 +1391,12 @@ public class TL_stories {
     }
 
     public static class TL_stories_searchPosts extends TLObject {
-        public static final int constructor = 0x6cea116a;
+        public static final int constructor = 0xd1810907;
 
         public int flags;
         public String hashtag;
         public MediaArea area;
+        public TLRPC.InputPeer peer;
         public String offset;
         public int limit;
 
@@ -1413,6 +1414,9 @@ public class TL_stories {
             }
             if ((flags & 2) != 0) {
                 area.serializeToStream(stream);
+            }
+            if ((flags & 4) != 0) {
+                peer.serializeToStream(stream);
             }
             stream.writeString(offset);
             stream.writeInt32(limit);

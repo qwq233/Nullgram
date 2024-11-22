@@ -112,9 +112,14 @@ public class BillingController {
         if (!currencyExpMap.isEmpty()) {
             return;
         }
-        BillingUtilities.extractCurrencyExp(currencyExpMap);
-//        if (!BuildVars.useInvoiceBilling()) {
-//            billingClient.startConnection(this);
+        try {
+            BillingUtilities.extractCurrencyExp(currencyExpMap);
+            // if (!BuildVars.useInvoiceBilling()) {
+                // billingClient.startConnection(this);
+            // }
+        } catch (Exception e) {
+            FileLog.e(e);
+        }
     }
 
     private void switchToInvoice() {

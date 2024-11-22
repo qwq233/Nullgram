@@ -97,6 +97,7 @@ public class MediaActivity extends BaseFragment implements SharedMediaLayout.Sha
     private long dialogId;
     private long topicId;
     private String hashtag;
+    private String username;
     private int storiesCount;
     private FrameLayout titlesContainer;
     private FrameLayout[] titles = new FrameLayout[2];
@@ -133,6 +134,7 @@ public class MediaActivity extends BaseFragment implements SharedMediaLayout.Sha
         dialogId = getArguments().getLong("dialog_id");
         topicId = getArguments().getLong("topic_id", 0);
         hashtag = getArguments().getString("hashtag", "");
+        username = getArguments().getString("username", "");
         storiesCount = getArguments().getInt("storiesCount", -1);
         int defaultTab = SharedMediaLayout.TAB_PHOTOVIDEO;
         if (type == TYPE_ARCHIVED_CHANNEL_STORIES) {
@@ -560,6 +562,11 @@ public class MediaActivity extends BaseFragment implements SharedMediaLayout.Sha
             @Override
             public String getStoriesHashtag() {
                 return hashtag;
+            }
+
+            @Override
+            public String getStoriesHashtagUsername() {
+                return username;
             }
 
             @Override

@@ -40,6 +40,7 @@ import android.graphics.PorterDuff;
 import android.graphics.PorterDuffColorFilter;
 import android.graphics.RectF;
 import android.graphics.drawable.Drawable;
+import android.icu.util.Measure;
 import android.os.Build;
 import android.os.Bundle;
 import android.text.TextPaint;
@@ -48,6 +49,7 @@ import android.view.Gravity;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.FrameLayout;
 import android.widget.TextView;
 
 import androidx.annotation.IntDef;
@@ -75,6 +77,7 @@ import org.telegram.messenger.MessagesController;
 import org.telegram.messenger.NotificationCenter;
 import org.telegram.messenger.R;
 import org.telegram.messenger.SendMessagesHelper;
+import org.telegram.messenger.UserConfig;
 import org.telegram.messenger.UserObject;
 import org.telegram.messenger.Utilities;
 import org.telegram.messenger.browser.Browser;
@@ -192,6 +195,7 @@ public class BotWebViewAttachedSheet implements NotificationCenter.NotificationC
     private long lastSwipeTime;
 
     private ChatAttachAlertBotWebViewLayout.WebViewSwipeContainer swipeContainer;
+    private FrameLayout.LayoutParams swipeContainerLayoutParams;
     private BotWebViewContainer webViewContainer;
     private ChatAttachAlertBotWebViewLayout.WebProgressView progressView;
     private Theme.ResourcesProvider resourcesProvider;
@@ -293,10 +297,11 @@ public class BotWebViewAttachedSheet implements NotificationCenter.NotificationC
             botButtons.setState(tab.buttons, false);
         }
         needCloseConfirmation = tab.confirmDismiss;
+        currentAccount = tab.props != null ? tab.props.currentAccount : UserConfig.selectedAccount;
         if (tab.webView != null) {
 //            tab.webView.resumeTimers();
             tab.webView.onResume();
-            webViewContainer.replaceWebView(tab.webView, tab.proxy);
+            webViewContainer.replaceWebView(currentAccount, tab.webView, tab.proxy);
             webViewContainer.setState(tab.ready || tab.webView.isPageLoaded(), tab.lastUrl);
             if (Theme.isCurrentThemeDark() != tab.themeIsDark) {
 //                webViewContainer.notifyThemeChanged();
@@ -435,8 +440,8 @@ public class BotWebViewAttachedSheet implements NotificationCenter.NotificationC
         swipeContainer.setShouldWaitWebViewScroll(true);
         webViewContainer = new BotWebViewContainer(getContext(), resourcesProvider, getColor(Theme.key_windowBackgroundWhite), true) {
             @Override
-            public void onWebViewCreated() {
-                super.onWebViewCreated();
+            public void onWebViewCreated(MyWebView webView) {
+                super.onWebViewCreated(webView);
                 swipeContainer.setWebView(webViewContainer.getWebView());
             }
         };
@@ -759,14 +764,8 @@ public class BotWebViewAttachedSheet implements NotificationCenter.NotificationC
             lastSwipeTime = System.currentTimeMillis();
         });
         swipeContainer.setScrollEndListener(() -> webViewContainer.invalidateViewPortHeight(true));
-        swipeContainer.setDelegate(() -> {
-//            if (can_minimize) {
-                dismiss(true, null);
-//            } else {
-//                if (!onCheckDismissByUser()) {
-//                    swipeContainer.stickTo(0);
-//                }
-//            }
+        swipeContainer.setDelegate(byTap -> {
+            dismiss(true, null);
         });
         swipeContainer.setTopActionBarOffsetY(ActionBar.getCurrentActionBarHeight() + AndroidUtilities.statusBarHeight - dp(24));
         swipeContainer.setIsKeyboardVisible(obj -> windowView.getKeyboardHeight() >= dp(20));
@@ -941,6 +940,11 @@ public class BotWebViewAttachedSheet implements NotificationCenter.NotificationC
         return true;
     }
 
+    @Override
+    public boolean hadDialog() {
+        return dialog != null;
+    }
+
     Drawable verifiedDrawable;
 
     public void requestWebView(BaseFragment fragment, WebViewRequestProps props) {
@@ -1016,7 +1020,7 @@ public class BotWebViewAttachedSheet implements NotificationCenter.NotificationC
         settingsItem = otherItem.addSubItem(R.id.menu_settings, R.drawable.msg_settings, LocaleController.getString(R.string.BotWebViewSettings));
         settingsItem.setVisibility(View.GONE);
         otherItem.addSubItem(R.id.menu_reload_page, R.drawable.msg_retry, LocaleController.getString(R.string.BotWebViewReloadPage));
-        if (currentBot != null && MediaDataController.getInstance(currentAccount).canCreateAttachedMenuBotShortcut(currentBot.bot_id)) {
+        if (userbot != null && userbot.bot_has_main_app) {
             otherItem.addSubItem(R.id.menu_add_to_home_screen_bot, R.drawable.msg_home, LocaleController.getString(R.string.AddShortcut));
         }
         otherItem.addSubItem(R.id.menu_share_bot, R.drawable.msg_share, LocaleController.getString(R.string.BotShare));
@@ -1101,6 +1105,7 @@ public class BotWebViewAttachedSheet implements NotificationCenter.NotificationC
                     req.peer = MessagesController.getInstance(currentAccount).getInputPeer(botId);
                     req.platform = "android";
                     req.compact = props.compact;
+                    req.fullscreen = props.fullscreen;
 
                     req.url = props.buttonUrl;
                     req.flags |= 2;
@@ -1130,6 +1135,7 @@ public class BotWebViewAttachedSheet implements NotificationCenter.NotificationC
                     req.platform = "android";
                     req.from_side_menu = (props.flags & FLAG_FROM_SIDE_MENU) != 0;
                     req.compact = props.compact;
+                    req.fullscreen = props.fullscreen;
                     if (themeParams != null) {
                         req.theme_params = new TLRPC.TL_dataJSON();
                         req.theme_params.data = themeParams.toString();
@@ -1160,6 +1166,7 @@ public class BotWebViewAttachedSheet implements NotificationCenter.NotificationC
                     req.bot = MessagesController.getInstance(currentAccount).getInputUser(botId);
                     req.platform = "android";
                     req.compact = props.compact;
+                    req.fullscreen = props.fullscreen;
                     if (props.buttonUrl != null) {
                         req.url = props.buttonUrl;
                         req.flags |= 2;
@@ -1199,6 +1206,7 @@ public class BotWebViewAttachedSheet implements NotificationCenter.NotificationC
                     req.peer = fragment instanceof ChatActivity ? ((ChatActivity) fragment).getCurrentUser() != null ? MessagesController.getInputPeer(((ChatActivity) fragment).getCurrentUser()) : MessagesController.getInputPeer(((ChatActivity) fragment).getCurrentChat())
                             : MessagesController.getInputPeer(props.botUser);
                     req.compact = props.compact;
+                    req.fullscreen = props.fullscreen;
 
                     if (!TextUtils.isEmpty(props.startParam)) {
                         req.start_param = props.startParam;
@@ -1229,6 +1237,7 @@ public class BotWebViewAttachedSheet implements NotificationCenter.NotificationC
                     req.peer = fragment instanceof ChatActivity ? ((ChatActivity) fragment).getCurrentUser() != null ? MessagesController.getInputPeer(((ChatActivity) fragment).getCurrentUser()) : MessagesController.getInputPeer(((ChatActivity) fragment).getCurrentChat())
                             : MessagesController.getInputPeer(props.botUser);
                     req.compact = props.compact;
+                    req.fullscreen = props.fullscreen;
 
                     if (!TextUtils.isEmpty(props.startParam)) {
                         req.start_param = props.startParam;
@@ -1870,7 +1879,9 @@ public class BotWebViewAttachedSheet implements NotificationCenter.NotificationC
             return;
         }
         MessagesController.getInstance(currentAccount).loadFullUser(user, 0, true, (userFull2) -> {
-            whenDone.run(hasPrivacy(userFull2));
+            AndroidUtilities.runOnUIThread(() -> {
+                whenDone.run(hasPrivacy(userFull2));
+            });
         });
     }
 
