@@ -265,8 +265,8 @@
             android:enabled="false"
             android:name="org.telegram.messenger.OFFICIAL"
             android:targetActivity="org.telegram.ui.LaunchActivity"
-            android:icon="@mipmap/ic_launcher"
-            android:roundIcon="@mipmap/ic_launcher_round"
+            android:icon="@mipmap/ic_launcher_official"
+            android:roundIcon="@mipmap/ic_launcher_round_official"
             android:exported="true">
 
             <intent-filter>
