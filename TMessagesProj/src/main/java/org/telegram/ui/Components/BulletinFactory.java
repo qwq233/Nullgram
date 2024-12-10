@@ -46,6 +46,8 @@ import androidx.annotation.CheckResult;
 import androidx.annotation.NonNull;
 import androidx.core.graphics.ColorUtils;
 
+import com.google.common.collect.Lists;
+
 import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.ApplicationLoader;
 import org.telegram.messenger.ChatObject;
@@ -72,6 +74,7 @@ import org.telegram.ui.PremiumPreviewFragment;
 import org.telegram.ui.Stories.recorder.HintView2;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 public final class BulletinFactory {
@@ -480,6 +483,10 @@ public final class BulletinFactory {
 
     public Bulletin createUsersBulletin(List<? extends TLObject> users, CharSequence text) {
        return createUsersBulletin(users, text, null, null);
+    }
+
+    public Bulletin createUsersBulletin(TLObject user, CharSequence text, CharSequence subtitle) {
+        return createUsersBulletin(Arrays.asList(user), text, subtitle, null);
     }
 
     public Bulletin createUsersBulletin(List<? extends TLObject> users, CharSequence text, CharSequence subtitle) {

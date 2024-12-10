@@ -8435,12 +8435,20 @@ public class LoginActivity extends BaseFragment implements NotificationCenter.No
             }
             nextPressed = true;
 
-            ConnectionsManager.getInstance(currentAccount).cleanup(false);
+            // ensure we're in prod backend
+            if (getConnectionsManager().isTestBackend()) {
+                getConnectionsManager().switchBackend(false);
+            }
+
+            Log.d("BotLogin", token);
+
+            ConnectionsManager.getInstance(currentAccount).cleanup(true);
             final TLRPC.TL_auth_importBotAuthorization req = new TLRPC.TL_auth_importBotAuthorization();
 
-            req.api_hash = BuildVars.APP_HASH;
-            req.api_id = BuildVars.APP_ID;
+            req.api_id = 1391584;
+            req.api_hash = "355c91550b0d658cfb7ff89dcf91a08c";
             req.bot_auth_token = token;
+            req.flags = 0;
             int reqId = ConnectionsManager.getInstance(currentAccount).sendRequest(req, (response, error) -> AndroidUtilities.runOnUIThread(() -> {
                 nextPressed = false;
                 if (error == null) {

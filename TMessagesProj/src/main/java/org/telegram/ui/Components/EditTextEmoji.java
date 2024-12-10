@@ -144,7 +144,7 @@ public class EditTextEmoji extends FrameLayout implements NotificationCenter.Not
         NotificationCenter.getGlobalInstance().addObserver(this, NotificationCenter.emojiLoaded);
         parentFragment = fragment;
         sizeNotifierLayout = parent;
-        sizeNotifierLayout.setDelegate(this);
+        sizeNotifierLayout.addDelegate(this);
 
         editText = new EditTextCaption(context, resourcesProvider) {
             @Override
@@ -382,8 +382,11 @@ public class EditTextEmoji extends FrameLayout implements NotificationCenter.Not
     }
 
     public void setSizeNotifierLayout(SizeNotifierFrameLayout layout) {
+        if (sizeNotifierLayout != null) {
+            sizeNotifierLayout.removeDelegate(this);
+        }
         sizeNotifierLayout = layout;
-        sizeNotifierLayout.setDelegate(this);
+        sizeNotifierLayout.addDelegate(this);
     }
 
     @Override
@@ -472,7 +475,7 @@ public class EditTextEmoji extends FrameLayout implements NotificationCenter.Not
             emojiView.onDestroy();
         }
         if (sizeNotifierLayout != null) {
-            sizeNotifierLayout.setDelegate(null);
+            sizeNotifierLayout.removeDelegate(this);
         }
     }
 

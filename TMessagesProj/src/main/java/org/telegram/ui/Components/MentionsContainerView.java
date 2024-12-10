@@ -284,9 +284,11 @@ public class MentionsContainerView extends BlurredFrameLayout implements Notific
     }
 
     public void setReversed(boolean reversed) {
-        scrollToFirst = true;
-        linearLayoutManager.setReverseLayout(reversed);
-        adapter.setIsReversed(reversed);
+        if (reversed != isReversed()) {
+            scrollToFirst = true;
+            linearLayoutManager.setReverseLayout(reversed);
+            adapter.setIsReversed(reversed);
+        }
     }
 
     public boolean isReversed() {
@@ -324,6 +326,7 @@ public class MentionsContainerView extends BlurredFrameLayout implements Notific
         boolean reversed = isReversed();
         boolean topPadding = (adapter.isStickers() || adapter.isBotContext()) && adapter.isMediaLayout() && adapter.getBotContextSwitch() == null && adapter.getBotWebViewSwitch() == null;
         containerPadding = AndroidUtilities.dp(2 + (topPadding ? 2 : 0));
+        canvas.save();
 
         float r = AndroidUtilities.dp(6);
         float wasContainerTop = containerTop;
@@ -334,6 +337,7 @@ public class MentionsContainerView extends BlurredFrameLayout implements Notific
             rect.set(0, (int) (containerTop = 0), getMeasuredWidth(), (int) (containerBottom = top));
             r = Math.min(r, Math.abs(getMeasuredHeight() - containerBottom));
             if (r > 0) {
+                canvas.clipRect(0, 0, getWidth(), getHeight());
                 rect.top -= (int) r;
             }
         } else {
@@ -347,6 +351,7 @@ public class MentionsContainerView extends BlurredFrameLayout implements Notific
             rect.set(0, (int) (containerTop = top), getMeasuredWidth(), (int) (containerBottom = getMeasuredHeight()));
             r = Math.min(r, Math.abs(containerTop));
             if (r > 0) {
+                canvas.clipRect(0, 0, getWidth(), getHeight());
                 rect.bottom += (int) r;
             }
         }
@@ -379,7 +384,6 @@ public class MentionsContainerView extends BlurredFrameLayout implements Notific
         } else {
             drawRoundRect(canvas, rect, r);
         }
-        canvas.save();
         canvas.clipRect(rect);
         super.dispatchDraw(canvas);
         canvas.restore();
@@ -715,6 +719,7 @@ public class MentionsContainerView extends BlurredFrameLayout implements Notific
                     }
                     int visibleItemCount = lastVisibleItem == RecyclerView.NO_POSITION ? 0 : lastVisibleItem;
                     if (visibleItemCount > 0 && lastVisibleItem > adapter.getLastItemCount() - 5) {
+//                        adapter.loadMoreStickers();
                         adapter.searchForContextBotForNextOffset();
                     }
 
