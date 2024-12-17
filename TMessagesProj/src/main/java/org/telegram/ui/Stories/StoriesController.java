@@ -1272,6 +1272,9 @@ public class StoriesController {
     }
 
     public boolean markStoryAsRead(long dialogId, TL_stories.StoryItem storyItem) {
+        if (Config.storyStealthMode) {
+        return false;
+        }
         TL_stories.PeerStories userStories = getStories(dialogId);
         if (userStories == null) {
             userStories = getStoriesFromFullPeer(dialogId);
