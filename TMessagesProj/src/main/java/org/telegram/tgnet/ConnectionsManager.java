@@ -370,11 +370,7 @@ public class ConnectionsManager extends BaseController {
         if (Config.disableSendTyping && (object instanceof TLRPC.TL_messages_setTyping || object instanceof TLRPC.TL_messages_setEncryptedTyping)) {
             return;
         }
-
-        if (Config.storyStealthMode && ((object instanceof TL_stories.TL_stories_readStories) || (object instanceof TL_stories.TL_updateReadStories))) {
-            return;
-        }
-
+        
         var user = getUserConfig().getCurrentUser();
         if (user != null && user.bot && DatabaseUtils.isUserOnlyMethod(object)) {
             FileLog.d("skip send request " + object + " user only method");
