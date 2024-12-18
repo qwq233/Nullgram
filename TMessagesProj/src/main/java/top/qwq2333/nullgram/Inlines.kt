@@ -26,8 +26,12 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import org.telegram.messenger.AccountInstance
 import org.telegram.messenger.UserConfig
+import org.telegram.tgnet.ConnectionsManager
+import org.telegram.tgnet.TLObject
 import org.telegram.tgnet.TLRPC
+import org.telegram.tgnet.tl.TL_stories
 import org.telegram.ui.Components.LayoutHelper
+import top.qwq2333.gen.Config
 import top.qwq2333.nullgram.utils.Log
 import java.net.URLEncoder
 
@@ -76,3 +80,20 @@ internal fun cacheUsersAndChats(users: ArrayList<TLRPC.User>? = null, chats: Arr
         cacheUsersAndChats(users, chats)
     }
 }
+
+fun ConnectionsManager.processTlRpcObject(obj: TLObject): TLObject? {
+    if (Config.disableSendTyping && (obj is TLRPC.TL_messages_setTyping || obj is TLRPC.TL_messages_setEncryptedTyping)) {
+        return null
+    }
+
+    if (Config.storyStealthMode && ((obj is TL_stories.TL_stories_readStories) || (obj is TL_stories.TL_updateReadStories))) {
+        return null
+    }
+
+    if (Config.keepOnlineStatusAs != 0 && obj is TLRPC.TL_account_updateStatus) {
+        obj.offline = Config.keepOnlineStatusAs == 2
+        return obj
+    }
+    return obj
+}
+
