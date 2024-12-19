@@ -35,7 +35,6 @@ import top.qwq2333.nullgram.utils.Defines
 import top.qwq2333.nullgram.utils.Log
 import java.io.IOException
 import java.util.Locale
-import java.util.UUID
 import java.util.concurrent.ThreadLocalRandom
 import java.util.concurrent.atomic.AtomicLong
 import java.util.regex.Matcher
@@ -71,8 +70,6 @@ object DeepLTranslator : BaseTranslator() {
         return code
     }
 
-    private val uuid = UUID.randomUUID().toString()
-
     override suspend fun translateText(text: String, from: String, to: String): RequestResult {
         Log.d("text: $text")
         Log.d("from: $from")
@@ -80,16 +77,14 @@ object DeepLTranslator : BaseTranslator() {
 
         client.post("https://www2.deepl.com/jsonrpc") {
             contentType(ContentType.Application.Json)
-            header("Referer", "https://www.deepl.com/")
-            header("User-Agent", "DeepL/1.8(52) Android 13 (Pixel 5;aarch64)")
-            header("Client-Id", uuid)
-            header("x-instance", uuid)
-            header("x-app-os-name", "Android")
-            header("x-app-os-version", "13")
-            header("x-app-version", "1.8")
-            header("x-app-build", "52")
-            header("x-app-device", "Pixel 5")
-            header("x-app-instance-id", uuid)
+            header("x-app-os-name", "iOS")
+            header("x-app-os-version", "16.3.0")
+            header("Accept-Language", "en-US,en;q=0.9")
+            header("x-app-device", "iPhone13,2")
+            header("User-Agent", "DeepL-iOS/2.9.1 iOS 16.3.0 (iPhone13,2)")
+            header("x-app-build", "510265")
+            header("x-app-version", "2.9.1")
+            header("Connection", "keep-alive")
             setBody(getRequestBody(text, from, to))
         }.let {
             when (it.status) {
@@ -114,11 +109,7 @@ object DeepLTranslator : BaseTranslator() {
         }
     }
 
-    const val FORMALITY_DEFAULT = 0
-    const val FORMALITY_MORE = 1
-    const val FORMALITY_LESS = 2
-
-    private val id: AtomicLong = AtomicLong(ThreadLocalRandom.current().nextLong("10000000000".toLong()))
+    private val id: AtomicLong = AtomicLong(ThreadLocalRandom.current().nextLong(8300000L, 8399999L))
 
     private fun getRequestBody(text: String, from: String, to: String): String {
         var iCounter = 1
@@ -135,7 +126,7 @@ object DeepLTranslator : BaseTranslator() {
             put("target_lang", to)
         }
         val commonJobParams = JSONObject().apply {
-            put("regionalVariant", JSONObject.NULL)
+            put("transcribe_as", "")
             put("wasSpoken", false)
             put("formality", getFormalityString() ?: JSONObject.NULL)
         }
@@ -153,11 +144,16 @@ object DeepLTranslator : BaseTranslator() {
             put("id", id.incrementAndGet())
         }
 
-        val body: String = if ((id.get() + 3) % 13 == 0L || (id.get() + 5) % 29 == 0L) _body.toString().replace("hod\":\"", "hod\" : \"")
-        else _body.toString().replace("hod\":\"", "hod\": \"")
+        val body: String = if ((id.get() + 3) % 13 == 0L || (id.get() + 5) % 29 == 0L) _body.toString().replace("\"method\":\"", "\"method\" : \"")
+        else _body.toString().replace("\"method\":\"", "\"method\": \"")
 
+        android.util.Log.e("Nullgram", "getRequestBody: "+body)
         return body
     }
+
+    const val FORMALITY_DEFAULT = 0
+    const val FORMALITY_MORE = 1
+    const val FORMALITY_LESS = 2
 
     private fun getFormalityString(): String? {
         return when (ConfigManager.getIntOrDefault(Defines.deepLFormality, -1)) {
@@ -170,6 +166,8 @@ object DeepLTranslator : BaseTranslator() {
 
     private fun getTimestamp(iNumber: Int): Long {
         val now = System.currentTimeMillis()
+        if (iNumber == 0)
+            return now
         return now + iNumber - now % iNumber
     }
 }
