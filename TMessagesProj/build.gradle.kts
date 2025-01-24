@@ -192,7 +192,6 @@ android {
     defaultConfig {
         externalNativeBuild {
             cmake {
-                version = "3.22.1"
                 arguments += listOf(
                     "-DANDROID_STL=c++_static",
                     "-DANDROID_PLATFORM=android-27",
