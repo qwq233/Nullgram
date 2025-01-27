@@ -1,6 +1,7 @@
 name: revert release stable commit
 
 on:
+    workflow_dispatch:
     push:
         branches:
             - master
