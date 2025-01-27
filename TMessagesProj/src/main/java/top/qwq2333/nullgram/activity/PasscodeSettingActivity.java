@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019-2024 qwq233 <qwq233@qwq2333.top>
+ * Copyright (C) 2019-2025 qwq233 <qwq233@qwq2333.top>
  * https://github.com/qwq233/Nullgram
  *
  * This program is free software; you can redistribute it and/or
@@ -422,7 +422,7 @@ public class PasscodeSettingActivity extends BaseActivity {
             accountNumber = account;
             TLRPC.User user = UserConfig.getInstance(accountNumber).getCurrentUser();
             avatarDrawable.setInfo(user);
-            textView.setText(Emoji.replaceEmoji(ContactsController.formatName(user.first_name, user.last_name), textView.getPaint().getFontMetricsInt(), AndroidUtilities.dp(15), false));
+            textView.setText(Emoji.replaceEmoji(ContactsController.formatName(user.first_name, user.last_name), textView.getPaint().getFontMetricsInt(), false));
             imageView.getImageReceiver().setCurrentAccount(account);
             imageView.setForUserOrChat(user, avatarDrawable);
             checkImageView.setVisibility(check ? VISIBLE : INVISIBLE);

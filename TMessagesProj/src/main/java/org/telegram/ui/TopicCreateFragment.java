@@ -1,3 +1,22 @@
+/*
+ * Copyright (C) 2019-2025 qwq233 <qwq233@qwq2333.top>
+ * https://github.com/qwq233/Nullgram
+ *
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation; either version 2
+ * of the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along with this software.
+ *  If not, see
+ * <https://www.gnu.org/licenses/>
+ */
+
 package org.telegram.ui;
 
 import android.animation.Animator;
@@ -34,6 +53,7 @@ import org.telegram.messenger.UserConfig;
 import org.telegram.messenger.Utilities;
 import org.telegram.tgnet.ConnectionsManager;
 import org.telegram.tgnet.TLRPC;
+import org.telegram.tgnet.tl.TL_stars;
 import org.telegram.ui.ActionBar.ActionBar;
 import org.telegram.ui.ActionBar.ActionBarPopupWindow;
 import org.telegram.ui.ActionBar.AlertDialog;
@@ -426,7 +446,7 @@ public class TopicCreateFragment extends BaseFragment {
                     }
                 }
 
-                protected void onEmojiSelected(View view, Long documentId, TLRPC.Document document, Integer until) {
+                protected void onEmojiSelected(View view, Long documentId, TLRPC.Document document, TL_stars.TL_starGiftUnique gift, Integer until) {
                     boolean setIsFree = false;
                     if (!TextUtils.isEmpty(UserConfig.getInstance(currentAccount).defaultTopicIcons)) {
                         TLRPC.TL_messages_stickerSet stickerSet = getMediaDataController().getStickerSetByEmojiOrName(UserConfig.getInstance(currentAccount).defaultTopicIcons);

@@ -1,9 +1,20 @@
 /*
- * This is the source code of Telegram for Android v. 5.x.x.
- * It is licensed under GNU GPL v. 2 or later.
- * You should have received a copy of the license in this archive (see LICENSE).
+ * Copyright (C) 2019-2025 qwq233 <qwq233@qwq2333.top>
+ * https://github.com/qwq233/Nullgram
  *
- * Copyright Nikolai Kudashov, 2013-2018.
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation; either version 2
+ * of the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along with this software.
+ *  If not, see
+ * <https://www.gnu.org/licenses/>
  */
 
 package org.telegram.ui.Cells;
@@ -30,7 +41,6 @@ import android.widget.FrameLayout;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
-import org.checkerframework.checker.units.qual.A;
 import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.ChatObject;
 import org.telegram.messenger.Emoji;
@@ -145,7 +155,7 @@ public class GroupCreateUserCell extends FrameLayout {
         nameTextView = new SimpleTextView(context) {
             @Override
             public boolean setText(CharSequence value, boolean force) {
-                value = Emoji.replaceEmoji(value, getPaint().getFontMetricsInt(), AndroidUtilities.dp(14), false);
+                value = Emoji.replaceEmoji(value, getPaint().getFontMetricsInt(), false);
                 return super.setText(value, force);
             }
         };
@@ -198,6 +208,7 @@ public class GroupCreateUserCell extends FrameLayout {
         nameTextView.setText(LocaleController.getString(R.string.PrivacyPremium));
         statusTextView.setTag(Theme.key_windowBackgroundWhiteGrayText);
         statusTextView.setTextColor(Theme.getColor(forceDarkTheme ? Theme.key_voipgroup_lastSeenText : Theme.key_windowBackgroundWhiteGrayText, resourcesProvider));
+        statusTextView.setEmojiColor(statusTextView.getTextColor());
         statusTextView.setText(LocaleController.getString(R.string.PrivacyPremiumText));
     }
 
@@ -208,6 +219,7 @@ public class GroupCreateUserCell extends FrameLayout {
         nameTextView.setText(LocaleController.getString(R.string.PrivacyMiniapps));
         statusTextView.setTag(Theme.key_windowBackgroundWhiteGrayText);
         statusTextView.setTextColor(Theme.getColor(forceDarkTheme ? Theme.key_voipgroup_lastSeenText : Theme.key_windowBackgroundWhiteGrayText, resourcesProvider));
+        statusTextView.setEmojiColor(statusTextView.getTextColor());
         statusTextView.setText(LocaleController.getString(R.string.PrivacyMiniappsText));
     }
 
@@ -466,6 +478,7 @@ public class GroupCreateUserCell extends FrameLayout {
                             statusTextView.setText(LocaleController.formatUserStatus(currentAccount, currentUser));
                         }
                     }
+                    statusTextView.setEmojiColor(statusTextView.getTextColor());
                 }
 
                 avatarImageView.setForUserOrChat(currentUser, avatarDrawable);
@@ -505,6 +518,7 @@ public class GroupCreateUserCell extends FrameLayout {
                 if (currentStatus == null) {
                     statusTextView.setTag(Theme.key_windowBackgroundWhiteGrayText);
                     statusTextView.setTextColor(Theme.getColor(forceDarkTheme ? Theme.key_voipgroup_lastSeenText : Theme.key_windowBackgroundWhiteGrayText));
+                    statusTextView.setEmojiColor(statusTextView.getTextColor());
                     if (currentChat.participants_count != 0) {
                         if (ChatObject.isChannel(currentChat) && !currentChat.megagroup) {
                             statusTextView.setText(LocaleController.formatPluralString("Subscribers", currentChat.participants_count));
@@ -537,6 +551,7 @@ public class GroupCreateUserCell extends FrameLayout {
             statusTextView.setText(currentStatus, true);
             statusTextView.setTag(Theme.key_windowBackgroundWhiteGrayText);
             statusTextView.setTextColor(Theme.getColor(forceDarkTheme ? Theme.key_voipgroup_lastSeenText : Theme.key_windowBackgroundWhiteGrayText, resourcesProvider));
+            statusTextView.setEmojiColor(statusTextView.getTextColor());
         }
 
         updatePremiumBlocked(false);

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019-2024 qwq233 <qwq233@qwq2333.top>
+ * Copyright (C) 2019-2025 qwq233 <qwq233@qwq2333.top>
  * https://github.com/qwq233/Nullgram
  *
  * This program is free software; you can redistribute it and/or
@@ -81,6 +81,8 @@ import org.telegram.messenger.browser.Browser;
 import org.telegram.messenger.browser.Browser.Progress;
 import org.telegram.tgnet.ConnectionsManager;
 import org.telegram.tgnet.TLRPC;
+import org.telegram.tgnet.tl.TL_account;
+import org.telegram.tgnet.tl.TL_stars;
 import org.telegram.ui.ActionBar.ActionBar;
 import org.telegram.ui.ActionBar.BaseFragment;
 import org.telegram.ui.ActionBar.Theme;
@@ -141,7 +143,7 @@ public class PremiumPreviewFragment extends BaseFragment implements Notification
     RecyclerListView listView;
     ArrayList<PremiumFeatureData> premiumFeatures = new ArrayList<>();
     ArrayList<PremiumFeatureData> morePremiumFeatures = new ArrayList<>();
-    ArrayList<SubscriptionTier> subscriptionTiers = new ArrayList<>();
+    final ArrayList<SubscriptionTier> subscriptionTiers = new ArrayList<>();
     int selectedTierIndex = 0;
     SubscriptionTier currentSubscriptionTier;
 
@@ -765,7 +767,7 @@ public class PremiumPreviewFragment extends BaseFragment implements Notification
                 cell.setChecked(!cell.isChecked());
                 userFull.sponsored_enabled = cell.isChecked();
 
-                TLRPC.TL_account_toggleSponsoredMessages req = new TLRPC.TL_account_toggleSponsoredMessages();
+                TL_account.toggleSponsoredMessages req = new TL_account.toggleSponsoredMessages();
                 req.enabled = userFull.sponsored_enabled;
                 getConnectionsManager().sendRequest(req, (res, err) -> AndroidUtilities.runOnUIThread(() -> {
                     if (err != null) {
@@ -801,16 +803,17 @@ public class PremiumPreviewFragment extends BaseFragment implements Notification
                         presentFragment(new MediaActivity(args, null));
                     } else if (cell.data.type == PREMIUM_FEATURE_EMOJI_STATUS) {
                         showSelectStatusDialog(cell, UserObject.getEmojiStatusDocumentId(getUserConfig().getCurrentUser()), (documentId, until) -> {
-                            TLRPC.EmojiStatus emojiStatus;
+                            final TLRPC.EmojiStatus emojiStatus;
                             if (documentId == null) {
                                 emojiStatus = new TLRPC.TL_emojiStatusEmpty();
-                            } else if (until != null) {
-                                emojiStatus = new TLRPC.TL_emojiStatusUntil();
-                                ((TLRPC.TL_emojiStatusUntil) emojiStatus).document_id = documentId;
-                                ((TLRPC.TL_emojiStatusUntil) emojiStatus).until = until;
                             } else {
-                                emojiStatus = new TLRPC.TL_emojiStatus();
-                                ((TLRPC.TL_emojiStatus) emojiStatus).document_id = documentId;
+                                final TLRPC.TL_emojiStatus status = new TLRPC.TL_emojiStatus();
+                                status.document_id = documentId;
+                                if (until != null) {
+                                    status.flags |= 1;
+                                    status.until = until;
+                                }
+                                emojiStatus = status;
                             }
                             getMessagesController().updateEmojiStatus(emojiStatus);
                             cell.setEmoji(documentId == null ? 0 : documentId, true);
@@ -1098,8 +1101,7 @@ public class PremiumPreviewFragment extends BaseFragment implements Notification
                     if (fragment.getParentActivity() instanceof LaunchActivity) {
                         try {
                             fragment.getFragmentView().performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP, HapticFeedbackConstants.FLAG_IGNORE_GLOBAL_SETTING);
-                        } catch (Exception ignored) {
-                        }
+                        } catch (Exception ignored) {}
                         ((LaunchActivity) fragment.getParentActivity()).getFireworksOverlay().start();
                     }
                 };
@@ -1956,13 +1958,16 @@ public class PremiumPreviewFragment extends BaseFragment implements Notification
     }
 
     private void updateButtonText(boolean animated) {
-        if (premiumButtonView == null || getUserConfig().isPremium() && currentSubscriptionTier != null && subscriptionTiers.get(selectedTierIndex).getMonths() < currentSubscriptionTier.getMonths()) {
+        if (premiumButtonView == null) {
+            return;
+        }
+        if (getUserConfig().isPremium() && currentSubscriptionTier != null && selectedTierIndex < subscriptionTiers.size() && subscriptionTiers.get(selectedTierIndex).getMonths() < currentSubscriptionTier.getMonths()) {
             return;
         }
         if (LocaleController.isRTL) {
             animated = false;
         }
-        if (BuildVars.IS_BILLING_UNAVAILABLE) {
+        if (BuildVars.IS_BILLING_UNAVAILABLE && selectedTierIndex < subscriptionTiers.size()) {
             premiumButtonView.setButton(getPremiumButtonText(currentAccount, subscriptionTiers.get(selectedTierIndex)), v -> buyPremium(this), animated);
             return;
         }
@@ -1971,7 +1976,7 @@ public class PremiumPreviewFragment extends BaseFragment implements Notification
             premiumButtonView.setFlickerDisabled(true);
             return;
         }
-        if (!subscriptionTiers.isEmpty()) {
+        if (!subscriptionTiers.isEmpty() && selectedTierIndex < subscriptionTiers.size()) {
             premiumButtonView.setButton(getPremiumButtonText(currentAccount, subscriptionTiers.get(selectedTierIndex)), v -> {
                 SubscriptionTier tier = subscriptionTiers.get(selectedTierIndex);
                 /*BillingFlowParams.SubscriptionUpdateParams updateParams = null;
@@ -2384,7 +2389,7 @@ public class PremiumPreviewFragment extends BaseFragment implements Notification
         int type = down ? SelectAnimatedEmojiDialog.TYPE_EMOJI_STATUS_TOP : SelectAnimatedEmojiDialog.TYPE_EMOJI_STATUS;
         SelectAnimatedEmojiDialog popupLayout = new SelectAnimatedEmojiDialog(PremiumPreviewFragment.this, getContext(), true, xoff, type, true, getResourceProvider(), down ? 24 : 16) {
             @Override
-            protected void onEmojiSelected(View emojiView, Long documentId, TLRPC.Document document, Integer until) {
+            protected void onEmojiSelected(View emojiView, Long documentId, TLRPC.Document document, TL_stars.TL_starGiftUnique gift, Integer until) {
                 if (onSet != null) {
                     onSet.run(documentId, until);
                 }

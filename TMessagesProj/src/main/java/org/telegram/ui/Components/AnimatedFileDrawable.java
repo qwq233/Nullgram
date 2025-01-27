@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019-2024 qwq233 <qwq233@qwq2333.top>
+ * Copyright (C) 2019-2025 qwq233 <qwq233@qwq2333.top>
  * https://github.com/qwq233/Nullgram
  *
  * This program is free software; you can redistribute it and/or
@@ -255,7 +255,7 @@ public class AnimatedFileDrawable extends BitmapDrawable implements Animatable, 
         }
     }
 
-    private void invalidateInternal() {
+    public void invalidateInternal() {
         for (int i = 0; i < parents.size(); i++) {
             parents.get(i).invalidate();
         }
@@ -922,8 +922,8 @@ public class AnimatedFileDrawable extends BitmapDrawable implements Animatable, 
             currentTime = System.currentTimeMillis();
         }
 
-        RectF rect = drawInBackground ? dstRectBackground[threadIndex] : dstRect;
-        Paint paint = drawInBackground ? backgroundPaint[threadIndex] : getPaint();
+        final RectF rect = drawInBackground ? dstRectBackground[threadIndex] : dstRect;
+        final Paint paint = drawInBackground ? backgroundPaint[threadIndex] : getPaint();
 
         if (!drawInBackground) {
             updateCurrentFrame(currentTime, false);
@@ -1071,6 +1071,21 @@ public class AnimatedFileDrawable extends BitmapDrawable implements Animatable, 
             return nextRenderingBitmap2;
         }
         return null;
+    }
+
+    public void replaceAnimatedBitmap(Bitmap b) {
+        if (renderingBitmap != null) {
+            unusedBitmaps.add(renderingBitmap);
+        }
+        if (nextRenderingBitmap != null) {
+            unusedBitmaps.add(nextRenderingBitmap);
+        }
+        if (nextRenderingBitmap2 != null) {
+            unusedBitmaps.add(nextRenderingBitmap2);
+        }
+        renderingBitmap = b;
+        nextRenderingBitmap = null;
+        nextRenderingBitmap2 = null;
     }
 
     public void setActualDrawRect(float x, float y, float width, float height) {

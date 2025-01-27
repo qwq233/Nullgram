@@ -1,9 +1,20 @@
 /*
- * This is the source code of Telegram for Android v. 5.x.x.
- * It is licensed under GNU GPL v. 2 or later.
- * You should have received a copy of the license in this archive (see LICENSE).
+ * Copyright (C) 2019-2025 qwq233 <qwq233@qwq2333.top>
+ * https://github.com/qwq233/Nullgram
  *
- * Copyright Nikolai Kudashov, 2013-2018.
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation; either version 2
+ * of the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along with this software.
+ *  If not, see
+ * <https://www.gnu.org/licenses/>
  */
 
 package org.telegram.ui;
@@ -108,6 +119,7 @@ import org.telegram.messenger.Utilities;
 import org.telegram.messenger.VideoEditedInfo;
 import org.telegram.tgnet.ConnectionsManager;
 import org.telegram.tgnet.TLRPC;
+import org.telegram.tgnet.tl.TL_account;
 import org.telegram.tgnet.tl.TL_stories;
 import org.telegram.ui.ActionBar.ActionBar;
 import org.telegram.ui.ActionBar.ActionBarMenu;
@@ -3619,11 +3631,11 @@ public class ThemePreviewActivity extends BaseFragment implements DownloadContro
                     acc = MediaDataController.calcHash(acc, wallPaper.id);
                 }
             }
-            TLRPC.TL_account_getWallPapers req = new TLRPC.TL_account_getWallPapers();
+            TL_account.getWallPapers req = new TL_account.getWallPapers();
             req.hash = acc;
             int reqId = ConnectionsManager.getInstance(currentAccount).sendRequest(req, (response, error) -> AndroidUtilities.runOnUIThread(() -> {
-                if (response instanceof TLRPC.TL_account_wallPapers) {
-                    TLRPC.TL_account_wallPapers res = (TLRPC.TL_account_wallPapers) response;
+                if (response instanceof TL_account.TL_wallPapers) {
+                    TL_account.TL_wallPapers res = (TL_account.TL_wallPapers) response;
                     patterns.clear();
                     patternsDict.clear();
                     boolean added2 = false;
@@ -3656,7 +3668,7 @@ public class ThemePreviewActivity extends BaseFragment implements DownloadContro
                     MessagesStorage.getInstance(currentAccount).putWallpapers(res.wallpapers, 1);
                 }
                 if (selectedPattern == null && accent != null && !TextUtils.isEmpty(accent.patternSlug)) {
-                    TLRPC.TL_account_getWallPaper req2 = new TLRPC.TL_account_getWallPaper();
+                    TL_account.getWallPaper req2 = new TL_account.getWallPaper();
                     TLRPC.TL_inputWallPaperSlug inputWallPaperSlug = new TLRPC.TL_inputWallPaperSlug();
                     inputWallPaperSlug.slug = accent.patternSlug;
                     req2.wallpaper = inputWallPaperSlug;

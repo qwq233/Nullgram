@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019-2024 qwq233 <qwq233@qwq2333.top>
+ * Copyright (C) 2019-2025 qwq233 <qwq233@qwq2333.top>
  * https://github.com/qwq233/Nullgram
  *
  * This program is free software; you can redistribute it and/or
@@ -589,7 +589,7 @@ public class LinkEditActivity extends BaseFragment {
             @Override public void onTextChanged(CharSequence s, int start, int before, int count) { }
             @Override
             public void afterTextChanged(Editable s) {
-                Emoji.replaceEmoji(s, nameEditText.getPaint().getFontMetricsInt(), (int) nameEditText.getPaint().getTextSize(), false);
+                Emoji.replaceEmoji(s, nameEditText.getPaint().getFontMetricsInt(), false);
             }
         });
         nameEditText.setCursorVisible(false);
@@ -959,7 +959,7 @@ public class LinkEditActivity extends BaseFragment {
             setUsesVisible(!invite.request_needed);
             if (!TextUtils.isEmpty(invite.title)) {
                 SpannableStringBuilder builder = new SpannableStringBuilder(invite.title);
-                Emoji.replaceEmoji(builder, nameEditText.getPaint().getFontMetricsInt(), (int) nameEditText.getPaint().getTextSize(), false);
+                Emoji.replaceEmoji(builder, nameEditText.getPaint().getFontMetricsInt(), false);
                 nameEditText.setText(builder);
             }
 

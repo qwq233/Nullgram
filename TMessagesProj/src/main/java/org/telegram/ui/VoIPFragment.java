@@ -1,3 +1,22 @@
+/*
+ * Copyright (C) 2019-2025 qwq233 <qwq233@qwq2333.top>
+ * https://github.com/qwq233/Nullgram
+ *
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation; either version 2
+ * of the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along with this software.
+ *  If not, see
+ * <https://www.gnu.org/licenses/>
+ */
+
 package org.telegram.ui;
 
 import static org.telegram.messenger.AndroidUtilities.dp;
@@ -16,7 +35,6 @@ import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
 import android.app.Activity;
 import android.app.KeyguardManager;
-import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -78,7 +96,6 @@ import org.telegram.messenger.Utilities;
 import org.telegram.messenger.voip.EncryptionKeyEmojifier;
 import org.telegram.messenger.voip.Instance;
 import org.telegram.messenger.voip.VideoCapturerDevice;
-import org.telegram.messenger.voip.VoIPPreNotificationService;
 import org.telegram.messenger.voip.VoIPService;
 import org.telegram.messenger.voip.VoIPServiceState;
 import org.telegram.messenger.voip.VoipAudioManager;
@@ -96,7 +113,6 @@ import org.telegram.ui.Components.BackupImageView;
 import org.telegram.ui.Components.CubicBezierInterpolator;
 import org.telegram.ui.Components.HideViewAfterAnimation;
 import org.telegram.ui.Components.LayoutHelper;
-import org.telegram.ui.Components.PermissionRequest;
 import org.telegram.ui.Components.voip.AcceptDeclineView;
 import org.telegram.ui.Components.voip.EmojiRationalLayout;
 import org.telegram.ui.Components.voip.EndCloseLayout;
@@ -126,7 +142,6 @@ import org.webrtc.RendererCommon;
 import org.webrtc.TextureViewRenderer;
 
 import java.io.ByteArrayOutputStream;
-import java.security.Permission;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -986,7 +1001,7 @@ public class VoIPFragment implements VoIPService.StateListener, NotificationCent
         callingUserTitle = new TextView(context);
         callingUserTitle.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 28);
         CharSequence name = ContactsController.formatName(callingUser.first_name, callingUser.last_name);
-        name = Emoji.replaceEmoji(name, callingUserTitle.getPaint().getFontMetricsInt(), AndroidUtilities.dp(20), false);
+        name = Emoji.replaceEmoji(name, callingUserTitle.getPaint().getFontMetricsInt(), false);
         callingUserTitle.setText(name);
         callingUserTitle.setMaxLines(2);
         callingUserTitle.setEllipsize(TextUtils.TruncateAt.END);

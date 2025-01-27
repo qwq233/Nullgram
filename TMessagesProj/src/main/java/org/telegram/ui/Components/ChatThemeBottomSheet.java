@@ -1,3 +1,22 @@
+/*
+ * Copyright (C) 2019-2025 qwq233 <qwq233@qwq2333.top>
+ * https://github.com/qwq233/Nullgram
+ *
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation; either version 2
+ * of the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along with this software.
+ *  If not, see
+ * <https://www.gnu.org/licenses/>
+ */
+
 package org.telegram.ui.Components;
 
 import static org.telegram.messenger.AndroidUtilities.dp;
@@ -59,6 +78,7 @@ import org.telegram.messenger.Utilities;
 import org.telegram.tgnet.ConnectionsManager;
 import org.telegram.tgnet.ResultCallback;
 import org.telegram.tgnet.TLRPC;
+import org.telegram.tgnet.tl.TL_account;
 import org.telegram.tgnet.tl.TL_stories;
 import org.telegram.ui.ActionBar.AlertDialog;
 import org.telegram.ui.ActionBar.BackDrawable;
@@ -1175,7 +1195,7 @@ public class ChatThemeBottomSheet extends BottomSheet implements NotificationCen
                 if (!file.exists()) {
                     if (!loadingWallpapers.containsKey(themeInfo)) {
                         loadingWallpapers.put(themeInfo, themeInfo.slug);
-                        TLRPC.TL_account_getWallPaper req = new TLRPC.TL_account_getWallPaper();
+                        TL_account.getWallPaper req = new TL_account.getWallPaper();
                         TLRPC.TL_inputWallPaperSlug inputWallPaperSlug = new TLRPC.TL_inputWallPaperSlug();
                         inputWallPaperSlug.slug = themeInfo.slug;
                         req.wallpaper = inputWallPaperSlug;

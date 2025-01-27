@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019-2024 qwq233 <qwq233@qwq2333.top>
+ * Copyright (C) 2019-2025 qwq233 <qwq233@qwq2333.top>
  * https://github.com/qwq233/Nullgram
  *
  * This program is free software; you can redistribute it and/or
@@ -216,14 +216,11 @@ public class MediaActivity extends BaseFragment implements SharedMediaLayout.Sha
                             AlertDialog.Builder builder = new AlertDialog.Builder(getContext(), getResourceProvider());
                             builder.setTitle(storyItems.size() > 1 ? LocaleController.getString(R.string.DeleteStoriesTitle) : LocaleController.getString(R.string.DeleteStoryTitle));
                             builder.setMessage(LocaleController.formatPluralString("DeleteStoriesSubtitle", storyItems.size()));
-                            builder.setPositiveButton(LocaleController.getString(R.string.Delete), new DialogInterface.OnClickListener() {
-                                @Override
-                                public void onClick(DialogInterface dialog, int which) {
-                                    getMessagesController().getStoriesController().deleteStories(dialogId, storyItems);
-                                    sharedMediaLayout.closeActionMode(false);
-                                }
+                            builder.setPositiveButton(LocaleController.getString(R.string.Delete), (dialog, which) -> {
+                                getMessagesController().getStoriesController().deleteStories(dialogId, storyItems);
+                                sharedMediaLayout.closeActionMode(false);
                             });
-                            builder.setNegativeButton(LocaleController.getString(R.string.Cancel), (DialogInterface.OnClickListener) (dialog, which) -> {
+                            builder.setNegativeButton(LocaleController.getString(R.string.Cancel), (dialog, which) -> {
                                 dialog.dismiss();
                             });
                             AlertDialog dialog = builder.create();

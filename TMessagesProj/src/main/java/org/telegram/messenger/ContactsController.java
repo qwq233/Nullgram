@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019-2024 qwq233 <qwq233@qwq2333.top>
+ * Copyright (C) 2019-2025 qwq233 <qwq233@qwq2333.top>
  * https://github.com/qwq233/Nullgram
  *
  * This program is free software; you can redistribute it and/or
@@ -46,6 +46,8 @@ import org.telegram.PhoneFormat.PhoneFormat;
 import org.telegram.tgnet.ConnectionsManager;
 import org.telegram.tgnet.TLObject;
 import org.telegram.tgnet.TLRPC;
+import org.telegram.tgnet.Vector;
+import org.telegram.tgnet.tl.TL_account;
 import org.telegram.ui.ActionBar.BaseFragment;
 import org.telegram.ui.Components.Bulletin;
 
@@ -2596,10 +2598,10 @@ public class ContactsController extends BaseController {
         editor.putBoolean("needGetStatuses", true).commit();
         TLRPC.TL_contacts_getStatuses req = new TLRPC.TL_contacts_getStatuses();
         getConnectionsManager().sendRequest(req, (response, error) -> {
-            if (error == null) {
+            if (response instanceof Vector) {
                 AndroidUtilities.runOnUIThread(() -> {
                     editor.remove("needGetStatuses").commit();
-                    TLRPC.Vector vector = (TLRPC.Vector) response;
+                    Vector vector = (Vector) response;
                     if (!vector.objects.isEmpty()) {
                         ArrayList<TLRPC.User> dbUsersStatus = new ArrayList<>();
                         for (Object object : vector.objects) {
@@ -2635,7 +2637,7 @@ public class ContactsController extends BaseController {
     public void loadGlobalPrivacySetting() {
         if (loadingGlobalSettings == 0) {
             loadingGlobalSettings = 1;
-            TLRPC.TL_account_getGlobalPrivacySettings req = new TLRPC.TL_account_getGlobalPrivacySettings();
+            TL_account.getGlobalPrivacySettings req = new TL_account.getGlobalPrivacySettings();
             getConnectionsManager().sendRequest(req, (response, error) -> AndroidUtilities.runOnUIThread(() -> {
                 if (error == null) {
                     globalPrivacySettings = (TLRPC.TL_globalPrivacySettings) response;
@@ -2651,7 +2653,7 @@ public class ContactsController extends BaseController {
     public void loadPrivacySettings() {
         if (loadingDeleteInfo == 0) {
             loadingDeleteInfo = 1;
-            TLRPC.TL_account_getAccountTTL req = new TLRPC.TL_account_getAccountTTL();
+            TL_account.getAccountTTL req = new TL_account.getAccountTTL();
             getConnectionsManager().sendRequest(req, (response, error) -> AndroidUtilities.runOnUIThread(() -> {
                 if (error == null) {
                     TLRPC.TL_accountDaysTTL ttl = (TLRPC.TL_accountDaysTTL) response;
@@ -2671,7 +2673,7 @@ public class ContactsController extends BaseController {
             loadingPrivacyInfo[a] = 1;
             final int num = a;
 
-            TLRPC.TL_account_getPrivacy req = new TLRPC.TL_account_getPrivacy();
+            TL_account.getPrivacy req = new TL_account.getPrivacy();
 
             switch (num) {
                 case PRIVACY_RULES_TYPE_LASTSEEN:
@@ -2716,7 +2718,7 @@ public class ContactsController extends BaseController {
 
             getConnectionsManager().sendRequest(req, (response, error) -> AndroidUtilities.runOnUIThread(() -> {
                 if (error == null) {
-                    TLRPC.TL_account_privacyRules rules = (TLRPC.TL_account_privacyRules) response;
+                    TL_account.privacyRules rules = (TL_account.privacyRules) response;
                     getMessagesController().putUsers(rules.users, false);
                     getMessagesController().putChats(rules.chats, false);
 

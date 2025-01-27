@@ -1,3 +1,22 @@
+/*
+ * Copyright (C) 2019-2025 qwq233 <qwq233@qwq2333.top>
+ * https://github.com/qwq233/Nullgram
+ *
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation; either version 2
+ * of the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along with this software.
+ *  If not, see
+ * <https://www.gnu.org/licenses/>
+ */
+
 package org.telegram.ui.Components.Premium.boosts.cells;
 
 import static org.telegram.messenger.AndroidUtilities.dp;
@@ -5,12 +24,12 @@ import static org.telegram.messenger.AndroidUtilities.dp;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.graphics.Canvas;
-import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.drawable.Drawable;
 import android.text.SpannableString;
 import android.text.SpannableStringBuilder;
 import android.text.Spanned;
+import android.text.TextUtils;
 import android.view.Gravity;
 import android.view.View;
 import android.widget.FrameLayout;
@@ -38,7 +57,7 @@ public abstract class BaseCell extends FrameLayout {
     protected final BackupImageView imageView;
 
     protected final SimpleTextView titleTextView;
-    protected final SimpleTextView subtitleTextView;
+    public final SimpleTextView subtitleTextView;
 
     protected final RadioButton radioButton;
 
@@ -64,7 +83,7 @@ public abstract class BaseCell extends FrameLayout {
         titleTextView = new SimpleTextView(context) {
             @Override
             public boolean setText(CharSequence value) {
-                value = Emoji.replaceEmoji(value, getPaint().getFontMetricsInt(), AndroidUtilities.dp(15), false);
+                value = Emoji.replaceEmoji(value, getPaint().getFontMetricsInt(), false);
                 return super.setText(value);
             }
         };
@@ -132,8 +151,8 @@ public abstract class BaseCell extends FrameLayout {
         return finalText;
     }
 
-    protected void setSubtitle(CharSequence text) {
-        if (text == null) {
+    public void setSubtitle(CharSequence text) {
+        if (TextUtils.isEmpty(text)) {
             titleTextView.setTranslationY(0);
             subtitleTextView.setVisibility(View.GONE);
         } else {

@@ -1,9 +1,20 @@
 /*
- * This is the source code of Telegram for Android v. 5.x.x.
- * It is licensed under GNU GPL v. 2 or later.
- * You should have received a copy of the license in this archive (see LICENSE).
+ * Copyright (C) 2019-2025 qwq233 <qwq233@qwq2333.top>
+ * https://github.com/qwq233/Nullgram
  *
- * Copyright Nikolai Kudashov, 2013-2018.
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation; either version 2
+ * of the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along with this software.
+ *  If not, see
+ * <https://www.gnu.org/licenses/>
  */
 
 package org.telegram.ui.Components;
@@ -32,10 +43,8 @@ import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.SystemClock;
-import android.text.Layout;
 import android.text.SpannableStringBuilder;
 import android.text.Spanned;
-import android.text.StaticLayout;
 import android.text.TextPaint;
 import android.text.TextUtils;
 import android.util.TypedValue;
@@ -73,6 +82,7 @@ import org.telegram.messenger.UserObject;
 import org.telegram.messenger.voip.VoIPService;
 import org.telegram.tgnet.ConnectionsManager;
 import org.telegram.tgnet.TLRPC;
+import org.telegram.tgnet.tl.TL_phone;
 import org.telegram.ui.ActionBar.ActionBarMenuItem;
 import org.telegram.ui.ActionBar.ActionBarMenuSlider;
 import org.telegram.ui.ActionBar.AlertDialog;
@@ -575,7 +585,9 @@ public class FragmentContextView extends FrameLayout implements NotificationCent
                 isMuted = false;
 
                 AndroidUtilities.runOnUIThread(toggleMicRunnable, 90);
-                muteButton.performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP, HapticFeedbackConstants.FLAG_IGNORE_GLOBAL_SETTING);
+                try {
+                    muteButton.performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP, HapticFeedbackConstants.FLAG_IGNORE_GLOBAL_SETTING);
+                } catch (Exception ignore) {}
             };
 
 
@@ -610,7 +622,9 @@ public class FragmentContextView extends FrameLayout implements NotificationCent
                             muteButton.playAnimation();
                             if (VoIPService.getSharedInstance() != null) {
                                 VoIPService.getSharedInstance().setMicMute(true, true, false);
-                                muteButton.performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP, HapticFeedbackConstants.FLAG_IGNORE_GLOBAL_SETTING);
+                                try {
+                                    muteButton.performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP, HapticFeedbackConstants.FLAG_IGNORE_GLOBAL_SETTING);
+                                } catch (Exception ignore) {}
                             }
                             pressed = false;
                             Theme.getFragmentContextViewWavesDrawable().updateState(true);
@@ -667,7 +681,9 @@ public class FragmentContextView extends FrameLayout implements NotificationCent
             }
             muteButton.playAnimation();
             Theme.getFragmentContextViewWavesDrawable().updateState(true);
-            muteButton.performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP, HapticFeedbackConstants.FLAG_IGNORE_GLOBAL_SETTING);
+            try {
+                muteButton.performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP, HapticFeedbackConstants.FLAG_IGNORE_GLOBAL_SETTING);
+            } catch (Exception ignore) {}
         });
 
         closeButton = new ImageView(context);
@@ -2500,7 +2516,7 @@ public class FragmentContextView extends FrameLayout implements NotificationCent
             fragment.getConnectionsManager().cancelRequest(toggleGroupCallStartSubscriptionReqId, true);
             toggleGroupCallStartSubscriptionReqId = 0;
         }
-        TLRPC.TL_phone_toggleGroupCallStartSubscription req = new TLRPC.TL_phone_toggleGroupCallStartSubscription();
+        TL_phone.toggleGroupCallStartSubscription req = new TL_phone.toggleGroupCallStartSubscription();
         req.call = call.getInputGroupCall();
         call.call.schedule_start_subscribed = willBeNotified = !willBeNotified;
         req.subscribed = willBeNotified;

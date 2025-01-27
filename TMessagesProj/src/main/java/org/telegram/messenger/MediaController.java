@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019-2024 qwq233 <qwq233@qwq2333.top>
+ * Copyright (C) 2019-2025 qwq233 <qwq233@qwq2333.top>
  * https://github.com/qwq233/Nullgram
  *
  * This program is free software; you can redistribute it and/or
@@ -87,6 +87,8 @@ import org.telegram.messenger.video.MediaCodecVideoConvertor;
 import org.telegram.messenger.voip.VoIPService;
 import org.telegram.tgnet.AbstractSerializedData;
 import org.telegram.tgnet.ConnectionsManager;
+import org.telegram.tgnet.InputSerializedData;
+import org.telegram.tgnet.OutputSerializedData;
 import org.telegram.tgnet.TLObject;
 import org.telegram.tgnet.TLRPC;
 import org.telegram.tgnet.tl.TL_stories;
@@ -252,7 +254,7 @@ public class MediaController implements AudioManager.OnAudioFocusChangeListener,
         public float blurExcludeBlurSize;
         public float blurAngle;
 
-        public void serializeToStream(AbstractSerializedData stream) {
+        public void serializeToStream(OutputSerializedData stream) {
             stream.writeFloat(enhanceValue);
             stream.writeFloat(softenSkinValue);
             stream.writeFloat(exposureValue);
@@ -281,7 +283,7 @@ public class MediaController implements AudioManager.OnAudioFocusChangeListener,
             stream.writeFloat(blurAngle);
         }
 
-        public void readParams(AbstractSerializedData stream, boolean exception) {
+        public void readParams(InputSerializedData stream, boolean exception) {
             enhanceValue = stream.readFloat(exception);
             softenSkinValue = stream.readFloat(exception);
             exposureValue = stream.readFloat(exception);
@@ -334,7 +336,8 @@ public class MediaController implements AudioManager.OnAudioFocusChangeListener,
         }
     }
 
-    public static class CropState {
+    public static class CropState extends TLObject {
+        public static final int constructor = 0x44a3abcd;
 
         public float cropPx;
         public float cropPy;
@@ -354,6 +357,7 @@ public class MediaController implements AudioManager.OnAudioFocusChangeListener,
         public int height;
         public boolean freeform;
         public float lockedAspectRatio;
+        public int orientation;
 
         public Matrix useMatrix;
 
@@ -381,6 +385,7 @@ public class MediaController implements AudioManager.OnAudioFocusChangeListener,
             cloned.height = this.height;
             cloned.freeform = this.freeform;
             cloned.lockedAspectRatio = this.lockedAspectRatio;
+            cloned.orientation = this.orientation;
 
             cloned.initied = this.initied;
             cloned.useMatrix = this.useMatrix;
@@ -393,12 +398,91 @@ public class MediaController implements AudioManager.OnAudioFocusChangeListener,
                 transformRotation == 0 && !mirrored && stateScale == 0 && scale == 0 && width == 0 && height == 0 && !freeform && lockedAspectRatio == 0;
 
         }
+
+        @Override
+        public void readParams(InputSerializedData stream, boolean exception) {
+            cropPx = stream.readFloat(exception);
+            cropPy = stream.readFloat(exception);
+            cropScale = stream.readFloat(exception);
+            cropRotate = stream.readFloat(exception);
+            cropPw = stream.readFloat(exception);
+            cropPh = stream.readFloat(exception);
+            transformWidth = stream.readInt32(exception);
+            transformHeight = stream.readInt32(exception);
+            transformRotation = stream.readInt32(exception);
+            mirrored = stream.readBool(exception);
+            stateScale = stream.readFloat(exception);
+            scale = stream.readFloat(exception);
+            final float[] values = new float[9];
+            for (int i = 0; i < values.length; ++i) {
+                values[i] = stream.readFloat(exception);
+            }
+            matrix = new Matrix();
+            matrix.setValues(values);
+            width = stream.readInt32(exception);
+            height = stream.readInt32(exception);
+            freeform = stream.readBool(exception);
+            lockedAspectRatio = stream.readFloat(exception);
+            int magic = stream.readInt32(exception);
+            if (magic == 0xaa23a61) {
+                for (int i = 0; i < values.length; ++i) {
+                    values[i] = stream.readFloat(exception);
+                }
+                useMatrix = new Matrix();
+                useMatrix.setValues(values);
+            }
+            initied = stream.readBool(exception);
+            orientation = stream.readInt32(exception);
+        }
+
+        @Override
+        public void serializeToStream(OutputSerializedData stream) {
+            stream.writeInt32(constructor);
+            stream.writeFloat(cropPx);
+            stream.writeFloat(cropPy);
+            stream.writeFloat(cropScale);
+            stream.writeFloat(cropRotate);
+            stream.writeFloat(cropPw);
+            stream.writeFloat(cropPh);
+            stream.writeInt32(transformWidth);
+            stream.writeInt32(transformHeight);
+            stream.writeInt32(transformRotation);
+            stream.writeBool(mirrored);
+            stream.writeFloat(stateScale);
+            stream.writeFloat(scale);
+            final float[] values = new float[9];
+            if (matrix != null) {
+                matrix.getValues(values);
+            } else for (int i = 0; i < values.length; ++i) {
+                values[i] = 0.0f;
+            }
+            for (int i = 0; i < values.length; ++i) {
+                stream.writeFloat(values[i]);
+            }
+            stream.writeInt32(width);
+            stream.writeInt32(height);
+            stream.writeBool(freeform);
+            stream.writeFloat(lockedAspectRatio);
+            if (useMatrix == null) {
+                stream.writeInt32(TLRPC.TL_null.constructor);
+            } else {
+                stream.writeInt32(0xaa23a61);
+                useMatrix.getValues(values);
+                for (int i = 0; i < values.length; ++i) {
+                    stream.writeFloat(values[i]);
+                }
+            }
+            stream.writeBool(initied);
+            stream.writeInt32(orientation);
+        }
     }
 
     public static class MediaEditState {
 
         public CharSequence caption;
 
+        public long customThumbSavedPosition;
+        public boolean customThumb;
         public String thumbPath;
         public String imagePath;
         public String filterPath;
@@ -4168,9 +4252,7 @@ public class MediaController implements AudioManager.OnAudioFocusChangeListener,
         try {
             if (!Config.disableVibration)
                 feedbackView.performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP, HapticFeedbackConstants.FLAG_IGNORE_GLOBAL_SETTING);
-        } catch (Exception e) {
-            Log.e(e);
-        }
+        } catch (Exception ignored) { }
 
         recordQueue.postRunnable(recordStartRunnable = () -> {
             if (audioRecorder != null) {
@@ -4440,9 +4522,7 @@ public class MediaController implements AudioManager.OnAudioFocusChangeListener,
             try {
                 if (!Config.disableVibration)
                     feedbackView.performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP, HapticFeedbackConstants.FLAG_IGNORE_GLOBAL_SETTING);
-            } catch (Exception e) {
-                Log.e(e);
-            }
+            } catch (Exception ignored) { }
             AndroidUtilities.runOnUIThread(() -> NotificationCenter.getInstance(recordingCurrentAccount).postNotificationName(NotificationCenter.recordStopped, recordingGuid, send == 2 ? 1 : 0));
         });
     }
@@ -5621,30 +5701,24 @@ public class MediaController implements AudioManager.OnAudioFocusChangeListener,
 
     private static class VideoConvertRunnable implements Runnable {
 
-        private final VideoConvertMessage convertMessage;
-        private final Handler handler;
+        private VideoConvertMessage convertMessage;
 
-        private VideoConvertRunnable(VideoConvertMessage message, Handler handler) {
-            this.convertMessage = message;
-            this.handler = handler;
+        private VideoConvertRunnable(VideoConvertMessage message) {
+            convertMessage = message;
         }
 
         @Override
         public void run() {
-            MediaController.getInstance().convertVideo(convertMessage, handler);
+            MediaController.getInstance().convertVideo(convertMessage);
         }
 
         public static void runConversion(final VideoConvertMessage obj) {
-            HandlerThread handlerThread = new HandlerThread("VideoConvertRunnableThread");
-            handlerThread.start();
-            Handler handler = new Handler(handlerThread.getLooper());
             new Thread(() -> {
                 try {
-                    VideoConvertRunnable wrapper = new VideoConvertRunnable(obj, handler);
+                    VideoConvertRunnable wrapper = new VideoConvertRunnable(obj);
                     Thread th = new Thread(wrapper, "VideoConvertRunnable");
                     th.start();
                     th.join();
-                    handlerThread.join();
                 } catch (Exception e) {
                     FileLog.e(e);
                 }
@@ -5653,7 +5727,7 @@ public class MediaController implements AudioManager.OnAudioFocusChangeListener,
     }
 
 
-    private boolean convertVideo(final VideoConvertMessage convertMessage, final Handler handler) {
+    private boolean convertVideo(final VideoConvertMessage convertMessage) {
         MessageObject messageObject = convertMessage.messageObject;
         VideoEditedInfo info = convertMessage.videoEditedInfo;
         if (messageObject == null || info == null) {
@@ -5759,7 +5833,7 @@ public class MediaController implements AudioManager.OnAudioFocusChangeListener,
                 callback,
                 info);
         convertVideoParams.soundInfos.addAll(info.mixedSoundInfos);
-        boolean error = videoConvertor.convertVideo(convertVideoParams, handler);
+        boolean error = videoConvertor.convertVideo(convertVideoParams);
 
 
         boolean canceled = info.canceled;

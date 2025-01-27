@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019-2024 qwq233 <qwq233@qwq2333.top>
+ * Copyright (C) 2019-2025 qwq233 <qwq233@qwq2333.top>
  * https://github.com/qwq233/Nullgram
  *
  * This program is free software; you can redistribute it and/or
@@ -226,6 +226,7 @@ public class ChatEditTypeActivity extends BaseFragment implements NotificationCe
 //            }
         }
         getNotificationCenter().addObserver(this, NotificationCenter.chatInfoDidLoad);
+        getNotificationCenter().addObserver(this, NotificationCenter.dialogDeleted);
         return super.onFragmentCreate();
     }
 
@@ -233,6 +234,7 @@ public class ChatEditTypeActivity extends BaseFragment implements NotificationCe
     public void onFragmentDestroy() {
         super.onFragmentDestroy();
         getNotificationCenter().removeObserver(this, NotificationCenter.chatInfoDidLoad);
+        getNotificationCenter().removeObserver(this, NotificationCenter.dialogDeleted);
         AndroidUtilities.removeAdjustResize(getParentActivity(), classGuid);
     }
 
@@ -681,6 +683,15 @@ public class ChatEditTypeActivity extends BaseFragment implements NotificationCe
                 info = chatFull;
                 invite = chatFull.exported_invite;
                 updatePrivatePublic();
+            }
+        } else if (id == NotificationCenter.dialogDeleted) {
+            long dialogId = (long) args[0];
+            if (-this.chatId == dialogId) {
+                if (parentLayout != null && parentLayout.getLastFragment() == this) {
+                    finishFragment();
+                } else {
+                    removeSelfFromStack();
+                }
             }
         }
     }

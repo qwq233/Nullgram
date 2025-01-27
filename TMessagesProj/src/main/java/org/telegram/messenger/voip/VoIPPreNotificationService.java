@@ -1,3 +1,22 @@
+/*
+ * Copyright (C) 2019-2025 qwq233 <qwq233@qwq2333.top>
+ * https://github.com/qwq233/Nullgram
+ *
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation; either version 2
+ * of the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along with this software.
+ *  If not, see
+ * <https://www.gnu.org/licenses/>
+ */
+
 package org.telegram.messenger.voip;
 
 import android.Manifest;
@@ -36,6 +55,7 @@ import org.telegram.messenger.UserConfig;
 import org.telegram.messenger.XiaomiUtilities;
 import org.telegram.tgnet.ConnectionsManager;
 import org.telegram.tgnet.TLRPC;
+import org.telegram.tgnet.tl.TL_phone;
 import org.telegram.ui.Components.PermissionRequest;
 import org.telegram.ui.LaunchActivity;
 import org.telegram.ui.VoIPFragment;
@@ -47,10 +67,10 @@ public class VoIPPreNotificationService { // } extends Service implements AudioM
 
         private final int currentAccount;
         private final long userId;
-        private final TLRPC.PhoneCall call;
+        private final TL_phone.PhoneCall call;
         private boolean destroyed;
 
-        public State(int currentAccount, long userId, TLRPC.PhoneCall phoneCall) {
+        public State(int currentAccount, long userId, TL_phone.PhoneCall phoneCall) {
             this.currentAccount = currentAccount;
             this.userId = userId;
             this.call = phoneCall;
@@ -72,7 +92,7 @@ public class VoIPPreNotificationService { // } extends Service implements AudioM
         }
 
         @Override
-        public TLRPC.PhoneCall getPrivateCall() {
+        public TL_phone.PhoneCall getPrivateCall() {
             return call;
         }
 
@@ -385,12 +405,12 @@ public class VoIPPreNotificationService { // } extends Service implements AudioM
 //        }
 //    }
 
-    public static TLRPC.PhoneCall pendingCall;
+    public static TL_phone.PhoneCall pendingCall;
     public static Intent pendingVoIP;
     public static State currentState;
 //    public static Intent pendingNotificationService;
 
-    public static void show(Context context, Intent intent, TLRPC.PhoneCall call) {
+    public static void show(Context context, Intent intent, TL_phone.PhoneCall call) {
         FileLog.d("VoIPPreNotification.show()");
 
         if (call == null || intent == null) {
@@ -424,8 +444,8 @@ public class VoIPPreNotificationService { // } extends Service implements AudioM
         });
     }
 
-    private static void acknowledge(Context context, int currentAccount, TLRPC.PhoneCall call, Runnable whenAcknowledged) {
-        if (call instanceof TLRPC.TL_phoneCallDiscarded) {
+    private static void acknowledge(Context context, int currentAccount, TL_phone.PhoneCall call, Runnable whenAcknowledged) {
+        if (call instanceof TL_phone.TL_phoneCallDiscarded) {
             if (BuildVars.LOGS_ENABLED) {
                 FileLog.w("Call " + call.id + " was discarded before the voip pre notification started, stopping");
             }
@@ -449,7 +469,7 @@ public class VoIPPreNotificationService { // } extends Service implements AudioM
                 return;
             }
         }
-        TLRPC.TL_phone_receivedCall req = new TLRPC.TL_phone_receivedCall();
+        TL_phone.receivedCall req = new TL_phone.receivedCall();
         req.peer = new TLRPC.TL_inputPhoneCall();
         req.peer.id = call.id;
         req.peer.access_hash = call.access_hash;
@@ -537,7 +557,7 @@ public class VoIPPreNotificationService { // } extends Service implements AudioM
             return;
         }
         final int account = pendingVoIP.getIntExtra("account", UserConfig.selectedAccount);
-        final TLRPC.TL_phone_discardCall req = new TLRPC.TL_phone_discardCall();
+        final TL_phone.discardCall req = new TL_phone.discardCall();
         req.peer = new TLRPC.TL_inputPhoneCall();
         req.peer.access_hash = pendingCall.access_hash;
         req.peer.id = pendingCall.id;

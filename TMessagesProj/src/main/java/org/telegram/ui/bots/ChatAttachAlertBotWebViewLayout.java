@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019-2024 qwq233 <qwq233@qwq2333.top>
+ * Copyright (C) 2019-2025 qwq233 <qwq233@qwq2333.top>
  * https://github.com/qwq233/Nullgram
  *
  * This program is free software; you can redistribute it and/or
@@ -838,7 +838,9 @@ public class ChatAttachAlertBotWebViewLayout extends ChatAttachAlert.AttachAlert
                     if (isSwipeDisallowed || !allowSwipes || fullsize && !allowFullSizeSwipe || (shouldWaitWebViewScroll && !allowingScroll(false))) {
                         return false;
                     }
-                    if (velocityY >= dp(650) && (AndroidUtilities.distance(e1.getX(), e1.getY(), e2.getX(), e2.getY()) > dp(200) || (e2.getEventTime() - e1.getEventTime()) > 250) && (webView == null || webView.getScrollY() == 0)) {
+                    final float distance = AndroidUtilities.distance(e1.getX(), e1.getY(), e2.getX(), e2.getY());
+                    final float time = e2.getEventTime() - e1.getEventTime();
+                    if (velocityY >= dp(650) && (distance > dp(200) || (time > 250)) && (webView == null || webView.getScrollY() == 0)) {
                         flingInProgress = true;
 
                         if (swipeOffsetY >= swipeStickyRange || fullsize) {
@@ -1137,7 +1139,7 @@ public class ChatAttachAlertBotWebViewLayout extends ChatAttachAlert.AttachAlert
 
                 } else if (flingInProgress) {
                     flingInProgress = false;
-                } else if (allowSwipes && (!shouldWaitWebViewScroll || swipeOffsetY != -offsetY + topActionBarOffsetY || allowingScroll(false))) {
+                } else if (allowSwipes && (!shouldWaitWebViewScroll || swipeOffsetY != -offsetY + topActionBarOffsetY && allowingScroll(false))) {
                     if (swipeOffsetY <= -swipeStickyRange) {
                         if (stickToEdges) {
                             stickTo(-offsetY + topActionBarOffsetY);
@@ -1147,7 +1149,9 @@ public class ChatAttachAlertBotWebViewLayout extends ChatAttachAlert.AttachAlert
                             stickTo(0);
                         }
                     } else {
-                        if (delegate != null && ((ev.getEventTime() - pressDownTime) > 250 || AndroidUtilities.distance(ev.getX(), ev.getY(), pressDownX, pressDownY) > dp(200))) {
+                        final float distance = AndroidUtilities.distance(ev.getX(), ev.getY(), pressDownX, pressDownY);
+                        final long time = ev.getEventTime() - pressDownTime;
+                        if (delegate != null && (time > 250 || distance > dp(200))) {
                             delegate.onDismiss(!wasScrolling);
                         } else if (stickToEdges) {
                             stickTo(-offsetY + topActionBarOffsetY);

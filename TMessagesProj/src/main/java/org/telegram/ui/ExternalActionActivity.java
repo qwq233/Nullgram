@@ -1,9 +1,20 @@
 /*
- * This is the source code of Telegram for Android v. 5.x.x.
- * It is licensed under GNU GPL v. 2 or later.
- * You should have received a copy of the license in this archive (see LICENSE).
+ * Copyright (C) 2019-2025 qwq233 <qwq233@qwq2333.top>
+ * https://github.com/qwq233/Nullgram
  *
- * Copyright Nikolai Kudashov, 2013-2018.
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation; either version 2
+ * of the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along with this software.
+ *  If not, see
+ * <https://www.gnu.org/licenses/>
  */
 
 package org.telegram.ui;
@@ -35,7 +46,7 @@ import org.telegram.messenger.R;
 import org.telegram.messenger.SharedConfig;
 import org.telegram.messenger.UserConfig;
 import org.telegram.tgnet.ConnectionsManager;
-import org.telegram.tgnet.TLRPC;
+import org.telegram.tgnet.tl.TL_account;
 import org.telegram.ui.ActionBar.AlertDialog;
 import org.telegram.ui.ActionBar.BaseFragment;
 import org.telegram.ui.ActionBar.DrawerLayoutContainer;
@@ -314,7 +325,7 @@ public class ExternalActionActivity extends Activity implements INavigationLayou
             final long bot_id = intent.getLongExtra("bot_id", intent.getIntExtra("bot_id", 0));
             final String nonce = intent.getStringExtra("nonce");
             final String payload = intent.getStringExtra("payload");
-            final TLRPC.TL_account_getAuthorizationForm req = new TLRPC.TL_account_getAuthorizationForm();
+            final TL_account.getAuthorizationForm req = new TL_account.getAuthorizationForm();
             req.bot_id = bot_id;
             req.scope = intent.getStringExtra("scope");
             req.public_key = intent.getStringExtra("public_key");
@@ -331,9 +342,9 @@ public class ExternalActionActivity extends Activity implements INavigationLayou
 
             progressDialog.show();
             requestId[0] = ConnectionsManager.getInstance(intentAccount).sendRequest(req, (response, error) -> {
-                final TLRPC.TL_account_authorizationForm authorizationForm = (TLRPC.TL_account_authorizationForm) response;
+                final TL_account.authorizationForm authorizationForm = (TL_account.authorizationForm) response;
                 if (authorizationForm != null) {
-                    TLRPC.TL_account_getPassword req2 = new TLRPC.TL_account_getPassword();
+                    TL_account.getPassword req2 = new TL_account.getPassword();
                     requestId[0] = ConnectionsManager.getInstance(intentAccount).sendRequest(req2, (response1, error1) -> AndroidUtilities.runOnUIThread(() -> {
                         try {
                             progressDialog.dismiss();
@@ -341,7 +352,7 @@ public class ExternalActionActivity extends Activity implements INavigationLayou
                             FileLog.e(e);
                         }
                         if (response1 != null) {
-                            TLRPC.account_Password accountPassword = (TLRPC.account_Password) response1;
+                            TL_account.Password accountPassword = (TL_account.Password) response1;
                             MessagesController.getInstance(intentAccount).putUsers(authorizationForm.users, false);
                             PassportActivity fragment = new PassportActivity(PassportActivity.TYPE_PASSWORD, req.bot_id, req.scope, req.public_key, payload, nonce, null, authorizationForm, accountPassword);
                             fragment.setNeedActivityResult(true);

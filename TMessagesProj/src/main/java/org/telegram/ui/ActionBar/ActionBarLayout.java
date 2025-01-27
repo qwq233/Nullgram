@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019-2024 qwq233 <qwq233@qwq2333.top>
+ * Copyright (C) 2019-2025 qwq233 <qwq233@qwq2333.top>
  * https://github.com/qwq233/Nullgram
  *
  * This program is free software; you can redistribute it and/or
@@ -2059,7 +2059,9 @@ public class ActionBarLayout extends FrameLayout implements INavigationLayout, F
             }
         });
         animatorSet.start();
-        performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP);
+        try {
+            performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP);
+        } catch (Exception ignore) {}
 
         fragment.setInPreviewMode(false);
         fragment.setInMenuMode(false);

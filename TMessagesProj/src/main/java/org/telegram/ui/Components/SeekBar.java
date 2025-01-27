@@ -1,9 +1,20 @@
 /*
- * This is the source code of Telegram for Android v. 1.3.x.
- * It is licensed under GNU GPL v. 2 or later.
- * You should have received a copy of the license in this archive (see LICENSE).
+ * Copyright (C) 2019-2025 qwq233 <qwq233@qwq2333.top>
+ * https://github.com/qwq233/Nullgram
  *
- * Copyright Nikolai Kudashov, 2013-2018.
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation; either version 2
+ * of the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along with this software.
+ *  If not, see
+ * <https://www.gnu.org/licenses/>
  */
 
 package org.telegram.ui.Components;
@@ -19,7 +30,6 @@ import android.text.Spanned;
 import android.text.StaticLayout;
 import android.text.TextPaint;
 import android.util.Pair;
-import android.view.HapticFeedbackConstants;
 import android.view.MotionEvent;
 import android.view.View;
 
@@ -339,7 +349,7 @@ public class SeekBar {
                         float position = seconds * 1000L / (float) videoDuration;
                         String label = link.label;
                         SpannableStringBuilder builder = new SpannableStringBuilder(label);
-                        Emoji.replaceEmoji(builder, timestampLabelPaint.getFontMetricsInt(), AndroidUtilities.dp(14), false);
+                        Emoji.replaceEmoji(builder, timestampLabelPaint.getFontMetricsInt(), false);
                         timestamps.add(new Pair<>(position, link));
                     }
                 }

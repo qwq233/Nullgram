@@ -1,3 +1,22 @@
+/*
+ * Copyright (C) 2019-2025 qwq233 <qwq233@qwq2333.top>
+ * https://github.com/qwq233/Nullgram
+ *
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation; either version 2
+ * of the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along with this software.
+ *  If not, see
+ * <https://www.gnu.org/licenses/>
+ */
+
 package org.telegram.ui;
 
 import android.animation.Animator;
@@ -72,6 +91,7 @@ import org.telegram.messenger.Utilities;
 import org.telegram.tgnet.ConnectionsManager;
 import org.telegram.tgnet.TLObject;
 import org.telegram.tgnet.TLRPC;
+import org.telegram.tgnet.tl.TL_account;
 import org.telegram.tgnet.tl.TL_stories;
 import org.telegram.ui.ActionBar.ActionBar;
 import org.telegram.ui.ActionBar.ActionBarMenu;
@@ -975,7 +995,9 @@ public class TopicsFragment extends BaseFragment implements NotificationCenter.N
                 }
             }
             toggleSelection(view);
-            view.performHapticFeedback(HapticFeedbackConstants.LONG_PRESS);
+            try {
+                view.performHapticFeedback(HapticFeedbackConstants.LONG_PRESS);
+            } catch (Exception ignored) {}
             return true;
         });
         recyclerListView.setOnScrollListener(new RecyclerView.OnScrollListener() {
@@ -1103,7 +1125,9 @@ public class TopicsFragment extends BaseFragment implements NotificationCenter.N
                         if (canShowHiddenArchive != canShowInternal) {
                             canShowHiddenArchive = canShowInternal;
                             if (pullViewState == ARCHIVE_ITEM_STATE_HIDDEN) {
-                                recyclerListView.performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP, HapticFeedbackConstants.FLAG_IGNORE_GLOBAL_SETTING);
+                                try {
+                                    recyclerListView.performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP, HapticFeedbackConstants.FLAG_IGNORE_GLOBAL_SETTING);
+                                } catch (Exception ignored) {}
                                 if (pullForegroundDrawable != null) {
                                     pullForegroundDrawable.colorize(canShowInternal);
                                 }
@@ -1774,7 +1798,9 @@ public class TopicsFragment extends BaseFragment implements NotificationCenter.N
                                 }
                                 if (!canShowHiddenArchive) {
                                     canShowHiddenArchive = true;
-                                    performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP, HapticFeedbackConstants.FLAG_IGNORE_GLOBAL_SETTING);
+                                    try {
+                                        performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP, HapticFeedbackConstants.FLAG_IGNORE_GLOBAL_SETTING);
+                                    } catch (Exception ignored) {}
                                     if (pullForegroundDrawable != null) {
                                         pullForegroundDrawable.colorize(true);
                                     }
@@ -1847,28 +1873,22 @@ public class TopicsFragment extends BaseFragment implements NotificationCenter.N
         } else {
             builder.setMessage(LocaleController.getString(R.string.DeleteSelectedTopics));
         }
-        builder.setPositiveButton(LocaleController.getString(R.string.Delete), new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                excludeTopics = new HashSet<>();
-                excludeTopics.addAll(selectedTopics);
+        builder.setPositiveButton(LocaleController.getString(R.string.Delete), (dialog, which) -> {
+            excludeTopics = new HashSet<>();
+            excludeTopics.addAll(selectedTopics);
+            updateTopicsList(true, false);
+            BulletinFactory.of(TopicsFragment.this).createUndoBulletin(LocaleController.getPluralString("TopicsDeleted", selectedTopics.size()), () -> {
+                excludeTopics = null;
                 updateTopicsList(true, false);
-                BulletinFactory.of(TopicsFragment.this).createUndoBulletin(LocaleController.getPluralString("TopicsDeleted", selectedTopics.size()), () -> {
-                    excludeTopics = null;
-                    updateTopicsList(true, false);
-                }, () -> {
-                    topicsController.deleteTopics(chatId, topicsToRemove);
-                    runnable.run();
-                }).show();
-                clearSelectedTopics();
-                dialog.dismiss();
-            }
+            }, () -> {
+                topicsController.deleteTopics(chatId, topicsToRemove);
+                runnable.run();
+            }).show();
+            clearSelectedTopics();
+            dialog.dismiss();
         });
-        builder.setNegativeButton(LocaleController.getString(R.string.Cancel), new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                dialog.dismiss();
-            }
+        builder.setNegativeButton(LocaleController.getString(R.string.Cancel), (dialog, which) -> {
+            dialog.dismiss();
         });
         AlertDialog alertDialog = builder.create();
         alertDialog.show();
@@ -1879,7 +1899,9 @@ public class TopicsFragment extends BaseFragment implements NotificationCenter.N
     }
 
     private boolean showChatPreview(DialogCell cell) {
-        cell.performHapticFeedback(HapticFeedbackConstants.LONG_PRESS);
+        try {
+            cell.performHapticFeedback(HapticFeedbackConstants.LONG_PRESS);
+        } catch (Exception ignored) {}
         final ActionBarPopupWindow.ActionBarPopupWindowLayout[] previewMenu = new ActionBarPopupWindow.ActionBarPopupWindowLayout[1];
         int flags = ActionBarPopupWindow.ActionBarPopupWindowLayout.FLAG_USE_SWIPEBACK;
         previewMenu[0] = new ActionBarPopupWindow.ActionBarPopupWindowLayout(getParentActivity(), R.drawable.popup_fixed_alert, getResourceProvider(), flags);
@@ -2631,16 +2653,11 @@ public class TopicsFragment extends BaseFragment implements NotificationCenter.N
         //TODO remove when server start send in get diff
         if (!settingsPreloaded.contains(chatId)) {
             settingsPreloaded.add(chatId);
-            TLRPC.TL_account_getNotifyExceptions exceptionsReq = new TLRPC.TL_account_getNotifyExceptions();
+            TL_account.getNotifyExceptions exceptionsReq = new TL_account.getNotifyExceptions();
             exceptionsReq.peer = new TLRPC.TL_inputNotifyPeer();
             exceptionsReq.flags |= 1;
             ((TLRPC.TL_inputNotifyPeer) exceptionsReq.peer).peer = getMessagesController().getInputPeer(-chatId);
-            getConnectionsManager().sendRequest(exceptionsReq, (response, error) -> AndroidUtilities.runOnUIThread(() -> {
-                if (response instanceof TLRPC.TL_updates) {
-                    TLRPC.TL_updates updates = (TLRPC.TL_updates) response;
-                    getMessagesController().processUpdates(updates, false);
-                }
-            }));
+            getConnectionsManager().sendRequest(exceptionsReq, null);
         }
         return true;
     }

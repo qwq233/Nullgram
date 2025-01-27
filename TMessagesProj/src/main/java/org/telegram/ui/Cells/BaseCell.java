@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019-2024 qwq233 <qwq233@qwq2333.top>
+ * Copyright (C) 2019-2025 qwq233 <qwq233@qwq2333.top>
  * https://github.com/qwq233/Nullgram
  *
  * This program is free software; you can redistribute it and/or
@@ -64,8 +64,10 @@ public abstract class BaseCell extends ViewGroup implements SizeNotifierFrameLay
         public void run() {
             if (checkingForLongPress && getParent() != null && currentPressCount == pressCount) {
                 checkingForLongPress = false;
-                if(Config.disableVibration) performHapticFeedback(HapticFeedbackConstants.LONG_PRESS, HapticFeedbackConstants.FLAG_IGNORE_GLOBAL_SETTING);
                 if (onLongPress()) {
+                    try {
+                        if(Config.disableVibration) performHapticFeedback(HapticFeedbackConstants.LONG_PRESS);
+                    } catch (Exception ignore) {}
                     MotionEvent event = MotionEvent.obtain(0, 0, MotionEvent.ACTION_CANCEL, 0, 0, 0);
                     onTouchEvent(event);
                     event.recycle();

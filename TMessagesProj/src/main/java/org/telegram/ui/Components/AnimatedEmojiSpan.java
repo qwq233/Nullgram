@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019-2024 qwq233 <qwq233@qwq2333.top>
+ * Copyright (C) 2019-2025 qwq233 <qwq233@qwq2333.top>
  * https://github.com/qwq233/Nullgram
  *
  * This program is free software; you can redistribute it and/or
@@ -26,11 +26,14 @@ import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.ColorFilter;
 import android.graphics.Paint;
+import android.graphics.PorterDuff;
+import android.graphics.PorterDuffColorFilter;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.text.Layout;
 import android.text.Spannable;
 import android.text.SpannableString;
+import android.text.SpannableStringBuilder;
 import android.text.Spanned;
 import android.text.TextUtils;
 import android.text.style.CharacterStyle;
@@ -1020,6 +1023,10 @@ public class AnimatedEmojiSpan extends ReplacementSpan {
     }
 
     public static CharSequence cloneSpans(CharSequence text, int newCacheType, Paint.FontMetricsInt fontMetricsInt) {
+        return cloneSpans(text, newCacheType, fontMetricsInt, 1.0f);
+    }
+
+    public static CharSequence cloneSpans(CharSequence text, int newCacheType, Paint.FontMetricsInt fontMetricsInt, float scale) {
         if (!(text instanceof Spanned)) {
             return text;
         }
@@ -1048,6 +1055,7 @@ public class AnimatedEmojiSpan extends ReplacementSpan {
                 if (newCacheType != -1) {
                     newSpan.cacheType = newCacheType;
                 }
+                newSpan.scale = oldSpan.scale * scale;
                 newText.setSpan(newSpan, start, end, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
             } else {
 //                newText.setSpan(spans[i], start, end, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
@@ -1056,9 +1064,33 @@ public class AnimatedEmojiSpan extends ReplacementSpan {
         return newText;
     }
 
+    public static CharSequence onlyEmojiSpans(CharSequence text) {
+        if (text == null) return null;
+        SpannableStringBuilder result = new SpannableStringBuilder(text);
+        CharacterStyle[] spans = result.getSpans(0, result.length(), CharacterStyle.class);
+        for (int i = 0; i < spans.length; ++i) {
+            if (!(spans[i] instanceof AnimatedEmojiSpan) && !(spans[i] instanceof Emoji.EmojiSpan)) {
+                result.removeSpan(spans[i]);
+            }
+        }
+        return result;
+    }
+
     public static class TextViewEmojis extends TextView {
+        private int cacheType = AnimatedEmojiDrawable.CACHE_TYPE_MESSAGES;
         public TextViewEmojis(Context context) {
             super(context);
+        }
+
+        private ColorFilter emojiColorFilter;
+        public void setEmojiColor(int emojiColor) {
+            emojiColorFilter = new PorterDuffColorFilter(emojiColor, PorterDuff.Mode.SRC_IN);
+        }
+
+        public void setCacheType(int cacheType) {
+            if (this.cacheType == cacheType) return;
+            this.cacheType = cacheType;
+            stack = AnimatedEmojiSpan.update(cacheType, this, stack, getLayout());
         }
 
         AnimatedEmojiSpan.EmojiGroupedSpans stack;
@@ -1066,19 +1098,19 @@ public class AnimatedEmojiSpan extends ReplacementSpan {
         @Override
         public void setText(CharSequence text, TextView.BufferType type) {
             super.setText(text, type);
-            stack = AnimatedEmojiSpan.update(AnimatedEmojiDrawable.CACHE_TYPE_MESSAGES, this, stack, getLayout());
+            stack = AnimatedEmojiSpan.update(cacheType, this, stack, getLayout());
         }
 
         @Override
         protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
             super.onMeasure(widthMeasureSpec, heightMeasureSpec);
-            stack = AnimatedEmojiSpan.update(AnimatedEmojiDrawable.CACHE_TYPE_MESSAGES, this, stack, getLayout());
+            stack = AnimatedEmojiSpan.update(cacheType, this, stack, getLayout());
         }
 
         @Override
         protected void onAttachedToWindow() {
             super.onAttachedToWindow();
-            stack = AnimatedEmojiSpan.update(AnimatedEmojiDrawable.CACHE_TYPE_MESSAGES, this, stack, getLayout());
+            stack = AnimatedEmojiSpan.update(cacheType, this, stack, getLayout());
         }
 
         @Override
@@ -1096,7 +1128,7 @@ public class AnimatedEmojiSpan extends ReplacementSpan {
                 canvas.save();
                 canvas.translate(offsetX, offsetY);
             }
-            AnimatedEmojiSpan.drawAnimatedEmojis(canvas, getLayout(), stack, 0, null, 0, 0, 0, 1f);
+            AnimatedEmojiSpan.drawAnimatedEmojis(canvas, getLayout(), stack, 0, null, 0, 0, 0, 1f, emojiColorFilter);
             if (offsetY != 0 || offsetX != 0) {
                 canvas.restore();
             }

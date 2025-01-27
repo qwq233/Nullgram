@@ -1,3 +1,22 @@
+/*
+ * Copyright (C) 2019-2025 qwq233 <qwq233@qwq2333.top>
+ * https://github.com/qwq233/Nullgram
+ *
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation; either version 2
+ * of the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along with this software.
+ *  If not, see
+ * <https://www.gnu.org/licenses/>
+ */
+
 package org.telegram.ui;
 
 import android.animation.Animator;
@@ -889,7 +908,7 @@ public class QrActivity extends BaseFragment {
                 shareUsernameLayoutPaint.setTypeface(AndroidUtilities.getTypeface("fonts/rcondensedbold.ttf"));
                 shareUsernameLayoutPaint.setTextSize(AndroidUtilities.dp(25));
                 CharSequence text = this.username == null ? "" : this.username;
-                text = Emoji.replaceEmoji(text, shareUsernameLayoutPaint.getFontMetricsInt(), AndroidUtilities.dp(20), false);
+                text = Emoji.replaceEmoji(text, shareUsernameLayoutPaint.getFontMetricsInt(), false);
                 shareUsernameLayout = StaticLayoutEx.createStaticLayout(text, shareUsernameLayoutPaint, getWidth(), Layout.Alignment.ALIGN_CENTER, 1f, 0, false, TextUtils.TruncateAt.END, getWidth() - AndroidUtilities.dp(60), 1);
             } else {
                 shareUsernameLayout = null;

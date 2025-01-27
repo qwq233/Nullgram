@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019-2024 qwq233 <qwq233@qwq2333.top>
+ * Copyright (C) 2019-2025 qwq233 <qwq233@qwq2333.top>
  * https://github.com/qwq233/Nullgram
  *
  * This program is free software; you can redistribute it and/or
@@ -54,6 +54,7 @@ import androidx.annotation.NonNull;
 import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.LocaleController;
 import org.telegram.messenger.MessageObject;
+import org.telegram.messenger.MessagesController;
 import org.telegram.messenger.R;
 import org.telegram.messenger.UserConfig;
 import org.telegram.messenger.browser.Browser;
@@ -278,6 +279,12 @@ public class StoryMediaAreasView extends FrameLayout implements View.OnClickList
                 selectedArea = null;
                 invalidate();
                 return;
+            } else if (selectedArea.mediaArea instanceof TL_stories.TL_mediaAreaStarGift) {
+                final String slug = ((TL_stories.TL_mediaAreaStarGift) selectedArea.mediaArea).slug;
+                Browser.openUrl(getContext(), "https://" + MessagesController.getInstance(UserConfig.selectedAccount).linkPrefix + "/nft/" + slug);
+                selectedArea = null;
+                invalidate();
+                return;
             }
 
             LocationActivity fragment = new LocationActivity(3) {
@@ -340,6 +347,8 @@ public class StoryMediaAreasView extends FrameLayout implements View.OnClickList
         SpannableStringBuilder text = new SpannableStringBuilder();
         if (selectedArea.mediaArea instanceof TL_stories.TL_mediaAreaChannelPost) {
             text.append(LocaleController.getString(R.string.StoryViewMessage));
+        } else if (selectedArea.mediaArea instanceof TL_stories.TL_mediaAreaStarGift) {
+            text.append(LocaleController.getString(R.string.StoryViewGift));
         } else if (selectedArea.mediaArea instanceof TL_stories.TL_mediaAreaUrl) {
             thisHint.setMultilineText(multiline = true);
             text.append(LocaleController.getString(R.string.StoryOpenLink));

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019-2024 qwq233 <qwq233@qwq2333.top>
+ * Copyright (C) 2019-2025 qwq233 <qwq233@qwq2333.top>
  * https://github.com/qwq233/Nullgram
  *
  * This program is free software; you can redistribute it and/or
@@ -1552,6 +1552,25 @@ public class DatabaseMigrationHelper {
             database.executeFast("ALTER TABLE star_gifts2 ADD COLUMN pos INTEGER default 0;").stepThis().dispose();
             database.executeFast("PRAGMA user_version = 159").stepThis().dispose();
             version = 159;
+        }
+
+        if (version == 159) {
+            database.executeFast("ALTER TABLE dialog_filter ADD COLUMN entities BLOB").stepThis().dispose();
+            database.executeFast("PRAGMA user_version = 160").stepThis().dispose();
+            version = 160;
+        }
+
+        if (version == 160) {
+            database.executeFast("ALTER TABLE dialog_filter ADD COLUMN noanimate INTEGER").stepThis().dispose();
+            database.executeFast("PRAGMA user_version = 161").stepThis().dispose();
+            version = 161;
+        }
+
+        if (version == 161) {
+            database.executeFast("DELETE FROM popular_bots").stepThis().dispose();
+            database.executeFast("ALTER TABLE popular_bots ADD COLUMN pos INTEGER").stepThis().dispose();
+            database.executeFast("PRAGMA user_version = 162").stepThis().dispose();
+            version = 162;
         }
 
         return version;

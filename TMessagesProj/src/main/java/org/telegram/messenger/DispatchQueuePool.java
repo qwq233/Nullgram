@@ -1,5 +1,26 @@
+/*
+ * Copyright (C) 2019-2025 qwq233 <qwq233@qwq2333.top>
+ * https://github.com/qwq233/Nullgram
+ *
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation; either version 2
+ * of the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along with this software.
+ *  If not, see
+ * <https://www.gnu.org/licenses/>
+ */
+
 package org.telegram.messenger;
 
+import android.os.Build;
+import android.os.Looper;
 import android.os.SystemClock;
 import android.util.SparseIntArray;
 
@@ -11,16 +32,16 @@ import java.util.LinkedList;
 
 public class DispatchQueuePool {
 
-    private LinkedList<DispatchQueue> queues = new LinkedList<>();
-    private SparseIntArray busyQueuesMap = new SparseIntArray();
-    private LinkedList<DispatchQueue> busyQueues = new LinkedList<>();
+    private final LinkedList<DispatchQueue> queues = new LinkedList<>();
+    private final SparseIntArray busyQueuesMap = new SparseIntArray();
+    private final LinkedList<DispatchQueue> busyQueues = new LinkedList<>();
     private int maxCount;
     private int createdCount;
     private int guid;
     private int totalTasksCount;
     private boolean cleanupScheduled;
 
-    private Runnable cleanupRunnable = new Runnable() {
+    private final Runnable cleanupRunnable = new Runnable() {
         @Override
         public void run() {
             if (!queues.isEmpty()) {
@@ -52,6 +73,10 @@ public class DispatchQueuePool {
 
     @UiThread
     public void execute(Runnable runnable) {
+        if (Looper.myLooper() != Looper.getMainLooper()) {
+            AndroidUtilities.runOnUIThread(() -> execute(runnable));
+            return;
+        }
         DispatchQueue queue;
         if (!busyQueues.isEmpty() && (totalTasksCount / 2 <= busyQueues.size() || queues.isEmpty() && createdCount >= maxCount)) {
             queue = busyQueues.remove(0);

@@ -1,9 +1,20 @@
 /*
- * This is the source code of Telegram for Android v. 5.x.x.
- * It is licensed under GNU GPL v. 2 or later.
- * You should have received a copy of the license in this archive (see LICENSE).
+ * Copyright (C) 2019-2025 qwq233 <qwq233@qwq2333.top>
+ * https://github.com/qwq233/Nullgram
  *
- * Copyright Nikolai Kudashov, 2013-2018.
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation; either version 2
+ * of the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along with this software.
+ *  If not, see
+ * <https://www.gnu.org/licenses/>
  */
 
 package org.telegram.ui;
@@ -1188,9 +1199,9 @@ public class SecretMediaViewer implements NotificationCenter.NotificationCenterD
                 if (messageObject.isVideo()) {
                     MessageObject.addUrlsByPattern(messageObject.isOutOwner(), spannableString, false, 3, (int) messageObject.getDuration(), false);
                 }
-                str = Emoji.replaceEmoji(spannableString, captionTextView.getPaint().getFontMetricsInt(), dp(20), false);
+                str = Emoji.replaceEmoji(spannableString, captionTextView.getPaint().getFontMetricsInt(), false);
             } else {
-                str = Emoji.replaceEmoji(new SpannableStringBuilder(caption), captionTextView.getPaint().getFontMetricsInt(), dp(20), false);
+                str = Emoji.replaceEmoji(new SpannableStringBuilder(caption), captionTextView.getPaint().getFontMetricsInt(), false);
             }
             captionTextViewSwitcher.setTag(str);
             try {
@@ -1246,7 +1257,7 @@ public class SecretMediaViewer implements NotificationCenter.NotificationCenterD
 //        }
     }
 
-    private void onLinkLongPress(URLSpan link, TextView widget, Runnable onDismiss) {
+    private void onLinkLongPress(ClickableSpan link, TextView widget, Runnable onDismiss) {
 //        int timestamp = -1;
 //        BottomSheet.Builder builder = new BottomSheet.Builder(parentActivity, false, resourcesProvider, 0xff1C2229);
 //        if (link.getURL().startsWith("video?")) {
@@ -1389,7 +1400,7 @@ public class SecretMediaViewer implements NotificationCenter.NotificationCenterD
         if (parentActivity == null || messageObject == null || !messageObject.needDrawBluredPreview() || provider == null) {
             return;
         }
-        final PhotoViewer.PlaceProviderObject object = provider.getPlaceForPhoto(messageObject, null, 0, true);
+        final PhotoViewer.PlaceProviderObject object = provider.getPlaceForPhoto(messageObject, null, 0, true, false);
         if (object == null) {
             return;
         }
@@ -2017,7 +2028,7 @@ public class SecretMediaViewer implements NotificationCenter.NotificationCenterD
         if (currentProvider == null || currentMessageObject.messageOwner.media.photo instanceof TLRPC.TL_photoEmpty || currentMessageObject.messageOwner.media.document instanceof TLRPC.TL_documentEmpty) {
             object = null;
         } else {
-            object = currentProvider.getPlaceForPhoto(currentMessageObject, null, 0, true);
+            object = currentProvider.getPlaceForPhoto(currentMessageObject, null, 0, true, false);
         }
         if (videoPlayer != null) {
             videoPlayer.pause();

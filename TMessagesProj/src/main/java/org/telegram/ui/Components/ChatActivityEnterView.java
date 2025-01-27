@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019-2024 qwq233 <qwq233@qwq2333.top>
+ * Copyright (C) 2019-2025 qwq233 <qwq233@qwq2333.top>
  * https://github.com/qwq233/Nullgram
  *
  * This program is free software; you can redistribute it and/or
@@ -141,6 +141,7 @@ import org.telegram.messenger.MediaController;
 import org.telegram.messenger.MediaDataController;
 import org.telegram.messenger.MessageObject;
 import org.telegram.messenger.MessagesController;
+import org.telegram.messenger.MessagesStorage;
 import org.telegram.messenger.NotificationCenter;
 import org.telegram.messenger.NotificationsController;
 import org.telegram.messenger.R;
@@ -156,6 +157,7 @@ import org.telegram.messenger.camera.CameraController;
 import org.telegram.tgnet.ConnectionsManager;
 import org.telegram.tgnet.SerializedData;
 import org.telegram.tgnet.TLRPC;
+import org.telegram.tgnet.tl.TL_account;
 import org.telegram.tgnet.tl.TL_bots;
 import org.telegram.tgnet.tl.TL_stories;
 import org.telegram.ui.ActionBar.ActionBar;
@@ -199,6 +201,7 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 
@@ -678,7 +681,7 @@ public class ChatActivityEnterView extends BlurredFrameLayout implements Notific
     private MessageObject editingMessageObject;
     private boolean editingCaption;
 
-    private TLRPC.TL_businessChatLink editingBusinessLink;
+    private TL_account.TL_businessChatLink editingBusinessLink;
 
     private BusinessLinkPresetMessage lastSavedBusinessLinkMessage;
 
@@ -3928,8 +3931,7 @@ public class ChatActivityEnterView extends BlurredFrameLayout implements Notific
             botCommandsMenuButton.setOpened(open);
             try {
                 performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP, HapticFeedbackConstants.FLAG_IGNORE_GLOBAL_SETTING);
-            } catch (Exception ignore) {
-            }
+            } catch (Exception ignore) {}
             if (hasBotWebView()) {
                 if (open) {
                     if (emojiViewVisible || botKeyboardViewVisible) {
@@ -4113,7 +4115,9 @@ public class ChatActivityEnterView extends BlurredFrameLayout implements Notific
 
     private void startLockTransition() {
         AnimatorSet animatorSet = new AnimatorSet();
-        performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP, HapticFeedbackConstants.FLAG_IGNORE_GLOBAL_SETTING);
+        try {
+            performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP, HapticFeedbackConstants.FLAG_IGNORE_GLOBAL_SETTING);
+        } catch (Exception ignored) {}
 
         ObjectAnimator translate = ObjectAnimator.ofFloat(this, "lockAnimatedTranslation", startTranslation);
         translate.setStartDelay(100);
@@ -8726,7 +8730,7 @@ public class ChatActivityEnterView extends BlurredFrameLayout implements Notific
         }
     }
 
-    public void setEditingBusinessLink(TLRPC.TL_businessChatLink businessLink) {
+    public void setEditingBusinessLink(TL_account.TL_businessChatLink businessLink) {
         editingBusinessLink = businessLink;
         updateFieldHint(false);
         if (editingBusinessLink != null) {
@@ -10068,7 +10072,8 @@ public class ChatActivityEnterView extends BlurredFrameLayout implements Notific
             TLRPC.TL_keyboardButtonRequestPeer btn = (TLRPC.TL_keyboardButtonRequestPeer) button;
             if (btn.peer_type != null && messageObject != null && messageObject.messageOwner != null) {
                 if (btn.peer_type instanceof TLRPC.TL_requestPeerTypeUser && btn.max_quantity > 1) {
-                    MultiContactsSelectorBottomSheet.open(btn.max_quantity, ids -> {
+                    TLRPC.TL_requestPeerTypeUser peer_type = (TLRPC.TL_requestPeerTypeUser) btn.peer_type;
+                    MultiContactsSelectorBottomSheet.open(peer_type.bot, peer_type.premium, btn.max_quantity, ids -> {
                         if (ids != null && !ids.isEmpty()) {
                             TLRPC.TL_messages_sendBotRequestedPeer req = new TLRPC.TL_messages_sendBotRequestedPeer();
                             req.peer = MessagesController.getInstance(currentAccount).getInputPeer(messageObject.messageOwner.peer_id);
@@ -10103,7 +10108,13 @@ public class ChatActivityEnterView extends BlurredFrameLayout implements Notific
                         req.peer = MessagesController.getInstance(currentAccount).getInputPeer(messageObject.messageOwner.peer_id);
                         req.msg_id = messageObject.getId();
                         req.button_id = btn.button_id;
-                        req.requested_peers.add(MessagesController.getInstance(currentAccount).getInputPeer(dids.get(0).dialogId));
+                        HashSet<Long> dialogIds = new HashSet<>();
+                        for (MessagesStorage.TopicKey key : dids) {
+                            dialogIds.add(key.dialogId);
+                        }
+                        for (long did : dialogIds) {
+                            req.requested_peers.add(MessagesController.getInstance(currentAccount).getInputPeer(did));
+                        }
                         ConnectionsManager.getInstance(currentAccount).sendRequest(req, null);
                     }
                     dialogFragment.finishFragment();

@@ -1,3 +1,22 @@
+/*
+ * Copyright (C) 2019-2025 qwq233 <qwq233@qwq2333.top>
+ * https://github.com/qwq233/Nullgram
+ *
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation; either version 2
+ * of the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along with this software.
+ *  If not, see
+ * <https://www.gnu.org/licenses/>
+ */
+
 package org.telegram.ui.Stories;
 
 import static org.telegram.messenger.AndroidUtilities.dp;
@@ -31,6 +50,7 @@ import org.telegram.tgnet.ConnectionsManager;
 import org.telegram.tgnet.RequestDelegate;
 import org.telegram.tgnet.TLObject;
 import org.telegram.tgnet.TLRPC;
+import org.telegram.tgnet.Vector;
 import org.telegram.ui.ActionBar.Theme;
 import org.telegram.ui.Components.AnimatedEmojiDrawable;
 import org.telegram.ui.Components.AnimatedEmojiSpan;
@@ -56,7 +76,7 @@ public class StoryContainsEmojiButton extends View {
 
     private ArrayList<TLRPC.StickerSetCovered> sets;
     private ArrayList<TLRPC.InputStickerSet> inputSets;
-    private TLRPC.Vector vector;
+    private Vector<TLRPC.StickerSetCovered> vector;
     private boolean emoji, stickers;
     private Object parentObject;
     private float loadT;
@@ -160,7 +180,7 @@ public class StoryContainsEmojiButton extends View {
     }
 
     private static Object lastRequestParentObject;
-    private static TLRPC.Vector lastResponse;
+    private static Vector<TLRPC.StickerSetCovered> lastResponse;
 
     public void load(int currentAccount, boolean requestStickers, TLObject obj, ArrayList<TLRPC.InputStickerSet> additionalEmojiSets, Object parentObject) {
         final boolean animate[] = new boolean[] { true };
@@ -206,14 +226,14 @@ public class StoryContainsEmojiButton extends View {
                 req.media = inputStickeredMediaDocument;
             }
             final RequestDelegate requestDelegate = (response, error) -> AndroidUtilities.runOnUIThread(() -> {
-                if (response == null) {
+                if (!(response instanceof Vector)) {
                     return;
                 }
-                TLRPC.Vector vector = this.vector = (TLRPC.Vector) response;
+                Vector<TLRPC.StickerSetCovered> vector = this.vector = (Vector<TLRPC.StickerSetCovered>) response;
                 lastRequestParentObject = parentObject;
                 lastResponse = vector;
                 for (int i = 0; i < vector.objects.size(); ++i) {
-                    TLRPC.StickerSetCovered setCovered = (TLRPC.StickerSetCovered) vector.objects.get(i);
+                    TLRPC.StickerSetCovered setCovered = vector.objects.get(i);
                     sets.add(setCovered);
                     if (setCovered.set != null) {
                         inputSets.add(MediaDataController.getInputStickerSet(setCovered.set));

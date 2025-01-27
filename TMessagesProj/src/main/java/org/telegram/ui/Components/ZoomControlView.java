@@ -1,3 +1,22 @@
+/*
+ * Copyright (C) 2019-2025 qwq233 <qwq233@qwq2333.top>
+ * https://github.com/qwq233/Nullgram
+ *
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation; either version 2
+ * of the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along with this software.
+ *  If not, see
+ * <https://www.gnu.org/licenses/>
+ */
+
 package org.telegram.ui.Components;
 
 import android.animation.Animator;
@@ -129,14 +148,18 @@ public class ZoomControlView extends View {
                 handled = true;
             } else if (x >= minusCx - AndroidUtilities.dp(16) && x <= minusCx + AndroidUtilities.dp(16) && y >= minusCy - AndroidUtilities.dp(16) && y <= minusCy + AndroidUtilities.dp(16)) {
                 if (action == MotionEvent.ACTION_UP && animateToZoom((float) Math.floor(getZoom() / 0.25f) * 0.25f - 0.25f)) {
-                    performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP);
+                    try {
+                        performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP);
+                    } catch (Exception ignored) {}
                 } else {
                     pressed = true;
                 }
                 handled = true;
             } else if (x >= plusCx - AndroidUtilities.dp(16) && x <= plusCx + AndroidUtilities.dp(16) && y >= plusCy - AndroidUtilities.dp(16) && y <= plusCy + AndroidUtilities.dp(16)) {
                 if (action == MotionEvent.ACTION_UP && animateToZoom((float) Math.floor(getZoom() / 0.25f) * 0.25f + 0.25f)) {
-                    performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP);
+                    try {
+                        performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP);
+                    } catch (Exception ignored) {}
                 } else {
                     pressed = true;
                 }

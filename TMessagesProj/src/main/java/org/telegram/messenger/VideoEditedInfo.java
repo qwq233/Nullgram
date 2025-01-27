@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019-2024 qwq233 <qwq233@qwq2333.top>
+ * Copyright (C) 2019-2025 qwq233 <qwq233@qwq2333.top>
  * https://github.com/qwq233/Nullgram
  *
  * This program is free software; you can redistribute it and/or
@@ -30,6 +30,8 @@ import org.telegram.messenger.video.MediaCodecPlayer;
 import org.telegram.messenger.video.MediaCodecVideoConvertor;
 import org.telegram.messenger.video.VideoPlayerHolderBase;
 import org.telegram.tgnet.AbstractSerializedData;
+import org.telegram.tgnet.InputSerializedData;
+import org.telegram.tgnet.OutputSerializedData;
 import org.telegram.tgnet.SerializedData;
 import org.telegram.tgnet.TLObject;
 import org.telegram.tgnet.TLRPC;
@@ -118,7 +120,7 @@ public class VideoEditedInfo {
         public byte subType;
 
         @Override
-        public void readParams(AbstractSerializedData stream, boolean exception) {
+        public void readParams(InputSerializedData stream, boolean exception) {
             super.readParams(stream, exception);
             subType = stream.readByte(exception);
             boolean hasPath = stream.readBool(exception);
@@ -131,7 +133,7 @@ public class VideoEditedInfo {
         }
 
         @Override
-        public void serializeToStream(AbstractSerializedData stream) {
+        public void serializeToStream(OutputSerializedData stream) {
             super.serializeToStream(stream);
             stream.writeByte(subType);
             stream.writeBool(!TextUtils.isEmpty(documentAbsolutePath));
@@ -152,6 +154,7 @@ public class VideoEditedInfo {
         public static final byte TYPE_MESSAGE = 6;
         public static final byte TYPE_LINK = 7;
         public static final byte TYPE_WEATHER = 8;
+        public static final byte TYPE_VIDEO = 9;
 
         public byte type;
         public byte subType;
@@ -173,6 +176,7 @@ public class VideoEditedInfo {
         public float roundRadius;
 
         public String segmentedPath = "";
+        public MediaController.CropState crop;
 
         public float scale = 1.0f;
         public float textViewWidth;
@@ -281,6 +285,11 @@ public class VideoEditedInfo {
                 roundDuration = data.readInt64(exception);
             } else if (type == TYPE_PHOTO) {
                 segmentedPath = data.readString(exception);
+                int magic = data.readInt32(exception);
+                if (magic == MediaController.CropState.constructor) {
+                    crop = new MediaController.CropState();
+                    crop.readParams(data, exception);
+                }
             } else if (type == TYPE_WEATHER) {
                 int magic = data.readInt32(exception);
                 if (magic == 0x7EA7539) {
@@ -352,6 +361,11 @@ public class VideoEditedInfo {
                 data.writeInt64(roundDuration);
             } else if (type == TYPE_PHOTO) {
                 data.writeString(segmentedPath);
+                if (crop != null) {
+                    crop.serializeToStream(data);
+                } else {
+                    data.writeInt32(TLRPC.TL_null.constructor);
+                }
             } else if (type == TYPE_WEATHER) {
                 if (weather == null) {
                     data.writeInt32(0xdeadbeef);
@@ -787,7 +801,7 @@ public class VideoEditedInfo {
         }
 
         @Override
-        public void readParams(AbstractSerializedData stream, boolean exception) {
+        public void readParams(InputSerializedData stream, boolean exception) {
             flags = stream.readInt32(exception);
             isVideo = (flags & 1) != 0;
             loop = (flags & 2) != 0;
@@ -803,7 +817,7 @@ public class VideoEditedInfo {
         }
 
         @Override
-        public void serializeToStream(AbstractSerializedData stream) {
+        public void serializeToStream(OutputSerializedData stream) {
             flags = isVideo ? flags | 1 : flags &~ 1;
             flags = loop ? flags | 2 : flags &~ 2;
             flags = muted ? flags | 4 : flags &~ 4;

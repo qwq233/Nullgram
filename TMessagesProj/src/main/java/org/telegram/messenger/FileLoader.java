@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019-2024 qwq233 <qwq233@qwq2333.top>
+ * Copyright (C) 2019-2025 qwq233 <qwq233@qwq2333.top>
  * https://github.com/qwq233/Nullgram
  *
  * This program is free software; you can redistribute it and/or
@@ -226,9 +226,9 @@ public class FileLoader extends BaseController {
 
     private final ConcurrentHashMap<String, FileLoadOperation> loadOperationPaths = new ConcurrentHashMap<>();
     private final ConcurrentHashMap<String, LoadOperationUIObject> loadOperationPathsUI = new ConcurrentHashMap<>(10, 1, 2);
-    private HashMap<String, Long> uploadSizes = new HashMap<>();
+    private final HashMap<String, Long> uploadSizes = new HashMap<>();
 
-    private HashMap<String, Boolean> loadingVideos = new HashMap<>();
+    private final HashMap<String, Boolean> loadingVideos = new HashMap<>();
 
     private String forceLoadingFile;
 
@@ -236,7 +236,7 @@ public class FileLoader extends BaseController {
     private FileLoaderDelegate delegate = null;
 
     private int lastReferenceId;
-    private ConcurrentHashMap<Integer, Object> parentObjectReferences = new ConcurrentHashMap<>();
+    private final ConcurrentHashMap<Integer, Object> parentObjectReferences = new ConcurrentHashMap<>();
 
     private static final FileLoader[] Instance = new FileLoader[UserConfig.MAX_ACCOUNT_COUNT];
 
@@ -1409,6 +1409,17 @@ public class FileLoader extends BaseController {
 
     public FilePathDatabase getFileDatabase() {
         return filePathDatabase;
+    }
+
+    public static TLRPC.TL_photoStrippedSize getStrippedPhotoSize(ArrayList<TLRPC.PhotoSize> sizes) {
+        if (sizes == null) return null;
+        for (int i = 0; i < sizes.size(); ++i) {
+            final TLRPC.PhotoSize photoSize = sizes.get(i);
+            if (photoSize instanceof TLRPC.TL_photoStrippedSize) {
+                return (TLRPC.TL_photoStrippedSize) photoSize;
+            }
+        }
+        return null;
     }
 
     public static TLRPC.PhotoSize getClosestPhotoSizeWithSize(ArrayList<TLRPC.PhotoSize> sizes, int side) {

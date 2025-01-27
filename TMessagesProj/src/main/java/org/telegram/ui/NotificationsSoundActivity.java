@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019-2024 qwq233 <qwq233@qwq2333.top>
+ * Copyright (C) 2019-2025 qwq233 <qwq233@qwq2333.top>
  * https://github.com/qwq233/Nullgram
  *
  * This program is free software; you can redistribute it and/or
@@ -65,6 +65,7 @@ import org.telegram.messenger.R;
 import org.telegram.messenger.ringtone.RingtoneDataStore;
 import org.telegram.messenger.ringtone.RingtoneUploader;
 import org.telegram.tgnet.TLRPC;
+import org.telegram.tgnet.tl.TL_account;
 import org.telegram.ui.ActionBar.ActionBar;
 import org.telegram.ui.ActionBar.ActionBarMenu;
 import org.telegram.ui.ActionBar.AlertDialog;
@@ -87,7 +88,6 @@ import org.telegram.ui.Components.RecyclerListView;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -291,7 +291,7 @@ public class NotificationsSoundActivity extends BaseFragment implements ChatAtta
 
                 for (int i = 0; i < documentsToRemove.size(); i++) {
                     TLRPC.Document document = documentsToRemove.get(i);
-                    TLRPC.TL_account_saveRingtone req = new TLRPC.TL_account_saveRingtone();
+                    TL_account.saveRingtone req = new TL_account.saveRingtone();
                     req.id = new TLRPC.TL_inputDocument();
                     req.id.id = document.id;
                     req.id.access_hash = document.access_hash;

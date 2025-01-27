@@ -1,3 +1,22 @@
+/*
+ * Copyright (C) 2019-2025 qwq233 <qwq233@qwq2333.top>
+ * https://github.com/qwq233/Nullgram
+ *
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation; either version 2
+ * of the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along with this software.
+ *  If not, see
+ * <https://www.gnu.org/licenses/>
+ */
+
 package org.telegram.ui.Components;
 
 import android.content.Context;
@@ -22,6 +41,7 @@ import org.telegram.messenger.MessagesController;
 import org.telegram.messenger.R;
 import org.telegram.tgnet.ConnectionsManager;
 import org.telegram.tgnet.TLRPC;
+import org.telegram.tgnet.tl.TL_phone;
 import org.telegram.ui.ActionBar.BaseFragment;
 import org.telegram.ui.ActionBar.Theme;
 import org.telegram.ui.Cells.TextDetailCell;
@@ -74,13 +94,13 @@ public class CreateRtmpStreamBottomSheet extends BottomSheetWithRecyclerListView
         fixNavigationBar();
         updateTitle();
 
-        TLRPC.TL_phone_getGroupCallStreamRtmpUrl req = new TLRPC.TL_phone_getGroupCallStreamRtmpUrl();
+        TL_phone.getGroupCallStreamRtmpUrl req = new TL_phone.getGroupCallStreamRtmpUrl();
         req.peer = MessagesController.getInstance(currentAccount).getInputPeer(dialogId);
         req.revoke = false;
         ConnectionsManager.getInstance(currentAccount).sendRequest(req, (response, error) -> AndroidUtilities.runOnUIThread(() -> {
             if (response != null) {
-                if (response instanceof TLRPC.TL_phone_groupCallStreamRtmpUrl) {
-                    TLRPC.TL_phone_groupCallStreamRtmpUrl rtmpUrl = (TLRPC.TL_phone_groupCallStreamRtmpUrl) response;
+                if (response instanceof TL_phone.groupCallStreamRtmpUrl) {
+                    TL_phone.groupCallStreamRtmpUrl rtmpUrl = (TL_phone.groupCallStreamRtmpUrl) response;
                     this.rtmpUrl = rtmpUrl.url;
                     this.rtmpKey = rtmpUrl.key;
                     adapter.update(false);

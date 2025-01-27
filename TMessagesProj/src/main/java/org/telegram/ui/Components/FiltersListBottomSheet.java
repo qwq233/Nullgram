@@ -1,3 +1,22 @@
+/*
+ * Copyright (C) 2019-2025 qwq233 <qwq233@qwq2333.top>
+ * https://github.com/qwq233/Nullgram
+ *
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation; either version 2
+ * of the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along with this software.
+ *  If not, see
+ * <https://www.gnu.org/licenses/>
+ */
+
 package org.telegram.ui.Components;
 
 import android.animation.Animator;
@@ -28,6 +47,7 @@ import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.DialogObject;
 import org.telegram.messenger.Emoji;
 import org.telegram.messenger.LocaleController;
+import org.telegram.messenger.MessageObject;
 import org.telegram.messenger.MessagesController;
 import org.telegram.messenger.NotificationCenter;
 import org.telegram.messenger.R;
@@ -63,6 +83,7 @@ public class FiltersListBottomSheet extends BottomSheet implements NotificationC
 
     public FiltersListBottomSheet(DialogsActivity baseFragment, ArrayList<Long> selectedDialogs) {
         super(baseFragment.getParentActivity(), false);
+        fixNavigationBar();
         this.selectedDialogs = selectedDialogs;
         this.fragment = baseFragment;
 //        dialogFilters = getCanAddDialogFilters(baseFragment, selectedDialogs);
@@ -431,7 +452,11 @@ public class FiltersListBottomSheet extends BottomSheet implements NotificationC
                 } else {
                     icon = R.drawable.msg_folders;
                 }
-                cell.setTextAndIcon(Emoji.replaceEmoji(filter.name, cell.getTextView().getPaint().getFontMetricsInt(), false), 0, new FolderDrawable(getContext(), icon, filter.color), false);
+                CharSequence title = filter.name;
+                title = Emoji.replaceEmoji(title, cell.getTextView().getPaint().getFontMetricsInt(), false);
+                title = MessageObject.replaceAnimatedEmoji(title, filter.entities, cell.getTextView().getPaint().getFontMetricsInt());
+                cell.setTextAndIcon(title, 0, new FolderDrawable(getContext(), icon, filter.color), false);
+                cell.getTextView().setEmojiColor(Theme.getColor(Theme.key_featuredStickers_addButton, resourcesProvider));
                 boolean isChecked = true;
                 for (int i = 0; i < selectedDialogs.size(); ++i) {
                     long did = selectedDialogs.get(i);

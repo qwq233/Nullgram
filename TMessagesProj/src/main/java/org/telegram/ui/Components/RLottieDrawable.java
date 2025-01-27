@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019-2024 qwq233 <qwq233@qwq2333.top>
+ * Copyright (C) 2019-2025 qwq233 <qwq233@qwq2333.top>
  * https://github.com/qwq233/Nullgram
  *
  * This program is free software; you can redistribute it and/or
@@ -760,6 +760,10 @@ public class RLottieDrawable extends BitmapDrawable implements Animatable, Bitma
         return currentFrame;
     }
 
+    public float getProgress() {
+        return (float) currentFrame / metaData[0];
+    }
+
     public int getCustomEndFrame() {
         return customEndFrame;
     }
@@ -1258,7 +1262,9 @@ public class RLottieDrawable extends BitmapDrawable implements Animatable, Bitma
                 if (vibrationPattern != null && currentParentView != null && allowVibration) {
                     Integer force = vibrationPattern.get(currentFrame - 1);
                     if (force != null) {
-                        currentParentView.performHapticFeedback(force == 1 ? HapticFeedbackConstants.LONG_PRESS : HapticFeedbackConstants.KEYBOARD_TAP, HapticFeedbackConstants.FLAG_IGNORE_GLOBAL_SETTING);
+                        try {
+                            currentParentView.performHapticFeedback(force == 1 ? HapticFeedbackConstants.LONG_PRESS : HapticFeedbackConstants.KEYBOARD_TAP, HapticFeedbackConstants.FLAG_IGNORE_GLOBAL_SETTING);
+                        } catch (Exception ignored) {}
                     }
                 }
                 setCurrentFrame(now, timeDiff, timeCheck, false);

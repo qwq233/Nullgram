@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019-2024 qwq233 <qwq233@qwq2333.top>
+ * Copyright (C) 2019-2025 qwq233 <qwq233@qwq2333.top>
  * https://github.com/qwq233/Nullgram
  *
  * This program is free software; you can redistribute it and/or
@@ -1171,7 +1171,7 @@ public class ViewPagerFixed extends FrameLayout {
                 int textX = (getMeasuredWidth() - tabWidth) / 2;
                 if (!TextUtils.equals(currentTab.title, currentText)) {
                     currentText = currentTab.title;
-                    CharSequence text = Emoji.replaceEmoji(currentText, textPaint.getFontMetricsInt(), dp(15), false);
+                    CharSequence text = Emoji.replaceEmoji(currentText, textPaint.getFontMetricsInt(), false);
                     textLayout = new StaticLayout(text, textPaint, dp(400), Layout.Alignment.ALIGN_NORMAL, 1.0f, 0, false);
                     textHeight = textLayout.getHeight();
                     textOffsetX = (int) -textLayout.getLineLeft(0);

@@ -1,3 +1,22 @@
+/*
+ * Copyright (C) 2019-2025 qwq233 <qwq233@qwq2333.top>
+ * https://github.com/qwq233/Nullgram
+ *
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation; either version 2
+ * of the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along with this software.
+ *  If not, see
+ * <https://www.gnu.org/licenses/>
+ */
+
 package org.telegram.ui.Business;
 
 import static org.telegram.messenger.AndroidUtilities.dp;
@@ -46,6 +65,7 @@ import org.telegram.messenger.R;
 import org.telegram.messenger.UserConfig;
 import org.telegram.messenger.UserObject;
 import org.telegram.tgnet.TLRPC;
+import org.telegram.tgnet.tl.TL_account;
 import org.telegram.ui.ActionBar.AlertDialog;
 import org.telegram.ui.ActionBar.AlertDialogDecor;
 import org.telegram.ui.ActionBar.BaseFragment;
@@ -77,7 +97,7 @@ public class BusinessLinksActivity extends UniversalFragment implements Notifica
 
     private static AlertDialog currentDialog;
 
-    public static void openRenameAlert(Context context, int currentAccount, TLRPC.TL_businessChatLink link, Theme.ResourcesProvider resourcesProvider, boolean forceNotAdaptive) {
+    public static void openRenameAlert(Context context, int currentAccount, TL_account.TL_businessChatLink link, Theme.ResourcesProvider resourcesProvider, boolean forceNotAdaptive) {
         BaseFragment fragment = LaunchActivity.getLastFragment();
         Activity activity = AndroidUtilities.findActivity(context);
         View currentFocus = activity != null ? activity.getCurrentFocus() : null;
@@ -321,7 +341,7 @@ public class BusinessLinksActivity extends UniversalFragment implements Notifica
         if (BusinessLinksController.getInstance(currentAccount).canAddNew()) {
             items.add(UItem.asButton(BUTTON_ADD, R.drawable.menu_link_create, getString(R.string.BusinessLinksAdd)).accent());
         }
-        for (TLRPC.TL_businessChatLink businessLink : BusinessLinksController.getInstance(currentAccount).links) {
+        for (TL_account.TL_businessChatLink businessLink : BusinessLinksController.getInstance(currentAccount).links) {
             UItem item = UItem.asBusinessChatLink(new BusinessLinkWrapper(businessLink));
             items.add(item);
         }
@@ -376,7 +396,7 @@ public class BusinessLinksActivity extends UniversalFragment implements Notifica
     @Override
     protected boolean onLongClick(UItem item, View view, int position, float x, float y) {
         if (item.viewType == UniversalAdapter.VIEW_TYPE_BUSINESS_LINK && item.object instanceof BusinessLinkWrapper) {
-            TLRPC.TL_businessChatLink link = ((BusinessLinkWrapper) item.object).link;
+            TL_account.TL_businessChatLink link = ((BusinessLinkWrapper) item.object).link;
 
             ItemOptions options = ItemOptions.makeOptions(this, view);
             options.add(R.drawable.msg_copy, getString(R.string.Copy), () -> {
@@ -421,22 +441,22 @@ public class BusinessLinksActivity extends UniversalFragment implements Notifica
                 listView.adapter.update(true);
             }
         } else if (id == NotificationCenter.businessLinkCreated) {
-            TLRPC.TL_businessChatLink link = (TLRPC.TL_businessChatLink) args[0];
+            TL_account.TL_businessChatLink link = (TL_account.TL_businessChatLink) args[0];
             Bundle activityArgs = new Bundle();
             activityArgs.putInt("chatMode", ChatActivity.MODE_EDIT_BUSINESS_LINK);
             activityArgs.putString("business_link", link.link);
             ChatActivity chatActivity = new ChatActivity(activityArgs);
             presentFragment(chatActivity);
         } else if (id == NotificationCenter.needDeleteBusinessLink) {
-            TLRPC.TL_businessChatLink link = (TLRPC.TL_businessChatLink) args[0];
+            TL_account.TL_businessChatLink link = (TL_account.TL_businessChatLink) args[0];
             BusinessLinksController.getInstance(currentAccount).deleteLinkUndoable(this, link.link);
         }
     }
 
     public static class BusinessLinkWrapper {
-        TLRPC.TL_businessChatLink link;
+        TL_account.TL_businessChatLink link;
 
-        public BusinessLinkWrapper(TLRPC.TL_businessChatLink link) {
+        public BusinessLinkWrapper(TL_account.TL_businessChatLink link) {
             this.link = link;
         }
 
@@ -465,7 +485,7 @@ public class BusinessLinksActivity extends UniversalFragment implements Notifica
 
         private boolean needDivider;
 
-        private TLRPC.TL_businessChatLink businessLink;
+        private TL_account.TL_businessChatLink businessLink;
 
         public BusinessLinkView(Context context, Theme.ResourcesProvider resourcesProvider) {
             super(context);

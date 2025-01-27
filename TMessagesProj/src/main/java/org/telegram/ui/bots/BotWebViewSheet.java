@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019-2024 qwq233 <qwq233@qwq2333.top>
+ * Copyright (C) 2019-2025 qwq233 <qwq233@qwq2333.top>
  * https://github.com/qwq233/Nullgram
  *
  * This program is free software; you can redistribute it and/or
@@ -517,6 +517,7 @@ public class BotWebViewSheet extends Dialog implements NotificationCenter.Notifi
                     sensors.attachWebView(webView);
                 }
                 fullscreenButtons.setWebView(webView);
+                updateWebViewBackgroundColor();
             }
 
             @Override
@@ -2102,6 +2103,7 @@ public class BotWebViewSheet extends Dialog implements NotificationCenter.Notifi
                     errorContainer.setDark(AndroidUtilities.computePerceivedBrightness(backgroundPaint.getColor()) <= .721f, false);
                     errorContainer.setBackgroundColor(backgroundPaint.getColor());
                 }
+                updateWebViewBackgroundColor();
             });
             backgroundColorAnimator.addListener(new AnimatorListenerAdapter() {
                 @Override
@@ -2113,6 +2115,7 @@ public class BotWebViewSheet extends Dialog implements NotificationCenter.Notifi
                         errorContainer.setDark(AndroidUtilities.computePerceivedBrightness(backgroundPaint.getColor()) <= .721f, false);
                         errorContainer.setBackgroundColor(backgroundPaint.getColor());
                     }
+                    updateWebViewBackgroundColor();
                 }
             });
             backgroundColorAnimator.start();
@@ -2124,7 +2127,19 @@ public class BotWebViewSheet extends Dialog implements NotificationCenter.Notifi
                 errorContainer.setDark(AndroidUtilities.computePerceivedBrightness(backgroundPaint.getColor()) <= .721f, false);
                 errorContainer.setBackgroundColor(backgroundPaint.getColor());
             }
+            updateWebViewBackgroundColor();
         }
+    }
+
+    private void updateWebViewBackgroundColor() {
+        if (webViewContainer == null) {
+            return;
+        }
+        BotWebViewContainer.MyWebView webView = webViewContainer.getWebView();
+        if (webView == null) {
+            return;
+        }
+        webView.setBackgroundColor(backgroundPaint.getColor());
     }
 
     private boolean resetOffsetY = true;

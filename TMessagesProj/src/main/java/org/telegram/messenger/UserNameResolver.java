@@ -1,3 +1,22 @@
+/*
+ * Copyright (C) 2019-2025 qwq233 <qwq233@qwq2333.top>
+ * https://github.com/qwq233/Nullgram
+ *
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation; either version 2
+ * of the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along with this software.
+ *  If not, see
+ * <https://www.gnu.org/licenses/>
+ */
+
 package org.telegram.messenger;
 
 import android.text.TextUtils;
@@ -27,18 +46,18 @@ public class UserNameResolver {
     LruCache<String, CachedPeer> resolvedCache = new LruCache<>(100);
     HashMap<String, ArrayList<Consumer<Long>>> resolvingConsumers = new HashMap<>();
 
-    public int resolve(String username, Consumer<Long> resolveConsumer) {
+    public Runnable resolve(String username, Consumer<Long> resolveConsumer) {
         return resolve(username, null, resolveConsumer);
     }
 
-    public int resolve(String username, String referrer, Consumer<Long> resolveConsumer) {
+    public Runnable resolve(String username, String referrer, Consumer<Long> resolveConsumer) {
         if (TextUtils.isEmpty(referrer)) {
             CachedPeer cachedPeer = resolvedCache.get(username);
             if (cachedPeer != null) {
                 if (System.currentTimeMillis() - cachedPeer.time < CACHE_TIME) {
                     resolveConsumer.accept(cachedPeer.peerId);
                     FileLog.d("resolve username from cache " + username + " " + cachedPeer.peerId);
-                    return -1;
+                    return null;
                 } else {
                     resolvedCache.remove(username);
                 }
@@ -48,7 +67,7 @@ public class UserNameResolver {
         ArrayList<Consumer<Long>> consumers = resolvingConsumers.get(username);
         if (consumers != null) {
             consumers.add(resolveConsumer);
-            return -1;
+            return null;
         }
         consumers = new ArrayList<>();
         consumers.add(resolveConsumer);
@@ -69,7 +88,7 @@ public class UserNameResolver {
             }
             req = resolveUsername;
         }
-        return ConnectionsManager.getInstance(currentAccount).sendRequest(req, (response, error) -> AndroidUtilities.runOnUIThread(() -> {
+        final int reqId = ConnectionsManager.getInstance(currentAccount).sendRequest(req, (response, error) -> AndroidUtilities.runOnUIThread(() -> {
             ArrayList<Consumer<Long>> finalConsumers = resolvingConsumers.remove(username);
             if (finalConsumers == null) {
                 return;
@@ -105,6 +124,10 @@ public class UserNameResolver {
                 finalConsumers.get(i).accept(peerId);
             }
         }, ConnectionsManager.RequestFlagFailOnServerErrors));
+        return () -> {
+            resolvingConsumers.remove(username);
+            ConnectionsManager.getInstance(currentAccount).cancelRequest(reqId, true);
+        };
     };
 
     public void update(TLRPC.User oldUser, TLRPC.User user) {

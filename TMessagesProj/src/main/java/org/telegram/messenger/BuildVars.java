@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019-2024 qwq233 <qwq233@qwq2333.top>
+ * Copyright (C) 2019-2025 qwq233 <qwq233@qwq2333.top>
  * https://github.com/qwq233/Nullgram
  *
  * This program is free software; you can redistribute it and/or
@@ -31,8 +31,8 @@ public class BuildVars {
     public static boolean LOGS_ENABLED = true;
     public static boolean USE_CLOUD_STRINGS = true;
     public static boolean NO_SCOPED_STORAGE = Build.VERSION.SDK_INT <= 29;
-    public static final int BUILD_VERSION = 5511;
-    public static final String BUILD_VERSION_STRING = "11.5.3";
+    public static final int BUILD_VERSION = 5663;
+    public static final String BUILD_VERSION_STRING = "11.7.0";
     public static final int APP_ID = 19797609;
     public static final String APP_HASH = "e8f1567dbbf38944a1391c4d23c34b60";
     public static final String APPCENTER_HASH = "PLACEHOLDER";

@@ -1,9 +1,20 @@
 /*
- * This is the source code of Telegram for Android v. 5.x.x
- * It is licensed under GNU GPL v. 2 or later.
- * You should have received a copy of the license in this archive (see LICENSE).
+ * Copyright (C) 2019-2025 qwq233 <qwq233@qwq2333.top>
+ * https://github.com/qwq233/Nullgram
  *
- * Copyright Nikolai Kudashov, 2013-2018.
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation; either version 2
+ * of the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along with this software.
+ *  If not, see
+ * <https://www.gnu.org/licenses/>
  */
 
 package org.telegram.ui.Components;
@@ -312,7 +323,7 @@ public class PhotoViewerCaptionEnterView extends FrameLayout implements Notifica
                         for (int i = 0; i < spans.length; i++) {
                             editable.removeSpan(spans[i]);
                         }
-                        Emoji.replaceEmoji(editable, messageEditText.getPaint().getFontMetricsInt(), AndroidUtilities.dp(20), false);
+                        Emoji.replaceEmoji(editable, messageEditText.getPaint().getFontMetricsInt(), false);
                         processChange = false;
                     }
                 }
@@ -736,7 +747,7 @@ public class PhotoViewerCaptionEnterView extends FrameLayout implements Notifica
                 }
                 try {
                     innerTextChange = true;
-                    CharSequence localCharSequence = Emoji.replaceEmoji(symbol, messageEditText.getPaint().getFontMetricsInt(), AndroidUtilities.dp(20), false);
+                    CharSequence localCharSequence = Emoji.replaceEmoji(symbol, messageEditText.getPaint().getFontMetricsInt(), false);
                     messageEditText.setText(messageEditText.getText().insert(i, localCharSequence));
                     int j = i + localCharSequence.length();
                     messageEditText.setSelection(j, j);
@@ -760,7 +771,7 @@ public class PhotoViewerCaptionEnterView extends FrameLayout implements Notifica
             SpannableStringBuilder builder = new SpannableStringBuilder(messageEditText.getText());
             builder.replace(start, start + len, text);
             if (parseEmoji) {
-                Emoji.replaceEmoji(builder, messageEditText.getPaint().getFontMetricsInt(), AndroidUtilities.dp(20), false);
+                Emoji.replaceEmoji(builder, messageEditText.getPaint().getFontMetricsInt(), false);
             }
             messageEditText.setText(builder);
             messageEditText.setSelection(Math.min(start + text.length(), messageEditText.length()));

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019-2024 qwq233 <qwq233@qwq2333.top>
+ * Copyright (C) 2019-2025 qwq233 <qwq233@qwq2333.top>
  * https://github.com/qwq233/Nullgram
  *
  * This program is free software; you can redistribute it and/or
@@ -45,6 +45,7 @@ import org.telegram.messenger.R;
 import org.telegram.messenger.ShareBroadcastReceiver;
 import org.telegram.messenger.SharedConfig;
 import org.telegram.messenger.UserConfig;
+import org.telegram.messenger.Utilities;
 import org.telegram.messenger.support.customtabs.CustomTabsCallback;
 import org.telegram.messenger.support.customtabs.CustomTabsClient;
 import org.telegram.messenger.support.customtabs.CustomTabsIntent;
@@ -55,11 +56,13 @@ import org.telegram.messenger.support.customtabsclient.shared.ServiceConnection;
 import org.telegram.messenger.support.customtabsclient.shared.ServiceConnectionCallback;
 import org.telegram.tgnet.ConnectionsManager;
 import org.telegram.tgnet.TLRPC;
+import org.telegram.tgnet.tl.TL_account;
 import org.telegram.ui.ActionBar.ActionBarLayout;
 import org.telegram.ui.ActionBar.AlertDialog;
 import org.telegram.ui.ActionBar.BaseFragment;
 import org.telegram.ui.ActionBar.BottomSheetTabs;
 import org.telegram.ui.ActionBar.Theme;
+import org.telegram.ui.BubbleActivity;
 import org.telegram.ui.LaunchActivity;
 import org.telegram.ui.web.RestrictedDomainsList;
 
@@ -172,6 +175,13 @@ public class Browser {
         openUrl(context, Uri.parse(url), true);
     }
 
+    public static void openUrlInSystemBrowser(Context context, String url) {
+        if (url == null) {
+            return;
+        }
+        openUrl(context, Uri.parse(url), false, true, false, null, null, false, false, false);
+    }
+
     public static void openUrl(Context context, Uri uri) {
         openUrl(context, uri, true);
     }
@@ -234,7 +244,26 @@ public class Browser {
     }
 
     public static class Progress {
-        public void init() {}
+
+        private Runnable onInitListener;
+        private Runnable onCancelListener;
+        private Runnable onEndListener;
+
+        public Progress() {
+
+        }
+
+        public Progress(Runnable init, Runnable end) {
+            this.onInitListener = init;
+            this.onEndListener = end;
+        }
+
+        public void init() {
+            if (onInitListener != null) {
+                onInitListener.run();
+                onInitListener = null;
+            }
+        }
         public void end() {
             end(false);
         }
@@ -254,14 +283,14 @@ public class Browser {
             end(replaced);
         }
 
-        private Runnable onCancelListener;
-        public void onCancel(Runnable onCancelListener) {
+        public Progress onCancel(Runnable onCancelListener) {
             this.onCancelListener = onCancelListener;
+            return this;
         }
 
-        private Runnable onEndListener;
-        public void onEnd(Runnable onEndListener) {
+        public Progress onEnd(Runnable onEndListener) {
             this.onEndListener = onEndListener;
+            return this;
         }
     }
 
@@ -295,7 +324,7 @@ public class Browser {
                     };
 
                     Uri finalUri = uri;
-                    TLRPC.TL_messages_getWebPagePreview req = new TLRPC.TL_messages_getWebPagePreview();
+                    TL_account.getWebPagePreview req = new TL_account.getWebPagePreview();
                     req.message = uri.toString();
                     final int reqId = ConnectionsManager.getInstance(UserConfig.selectedAccount).sendRequest(req, (response, error) -> AndroidUtilities.runOnUIThread(() -> {
                         if (inCaseLoading != null) {
@@ -308,11 +337,15 @@ public class Browser {
                         }
 
                         boolean ok = false;
-                        if (response instanceof TLRPC.TL_messageMediaWebPage) {
-                            TLRPC.TL_messageMediaWebPage webPage = (TLRPC.TL_messageMediaWebPage) response;
-                            if (webPage.webpage instanceof TLRPC.TL_webPage && webPage.webpage.cached_page != null) {
-                                NotificationCenter.getInstance(currentAccount).postNotificationName(NotificationCenter.openArticle, webPage.webpage, finalUri.toString());
-                                ok = true;
+                        if (response instanceof TL_account.webPagePreview) {
+                            final TL_account.webPagePreview preview = (TL_account.webPagePreview) response;
+                            MessagesController.getInstance(currentAccount).putUsers(preview.users, false);
+                            if (preview.media instanceof TLRPC.TL_messageMediaWebPage) {
+                                TLRPC.TL_messageMediaWebPage webPage = (TLRPC.TL_messageMediaWebPage) preview.media;
+                                if (webPage.webpage instanceof TLRPC.TL_webPage && webPage.webpage.cached_page != null) {
+                                    NotificationCenter.getInstance(currentAccount).postNotificationName(NotificationCenter.openArticle, webPage.webpage, finalUri.toString());
+                                    ok = true;
+                                }
                             }
                         }
                         if (!ok) {
@@ -398,7 +431,7 @@ public class Browser {
         }
         try {
             final boolean inappBrowser = (
-                allowInAppBrowser &&
+                allowInAppBrowser && BubbleActivity.instance == null &&
                 SharedConfig.inappBrowser &&
                 TextUtils.isEmpty(browserPackage) &&
                 !RestrictedDomainsList.getInstance().isRestricted(AndroidUtilities.getHostAuthority(uri, true)) &&
@@ -830,7 +863,7 @@ public class Browser {
         }
         if (newPath != null) {
             modifiedUriBuilder.append(newPath);
-        } else {
+        } else if (originalUri.getPath() != null) {
             modifiedUriBuilder.append(originalUri.getPath());
         }
         if (originalUri.getQuery() != null) {

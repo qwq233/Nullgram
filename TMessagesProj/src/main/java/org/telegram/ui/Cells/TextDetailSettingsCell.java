@@ -1,9 +1,20 @@
 /*
- * This is the source code of Telegram for Android v. 5.x.x.
- * It is licensed under GNU GPL v. 2 or later.
- * You should have received a copy of the license in this archive (see LICENSE).
+ * Copyright (C) 2019-2025 qwq233 <qwq233@qwq2333.top>
+ * https://github.com/qwq233/Nullgram
  *
- * Copyright Nikolai Kudashov, 2013-2018.
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation; either version 2
+ * of the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along with this software.
+ *  If not, see
+ * <https://www.gnu.org/licenses/>
  */
 
 package org.telegram.ui.Cells;
@@ -113,7 +124,7 @@ public class TextDetailSettingsCell extends FrameLayout {
 
     public void setTextAndValueWithEmoji(String text, CharSequence value, boolean divider) {
         textView.setText(text);
-        valueTextView.setText(Emoji.replaceEmoji(value, valueTextView.getPaint().getFontMetricsInt(), AndroidUtilities.dp(13), false));
+        valueTextView.setText(Emoji.replaceEmoji(value, valueTextView.getPaint().getFontMetricsInt(), false));
         needDivider = divider;
         imageView.setVisibility(GONE);
         setWillNotDraw(!divider);
@@ -135,7 +146,7 @@ public class TextDetailSettingsCell extends FrameLayout {
     }
 
     public void setTextWithEmojiAnd21Value(String text, CharSequence value, boolean divider) {
-        textView.setText(Emoji.replaceEmoji(text, textView.getPaint().getFontMetricsInt(), AndroidUtilities.dp(14), false));
+        textView.setText(Emoji.replaceEmoji(text, textView.getPaint().getFontMetricsInt(), false));
         valueTextView.setText(value);
         needDivider = divider;
         setWillNotDraw(!divider);

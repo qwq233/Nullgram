@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019-2024 qwq233 <qwq233@qwq2333.top>
+ * Copyright (C) 2019-2025 qwq233 <qwq233@qwq2333.top>
  * https://github.com/qwq233/Nullgram
  *
  * This program is free software; you can redistribute it and/or
@@ -28,6 +28,7 @@ import org.telegram.messenger.NotificationCenter;
 import org.telegram.messenger.R;
 import org.telegram.tgnet.ConnectionsManager;
 import org.telegram.tgnet.TLRPC;
+import org.telegram.tgnet.tl.TL_account;
 import org.telegram.ui.Components.Bulletin;
 
 import java.io.File;
@@ -54,7 +55,7 @@ public class RingtoneUploader implements NotificationCenter.NotificationCenterDe
             }
             if (location.equals(filePath)) {
                 final TLRPC.InputFile file = (TLRPC.InputFile) args[1];
-                TLRPC.TL_account_uploadRingtone req = new TLRPC.TL_account_uploadRingtone();
+                TL_account.uploadRingtone req = new TL_account.uploadRingtone();
                 req.file = file;
                 req.file_name = file.name;
                 req.mime_type = FileLoader.getFileExtension(new File(file.name));

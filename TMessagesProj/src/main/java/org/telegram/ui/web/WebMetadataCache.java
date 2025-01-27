@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019-2024 qwq233 <qwq233@qwq2333.top>
+ * Copyright (C) 2019-2025 qwq233 <qwq233@qwq2333.top>
  * https://github.com/qwq233/Nullgram
  *
  * This program is free software; you can redistribute it and/or
@@ -49,6 +49,8 @@ import org.telegram.messenger.NotificationCenter;
 import org.telegram.messenger.R;
 import org.telegram.messenger.Utilities;
 import org.telegram.tgnet.AbstractSerializedData;
+import org.telegram.tgnet.InputSerializedData;
+import org.telegram.tgnet.OutputSerializedData;
 import org.telegram.tgnet.SerializedData;
 import org.telegram.tgnet.TLObject;
 import org.telegram.tgnet.TLRPC;
@@ -112,7 +114,7 @@ public class WebMetadataCache {
         }
 
         @Override
-        public void serializeToStream(AbstractSerializedData stream) {
+        public void serializeToStream(OutputSerializedData stream) {
             stream.writeInt64(time);
             stream.writeString(domain == null ? "" : domain);
             stream.writeString(title == null ? "" : title);
@@ -143,7 +145,7 @@ public class WebMetadataCache {
         }
 
         @Override
-        public void readParams(AbstractSerializedData stream, boolean exception) {
+        public void readParams(InputSerializedData stream, boolean exception) {
             time = stream.readInt64(exception);
             domain = stream.readString(exception);
             title = stream.readString(exception);
@@ -164,7 +166,7 @@ public class WebMetadataCache {
         public final ArrayList<WebMetadata> array = new ArrayList<>();
 
         @Override
-        public void serializeToStream(AbstractSerializedData stream) {
+        public void serializeToStream(OutputSerializedData stream) {
             stream.writeInt32(array.size());
             for (int i = 0; i < array.size(); ++i) {
                 array.get(i).serializeToStream(stream);
@@ -172,7 +174,7 @@ public class WebMetadataCache {
         }
 
         @Override
-        public void readParams(AbstractSerializedData stream, boolean exception) {
+        public void readParams(InputSerializedData stream, boolean exception) {
             final int count = stream.readInt32(exception);
             for (int i = 0; i < count; ++i) {
                 WebMetadata metadata = new WebMetadata();

@@ -1,3 +1,22 @@
+/*
+ * Copyright (C) 2019-2025 qwq233 <qwq233@qwq2333.top>
+ * https://github.com/qwq233/Nullgram
+ *
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation; either version 2
+ * of the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along with this software.
+ *  If not, see
+ * <https://www.gnu.org/licenses/>
+ */
+
 package org.telegram.ui.Cells;
 
 import static org.telegram.messenger.AndroidUtilities.dp;
@@ -32,6 +51,7 @@ import org.telegram.messenger.LocaleController;
 import org.telegram.messenger.R;
 import org.telegram.ui.ActionBar.Theme;
 import org.telegram.ui.Components.AnimatedColor;
+import org.telegram.ui.Components.AnimatedEmojiDrawable;
 import org.telegram.ui.Components.AnimatedTextView;
 import org.telegram.ui.Components.CubicBezierInterpolator;
 import org.telegram.ui.Components.EditTextCaption;
@@ -53,6 +73,8 @@ public class EditEmojiTextCell extends FrameLayout {
 
     public boolean autofocused;
     private boolean focused;
+
+    private boolean allowEntities = true;
 
     final AnimatedColor limitColor;
     private int limitCount;
@@ -107,6 +129,19 @@ public class EditEmojiTextCell extends FrameLayout {
         this(context, parent, hint, multiline, -1, style, null);
     }
 
+    public int emojiCacheType() {
+        return AnimatedEmojiDrawable.getCacheTypeForEnterView();
+    }
+
+    public void setEmojiViewCacheType(int cacheType) {
+        editTextEmoji.setEmojiViewCacheType(cacheType);
+    }
+
+    public EditEmojiTextCell setAllowEntities(boolean allow) {
+        allowEntities = allow;
+        return this;
+    }
+
     public EditEmojiTextCell(
         Context context,
         SizeNotifierFrameLayout parent,
@@ -136,7 +171,8 @@ public class EditEmojiTextCell extends FrameLayout {
                     limit.setTextColor(limitColor.set(Theme.getColor(limitCount <= 0 ? Theme.key_text_RedRegular : Theme.key_dialogSearchHint, resourceProvider)));
                 }
                 int h = Math.min(dp(48), getHeight());
-                limit.setBounds(getScrollX(), getHeight() - h, getScrollX() + getWidth() - dp(12), getHeight());
+                final float ty = multiline ? 0 : -dp(1);
+                limit.setBounds(getScrollX(), ty + getHeight() - h, getScrollX() + getWidth() - dp(12 + (!multiline ? 44 : 0)), ty + getHeight());
                 limit.draw(canvas);
             }
 
@@ -156,13 +192,22 @@ public class EditEmojiTextCell extends FrameLayout {
                 stringBuilder = new SpannableStringBuilder(getString(R.string.Italic));
                 stringBuilder.setSpan(new TypefaceSpan(AndroidUtilities.getTypeface(AndroidUtilities.TYPEFACE_ROBOTO_MEDIUM_ITALIC)), 0, stringBuilder.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
                 menu.add(R.id.menu_groupbolditalic, R.id.menu_italic, order++, stringBuilder);
-//                menu.add(R.id.menu_groupbolditalic, R.id.menu_link, order++, getString(R.string.CreateLink));
                 stringBuilder = new SpannableStringBuilder(LocaleController.getString(R.string.Strike));
                 TextStyleSpan.TextStyleRun run = new TextStyleSpan.TextStyleRun();
                 run.flags |= TextStyleSpan.FLAG_STYLE_STRIKE;
                 stringBuilder.setSpan(new TextStyleSpan(run), 0, stringBuilder.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
                 menu.add(R.id.menu_groupbolditalic, R.id.menu_strike, order++, stringBuilder);
                 menu.add(R.id.menu_groupbolditalic, R.id.menu_regular, order++, getString(R.string.Regular));
+            }
+
+            @Override
+            protected boolean allowEntities() {
+                return allowEntities && super.allowEntities();
+            }
+
+            @Override
+            public int emojiCacheType() {
+                return EditEmojiTextCell.this.emojiCacheType();
             }
         };
         final EditTextCaption editText = editTextEmoji.getEditText();
@@ -283,5 +328,10 @@ public class EditEmojiTextCell extends FrameLayout {
                     Theme.dividerPaint
             );
         }
+    }
+
+    @Override
+    protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+        super.onMeasure(MeasureSpec.makeMeasureSpec(MeasureSpec.getSize(widthMeasureSpec), MeasureSpec.EXACTLY), heightMeasureSpec);
     }
 }

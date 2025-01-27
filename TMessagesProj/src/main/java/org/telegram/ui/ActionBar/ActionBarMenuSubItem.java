@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019-2024 qwq233 <qwq233@qwq2333.top>
+ * Copyright (C) 2019-2025 qwq233 <qwq233@qwq2333.top>
  * https://github.com/qwq233/Nullgram
  *
  * This program is free software; you can redistribute it and/or
@@ -41,6 +41,8 @@ import androidx.core.graphics.ColorUtils;
 
 import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.LocaleController;
+import org.telegram.ui.Components.AnimatedEmojiSpan;
+import org.telegram.ui.Components.AnimatedTextView;
 import org.telegram.ui.Components.CheckBox2;
 import org.telegram.ui.Components.CubicBezierInterpolator;
 import org.telegram.ui.Components.LayoutHelper;
@@ -48,7 +50,7 @@ import org.telegram.ui.Components.RLottieImageView;
 
 public class ActionBarMenuSubItem extends FrameLayout {
 
-    public TextView textView;
+    public AnimatedEmojiSpan.TextViewEmojis textView;
     public TextView subtextView;
     public RLottieImageView imageView;
     public boolean checkViewLeft;
@@ -102,7 +104,7 @@ public class ActionBarMenuSubItem extends FrameLayout {
         imageView.setColorFilter(new PorterDuffColorFilter(iconColor, PorterDuff.Mode.MULTIPLY));
         addView(imageView, LayoutHelper.createFrame(LayoutHelper.WRAP_CONTENT, 40, Gravity.CENTER_VERTICAL | (LocaleController.isRTL ? Gravity.RIGHT : Gravity.LEFT)));
 
-        textView = new TextView(context);
+        textView = new AnimatedEmojiSpan.TextViewEmojis(context);
         textView.setLines(1);
         textView.setSingleLine(true);
         textView.setGravity(Gravity.LEFT);
@@ -126,6 +128,10 @@ public class ActionBarMenuSubItem extends FrameLayout {
                 textView.setPadding(LocaleController.isRTL ? dp(34) : 0, 0, LocaleController.isRTL ? 0 : dp(34), 0);
             }
         }
+    }
+
+    public void setEmojiCacheType(int cacheType) {
+        textView.setCacheType(cacheType);
     }
 
     @Override
@@ -330,7 +336,7 @@ public class ActionBarMenuSubItem extends FrameLayout {
         subtextView.setText(text);
     }
 
-    public TextView getTextView() {
+    public AnimatedEmojiSpan.TextViewEmojis getTextView() {
         return textView;
     }
 

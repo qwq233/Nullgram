@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019-2024 qwq233 <qwq233@qwq2333.top>
+ * Copyright (C) 2019-2025 qwq233 <qwq233@qwq2333.top>
  * https://github.com/qwq233/Nullgram
  *
  * This program is free software; you can redistribute it and/or
@@ -33,7 +33,6 @@ import android.text.SpannableString;
 import android.text.SpannableStringBuilder;
 import android.text.Spanned;
 import android.text.TextWatcher;
-import android.text.style.UnderlineSpan;
 import android.view.Gravity;
 import android.view.HapticFeedbackConstants;
 import android.view.MotionEvent;
@@ -59,7 +58,6 @@ import org.telegram.messenger.R;
 import org.telegram.messenger.SharedConfig;
 import org.telegram.messenger.UserConfig;
 import org.telegram.messenger.UserObject;
-import org.telegram.tgnet.ConnectionsManager;
 import org.telegram.tgnet.TLRPC;
 import org.telegram.ui.ActionBar.BaseFragment;
 import org.telegram.ui.ActionBar.Theme;
@@ -168,23 +166,24 @@ public class SuggestEmojiView extends FrameLayout implements NotificationCenter.
 
                 @Override
                 public void setAsEmojiStatus(TLRPC.Document document, Integer until) {
-                    TLRPC.EmojiStatus status;
+                    final TLRPC.EmojiStatus emojiStatus;
                     if (document == null) {
-                        status = new TLRPC.TL_emojiStatusEmpty();
-                    } else if (until != null) {
-                        status = new TLRPC.TL_emojiStatusUntil();
-                        ((TLRPC.TL_emojiStatusUntil) status).document_id = document.id;
-                        ((TLRPC.TL_emojiStatusUntil) status).until = until;
+                        emojiStatus = new TLRPC.TL_emojiStatusEmpty();
                     } else {
-                        status = new TLRPC.TL_emojiStatus();
-                        ((TLRPC.TL_emojiStatus) status).document_id = document.id;
+                        final TLRPC.TL_emojiStatus status = new TLRPC.TL_emojiStatus();
+                        status.document_id = document.id;
+                        if (until != null) {
+                            status.flags |= 1;
+                            status.until = until;
+                        }
+                        emojiStatus = status;
                     }
-                    TLRPC.User user = UserConfig.getInstance(UserConfig.selectedAccount).getCurrentUser();
+                    final TLRPC.User user = UserConfig.getInstance(UserConfig.selectedAccount).getCurrentUser();
                     final TLRPC.EmojiStatus previousEmojiStatus = user == null ? new TLRPC.TL_emojiStatusEmpty() : user.emoji_status;
-                    MessagesController.getInstance(currentAccount).updateEmojiStatus(status);
+                    MessagesController.getInstance(currentAccount).updateEmojiStatus(emojiStatus);
 
-                    Runnable undoAction = () -> MessagesController.getInstance(currentAccount).updateEmojiStatus(previousEmojiStatus);
-                    BaseFragment fragment = enterView == null ? null : enterView.getParentFragment();
+                    final Runnable undoAction = () -> MessagesController.getInstance(currentAccount).updateEmojiStatus(previousEmojiStatus);
+                    final BaseFragment fragment = enterView == null ? null : enterView.getParentFragment();
                     if (fragment != null) {
                         if (document == null) {
                             final Bulletin.SimpleLayout layout = new Bulletin.SimpleLayout(getContext(), resourcesProvider);
@@ -688,7 +687,7 @@ public class SuggestEmojiView extends FrameLayout implements NotificationCenter.
             }
         } else {
             emoji = emojiSource;
-            emoji = Emoji.replaceEmoji(emoji, fontMetricsInt, AndroidUtilities.dp(20), true);
+            emoji = Emoji.replaceEmoji(emoji, fontMetricsInt, true);
         }
         return emoji;
     }

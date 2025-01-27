@@ -1,6 +1,24 @@
+/*
+ * Copyright (C) 2019-2025 qwq233 <qwq233@qwq2333.top>
+ * https://github.com/qwq233/Nullgram
+ *
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation; either version 2
+ * of the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along with this software.
+ *  If not, see
+ * <https://www.gnu.org/licenses/>
+ */
+
 package org.telegram.ui.Components.Premium.boosts.cells;
 
-import static org.telegram.messenger.AndroidUtilities.dp;
 import static org.telegram.tgnet.tl.TL_stories.Boost.NO_USER_ID;
 
 import android.annotation.SuppressLint;
@@ -232,12 +250,12 @@ public class TableCell extends FrameLayout {
             builder.append(fromChat.title);
             builder.append("**");
             builder = AndroidUtilities.replaceSingleTag(builder.toString(), Theme.key_chat_messageLinkIn, 0, () -> onObjectClicked.run(fromChat), resourcesProvider);
-            fromTextView.setText(Emoji.replaceEmoji(builder, fromTextView.getPaint().getFontMetricsInt(), dp(12), false));
+            fromTextView.setText(Emoji.replaceEmoji(builder, fromTextView.getPaint().getFontMetricsInt(), false));
             fromImageView.setForUserOrChat(fromChat, new AvatarDrawable(fromChat));
             fromFrameLayout.setOnClickListener(v -> onObjectClicked.run(fromChat));
         } else {
             TLRPC.User fromUser = MessagesController.getInstance(UserConfig.selectedAccount).getUser(giftCode.from_id.user_id);
-            fromTextView.setText(Emoji.replaceEmoji(UserObject.getFirstName(fromUser), fromTextView.getPaint().getFontMetricsInt(), dp(12), false));
+            fromTextView.setText(Emoji.replaceEmoji(UserObject.getFirstName(fromUser), fromTextView.getPaint().getFontMetricsInt(), false));
             fromImageView.setForUserOrChat(fromUser, new AvatarDrawable(fromUser));
             fromFrameLayout.setOnClickListener(v -> onObjectClicked.run(fromUser));
         }
@@ -262,7 +280,7 @@ public class TableCell extends FrameLayout {
                 builder.append(UserObject.getFirstName(toUser));
                 builder.append("**");
                 builder = AndroidUtilities.replaceSingleTag(builder.toString(), Theme.key_chat_messageLinkIn, 0, () -> onObjectClicked.run(toUser), resourcesProvider);
-                toTextView.setText(Emoji.replaceEmoji(builder, toTextView.getPaint().getFontMetricsInt(), dp(12), false));
+                toTextView.setText(Emoji.replaceEmoji(builder, toTextView.getPaint().getFontMetricsInt(), false));
                 toImageView.setForUserOrChat(toUser, new AvatarDrawable(toUser));
                 toFrameLayout.setOnClickListener(v -> onObjectClicked.run(toUser));
             }

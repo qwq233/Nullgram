@@ -1,12 +1,33 @@
+/*
+ * Copyright (C) 2019-2025 qwq233 <qwq233@qwq2333.top>
+ * https://github.com/qwq233/Nullgram
+ *
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation; either version 2
+ * of the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along with this software.
+ *  If not, see
+ * <https://www.gnu.org/licenses/>
+ */
+
 package org.telegram.ui.Components;
 
 import static org.telegram.messenger.AndroidUtilities.dp;
 
 import android.graphics.Canvas;
+import android.graphics.ColorFilter;
 import android.graphics.LinearGradient;
 import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.PorterDuff;
+import android.graphics.PorterDuffColorFilter;
 import android.graphics.PorterDuffXfermode;
 import android.graphics.Shader;
 import android.graphics.Typeface;
@@ -15,6 +36,7 @@ import android.text.StaticLayout;
 import android.text.TextPaint;
 import android.text.TextUtils;
 import android.util.Log;
+import android.view.View;
 
 import androidx.annotation.NonNull;
 
@@ -46,6 +68,42 @@ public class Text {
 
     public Text setTextSizePx(float px) {
         paint.setTextSize(px);
+        return this;
+    }
+
+    private boolean drawAnimatedEmojis;
+    private View parentView;
+    private AnimatedEmojiSpan.EmojiGroupedSpans animatedEmojis;
+    private int animatedEmojisCacheType = AnimatedEmojiDrawable.CACHE_TYPE_MESSAGES;
+    private ColorFilter animatedEmojisColorFilter;
+    private int animatedEmojisColorFilterColor;
+    public Text supportAnimatedEmojis(View view) {
+        drawAnimatedEmojis = true;
+        parentView = view;
+        if (view.isAttachedToWindow()) {
+            animatedEmojis = AnimatedEmojiSpan.update(animatedEmojisCacheType, view, animatedEmojis, layout);
+        }
+        view.addOnAttachStateChangeListener(new View.OnAttachStateChangeListener() {
+            @Override
+            public void onViewAttachedToWindow(@NonNull View v) {
+                animatedEmojis = AnimatedEmojiSpan.update(animatedEmojisCacheType, view, animatedEmojis, layout);
+            }
+            @Override
+            public void onViewDetachedFromWindow(@NonNull View v) {
+                AnimatedEmojiSpan.release(view, animatedEmojis);
+            }
+        });
+        return this;
+    }
+
+    public Text setEmojiCacheType(int cacheType) {
+        if (animatedEmojisCacheType != cacheType) {
+            animatedEmojisCacheType = cacheType;
+            if (drawAnimatedEmojis) {
+                AnimatedEmojiSpan.release(parentView, animatedEmojis);
+                animatedEmojis = AnimatedEmojiSpan.update(animatedEmojisCacheType, parentView, animatedEmojis, layout);
+            }
+        }
         return this;
     }
 
@@ -89,8 +147,9 @@ public class Text {
         return layout == null || TextUtils.isEmpty(layout.getText());
     }
 
-    public void setColor(int color) {
+    public Text setColor(int color) {
         paint.setColor(color);
+        return this;
     }
 
     private float ellipsizeWidth = -1;
@@ -169,6 +228,12 @@ public class Text {
             canvas.drawText(layout.getText().toString(), 0, -paint.getFontMetricsInt().ascent, paint);
         } else {
             layout.draw(canvas);
+        }
+        if (drawAnimatedEmojis) {
+            if (animatedEmojisColorFilter == null || paint.getColor() != animatedEmojisColorFilterColor) {
+                animatedEmojisColorFilter = new PorterDuffColorFilter(animatedEmojisColorFilterColor = paint.getColor(), PorterDuff.Mode.SRC_IN);
+            }
+            AnimatedEmojiSpan.drawAnimatedEmojis(canvas, layout, animatedEmojis, 0, null, 0, 0, 0, 1.0f, animatedEmojisColorFilter);
         }
         canvas.restore();
         if (!doNotSave && ellipsizeWidth >= 0 && width > ellipsizeWidth) {

@@ -1,9 +1,20 @@
 /*
- * This is the source code of Telegram for Android v. 5.x.x
- * It is licensed under GNU GPL v. 2 or later.
- * You should have received a copy of the license in this archive (see LICENSE).
+ * Copyright (C) 2019-2025 qwq233 <qwq233@qwq2333.top>
+ * https://github.com/qwq233/Nullgram
  *
- * Copyright Nikolai Kudashov, 2013-2018.
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation; either version 2
+ * of the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along with this software.
+ *  If not, see
+ * <https://www.gnu.org/licenses/>
  */
 
 package org.telegram.ui.Components;
@@ -49,6 +60,8 @@ import org.telegram.messenger.R;
 import org.telegram.messenger.SharedConfig;
 import org.telegram.messenger.Utilities;
 import org.telegram.tgnet.AbstractSerializedData;
+import org.telegram.tgnet.InputSerializedData;
+import org.telegram.tgnet.OutputSerializedData;
 import org.telegram.ui.ActionBar.Theme;
 import org.telegram.ui.BubbleActivity;
 import org.telegram.ui.Cells.PhotoEditRadioCell;
@@ -250,7 +263,7 @@ public class PhotoFilterView extends FrameLayout implements FilterShaders.Filter
             return Math.abs(blacksLevel - 0) < 0.00001 && Math.abs(shadowsLevel - 25) < 0.00001 && Math.abs(midtonesLevel - 50) < 0.00001 && Math.abs(highlightsLevel - 75) < 0.00001 && Math.abs(whitesLevel - 100) < 0.00001;
         }
 
-        public void serializeToStream(AbstractSerializedData stream) {
+        public void serializeToStream(OutputSerializedData stream) {
             stream.writeFloat(blacksLevel);
             stream.writeFloat(shadowsLevel);
             stream.writeFloat(midtonesLevel);
@@ -258,7 +271,7 @@ public class PhotoFilterView extends FrameLayout implements FilterShaders.Filter
             stream.writeFloat(whitesLevel);
         }
 
-        public void readParams(AbstractSerializedData stream, boolean exception) {
+        public void readParams(InputSerializedData stream, boolean exception) {
             blacksLevel = previousBlacksLevel = stream.readFloat(exception);
             shadowsLevel = previousShadowsLevel = stream.readFloat(exception);
             midtonesLevel = previousMidtonesLevel = stream.readFloat(exception);
@@ -306,14 +319,14 @@ public class PhotoFilterView extends FrameLayout implements FilterShaders.Filter
             return luminanceCurve.isDefault() && redCurve.isDefault() && greenCurve.isDefault() && blueCurve.isDefault();
         }
 
-        public void serializeToStream(AbstractSerializedData stream) {
+        public void serializeToStream(OutputSerializedData stream) {
             luminanceCurve.serializeToStream(stream);
             redCurve.serializeToStream(stream);
             greenCurve.serializeToStream(stream);
             blueCurve.serializeToStream(stream);
         }
 
-        public void readParams(AbstractSerializedData stream, boolean exception) {
+        public void readParams(InputSerializedData stream, boolean exception) {
             luminanceCurve.readParams(stream, exception);
             redCurve.readParams(stream, exception);
             greenCurve.readParams(stream, exception);

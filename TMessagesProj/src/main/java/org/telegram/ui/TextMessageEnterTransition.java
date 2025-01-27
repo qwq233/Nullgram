@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019-2024 qwq233 <qwq233@qwq2333.top>
+ * Copyright (C) 2019-2025 qwq233 <qwq233@qwq2333.top>
  * https://github.com/qwq233/Nullgram
  *
  * This program is free software; you can redistribute it and/or
@@ -218,7 +218,7 @@ public class TextMessageEnterTransition implements MessageEnterTransitionContain
                 layoutH = chatActivityEnterView.getEditField().getLayout().getLineBottom(chatActivityEnterView.getEditField().getLayout().getLineForOffset(newStart[0] + trimmedStr.length())) - linesOffset;
             }
             text = AnimatedEmojiSpan.cloneSpans(text);
-            text = Emoji.replaceEmoji(editText, textPaint.getFontMetricsInt(), emojiSize, false);
+            text = Emoji.replaceEmoji(editText, textPaint.getFontMetricsInt(), false);
         }
 
         scaleFrom = chatActivityEnterView.getEditField().getTextSize() / textPaint.getTextSize();

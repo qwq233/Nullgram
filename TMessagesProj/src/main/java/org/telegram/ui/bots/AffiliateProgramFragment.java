@@ -1,3 +1,22 @@
+/*
+ * Copyright (C) 2019-2025 qwq233 <qwq233@qwq2333.top>
+ * https://github.com/qwq233/Nullgram
+ *
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation; either version 2
+ * of the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along with this software.
+ *  If not, see
+ * <https://www.gnu.org/licenses/>
+ */
+
 package org.telegram.ui.bots;
 
 import static org.telegram.messenger.AndroidUtilities.dp;
@@ -576,17 +595,17 @@ public class AffiliateProgramFragment extends GradientHeaderActivity implements 
             imageView = new ImageView(context);
             imageView.setScaleType(ImageView.ScaleType.CENTER);
             imageView.setColorFilter(new PorterDuffColorFilter(Theme.getColor(Theme.key_windowBackgroundWhiteBlackText, resourcesProvider), PorterDuff.Mode.SRC_IN));
-            addView(imageView, LayoutHelper.createFrame(24, 24, Gravity.TOP | Gravity.LEFT, 20, 12.66f, 0, 0));
+            addView(imageView, LayoutHelper.createFrame(24, 24, Gravity.TOP | Gravity.LEFT, 20, 4.66f, 0, 0));
 
             textLayout = new LinearLayout(context);
             textLayout.setOrientation(LinearLayout.VERTICAL);
-            addView(textLayout, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT, Gravity.CENTER_VERTICAL | Gravity.FILL_HORIZONTAL, 64, 3, 24, 5 + 8.33f));
+            addView(textLayout, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT, Gravity.CENTER_VERTICAL | Gravity.FILL_HORIZONTAL, 64, 3, 24, 5 + 7.66f));
 
             titleView = new TextView(context);
             titleView.setTextColor(Theme.getColor(Theme.key_windowBackgroundWhiteBlackText, resourcesProvider));
             titleView.setTypeface(AndroidUtilities.bold());
             titleView.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 14);
-            textLayout.addView(titleView, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT, Gravity.FILL_HORIZONTAL | Gravity.TOP, 0, 0, 0, 4));
+            textLayout.addView(titleView, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT, Gravity.FILL_HORIZONTAL | Gravity.TOP, 0, 0, 0, 1));
 
             textView = new TextView(context);
             textView.setTextColor(Theme.getColor(Theme.key_windowBackgroundWhiteGrayText2, resourcesProvider));
@@ -597,6 +616,10 @@ public class AffiliateProgramFragment extends GradientHeaderActivity implements 
         public void set(int iconResId, CharSequence title, CharSequence text) {
             imageView.setImageResource(iconResId);
             titleView.setText(title);
+            textView.setText(text);
+        }
+
+        public void setText(CharSequence text) {
             textView.setText(text);
         }
 
@@ -670,7 +693,7 @@ public class AffiliateProgramFragment extends GradientHeaderActivity implements 
             textLayout.addView(textView, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT, Gravity.FILL_HORIZONTAL | Gravity.TOP, 0, 3, 0, 0));
 
             arrowView = new ImageView(context);
-            arrowView.setColorFilter(new PorterDuffColorFilter(Theme.getColor(Theme.key_windowBackgroundWhiteGrayText2, resourcesProvider), PorterDuff.Mode.SRC_IN));
+            arrowView.setColorFilter(new PorterDuffColorFilter(Theme.getColor(Theme.key_switchTrack, resourcesProvider), PorterDuff.Mode.SRC_IN));
             arrowView.setImageResource(R.drawable.msg_arrowright);
             arrowView.setScaleType(ImageView.ScaleType.CENTER);
             addView(arrowView, LayoutHelper.createFrame(24, 24, Gravity.RIGHT | Gravity.CENTER_VERTICAL, 0, 0, 10, 0));
@@ -680,10 +703,10 @@ public class AffiliateProgramFragment extends GradientHeaderActivity implements 
             percentView.setBackground(Theme.createRoundRectDrawable(dp(4), Theme.getColor(Theme.key_color_green, resourcesProvider)));
             percentView.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 13);
             percentView.setTypeface(AndroidUtilities.bold());
-            percentView.setPadding(dp(5), 0, dp(4), dp(2));
+            percentView.setPadding(dp(5), 0, dp(4), 0);
             percentView.setGravity(Gravity.CENTER);
             percentView.setVisibility(View.GONE);
-            addView(percentView, LayoutHelper.createFrame(LayoutHelper.WRAP_CONTENT, 17, Gravity.RIGHT | Gravity.CENTER_VERTICAL, 0, 0, 35.33f, 0));
+            addView(percentView, LayoutHelper.createFrame(LayoutHelper.WRAP_CONTENT, 18, Gravity.RIGHT | Gravity.CENTER_VERTICAL, 0, 0, 35.33f, 0));
         }
 
         public void set(int color, int iconResId, CharSequence title, CharSequence text) {

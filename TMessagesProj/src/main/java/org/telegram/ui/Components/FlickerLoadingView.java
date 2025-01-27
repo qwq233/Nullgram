@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019-2024 qwq233 <qwq233@qwq2333.top>
+ * Copyright (C) 2019-2025 qwq233 <qwq233@qwq2333.top>
  * https://github.com/qwq233/Nullgram
  *
  * This program is free software; you can redistribute it and/or
@@ -75,6 +75,7 @@ public class FlickerLoadingView extends View implements Theme.Colorable {
     public static final int BROWSER_BOOKMARK = 32;
     public static final int STAR_SUBSCRIPTION = 33;
     public static final int STAR_GIFT = 34;
+    public static final int STAR_GIFT_SELECT = 35;
 
     private int gradientWidth;
     private LinearGradient gradient;
@@ -182,7 +183,7 @@ public class FlickerLoadingView extends View implements Theme.Colorable {
             paint = globalGradientView.paint;
         }
 
-        if (getViewType() == STAR_GIFT) {
+        if (getViewType() == STAR_GIFT || getViewType() == STAR_GIFT_SELECT) {
             parentXOffset = -getX();
         }
 
@@ -874,7 +875,7 @@ public class FlickerLoadingView extends View implements Theme.Colorable {
                     break;
                 }
             }
-        } else if (getViewType() == STAR_GIFT) {
+        } else if (getViewType() == STAR_GIFT || getViewType() == STAR_GIFT_SELECT) {
             rectF.set(paddingLeft, paddingTop, getMeasuredWidth() - paddingLeft, getMeasuredHeight() - paddingTop);
             rectF.inset(dp(3.33f), dp(4));
             canvas.drawRoundRect(rectF, dp(11), dp(11), paint);
@@ -899,7 +900,7 @@ public class FlickerLoadingView extends View implements Theme.Colorable {
         if (width == 0) {
             width = getMeasuredWidth();
         }
-        if (viewType == STAR_GIFT) {
+        if (viewType == STAR_GIFT || viewType == STAR_GIFT_SELECT) {
             width = Math.max(width, AndroidUtilities.displaySize.x);
         }
         int height = parentHeight;
@@ -936,7 +937,7 @@ public class FlickerLoadingView extends View implements Theme.Colorable {
         if (this.color1 != color1 || this.color0 != color0) {
             this.color0 = color0;
             this.color1 = color1;
-            if (viewType == STAR_GIFT) {
+            if (viewType == STAR_GIFT || viewType == STAR_GIFT_SELECT) {
                 gradientWidth = AndroidUtilities.displaySize.x;
             } else if (isSingleCell || viewType == MESSAGE_SEEN_TYPE || viewType == CHAT_THEMES_TYPE || viewType == QR_TYPE) {
                 gradientWidth = dp(200);
@@ -1024,6 +1025,8 @@ public class FlickerLoadingView extends View implements Theme.Colorable {
                 return dp(56) + 1;
             case STAR_GIFT:
                 return dp(140);
+            case STAR_GIFT_SELECT:
+                return dp(120 - 8);
         }
         return 0;
     }

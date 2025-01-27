@@ -1,3 +1,22 @@
+/*
+ * Copyright (C) 2019-2025 qwq233 <qwq233@qwq2333.top>
+ * https://github.com/qwq233/Nullgram
+ *
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation; either version 2
+ * of the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along with this software.
+ *  If not, see
+ * <https://www.gnu.org/licenses/>
+ */
+
 package org.telegram.ui.bots;
 
 import static org.telegram.messenger.AndroidUtilities.dp;
@@ -10,6 +29,7 @@ import static org.telegram.ui.Stars.StarsIntroActivity.replaceStarsWithPlain;
 import static org.telegram.ui.bots.AffiliateProgramFragment.percents;
 
 import android.content.Context;
+import android.graphics.Canvas;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffColorFilter;
 import android.graphics.drawable.ShapeDrawable;
@@ -69,12 +89,14 @@ import org.telegram.ui.Components.Premium.GLIcon.Icon3D;
 import org.telegram.ui.Components.Premium.PremiumGradient;
 import org.telegram.ui.Components.Premium.StarParticlesView;
 import org.telegram.ui.Components.RecyclerListView;
+import org.telegram.ui.Components.ScaleStateListAnimator;
 import org.telegram.ui.Components.TableView;
 import org.telegram.ui.Components.UItem;
 import org.telegram.ui.Components.UniversalAdapter;
 import org.telegram.ui.FilterCreateActivity;
 import org.telegram.ui.GradientHeaderActivity;
 import org.telegram.ui.LaunchActivity;
+import org.telegram.ui.ProfileActivity;
 import org.telegram.ui.Stars.BotStarsController;
 import org.telegram.ui.Stars.StarsIntroActivity;
 import org.telegram.ui.Stories.recorder.ButtonWithCounterView;
@@ -131,7 +153,7 @@ public class ChannelAffiliateProgramsFragment extends GradientHeaderActivity imp
         iconTextureView.mRenderer.colorKey2 = Theme.key_starsGradient2;
         iconTextureView.mRenderer.updateColors();
         iconTextureView.setStarParticlesView(particlesView);
-        aboveTitleView.addView(iconTextureView, LayoutHelper.createFrame(190, 190, Gravity.CENTER, 0, 32, 0, 24));
+        aboveTitleView.addView(iconTextureView, LayoutHelper.createFrame(190, 190, Gravity.CENTER, 0, 32, 0, 12));
         configureHeader(getString(R.string.ChannelAffiliateProgramTitle), AndroidUtilities.replaceTags(getString(R.string.ChannelAffiliateProgramText)), aboveTitleView, null);
 
         listView.setOnItemClickListener((view, position) -> {
@@ -272,7 +294,7 @@ public class ChannelAffiliateProgramsFragment extends GradientHeaderActivity imp
                 TL_payments.connectedBotStarRef bot = connectedBots.bots.get(i);
                 items.add(BotCell.Factory.as(bot));
             }
-            if (connectedBots.isLoading()) {
+            if (!connectedBots.endReached || connectedBots.isLoading()) {
                 items.add(UItem.asFlicker(FlickerLoadingView.PROFILE_SEARCH_CELL));
                 items.add(UItem.asFlicker(FlickerLoadingView.PROFILE_SEARCH_CELL));
                 items.add(UItem.asFlicker(FlickerLoadingView.PROFILE_SEARCH_CELL));
@@ -286,7 +308,7 @@ public class ChannelAffiliateProgramsFragment extends GradientHeaderActivity imp
             for (int i = 0; i < suggestedBots.bots.size(); ++i) {
                 items.add(BotCell.Factory.as(suggestedBots.bots.get(i)));
             }
-            if (suggestedBots.isLoading()) {
+            if (!suggestedBots.endReached || suggestedBots.isLoading()) {
                 items.add(UItem.asFlicker(FlickerLoadingView.PROFILE_SEARCH_CELL));
                 items.add(UItem.asFlicker(FlickerLoadingView.PROFILE_SEARCH_CELL));
                 items.add(UItem.asFlicker(FlickerLoadingView.PROFILE_SEARCH_CELL));
@@ -473,13 +495,15 @@ public class ChannelAffiliateProgramsFragment extends GradientHeaderActivity imp
             textLayout.addView(textView, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT, Gravity.FILL_HORIZONTAL | Gravity.TOP, 6, 1, 24, 0));
 
             arrowView = new ImageView(context);
-            arrowView.setColorFilter(new PorterDuffColorFilter(Theme.getColor(Theme.key_windowBackgroundWhiteGrayText2, resourcesProvider), PorterDuff.Mode.SRC_IN));
-            arrowView.setImageResource(R.drawable.photos_arrow);
+            arrowView.setColorFilter(new PorterDuffColorFilter(Theme.getColor(Theme.key_switchTrack, resourcesProvider), PorterDuff.Mode.SRC_IN));
+            arrowView.setImageResource(R.drawable.msg_arrowright);
             arrowView.setScaleType(ImageView.ScaleType.CENTER);
             addView(arrowView, LayoutHelper.createFrame(24, 24, Gravity.RIGHT | Gravity.CENTER_VERTICAL, 0, 0, 10, 0));
         }
 
-        public void set(TL_payments.connectedBotStarRef bot, boolean showArrow) {
+        private boolean needDivider;
+
+        public void set(TL_payments.connectedBotStarRef bot, boolean showArrow, boolean needDivider) {
             final TLRPC.User user = MessagesController.getInstance(currentAccount).getUser(bot.bot_id);
 
             AvatarDrawable avatarDrawable = new AvatarDrawable();
@@ -512,9 +536,11 @@ public class ChannelAffiliateProgramsFragment extends GradientHeaderActivity imp
             linkFgView.setImageResource(bot.revoked ? R.drawable.msg_link_2 : R.drawable.msg_limit_links);
             linkFgView.setScaleX(bot.revoked ? 0.8f : 0.6f);
             linkFgView.setScaleY(bot.revoked ? 0.8f : 0.6f);
+
+            setWillNotDraw(!(this.needDivider = needDivider));
         }
 
-        public void set(TL_payments.starRefProgram bot, boolean showArrow) {
+        public void set(TL_payments.starRefProgram bot, boolean showArrow, boolean needDivider) {
             final TLRPC.User user = MessagesController.getInstance(currentAccount).getUser(bot.bot_id);
 
             AvatarDrawable avatarDrawable = new AvatarDrawable();
@@ -543,6 +569,8 @@ public class ChannelAffiliateProgramsFragment extends GradientHeaderActivity imp
             linkBgView.setVisibility(View.GONE);
             linkFgView.setVisibility(View.GONE);
             linkFg2View.setVisibility(View.GONE);
+
+            setWillNotDraw(!(this.needDivider = needDivider));
         }
 
         @Override
@@ -551,6 +579,14 @@ public class ChannelAffiliateProgramsFragment extends GradientHeaderActivity imp
                 MeasureSpec.makeMeasureSpec(MeasureSpec.getSize(widthMeasureSpec), MeasureSpec.EXACTLY),
                 MeasureSpec.makeMeasureSpec(dp(58), MeasureSpec.EXACTLY)
             );
+        }
+
+        @Override
+        protected void dispatchDraw(@NonNull Canvas canvas) {
+            super.dispatchDraw(canvas);
+            if (needDivider) {
+                canvas.drawRect(dp(72), getHeight() - 1, getWidth(), getHeight(), Theme.dividerPaint);
+            }
         }
 
         public static class Factory extends UItem.UItemFactory<BotCell> {
@@ -564,9 +600,9 @@ public class ChannelAffiliateProgramsFragment extends GradientHeaderActivity imp
             @Override
             public void bindView(View view, UItem item, boolean divider) {
                 if (item.object instanceof TL_payments.connectedBotStarRef) {
-                    ((BotCell) view).set((TL_payments.connectedBotStarRef) item.object, item.red);
+                    ((BotCell) view).set((TL_payments.connectedBotStarRef) item.object, item.red, divider);
                 } else if (item.object instanceof TL_payments.starRefProgram) {
-                    ((BotCell) view).set((TL_payments.starRefProgram) item.object, item.red);
+                    ((BotCell) view).set((TL_payments.starRefProgram) item.object, item.red, divider);
                 }
             }
 
@@ -593,7 +629,7 @@ public class ChannelAffiliateProgramsFragment extends GradientHeaderActivity imp
             subtextView = new LinkSpanDrawable.LinksTextView(context, resourcesProvider);
             subtextView.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 14);
             subtextView.setTextColor(Theme.getColor(Theme.key_windowBackgroundWhiteGrayText2, resourcesProvider));
-            subtextView.setLinkTextColor(Theme.getColor(Theme.key_chat_messageLinkIn, resourcesProvider));
+            subtextView.setLinkTextColor(Theme.getColor(Theme.key_windowBackgroundWhiteBlueHeader, resourcesProvider));
             subtextView.setPadding(dp(4), 0, dp(4), 0);
             addView(subtextView, LayoutHelper.createFrame(LayoutHelper.WRAP_CONTENT, LayoutHelper.WRAP_CONTENT, (LocaleController.isRTL ? Gravity.LEFT : Gravity.RIGHT) | Gravity.TOP, 14 - 4, 20, 14 - 4, 0));
         }
@@ -652,6 +688,7 @@ public class ChannelAffiliateProgramsFragment extends GradientHeaderActivity imp
         AvatarDrawable avatarDrawable2 = new AvatarDrawable();
         avatarDrawable2.setInfo(botUser);
         imageView1.setForUserOrChat(botUser, avatarDrawable2);
+        ScaleStateListAnimator.apply(imageView1);
         topView.addView(imageView1, LayoutHelper.createFrame(60, 60, Gravity.CENTER_VERTICAL | Gravity.LEFT, 0, 0, 0, 0));
 
         ImageView arrowView = new ImageView(context);
@@ -759,7 +796,13 @@ public class ChannelAffiliateProgramsFragment extends GradientHeaderActivity imp
         b.setCustomView(linearLayout);
 
         BottomSheet sheet = b.create();
-
+        imageView1.setOnClickListener(v -> {
+            final BaseFragment lastFragment = LaunchActivity.getSafeLastFragment();
+            if (lastFragment != null) {
+                sheet.dismiss();
+                lastFragment.presentFragment(ProfileActivity.of(bot.bot_id));
+            }
+        });
         button.setOnClickListener(v -> {
             if (button.isLoading()) return;
             button.setLoading(true);

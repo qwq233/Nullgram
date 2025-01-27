@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019-2024 qwq233 <qwq233@qwq2333.top>
+ * Copyright (C) 2019-2025 qwq233 <qwq233@qwq2333.top>
  * https://github.com/qwq233/Nullgram
  *
  * This program is free software; you can redistribute it and/or
@@ -162,9 +162,9 @@ public class ReactionsContainerLayout extends FrameLayout implements Notificatio
         }
     }
 
-    private Paint bgPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
-    private Paint leftShadowPaint = new Paint(Paint.ANTI_ALIAS_FLAG),
-        rightShadowPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+    private final Paint bgPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+    private final Paint leftShadowPaint = new Paint(Paint.ANTI_ALIAS_FLAG),
+            rightShadowPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
     private float leftAlpha, rightAlpha;
     private float transitionProgress = 1f;
     public RectF rect = new RectF();
@@ -309,7 +309,9 @@ public class ReactionsContainerLayout extends FrameLayout implements Notificatio
                     boolean b1 = oldProgress > 1f;
                     boolean b2 = newProgress > 1f;
                     if (b1 != b2) {
-                        recyclerListView.performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP);
+                        try {
+                            recyclerListView.performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP);
+                        } catch (Exception ignore) {}
                     }
                     if (pullingLeftOffset < 0) {
                         dx = (int) pullingLeftOffset;
@@ -340,7 +342,9 @@ public class ReactionsContainerLayout extends FrameLayout implements Notificatio
                     boolean b1 = oldProgress > 1f;
                     boolean b2 = newProgress > 1f;
                     if (b1 != b2) {
-                        recyclerListView.performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP);
+                        try {
+                            recyclerListView.performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP);
+                        } catch (Exception ignore) {}
                     }
                     if (customReactionsContainer != null) {
                         customReactionsContainer.invalidate();
@@ -2180,7 +2184,9 @@ public class ReactionsContainerLayout extends FrameLayout implements Notificatio
         Runnable longPressRunnable = new Runnable() {
             @Override
             public void run() {
-                performHapticFeedback(HapticFeedbackConstants.LONG_PRESS);
+                try {
+                    performHapticFeedback(HapticFeedbackConstants.LONG_PRESS);
+                } catch (Exception ignored) {}
                 pressedReactionPosition = visibleReactionsList.indexOf(currentReaction);
                 pressedReaction = currentReaction;
                 ReactionsContainerLayout.this.invalidate();

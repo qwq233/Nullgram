@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019-2024 qwq233 <qwq233@qwq2333.top>
+ * Copyright (C) 2019-2025 qwq233 <qwq233@qwq2333.top>
  * https://github.com/qwq233/Nullgram
  *
  * This program is free software; you can redistribute it and/or
@@ -46,11 +46,13 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.FileLog;
+import org.telegram.messenger.MessagesController;
 import org.telegram.messenger.NotificationCenter;
 import org.telegram.messenger.R;
 import org.telegram.messenger.Utilities;
 import org.telegram.tgnet.ConnectionsManager;
 import org.telegram.tgnet.TLRPC;
+import org.telegram.tgnet.tl.TL_account;
 import org.telegram.ui.ActionBar.Theme;
 import org.telegram.ui.Cells.EditTextCell;
 import org.telegram.ui.Cells.TextCheckCell;
@@ -364,11 +366,19 @@ public class StoryLinkSheet extends BottomSheetWithRecyclerListView implements N
     }
 
     private final Runnable requestPreview = () -> {
-        TLRPC.TL_messages_getWebPagePreview req = new TLRPC.TL_messages_getWebPagePreview();
+        TL_account.getWebPagePreview req = new TL_account.getWebPagePreview();
         req.message = urlEditText.editText.getText().toString();
         reqId = ConnectionsManager.getInstance(currentAccount).sendRequest(req, (res, err) -> AndroidUtilities.runOnUIThread(() -> {
-            if (res instanceof TLRPC.TL_messageMediaWebPage) {
-                webpage = ((TLRPC.TL_messageMediaWebPage) res).webpage;
+            TLRPC.TL_messageMediaWebPage media = null;
+            if (res instanceof TL_account.webPagePreview) {
+                final TL_account.webPagePreview preview = (TL_account.webPagePreview) res;
+                MessagesController.getInstance(currentAccount).putUsers(preview.users, false);
+                if (preview.media instanceof TLRPC.TL_messageMediaWebPage) {
+                    media = (TLRPC.TL_messageMediaWebPage) preview.media;
+                }
+            }
+            if (media != null) {
+                webpage = media.webpage;
                 if (isPreviewEmpty(webpage)) {
                     webpageId = webpage == null ? 0 : webpage.id;
                     webpage = null;

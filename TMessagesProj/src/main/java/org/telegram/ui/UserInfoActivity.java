@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019-2024 qwq233 <qwq233@qwq2333.top>
+ * Copyright (C) 2019-2025 qwq233 <qwq233@qwq2333.top>
  * https://github.com/qwq233/Nullgram
  *
  * This program is free software; you can redistribute it and/or
@@ -45,6 +45,7 @@ import org.telegram.messenger.Utilities;
 import org.telegram.tgnet.ConnectionsManager;
 import org.telegram.tgnet.TLObject;
 import org.telegram.tgnet.TLRPC;
+import org.telegram.tgnet.tl.TL_account;
 import org.telegram.ui.ActionBar.ActionBar;
 import org.telegram.ui.ActionBar.ActionBarMenuItem;
 import org.telegram.ui.ActionBar.AlertDialog;
@@ -214,7 +215,7 @@ public class UserInfoActivity extends UniversalFragment implements NotificationC
         }
     }
 
-    public static String birthdayString(TLRPC.TL_birthday birthday) {
+    public static String birthdayString(TL_account.TL_birthday birthday) {
         if (birthday == null) {
             return "—";
         }
@@ -321,10 +322,10 @@ public class UserInfoActivity extends UniversalFragment implements NotificationC
     private String currentFirstName;
     private String currentLastName;
     private String currentBio;
-    private TLRPC.TL_birthday currentBirthday;
+    private TL_account.TL_birthday currentBirthday;
     private long currentChannel;
 
-    private TLRPC.TL_birthday birthday;
+    private TL_account.TL_birthday birthday;
     private TLRPC.Chat channel;
 
     private boolean hadHours, hadLocation;
@@ -382,7 +383,7 @@ public class UserInfoActivity extends UniversalFragment implements NotificationC
         );
     }
 
-    public static boolean birthdaysEqual(TLRPC.TL_birthday a, TLRPC.TL_birthday b) {
+    public static boolean birthdaysEqual(TL_account.TL_birthday a, TL_account.TL_birthday b) {
         return !((a == null) == (b != null) || a != null && (a.day != b.day || a.month != b.month || a.year != b.year));
     }
 
@@ -425,7 +426,7 @@ public class UserInfoActivity extends UniversalFragment implements NotificationC
                 !TextUtils.equals(currentBio, bioEdit.getText().toString())
             )
         ) {
-            TLRPC.TL_account_updateProfile req1 = new TLRPC.TL_account_updateProfile();
+            TL_account.updateProfile req1 = new TL_account.updateProfile();
 
             req1.flags |= 1;
             req1.first_name = user.first_name = firstNameEdit.getText().toString();
@@ -440,9 +441,9 @@ public class UserInfoActivity extends UniversalFragment implements NotificationC
             requests.add(req1);
         }
 
-        TLRPC.TL_birthday oldBirthday = userFull != null ? userFull.birthday : null;
+        TL_account.TL_birthday oldBirthday = userFull != null ? userFull.birthday : null;
         if (!birthdaysEqual(currentBirthday, birthday)) {
-            TLRPC.TL_account_updateBirthday req = new TLRPC.TL_account_updateBirthday();
+            TL_account.updateBirthday req = new TL_account.updateBirthday();
             if (birthday != null) {
                 userFull.flags2 |= 32;
                 userFull.birthday = birthday;
@@ -459,7 +460,7 @@ public class UserInfoActivity extends UniversalFragment implements NotificationC
         }
 
         if (currentChannel != (channel != null ? channel.id : 0)) {
-            TLRPC.TL_account_updatePersonalChannel req = new TLRPC.TL_account_updatePersonalChannel();
+            TL_account.updatePersonalChannel req = new TL_account.updatePersonalChannel();
             req.channel = MessagesController.getInputChannel(channel);
             if (channel != null) {
                 userFull.flags |= 64;
@@ -486,7 +487,7 @@ public class UserInfoActivity extends UniversalFragment implements NotificationC
             getConnectionsManager().sendRequest(req, (res, err) -> AndroidUtilities.runOnUIThread(() -> {
                 if (err != null) {
                     doneButtonDrawable.animateToProgress(0f);
-                    if (req instanceof TLRPC.TL_account_updateBirthday && err.text != null && err.text.startsWith("FLOOD_WAIT_")) {
+                    if (req instanceof TL_account.updateBirthday && err.text != null && err.text.startsWith("FLOOD_WAIT_")) {
                         if (getContext() != null) {
                             showDialog(
                                 new AlertDialog.Builder(getContext(), resourceProvider)
@@ -499,7 +500,7 @@ public class UserInfoActivity extends UniversalFragment implements NotificationC
                     } else {
                         BulletinFactory.showError(err);
                     }
-                    if (req instanceof TLRPC.TL_account_updateBirthday) {
+                    if (req instanceof TL_account.updateBirthday) {
                         if (oldBirthday != null) {
                             userFull.flags |= 32;
                         } else {

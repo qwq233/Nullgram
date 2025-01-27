@@ -1,3 +1,22 @@
+/*
+ * Copyright (C) 2019-2025 qwq233 <qwq233@qwq2333.top>
+ * https://github.com/qwq233/Nullgram
+ *
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation; either version 2
+ * of the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along with this software.
+ *  If not, see
+ * <https://www.gnu.org/licenses/>
+ */
+
 package org.telegram.ui.Components.spoilers;
 
 import android.content.Context;
@@ -11,15 +30,22 @@ import android.graphics.PorterDuffXfermode;
 import android.graphics.Rect;
 import android.graphics.Region;
 import android.text.Layout;
+import android.text.Spannable;
+import android.text.SpannableString;
 import android.text.Spanned;
+import android.text.style.ClickableSpan;
 import android.view.MotionEvent;
+import android.view.ViewConfiguration;
 import android.widget.TextView;
 
 import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.Emoji;
+import org.telegram.ui.ActionBar.Theme;
 import org.telegram.ui.Cells.TextSelectionHelper;
 import org.telegram.ui.Components.AnimatedEmojiDrawable;
 import org.telegram.ui.Components.AnimatedEmojiSpan;
+import org.telegram.ui.Components.LinkPath;
+import org.telegram.ui.Components.LinkSpanDrawable;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -42,12 +68,34 @@ public class SpoilersTextView extends TextView implements TextSelectionHelper.Si
     private AnimatedEmojiSpan.EmojiGroupedSpans animatedEmoji;
     private boolean useAlphaForEmoji = true;
 
+    private final LinkSpanDrawable.LinkCollector links;
+    private Theme.ResourcesProvider resourcesProvider;
+
     public SpoilersTextView(Context context) {
-        this(context, true);
+        this(context, null);
+    }
+
+    public SpoilersTextView(Context context, Theme.ResourcesProvider resourcesProvider) {
+        this(context, true, resourcesProvider);
     }
 
     public SpoilersTextView(Context context, boolean revealOnClick) {
+        this(context, revealOnClick, null);
+    }
+
+    private boolean clearLinkOnLongPress = true;
+    public void setClearLinkOnLongPress(boolean clear) {
+        this.clearLinkOnLongPress = clear;
+    }
+
+    public void clearLinks() {
+        links.clear();
+    }
+
+    public SpoilersTextView(Context context, boolean revealOnClick, Theme.ResourcesProvider resourcesProvider) {
         super(context);
+        this.links = new LinkSpanDrawable.LinkCollector(this);
+        this.resourcesProvider = resourcesProvider;
 
         clickDetector = new SpoilersClickDetector(this, spoilers, (eff, x, y) -> {
             if (isSpoilersRevealed || !revealOnClick) return;
@@ -63,8 +111,63 @@ public class SpoilersTextView extends TextView implements TextSelectionHelper.Si
         });
     }
 
+    public int overrideLinkColor() {
+        return Theme.getColor(Theme.key_chat_linkSelectBackground, resourcesProvider);
+    }
+
+    protected LinkSpanDrawable.LinksTextView.OnLinkPress onPressListener;
+    protected LinkSpanDrawable.LinksTextView.OnLinkPress onLongPressListener;
+
+    private LinkSpanDrawable<ClickableSpan> pressedLink;
+
     @Override
     public boolean dispatchTouchEvent(MotionEvent event) {
+        if (links != null) {
+            Layout textLayout = getLayout();
+            ClickableSpan span;
+            if ((span = hit((int) event.getX(), (int) event.getY())) != null) {
+                if (event.getAction() == MotionEvent.ACTION_DOWN) {
+                    final LinkSpanDrawable link = new LinkSpanDrawable<ClickableSpan>(span, resourcesProvider, event.getX(), event.getY());
+                    link.setColor(overrideLinkColor());
+                    pressedLink = link;
+                    links.addLink(pressedLink);
+                    Spannable buffer = new SpannableString(textLayout.getText());
+                    int start = buffer.getSpanStart(pressedLink.getSpan());
+                    int end = buffer.getSpanEnd(pressedLink.getSpan());
+                    LinkPath path = pressedLink.obtainNewPath();
+                    path.setCurrentLayout(textLayout, start, getPaddingTop());
+                    textLayout.getSelectionPath(start, end, path);
+                    AndroidUtilities.runOnUIThread(() -> {
+                        if (onLongPressListener != null && pressedLink == link) {
+                            onLongPressListener.run(span);
+                            pressedLink = null;
+                            links.clear();
+                        }
+                    }, ViewConfiguration.getLongPressTimeout());
+                    return true;
+                }
+            }
+            if (event.getAction() == MotionEvent.ACTION_UP) {
+                links.clear();
+                if (pressedLink != null && pressedLink.getSpan() == span) {
+                    if (onPressListener != null) {
+                        onPressListener.run(pressedLink.getSpan());
+                    } else if (pressedLink.getSpan() != null) {
+                        pressedLink.getSpan().onClick(this);
+                    }
+                    pressedLink = null;
+                    return true;
+                }
+                pressedLink = null;
+            }
+            if (event.getAction() == MotionEvent.ACTION_CANCEL) {
+                links.clear();
+                pressedLink = null;
+            }
+        }
+        if (pressedLink != null) {
+            return true;
+        }
         if (allowClickSpoilers && clickDetector.onTouchEvent(event))
             return true;
         return super.dispatchTouchEvent(event);
@@ -100,9 +203,33 @@ public class SpoilersTextView extends TextView implements TextSelectionHelper.Si
         animatedEmojiColorFilter = new PorterDuffColorFilter(color, PorterDuff.Mode.SRC_IN);
     }
 
+    private boolean disablePaddingsOffset;
+    private boolean disablePaddingsOffsetX;
+    private boolean disablePaddingsOffsetY;
+    public void setDisablePaddingsOffset(boolean disablePaddingsOffset) {
+        this.disablePaddingsOffset = disablePaddingsOffset;
+    }
+
+    public void setDisablePaddingsOffsetX(boolean disablePaddingsOffsetX) {
+        this.disablePaddingsOffsetX = disablePaddingsOffsetX;
+    }
+
+    public void setDisablePaddingsOffsetY(boolean disablePaddingsOffsetY) {
+        this.disablePaddingsOffsetY = disablePaddingsOffsetY;
+    }
+
     @Override
     protected void onDraw(Canvas canvas) {
         int pl = getPaddingLeft(), pt = getPaddingTop();
+
+        canvas.save();
+        if (!disablePaddingsOffset) {
+            canvas.translate(disablePaddingsOffsetX ? 0 : getPaddingLeft(), disablePaddingsOffsetY ? 0 : getPaddingTop());
+        }
+        if (links != null && links.draw(canvas)) {
+            invalidate();
+        }
+        canvas.restore();
 
         canvas.save();
         path.rewind();
@@ -200,6 +327,27 @@ public class SpoilersTextView extends TextView implements TextSelectionHelper.Si
             SpoilerEffect.addSpoilers(this, spoilersPool, spoilers);
         }
         invalidate();
+    }
+
+
+    public ClickableSpan hit(int x, int y) {
+        Layout textLayout = getLayout();
+        if (textLayout == null) {
+            return null;
+        }
+        x -= getPaddingLeft();
+        y -= getPaddingTop();
+        final int line = textLayout.getLineForVertical(y);
+        final int off = textLayout.getOffsetForHorizontal(line, x);
+        final float left = textLayout.getLineLeft(line);
+        if (left <= x && left + textLayout.getLineWidth(line) >= x && y >= 0 && y <= textLayout.getHeight()) {
+            Spannable buffer = new SpannableString(textLayout.getText());
+            ClickableSpan[] spans = buffer.getSpans(off, off, ClickableSpan.class);
+            if (spans.length != 0 && !AndroidUtilities.isAccessibilityScreenReaderEnabled()) {
+                return spans[0];
+            }
+        }
+        return null;
     }
 
     @Override

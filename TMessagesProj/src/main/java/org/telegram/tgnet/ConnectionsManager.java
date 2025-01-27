@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019-2024 qwq233 <qwq233@qwq2333.top>
+ * Copyright (C) 2019-2025 qwq233 <qwq233@qwq2333.top>
  * https://github.com/qwq233/Nullgram
  *
  * This program is free software; you can redistribute it and/or
@@ -30,6 +30,8 @@ import android.os.Build;
 import android.os.SystemClock;
 import android.text.TextUtils;
 import android.util.Base64;
+
+import androidx.annotation.Keep;
 
 import com.google.android.exoplayer2.upstream.DefaultBandwidthMeter;
 import com.google.firebase.remoteconfig.FirebaseRemoteConfig;
@@ -1032,9 +1034,6 @@ public class ConnectionsManager extends BaseController {
     public static native void native_setRegId(int currentAccount, String regId);
 
     public static native void native_setSystemLangCode(int currentAccount, String langCode);
-
-    public static native void native_seSystemLangCode(int currentAccount, String langCode);
-
     public static native void native_setJava(boolean useJavaByteBuffers);
 
     public static native void native_setPushConnectionEnabled(int currentAccount, boolean value);
@@ -1047,7 +1046,6 @@ public class ConnectionsManager extends BaseController {
     public static native void native_discardConnection(int currentAccount, int datacenterId, int connectionType);
     public static native void native_failNotRunningRequest(int currentAccount, int token);
     public static native void native_receivedIntegrityCheckClassic(int currentAccount, int requestToken, String nonce, String token);
-
     public static native boolean native_isGoodPrime(byte[] prime, int g);
 
     public static int generateClassGuid() {
@@ -1575,6 +1573,7 @@ public class ConnectionsManager extends BaseController {
     }
 
     public static long lastPremiumFloodWaitShown = 0;
+    @Keep
     public static void onPremiumFloodWait(final int currentAccount, final int requestToken, boolean isUpload) {
         AndroidUtilities.runOnUIThread(() -> {
             if (UserConfig.selectedAccount != currentAccount) {
@@ -1603,6 +1602,7 @@ public class ConnectionsManager extends BaseController {
         });
     }
 
+    @Keep
     public static void onIntegrityCheckClassic(final int currentAccount, final int requestToken, final String project, final String nonce) {
         native_receivedIntegrityCheckClassic(currentAccount, requestToken, nonce, "PLAYINTEGRITY_FAILED_EXCEPTION_NULL");
     }

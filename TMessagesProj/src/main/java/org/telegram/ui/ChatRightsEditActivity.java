@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019-2024 qwq233 <qwq233@qwq2333.top>
+ * Copyright (C) 2019-2025 qwq233 <qwq233@qwq2333.top>
  * https://github.com/qwq233/Nullgram
  *
  * This program is free software; you can redistribute it and/or
@@ -57,10 +57,12 @@ import org.telegram.messenger.ChatObject;
 import org.telegram.messenger.FileLog;
 import org.telegram.messenger.LocaleController;
 import org.telegram.messenger.MessagesController;
+import org.telegram.messenger.NotificationCenter;
 import org.telegram.messenger.R;
 import org.telegram.messenger.UserObject;
 import org.telegram.tgnet.ConnectionsManager;
 import org.telegram.tgnet.TLRPC;
+import org.telegram.tgnet.tl.TL_account;
 import org.telegram.ui.ActionBar.ActionBar;
 import org.telegram.ui.ActionBar.ActionBarMenu;
 import org.telegram.ui.ActionBar.AlertDialog;
@@ -93,7 +95,7 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Locale;
 
-public class ChatRightsEditActivity extends BaseFragment {
+public class ChatRightsEditActivity extends BaseFragment implements NotificationCenter.NotificationCenterDelegate {
 
     private ListAdapter listViewAdapter;
     private RecyclerListView listView;
@@ -1091,10 +1093,10 @@ public class ChatRightsEditActivity extends BaseFragment {
                     }
                     showDialog(builder.create());
                 } else if ("SRP_ID_INVALID".equals(error.text)) {
-                    TLRPC.TL_account_getPassword getPasswordReq = new TLRPC.TL_account_getPassword();
+                    TL_account.getPassword getPasswordReq = new TL_account.getPassword();
                     ConnectionsManager.getInstance(currentAccount).sendRequest(getPasswordReq, (response2, error2) -> AndroidUtilities.runOnUIThread(() -> {
                         if (error2 == null) {
-                            TLRPC.account_Password currentPassword = (TLRPC.account_Password) response2;
+                            TL_account.Password currentPassword = (TL_account.Password) response2;
                             passwordFragment.setCurrentPasswordInfo(null, currentPassword);
                             TwoStepVerificationActivity.initPasswordNewAlgo(currentPassword);
                             initTransfer(passwordFragment.getNewSrpPassword(), passwordFragment);
@@ -1122,6 +1124,32 @@ public class ChatRightsEditActivity extends BaseFragment {
                 }
             }
         }));
+    }
+
+    @Override
+    public boolean onFragmentCreate() {
+        getNotificationCenter().addObserver(this, NotificationCenter.dialogDeleted);
+        return super.onFragmentCreate();
+    }
+
+    @Override
+    public void onFragmentDestroy() {
+        getNotificationCenter().removeObserver(this, NotificationCenter.dialogDeleted);
+        super.onFragmentDestroy();
+    }
+
+    @Override
+    public void didReceivedNotification(int id, int account, Object... args) {
+        if (id == NotificationCenter.dialogDeleted) {
+            long dialogId = (long) args[0];
+            if (-this.chatId == dialogId) {
+                if (parentLayout != null && parentLayout.getLastFragment() == this) {
+                    finishFragment();
+                } else {
+                    removeSelfFromStack();
+                }
+            }
+        }
     }
 
     private void updateRows(boolean update) {

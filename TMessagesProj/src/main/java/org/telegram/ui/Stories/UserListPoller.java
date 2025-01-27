@@ -1,3 +1,22 @@
+/*
+ * Copyright (C) 2019-2025 qwq233 <qwq233@qwq2333.top>
+ * https://github.com/qwq233/Nullgram
+ *
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation; either version 2
+ * of the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along with this software.
+ *  If not, see
+ * <https://www.gnu.org/licenses/>
+ */
+
 package org.telegram.ui.Stories;
 
 import android.view.View;
@@ -11,6 +30,7 @@ import org.telegram.messenger.UserConfig;
 import org.telegram.messenger.support.LongSparseLongArray;
 import org.telegram.tgnet.ConnectionsManager;
 import org.telegram.tgnet.TLRPC;
+import org.telegram.tgnet.Vector;
 import org.telegram.tgnet.tl.TL_stories;
 import org.telegram.ui.Cells.DialogCell;
 import org.telegram.ui.Cells.UserCell;
@@ -52,8 +72,8 @@ public class UserListPoller {
                     request.id.add(MessagesController.getInstance(currentAccount).getInputPeer(dialogsFinal.get(i)));
                 }
                 ConnectionsManager.getInstance(currentAccount).sendRequest(request, (response, error) -> AndroidUtilities.runOnUIThread(() -> {
-                    if (response != null) {
-                        TLRPC.Vector vector = (TLRPC.Vector) response;
+                    if (response instanceof Vector) {
+                        Vector vector = (Vector) response;
                         ArrayList<TLRPC.User> usersToUpdate = new ArrayList<>();
                         ArrayList<TLRPC.Chat> chatsToUpdate = new ArrayList<>();
                         for (int i = 0; i < vector.objects.size(); i++) {
@@ -62,7 +82,7 @@ public class UserListPoller {
                                 if (user == null) {
                                     continue;
                                 }
-                                user.stories_max_id = (int) vector.objects.get(i);
+                                user.stories_max_id = ((Vector.Int) vector.objects.get(i)).value;
                                 if (user.stories_max_id != 0) {
                                     user.flags2 |= 32;
                                 } else {
@@ -74,7 +94,7 @@ public class UserListPoller {
                                 if (chat == null) {
                                     continue;
                                 }
-                                chat.stories_max_id = (int) vector.objects.get(i);
+                                chat.stories_max_id = ((Vector.Int) vector.objects.get(i)).value;
                                 if (chat.stories_max_id != 0) {
                                     chat.flags2 |= 16;
                                 } else {

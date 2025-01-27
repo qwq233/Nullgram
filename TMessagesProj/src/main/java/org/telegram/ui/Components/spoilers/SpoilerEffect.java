@@ -1,3 +1,22 @@
+/*
+ * Copyright (C) 2019-2025 qwq233 <qwq233@qwq2333.top>
+ * https://github.com/qwq233/Nullgram
+ *
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation; either version 2
+ * of the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along with this software.
+ *  If not, see
+ * <https://www.gnu.org/licenses/>
+ */
+
 package org.telegram.ui.Components.spoilers;
 
 import static org.telegram.messenger.AndroidUtilities.dp;
@@ -72,8 +91,8 @@ public class SpoilerEffect extends Drawable {
     private final Stack<Particle> particlesPool = new Stack<>();
     private int maxParticles;
     float[][] particlePoints = new float[ALPHAS.length][MAX_PARTICLES_PER_ENTITY * 5];
-    private float[] particleRands = new float[RAND_REPEAT];
-    private int[] renderCount = new int[ALPHAS.length];
+    private final float[] particleRands = new float[RAND_REPEAT];
+    private final int[] renderCount = new int[ALPHAS.length];
 
     private static final Path tempPath = new Path();
 
@@ -371,7 +390,7 @@ public class SpoilerEffect extends Drawable {
                 for (int i = 0; i < particles.size(); i++) {
                     Particle p = particles.get(i);
 
-                    if (visibleRect != null && !visibleRect.contains(p.x, p.y) || p.alpha != a && enableAlpha) {
+                    if (p == null || visibleRect != null && !visibleRect.contains(p.x, p.y) || p.alpha != a && enableAlpha) {
                         continue;
                     }
 
@@ -596,6 +615,8 @@ public class SpoilerEffect extends Drawable {
         addSpoilers(v, textLayout, -1, -1, spannable, spoilersPool, spoilers, null);
     }
 
+    public static final int MAX_SPOILERS_COUNT = 100;
+
     /**
      * Parses spoilers from spannable
      *
@@ -614,7 +635,7 @@ public class SpoilerEffect extends Drawable {
             return;
         }
         TextStyleSpan[] spans = spannable.getSpans(0, textLayout.getText().length(), TextStyleSpan.class);
-        for (int i = 0; i < spans.length; ++i) {
+        for (int i = 0; i < Math.min(MAX_SPOILERS_COUNT, spans.length); ++i) {
             if (spans[i].isSpoiler()) {
                 final int start = spannable.getSpanStart(spans[i]);
                 final int end = spannable.getSpanEnd(spans[i]);
@@ -743,7 +764,9 @@ public class SpoilerEffect extends Drawable {
             SpannableStringBuilder sb = new SpannableStringBuilder(textLayout.getText());
             if (textLayout.getText() instanceof Spanned) {
                 Spanned sp = (Spanned) textLayout.getText();
-                for (TextStyleSpan ss : sp.getSpans(0, sp.length(), TextStyleSpan.class)) {
+                TextStyleSpan[] spans = sp.getSpans(0, sp.length(), TextStyleSpan.class);
+                for (int i = 0; i < Math.min(MAX_SPOILERS_COUNT, spans.length); ++i) {
+                    TextStyleSpan ss = spans[i];
                     if (ss.isSpoiler()) {
                         int start = sp.getSpanStart(ss), end = sp.getSpanEnd(ss);
                         for (Emoji.EmojiSpan e : sp.getSpans(start, end, Emoji.EmojiSpan.class)) {

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019-2024 qwq233 <qwq233@qwq2333.top>
+ * Copyright (C) 2019-2025 qwq233 <qwq233@qwq2333.top>
  * https://github.com/qwq233/Nullgram
  *
  * This program is free software; you can redistribute it and/or
@@ -68,6 +68,7 @@ import org.telegram.tgnet.SerializedData;
 import org.telegram.tgnet.TLObject;
 import org.telegram.tgnet.TLRPC;
 import org.telegram.tgnet.TLRPC.MessageEntity;
+import org.telegram.tgnet.tl.TL_account;
 import org.telegram.tgnet.tl.TL_stories;
 import org.telegram.ui.ActionBar.AlertDialog;
 import org.telegram.ui.ActionBar.BaseFragment;
@@ -603,6 +604,7 @@ public class SendMessagesHelper extends BaseController implements NotificationCe
         public String path;
         public String caption;
         public String thumbPath;
+        public String coverPath;
         public String paintPath;
         public int ttl;
         public ArrayList<TLRPC.MessageEntity> entities;
@@ -1876,10 +1878,10 @@ public class SendMessagesHelper extends BaseController implements NotificationCe
     }
 
     public int sendMessage(ArrayList<MessageObject> messages, final long peer, boolean forwardFromMyName, boolean hideCaption, boolean notify, int scheduleDate) {
-        return sendMessage(messages, peer, forwardFromMyName, hideCaption, notify, scheduleDate, null);
+        return sendMessage(messages, peer, forwardFromMyName, hideCaption, notify, scheduleDate, null, -1);
     }
 
-    public int sendMessage(ArrayList<MessageObject> messages, final long peer, boolean forwardFromMyName, boolean hideCaption, boolean notify, int scheduleDate, MessageObject replyToTopMsg) {
+    public int sendMessage(ArrayList<MessageObject> messages, final long peer, boolean forwardFromMyName, boolean hideCaption, boolean notify, int scheduleDate, MessageObject replyToTopMsg, int video_timestamp) {
         if (messages == null || messages.isEmpty()) {
             return 0;
         }
@@ -2323,6 +2325,10 @@ public class SendMessagesHelper extends BaseController implements NotificationCe
                     req.drop_author = forwardFromMyName;
                     req.drop_media_captions = hideCaption;
                     req.with_my_score = messages.size() == 1 && messages.get(0).messageOwner.with_my_score;
+                    if (video_timestamp >= 0) {
+                        req.flags |= 1048576;
+                        req.video_timestamp = video_timestamp;
+                    }
 
                     final ArrayList<TLRPC.Message> newMsgObjArr = arr;
                     final ArrayList<MessageObject> newMsgArr = new ArrayList<>(objArr);
@@ -3441,10 +3447,10 @@ public class SendMessagesHelper extends BaseController implements NotificationCe
                     }
                     parentFragment.showDialog(builder.create());
                 } else if ("SRP_ID_INVALID".equals(error.text)) {
-                    TLRPC.TL_account_getPassword getPasswordReq = new TLRPC.TL_account_getPassword();
+                    TL_account.getPassword getPasswordReq = new TL_account.getPassword();
                     ConnectionsManager.getInstance(currentAccount).sendRequest(getPasswordReq, (response2, error2) -> AndroidUtilities.runOnUIThread(() -> {
                         if (error2 == null) {
-                            TLRPC.account_Password currentPassword = (TLRPC.account_Password) response2;
+                            TL_account.Password currentPassword = (TL_account.Password) response2;
                             passwordFragment.setCurrentPasswordInfo(null, currentPassword);
                             TwoStepVerificationActivity.initPasswordNewAlgo(currentPassword);
                             sendCallback(cache, messageObject, button, passwordFragment.getNewSrpPassword(), passwordFragment, parentFragment);
@@ -8211,6 +8217,7 @@ public class SendMessagesHelper extends BaseController implements NotificationCe
             SendMessagesHelper.SendMessageParams params2 = SendMessagesHelper.SendMessageParams.of(result.send_message.message, dialogId, replyToMsg, replyToTopMsg, webPage, !result.send_message.no_webpage, result.send_message.entities, result.send_message.reply_markup, params, notify, scheduleDate, null, false);
             params2.quick_reply_shortcut = quick_reply_shortcut;
             params2.quick_reply_shortcut_id = quick_reply_shortcut_id;
+            params2.replyQuote = quote;
             accountInstance.getSendMessagesHelper().sendMessage(params2);
         } else if (result.send_message instanceof TLRPC.TL_botInlineMessageMediaVenue) {
             TLRPC.TL_messageMediaVenue venue = new TLRPC.TL_messageMediaVenue();
@@ -8226,6 +8233,7 @@ public class SendMessagesHelper extends BaseController implements NotificationCe
             SendMessagesHelper.SendMessageParams params2 = SendMessagesHelper.SendMessageParams.of(venue, dialogId, replyToMsg, replyToTopMsg, result.send_message.reply_markup, params, notify, scheduleDate);
             params2.quick_reply_shortcut = quick_reply_shortcut;
             params2.quick_reply_shortcut_id = quick_reply_shortcut_id;
+            params2.replyQuote = quote;
             accountInstance.getSendMessagesHelper().sendMessage(params2);
         } else if (result.send_message instanceof TLRPC.TL_botInlineMessageMediaGeo) {
             SendMessagesHelper.SendMessageParams params2;
@@ -8244,6 +8252,7 @@ public class SendMessagesHelper extends BaseController implements NotificationCe
             }
             params2.quick_reply_shortcut = quick_reply_shortcut;
             params2.quick_reply_shortcut_id = quick_reply_shortcut_id;
+            params2.replyQuote = quote;
             accountInstance.getSendMessagesHelper().sendMessage(params2);
         } else if (result.send_message instanceof TLRPC.TL_botInlineMessageMediaContact) {
             TLRPC.User user = new TLRPC.TL_user();
@@ -8258,6 +8267,7 @@ public class SendMessagesHelper extends BaseController implements NotificationCe
             SendMessagesHelper.SendMessageParams params2 = SendMessagesHelper.SendMessageParams.of(user, dialogId, replyToMsg, replyToTopMsg, result.send_message.reply_markup, params, notify, scheduleDate);
             params2.quick_reply_shortcut = quick_reply_shortcut;
             params2.quick_reply_shortcut_id = quick_reply_shortcut_id;
+            params2.replyQuote = quote;
             accountInstance.getSendMessagesHelper().sendMessage(params2);
         } else if (result.send_message instanceof TLRPC.TL_botInlineMessageMediaInvoice) {
             if (DialogObject.isEncryptedDialog(dialogId)) {
@@ -8279,6 +8289,7 @@ public class SendMessagesHelper extends BaseController implements NotificationCe
             SendMessagesHelper.SendMessageParams params2 = SendMessagesHelper.SendMessageParams.of(messageMediaInvoice, dialogId, replyToMsg, replyToTopMsg, result.send_message.reply_markup, params, notify, scheduleDate);
             params2.quick_reply_shortcut = quick_reply_shortcut;
             params2.quick_reply_shortcut_id = quick_reply_shortcut_id;
+            params2.replyQuote = quote;
             accountInstance.getSendMessagesHelper().sendMessage(params2);
         } else if (result.send_message instanceof TLRPC.TL_botInlineMessageMediaWebPage) {
             TLRPC.TL_botInlineMessageMediaWebPage request = (TLRPC.TL_botInlineMessageMediaWebPage) result.send_message;
@@ -8287,6 +8298,7 @@ public class SendMessagesHelper extends BaseController implements NotificationCe
             SendMessagesHelper.SendMessageParams params2 = SendMessagesHelper.SendMessageParams.of(result.send_message.message, dialogId, replyToMsg, replyToTopMsg, webPage, !result.send_message.no_webpage, result.send_message.entities, result.send_message.reply_markup, params, notify, scheduleDate, null, false);
             params2.quick_reply_shortcut = quick_reply_shortcut;
             params2.quick_reply_shortcut_id = quick_reply_shortcut_id;
+            params2.replyQuote = quote;
             accountInstance.getSendMessagesHelper().sendMessage(params2);
         }
     }

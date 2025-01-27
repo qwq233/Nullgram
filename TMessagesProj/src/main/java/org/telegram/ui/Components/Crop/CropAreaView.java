@@ -1,3 +1,22 @@
+/*
+ * Copyright (C) 2019-2025 qwq233 <qwq233@qwq2333.top>
+ * https://github.com/qwq233/Nullgram
+ *
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation; either version 2
+ * of the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along with this software.
+ *  If not, see
+ * <https://www.gnu.org/licenses/>
+ */
+
 package org.telegram.ui.Components.Crop;
 
 import android.animation.Animator;
@@ -64,11 +83,13 @@ public class CropAreaView extends ViewGroup {
     private int previousX;
     private int previousY;
 
-    private float bottomPadding;
+    private float bottomPadding, topPadding;
     private boolean dimVisibile;
     private boolean frameVisible;
+    private float overrideDimAlpha = -1.0f;
 
     private float frameAlpha = 1.0f;
+    private float overrideFrameAlpha = -1.0f;
     private long lastUpdateTime;
 
     private Paint dimPaint;
@@ -190,6 +211,14 @@ public class CropAreaView extends ViewGroup {
         dimVisibile = visible;
     }
 
+    public void setDimAlpha(float alpha) {
+        overrideDimAlpha = alpha;
+    }
+
+    public void setFrameAlpha(float alpha) {
+        overrideFrameAlpha = alpha;
+    }
+
     public void setFrameVisibility(boolean visible, boolean animated) {
         frameVisible = visible;
         if (frameVisible) {
@@ -203,6 +232,10 @@ public class CropAreaView extends ViewGroup {
 
     public void setBottomPadding(float value) {
         bottomPadding = value;
+    }
+
+    public void setTopPadding(float value) {
+        topPadding = value;
     }
 
     public Interpolator getInterpolator() {
@@ -278,7 +311,11 @@ public class CropAreaView extends ViewGroup {
                 int left = -getWidth() * 4, top = -getHeight() * 4,
                     right = getWidth() * 4, bottom = getHeight() * 4;
 
-                dimPaint.setAlpha((int) (0xff - 0x7f * frameAlpha));
+                if (overrideDimAlpha >= 0) {
+                    dimPaint.setAlpha((int) (0xFF * overrideDimAlpha));
+                } else {
+                    dimPaint.setAlpha((int) (0xff - 0x7f * frameAlpha));
+                }
 
                 canvas.drawRect(left, top, right, 0, dimPaint);
                 canvas.drawRect(left, 0, 0, getHeight(), dimPaint);
@@ -304,10 +341,17 @@ public class CropAreaView extends ViewGroup {
                 type = previousGridType;
             }
 
-            shadowPaint.setAlpha((int) (gridProgress * 26 * frameAlpha));
-            linePaint.setAlpha((int) (gridProgress * 178 * frameAlpha));
-            framePaint.setAlpha((int) (178 * frameAlpha));
-            handlePaint.setAlpha((int) (255 * frameAlpha));
+            if (overrideFrameAlpha >= 0) {
+                shadowPaint.setAlpha((int) (gridProgress * 26 * overrideFrameAlpha));
+                linePaint.setAlpha((int) (gridProgress * 178 * overrideFrameAlpha));
+                framePaint.setAlpha((int) (178 * overrideFrameAlpha));
+                handlePaint.setAlpha((int) (255 * overrideFrameAlpha));
+            } else {
+                shadowPaint.setAlpha((int) (gridProgress * 26 * frameAlpha));
+                linePaint.setAlpha((int) (gridProgress * 178 * frameAlpha));
+                framePaint.setAlpha((int) (178 * frameAlpha));
+                handlePaint.setAlpha((int) (255 * frameAlpha));
+            }
 
             canvas.drawRect(originX + inset, originY + inset, originX + width - inset, originY + inset + lineThickness, framePaint);
             canvas.drawRect(originX + inset, originY + inset, originX + inset + lineThickness, originY + height - inset, framePaint);
@@ -357,7 +401,7 @@ public class CropAreaView extends ViewGroup {
             canvas.restore();
         } else {
             float width = getMeasuredWidth() - 2 * sidePadding;
-            float height = getMeasuredHeight() - bottomPadding - (Build.VERSION.SDK_INT >= 21 && !inBubbleMode ? AndroidUtilities.statusBarHeight : 0) - 2 * sidePadding;
+            float height = getMeasuredHeight() - bottomPadding - (Build.VERSION.SDK_INT >= 21 && !inBubbleMode ? AndroidUtilities.statusBarHeight : 0) - topPadding - 2 * sidePadding;
             size = (int) Math.min(width, height);
 
             if (circleBitmap == null || circleBitmap.getWidth() != size) {
@@ -603,13 +647,13 @@ public class CropAreaView extends ViewGroup {
     public void calculateRect(RectF rect, float cropAspectRatio) {
         float statusBarHeight = (Build.VERSION.SDK_INT >= 21 && !inBubbleMode ? AndroidUtilities.statusBarHeight : 0);
         float left, top, right, bottom;
-        float measuredHeight = (float) getMeasuredHeight() - bottomPadding - statusBarHeight;
+        float measuredHeight = (float) getMeasuredHeight() - bottomPadding - topPadding - statusBarHeight;
         float aspectRatio = (float) getMeasuredWidth() / measuredHeight;
         float minSide = Math.min(getMeasuredWidth(), measuredHeight) - 2 * sidePadding;
         float width = getMeasuredWidth() - 2 * sidePadding;
         float height = measuredHeight - 2 * sidePadding;
         float centerX = getMeasuredWidth() / 2.0f;
-        float centerY = statusBarHeight + measuredHeight / 2.0f;
+        float centerY = statusBarHeight + topPadding + measuredHeight / 2.0f;
 
         if (Math.abs(1.0f - cropAspectRatio) < 0.0001) {
             left = centerX - (minSide / 2.0f);
@@ -842,7 +886,7 @@ public class CropAreaView extends ViewGroup {
                 }
             }
 
-            float topPadding = statusBarHeight + sidePadding;
+            float topPadding = statusBarHeight + this.topPadding + sidePadding;
             float finalBottomPadidng = bottomPadding + sidePadding;
             if (tempRect.top < topPadding) {
                 if (lockAspectRatio > 0) {

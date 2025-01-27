@@ -1,3 +1,22 @@
+/*
+ * Copyright (C) 2019-2025 qwq233 <qwq233@qwq2333.top>
+ * https://github.com/qwq233/Nullgram
+ *
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation; either version 2
+ * of the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along with this software.
+ *  If not, see
+ * <https://www.gnu.org/licenses/>
+ */
+
 package org.telegram.messenger;
 
 import android.text.TextUtils;
@@ -28,13 +47,11 @@ public class CacheByChatsController {
 
     private final int currentAccount;
 
-    int[] keepMediaByTypes = {-1, -1, -1, -1};
+    private boolean gotKeepMediaByTypes = false;
+    private final int[] keepMediaByTypes = { -1, -1, -1, -1 };
 
     public CacheByChatsController(int currentAccount) {
         this.currentAccount = currentAccount;
-        for (int i = 0; i < 4; i++) {
-            keepMediaByTypes[i] = SharedConfig.getPreferences().getInt("keep_media_type_" + i, getDefault(i));
-        }
     }
 
     public static int getDefault(int type) {
@@ -122,6 +139,12 @@ public class CacheByChatsController {
     }
 
     public int getKeepMedia(int type) {
+        if (!gotKeepMediaByTypes) {
+            gotKeepMediaByTypes = true;
+            for (int i = 0; i < 4; i++) {
+                keepMediaByTypes[i] = SharedConfig.getPreferences().getInt("keep_media_type_" + i, getDefault(i));
+            }
+        }
         if (keepMediaByTypes[type] == -1) {
             return SharedConfig.keepMedia;
         }
@@ -129,6 +152,12 @@ public class CacheByChatsController {
     }
 
     public void setKeepMedia(int type, int keepMedia) {
+        if (!gotKeepMediaByTypes) {
+            gotKeepMediaByTypes = true;
+            for (int i = 0; i < 4; i++) {
+                keepMediaByTypes[i] = SharedConfig.getPreferences().getInt("keep_media_type_" + i, getDefault(i));
+            }
+        }
         keepMediaByTypes[type] = keepMedia;
         SharedConfig.getPreferences().edit().putInt("keep_media_type_" + type, keepMedia).apply();
     }

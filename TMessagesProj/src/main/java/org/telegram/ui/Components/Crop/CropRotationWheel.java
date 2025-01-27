@@ -1,3 +1,22 @@
+/*
+ * Copyright (C) 2019-2025 qwq233 <qwq233@qwq2333.top>
+ * https://github.com/qwq233/Nullgram
+ *
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation; either version 2
+ * of the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along with this software.
+ *  If not, see
+ * <https://www.gnu.org/licenses/>
+ */
+
 package org.telegram.ui.Components.Crop;
 
 import android.content.Context;
@@ -41,7 +60,7 @@ public class CropRotationWheel extends FrameLayout {
 
     private ImageView aspectRatioButton;
     private ImageView rotation90Button;
-    private ImageView mirrorButton;
+    private ImageView  mirrorButton;
 //    private TextView degreesLabel;
     private String degreesText;
     private TextPaint degreesTextPaint;
@@ -192,7 +211,9 @@ public class CropRotationWheel extends FrameLayout {
                 try {
                     if (Math.abs(newAngle - MAX_ANGLE) < 0.001f && Math.abs(this.rotation - MAX_ANGLE) >= 0.001f ||
                         Math.abs(newAngle - -MAX_ANGLE) < 0.001f && Math.abs(this.rotation - -MAX_ANGLE) >= 0.001f) {
-                        performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP, HapticFeedbackConstants.FLAG_IGNORE_VIEW_SETTING);
+                        try {
+                            performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP, HapticFeedbackConstants.FLAG_IGNORE_VIEW_SETTING);
+                        } catch (Exception ignored) {}
                     } else if (Math.floor(this.rotation / 2.5f) != Math.floor(newAngle / 2.5f)) {
                         AndroidUtilities.vibrateCursor(this);
                     }

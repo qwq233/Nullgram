@@ -1,3 +1,22 @@
+/*
+ * Copyright (C) 2019-2025 qwq233 <qwq233@qwq2333.top>
+ * https://github.com/qwq233/Nullgram
+ *
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation; either version 2
+ * of the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along with this software.
+ *  If not, see
+ * <https://www.gnu.org/licenses/>
+ */
+
 package androidx.recyclerview.widget;
 
 import android.animation.Animator;
@@ -439,12 +458,16 @@ public class ChatListItemAnimator extends DefaultItemAnimator {
     public boolean animateMove(RecyclerView.ViewHolder holder, ItemHolderInfo info, int fromX, int fromY, int toX, int toY) {
         final View view = holder.itemView;
         ChatMessageCell chatMessageCell = null;
+        ChatActionCell chatActionCell = null;
         if (holder.itemView instanceof ChatMessageCell) {
             chatMessageCell = ((ChatMessageCell) holder.itemView);
             fromX += (int) chatMessageCell.getAnimationOffsetX();
             if (chatMessageCell.getTransitionParams().lastTopOffset != chatMessageCell.getTopMediaOffset()) {
                 fromY += chatMessageCell.getTransitionParams().lastTopOffset - chatMessageCell.getTopMediaOffset();
             }
+        } else if (holder.itemView instanceof ChatActionCell) {
+            chatActionCell = ((ChatActionCell) holder.itemView);
+            fromX += (int) holder.itemView.getTranslationX();
         } else {
             fromX += (int) holder.itemView.getTranslationX();
         }
@@ -689,13 +712,43 @@ public class ChatListItemAnimator extends DefaultItemAnimator {
                 params.changePinnedBottomProgress = 0;
             }
 
-            moveInfo.animateChangeInternal = chatMessageCell.getTransitionParams().animateChange();
+            moveInfo.animateChangeInternal = params.animateChange();
             if (moveInfo.animateChangeInternal) {
-                chatMessageCell.getTransitionParams().animateChange = true;
-                chatMessageCell.getTransitionParams().animateChangeProgress = 0f;
+                params.animateChange = true;
+                params.animateChangeProgress = 0f;
             }
 
             if (deltaX == 0 && deltaY == 0 && !moveInfo.animateImage && !moveInfo.animateRemoveGroup && !moveInfo.animateChangeGroupBackground && !moveInfo.animatePinnedBottom && !moveInfo.animateBackgroundOnly && !moveInfo.animateChangeInternal) {
+                dispatchMoveFinished(holder);
+                return false;
+            }
+        } else if (chatActionCell != null) {
+            ChatActionCell.TransitionParams params = chatActionCell.getTransitionParams();
+
+            if (!params.supportChangeAnimation()) {
+                if (deltaX == 0 && deltaY == 0) {
+                    dispatchMoveFinished(holder);
+                    return false;
+                }
+                if (deltaX != 0) {
+                    view.setTranslationX(-deltaX);
+                }
+                mPendingMoves.add(moveInfo);
+                checkIsRunning();
+                return true;
+            }
+
+            if (deltaX != 0) {
+                view.setTranslationX(-deltaX);
+            }
+
+            moveInfo.animateChangeInternal = params.animateChange();
+            if (moveInfo.animateChangeInternal) {
+                params.animateChange = true;
+                params.animateChangeProgress = 0f;
+            }
+
+            if (deltaX == 0 && deltaY == 0 && !moveInfo.animateChangeInternal) {
                 dispatchMoveFinished(holder);
                 return false;
             }
@@ -899,6 +952,19 @@ public class ChatListItemAnimator extends DefaultItemAnimator {
                 valueAnimator.addUpdateListener(animation -> {
                     params.animateChangeProgress = (float) animation.getAnimatedValue();
                     chatMessageCell.invalidate();
+                });
+                animatorSet.playTogether(valueAnimator);
+            }
+        } else if (holder.itemView instanceof ChatActionCell) {
+            ChatActionCell chatActionCell = (ChatActionCell) holder.itemView;
+            ChatActionCell.TransitionParams params = chatActionCell.getTransitionParams();
+
+            if (moveInfoExtended.animateChangeInternal) {
+                ValueAnimator valueAnimator = ValueAnimator.ofFloat(0, 1f);
+                params.animateChange = true;
+                valueAnimator.addUpdateListener(animation -> {
+                    params.animateChangeProgress = (float) animation.getAnimatedValue();
+                    chatActionCell.invalidate();
                 });
                 animatorSet.playTogether(valueAnimator);
             }
@@ -1141,6 +1207,8 @@ public class ChatListItemAnimator extends DefaultItemAnimator {
         } else if (view instanceof ChatMessageCell) {
             ((ChatMessageCell) view).getTransitionParams().resetAnimation();
             ((ChatMessageCell) view).setAnimationOffsetX(0f);
+        } else if (view instanceof ChatActionCell) {
+            ((ChatActionCell) view).getTransitionParams().resetAnimation();
         } else {
             view.setTranslationX(0f);
         }

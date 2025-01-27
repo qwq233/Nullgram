@@ -1,3 +1,22 @@
+/*
+ * Copyright (C) 2019-2025 qwq233 <qwq233@qwq2333.top>
+ * https://github.com/qwq233/Nullgram
+ *
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation; either version 2
+ * of the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along with this software.
+ *  If not, see
+ * <https://www.gnu.org/licenses/>
+ */
+
 package org.telegram.ui;
 
 import android.graphics.Canvas;
@@ -259,7 +278,9 @@ public class EmojiAnimationsOverlay implements NotificationCenter.NotificationCe
         if (bestView != null && chatActivity != null) {
             chatActivity.restartSticker(bestView);
             if (!EmojiData.hasEmojiSupportVibration(bestView.getMessageObject().getStickerEmoji()) && !bestView.getMessageObject().isPremiumSticker() && !bestView.getMessageObject().isAnimatedAnimatedEmoji()) {
-                bestView.performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP);
+                try {
+                    bestView.performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP);
+                } catch (Exception ignored) {}
             }
             showAnimationForCell(bestView, animation, false, true);
         }
@@ -430,7 +451,9 @@ public class EmojiAnimationsOverlay implements NotificationCenter.NotificationCe
         boolean show = showAnimationForCell(view, -1, userTapped, false);
 
         if (userTapped && show && !EmojiData.hasEmojiSupportVibration(view.getMessageObject().getStickerEmoji()) && !view.getMessageObject().isPremiumSticker() && !view.getMessageObject().isAnimatedAnimatedEmoji()) {
-            view.performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP);
+            try {
+                view.performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP);
+            } catch (Exception ignored) {}
         }
         if (view.getMessageObject().isPremiumSticker() || view.getEffect() != null || (!userTapped && view.getMessageObject().isAnimatedEmojiStickerSingle())) {
             view.getMessageObject().forcePlayEffect = false;
@@ -746,8 +769,10 @@ public class EmojiAnimationsOverlay implements NotificationCenter.NotificationCe
 
                         @Override
                         public void onAnimationReady(ImageReceiver imageReceiver) {
-                            if (sendTap && messageObject.isAnimatedAnimatedEmoji() && imageReceiver.getLottieAnimation() != null && !imageReceiver.getLottieAnimation().hasVibrationPattern()) {
-                                contentLayout.performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP, HapticFeedbackConstants.FLAG_IGNORE_VIEW_SETTING);
+                            if (sendTap && messageObject != null && messageObject.isAnimatedAnimatedEmoji() && imageReceiver.getLottieAnimation() != null && !imageReceiver.getLottieAnimation().hasVibrationPattern()) {
+                                try {
+                                    contentLayout.performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP, HapticFeedbackConstants.FLAG_IGNORE_VIEW_SETTING);
+                                } catch (Exception ignored) {}
                             }
                         }
                     });

@@ -1,3 +1,22 @@
+/*
+ * Copyright (C) 2019-2025 qwq233 <qwq233@qwq2333.top>
+ * https://github.com/qwq233/Nullgram
+ *
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation; either version 2
+ * of the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along with this software.
+ *  If not, see
+ * <https://www.gnu.org/licenses/>
+ */
+
 package org.telegram.messenger;
 
 import android.content.Context;
@@ -11,6 +30,7 @@ import org.telegram.tgnet.ConnectionsManager;
 import org.telegram.tgnet.ResultCallback;
 import org.telegram.tgnet.SerializedData;
 import org.telegram.tgnet.TLRPC;
+import org.telegram.tgnet.tl.TL_account;
 import org.telegram.ui.ActionBar.EmojiThemes;
 import org.telegram.ui.ActionBar.Theme;
 import org.telegram.ui.ChatBackgroundDrawable;
@@ -72,13 +92,13 @@ public class ChatThemeController extends BaseController {
 
         boolean needReload = System.currentTimeMillis() - lastReloadTimeMs > reloadTimeoutMs;
         if (allChatThemes == null || allChatThemes.isEmpty() || needReload) {
-            TLRPC.TL_account_getChatThemes request = new TLRPC.TL_account_getChatThemes();
+            TL_account.getChatThemes request = new TL_account.getChatThemes();
             request.hash = themesHash;
             ConnectionsManager.getInstance(UserConfig.selectedAccount).sendRequest(request, (response, error) -> chatThemeQueue.postRunnable(() -> {
                 boolean isError = false;
                 final List<EmojiThemes> chatThemes;
-                if (response instanceof TLRPC.TL_account_themes) {
-                    TLRPC.TL_account_themes resp = (TLRPC.TL_account_themes) response;
+                if (response instanceof TL_account.TL_themes) {
+                    TL_account.TL_themes resp = (TL_account.TL_themes) response;
                     themesHash = resp.hash;
                     lastReloadTimeMs = System.currentTimeMillis();
 
@@ -99,7 +119,7 @@ public class ChatThemeController extends BaseController {
                         chatThemes.add(chatTheme);
                     }
                     editor.apply();
-                } else if (response instanceof TLRPC.TL_account_themesNotModified) {
+                } else if (response instanceof TL_account.TL_themesNotModified) {
                    // if (allChatThemes == null || allChatThemes.isEmpty()) {
                         chatThemes = getAllChatThemesFromPrefs();
 //                    } else {

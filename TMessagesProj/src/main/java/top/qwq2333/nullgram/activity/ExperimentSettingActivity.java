@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019-2024 qwq233 <qwq233@qwq2333.top>
+ * Copyright (C) 2019-2025 qwq233 <qwq233@qwq2333.top>
  * https://github.com/qwq233/Nullgram
  *
  * This program is free software; you can redistribute it and/or
@@ -31,6 +31,7 @@ import org.telegram.messenger.R;
 import org.telegram.messenger.UserConfig;
 import org.telegram.tgnet.ConnectionsManager;
 import org.telegram.tgnet.TLRPC;
+import org.telegram.tgnet.tl.TL_account;
 import org.telegram.ui.ActionBar.AlertDialog;
 import org.telegram.ui.ActionBar.Theme;
 import org.telegram.ui.Cells.HeaderCell;
@@ -188,7 +189,7 @@ public class ExperimentSettingActivity extends BaseActivity {
                 Config.getKeepOnlineStatusAs(), getParentActivity(), view, i -> {
                     Config.setKeepOnlineStatusAs(i);
 
-                    TLRPC.TL_account_updateStatus req = new TLRPC.TL_account_updateStatus();
+                    TL_account.updateStatus req = new TL_account.updateStatus();
                     req.offline = i == 2;
                     ConnectionsManager.getInstance(UserConfig.selectedAccount).sendRequest(req, null);
 

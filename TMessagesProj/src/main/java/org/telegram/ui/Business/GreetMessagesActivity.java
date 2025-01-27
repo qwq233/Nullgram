@@ -1,3 +1,22 @@
+/*
+ * Copyright (C) 2019-2025 qwq233 <qwq233@qwq2333.top>
+ * https://github.com/qwq233/Nullgram
+ *
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation; either version 2
+ * of the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along with this software.
+ *  If not, see
+ * <https://www.gnu.org/licenses/>
+ */
+
 package org.telegram.ui.Business;
 
 import static org.telegram.messenger.LocaleController.getString;
@@ -16,6 +35,7 @@ import org.telegram.messenger.LocaleController;
 import org.telegram.messenger.NotificationCenter;
 import org.telegram.messenger.R;
 import org.telegram.tgnet.TLRPC;
+import org.telegram.tgnet.tl.TL_account;
 import org.telegram.ui.ActionBar.ActionBar;
 import org.telegram.ui.ActionBar.ActionBarMenuItem;
 import org.telegram.ui.ActionBar.AlertDialog;
@@ -175,9 +195,9 @@ public class GreetMessagesActivity extends BaseFragment implements NotificationC
 
         doneButtonDrawable.animateToProgress(1f);
         TLRPC.UserFull userFull = getMessagesController().getUserFull(getUserConfig().getClientUserId());
-        TLRPC.TL_account_updateBusinessGreetingMessage req = new TLRPC.TL_account_updateBusinessGreetingMessage();
+        TL_account.updateBusinessGreetingMessage req = new TL_account.updateBusinessGreetingMessage();
         if (enabled) {
-            req.message = new TLRPC.TL_inputBusinessGreetingMessage();
+            req.message = new TL_account.TL_inputBusinessGreetingMessage();
             req.message.shortcut_id = reply.id;
             req.message.recipients = recipientsHelper.getInputValue();
             req.message.no_activity_days = inactivityDays;
@@ -185,7 +205,7 @@ public class GreetMessagesActivity extends BaseFragment implements NotificationC
 
             if (userFull != null) {
                 userFull.flags2 |= 4;
-                userFull.business_greeting_message = new TLRPC.TL_businessGreetingMessage();
+                userFull.business_greeting_message = new TL_account.TL_businessGreetingMessage();
                 userFull.business_greeting_message.shortcut_id = reply.id;
                 userFull.business_greeting_message.recipients = recipientsHelper.getValue();
                 userFull.business_greeting_message.no_activity_days = inactivityDays;
@@ -230,7 +250,7 @@ public class GreetMessagesActivity extends BaseFragment implements NotificationC
     }
 
 
-    public TLRPC.TL_businessGreetingMessage currentValue;
+    public TL_account.TL_businessGreetingMessage currentValue;
 
     public boolean enabled;
     public boolean exclude;

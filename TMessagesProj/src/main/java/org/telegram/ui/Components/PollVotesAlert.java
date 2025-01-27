@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019-2024 qwq233 <qwq233@qwq2333.top>
+ * Copyright (C) 2019-2025 qwq233 <qwq233@qwq2333.top>
  * https://github.com/qwq233/Nullgram
  *
  * This program is free software; you can redistribute it and/or
@@ -240,11 +240,11 @@ public class PollVotesAlert extends BottomSheet {
                 NotificationCenter.listenEmojiLoading(textView);
                 CharSequence answerText = new SpannableStringBuilder(left);
                 MediaDataController.addTextStyleRuns(entities, left, (Spannable) answerText);
-                answerText = Emoji.replaceEmoji(answerText, textView.getPaint().getFontMetricsInt(), AndroidUtilities.dp(14), false);
+                answerText = Emoji.replaceEmoji(answerText, textView.getPaint().getFontMetricsInt(), false);
                 MessageObject.replaceAnimatedEmoji(answerText, entities, textView.getPaint().getFontMetricsInt());
                 textView.setText(answerText);
             } else {
-                textView.setText(Emoji.replaceEmoji(left, textView.getPaint().getFontMetricsInt(), AndroidUtilities.dp(14), false));
+                textView.setText(Emoji.replaceEmoji(left, textView.getPaint().getFontMetricsInt(), false));
             }
             String p = String.format("%d", percent);
             SpannableStringBuilder builder;
@@ -939,7 +939,7 @@ public class PollVotesAlert extends BottomSheet {
             MessageObject.replaceAnimatedEmoji(questionText, poll.question.entities, titleTextView.getPaint().getFontMetricsInt());
             titleTextView.setText(questionText);
         } else {
-            titleTextView.setText(Emoji.replaceEmoji(poll.question == null ? "" : poll.question.text, titleTextView.getPaint().getFontMetricsInt(), AndroidUtilities.dp(18), false));
+            titleTextView.setText(Emoji.replaceEmoji(poll.question == null ? "" : poll.question.text, titleTextView.getPaint().getFontMetricsInt(), false));
         }
 
         actionBar = new ActionBar(context) {

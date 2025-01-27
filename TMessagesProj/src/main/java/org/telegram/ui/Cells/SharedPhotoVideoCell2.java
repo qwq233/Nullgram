@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019-2024 qwq233 <qwq233@qwq2333.top>
+ * Copyright (C) 2019-2025 qwq233 <qwq233@qwq2333.top>
  * https://github.com/qwq233/Nullgram
  *
  * This program is free software; you can redistribute it and/or
@@ -135,7 +135,7 @@ public class SharedPhotoVideoCell2 extends FrameLayout {
     static boolean lastAutoDownload;
 
     private Path path = new Path();
-    private SpoilerEffect mediaSpoilerEffect = new SpoilerEffect();
+    private SpoilerEffect mediaSpoilerEffect;
     private float spoilerRevealProgress;
     private float spoilerRevealX;
     private float spoilerRevealY;
@@ -565,6 +565,9 @@ public class SharedPhotoVideoCell2 extends FrameLayout {
                     canvas.clipRect(imageReceiver.getImageX(), imageReceiver.getImageY(), imageReceiver.getImageX2(), imageReceiver.getImageY2());
                     mediaSpoilerEffect2.draw(canvas, this, (int) imageReceiver.getImageWidth(), (int) imageReceiver.getImageHeight());
                 } else {
+                    if (mediaSpoilerEffect == null) {
+                        mediaSpoilerEffect = new SpoilerEffect();
+                    }
                     int sColor = Color.WHITE;
                     mediaSpoilerEffect.setColor(ColorUtils.setAlphaComponent(sColor, (int) (Color.alpha(sColor) * 0.325f)));
                     mediaSpoilerEffect.setBounds((int) imageReceiver.getImageX(), (int) imageReceiver.getImageY(), (int) imageReceiver.getImageX2(), (int) imageReceiver.getImageY2());

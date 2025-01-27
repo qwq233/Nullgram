@@ -1,3 +1,22 @@
+/*
+ * Copyright (C) 2019-2025 qwq233 <qwq233@qwq2333.top>
+ * https://github.com/qwq233/Nullgram
+ *
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation; either version 2
+ * of the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along with this software.
+ *  If not, see
+ * <https://www.gnu.org/licenses/>
+ */
+
 package org.telegram.ui.Stories;
 
 import static org.telegram.ui.Stories.StoriesController.STATE_UNREAD;
@@ -860,12 +879,12 @@ public class StoriesUtilities {
     }
 
     public static CharSequence createExpiredStoryString() {
-        return createExpiredStoryString(false, "ExpiredStory", R.string.ExpiredStory);
+        return createExpiredStoryString(false, R.string.ExpiredStory);
     }
 
-    public static CharSequence createExpiredStoryString(boolean useScale, String strKey, int strRes, Object... args) {
+    public static CharSequence createExpiredStoryString(boolean useScale, int strRes, Object... args) {
         SpannableStringBuilder spannableStringBuilder = new SpannableStringBuilder();
-        spannableStringBuilder.append("d ").append(LocaleController.formatString(strKey, strRes, args));
+        spannableStringBuilder.append("d ").append(LocaleController.formatString(strRes, args));
         ColoredImageSpan coloredImageSpan = new ColoredImageSpan(R.drawable.msg_mini_bomb);
         if (useScale) {
             coloredImageSpan.setScale(0.8f, 0.8f);
@@ -1173,7 +1192,9 @@ public class StoriesUtilities {
                             AndroidUtilities.cancelRunOnUIThread(longPressRunnable);
                         }
                         AndroidUtilities.runOnUIThread(longPressRunnable = () -> {
-                            view.performHapticFeedback(HapticFeedbackConstants.LONG_PRESS);
+                            try {
+                                view.performHapticFeedback(HapticFeedbackConstants.LONG_PRESS);
+                            } catch (Exception ignored) {}
                             if (buttonBounce != null) {
                                 buttonBounce.setPressed(false);
                             }
@@ -1411,6 +1432,10 @@ public class StoriesUtilities {
         public void setColorId(int colorId, boolean animated) {
             MessagesController.PeerColors peerColors = MessagesController.getInstance(currentAccount).profilePeerColors;
             MessagesController.PeerColor peerColor = peerColors == null ? null : peerColors.getColor(colorId);
+            setColor(peerColor, animated);
+        }
+
+        public void setColor(MessagesController.PeerColor peerColor, boolean animated) {
             if (peerColor != null) {
                 setColors(
                     peerColor.getStoryColor1(Theme.isCurrentThemeDark()),
@@ -1421,6 +1446,7 @@ public class StoriesUtilities {
                 resetColors(animated);
             }
         }
+
         private void resetColors(boolean animated) {
             if (isDialogCell) {
                 setColors(Theme.getColor(Theme.key_stories_circle_dialog1), Theme.getColor(Theme.key_stories_circle_dialog2), animated);

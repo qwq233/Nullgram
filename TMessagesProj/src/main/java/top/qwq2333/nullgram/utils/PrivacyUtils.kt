@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019-2023 qwq233 <qwq233@qwq2333.top>
+ * Copyright (C) 2019-2025 qwq233 <qwq233@qwq2333.top>
  * https://github.com/qwq233/Nullgram
  *
  * This program is free software; you can redistribute it and/or
@@ -29,10 +29,12 @@ import org.telegram.messenger.MessagesController
 import org.telegram.messenger.R
 import org.telegram.tgnet.ConnectionsManager
 import org.telegram.tgnet.TLRPC
+import org.telegram.tgnet.tl.TL_account
 import org.telegram.ui.ActionBar.AlertDialog
 import org.telegram.ui.ActionBar.Theme
 import org.telegram.ui.LaunchActivity
 import org.telegram.ui.TwoStepVerificationActivity
+import kotlin.apply
 
 object PrivacyUtils {
 
@@ -55,10 +57,10 @@ object PrivacyUtils {
 
     private fun postCheckPhoneNumberVisible(ctx: Context, account: Int) {
 
-        ConnectionsManager.getInstance(account).sendRequest(TLRPC.TL_account_getPrivacy().apply {
+        ConnectionsManager.getInstance(account).sendRequest(TL_account.getPrivacy().apply {
             key = TLRPC.TL_inputPrivacyKeyPhoneNumber()
         }, { response, _ ->
-            if (response is TLRPC.TL_account_privacyRules) {
+            if (response is TL_account.privacyRules) {
                 if (response.rules.isEmpty()) {
                     AndroidUtilities.runOnUIThread {
                         showPrivacyAlert(ctx, account, 0)
@@ -78,10 +80,10 @@ object PrivacyUtils {
     }
 
     private fun postCheckAddMeByPhone(ctx: Context, account: Int) {
-        ConnectionsManager.getInstance(account).sendRequest(TLRPC.TL_account_getPrivacy().apply {
+        ConnectionsManager.getInstance(account).sendRequest(TL_account.getPrivacy().apply {
             key = TLRPC.TL_inputPrivacyKeyAddedByPhone()
         }, { response, _ ->
-            if (response is TLRPC.TL_account_privacyRules) {
+            if (response is TL_account.privacyRules) {
                 if (response.rules.isEmpty()) {
                     AndroidUtilities.runOnUIThread {
                         showPrivacyAlert(ctx, account, 1)
@@ -101,10 +103,10 @@ object PrivacyUtils {
     }
 
     private fun postCheckAllowP2p(ctx: Context, account: Int) {
-        ConnectionsManager.getInstance(account).sendRequest(TLRPC.TL_account_getPrivacy().apply {
+        ConnectionsManager.getInstance(account).sendRequest(TL_account.getPrivacy().apply {
             key = TLRPC.TL_inputPrivacyKeyPhoneP2P()
         }, { response, _ ->
-            if (response is TLRPC.TL_account_privacyRules) {
+            if (response is TL_account.privacyRules) {
                 if (response.rules.isEmpty()) {
                     AndroidUtilities.runOnUIThread {
                         showPrivacyAlert(ctx, account, 2)
@@ -124,8 +126,8 @@ object PrivacyUtils {
     }
 
     private fun postCheckAllow2fa(ctx: Context, account: Int) {
-        ConnectionsManager.getInstance(account).sendRequest(TLRPC.TL_account_getPassword(), { response, _ ->
-            if (response is TLRPC.TL_account_password) {
+        ConnectionsManager.getInstance(account).sendRequest(TL_account.getPassword(), { response, _ ->
+            if (response is TL_account.Password) {
                 if (!response.has_password) {
                     AndroidUtilities.runOnUIThread {
                         show2faAlert(ctx, account, response)
@@ -154,7 +156,7 @@ object PrivacyUtils {
             )
         )
         builder.setPositiveButton(LocaleController.getString("ApplySuggestion", R.string.ApplySuggestion)) { _, _ ->
-            ConnectionsManager.getInstance(account).sendRequest(TLRPC.TL_account_setPrivacy().apply {
+            ConnectionsManager.getInstance(account).sendRequest(TL_account.setPrivacy().apply {
                 key = when (type) {
                     0 -> TLRPC.TL_inputPrivacyKeyPhoneNumber()
                     1 -> TLRPC.TL_inputPrivacyKeyAddedByPhone()
@@ -194,7 +196,7 @@ object PrivacyUtils {
         }
     }
 
-    private fun show2faAlert(ctx: Context, account: Int, password: TLRPC.TL_account_password) {
+    private fun show2faAlert(ctx: Context, account: Int, password: TL_account.Password) {
         val builder = AlertDialog.Builder(ctx)
         builder.setTitle(LocaleController.getString("PrivacyNotice", R.string.PrivacyNotice))
         builder.setMessage(

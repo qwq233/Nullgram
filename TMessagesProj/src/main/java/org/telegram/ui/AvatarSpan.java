@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019-2024 qwq233 <qwq233@qwq2333.top>
+ * Copyright (C) 2019-2025 qwq233 <qwq233@qwq2333.top>
  * https://github.com/qwq233/Nullgram
  *
  * This program is free software; you can redistribute it and/or
@@ -34,6 +34,7 @@ import androidx.annotation.Nullable;
 
 import org.telegram.messenger.ImageReceiver;
 import org.telegram.messenger.MessagesController;
+import org.telegram.tgnet.TLObject;
 import org.telegram.tgnet.TLRPC;
 import org.telegram.ui.ActionBar.Theme;
 import org.telegram.ui.Components.AvatarDrawable;
@@ -125,6 +126,11 @@ public class AvatarSpan extends ReplacementSpan {
     public void setUser(TLRPC.User user) {
         avatarDrawable.setInfo(currentAccount, user);
         imageReceiver.setForUserOrChat(user, avatarDrawable);
+    }
+
+    public void setObject(TLObject obj) {
+        avatarDrawable.setInfo(currentAccount, obj);
+        imageReceiver.setForUserOrChat(obj, avatarDrawable);
     }
 
     public void setName(String name) {

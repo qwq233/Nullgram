@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019-2024 qwq233 <qwq233@qwq2333.top>
+ * Copyright (C) 2019-2025 qwq233 <qwq233@qwq2333.top>
  * https://github.com/qwq233/Nullgram
  *
  * This program is free software; you can redistribute it and/or
@@ -170,13 +170,19 @@ public class UserObject {
         if (MessagesController.getInstance(UserConfig.selectedAccount).premiumFeaturesBlocked()) {
             return null;
         }
-        if (emojiStatus instanceof TLRPC.TL_emojiStatus)
-            return ((TLRPC.TL_emojiStatus) emojiStatus).document_id;
-        if (emojiStatus instanceof TLRPC.TL_emojiStatusUntil) {
-            TLRPC.TL_emojiStatusUntil untilStatus = (TLRPC.TL_emojiStatusUntil) emojiStatus;
-            if (untilStatus.until > (int) (System.currentTimeMillis() / 1000)) {
-                return untilStatus.document_id;
+        if (emojiStatus instanceof TLRPC.TL_emojiStatus) {
+            final TLRPC.TL_emojiStatus status = (TLRPC.TL_emojiStatus) emojiStatus;
+            if ((status.flags & 1) != 0 && status.until <= (int) (System.currentTimeMillis() / 1000)) {
+                return null;
             }
+            return status.document_id;
+        }
+        if (emojiStatus instanceof TLRPC.TL_emojiStatusCollectible) {
+            final TLRPC.TL_emojiStatusCollectible status = (TLRPC.TL_emojiStatusCollectible) emojiStatus;
+            if ((status.flags & 1) != 0 && status.until <= (int) (System.currentTimeMillis() / 1000)) {
+                return null;
+            }
+            return status.document_id;
         }
         return null;
     }
@@ -210,7 +216,17 @@ public class UserObject {
     }
 
     public static long getProfileEmojiId(TLRPC.User user) {
+        if (user != null && user.emoji_status instanceof TLRPC.TL_emojiStatusCollectible) {
+            return ((TLRPC.TL_emojiStatusCollectible) user.emoji_status).pattern_document_id;
+        }
         if (user != null && user.profile_color != null && (user.profile_color.flags & 2) != 0) return user.profile_color.background_emoji_id;
+        return 0;
+    }
+
+    public static long getProfileCollectibleId(TLRPC.User user) {
+        if (user != null && user.emoji_status instanceof TLRPC.TL_emojiStatusCollectible) {
+            return ((TLRPC.TL_emojiStatusCollectible) user.emoji_status).collectible_id;
+        }
         return 0;
     }
 }

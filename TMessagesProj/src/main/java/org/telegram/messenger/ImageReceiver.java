@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019-2024 qwq233 <qwq233@qwq2333.top>
+ * Copyright (C) 2019-2025 qwq233 <qwq233@qwq2333.top>
  * https://github.com/qwq233/Nullgram
  *
  * This program is free software; you can redistribute it and/or
@@ -297,7 +297,7 @@ public class ImageReceiver implements NotificationCenter.NotificationCenterDeleg
     private boolean allowLottieVibration = true;
     private boolean allowStartAnimation = true;
     private boolean allowStartLottieAnimation = true;
-    private boolean useSharedAnimationQueue;
+    public boolean useSharedAnimationQueue;
     private boolean allowDecodeSingleFrame;
     private int autoRepeat = 1;
     private int autoRepeatCount = -1;

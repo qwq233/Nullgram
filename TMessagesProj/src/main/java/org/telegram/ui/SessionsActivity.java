@@ -1,9 +1,20 @@
 /*
- * This is the source code of Telegram for Android v. 5.x.x
- * It is licensed under GNU GPL v. 2 or later.
- * You should have received a copy of the license in this archive (see LICENSE).
+ * Copyright (C) 2019-2025 qwq233 <qwq233@qwq2333.top>
+ * https://github.com/qwq233/Nullgram
  *
- * Copyright Nikolai Kudashov, 2013-2018.
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation; either version 2
+ * of the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along with this software.
+ *  If not, see
+ * <https://www.gnu.org/licenses/>
  */
 
 package org.telegram.ui;
@@ -50,6 +61,7 @@ import org.telegram.messenger.UserObject;
 import org.telegram.tgnet.ConnectionsManager;
 import org.telegram.tgnet.TLObject;
 import org.telegram.tgnet.TLRPC;
+import org.telegram.tgnet.tl.TL_account;
 import org.telegram.ui.ActionBar.ActionBar;
 import org.telegram.ui.ActionBar.AlertDialog;
 import org.telegram.ui.ActionBar.BaseFragment;
@@ -270,7 +282,7 @@ public class SessionsActivity extends BaseFragment implements NotificationCenter
                             value = 365;
                         }
 
-                        final TLRPC.TL_account_setAuthorizationTTL req = new TLRPC.TL_account_setAuthorizationTTL();
+                        final TL_account.setAuthorizationTTL req = new TL_account.setAuthorizationTTL();
                         req.authorization_ttl_days = value;
                         ttlDays = value;
                         if (listAdapter != null) {
@@ -324,7 +336,7 @@ public class SessionsActivity extends BaseFragment implements NotificationCenter
                             }
                         });
                     } else {
-                        TLRPC.TL_account_resetWebAuthorizations req = new TLRPC.TL_account_resetWebAuthorizations();
+                        TL_account.resetWebAuthorizations req = new TL_account.resetWebAuthorizations();
                         ConnectionsManager.getInstance(currentAccount).sendRequest(req, (response, error) -> AndroidUtilities.runOnUIThread(() -> {
                             if (getParentActivity() == null) {
                                 return;
@@ -418,7 +430,7 @@ public class SessionsActivity extends BaseFragment implements NotificationCenter
                         } else {
                             authorization = (TLRPC.TL_authorization) passwordSessions.get(position - passwordSessionsStartRow);
                         }
-                        TLRPC.TL_account_resetAuthorization req = new TLRPC.TL_account_resetAuthorization();
+                        TL_account.resetAuthorization req = new TL_account.resetAuthorization();
                         req.hash = authorization.hash;
                         ConnectionsManager.getInstance(currentAccount).sendRequest(req, (response, error) -> AndroidUtilities.runOnUIThread(() -> {
                             try {
@@ -437,7 +449,7 @@ public class SessionsActivity extends BaseFragment implements NotificationCenter
                         }));
                     } else {
                         final TLRPC.TL_webAuthorization authorization = (TLRPC.TL_webAuthorization) sessions.get(position - otherSessionsStartRow);
-                        TLRPC.TL_account_resetWebAuthorization req = new TLRPC.TL_account_resetWebAuthorization();
+                        TL_account.resetWebAuthorization req = new TL_account.resetWebAuthorization();
                         req.hash = authorization.hash;
                         ConnectionsManager.getInstance(currentAccount).sendRequest(req, (response, error) -> AndroidUtilities.runOnUIThread(() -> {
                             try {
@@ -474,7 +486,7 @@ public class SessionsActivity extends BaseFragment implements NotificationCenter
                 public void hide(boolean apply, int animated) {
                     if (!apply) {
                         TLRPC.TL_authorization authorization = (TLRPC.TL_authorization) getCurrentInfoObject();
-                        TLRPC.TL_account_resetAuthorization req = new TLRPC.TL_account_resetAuthorization();
+                        TL_account.resetAuthorization req = new TL_account.resetAuthorization();
                         req.hash = authorization.hash;
                         ConnectionsManager.getInstance(currentAccount).sendRequest(req, (response, error) -> AndroidUtilities.runOnUIThread(() -> {
                             if (error == null) {
@@ -521,7 +533,7 @@ public class SessionsActivity extends BaseFragment implements NotificationCenter
         SessionBottomSheet bottomSheet = new SessionBottomSheet(this, authorization, isCurrentSession, new SessionBottomSheet.Callback() {
             @Override
             public void onSessionTerminated(TLRPC.TL_authorization authorization) {
-                TLRPC.TL_account_resetAuthorization req = new TLRPC.TL_account_resetAuthorization();
+                TL_account.resetAuthorization req = new TL_account.resetAuthorization();
                 req.hash = authorization.hash;
                 ConnectionsManager.getInstance(currentAccount).sendRequest(req, (response, error) -> AndroidUtilities.runOnUIThread(() -> {
                     if (error == null) {
@@ -577,14 +589,14 @@ public class SessionsActivity extends BaseFragment implements NotificationCenter
             loading = true;
         }
         if (currentType == 0) {
-            TLRPC.TL_account_getAuthorizations req = new TLRPC.TL_account_getAuthorizations();
+            TL_account.getAuthorizations req = new TL_account.getAuthorizations();
             int reqId = ConnectionsManager.getInstance(currentAccount).sendRequest(req, (response, error) -> AndroidUtilities.runOnUIThread(() -> {
                 loading = false;
                 int oldItemsCount = listAdapter != null ? listAdapter.getItemCount() : 0;
                 if (error == null) {
                     sessions.clear();
                     passwordSessions.clear();
-                    TLRPC.TL_account_authorizations res = (TLRPC.TL_account_authorizations) response;
+                    TL_account.authorizations res = (TL_account.authorizations) response;
                     for (int a = 0, N = res.authorizations.size(); a < N; a++) {
                         TLRPC.TL_authorization authorization = res.authorizations.get(a);
                         if ((authorization.flags & 1) != 0) {
@@ -619,12 +631,12 @@ public class SessionsActivity extends BaseFragment implements NotificationCenter
             }));
             ConnectionsManager.getInstance(currentAccount).bindRequestToGuid(reqId, classGuid);
         } else {
-            TLRPC.TL_account_getWebAuthorizations req = new TLRPC.TL_account_getWebAuthorizations();
+            TL_account.getWebAuthorizations req = new TL_account.getWebAuthorizations();
             int reqId = ConnectionsManager.getInstance(currentAccount).sendRequest(req, (response, error) -> AndroidUtilities.runOnUIThread(() -> {
                 loading = false;
                 if (error == null) {
                     sessions.clear();
-                    TLRPC.TL_account_webAuthorizations res = (TLRPC.TL_account_webAuthorizations) response;
+                    TL_account.webAuthorizations res = (TL_account.webAuthorizations) response;
                     MessagesController.getInstance(currentAccount).putUsers(res.users, false);
                     sessions.addAll(res.authorizations);
                     updateRows();

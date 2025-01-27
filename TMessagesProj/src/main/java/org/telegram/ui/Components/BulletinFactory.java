@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019-2024 qwq233 <qwq233@qwq2333.top>
+ * Copyright (C) 2019-2025 qwq233 <qwq233@qwq2333.top>
  * https://github.com/qwq233/Nullgram
  *
  * This program is free software; you can redistribute it and/or
@@ -45,8 +45,6 @@ import android.widget.FrameLayout;
 import androidx.annotation.CheckResult;
 import androidx.annotation.NonNull;
 import androidx.core.graphics.ColorUtils;
-
-import com.google.common.collect.Lists;
 
 import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.ApplicationLoader;
@@ -117,9 +115,13 @@ public final class BulletinFactory {
     public void showForError(TLRPC.TL_error error) {
         if (!LaunchActivity.isActive) return;
         if (error == null) {
-            createErrorBulletin(LocaleController.formatString(R.string.UnknownError)).show();
+            Bulletin b = createErrorBulletin(LocaleController.formatString(R.string.UnknownError));
+            b.hideAfterBottomSheet = false;
+            b.show();
         } else {
-            createErrorBulletin(LocaleController.formatString(R.string.UnknownErrorCode, error.text)).show();
+            Bulletin b = createErrorBulletin(LocaleController.formatString(R.string.UnknownErrorCode, error.text));
+            b.hideAfterBottomSheet = false;
+            b.show();
         }
     }
 
@@ -489,6 +491,10 @@ public final class BulletinFactory {
         return createUsersBulletin(Arrays.asList(user), text, subtitle, null);
     }
 
+    public Bulletin createUsersBulletin(TLObject user, CharSequence text) {
+        return createUsersBulletin(Arrays.asList(user), text, null, null);
+    }
+
     public Bulletin createUsersBulletin(List<? extends TLObject> users, CharSequence text, CharSequence subtitle) {
         return createUsersBulletin(users, text, subtitle, null);
     }
@@ -538,7 +544,7 @@ public final class BulletinFactory {
             }
         } else {
             layout.textView.setSingleLine(false);
-            layout.textView.setMaxLines(2);
+            layout.textView.setMaxLines(4);
             layout.textView.setText(text);
             if (layout.textView.getLayoutParams() instanceof ViewGroup.MarginLayoutParams) {
                 int margin = dp(12 + 56 + 2 - (3 - count) * 12);
@@ -940,7 +946,7 @@ public final class BulletinFactory {
 
     @CheckResult
     public Bulletin createCopyLinkBulletin() {
-        return createCopyLinkBulletin(false, resourcesProvider);
+        return createCopyLinkBulletin(false);
     }
 
     @CheckResult
@@ -960,7 +966,7 @@ public final class BulletinFactory {
     }
 
     @CheckResult
-    public Bulletin createCopyLinkBulletin(boolean isPrivate, Theme.ResourcesProvider resourcesProvider) {
+    public Bulletin createCopyLinkBulletin(boolean isPrivate) {
         if (!AndroidUtilities.shouldShowClipboardToast()) {
             return new Bulletin.EmptyBulletin();
         }

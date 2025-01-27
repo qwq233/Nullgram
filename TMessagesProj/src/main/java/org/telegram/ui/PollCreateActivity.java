@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019-2024 qwq233 <qwq233@qwq2333.top>
+ * Copyright (C) 2019-2025 qwq233 <qwq233@qwq2333.top>
  * https://github.com/qwq233/Nullgram
  *
  * This program is free software; you can redistribute it and/or
@@ -1222,7 +1222,7 @@ public class PollCreateActivity extends BaseFragment implements NotificationCent
                     i = 0;
                 }
                 try {
-                    CharSequence localCharSequence = Emoji.replaceEmoji(symbol, editText.getPaint().getFontMetricsInt(), AndroidUtilities.dp(18), false);
+                    CharSequence localCharSequence = Emoji.replaceEmoji(symbol, editText.getPaint().getFontMetricsInt(), false);
                     editText.setText(editText.getText().insert(i, localCharSequence));
                     int j = i + localCharSequence.length();
                     editText.setSelection(j, j);
@@ -1485,7 +1485,7 @@ public class PollCreateActivity extends BaseFragment implements NotificationCent
                                     for (ImageSpan span : spans) {
                                         s.removeSpan(span);
                                     }
-                                    Emoji.replaceEmoji(s, cell.getEditField().getPaint().getFontMetricsInt(), AndroidUtilities.dp(18), false);
+                                    Emoji.replaceEmoji(s, cell.getEditField().getPaint().getFontMetricsInt(), false);
 
                                     suggestEmojiPanel.setDirection(SuggestEmojiView.DIRECTION_TO_TOP);
                                     suggestEmojiPanel.setDelegate(cell);
@@ -1555,7 +1555,7 @@ public class PollCreateActivity extends BaseFragment implements NotificationCent
                                     for (ImageSpan span : spans) {
                                         s.removeSpan(span);
                                     }
-                                    Emoji.replaceEmoji(s, cell.getEditField().getPaint().getFontMetricsInt(), AndroidUtilities.dp(18), false);
+                                    Emoji.replaceEmoji(s, cell.getEditField().getPaint().getFontMetricsInt(), false);
 
                                     suggestEmojiPanel.setDirection(SuggestEmojiView.DIRECTION_TO_TOP);
                                     suggestEmojiPanel.setDelegate(cell);
@@ -1707,7 +1707,7 @@ public class PollCreateActivity extends BaseFragment implements NotificationCent
                                     for (ImageSpan span : spans) {
                                         s.removeSpan(span);
                                     }
-                                    Emoji.replaceEmoji(s, cell.getEditField().getPaint().getFontMetricsInt(), AndroidUtilities.dp(18), false);
+                                    Emoji.replaceEmoji(s, cell.getEditField().getPaint().getFontMetricsInt(), false);
                                     float y = holder.itemView.getY() - AndroidUtilities.dp(166) + holder.itemView.getMeasuredHeight();
                                     if (y > 0) {
                                         suggestEmojiPanel.setDirection(SuggestEmojiView.DIRECTION_TO_BOTTOM);

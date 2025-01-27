@@ -1,3 +1,22 @@
+/*
+ * Copyright (C) 2019-2025 qwq233 <qwq233@qwq2333.top>
+ * https://github.com/qwq233/Nullgram
+ *
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation; either version 2
+ * of the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along with this software.
+ *  If not, see
+ * <https://www.gnu.org/licenses/>
+ */
+
 package org.telegram.messenger;
 
 import org.telegram.tgnet.TLRPC;
@@ -10,9 +29,9 @@ import java.util.ArrayList;
 public class ChatMessagesMetadataController {
 
     final ChatActivity chatActivity;
-    private ArrayList<MessageObject> reactionsToCheck = new ArrayList<>(10);
-    private ArrayList<MessageObject> extendedMediaToCheck = new ArrayList<>(10);
-    private ArrayList<MessageObject> storiesToCheck = new ArrayList<>(10);
+    private final ArrayList<MessageObject> reactionsToCheck = new ArrayList<>(10);
+    private final ArrayList<MessageObject> extendedMediaToCheck = new ArrayList<>(10);
+    private final ArrayList<MessageObject> storiesToCheck = new ArrayList<>(10);
 
     ArrayList<Integer> reactionsRequests = new ArrayList<>();
     ArrayList<Integer> extendedMediaRequests = new ArrayList<>();
@@ -38,7 +57,7 @@ public class ChatMessagesMetadataController {
             storiesToCheck.clear();
             for (int i = from; i < to; i++) {
                 MessageObject messageObject = messages.get(i);
-                if (chatActivity.getThreadMessage() != messageObject && messageObject.getId() > 0 && messageObject.messageOwner.action == null && (currentTime - messageObject.reactionsLastCheckTime) > 15000L) {
+                if (chatActivity.getThreadMessage() != messageObject && messageObject.getId() > 0 && (messageObject.messageOwner.action == null || messageObject.canSetReaction()) && (currentTime - messageObject.reactionsLastCheckTime) > 15000L) {
                     messageObject.reactionsLastCheckTime = currentTime;
                     reactionsToCheck.add(messageObject);
                 }

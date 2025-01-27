@@ -1,3 +1,22 @@
+/*
+ * Copyright (C) 2019-2025 qwq233 <qwq233@qwq2333.top>
+ * https://github.com/qwq233/Nullgram
+ *
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation; either version 2
+ * of the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along with this software.
+ *  If not, see
+ * <https://www.gnu.org/licenses/>
+ */
+
 package org.telegram.ui.Components.voip;
 
 import android.Manifest;
@@ -40,6 +59,7 @@ import org.telegram.messenger.voip.Instance;
 import org.telegram.messenger.voip.VoIPService;
 import org.telegram.tgnet.ConnectionsManager;
 import org.telegram.tgnet.TLRPC;
+import org.telegram.tgnet.tl.TL_phone;
 import org.telegram.ui.ActionBar.AlertDialog;
 import org.telegram.ui.ActionBar.BaseFragment;
 import org.telegram.ui.ActionBar.Theme;
@@ -391,7 +411,7 @@ public class VoIPHelper {
 
 	public static void sendCallRating(final long callID, final long accessHash, final int account, int rating) {
 		final int currentAccount = UserConfig.selectedAccount;
-		final TLRPC.TL_phone_setCallRating req = new TLRPC.TL_phone_setCallRating();
+		final TL_phone.setCallRating req = new TL_phone.setCallRating();
 		req.rating = rating;
 		req.comment = "";
 		req.peer = new TLRPC.TL_inputPhoneCall();
@@ -573,7 +593,7 @@ public class VoIPHelper {
 			int rating = bar.getRating();
 			if (rating >= 4 || page[0] == 1) {
 				final int currentAccount = UserConfig.selectedAccount;
-				final TLRPC.TL_phone_setCallRating req = new TLRPC.TL_phone_setCallRating();
+				final TL_phone.setCallRating req = new TL_phone.setCallRating();
 				req.rating = bar.getRating();
 				ArrayList<String> problemTags = new ArrayList<>();
 				for (int i = 0; i < problemsWrap.getChildCount(); i++) {

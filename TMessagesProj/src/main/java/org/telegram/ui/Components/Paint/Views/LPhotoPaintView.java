@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019-2024 qwq233 <qwq233@qwq2333.top>
+ * Copyright (C) 2019-2025 qwq233 <qwq233@qwq2333.top>
  * https://github.com/qwq233/Nullgram
  *
  * This program is free software; you can redistribute it and/or
@@ -497,7 +497,7 @@ public class LPhotoPaintView extends SizeNotifierFrameLayoutPhoto implements IPh
                         text.setSpan(new AnimatedEmojiSpan(e.document_id, textPaintView.getFontMetricsInt()), e.offset, e.offset + e.length, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
                     }
                     CharSequence charSequence = text;
-                    charSequence = Emoji.replaceEmoji(charSequence, textPaintView.getFontMetricsInt(), (int) (textPaintView.getFontSize() * .8f), false);
+                    charSequence = Emoji.replaceEmoji(charSequence, textPaintView.getFontMetricsInt(), false);
                     if (charSequence instanceof Spanned) {
                         Emoji.EmojiSpan[] spans = ((Spanned) charSequence).getSpans(0, charSequence.length(), Emoji.EmojiSpan.class);
                         if (spans != null) {
@@ -1568,7 +1568,7 @@ public class LPhotoPaintView extends SizeNotifierFrameLayoutPhoto implements IPh
             size.height = w;
         }
         PhotoView view = new PhotoView(getContext(), centerPositionForEntity(), 0, 1f, size, path, orientation.first, orientation.second);
-        view.centerImage.setLayerNum(4 + 8);
+//        view.centerImage.setLayerNum(4 + 8);
 //        view.setHasStickyX(true);
 //        view.setHasStickyY(true);
         view.setDelegate(this);
@@ -3648,7 +3648,7 @@ public class LPhotoPaintView extends SizeNotifierFrameLayoutPhoto implements IPh
                 }
                 try {
                     innerTextChange = 2;
-                    CharSequence localCharSequence = Emoji.replaceEmoji(symbol, textPaintView.getFontMetricsInt(), (int) (textPaintView.getFontSize() * .8f), false);
+                    CharSequence localCharSequence = Emoji.replaceEmoji(symbol, textPaintView.getFontMetricsInt(), false);
                     if (localCharSequence instanceof Spanned) {
                         Emoji.EmojiSpan[] spans = ((Spanned) localCharSequence).getSpans(0, localCharSequence.length(), Emoji.EmojiSpan.class);
                         if (spans != null) {

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019-2024 qwq233 <qwq233@qwq2333.top>
+ * Copyright (C) 2019-2025 qwq233 <qwq233@qwq2333.top>
  * https://github.com/qwq233/Nullgram
  *
  * This program is free software; you can redistribute it and/or
@@ -27,6 +27,7 @@ import android.util.LongSparseArray;
 
 import org.telegram.tgnet.SerializedData;
 import org.telegram.tgnet.TLRPC;
+import org.telegram.tgnet.tl.TL_account;
 
 import java.util.Arrays;
 
@@ -50,7 +51,7 @@ public class UserConfig extends BaseController {
     public int lastHintsSyncTime;
     public boolean draftsLoaded;
     public boolean unreadDialogsLoaded = true;
-    public TLRPC.TL_account_tmpPassword tmpPassword;
+    public TL_account.tmpPassword tmpPassword;
     public int ratingLoadTime;
     public int botRatingLoadTime;
     public int webappRatingLoadTime;
@@ -373,7 +374,7 @@ public class UserConfig extends BaseController {
                 byte[] bytes = Base64.decode(string, Base64.DEFAULT);
                 if (bytes != null) {
                     SerializedData data = new SerializedData(bytes);
-                    tmpPassword = TLRPC.TL_account_tmpPassword.TLdeserialize(data, data.readInt32(false), false);
+                    tmpPassword = TL_account.tmpPassword.TLdeserialize(data, data.readInt32(false), false);
                     data.cleanup();
                 }
             }
