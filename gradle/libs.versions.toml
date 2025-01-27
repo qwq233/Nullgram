@@ -19,7 +19,7 @@ imageLabeling= "16.0.8"
 kotlin = "2.1.0"
 ksp = "2.1.0-1.0.29"
 kotlinxCoroutinesAndroid = "1.9.0"
-kotlinxSerializationJson = "1.7.3"
+kotlinxSerializationJson = "1.8.0"
 ktor = "3.0.3"
 languageId = "17.0.6"
 osmdroidAndroid = "6.1.20"
@@ -31,7 +31,7 @@ mlkitVision = "16.0.0-beta1"
 processPhoenix = "3.0.0"
 sharetarget = "1.2.0"
 paletteKtx = "1.0.0"
-rust = "0.9.4"
+rust = "0.9.6"
 
 [libraries]
 checker-compat-qual = { module = "org.checkerframework:checker-compat-qual", version.ref = "checkerCompatQual" }
