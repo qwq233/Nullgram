@@ -13924,13 +13924,13 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
         if (arrayList == null || arrayList.isEmpty()) {
             return;
         }
-        if (did == 0 && !checkSlowModeAlert()) {
+        if (!checkSlowModeAlert()) {
             return;
         }
         if ((scheduleDate != 0) == (chatMode == MODE_SCHEDULED)) {
             waitingForSendingMessageLoad = true;
         }
-        int result = getSendMessagesHelper().sendMessage(arrayList, dialog_id, fromMyName, hideCaption, notify, scheduleDate, getThreadMessage(), -1);
+        int result = getSendMessagesHelper().sendMessage(arrayList, did != 0 ? did : dialog_id, fromMyName, hideCaption, notify, scheduleDate, getThreadMessage(), -1);
         AlertsCreator.showSendMediaAlert(result, this, themeDelegate);
         if (result != 0) {
             AndroidUtilities.runOnUIThread(() -> {
