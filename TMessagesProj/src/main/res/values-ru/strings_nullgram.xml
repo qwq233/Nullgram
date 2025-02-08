@@ -252,9 +252,9 @@
     <string name="Translator">Переводчик</string>
     <string name="ProviderGoogleTranslate">Переводчик Google</string>
     <string name="ProviderYandexTranslate">Яндекс переводчик</string>
-    <string name="ProviderTelegramTranslate">TELEOFFICIAL Переводчик</string>
+    <string name="ProviderTelegramTranslate">TELEOFFICIAL переводчик</string>
     <string name="ProviderMicrosoftTranslate">Microsoft Translate</string>
-    <string name="ProviderDeepLTranslate">DeepL </string>
+    <string name="ProviderDeepLTranslate">DeepL переводчик</string>
     <string name="ProviderLingoTranslate">Lingo Translate</string>
     <string name="TranslationProvider">Поставщик переводов</string>
     <string name="TranslateApiUnsupported">Переводчик, который Вы выбрали, не поддерживает Ваш язык.</string>
@@ -292,7 +292,7 @@
     <string name="JumpToBeginning">Вернуться к Началу</string>
     <string name="DisableQuickSendMediaBottom">Скрыть быструю отправку медиа</string>
     <string name="ProviderBaiduTranslate">Переводчик Baidu</string>
-    <string name="ProviderTranSmartTranslate">TranSmart Переводчик</string>
+    <string name="ProviderTranSmartTranslate">TranSmart переводчик</string>
     <string name="alwaysSendWithoutSound">Всегда отправлять без звука</string>
     <string name="EditEnableMarkdown">Включить разметку текста</string>
     <string name="EditDisableMarkdown">Отключить разметку текста</string>
