@@ -252,7 +252,7 @@
     <string name="Translator">Переводчик</string>
     <string name="ProviderGoogleTranslate">Переводчик Google</string>
     <string name="ProviderYandexTranslate">Яндекс переводчик</string>
-    <string name="ProviderTelegramTranslate">TELEOFFICIAL переводчик</string>
+    <string name="ProviderTelegramTranslate">Переводчик Telegram</string>
     <string name="ProviderMicrosoftTranslate">Microsoft Translate</string>
     <string name="ProviderDeepLTranslate">DeepL переводчик</string>
     <string name="ProviderLingoTranslate">Lingo Translate</string>
@@ -310,7 +310,7 @@
     <string name="showRPCError">Показать ошибку RPC</string>
     <string name="enablePanguOnReceiving">Включить Pangu при получении</string>
     <string name="enablePanguOnSending">Включить Pangu при отправке</string>
-    <string name="panguInfo">Чрезмерно осторожный интервал в тексте для автоматической вставки пробелов между китайскими, японскими, корейскими (CJK) символами, полуширинными английскими символами, цифрами и символами для лучшей читаемости.</string>
+    <string name="panguInfo">Автоматическая расстановка пробелов для удобочитаемости: добавление пробелов между символами CJK (китайскими, японскими, корейскими), латинскими буквами, цифрами и специальными знаками.</string>
     <string name="showExactTime">Показывать время с секундами</string>
     <string name="keepOnlineStatusAs">Поддерживать онлайн-статус</string>
     <string name="Offline">Не в сети</string>
