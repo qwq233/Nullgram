@@ -121,7 +121,7 @@
     <string name="disableUndo">Вимкнути скасування</string>
     <string name="confirmToSendMediaMessages">Підтвердити для надсилання відео повідомлень</string>
     <string name="disableInstantCamera">Вимкнути вбудовану камеру</string>
-    <string name="LastUpdateRecently">Last successfully checked just now.</string>
+    <string name="LastUpdateRecently">Остання успішна перевірка оновлень щойно.</string>
     <string name="NullgramPrivacyPolicyUrl">https://github.com/qwq233/Nullgram/wiki/Privacy-Policy</string>
     <string name="skipOpenLinkConfirm">Skip Open Link Confirm</string>
     <string name="maxRecentSticker">Max Recent Sticker</string>
