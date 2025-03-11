@@ -47,7 +47,6 @@ import androidx.annotation.RequiresApi;
 
 import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.ApplicationLoader;
-import org.telegram.messenger.Bitmaps;
 import org.telegram.messenger.Emoji;
 import org.telegram.messenger.FileLog;
 import org.telegram.messenger.LocaleController;
@@ -60,9 +59,7 @@ import org.telegram.ui.Components.Paint.Views.PaintTextOptionsView;
 import org.telegram.ui.Components.RLottieDrawable;
 
 import java.io.File;
-import java.io.RandomAccessFile;
 import java.nio.ByteBuffer;
-import java.nio.channels.FileChannel;
 import java.util.ArrayList;
 
 public class WebmEncoder {
@@ -299,7 +296,7 @@ public class WebmEncoder {
                 };
                 ((Spannable) text).setSpan(span, e.offset, e.offset + e.length, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
             }
-            text = Emoji.replaceEmoji(text, editText.getPaint().getFontMetricsInt(), (int) (editText.getTextSize() * .8f), false);
+            text = Emoji.replaceEmoji(text, editText.getPaint().getFontMetricsInt(), false);
             if (text instanceof Spanned) {
                 Emoji.EmojiSpan[] spans = ((Spanned) text).getSpans(0, text.length(), Emoji.EmojiSpan.class);
                 if (spans != null) {

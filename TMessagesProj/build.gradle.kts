@@ -93,6 +93,7 @@ dependencies {
     implementation(libs.play.services.wallet)
     implementation(libs.play.services.mlkit.vision)
     implementation(libs.play.services.mlkit.imageLabeling)
+    implementation(libs.play.services.cast.framework)
     implementation(libs.isoparser)
     implementation(files("libs/stripe.aar"))
     implementation(libs.language.id)
@@ -101,6 +102,9 @@ dependencies {
     implementation(libs.gson)
     implementation(libs.process.phoenix)
     implementation(libs.hiddenapibypass)
+    implementation(libs.nanohttpd)
+    implementation(libs.mediarouter)
+    implementation(libs.recaptcha)
 
     implementation(libs.kotlin.stdlib.common)
     implementation(libs.kotlin.stdlib)

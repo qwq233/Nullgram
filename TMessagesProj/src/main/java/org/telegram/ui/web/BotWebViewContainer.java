@@ -398,6 +398,13 @@ public abstract class BotWebViewContainer extends FrameLayout implements Notific
         if (replaceWith != null) {
             AndroidUtilities.removeFromParent(replaceWith);
         }
+        try {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT && SharedConfig.debugWebView) {
+                WebView.setWebContentsDebuggingEnabled(true);
+            }
+        } catch (Exception e) {
+            FileLog.e(e);
+        }
         webView = replaceWith == null ? new MyWebView(getContext(), bot) : replaceWith;
         if (!bot) {
             CookieManager cookieManager = CookieManager.getInstance();
@@ -2751,7 +2758,7 @@ public abstract class BotWebViewContainer extends FrameLayout implements Notific
 
     private JSONObject buildThemeParams() {
         try {
-            JSONObject object = BotWebViewSheet.makeThemeParams(resourcesProvider);
+            JSONObject object = BotWebViewSheet.makeThemeParams(resourcesProvider, true);
             if (object != null) {
                 return new JSONObject().put("theme_params", object);
             }
@@ -3495,20 +3502,25 @@ public abstract class BotWebViewContainer extends FrameLayout implements Notific
                     } else {
                         d("onRenderProcessGone");
                     }
-                    if (!AndroidUtilities.isSafeToShow(getContext())) {
+                    try {
+                        if (!AndroidUtilities.isSafeToShow(getContext())) {
+                            return true;
+                        }
+                        new AlertDialog.Builder(getContext(), botWebViewContainer == null ? null : botWebViewContainer.resourcesProvider)
+                                .setTitle(getString(R.string.ChromeCrashTitle))
+                                .setMessage(AndroidUtilities.replaceSingleTag(getString(R.string.ChromeCrashMessage), () -> Browser.openUrl(getContext(), "https://play.google.com/store/apps/details?id=com.google.android.webview")))
+                                .setPositiveButton(getString(R.string.OK), null)
+                                .setOnDismissListener(d -> {
+                                    if (botWebViewContainer != null && botWebViewContainer.delegate != null) {
+                                        botWebViewContainer.delegate.onCloseRequested(null);
+                                    }
+                                })
+                                .show();
                         return true;
+                    } catch (Exception e) {
+                        FileLog.e(e);
+                        return false;
                     }
-                    new AlertDialog.Builder(getContext(), botWebViewContainer == null ? null : botWebViewContainer.resourcesProvider)
-                            .setTitle(getString(R.string.ChromeCrashTitle))
-                            .setMessage(AndroidUtilities.replaceSingleTag(getString(R.string.ChromeCrashMessage), () -> Browser.openUrl(getContext(), "https://play.google.com/store/apps/details?id=com.google.android.webview")))
-                            .setPositiveButton(getString(R.string.OK), null)
-                            .setOnDismissListener(d -> {
-                                if (botWebViewContainer != null && botWebViewContainer.delegate != null) {
-                                    botWebViewContainer.delegate.onCloseRequested(null);
-                                }
-                            })
-                            .show();
-                    return true;
                 }
 
                 @Override
@@ -3801,20 +3813,25 @@ public abstract class BotWebViewContainer extends FrameLayout implements Notific
                                 } else {
                                     d("newWebView.onRenderProcessGone");
                                 }
-                                if (!AndroidUtilities.isSafeToShow(getContext())) {
+                                try {
+                                    if (!AndroidUtilities.isSafeToShow(getContext())) {
+                                        return true;
+                                    }
+                                    new AlertDialog.Builder(getContext(), botWebViewContainer == null ? null : botWebViewContainer.resourcesProvider)
+                                            .setTitle(getString(R.string.ChromeCrashTitle))
+                                            .setMessage(AndroidUtilities.replaceSingleTag(getString(R.string.ChromeCrashMessage), () -> Browser.openUrl(getContext(), "https://play.google.com/store/apps/details?id=com.google.android.webview")))
+                                            .setPositiveButton(getString(R.string.OK), null)
+                                            .setOnDismissListener(d -> {
+                                                if (botWebViewContainer.delegate != null) {
+                                                    botWebViewContainer.delegate.onCloseRequested(null);
+                                                }
+                                            })
+                                            .show();
                                     return true;
+                                } catch (Exception e) {
+                                    FileLog.e(e);
+                                    return false;
                                 }
-                                new AlertDialog.Builder(getContext(), botWebViewContainer == null ? null : botWebViewContainer.resourcesProvider)
-                                        .setTitle(getString(R.string.ChromeCrashTitle))
-                                        .setMessage(AndroidUtilities.replaceSingleTag(getString(R.string.ChromeCrashMessage), () -> Browser.openUrl(getContext(), "https://play.google.com/store/apps/details?id=com.google.android.webview")))
-                                        .setPositiveButton(getString(R.string.OK), null)
-                                        .setOnDismissListener(d -> {
-                                            if (botWebViewContainer.delegate != null) {
-                                                botWebViewContainer.delegate.onCloseRequested(null);
-                                            }
-                                        })
-                                        .show();
-                                return true;
                             }
 
                             @Override
@@ -4106,7 +4123,7 @@ public abstract class BotWebViewContainer extends FrameLayout implements Notific
                                 // we can't get blob binary from webview :(
                                 return;
                             } else {
-                                final String filename = getFilename(url, contentDisposition, mimeType);
+                                final String filename = AndroidUtilities.escape(getFilename(url, contentDisposition, mimeType));
 
                                 final Runnable download = () -> {
                                     try {

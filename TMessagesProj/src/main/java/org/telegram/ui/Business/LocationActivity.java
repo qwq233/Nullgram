@@ -37,6 +37,7 @@ import org.telegram.messenger.SvgHelper;
 import org.telegram.messenger.Utilities;
 import org.telegram.messenger.WebFile;
 import org.telegram.tgnet.TLRPC;
+import org.telegram.tgnet.tl.TL_account;
 import org.telegram.ui.ActionBar.ActionBar;
 import org.telegram.ui.ActionBar.ActionBarMenuItem;
 import org.telegram.ui.ActionBar.AlertDialog;
@@ -386,7 +387,7 @@ public class LocationActivity extends BaseFragment implements NotificationCenter
 
         doneButtonDrawable.animateToProgress(1f);
         TLRPC.UserFull userFull = getMessagesController().getUserFull(getUserConfig().getClientUserId());
-        TLRPC.TL_account_updateBusinessLocation req = new TLRPC.TL_account_updateBusinessLocation();
+        TL_account.updateBusinessLocation req = new TL_account.updateBusinessLocation();
         if (!empty) {
             if (geo != null) {
                 req.flags |= 2;
@@ -484,7 +485,7 @@ public class LocationActivity extends BaseFragment implements NotificationCenter
             builder.setPositiveButton(LocaleController.getString(R.string.Remove), (di, w) -> {
                 doneButtonDrawable.animateToProgress(1f);
                 TLRPC.UserFull userFull = getMessagesController().getUserFull(getUserConfig().getClientUserId());
-                TLRPC.TL_account_updateBusinessLocation req = new TLRPC.TL_account_updateBusinessLocation();
+                TL_account.updateBusinessLocation req = new TL_account.updateBusinessLocation();
                 if (userFull != null) {
                     userFull.business_location = null;
                     userFull.flags2 &=~ 2;
@@ -513,7 +514,7 @@ public class LocationActivity extends BaseFragment implements NotificationCenter
             initialLocation.geo_point = geo;
             fragment.setInitialLocation(initialLocation);
         }
-        fragment.setDelegate((location, live, notify, scheduleDate) -> {
+        fragment.setDelegate((location, live, notify, scheduleDate, payStars) -> {
             geo = location.geo;
             if (TextUtils.isEmpty(address) && !TextUtils.isEmpty(fragment.getAddressName()) || mapAddress) {
                 mapAddress = true;

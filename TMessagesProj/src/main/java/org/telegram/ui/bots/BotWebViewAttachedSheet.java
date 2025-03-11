@@ -966,7 +966,7 @@ public class BotWebViewAttachedSheet implements NotificationCenter.NotificationC
         } catch (Exception ignore) {}
         actionBar.setTitle(title);
         TLRPC.UserFull userInfo = MessagesController.getInstance(currentAccount).getUserFull(botId);
-        if (userbot != null && userbot.verified || userInfo != null && userInfo.user != null && userInfo.user.verified) {
+        if (userbot != null && userbot.verifiedExtended() || userInfo != null && userInfo.user != null && userInfo.user.verifiedExtended()) {
             verifiedDrawable = getContext().getResources().getDrawable(R.drawable.verified_profile).mutate();
             verifiedDrawable.setColorFilter(new PorterDuffColorFilter(Theme.getColor(Theme.key_featuredStickers_addButton), PorterDuff.Mode.SRC_IN));
             actionBar.getTitleTextView().setDrawablePadding(dp(2));

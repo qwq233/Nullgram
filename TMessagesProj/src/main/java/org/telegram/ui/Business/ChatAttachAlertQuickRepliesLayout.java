@@ -33,17 +33,9 @@ import org.telegram.ui.ActionBar.AlertDialog;
 import org.telegram.ui.ActionBar.SimpleTextView;
 import org.telegram.ui.ActionBar.Theme;
 import org.telegram.ui.ActionBar.ThemeDescription;
-import org.telegram.ui.Components.AvatarDrawable;
-import org.telegram.ui.Components.BackupImageView;
-import org.telegram.ui.Components.ChatActivityInterface;
-import org.telegram.ui.Components.ChatAttachAlert;
-import org.telegram.ui.Components.CheckBox2;
-import org.telegram.ui.Components.EditTextBoldCursor;
-import org.telegram.ui.Components.EmptyTextProgressView;
-import org.telegram.ui.Components.FillLastLinearLayoutManager;
-import org.telegram.ui.Components.LayoutHelper;
-import org.telegram.ui.Components.RecyclerListView;
-import org.telegram.ui.Components.SearchField;
+import org.telegram.ui.Components.*;
+import org.telegram.ui.Components.Premium.PremiumFeatureBottomSheet;
+import org.telegram.ui.PremiumPreviewFragment;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -101,7 +93,7 @@ public class ChatAttachAlertQuickRepliesLayout extends ChatAttachAlert.AttachAle
             nameTextView = new SimpleTextView(context) {
                 @Override
                 public boolean setText(CharSequence value, boolean force) {
-                    value = Emoji.replaceEmoji(value, getPaint().getFontMetricsInt(), AndroidUtilities.dp(14), false);
+                    value = Emoji.replaceEmoji(value, getPaint().getFontMetricsInt(), false);
                     return super.setText(value, force);
                 }
             };
@@ -407,12 +399,16 @@ public class ChatAttachAlertQuickRepliesLayout extends ChatAttachAlert.AttachAle
                 object = listAdapter.getItem(section, row);
             }
             if (object instanceof QuickRepliesController.QuickReply) {
-                long dialogId;
-                if (parentAlert.baseFragment instanceof ChatActivityInterface) {
-                    dialogId = ((ChatActivityInterface) parentAlert.baseFragment).getDialogId();
-                } else return;
-                QuickRepliesController.getInstance(UserConfig.selectedAccount).sendQuickReplyTo(dialogId, (QuickRepliesController.QuickReply) object);
-                parentAlert.dismiss();
+                if (!UserConfig.getInstance(parentAlert.currentAccount).isPremium()) {
+                    if (parentAlert.baseFragment != null) {
+                        new PremiumFeatureBottomSheet(parentAlert.baseFragment, getContext(), parentAlert.currentAccount, true, PremiumPreviewFragment.PREMIUM_FEATURE_BUSINESS_QUICK_REPLIES, false, null).show();
+                    }
+                    return;
+                }
+                AlertsCreator.ensurePaidMessageConfirmation(parentAlert.currentAccount, parentAlert.getDialogId(), ((QuickRepliesController.QuickReply) object).getMessagesCount(), payStars -> {
+                    QuickRepliesController.getInstance(UserConfig.selectedAccount).sendQuickReplyTo(parentAlert.getDialogId(), (QuickRepliesController.QuickReply) object);
+                    parentAlert.dismiss();
+                });
             }
         });
         listView.setOnScrollListener(new RecyclerView.OnScrollListener() {
@@ -446,8 +442,8 @@ public class ChatAttachAlertQuickRepliesLayout extends ChatAttachAlert.AttachAle
     }
 
     @Override
-    public void sendSelectedItems(boolean notify, int scheduleDate, long effectId, boolean invertMedia) {
-
+    public boolean sendSelectedItems(boolean notify, int scheduleDate, long effectId, boolean invertMedia) {
+        return false;
     }
 
     @Override

@@ -1049,7 +1049,7 @@ public class TranslateAlert extends Dialog {
                         );
                     }
 
-                    spannable = (Spannable) Emoji.replaceEmoji(spannable, allTextsView.getPaint().getFontMetricsInt(), dp(14), false);
+                    spannable = (Spannable) Emoji.replaceEmoji(spannable, allTextsView.getPaint().getFontMetricsInt(), false, dp(14));
                 } catch (Exception e) {
                     e.printStackTrace();
                 }

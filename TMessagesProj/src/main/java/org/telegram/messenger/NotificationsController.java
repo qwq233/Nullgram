@@ -78,13 +78,13 @@ import androidx.core.graphics.drawable.IconCompat;
 import org.telegram.messenger.support.LongSparseIntArray;
 import org.telegram.tgnet.ConnectionsManager;
 import org.telegram.tgnet.TLRPC;
+import org.telegram.tgnet.tl.TL_account;
 import org.telegram.ui.ActionBar.Theme;
 import org.telegram.ui.BubbleActivity;
 import org.telegram.ui.Components.AvatarDrawable;
 import org.telegram.ui.Components.spoilers.SpoilerEffect;
 import org.telegram.ui.LaunchActivity;
 import org.telegram.ui.PopupNotificationActivity;
-import org.telegram.ui.Stars.StarsIntroActivity;
 import org.telegram.ui.Stories.recorder.StoryEntry;
 
 import java.io.File;
@@ -2455,6 +2455,8 @@ public class NotificationsController extends BaseController {
                         } else if (messageObject.messageOwner.action instanceof TLRPC.TL_messageActionGameScore || messageObject.messageOwner.action instanceof TLRPC.TL_messageActionPaymentSent || messageObject.messageOwner.action instanceof TLRPC.TL_messageActionPaymentSentMe) {
                             msg = messageObject.messageText.toString();
                         } else if (messageObject.messageOwner.action instanceof TLRPC.TL_messageActionStarGift || messageObject.messageOwner.action instanceof TLRPC.TL_messageActionGiftPremium) {
+                            msg = messageObject.messageText.toString();
+                        } else if (messageObject.messageOwner.action instanceof TLRPC.TL_messageActionStarGiftUnique) {
                             msg = messageObject.messageText.toString();
                         } else if (messageObject.messageOwner.action instanceof TLRPC.TL_messageActionPhoneCall) {
                             if (messageObject.messageOwner.action.video) {
@@ -4915,7 +4917,7 @@ public class NotificationsController extends BaseController {
 
             NotificationCompat.Action wearReplyAction = null;
 
-            if ((!isChannel || isSupergroup) && canReply && !SharedConfig.isWaitingForPasscodeEnter && selfUserId != dialogId && !UserObject.isReplyUser(dialogId)) {
+            if ((!isChannel || isSupergroup) && canReply && !SharedConfig.isWaitingForPasscodeEnter && selfUserId != dialogId && !UserObject.isReplyUser(dialogId) && MessagesController.getInstance(currentAccount).getSendPaidMessagesStars(dialogId) <= 0) {
                 Intent replyIntent = new Intent(ApplicationLoader.applicationContext, WearReplyReceiver.class);
                 replyIntent.putExtra("dialog_id", dialogId);
                 replyIntent.putExtra("max_id", maxId);
@@ -5787,7 +5789,7 @@ public class NotificationsController extends BaseController {
             return;
         }
         SharedPreferences preferences = getAccountInstance().getNotificationsSettings();
-        TLRPC.TL_account_updateNotifySettings req = new TLRPC.TL_account_updateNotifySettings();
+        TL_account.updateNotifySettings req = new TL_account.updateNotifySettings();
         req.settings = new TLRPC.TL_inputPeerNotifySettings();
 
         final String key = NotificationsController.getSharedPrefKey(dialogId, topicId);
@@ -5857,22 +5859,22 @@ public class NotificationsController extends BaseController {
     public void updateServerNotificationsSettings(int type) {
         SharedPreferences preferences = getAccountInstance().getNotificationsSettings();
         if (type == TYPE_REACTIONS_MESSAGES || type == TYPE_REACTIONS_STORIES) {
-            TLRPC.TL_account_setReactionsNotifySettings req = new TLRPC.TL_account_setReactionsNotifySettings();
-            req.settings = new TLRPC.TL_reactionsNotifySettings();
+            TL_account.setReactionsNotifySettings req = new TL_account.setReactionsNotifySettings();
+            req.settings = new TL_account.TL_reactionsNotifySettings();
             if (preferences.getBoolean("EnableReactionsMessages", true)) {
                 req.settings.flags |= 1;
                 if (preferences.getBoolean("EnableReactionsMessagesContacts", false)) {
-                    req.settings.messages_notify_from = new TLRPC.TL_reactionNotificationsFromContacts();
+                    req.settings.messages_notify_from = new TL_account.TL_reactionNotificationsFromContacts();
                 } else {
-                    req.settings.messages_notify_from = new TLRPC.TL_reactionNotificationsFromAll();
+                    req.settings.messages_notify_from = new TL_account.TL_reactionNotificationsFromAll();
                 }
             }
             if (preferences.getBoolean("EnableReactionsStories", true)) {
                 req.settings.flags |= 2;
                 if (preferences.getBoolean("EnableReactionsStoriesContacts", false)) {
-                    req.settings.stories_notify_from = new TLRPC.TL_reactionNotificationsFromContacts();
+                    req.settings.stories_notify_from = new TL_account.TL_reactionNotificationsFromContacts();
                 } else {
-                    req.settings.stories_notify_from = new TLRPC.TL_reactionNotificationsFromAll();
+                    req.settings.stories_notify_from = new TL_account.TL_reactionNotificationsFromAll();
                 }
             }
             req.settings.show_previews = preferences.getBoolean("EnableReactionsPreview", true);
@@ -5881,7 +5883,7 @@ public class NotificationsController extends BaseController {
             return;
         }
 
-        TLRPC.TL_account_updateNotifySettings req = new TLRPC.TL_account_updateNotifySettings();
+        TL_account.updateNotifySettings req = new TL_account.updateNotifySettings();
         req.settings = new TLRPC.TL_inputPeerNotifySettings();
         req.settings.flags = 5;
         if (type == TYPE_GROUP) {

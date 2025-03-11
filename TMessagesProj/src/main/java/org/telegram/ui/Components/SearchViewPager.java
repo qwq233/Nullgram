@@ -885,7 +885,7 @@ public class SearchViewPager extends ViewPagerFixed implements FilteredSearchVie
                         if (message != null) {
                             AccountInstance.getInstance(currentAccount).getSendMessagesHelper().sendMessage(SendMessagesHelper.SendMessageParams.of(message.toString(), did, null, null, null, true, null, null, null, forwardParams.notify, forwardParams.scheduleDate, null, false));
                         }
-                        AccountInstance.getInstance(currentAccount).getSendMessagesHelper().sendMessage(fmessages, did, forwardParams.noQuote, forwardParams.noCaption, forwardParams.notify, forwardParams.scheduleDate);
+                        AccountInstance.getInstance(currentAccount).getSendMessagesHelper().sendMessage(fmessages, did, forwardParams.noQuote, forwardParams.noCaption, forwardParams.notify, forwardParams.scheduleDate, 0);
                     }
                     fragment1.finishFragment();
                 } else {
@@ -1430,5 +1430,11 @@ public class SearchViewPager extends ViewPagerFixed implements FilteredSearchVie
         void startChatPreview(RecyclerListView listView, DialogCell cell);
         void move(float dy);
         void finish();
+    }
+
+    public void onShown() {
+        if (dialogsSearchAdapter != null) {
+            dialogsSearchAdapter.resetFilter();
+        }
     }
 }

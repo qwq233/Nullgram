@@ -51,7 +51,7 @@ jobs:
       - name: Prepare Environment
         run: |
             echo "Removing large packages"
-            sudo apt-get remove -y '^dotnet-.*' aspnetcore-targeting-pack-6.0 aspnetcore-targeting-pack-7.0
+            sudo apt-get remove -y '^dotnet-.*' aspnetcore-targeting-pack-6.0
             sudo apt-get remove -y '^llvm-.*'
             sudo apt-get remove -y 'php.*'
             sudo apt-get remove -y '^mongodb-.*'
@@ -84,18 +84,18 @@ jobs:
           echo "APK_FILE=$(find TMessagesProj/build/outputs/apk -name '*arm64*.apk')" >> $GITHUB_ENV
           echo "APK_FILE_ARMV7=$(find TMessagesProj/build/outputs/apk -name '*arm32*.apk')" >> $GITHUB_ENV
 
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         name: Upload apk (arm64-v8a)
         with:
           name: Nullgram-arm64-v8a
           path: ${{ env.APK_FILE }}
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         name: Upload apk (armeabi-v7a)
         with:
           name: Nullgram-armeabi-v7a
           path: ${{ env.APK_FILE_ARMV7 }}
       - name: Upload mapping
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: mapping
           path: TMessagesProj/build/outputs/mapping
@@ -140,7 +140,7 @@ jobs:
       - name: Prepare Environment
         run: |
             echo "Removing large packages"
-            sudo apt-get remove -y '^dotnet-.*' aspnetcore-targeting-pack-6.0 aspnetcore-targeting-pack-7.0
+            sudo apt-get remove -y '^dotnet-.*' aspnetcore-targeting-pack-6.0
             sudo apt-get remove -y '^llvm-.*'
             sudo apt-get remove -y 'php.*'
             sudo apt-get remove -y '^mongodb-.*'
@@ -227,7 +227,7 @@ jobs:
           git status telegram-bot-api >> telegram-bot-api-status
       - name: Cache Bot API Binary
         id: cache-bot-api
-        uses: actions/cache@v2
+        uses: actions/cache@v4
         with:
           path: telegram-bot-api-binary
           key: CI-telegram-bot-api-${{ hashFiles('telegram-bot-api-status') }}

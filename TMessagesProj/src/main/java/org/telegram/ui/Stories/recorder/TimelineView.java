@@ -67,7 +67,6 @@ import org.telegram.ui.Components.CubicBezierInterpolator;
 import org.telegram.ui.Components.ItemOptions;
 import org.telegram.ui.Components.Scroller;
 import org.telegram.ui.Components.Text;
-import org.telegram.ui.Stories.StoriesViewPager;
 
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
@@ -88,12 +87,12 @@ public class TimelineView extends View {
     // maximum allowed duration to select
     public static final long MAX_SELECT_DURATION = (long) (59 * 1000L);
 
-    interface TimelineDelegate {
+    public interface TimelineDelegate {
         default void onProgressDragChange(boolean dragging) {};
         default void onProgressChange(long progress, boolean fast) {};
 
-        default void onVideoLeftChange(float left) {};
-        default void onVideoRightChange(float right) {};
+        default void onVideoLeftChange(boolean released, float left) {};
+        default void onVideoRightChange(boolean released, float right) {};
         default void onVideoVolumeChange(float volume) {};
 
         default void onVideoLeftChange(int i, float left) {};
@@ -283,7 +282,6 @@ public class TimelineView extends View {
 
     private final Scroller scroller = new Scroller(getContext());
 
-    private final ViewGroup container;
     private final View previewContainer;
     private final Theme.ResourcesProvider resourcesProvider;
 
@@ -297,7 +295,6 @@ public class TimelineView extends View {
     public TimelineView(Context context, ViewGroup container, View previewContainer, Theme.ResourcesProvider resourcesProvider, BlurringShader.BlurManager blurManager) {
         super(context);
 
-        this.container = container;
         this.previewContainer = previewContainer;
         this.resourcesProvider = resourcesProvider;
 
@@ -629,6 +626,12 @@ public class TimelineView extends View {
         invalidate();
     }
 
+    public void normalizeScrollByVideo() {
+        final long scrollDuration = Math.min(getBaseDuration(), getMaxScrollDuration());
+        scroll = Utilities.clamp((long) ((videoTrack.right + videoTrack.left) / 2.0f * videoTrack.duration - scrollDuration / 2.0f), videoTrack.duration - scrollDuration, 0);
+        invalidate();
+    }
+
     public void setAudio(String audioPath, String audioAuthorText, String audioTitleText, long duration, long offset, float left, float right, float volume, boolean animated) {
         if (!TextUtils.equals(this.audioPath, audioPath)) {
             if (waveform != null) {
@@ -753,12 +756,15 @@ public class TimelineView extends View {
                 }
             }
         } else if (isInVideo) {
-            if (isCover) {
-                return HANDLE_VIDEO_REGION;
-            }
-
             final float leftX = px + ph + (videoTrack.left * videoTrack.duration - scroll) / (float) scrollWidth * sw;
             final float rightX = px + ph + (videoTrack.right * videoTrack.duration - scroll) / (float) scrollWidth * sw;
+
+            if (isCover) {
+                if (getBaseDuration() < getMaxScrollDuration() || x >= leftX - dp(10 + 5) && x <= rightX + dp(10 + 5)) {
+                    return HANDLE_VIDEO_REGION;
+                }
+                return HANDLE_VIDEO_SCROLL;
+            }
 
             if (x >= leftX - dp(10 + 5) && x <= leftX + dp(5)) {
                 return HANDLE_VIDEO_LEFT;
@@ -918,6 +924,7 @@ public class TimelineView extends View {
     private int pressType = -1;
     private int pressCollageIndex = -1;
     private boolean draggingProgress, dragged;
+    private float dragSpeed = 1.0f;
     private boolean hadDragChange;
     private VelocityTracker velocityTracker;
     private boolean scrollingVideo = true;
@@ -990,6 +997,7 @@ public class TimelineView extends View {
                 velocityTracker.recycle();
                 velocityTracker = null;
             }
+            dragSpeed = 1.0f;
             dragged = false;
             lastX = event.getX();
             if (!isCover) {
@@ -1004,6 +1012,7 @@ public class TimelineView extends View {
                 if (videoTrack != null && pressHandle == HANDLE_VIDEO_SCROLL) {
                     scroll = (long) Utilities.clamp(scroll - Δx / sw * videoScrollDuration, videoTrack.duration - videoScrollDuration, 0);
                     invalidate();
+                    if (!dragged) dragSpeed = 1.0f;
                     dragged = true;
                     draggingProgress = false;
                 } else if (videoTrack != null && (pressHandle == HANDLE_VIDEO_LEFT || pressHandle == HANDLE_VIDEO_RIGHT || pressHandle == HANDLE_VIDEO_REGION)) {
@@ -1011,23 +1020,23 @@ public class TimelineView extends View {
                     if (pressHandle == HANDLE_VIDEO_LEFT) {
                         videoTrack.left = Utilities.clamp(videoTrack.left + d, videoTrack.right - MIN_SELECT_DURATION / (float) videoTrack.duration, 0);
                         if (delegate != null) {
-                            delegate.onVideoLeftChange(videoTrack.left);
+                            delegate.onVideoLeftChange(false, videoTrack.left);
                         }
                         if (videoTrack.right - videoTrack.left > MAX_SELECT_DURATION / (float) videoTrack.duration) {
                             videoTrack.right = Math.min(1, videoTrack.left + MAX_SELECT_DURATION / (float) videoTrack.duration);
                             if (delegate != null) {
-                                delegate.onVideoRightChange(videoTrack.right);
+                                delegate.onVideoRightChange(false, videoTrack.right);
                             }
                         }
                     } else if (pressHandle == HANDLE_VIDEO_RIGHT) {
                         videoTrack.right = Utilities.clamp(videoTrack.right + d, 1, videoTrack.left + MIN_SELECT_DURATION / (float) videoTrack.duration);
                         if (delegate != null) {
-                            delegate.onVideoRightChange(videoTrack.right);
+                            delegate.onVideoRightChange(false, videoTrack.right);
                         }
                         if (videoTrack.right - videoTrack.left > MAX_SELECT_DURATION / (float) videoTrack.duration) {
                             videoTrack.left = Math.max(0, videoTrack.right - MAX_SELECT_DURATION / (float) videoTrack.duration);
                             if (delegate != null) {
-                                delegate.onVideoLeftChange(videoTrack.left);
+                                delegate.onVideoLeftChange(false, videoTrack.left);
                             }
                         }
                     } else if (pressHandle == HANDLE_VIDEO_REGION) {
@@ -1039,8 +1048,8 @@ public class TimelineView extends View {
                         videoTrack.left += d;
                         videoTrack.right += d;
                         if (delegate != null) {
-                            delegate.onVideoLeftChange(videoTrack.left);
-                            delegate.onVideoRightChange(videoTrack.right);
+                            delegate.onVideoLeftChange(false, videoTrack.left);
+                            delegate.onVideoRightChange(false, videoTrack.right);
                         }
                     }
                     if (progress / (float) videoTrack.duration < videoTrack.left || progress / (float) videoTrack.duration > videoTrack.right) {
@@ -1050,6 +1059,7 @@ public class TimelineView extends View {
                         }
                     }
                     invalidate();
+                    if (!dragged) dragSpeed = 1.0f;
                     dragged = true;
                     draggingProgress = false;
                 } else if (pressHandle == HANDLE_AUDIO_LEFT || pressHandle == HANDLE_AUDIO_RIGHT || pressHandle == HANDLE_AUDIO_REGION) {
@@ -1136,6 +1146,7 @@ public class TimelineView extends View {
                         }
                     }
                     invalidate();
+                    if (!dragged) dragSpeed = 1.0f;
                     dragged = true;
                     draggingProgress = false;
                 } else if (pressHandle == HANDLE_ROUND_LEFT || pressHandle == HANDLE_ROUND_RIGHT || pressHandle == HANDLE_ROUND_REGION) {
@@ -1218,6 +1229,7 @@ public class TimelineView extends View {
                         }
                     }
                     invalidate();
+                    if (!dragged) dragSpeed = 1.0f;
                     dragged = true;
                     draggingProgress = false;
                 } else if ((pressHandleCollageIndex >= 0 && pressHandleCollageIndex < collageTracks.size()) && (pressHandle == HANDLE_COLLAGE_LEFT || pressHandle == HANDLE_COLLAGE_RIGHT || pressHandle == HANDLE_COLLAGE_REGION)) {
@@ -1299,22 +1311,26 @@ public class TimelineView extends View {
 //                        }
 //                    }
                     invalidate();
+                    if (!dragged) dragSpeed = 1.0f;
                     dragged = true;
                     draggingProgress = false;
                 } else if (pressHandle == HANDLE_AUDIO_SCROLL) {
                     float d = Δx / sw * videoScrollDuration;
                     moveAudioOffset(d);
+                    if (!dragged) dragSpeed = 1.0f;
                     dragged = true;
                     draggingProgress = false;
                 } else if (pressHandle == HANDLE_ROUND_SCROLL) {
                     float d = Δx / sw * videoScrollDuration;
                     moveRoundOffset(d);
+                    if (!dragged) dragSpeed = 1.0f;
                     dragged = true;
                     draggingProgress = false;
                 } else if ((pressHandleCollageIndex >= 0 && pressHandleCollageIndex < collageTracks.size()) && pressHandle == HANDLE_COLLAGE_SCROLL) {
                     final Track track = collageTracks.get(pressHandleCollageIndex);
                     float d = Δx / sw * videoScrollDuration;
                     moveCollageOffset(track, d);
+                    if (!dragged) dragSpeed = 1.0f;
                     dragged = true;
                     draggingProgress = false;
                 } else if (draggingProgress) {
@@ -1322,6 +1338,7 @@ public class TimelineView extends View {
                     if (!dragged && delegate != null) {
                         delegate.onProgressDragChange(true);
                     }
+                    if (!dragged) dragSpeed = 1.0f;
                     dragged = true;
                 }
                 lastX = event.getX();
@@ -1345,12 +1362,15 @@ public class TimelineView extends View {
                             }
                         }
                     } else if (isCover && videoTrack != null) {
-                        float d = videoTrack.right - videoTrack.left;
-                        videoTrack.left = (event.getX() - px - ph) / sw * (1 - d);
+                        final long scrollWidth = Math.min(getBaseDuration(), getMaxScrollDuration());
+                        final float t = (event.getX() - px - ph) / sw;
+                        final long progress = (long) Utilities.clamp(t * scrollWidth + scroll, getBaseDuration(), 0);
+                        final float d = videoTrack.right - videoTrack.left;
+                        videoTrack.left = (float) progress / getBaseDuration() * (1 - d);
                         videoTrack.right = videoTrack.left + d;
                         if (delegate != null) {
-                            delegate.onVideoLeftChange(videoTrack.left);
-                            delegate.onVideoRightChange(videoTrack.right);
+                            delegate.onVideoLeftChange(true, videoTrack.left);
+                            delegate.onVideoRightChange(true, videoTrack.right);
                         }
                         invalidate();
                     } else if (pressType == 3 && (audioSelected || roundSelected ? -1 : collageSelected) != pressCollageIndex) {
@@ -1472,6 +1492,7 @@ public class TimelineView extends View {
             if (dragged && scrollStopped && delegate != null) {
                 delegate.onProgressDragChange(false);
             }
+            dragSpeed = 1.0f;
             dragged = false;
             draggingProgress = false;
             pressTime = -1;
@@ -2536,13 +2557,19 @@ public class TimelineView extends View {
         }
 
         if (dragged) {
-            long Δd = (long) (dp(32) / (float) sw * scrollDuration * (1f / (1000f / AndroidUtilities.screenRefreshRate)));
+            final float timeDelta = 1f / (1000f / AndroidUtilities.screenRefreshRate);
+            long Δd = (long) (dp(32) / (float) sw * scrollDuration * timeDelta * dragSpeed);
+            if (isCover) {
+                dragSpeed += 0.25f * timeDelta;
+            }
             if (pressHandle == HANDLE_VIDEO_REGION && videoTrack != null) {
                 int direction = 0;
                 if (videoTrack.left < (scroll / (float) videoTrack.duration)) {
                     direction = -1;
                 } else if (videoTrack.right > ((scroll + scrollDuration) / (float) videoTrack.duration)) {
                     direction = +1;
+                } else {
+                    dragSpeed = 1.0f;
                 }
                 long wasScroll = scroll;
                 scroll = Utilities.clamp(scroll + direction * Δd, videoTrack.duration - scrollDuration, 0);
@@ -2556,8 +2583,8 @@ public class TimelineView extends View {
                 videoTrack.left = Utilities.clamp(videoTrack.left + d, 1, 0);
                 videoTrack.right = Utilities.clamp(videoTrack.right + d, 1, 0);
                 if (delegate != null) {
-                    delegate.onVideoLeftChange(videoTrack.left);
-                    delegate.onVideoRightChange(videoTrack.right);
+                    delegate.onVideoLeftChange(false, videoTrack.left);
+                    delegate.onVideoRightChange(false, videoTrack.right);
                 }
                 invalidate();
             } else if (pressHandle == HANDLE_AUDIO_REGION) {
@@ -2566,6 +2593,8 @@ public class TimelineView extends View {
                     direction = -1;
                 } else if (audioRight >= ((-audioOffset + scrollDuration - 100) / (float) audioDuration)) {
                     direction = +1;
+                } else {
+                    dragSpeed = 1.0f;
                 }
                 if (direction != 0) {
                     long wasOffset = audioOffset;
@@ -2593,8 +2622,14 @@ public class TimelineView extends View {
                         delegate.onProgressChange(progress, false);
                     }
                     invalidate();
+                } else {
+                    dragSpeed = 1.0f;
                 }
+            } else {
+                dragSpeed = 1.0f;
             }
+        } else {
+            dragSpeed = 1.0f;
         }
 
     }

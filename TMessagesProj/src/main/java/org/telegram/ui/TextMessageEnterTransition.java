@@ -218,7 +218,7 @@ public class TextMessageEnterTransition implements MessageEnterTransitionContain
                 layoutH = chatActivityEnterView.getEditField().getLayout().getLineBottom(chatActivityEnterView.getEditField().getLayout().getLineForOffset(newStart[0] + trimmedStr.length())) - linesOffset;
             }
             text = AnimatedEmojiSpan.cloneSpans(text);
-            text = Emoji.replaceEmoji(editText, textPaint.getFontMetricsInt(), emojiSize, false);
+            text = Emoji.replaceEmoji(editText, textPaint.getFontMetricsInt(), false);
         }
 
         scaleFrom = chatActivityEnterView.getEditField().getTextSize() / textPaint.getTextSize();
@@ -464,7 +464,7 @@ public class TextMessageEnterTransition implements MessageEnterTransitionContain
             return;
         } else {
             messageViewX = messageView.getX() + listView.getX() - container.getX();
-            messageViewY = messageView.getTop() + listView.getTop() - container.getY();
+            messageViewY = messageView.getTop() + messageView.getPaddingTop() + listView.getTop() - container.getY();
             messageViewY += enterView.getTopViewHeight();
 
             lastMessageX = messageViewX;

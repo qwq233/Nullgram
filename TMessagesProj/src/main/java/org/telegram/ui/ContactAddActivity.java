@@ -360,8 +360,8 @@ public class ContactAddActivity extends BaseFragment implements NotificationCent
                 checkBoxCell = new CheckBoxCell(getParentActivity(), 0);
                 checkBoxCell.setBackgroundDrawable(Theme.getSelectorDrawable(false));
                 CharSequence firstName = UserObject.getFirstName(user);
-                firstName = Emoji.replaceEmoji(firstName, infoTextView.getPaint().getFontMetricsInt(), AndroidUtilities.dp(12), false);
-                checkBoxCell.setText(AndroidUtilities.replaceCharSequence("%1$s", AndroidUtilities.replaceTags(LocaleController.getString(R.string.SharePhoneNumberWith)), firstName), "", !Config.disableSharePhoneWithContactByDefault, false);
+                firstName = Emoji.replaceEmoji(firstName, infoTextView.getPaint().getFontMetricsInt(), false);
+                checkBoxCell.setText(AndroidUtilities.replaceCharSequence("%1$s", AndroidUtilities.replaceTags(LocaleController.getString(R.string.SharePhoneNumberWith)), firstName), "", true, false);
                 checkBoxCell.setPadding(AndroidUtilities.dp(7), 0, AndroidUtilities.dp(7), 0);
                 checkBoxCell.setOnClickListener(v -> checkBoxCell.setChecked(!checkBoxCell.isChecked(), true));
                 linearLayout.addView(checkBoxCell, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT, 0, 10, 0, 0));
@@ -576,7 +576,7 @@ public class ContactAddActivity extends BaseFragment implements NotificationCent
         if (TextUtils.isEmpty(getPhone())) {
             nameTextView.setText(LocaleController.getString(R.string.MobileHidden));
             CharSequence firstName = UserObject.getFirstName(user);
-            firstName = Emoji.replaceEmoji(firstName, infoTextView.getPaint().getFontMetricsInt(), AndroidUtilities.dp(12), false);
+            firstName = Emoji.replaceEmoji(firstName, infoTextView.getPaint().getFontMetricsInt(), false);
             infoTextView.setText(AndroidUtilities.replaceCharSequence("%1$s", AndroidUtilities.replaceTags(LocaleController.getString(R.string.MobileHiddenExceptionInfo)), firstName));
         } else {
             nameTextView.setText(PhoneFormat.getInstance().format("+" + getPhone()));
@@ -859,7 +859,7 @@ public class ContactAddActivity extends BaseFragment implements NotificationCent
     }
 
     @Override
-    public void didStartUpload(boolean isVideo) {
+    public void didStartUpload(boolean fromAvatarConstructor, boolean isVideo) {
         if (avatarProgressView == null) {
             return;
         }

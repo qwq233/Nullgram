@@ -758,7 +758,7 @@ public class EmojiBottomSheet extends BottomSheet implements NotificationCenter.
             });
             addView(searchField, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT, Gravity.TOP));
 
-            tabsStrip = new EmojiTabsStrip(context, resourcesProvider, false, false, true, 0, null) {
+            tabsStrip = new EmojiTabsStrip(context, resourcesProvider, false, false, false, true, 0, null) {
                 @Override
                 protected boolean onTabClick(int index) {
                     if (scrollingAnimation) {
@@ -1437,7 +1437,9 @@ public class EmojiBottomSheet extends BottomSheet implements NotificationCenter.
     }
 
     public void showPremiumBulletin(String text) {
-        container.performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP);
+        try {
+            container.performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP);
+        } catch (Exception ignored) {}
         BulletinFactory.of(container, resourcesProvider).createSimpleBulletin(
                 R.raw.star_premium_2,
                 LocaleController.getString(R.string.IncreaseLimit),

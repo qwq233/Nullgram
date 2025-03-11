@@ -107,7 +107,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Locale;
 
-public class ManageLinksActivity extends BaseFragment {
+public class ManageLinksActivity extends BaseFragment implements NotificationCenter.NotificationCenterDelegate {
 
     private ListAdapter listViewAdapter;
     private RecyclerListView listView;
@@ -680,7 +680,9 @@ public class ManageLinksActivity extends BaseFragment {
             if ((position >= linksStartRow && position < linksEndRow) || (position >= revokedLinksStartRow && position < revokedLinksEndRow)) {
                 LinkCell cell = (LinkCell) view;
                 cell.optionsView.callOnClick();
-                view.performHapticFeedback(HapticFeedbackConstants.LONG_PRESS, HapticFeedbackConstants.FLAG_IGNORE_GLOBAL_SETTING);
+                try {
+                    view.performHapticFeedback(HapticFeedbackConstants.LONG_PRESS, HapticFeedbackConstants.FLAG_IGNORE_GLOBAL_SETTING);
+                } catch (Exception ignored) {}
                 return true;
             }
             return false;
@@ -1135,7 +1137,8 @@ public class ManageLinksActivity extends BaseFragment {
                             if (invite.link == null) return;
                             showDialog(new ShareAlert(getContext(), null, invite.link, false, invite.link, false, getResourceProvider()) {
                                 @Override
-                                protected void onSend(LongSparseArray<TLRPC.Dialog> dids, int count, TLRPC.TL_forumTopic topic) {
+                                protected void onSend(LongSparseArray<TLRPC.Dialog> dids, int count, TLRPC.TL_forumTopic topic, boolean showToast) {
+                                    if (!showToast) return;
                                     final String str;
                                     if (dids != null && dids.size() == 1) {
                                         long did = dids.valueAt(0).id;
@@ -1379,7 +1382,7 @@ public class ManageLinksActivity extends BaseFragment {
 
             if (!TextUtils.isEmpty(invite.title)) {
                 SpannableStringBuilder builder = new SpannableStringBuilder(invite.title);
-                Emoji.replaceEmoji(builder, titleView.getPaint().getFontMetricsInt(), (int) titleView.getPaint().getTextSize(), false);
+                Emoji.replaceEmoji(builder, titleView.getPaint().getFontMetricsInt(), false);
                 titleView.setText(builder);
             } else if (invite.link.startsWith("https://t.me/+")) {
                 titleView.setText(MessagesController.getInstance(currentAccount).linkPrefix + "/" + invite.link.substring("https://t.me/+".length()));
@@ -1789,5 +1792,31 @@ public class ManageLinksActivity extends BaseFragment {
     public void onTransitionAnimationStart(boolean isOpen, boolean backward) {
         super.onTransitionAnimationStart(isOpen, backward);
         notificationsLocker.lock();
+    }
+
+    @Override
+    public boolean onFragmentCreate() {
+        getNotificationCenter().addObserver(this, NotificationCenter.dialogDeleted);
+        return super.onFragmentCreate();
+    }
+
+    @Override
+    public void onFragmentDestroy() {
+        getNotificationCenter().removeObserver(this, NotificationCenter.dialogDeleted);
+        super.onFragmentDestroy();
+    }
+
+    @Override
+    public void didReceivedNotification(int id, int account, Object... args) {
+        if (id == NotificationCenter.dialogDeleted) {
+            long dialogId = (long) args[0];
+            if (dialogId == -this.currentChatId) {
+                if (parentLayout != null && parentLayout.getLastFragment() == this) {
+                    finishFragment();
+                } else {
+                    removeSelfFromStack();
+                }
+            }
+        }
     }
 }

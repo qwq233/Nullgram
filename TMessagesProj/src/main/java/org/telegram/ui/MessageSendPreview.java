@@ -96,6 +96,7 @@ import org.telegram.ui.Stars.StarsIntroActivity;
 import org.telegram.ui.Stories.recorder.KeyboardNotifier;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 
 public class MessageSendPreview extends Dialog implements NotificationCenter.NotificationCenterDelegate {
 
@@ -211,6 +212,8 @@ public class MessageSendPreview extends Dialog implements NotificationCenter.Not
                             AndroidUtilities.showKeyboard(newFocus);
                             if (anchorSendButton != null) {
                                 anchorSendButton.getLocationOnScreen(sendButtonInitialPosition);
+//                                sendButtonInitialPosition[0] = Math.min(sendButtonInitialPosition[0] + anchorSendButton.getWidth(), AndroidUtilities.displaySize.x) - anchorSendButton.getWidth();
+                                sendButtonInitialPosition[0] += anchorSendButton.getWidth() - anchorSendButton.width(anchorSendButton.getHeight()) - dp(6);
                             }
                         }, 100);
                     }, 200);
@@ -317,7 +320,10 @@ public class MessageSendPreview extends Dialog implements NotificationCenter.Not
                         final float s = ts / messageCellTextSize;
                         canvas.scale(s, s, textX, textY);
                         if (mainMessageCell.drawBackgroundInParent()) {
+                            canvas.save();
+                            canvas.translate(0, mainMessageCell.getPaddingTop());
                             mainMessageCell.drawBackgroundInternal(canvas, true);
+                            canvas.restore();
                         }
                         mainMessageCell.draw(canvas);
                         canvas.restore();
@@ -345,9 +351,11 @@ public class MessageSendPreview extends Dialog implements NotificationCenter.Not
                         mainMessageCell.setTimeAlpha(1f - openProgress);
                         if (mainMessageCell.drawBackgroundInParent()) {
                             canvas.saveLayerAlpha(0, 0, destCell.getWidth(), destCell.getHeight(), (int) (0xFF * openProgress), Canvas.ALL_SAVE_FLAG);
+                            canvas.translate(0, mainMessageCell.getPaddingTop());
                             mainMessageCell.drawBackgroundInternal(canvas, true);
                             canvas.restore();
                             canvas.saveLayerAlpha(0, 0, destCell.getWidth(), destCell.getHeight(), (int) (0xFF * (1f - openProgress)), Canvas.ALL_SAVE_FLAG);
+                            canvas.translate(0, destCell.getPaddingTop());
                             destCell.drawBackgroundInternal(canvas, true);
                             canvas.restore();
                         }
@@ -377,8 +385,8 @@ public class MessageSendPreview extends Dialog implements NotificationCenter.Not
                     }
                     canvas.save();
                     canvas.translate(
-                            AndroidUtilities.lerp(sendButtonInitialPosition[0], sendButton.getX(), openProgress),
-                            AndroidUtilities.lerp(sendButtonInitialPosition[1], sendButton.getY(), openProgress)
+                        AndroidUtilities.lerp(sendButtonInitialPosition[0] - (sendButton.getWidth() - sendButton.width(sendButton.getHeight())) + dp(6), sendButton.getX(), openProgress),
+                        AndroidUtilities.lerp(sendButtonInitialPosition[1], sendButton.getY(), openProgress)
                     );
                     if (closing && sent) {
                         canvas.saveLayerAlpha(0, 0, sendButton.getWidth(), sendButton.getHeight(), (int) (0xFF * openProgress), Canvas.ALL_SAVE_FLAG);
@@ -518,12 +526,15 @@ public class MessageSendPreview extends Dialog implements NotificationCenter.Not
                     canvas.translate(cell.getX(), cell.getY());
                     canvas.scale(cell.getScaleX(), cell.getScaleY(), cell.getPivotX(), cell.getPivotY());
                     if (cell.drawBackgroundInParent() && cell.getCurrentPosition() == null) {
+                        canvas.save();
+                        canvas.translate(0, cell.getPaddingTop());
                         cell.drawBackgroundInternal(canvas, true);
+                        canvas.restore();
                     }
                     canvas.restore();
                     boolean r = super.drawChild(canvas, child, drawingTime);
                     canvas.save();
-                    canvas.translate(cell.getX(), cell.getY());
+                    canvas.translate(cell.getX(), cell.getY() + cell.getPaddingTop());
                     canvas.scale(cell.getScaleX(), cell.getScaleY(), cell.getPivotX(), cell.getPivotY());
                     if ((cell.getCurrentPosition() != null && ((cell.getCurrentPosition().flags & cell.captionFlag()) != 0 && (cell.getCurrentPosition().flags & MessageObject.POSITION_FLAG_LEFT) != 0 || cell.getCurrentMessagesGroup() != null && cell.getCurrentMessagesGroup().isDocuments))) {
                         cell.drawCaptionLayout(canvas, false, cell.getAlpha());
@@ -603,8 +614,8 @@ public class MessageSendPreview extends Dialog implements NotificationCenter.Not
 
                             int left = (int) (cell.getX() + cell.getBackgroundDrawableLeft());
                             int right = (int) (cell.getX() + cell.getBackgroundDrawableRight());
-                            int top = (int) (cell.getY() + cell.getBackgroundDrawableTop());
-                            int bottom = (int) (cell.getY() + cell.getBackgroundDrawableBottom());
+                            int top = (int) (cell.getY() + cell.getPaddingTop() + cell.getBackgroundDrawableTop());
+                            int bottom = (int) (cell.getY() + cell.getPaddingTop() + cell.getBackgroundDrawableBottom());
 
                             if ((cell.getCurrentPosition().flags & MessageObject.POSITION_FLAG_TOP) == 0) {
                                 top -= dp(10);
@@ -742,8 +753,8 @@ public class MessageSendPreview extends Dialog implements NotificationCenter.Not
 
                             int left = (int) (cell.getX() + cell.getBackgroundDrawableLeft());
                             int right = (int) (cell.getX() + cell.getBackgroundDrawableRight());
-                            int top = (int) (cell.getY() + cell.getBackgroundDrawableTop());
-                            int bottom = (int) (cell.getY() + cell.getBackgroundDrawableBottom());
+                            int top = (int) (cell.getY() + cell.getPaddingTop() + cell.getBackgroundDrawableTop());
+                            int bottom = (int) (cell.getY() + cell.getPaddingTop() + cell.getBackgroundDrawableBottom());
 
                             if ((cell.getCurrentPosition().flags & MessageObject.POSITION_FLAG_TOP) == 0) {
                                 top -= dp(10);
@@ -1211,7 +1222,7 @@ public class MessageSendPreview extends Dialog implements NotificationCenter.Not
     public void setSendButton(ChatActivityEnterView.SendButton sendButton, boolean fillWhenClose, View.OnClickListener onClick) {
         this.anchorSendButton = sendButton;
         anchorSendButton.getLocationOnScreen(sendButtonInitialPosition);
-        sendButtonWidth = anchorSendButton.getWidth();
+//        sendButtonInitialPosition[0] = Math.min(sendButtonInitialPosition[0] + anchorSendButton.getWidth(), AndroidUtilities.displaySize.x) - anchorSendButton.getWidth();
         this.sendButton = new ChatActivityEnterView.SendButton(getContext(), sendButton.resId, resourcesProvider) {
             @Override
             public boolean isInScheduleMode() {
@@ -1219,7 +1230,7 @@ public class MessageSendPreview extends Dialog implements NotificationCenter.Not
             }
             @Override
             public boolean isOpen() {
-                return fillWhenClose ? !dismissing : true;
+                return (fillWhenClose ? !dismissing : true) || super.isOpen();
             }
             @Override
             public boolean isInactive() {
@@ -1234,12 +1245,13 @@ public class MessageSendPreview extends Dialog implements NotificationCenter.Not
                 return sendButton.getFillColor();
             }
         };
-        this.anchorSendButton.copyCountTo(this.sendButton);
-        this.anchorSendButton.copyEmojiTo(this.sendButton);
+        this.anchorSendButton.copyTo(this.sendButton);
         this.sendButton.center = sendButton.center;
         this.sendButton.open.set(sendButton.open.get(), true);
         this.sendButton.setOnClickListener(onClick);
         containerView.addView(this.sendButton, new ViewGroup.LayoutParams(sendButton.getWidth(), sendButton.getHeight()));
+        sendButtonWidth = anchorSendButton.width(sendButton.getHeight());
+        sendButtonInitialPosition[0] += anchorSendButton.getWidth() - anchorSendButton.width(sendButton.getHeight()) - dp(6);
     }
 
     public void setItemOptions(ItemOptions options) {
@@ -1452,10 +1464,13 @@ public class MessageSendPreview extends Dialog implements NotificationCenter.Not
 
         int[] pos = new int[2];
         anchorSendButton.getLocationOnScreen(pos);
+//        pos[0] = Math.min(pos[0] + anchorSendButton.getWidth(), AndroidUtilities.displaySize.x) - anchorSendButton.getWidth();
+        pos[0] += anchorSendButton.getWidth() - anchorSendButton.width() - dp(6);
+
         sendButtonInitialPosition[0] = pos[0];
         sendButtonInitialPosition[1] = pos[1];
 
-        final int heightup = chatListView.getMeasuredHeight() - sendButton.getWidth() + (effectSelector != null ? dp(320) : 0);
+        final int heightup = chatListView.getMeasuredHeight() - sendButton.getHeight() + (effectSelector != null ? dp(320) : 0);
         final int top = insets.top + dp(8);
 
         final int heightdown = dp(messageObjects.isEmpty() ? -6 : 48) + (optionsView == null ? 0 : optionsView.getMeasuredHeight());
@@ -1466,18 +1481,18 @@ public class MessageSendPreview extends Dialog implements NotificationCenter.Not
         if (pos[1] - heightup < top) {
             pos[1] = top + heightup;
         }
-        if (pos[1] + heightdown > bottom) {
-            pos[1] = bottom - heightdown;
+        if (pos[1] + anchorSendButton.getHeight() + heightdown > bottom) {
+            pos[1] = bottom - heightdown - anchorSendButton.getHeight();
         }
 
-        sendButton.setX(pos[0]);
+        sendButton.setX(pos[0] - (sendButton.getWidth() - sendButton.width()) + dp(6));
         sendButton.setY(pos[1]);
 
         chatListView.setX(pos[0] + dp(7) - chatListView.getMeasuredWidth());
         if (layoutDone) {
-            chatListView.animate().translationY(pos[1] + sendButton.getWidth() - chatListView.getMeasuredHeight() - chatListView.getTop()).setInterpolator(ChatListItemAnimator.DEFAULT_INTERPOLATOR).setDuration(ChatListItemAnimator.DEFAULT_DURATION).start();
+            chatListView.animate().translationY(pos[1] + sendButton.getHeight() - chatListView.getMeasuredHeight() - chatListView.getTop()).setInterpolator(ChatListItemAnimator.DEFAULT_INTERPOLATOR).setDuration(ChatListItemAnimator.DEFAULT_DURATION).start();
         } else {
-            chatListView.setY(pos[1] + sendButton.getWidth() - chatListView.getMeasuredHeight());
+            chatListView.setY(pos[1] + sendButton.getHeight() - chatListView.getMeasuredHeight());
         }
 
         if (optionsView != null) {
@@ -1486,14 +1501,14 @@ public class MessageSendPreview extends Dialog implements NotificationCenter.Not
         }
 
         if (effectSelectorContainer != null) {
-            effectSelectorContainer.setX(Math.max(0, pos[0] + sendButton.getWidth() - effectSelectorContainer.getMeasuredWidth() - dp(6)));
+            effectSelectorContainer.setX(Math.max(0, pos[0] + sendButton.width() - effectSelectorContainer.getMeasuredWidth() - dp(6)));
             if (cameraRect != null) {
                 effectSelectorContainer.setY(effectSelectorContainerY = Math.max(insets.top, cameraRect.top - effectSelectorContainer.getMeasuredWidth()));
                 if (effectSelector != null) {
                     effectSelector.setY(Math.max(insets.top, cameraRect.top - dp(24) - effectSelector.getMeasuredHeight()));
                 }
             } else {
-                final float y = pos[1] + sendButton.getWidth() - chatListView.getMeasuredHeight();
+                final float y = pos[1] + sendButton.getHeight() - chatListView.getMeasuredHeight();
                 effectSelectorContainer.setY(effectSelectorContainerY = Math.max(insets.top, y - effectSelectorContainer.getMeasuredHeight()) + dp(24));
                 if (effectSelector != null) {
                     effectSelector.setY(Math.max(0, y - effectSelector.getMeasuredHeight() - effectSelectorContainerY));
@@ -1746,7 +1761,14 @@ public class MessageSendPreview extends Dialog implements NotificationCenter.Not
         if (withoutView != null) {
             withoutView.setVisibility(View.INVISIBLE);
         }
+        final float oldAlpha = anchorSendButton.getAlpha();
+        if (anchorSendButton != null) {
+            anchorSendButton.setAlpha(0.0f);
+        }
         AndroidUtilities.makeGlobalBlurBitmap(bitmap -> {
+            if (anchorSendButton != null) {
+                anchorSendButton.setAlpha(oldAlpha);
+            }
             if (withoutView != null) {
                 withoutView.setVisibility(View.VISIBLE);
             }

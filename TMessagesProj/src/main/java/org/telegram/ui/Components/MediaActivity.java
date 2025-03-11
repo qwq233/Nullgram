@@ -216,14 +216,11 @@ public class MediaActivity extends BaseFragment implements SharedMediaLayout.Sha
                             AlertDialog.Builder builder = new AlertDialog.Builder(getContext(), getResourceProvider());
                             builder.setTitle(storyItems.size() > 1 ? LocaleController.getString(R.string.DeleteStoriesTitle) : LocaleController.getString(R.string.DeleteStoryTitle));
                             builder.setMessage(LocaleController.formatPluralString("DeleteStoriesSubtitle", storyItems.size()));
-                            builder.setPositiveButton(LocaleController.getString(R.string.Delete), new DialogInterface.OnClickListener() {
-                                @Override
-                                public void onClick(DialogInterface dialog, int which) {
-                                    getMessagesController().getStoriesController().deleteStories(dialogId, storyItems);
-                                    sharedMediaLayout.closeActionMode(false);
-                                }
+                            builder.setPositiveButton(LocaleController.getString(R.string.Delete), (dialog, which) -> {
+                                getMessagesController().getStoriesController().deleteStories(dialogId, storyItems);
+                                sharedMediaLayout.closeActionMode(false);
                             });
-                            builder.setNegativeButton(LocaleController.getString(R.string.Cancel), (DialogInterface.OnClickListener) (dialog, which) -> {
+                            builder.setNegativeButton(LocaleController.getString(R.string.Cancel), (dialog, which) -> {
                                 dialog.dismiss();
                             });
                             AlertDialog dialog = builder.create();
@@ -783,10 +780,10 @@ public class MediaActivity extends BaseFragment implements SharedMediaLayout.Sha
                 subtitleTextView[0].setText(LocaleController.formatPluralStringSpaced("FoundStories", storiesCount));
             }
         } else if (type == TYPE_ARCHIVED_CHANNEL_STORIES) {
-            nameTextView[0].setText(LocaleController.getString("ProfileStoriesArchive"));
+            nameTextView[0].setText(LocaleController.getString(R.string.ProfileStoriesArchive));
         } else if (type == TYPE_STORIES) {
-            nameTextView[0].setText(LocaleController.getString("ProfileMyStories"));
-            nameTextView[1].setText(LocaleController.getString("ProfileStoriesArchive"));
+            nameTextView[0].setText(LocaleController.getString(R.string.ProfileMyStories));
+            nameTextView[1].setText(LocaleController.getString(R.string.ProfileStoriesArchive));
         } else if (avatarDialogId == UserObject.ANONYMOUS) {
             nameTextView[0].setText(LocaleController.getString(R.string.AnonymousForward));
             avatarDrawable.setAvatarType(AvatarDrawable.AVATAR_TYPE_ANONYMOUS);

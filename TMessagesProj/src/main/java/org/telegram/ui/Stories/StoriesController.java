@@ -67,6 +67,7 @@ import org.telegram.tgnet.RequestDelegate;
 import org.telegram.tgnet.SerializedData;
 import org.telegram.tgnet.TLObject;
 import org.telegram.tgnet.TLRPC;
+import org.telegram.tgnet.Vector;
 import org.telegram.tgnet.tl.TL_bots;
 import org.telegram.tgnet.tl.TL_stories;
 import org.telegram.ui.ActionBar.BaseFragment;
@@ -76,7 +77,6 @@ import org.telegram.ui.Components.BulletinFactory;
 import org.telegram.ui.Components.Premium.LimitReachedBottomSheet;
 import org.telegram.ui.Components.Reactions.ReactionImageHolder;
 import org.telegram.ui.Components.Reactions.ReactionsLayoutInBubble;
-import org.telegram.ui.Components.Text;
 import org.telegram.ui.LaunchActivity;
 import org.telegram.ui.StatisticActivity;
 import org.telegram.ui.Stories.bots.BotPreviewsEditContainer;
@@ -1228,7 +1228,7 @@ public class StoriesController {
     }
 
     public void updateStoriesPinned(long dialogId, ArrayList<TL_stories.StoryItem> storyItems, boolean pinned, Utilities.Callback<Boolean> whenDone) {
-        TL_stories.TL_stories_togglePinned req = new TL_stories.TL_stories_togglePinned();
+        TL_stories.togglePinned req = new TL_stories.togglePinned();
         TL_stories.PeerStories peerStories = getStories(dialogId);
         for (int i = 0; i < storyItems.size(); ++i) {
             TL_stories.StoryItem storyItem = storyItems.get(i);
@@ -1299,7 +1299,7 @@ public class StoriesController {
             TL_stories.TL_stories_readStories req = new TL_stories.TL_stories_readStories();
             req.peer = MessagesController.getInstance(currentAccount).getInputPeer(dialogId);
             req.max_id = storyItem.id;
-            ConnectionsManager.getInstance(currentAccount).sendRequest(req, (response, error) -> {});
+            ConnectionsManager.getInstance(currentAccount).sendRequest(req, null);
             NotificationCenter.getInstance(currentAccount).postNotificationName(NotificationCenter.storiesReadUpdated);
             return true;
         }
@@ -2384,9 +2384,9 @@ public class StoriesController {
             for (int i = 0; i < count; ++i) {
                 long userId = entry.shareUserIds.get(i);
                 if (entry.wouldBeVideo()) {
-                    SendMessagesHelper.prepareSendingVideo(AccountInstance.getInstance(currentAccount), path, null, userId, null, null, null, null, captionEntities, 0, null, !entry.silent, entry.scheduleDate, false, false, caption, null, 0, 0);
+                    SendMessagesHelper.prepareSendingVideo(AccountInstance.getInstance(currentAccount), path, null, null, null, userId, null, null, null, null, captionEntities, 0, null, !entry.silent, entry.scheduleDate, false, false, caption, null, 0, 0, 0);
                 } else {
-                    SendMessagesHelper.prepareSendingPhoto(AccountInstance.getInstance(currentAccount), path, null, null, userId, null, null, null, null, captionEntities, null, null, 0, null, null, !entry.silent, entry.scheduleDate, 0, false, caption, null, 0, 0);
+                    SendMessagesHelper.prepareSendingPhoto(AccountInstance.getInstance(currentAccount), path, null, null, userId, null, null, null, null, captionEntities, null, null, 0, null, null, !entry.silent, entry.scheduleDate, 0, false, caption, null, 0, 0, 0);
                 }
             }
             putMessages = true;
@@ -2581,8 +2581,8 @@ public class StoriesController {
                 this.done = true;
 
                 final ArrayList<TL_bots.botPreviewMedia> medias = new ArrayList<>();
-                if (res instanceof TLRPC.Vector) {
-                    ArrayList<Object> objects = ((TLRPC.Vector) res).objects;
+                if (res instanceof Vector) {
+                    ArrayList<Object> objects = ((Vector) res).objects;
                     for (Object o : objects) {
                         TL_bots.botPreviewMedia media = (TL_bots.botPreviewMedia) o;
                         medias.add(media);
