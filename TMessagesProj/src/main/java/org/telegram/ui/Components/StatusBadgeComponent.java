@@ -58,7 +58,7 @@ public class StatusBadgeComponent {
         } else if (chat != null && DialogObject.getEmojiStatusDocumentId(chat.emoji_status) != 0) {
             statusDrawable.set(DialogObject.getEmojiStatusDocumentId(chat.emoji_status), animated);
             statusDrawable.setColor(colorFilter);
-        } else if (user != null && user.verified) {
+        } else if (user != null && user.verifiedExtended()) {
             statusDrawable.set(verifiedDrawable = (verifiedDrawable == null ? new CombinedDrawable(Theme.dialogs_verifiedDrawable, Theme.dialogs_verifiedCheckDrawable) : verifiedDrawable), animated);
             statusDrawable.setColor(null);
         } else if (user != null && DialogObject.getEmojiStatusDocumentId(user.emoji_status) != 0) {

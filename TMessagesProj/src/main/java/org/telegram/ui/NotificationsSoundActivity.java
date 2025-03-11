@@ -65,6 +65,7 @@ import org.telegram.messenger.R;
 import org.telegram.messenger.ringtone.RingtoneDataStore;
 import org.telegram.messenger.ringtone.RingtoneUploader;
 import org.telegram.tgnet.TLRPC;
+import org.telegram.tgnet.tl.TL_account;
 import org.telegram.ui.ActionBar.ActionBar;
 import org.telegram.ui.ActionBar.ActionBarMenu;
 import org.telegram.ui.ActionBar.AlertDialog;
@@ -87,7 +88,6 @@ import org.telegram.ui.Components.RecyclerListView;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -291,7 +291,7 @@ public class NotificationsSoundActivity extends BaseFragment implements ChatAtta
 
                 for (int i = 0; i < documentsToRemove.size(); i++) {
                     TLRPC.Document document = documentsToRemove.get(i);
-                    TLRPC.TL_account_saveRingtone req = new TLRPC.TL_account_saveRingtone();
+                    TL_account.saveRingtone req = new TL_account.saveRingtone();
                     req.id = new TLRPC.TL_inputDocument();
                     req.id.id = document.id;
                     req.id.access_hash = document.access_hash;
@@ -606,7 +606,7 @@ public class NotificationsSoundActivity extends BaseFragment implements ChatAtta
     }
 
     @Override
-    public void didSelectFiles(ArrayList<String> files, String caption, ArrayList<MessageObject> fmessages, boolean notify, int scheduleDate, long effectId, boolean invertMedia) {
+    public void didSelectFiles(ArrayList<String> files, String caption, ArrayList<MessageObject> fmessages, boolean notify, int scheduleDate, long effectId, boolean invertMedia, long payStars) {
         for (int i = 0; i < files.size(); i++) {
             getMediaDataController().uploadRingtone(files.get(i));
         }

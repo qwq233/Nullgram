@@ -46,6 +46,7 @@ import android.text.TextUtils;
 import android.util.Pair;
 import android.util.SparseArray;
 
+import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
 import androidx.core.graphics.ColorUtils;
 
@@ -65,6 +66,7 @@ import org.telegram.ui.Components.Point;
 import org.telegram.ui.Components.RLottieDrawable;
 import org.telegram.ui.Components.SlotsDrawable;
 import org.telegram.ui.Components.ThemePreviewDrawable;
+import org.telegram.ui.PhotoViewer;
 import org.telegram.ui.web.WebInstantView;
 
 import java.io.BufferedReader;
@@ -3128,7 +3130,7 @@ public class ImageLoader {
                             String location = imageLocation.path;
                             if (!location.startsWith("vthumb") && !location.startsWith("thumb")) {
                                 String trueExt = getHttpUrlExtension(location, "jpg");
-                                if (trueExt.equals("webm") || trueExt.equals("mp4") || trueExt.equals("gif")) {
+                                if (trueExt.equalsIgnoreCase("webm") || trueExt.equalsIgnoreCase("mp4") || trueExt.equalsIgnoreCase("gif")) {
                                     img.imageType = FileLoader.IMAGE_TYPE_ANIMATION;
                                 } else if ("tgs".equals(ext)) {
                                     img.imageType = FileLoader.IMAGE_TYPE_LOTTIE;
@@ -4081,6 +4083,75 @@ public class ImageLoader {
             }
         } catch (Throwable e) {
             FileLog.e(e);
+        }
+    }
+
+    @Nullable
+    public static TLRPC.PhotoSize fileToSize(String path, boolean forceCacheDir) {
+        if (path == null) {
+            return null;
+        }
+
+        int w, h;
+        try {
+            BitmapFactory.Options o = new BitmapFactory.Options();
+            o.inJustDecodeBounds = true;
+            BitmapFactory.decodeFile(path, o);
+            w = o.outWidth;
+            h = o.outHeight;
+        } catch (Exception e) {
+            FileLog.e(e);
+            return null;
+        }
+
+        TLRPC.TL_fileLocationToBeDeprecated location = new TLRPC.TL_fileLocationToBeDeprecated();
+        location.volume_id = Integer.MIN_VALUE;
+        location.dc_id = Integer.MIN_VALUE;
+        location.local_id = SharedConfig.getLastLocalId();
+        location.file_reference = new byte[0];
+
+        TLRPC.TL_photoSize_layer127 photoSize = new TLRPC.TL_photoSize_layer127();
+        photoSize.location = location;
+        photoSize.w = w;
+        photoSize.h = h;
+        if (photoSize.w <= 100 && photoSize.h <= 100) {
+            photoSize.type = "s";
+        } else if (photoSize.w <= 320 && photoSize.h <= 320) {
+            photoSize.type = "m";
+        } else if (photoSize.w <= 800 && photoSize.h <= 800) {
+            photoSize.type = "x";
+        } else if (photoSize.w <= 1280 && photoSize.h <= 1280) {
+            photoSize.type = "y";
+        } else {
+            photoSize.type = "w";
+        }
+
+        String external = ".jpg";
+
+        String fileName = location.volume_id + "_" + location.local_id + external;
+        File fileDir;
+        if (forceCacheDir) {
+            fileDir = FileLoader.getDirectory(FileLoader.MEDIA_DIR_CACHE);
+        } else {
+            fileDir = location.volume_id != Integer.MIN_VALUE ? FileLoader.getDirectory(FileLoader.MEDIA_DIR_IMAGE) : FileLoader.getDirectory(FileLoader.MEDIA_DIR_CACHE);
+        }
+        final File cacheFile = new File(fileDir, fileName);
+        new File(path).renameTo(cacheFile);
+        photoSize.size = (int) cacheFile.length();
+
+        return photoSize;
+    }
+
+    public static class PhotoSizeFromPhoto extends TLRPC.PhotoSize {
+        public final TLRPC.Photo photo;
+        public final TLRPC.InputPhoto inputPhoto;
+        public PhotoSizeFromPhoto(TLRPC.Photo photo) {
+            this.photo = photo;
+            final TLRPC.TL_inputPhoto i = new TLRPC.TL_inputPhoto();
+            i.id = photo.id;
+            i.file_reference = photo.file_reference;
+            i.access_hash = photo.access_hash;
+            this.inputPhoto = i;
         }
     }
 

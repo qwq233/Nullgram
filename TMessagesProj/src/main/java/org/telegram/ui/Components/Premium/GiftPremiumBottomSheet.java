@@ -153,13 +153,7 @@ public class GiftPremiumBottomSheet extends BottomSheetWithRecyclerListView impl
             //List<QueryProductDetailsParams.Product> products = new ArrayList<>();
             long pricePerMonthMax = 0;
             for (TLRPC.TL_premiumGiftOption option : userFull.premium_gifts) {
-                GiftTier giftTier = new GiftTier(option);
-                giftTiers.add(giftTier);
-                if (BuildVars.useInvoiceBilling()) {
-                    if (giftTier.getPricePerMonth() > pricePerMonthMax) {
-                        pricePerMonthMax = giftTier.getPricePerMonth();
-                    }
-                }/* else if (giftTier.giftOption.store_product != null && BillingController.getInstance().isReady()) {
+                /* else if (giftTier.giftOption.store_product != null && BillingController.getInstance().isReady()) {
                     products.add(QueryProductDetailsParams.Product.newBuilder()
                             .setProductType(BillingClient.ProductType.INAPP)
                             .setProductId(giftTier.giftOption.store_product)
@@ -489,8 +483,11 @@ public class GiftPremiumBottomSheet extends BottomSheetWithRecyclerListView impl
     }
 
     public final static class GiftTier {
+
         public final TLRPC.TL_premiumGiftOption giftOption;
         public final TLRPC.TL_premiumGiftCodeOption giftCodeOption;
+        public final TLRPC.TL_premiumGiftOption starsOption;
+        public final TLRPC.TL_premiumGiftCodeOption starsCodeOption;
         private int discount;
         private long pricePerMonth;
 
@@ -498,13 +495,17 @@ public class GiftPremiumBottomSheet extends BottomSheetWithRecyclerListView impl
 
         public int yOffset;
 
-        public GiftTier(TLRPC.TL_premiumGiftOption giftOption) {
+        public GiftTier(TLRPC.TL_premiumGiftOption giftOption, Object starsOption) {
             this.giftOption = giftOption;
             this.giftCodeOption = null;
+            this.starsOption = starsOption instanceof TLRPC.TL_premiumGiftOption ? (TLRPC.TL_premiumGiftOption) starsOption : null;
+            this.starsCodeOption = starsOption instanceof TLRPC.TL_premiumGiftCodeOption ? (TLRPC.TL_premiumGiftCodeOption) starsOption : null;
         }
-        public GiftTier(TLRPC.TL_premiumGiftCodeOption giftCodeOption) {
+        public GiftTier(TLRPC.TL_premiumGiftCodeOption giftCodeOption, Object starsOption) {
             this.giftOption = null;
             this.giftCodeOption = giftCodeOption;
+            this.starsOption = starsOption instanceof TLRPC.TL_premiumGiftOption ? (TLRPC.TL_premiumGiftOption) starsOption : null;
+            this.starsCodeOption = starsOption instanceof TLRPC.TL_premiumGiftCodeOption ? (TLRPC.TL_premiumGiftCodeOption) starsOption : null;
         }
 
         public void setPricePerMonthRegular(long pricePerMonthRegular) {
@@ -590,6 +591,26 @@ public class GiftPremiumBottomSheet extends BottomSheetWithRecyclerListView impl
                 }
             }
             return "";
+        }
+
+        public Object getStarsOption() {
+            if (starsOption != null) return starsOption;
+            if (starsCodeOption != null) return starsCodeOption;
+            return null;
+        }
+
+        public boolean isStarsPaymentAvailable() {
+            return starsOption != null || starsCodeOption != null;
+        }
+
+        public long getStarsPrice() {
+            if (starsOption != null) {
+                return starsOption.amount;
+            }
+            if (starsCodeOption != null) {
+                return starsCodeOption.amount;
+            }
+            return 0;
         }
     }
 }

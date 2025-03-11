@@ -29,6 +29,7 @@ import org.telegram.messenger.UserConfig
 import org.telegram.tgnet.ConnectionsManager
 import org.telegram.tgnet.TLObject
 import org.telegram.tgnet.TLRPC
+import org.telegram.tgnet.tl.TL_account
 import org.telegram.tgnet.tl.TL_stories
 import org.telegram.ui.Components.LayoutHelper
 import top.qwq2333.gen.Config
@@ -90,7 +91,7 @@ fun ConnectionsManager.processTlRpcObject(obj: TLObject): TLObject? {
         return null
     }
 
-    if (Config.keepOnlineStatusAs != 0 && obj is TLRPC.TL_account_updateStatus) {
+    if (Config.keepOnlineStatusAs != 0 && obj is TL_account.updateStatus) {
         obj.offline = Config.keepOnlineStatusAs == 2
         return obj
     }

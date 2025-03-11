@@ -48,6 +48,7 @@ import org.telegram.messenger.R;
 import org.telegram.messenger.browser.Browser;
 import org.telegram.tgnet.TLObject;
 import org.telegram.tgnet.TLRPC;
+import org.telegram.tgnet.tl.TL_account;
 import org.telegram.ui.ActionBar.ActionBar;
 import org.telegram.ui.ActionBar.ActionBarMenuItem;
 import org.telegram.ui.ActionBar.AlertDialog;
@@ -199,6 +200,7 @@ public class ChatbotsActivity extends BaseFragment {
                 return (int) (size + thickness * 2);
             }
         };
+        emptyViewLoading.setScaleType(ImageView.ScaleType.CENTER);
         emptyViewLoading.setImageDrawable(progressDrawable);
         emptyView.addView(emptyViewLoading, LayoutHelper.createFrame(LayoutHelper.WRAP_CONTENT, LayoutHelper.WRAP_CONTENT, Gravity.CENTER));
         emptyViewLoading.setAlpha(0f);
@@ -276,8 +278,8 @@ public class ChatbotsActivity extends BaseFragment {
         }
     };
 
-    public TLRPC.TL_account_connectedBots currentValue;
-    public TLRPC.TL_connectedBot currentBot;
+    public TL_account.connectedBots currentValue;
+    public TL_account.TL_connectedBot currentBot;
 
     public boolean exclude;
     public boolean allowReply = true;
@@ -398,15 +400,15 @@ public class ChatbotsActivity extends BaseFragment {
         ArrayList<TLObject> requests = new ArrayList<>();
 
         if (currentBot != null && (selectedBot == null || currentBot.bot_id != selectedBot.id)) {
-            TLRPC.TL_account_updateConnectedBot req = new TLRPC.TL_account_updateConnectedBot();
+            TL_account.updateConnectedBot req = new TL_account.updateConnectedBot();
             req.deleted = true;
             req.bot = getMessagesController().getInputUser(currentBot.bot_id);
-            req.recipients = new TLRPC.TL_inputBusinessBotRecipients();
+            req.recipients = new TL_account.TL_inputBusinessBotRecipients();
             requests.add(req);
         }
 
         if (selectedBot != null) {
-            TLRPC.TL_account_updateConnectedBot req = new TLRPC.TL_account_updateConnectedBot();
+            TL_account.updateConnectedBot req = new TL_account.updateConnectedBot();
             req.deleted = false;
             req.can_reply = allowReply;
             req.bot = getMessagesController().getInputUser(selectedBot);

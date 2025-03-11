@@ -422,7 +422,7 @@ public class PasscodeSettingActivity extends BaseActivity {
             accountNumber = account;
             TLRPC.User user = UserConfig.getInstance(accountNumber).getCurrentUser();
             avatarDrawable.setInfo(user);
-            textView.setText(Emoji.replaceEmoji(ContactsController.formatName(user.first_name, user.last_name), textView.getPaint().getFontMetricsInt(), AndroidUtilities.dp(15), false));
+            textView.setText(Emoji.replaceEmoji(ContactsController.formatName(user.first_name, user.last_name), textView.getPaint().getFontMetricsInt(), false, AndroidUtilities.dp(15)));
             imageView.getImageReceiver().setCurrentAccount(account);
             imageView.setForUserOrChat(user, avatarDrawable);
             checkImageView.setVisibility(check ? VISIBLE : INVISIBLE);

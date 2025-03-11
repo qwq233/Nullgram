@@ -30,9 +30,9 @@ import android.widget.FrameLayout;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
-import org.checkerframework.checker.units.qual.A;
 import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.ChatObject;
+import org.telegram.messenger.DialogObject;
 import org.telegram.messenger.Emoji;
 import org.telegram.messenger.LocaleController;
 import org.telegram.messenger.MessagesController;
@@ -43,6 +43,7 @@ import org.telegram.messenger.UserObject;
 import org.telegram.tgnet.ConnectionsManager;
 import org.telegram.tgnet.TLObject;
 import org.telegram.tgnet.TLRPC;
+import org.telegram.tgnet.tl.TL_account;
 import org.telegram.ui.ActionBar.SimpleTextView;
 import org.telegram.ui.ActionBar.Theme;
 import org.telegram.ui.Components.AnimatedFloat;
@@ -90,7 +91,9 @@ public class GroupCreateUserCell extends FrameLayout {
 
     private final AnimatedFloat premiumBlockedT = new AnimatedFloat(this, 0, 350, CubicBezierInterpolator.EASE_OUT_QUINT);
     private boolean premiumBlocked;
-    private Boolean premiumBlockedOverriden;
+    private final AnimatedFloat starsBlockedT = new AnimatedFloat(this, 0, 350, CubicBezierInterpolator.EASE_OUT_QUINT);
+    private long starsPriceBlocked;
+    private TL_account.RequirementToContact blockedOverridden;
     private boolean showPremiumBlocked;
 
     public boolean isBlocked() {
@@ -107,9 +110,10 @@ public class GroupCreateUserCell extends FrameLayout {
     }
 
     private void updatePremiumBlocked(boolean animated) {
-        final boolean wasPremiumBlocked = premiumBlocked;
-        premiumBlocked = showPremiumBlocked && (premiumBlockedOverriden != null ? premiumBlockedOverriden : currentObject instanceof TLRPC.User && MessagesController.getInstance(currentAccount).isUserPremiumBlocked(((TLRPC.User) currentObject).id));
-        if (wasPremiumBlocked != premiumBlocked) {
+        final TL_account.RequirementToContact r = showPremiumBlocked ? (blockedOverridden != null ? blockedOverridden : currentObject instanceof TLRPC.User ? MessagesController.getInstance(currentAccount).isUserContactBlocked(((TLRPC.User) currentObject).id) : null) : null;
+        if (premiumBlocked != DialogObject.isPremiumBlocked(r) || starsPriceBlocked != DialogObject.getMessagesStarsPrice(r)) {
+            premiumBlocked = DialogObject.isPremiumBlocked(r);
+            starsPriceBlocked = DialogObject.getMessagesStarsPrice(r);
             if (!animated) {
                 premiumBlockedT.set(premiumBlocked, true);
             }
@@ -117,9 +121,9 @@ public class GroupCreateUserCell extends FrameLayout {
         }
     }
 
-    public void overridePremiumBlocked(boolean premiumBlocked, boolean animated) {
+    public void overridePremiumBlocked(TL_account.RequirementToContact blocked, boolean animated) {
         showPremiumBlocked = true;
-        premiumBlockedOverriden = premiumBlocked;
+        blockedOverridden = blocked;
         updatePremiumBlocked(animated);
     }
 
@@ -145,7 +149,7 @@ public class GroupCreateUserCell extends FrameLayout {
         nameTextView = new SimpleTextView(context) {
             @Override
             public boolean setText(CharSequence value, boolean force) {
-                value = Emoji.replaceEmoji(value, getPaint().getFontMetricsInt(), AndroidUtilities.dp(14), false);
+                value = Emoji.replaceEmoji(value, getPaint().getFontMetricsInt(), false);
                 return super.setText(value, force);
             }
         };
@@ -198,6 +202,7 @@ public class GroupCreateUserCell extends FrameLayout {
         nameTextView.setText(LocaleController.getString(R.string.PrivacyPremium));
         statusTextView.setTag(Theme.key_windowBackgroundWhiteGrayText);
         statusTextView.setTextColor(Theme.getColor(forceDarkTheme ? Theme.key_voipgroup_lastSeenText : Theme.key_windowBackgroundWhiteGrayText, resourcesProvider));
+        statusTextView.setEmojiColor(statusTextView.getTextColor());
         statusTextView.setText(LocaleController.getString(R.string.PrivacyPremiumText));
     }
 
@@ -208,6 +213,7 @@ public class GroupCreateUserCell extends FrameLayout {
         nameTextView.setText(LocaleController.getString(R.string.PrivacyMiniapps));
         statusTextView.setTag(Theme.key_windowBackgroundWhiteGrayText);
         statusTextView.setTextColor(Theme.getColor(forceDarkTheme ? Theme.key_voipgroup_lastSeenText : Theme.key_windowBackgroundWhiteGrayText, resourcesProvider));
+        statusTextView.setEmojiColor(statusTextView.getTextColor());
         statusTextView.setText(LocaleController.getString(R.string.PrivacyMiniappsText));
     }
 
@@ -466,6 +472,7 @@ public class GroupCreateUserCell extends FrameLayout {
                             statusTextView.setText(LocaleController.formatUserStatus(currentAccount, currentUser));
                         }
                     }
+                    statusTextView.setEmojiColor(statusTextView.getTextColor());
                 }
 
                 avatarImageView.setForUserOrChat(currentUser, avatarDrawable);
@@ -505,6 +512,7 @@ public class GroupCreateUserCell extends FrameLayout {
                 if (currentStatus == null) {
                     statusTextView.setTag(Theme.key_windowBackgroundWhiteGrayText);
                     statusTextView.setTextColor(Theme.getColor(forceDarkTheme ? Theme.key_voipgroup_lastSeenText : Theme.key_windowBackgroundWhiteGrayText));
+                    statusTextView.setEmojiColor(statusTextView.getTextColor());
                     if (currentChat.participants_count != 0) {
                         if (ChatObject.isChannel(currentChat) && !currentChat.megagroup) {
                             statusTextView.setText(LocaleController.formatPluralString("Subscribers", currentChat.participants_count));
@@ -537,6 +545,7 @@ public class GroupCreateUserCell extends FrameLayout {
             statusTextView.setText(currentStatus, true);
             statusTextView.setTag(Theme.key_windowBackgroundWhiteGrayText);
             statusTextView.setTextColor(Theme.getColor(forceDarkTheme ? Theme.key_voipgroup_lastSeenText : Theme.key_windowBackgroundWhiteGrayText, resourcesProvider));
+            statusTextView.setEmojiColor(statusTextView.getTextColor());
         }
 
         updatePremiumBlocked(false);
@@ -583,7 +592,7 @@ public class GroupCreateUserCell extends FrameLayout {
             Theme.dialogs_onlineCirclePaint.setColor(Theme.getColor(Theme.key_windowBackgroundWhite, resourcesProvider));
             canvas.drawCircle(left, top, dp(10 + 1.33f) * lockT, Theme.dialogs_onlineCirclePaint);
             Paint paint;
-            if (premiumBlockedOverriden == null) {
+            if (blockedOverridden == null) {
                 if (premiumGradient == null) {
                     premiumGradient = new PremiumGradient.PremiumGradientTools(Theme.key_premiumGradient1, Theme.key_premiumGradient2, -1, -1, -1, resourcesProvider);
                 }

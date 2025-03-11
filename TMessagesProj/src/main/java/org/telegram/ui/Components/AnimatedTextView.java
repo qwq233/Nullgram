@@ -1011,7 +1011,7 @@ public class AnimatedTextView extends View {
 
         public void setEmojiColor(int emojiColor) {
             if (this.emojiColor != emojiColor) {
-                emojiColorFilter = new PorterDuffColorFilter(this.emojiColor = emojiColor, PorterDuff.Mode.MULTIPLY);
+                emojiColorFilter = new PorterDuffColorFilter(this.emojiColor = emojiColor, PorterDuff.Mode.SRC_IN);
             }
         }
 
@@ -1244,6 +1244,10 @@ public class AnimatedTextView extends View {
 
     public int width() {
         return getPaddingLeft() + (int) Math.ceil(drawable.getCurrentWidth()) + getPaddingRight();
+    }
+
+    public int finalWidth() {
+        return getPaddingLeft() + (int) Math.ceil(drawable.getAnimateToWidth()) + getPaddingRight();
     }
 
     public CharSequence getText() {

@@ -46,11 +46,13 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.FileLog;
+import org.telegram.messenger.MessagesController;
 import org.telegram.messenger.NotificationCenter;
 import org.telegram.messenger.R;
 import org.telegram.messenger.Utilities;
 import org.telegram.tgnet.ConnectionsManager;
 import org.telegram.tgnet.TLRPC;
+import org.telegram.tgnet.tl.TL_account;
 import org.telegram.ui.ActionBar.Theme;
 import org.telegram.ui.Cells.EditTextCell;
 import org.telegram.ui.Cells.TextCheckCell;
@@ -113,7 +115,7 @@ public class StoryLinkSheet extends BottomSheetWithRecyclerListView implements N
         ScaleStateListAnimator.apply(pasteTextView, .1f, 1.5f);
         urlEditText.addView(pasteTextView, LayoutHelper.createFrame(LayoutHelper.WRAP_CONTENT, 26, Gravity.RIGHT | Gravity.CENTER_VERTICAL, 0, 4, 24, 3));
 
-        Runnable checkPaste = () -> {
+        final Runnable checkPaste = () -> {
             ClipboardManager clipboardManager = (ClipboardManager) getContext().getSystemService(Context.CLIPBOARD_SERVICE);
             final boolean show = (TextUtils.isEmpty(urlEditText.editText.getText()) || TextUtils.equals(urlEditText.editText.getText(), def) || TextUtils.isEmpty(urlEditText.editText.getText().toString())) && clipboardManager != null && clipboardManager.hasPrimaryClip();
             pasteTextView.animate()
@@ -364,11 +366,19 @@ public class StoryLinkSheet extends BottomSheetWithRecyclerListView implements N
     }
 
     private final Runnable requestPreview = () -> {
-        TLRPC.TL_messages_getWebPagePreview req = new TLRPC.TL_messages_getWebPagePreview();
+        TL_account.getWebPagePreview req = new TL_account.getWebPagePreview();
         req.message = urlEditText.editText.getText().toString();
         reqId = ConnectionsManager.getInstance(currentAccount).sendRequest(req, (res, err) -> AndroidUtilities.runOnUIThread(() -> {
-            if (res instanceof TLRPC.TL_messageMediaWebPage) {
-                webpage = ((TLRPC.TL_messageMediaWebPage) res).webpage;
+            TLRPC.TL_messageMediaWebPage media = null;
+            if (res instanceof TL_account.webPagePreview) {
+                final TL_account.webPagePreview preview = (TL_account.webPagePreview) res;
+                MessagesController.getInstance(currentAccount).putUsers(preview.users, false);
+                if (preview.media instanceof TLRPC.TL_messageMediaWebPage) {
+                    media = (TLRPC.TL_messageMediaWebPage) preview.media;
+                }
+            }
+            if (media != null) {
+                webpage = media.webpage;
                 if (isPreviewEmpty(webpage)) {
                     webpageId = webpage == null ? 0 : webpage.id;
                     webpage = null;
