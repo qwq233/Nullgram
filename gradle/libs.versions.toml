@@ -33,7 +33,7 @@ mlkitVision = "16.0.0-beta1"
 processPhoenix = "3.0.0"
 sharetarget = "1.2.0"
 paletteKtx = "1.0.0"
-rust = "0.9.4"
+rust = "0.9.6"
 nanohttpd = "2.3.1"
 mediarouter = "1.7.0"
 
