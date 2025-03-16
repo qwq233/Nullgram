@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019-2023 qwq233 <qwq233@qwq2333.top>
+ * Copyright (C) 2019-2025 qwq233 <qwq233@qwq2333.top>
  * https://github.com/qwq233/Nullgram
  *
  * This program is free software; you can redistribute it and/or
@@ -77,6 +77,7 @@ class ConfigSwitchGenerator(
                         addFunction(FunSpec.builder("set$uppercaseName").apply {
                             addAnnotation(JvmStatic::class)
                             addParameter("value", Boolean::class)
+                            addStatement("$originName = value")
                             addStatement("%T.putBoolean(%T.$originName, value)", configManager, defines)
                         }.build())
                         addFunction(FunSpec.builder("toggle$uppercaseName").apply {
