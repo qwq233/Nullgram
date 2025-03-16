@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019-2023 qwq233 <qwq233@qwq2333.top>
+ * Copyright (C) 2019-2025 qwq233 <qwq233@qwq2333.top>
  * https://github.com/qwq233/Nullgram
  *
  * This program is free software; you can redistribute it and/or
@@ -39,7 +39,7 @@ import org.telegram.messenger.MessagesController;
 import org.telegram.messenger.R;
 import org.telegram.messenger.SendMessagesHelper;
 import org.telegram.messenger.browser.Browser;
-import org.telegram.tgnet.TLRPC;
+import org.telegram.tgnet.tl.TL_account;
 import org.telegram.ui.ActionBar.ActionBar;
 import org.telegram.ui.ActionBar.ActionBarMenu;
 import org.telegram.ui.ActionBar.ActionBarMenuItem;
@@ -142,10 +142,10 @@ public class MainSettingActivity extends BaseActivity {
     }
 
     private void checkSensitive() {
-        TLRPC.TL_account_getContentSettings req = new TLRPC.TL_account_getContentSettings();
+        TL_account.getContentSettings req = new TL_account.getContentSettings();
         getConnectionsManager().sendRequest(req, (response, error) -> AndroidUtilities.runOnUIThread(() -> {
             if (error == null) {
-                TLRPC.TL_account_contentSettings settings = (TLRPC.TL_account_contentSettings) response;
+                TL_account.contentSettings settings = (TL_account.contentSettings) response;
                 sensitiveEnabled = settings.sensitive_enabled;
                 sensitiveCanChange = settings.sensitive_can_change;
             } else {
