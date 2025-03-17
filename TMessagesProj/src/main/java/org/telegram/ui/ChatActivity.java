@@ -38794,10 +38794,15 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
                 return;
             }
 
-            if (message != null && cell.getPhotoImage() != null && !message.preview) {
+            if (cell.getPhotoImage() != null && !message.preview) {
                 TLRPC.WebPage webPage = MessageObject.getMedia(message.messageOwner).webpage;
-                if (webPage != null && webPage.photo != null && (x < cell.getPhotoImage().getCenterX() + cell.getPhotoImage().getImageWidth() / 2
-                    && x > cell.getPhotoImage().getCenterX() - cell.getPhotoImage().getImageWidth() / 2)) {
+                ImageReceiver photoImage = cell.getPhotoImage();
+                if (webPage != null && webPage.photo != null 
+                    && (x < photoImage.getCenterX() + photoImage.getImageWidth() / 2
+                        && x > photoImage.getCenterX() - photoImage.getImageWidth() / 2)
+                    && (y < photoImage.getCenterY() + photoImage.getImageHeight() / 2
+                        && y > photoImage.getCenterY() - photoImage.getImageHeight() / 2)
+                ) {
                     openPhotoViewerForMessage(cell, message);
                     return;
                 }
