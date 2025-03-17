@@ -38793,6 +38793,16 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
             } else if (message.isSending()) {
                 return;
             }
+
+            if (message != null && cell.getPhotoImage() != null && !message.preview) {
+                TLRPC.WebPage webPage = MessageObject.getMedia(message.messageOwner).webpage;
+                if (webPage != null && webPage.photo != null && (x < cell.getPhotoImage().getCenterX() + cell.getPhotoImage().getImageWidth() / 2
+                    && x > cell.getPhotoImage().getCenterX() - cell.getPhotoImage().getImageWidth() / 2)) {
+                    openPhotoViewerForMessage(cell, message);
+                    return;
+                }
+            }
+
             if (fullPreview && message != null && message.messageOwner != null && message.messageOwner.media != null && message.messageOwner.media.webpage != null && !TextUtils.isEmpty(message.messageOwner.media.webpage.url)) {
                 final String url = message.messageOwner.media.webpage.url;
                 final String host = AndroidUtilities.getHostAuthority(url);

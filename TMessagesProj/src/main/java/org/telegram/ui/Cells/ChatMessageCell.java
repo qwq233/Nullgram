@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019-2024 qwq233 <qwq233@qwq2333.top>
+ * Copyright (C) 2019-2025 qwq233 <qwq233@qwq2333.top>
  * https://github.com/qwq233/Nullgram
  *
  * This program is free software; you can redistribute it and/or
@@ -23,7 +23,6 @@ import static org.telegram.messenger.AndroidUtilities.dp;
 import static org.telegram.messenger.AndroidUtilities.dpf2;
 import static org.telegram.messenger.AndroidUtilities.lerp;
 import static org.telegram.messenger.LocaleController.formatPluralStringComma;
-import static org.telegram.messenger.LocaleController.formatString;
 import static org.telegram.messenger.LocaleController.getString;
 import static org.telegram.messenger.MessageObject.replaceWithLink;
 
@@ -82,7 +81,6 @@ import android.text.TextUtils.TruncateAt;
 import android.text.style.CharacterStyle;
 import android.text.style.ClickableSpan;
 import android.text.style.LeadingMarginSpan;
-import android.text.style.LeadingMarginSpan.Standard;
 import android.text.style.URLSpan;
 import android.util.Pair;
 import android.util.Property;
@@ -151,8 +149,6 @@ import org.telegram.tgnet.TLRPC;
 import org.telegram.tgnet.TLRPC.Chat;
 import org.telegram.tgnet.TLRPC.EncryptedChat;
 import org.telegram.tgnet.TLRPC.PhotoSize;
-import org.telegram.tgnet.TLRPC.TL_messageMediaGame;
-import org.telegram.tgnet.TLRPC.TL_messageMediaInvoice;
 import org.telegram.tgnet.TLRPC.TL_peerChannel;
 import org.telegram.tgnet.TLRPC.TL_peerChat;
 import org.telegram.tgnet.TLRPC.TL_peerUser;
@@ -164,7 +160,6 @@ import org.telegram.ui.AvatarSpan;
 import org.telegram.ui.Cells.DialogCell.FixedWidthSpan;
 import org.telegram.ui.ChatActivity;
 import org.telegram.ui.Components.AnimatedEmojiDrawable;
-import org.telegram.ui.Components.AnimatedEmojiDrawable.SwapAnimatedEmojiDrawable;
 import org.telegram.ui.Components.AnimatedEmojiSpan;
 import org.telegram.ui.Components.AnimatedFileDrawable;
 import org.telegram.ui.Components.AnimatedFloat;
@@ -2715,14 +2710,10 @@ public class ChatMessageCell extends BaseCell implements SeekBar.SeekBarDelegate
                         if (delegate != null) {
                             delegate.didPressImage(this, lastTouchX, lastTouchY, true);
                         }
-                    } else if (!currentMessageObject.preview) {
+                    } else if (currentMessageObject != null && !currentMessageObject.preview) {
                         Log.d("cell", "trigger !currentMessageObject.preview");
                         TLRPC.WebPage webPage = MessageObject.getMedia(currentMessageObject.messageOwner).webpage;
-                        if (webPage != null && webPage.photo != null && (lastTouchX < photoImage.getCenterX() + photoImage.getImageWidth() / 2 && lastTouchX > photoImage.getCenterX() - photoImage.getImageWidth() / 2)) {
-                            if (delegate != null) {
-                                delegate.didPressImage(this, lastTouchX, lastTouchY, true);
-                            }
-                        } else if (webPage != null && !TextUtils.isEmpty(webPage.embed_url)) {
+                        if (webPage != null && !TextUtils.isEmpty(webPage.embed_url)) {
                             if (delegate != null) {
                                 delegate.needOpenWebView(currentMessageObject, webPage.embed_url, webPage.site_name, webPage.title, webPage.url, webPage.embed_width, webPage.embed_height);
                             }
