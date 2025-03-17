@@ -8473,7 +8473,7 @@ public class LoginActivity extends BaseFragment implements NotificationCenter.No
                         needShowAlert(LocaleController.getString("AppName", R.string.AppName), error.code + " " + error.text);
                     }
                 }
-            }), 10);
+            }), ConnectionsManager.RequestFlagFailOnServerErrors | ConnectionsManager.RequestFlagWithoutLogin | ConnectionsManager.RequestFlagTryDifferentDc | ConnectionsManager.RequestFlagEnableUnauthorized);
             needShowProgress(reqId);
         }
 

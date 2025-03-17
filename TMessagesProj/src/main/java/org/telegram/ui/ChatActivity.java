@@ -26540,34 +26540,6 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
     }
 
     private void showGiftButton(boolean show, boolean animated) {
-        if (getContext() == null) return;
-        final boolean wasShown = bottomGiftButton != null && bottomGiftButton.getAlpha() > 0.5f;
-        if (bottomGiftButton == null) {
-            bottomGiftButton = new ImageView(getContext());
-            bottomGiftButton.setImageResource(R.drawable.input_gift_s);
-            bottomGiftButton.setScaleType(ImageView.ScaleType.CENTER);
-            bottomGiftButton.setColorFilter(new PorterDuffColorFilter(getThemedColor(Theme.key_chat_fieldOverlayText), PorterDuff.Mode.SRC_IN));
-            bottomOverlayChat.addView(bottomGiftButton, LayoutHelper.createFrame(48, 48, Gravity.RIGHT | Gravity.CENTER_VERTICAL));
-            bottomGiftButton.setBackground(Theme.createSelectorDrawable(Theme.multAlpha(getThemedColor(Theme.key_chat_fieldOverlayText), .10f), Theme.RIPPLE_MASK_CIRCLE_20DP));
-            bottomGiftButton.setOnClickListener(v -> {
-                MessagesController.getGlobalMainSettings().edit().putInt("channelgifthint", 3).apply();
-                showDialog(new GiftSheet(getContext(), currentAccount, getDialogId(), null, null));
-            });
-            bottomGiftButton.setContentDescription(getString(R.string.Gift2ChannelSend));
-            ScaleStateListAnimator.apply(bottomGiftButton);
-        }
-        AndroidUtilities.updateViewShow(bottomGiftButton, show, true, animated);
-        if (show && !wasShown && bottomGiftHintView == null && MessagesController.getGlobalMainSettings().getInt("channelgifthint", 0) < 2) {
-            bottomGiftHintView = new HintView2(getContext(), HintView2.DIRECTION_BOTTOM);
-            bottomGiftHintView.setPadding(dp(7.33f), 0, dp(7.33f), 0);
-            bottomGiftHintView.setMultilineText(false);
-            bottomGiftHintView.setText(getString(R.string.Gift2ChannelSendHint));
-            bottomGiftHintView.setJoint(1, -24 + 7.33f);
-            contentView.addView(bottomGiftHintView, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, 100, Gravity.BOTTOM | Gravity.FILL_HORIZONTAL, 0, 0, 0, 51 - 8.66f));
-            bottomGiftHintView.setOnHiddenListener(() -> AndroidUtilities.removeFromParent(bottomGiftHintView));
-            bottomGiftHintView.show();
-            MessagesController.getGlobalMainSettings().edit().putInt("channelgifthint", MessagesController.getGlobalMainSettings().getInt("channelgifthint", 0) + 1).apply();
-        }
     }
 
 
