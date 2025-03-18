@@ -2713,7 +2713,14 @@ public class ChatMessageCell extends BaseCell implements SeekBar.SeekBarDelegate
                     } else if (currentMessageObject != null && !currentMessageObject.preview) {
                         Log.d("cell", "trigger !currentMessageObject.preview");
                         TLRPC.WebPage webPage = MessageObject.getMedia(currentMessageObject.messageOwner).webpage;
-                        if (webPage != null && !TextUtils.isEmpty(webPage.embed_url)) {
+                        if (webPage != null && webPage.photo != null
+                            && (x < photoImage.getCenterX() + photoImage.getImageWidth() / 2
+                                && x > photoImage.getCenterX() - photoImage.getImageWidth() / 2)
+                            && (y < photoImage.getCenterY() + photoImage.getImageHeight() / 2
+                                && y > photoImage.getCenterY() - photoImage.getImageHeight() / 2)
+                        ) {
+                            delegate.didPressImage(this, lastTouchX, lastTouchY, true);
+                        } else if (webPage != null && !TextUtils.isEmpty(webPage.embed_url)) {
                             if (delegate != null) {
                                 delegate.needOpenWebView(currentMessageObject, webPage.embed_url, webPage.site_name, webPage.title, webPage.url, webPage.embed_width, webPage.embed_height);
                             }
