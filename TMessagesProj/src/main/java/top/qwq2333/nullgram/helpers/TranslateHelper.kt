@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019-2024 qwq233 <qwq233@qwq2333.top>
+ * Copyright (C) 2019-2025 qwq233 <qwq233@qwq2333.top>
  * https://github.com/qwq233/Nullgram
  *
  * This program is free software; you can redistribute it and/or
@@ -40,7 +40,7 @@ import org.telegram.ui.ActionBar.AlertDialog
 import org.telegram.ui.ActionBar.BaseFragment
 import org.telegram.ui.ActionBar.Theme.ResourcesProvider
 import org.telegram.ui.Components.BulletinFactory
-import org.telegram.ui.Components.TranslateAlert
+import org.telegram.ui.Components.TranslateAlert2
 import top.qwq2333.gen.Config
 import top.qwq2333.nullgram.activity.LanguageSelectActivity
 import top.qwq2333.nullgram.config.ConfigManager
@@ -184,15 +184,15 @@ object TranslateHelper {
     }
 
     @JvmStatic
-    fun translate(obj: Any, from: String, onSuccess: (Any, String, String) -> Unit, onError: (Exception) -> Unit) {
+    @JvmOverloads
+    fun translate(obj: Any, from: String, to: String = getCurrentProvider().getCurrentTargetLanguage(), onSuccess: (Any, String, String) -> Unit, onError: (Exception) -> Unit) {
         val translator = getCurrentProvider()
-        val language = translator.getCurrentTargetLanguage()
-        if (!translator.supportLanguage(language)) {
+        if (!translator.supportLanguage(to)) {
             onError(UnsupportedTargetLanguageException())
         } else {
             CoroutineScope(Dispatchers.Main).launch {
                 val result = withContext(Dispatchers.IO) {
-                    translator.translate(obj, from, language)
+                    translator.translate(obj, from, to)
                 }
                 if (result.error != null) {
                     if (result.error == HttpStatusCode.TooManyRequests) {
@@ -201,7 +201,7 @@ object TranslateHelper {
                         onError(Exception(result.error.toString()))
                     }
                 } else {
-                    onSuccess(result.result!!, translator.convertLanguageCode(result.from, true), language)
+                    onSuccess(result.result!!, translator.convertLanguageCode(result.from, true), to)
                 }
             }
         }
@@ -351,12 +351,12 @@ object TranslateHelper {
 
     @JvmStatic
     fun showTranslateDialog(
-        context: Context, query: String, fragment: BaseFragment?, sourceLanguage: String?, onLinkPress: ((URLSpan) -> Boolean)?
+        context: Context, query: String, fragment: BaseFragment, sourceLanguage: String, onLinkPress: ((URLSpan) -> Boolean)?
     ) {
         if (currentStatus == Status.External) {
             startExternalTranslator(context, query)
         } else {
-            TranslateAlert.showAlert(context, fragment, sourceLanguage, currentTargetLanguage, query, false, onLinkPress, null)
+            TranslateAlert2.showAlert(context, fragment, sourceLanguage, currentTargetLanguage, query, onLinkPress, null)
         }
     }
 

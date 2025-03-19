@@ -1897,7 +1897,7 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
                 }
                 switch (Config.getDoubleTab()) {
                     case Defines.doubleTabTranslate:
-                        if (TranslateHelper.getCurrentStatus() != Status.External || !noforwards) {
+                        if (TranslateHelper.getCurrentStatus() != Status.External) {
                             MessageObject messageObject = getMessageUtils().getMessageForTranslate(message, messageGroup);
                             if (messageObject != null) {
                                 return true;

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019-2024 qwq233 <qwq233@qwq2333.top>
+ * Copyright (C) 2019-2025 qwq233 <qwq233@qwq2333.top>
  * https://github.com/qwq233/Nullgram
  *
  * This program is free software; you can redistribute it and/or
@@ -60,7 +60,6 @@ import androidx.recyclerview.widget.RecyclerView;
 import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.Emoji;
 import org.telegram.messenger.LocaleController;
-import org.telegram.messenger.MessageObject;
 import org.telegram.messenger.MessagesController;
 import org.telegram.messenger.NotificationCenter;
 import org.telegram.messenger.R;
@@ -79,6 +78,10 @@ import org.telegram.ui.ActionBar.Theme;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Locale;
+
+import kotlin.Unit;
+import top.qwq2333.gen.Config;
+import top.qwq2333.nullgram.helpers.TranslateHelper;
 
 public class TranslateAlert2 extends BottomSheet implements NotificationCenter.NotificationCenterDelegate {
 
@@ -273,60 +276,14 @@ public class TranslateAlert2 extends BottomSheet implements NotificationCenter.N
     }
 
     public void translate() {
-        if (reqId != null) {
-            ConnectionsManager.getInstance(currentAccount).cancelRequest(reqId, true);
-            reqId = null;
-        }
-        TLRPC.TL_messages_translateText req = new TLRPC.TL_messages_translateText();
-        TLRPC.TL_textWithEntities textWithEntities = new TLRPC.TL_textWithEntities();
-        textWithEntities.text = reqText == null ? "" : reqText.toString();
-        if (reqMessageEntities != null) {
-            textWithEntities.entities = reqMessageEntities;
-        }
-        if (reqPeer != null) {
-            req.flags |= 1;
-            req.peer = reqPeer;
-            req.id.add(reqMessageId);
-        } else {
-            req.flags |= 2;
-            req.text.add(textWithEntities);
-        }
-//        if (fromLanguage != null && !"und".equals(fromLanguage)) {
-//            req.flags |= 4;
-//            req.from_lang = fromLanguage;
-//        }
-        String lang = toLanguage;
-        if (lang != null) {
-            lang = lang.split("_")[0];
-        }
-        if ("nb".equals(lang)) {
-            lang = "no";
-        }
-        req.to_lang = lang;
-        reqId = ConnectionsManager.getInstance(currentAccount).sendRequest(req, (res, err) -> {
-            AndroidUtilities.runOnUIThread(() -> {
-                reqId = null;
-                if (res instanceof TLRPC.TL_messages_translateResult &&
-                    !((TLRPC.TL_messages_translateResult) res).result.isEmpty() &&
-                    ((TLRPC.TL_messages_translateResult) res).result.get(0) != null &&
-                    ((TLRPC.TL_messages_translateResult) res).result.get(0).text != null
-                ) {
-                    firstTranslation = false;
-                    TLRPC.TL_textWithEntities text = preprocess(textWithEntities, ((TLRPC.TL_messages_translateResult) res).result.get(0));
-                    CharSequence translated = SpannableStringBuilder.valueOf(text.text);
-                    MessageObject.addEntitiesToText(translated, text.entities, false, true, false, false);
-                    translated = preprocessText(translated);
-                    textView.setText(translated);
-                    adapter.updateMainView(textViewContainer);
-                } else if (firstTranslation) {
-                    dismiss();
-                    NotificationCenter.getGlobalInstance().postNotificationName(NotificationCenter.showBulletin, Bulletin.TYPE_ERROR, LocaleController.getString(R.string.TranslationFailedAlert2));
-                } else {
-                    BulletinFactory.of((FrameLayout) containerView, resourcesProvider).createErrorBulletin(LocaleController.getString(R.string.TranslationFailedAlert2)).show();
-                    headerView.toLanguageTextView.setText(languageName(toLanguage = prevToLanguage));
-                    adapter.updateMainView(textViewContainer);
-                }
-            });
+        TranslateHelper.translate(reqText, fromLanguage, toLanguage, (translation, sourceLanguageT, targetLanguageT) -> {
+            textView.setText((String) translation);
+            adapter.updateMainView(textViewContainer);
+            return Unit.INSTANCE;
+        }, (exception) -> {
+            dismiss();
+            TranslateHelper.handleTranslationError(fragment, exception, this::translate, null);
+            return Unit.INSTANCE;
         });
     }
 
@@ -521,7 +478,7 @@ public class TranslateAlert2 extends BottomSheet implements NotificationCenter.N
         if (textView != null) {
             textView.setTextIsSelectable(!noforwards);
         }
-        if (noforwards) {
+        if (noforwards && Config.allowScreenshotOnNoForwardChat) {
             getWindow().addFlags(WindowManager.LayoutParams.FLAG_SECURE);
         } else {
             getWindow().clearFlags(WindowManager.LayoutParams.FLAG_SECURE);
@@ -1150,6 +1107,11 @@ public class TranslateAlert2 extends BottomSheet implements NotificationCenter.N
             alert.show();
         }
         return alert;
+    }
+
+    public static TranslateAlert2 showAlert(Context context, BaseFragment fragment, String fromLanguage, String toLanguage, CharSequence text,
+         Utilities.CallbackReturn<URLSpan, Boolean> onLinkPress, Runnable onDismiss) {
+        return showAlert(context, fragment, -1, fromLanguage, toLanguage, text, null, false, onLinkPress, onDismiss);
     }
 
     public static TranslateAlert2 showAlert(Context context, BaseFragment fragment, int currentAccount, String fromLanguage, String toLanguage, CharSequence text, ArrayList<TLRPC.MessageEntity> entities, boolean noforwards, Utilities.CallbackReturn<URLSpan, Boolean> onLinkPress, Runnable onDismiss) {
