@@ -299,7 +299,7 @@
     <string name="MarkdownParser">Markdown 解析器</string>
     <string name="MarkdownParseLinks">链接解析</string>
     <string name="MarkdownAbout">使用 Markdown 编辑消息中的文字：^1**粗体**^1，^2__斜体__^2，^3~~删除线~~^3，^4`等宽`^4，^5||打码||^5，^6文本^7链接^8。</string>
-    <string name="MarkdownAbout2">使用 Markdown编 辑消息中的文字：^1**粗体**^1，^2__斜体__^2，^3~~删除线~~^3，^4`等宽`^4，^5||打码||^5。</string>
+    <string name="MarkdownAbout2">使用 Markdown 编辑消息中的文字：^1**粗体**^1，^2__斜体__^2，^3~~删除线~~^3，^4`等宽`^4，^5||打码||^5。</string>
     <string name="MarkdownDisableByDefault">默认为禁用</string>
     <string name="DatacenterStatusShort">数据中心</string>
     <string name="RegistrationDate">注册日期</string>
@@ -319,7 +319,7 @@
     <string name="HideStories">隐藏动态</string>
     <string name="storyStealthMode">动态隐身模式</string>
     <string name="OneMoreThing">还有一件事</string>
-    <string name="NotOriginalNullgramInfo">你似乎正在使用 Nullgram 的分支。\n 你想要关注 Nullgram 的频道吗？</string>
+    <string name="NotOriginalNullgramInfo">你似乎正在使用 Nullgram 的分支。\n你想要关注 Nullgram 的频道吗？</string>
     <string name="Official">官方</string>
     <string name="Before">开始...</string>
     <string name="Custom">自定义</string>
@@ -343,7 +343,7 @@
     <string name="SaveToDownloadCount_few">正在保存 %1$d 个文件至下载目录</string>
     <string name="SaveToDownloadCount_many">正在保存 %1$d 个文件至下载目录</string>
     <string name="SaveToDownloadCount_other">正在保存 %1$d 个文件至下载目录</string>
-    <string name="InvalidPattern">Invalid Pattern</string>
-    <string name="sendLargePhoto">Send large photo</string>
-    <string name="Details">Details</string>
+    <string name="InvalidPattern">无效的正则表达式</string>
+    <string name="sendLargePhoto">发送大尺寸图片</string>
+    <string name="Details">详情</string>
 </resources>
