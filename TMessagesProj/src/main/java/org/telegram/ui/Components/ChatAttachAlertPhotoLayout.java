@@ -2639,8 +2639,10 @@ public class ChatAttachAlertPhotoLayout extends ChatAttachAlert.AttachAlertLayou
                             canvas.save();
                             canvas.clipRect(0, 0, getMeasuredWidth(), maxY);
                         }
-                        cameraDrawable.setBounds(x, y, x + w, y + h);
-                        cameraDrawable.draw(canvas);
+                        if (!Config.disableInstantCamera) {
+                            cameraDrawable.setBounds(x, y, x + w, y + h);
+                            cameraDrawable.draw(canvas);
+                        }
                         if (clip) {
                             canvas.restore();
                         }
