@@ -39,7 +39,6 @@
 extern const uint8_t ff_golomb_vlc_len[512];
 extern const uint8_t ff_ue_golomb_vlc_code[512];
 extern const  int8_t ff_se_golomb_vlc_code[512];
-extern const uint8_t ff_ue_golomb_len[256];
 
 extern const uint8_t ff_interleaved_golomb_vlc_len[256];
 extern const uint8_t ff_interleaved_ue_golomb_vlc_code[256];
@@ -65,9 +64,12 @@ static inline int get_ue_golomb(GetBitContext *gb)
         return ff_ue_golomb_vlc_code[buf];
     } else {
         int log = 2 * av_log2(buf) - 31;
+
+        skip_bits_long(gb, 32 - log);
+        if (log < 7)
+            return AVERROR_INVALIDDATA;
         buf >>= log;
         buf--;
-        skip_bits_long(gb, 32 - log);
 
         return buf;
     }
@@ -86,10 +88,8 @@ static inline int get_ue_golomb(GetBitContext *gb)
         int log = 2 * av_log2(buf) - 31;
         LAST_SKIP_BITS(re, gb, 32 - log);
         CLOSE_READER(re, gb);
-        if (log < 7) {
-            av_log(NULL, AV_LOG_ERROR, "Invalid UE golomb code\n");
+        if (log < 7)
             return AVERROR_INVALIDDATA;
-        }
         buf >>= log;
         buf--;
 
@@ -114,7 +114,8 @@ static inline unsigned get_ue_golomb_long(GetBitContext *gb)
 
 /**
  * read unsigned exp golomb code, constraint to a max of 31.
- * the return value is undefined if the stored value exceeds 31.
+ * If the value encountered is not in 0..31, the return value
+ * is outside the range 0..30.
  */
 static inline int get_ue_golomb_31(GetBitContext *gb)
 {
@@ -401,6 +402,7 @@ static inline int get_ur_golomb(GetBitContext *gb, int k, int limit,
     log = av_log2(buf);
 
     if (log > 31 - limit) {
+        av_assert2(log >= k);
         buf >>= log - k;
         buf  += (30U - log) << k;
         LAST_SKIP_BITS(re, gb, 32 + k - log);
@@ -474,5 +476,4 @@ static inline int get_te(GetBitContext *s, int r, char *file, const char *func,
 #define get_te0_golomb(a, r) get_te(a, r, __FILE__, __func__, __LINE__)
 
 #endif /* TRACE */
-
 #endif /* AVCODEC_GOLOMB_H */

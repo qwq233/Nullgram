@@ -16,6 +16,7 @@
 
 extern "C" {
 #include <libavformat/avformat.h>
+#include <libavcodec/avcodec.h>
 #include <libavformat/isom.h>
 #include <libavcodec/bytestream.h>
 #include <libavcodec/get_bits.h>
@@ -163,7 +164,6 @@ static enum AVPixelFormat get_format(AVCodecContext *ctx,
 int open_codec_context(int *stream_idx, AVCodecContext **dec_ctx, AVFormatContext *fmt_ctx, enum AVMediaType type) {
     int ret, stream_index;
     AVStream *st;
-    AVCodec *dec = NULL;
     AVDictionary *opts = NULL;
 
     ret = av_find_best_stream(fmt_ctx, type, -1, -1, NULL, 0);
@@ -174,7 +174,7 @@ int open_codec_context(int *stream_idx, AVCodecContext **dec_ctx, AVFormatContex
         stream_index = ret;
         st = fmt_ctx->streams[stream_index];
 
-        dec = avcodec_find_decoder(st->codecpar->codec_id);
+        const AVCodec *dec = avcodec_find_decoder(st->codecpar->codec_id);
         if (!dec) {
             LOGE("failed to find %d codec", st->codecpar->codec_id);
             return AVERROR(EINVAL);
@@ -552,8 +552,14 @@ extern "C" JNIEXPORT jlong JNICALL Java_org_telegram_ui_Components_AnimatedFileD
             } else if(video_stream->r_frame_rate.den && video_stream->r_frame_rate.num) {
                 fps = av_q2d(video_stream->r_frame_rate);
             } else {
-                int ticks = video_stream->codec->ticks_per_frame;
+                const AVCodec *codec = avcodec_find_decoder(video_stream->codecpar->codec_id);
+                AVCodecContext *codec_ctx = avcodec_alloc_context3(codec);
+                avcodec_parameters_to_context(codec_ctx, video_stream->codecpar);
+                avcodec_open2(codec_ctx, codec, NULL);
+
+                int ticks = codec_ctx->ticks_per_frame;
                 fps = 1.0 / (ticks * av_q2d(video_stream->time_base));
+                avcodec_free_context(&codec_ctx);
             }
         }
         dataArr[5] = (int32_t) fps;

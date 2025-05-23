@@ -311,7 +311,7 @@ void AudioStreamingPartInternal::fillPcmBuffer(AudioStreamingPartPersistentDecod
     }
     
     if (_channelCount == 0) {
-        _channelCount = _frame->channels;
+        _channelCount = _frame->ch_layout.nb_channels;
     }
     
     if (_channelCount == 0) {
@@ -319,24 +319,24 @@ void AudioStreamingPartInternal::fillPcmBuffer(AudioStreamingPartPersistentDecod
         return;
     }
     
-    if (_frame->channels != _channelCount || _frame->channels > 8) {
+    if (_frame->ch_layout.nb_channels != _channelCount || _frame->ch_layout.nb_channels > 8) {
         _didReadToEnd = true;
         return;
     }
 
-    if (_pcmBuffer.size() < _frame->nb_samples * _frame->channels) {
-        _pcmBuffer.resize(_frame->nb_samples * _frame->channels);
+    if (_pcmBuffer.size() < _frame->nb_samples * _frame->ch_layout.nb_channels) {
+        _pcmBuffer.resize(_frame->nb_samples * _frame->ch_layout.nb_channels);
     }
 
     switch (_frame->format) {
     case AV_SAMPLE_FMT_S16: {
-        memcpy(_pcmBuffer.data(), _frame->data[0], _frame->nb_samples * 2 * _frame->channels);
+        memcpy(_pcmBuffer.data(), _frame->data[0], _frame->nb_samples * 2 * _frame->ch_layout.nb_channels);
     } break;
 
     case AV_SAMPLE_FMT_S16P: {
         int16_t *to = _pcmBuffer.data();
         for (int sample = 0; sample < _frame->nb_samples; ++sample) {
-            for (int channel = 0; channel < _frame->channels; ++channel) {
+            for (int channel = 0; channel < _frame->ch_layout.nb_channels; ++channel) {
                 int16_t *shortChannel = (int16_t*)_frame->data[channel];
                 *to++ = shortChannel[sample];
             }
@@ -345,7 +345,7 @@ void AudioStreamingPartInternal::fillPcmBuffer(AudioStreamingPartPersistentDecod
 
     case AV_SAMPLE_FMT_FLT: {
 		float *floatData = (float *)&_frame->data[0];
-		for (int i = 0; i < _frame->nb_samples * _frame->channels; i++) {
+		for (int i = 0; i < _frame->nb_samples * _frame->ch_layout.nb_channels; i++) {
 			_pcmBuffer[i] = sampleFloatToInt16(floatData[i]);
 		}
     } break;
@@ -353,7 +353,7 @@ void AudioStreamingPartInternal::fillPcmBuffer(AudioStreamingPartPersistentDecod
     case AV_SAMPLE_FMT_FLTP: {
 		int16_t *to = _pcmBuffer.data();
 		for (int sample = 0; sample < _frame->nb_samples; ++sample) {
-			for (int channel = 0; channel < _frame->channels; ++channel) {
+			for (int channel = 0; channel < _frame->ch_layout.nb_channels; ++channel) {
 				float *floatChannel = (float*)_frame->data[channel];
 				*to++ = sampleFloatToInt16(floatChannel[sample]);
 			}

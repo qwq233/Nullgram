@@ -21,7 +21,7 @@ bool WrappedCodecParameters::isEqual(AVCodecParameters const *other) {
     if (_value->format != other->format) {
         return false;
     }
-    if (_value->channels != other->channels) {
+    if (_value->ch_layout.nb_channels != other->ch_layout.nb_channels) {
         return false;
     }
     return true;
@@ -42,7 +42,7 @@ public:
             } else {
                 _codecContext->pkt_timebase = timeBase;
 
-                _channelCount = _codecContext->channels;
+                _channelCount = _codecContext->ch_layout.nb_channels;
 
                 ret = avcodec_open2(_codecContext, codec, nullptr);
                 if (ret < 0) {

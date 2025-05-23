@@ -69,14 +69,14 @@ static const int AUDIO_DECODER_ERROR_OTHER = -2;
 /**
  * Returns the AVCodec with the specified name, or NULL if it is not available.
  */
-AVCodec *getCodecByName(JNIEnv *env, jstring codecName);
+const AVCodec *getCodecByName(JNIEnv *env, jstring codecName);
 
 /**
  * Allocates and opens a new AVCodecContext for the specified codec, passing the
  * provided extraData as initialization data for the decoder if it is non-NULL.
  * Returns the created context.
  */
-AVCodecContext *createContext(JNIEnv *env, AVCodec *codec, jbyteArray extraData,
+AVCodecContext *createContext(JNIEnv *env, const AVCodec *codec, jbyteArray extraData,
                               jboolean outputFloat, jint rawSampleRate,
                               jint rawChannelCount);
 
@@ -118,7 +118,7 @@ LIBRARY_FUNC(jboolean, ffmpegHasDecoder, jstring codecName) {
 AUDIO_DECODER_FUNC(jlong, ffmpegInitialize, jstring codecName,
                    jbyteArray extraData, jboolean outputFloat,
                    jint rawSampleRate, jint rawChannelCount) {
-  AVCodec *codec = getCodecByName(env, codecName);
+  const AVCodec *codec = getCodecByName(env, codecName);
   if (!codec) {
     LOGE("Codec not found.");
     return 0L;
@@ -160,7 +160,7 @@ AUDIO_DECODER_FUNC(jint, ffmpegGetChannelCount, jlong context) {
     LOGE("Context must be non-NULL.");
     return -1;
   }
-  return ((AVCodecContext *)context)->channels;
+  return ((AVCodecContext *)context)->ch_layout.nb_channels;
 }
 
 AUDIO_DECODER_FUNC(jint, ffmpegGetSampleRate, jlong context) {
@@ -183,7 +183,7 @@ AUDIO_DECODER_FUNC(jlong, ffmpegReset, jlong jContext, jbyteArray extraData) {
     // Release and recreate the context if the codec is TrueHD.
     // TODO: Figure out why flushing doesn't work for this codec.
     releaseContext(context);
-    AVCodec *codec = avcodec_find_decoder(codecId);
+    const AVCodec *codec = avcodec_find_decoder(codecId);
     if (!codec) {
       LOGE("Unexpected error finding codec %d.", codecId);
       return 0L;
@@ -205,17 +205,17 @@ AUDIO_DECODER_FUNC(void, ffmpegRelease, jlong context) {
   }
 }
 
-AVCodec *getCodecByName(JNIEnv *env, jstring codecName) {
+const AVCodec *getCodecByName(JNIEnv *env, jstring codecName) {
   if (!codecName) {
     return NULL;
   }
   const char *codecNameChars = env->GetStringUTFChars(codecName, NULL);
-  AVCodec *codec = avcodec_find_decoder_by_name(codecNameChars);
+  const AVCodec *codec = avcodec_find_decoder_by_name(codecNameChars);
   env->ReleaseStringUTFChars(codecName, codecNameChars);
   return codec;
 }
 
-AVCodecContext *createContext(JNIEnv *env, AVCodec *codec, jbyteArray extraData,
+AVCodecContext *createContext(JNIEnv *env, const AVCodec *codec, jbyteArray extraData,
                               jboolean outputFloat, jint rawSampleRate,
                               jint rawChannelCount) {
   AVCodecContext *context = avcodec_alloc_context3(codec);
@@ -240,8 +240,7 @@ AVCodecContext *createContext(JNIEnv *env, AVCodec *codec, jbyteArray extraData,
   if (context->codec_id == AV_CODEC_ID_PCM_MULAW ||
       context->codec_id == AV_CODEC_ID_PCM_ALAW) {
     context->sample_rate = rawSampleRate;
-    context->channels = rawChannelCount;
-    context->channel_layout = av_get_default_channel_layout(rawChannelCount);
+    av_channel_layout_default(&context->ch_layout, rawChannelCount);
   }
   context->err_recognition = AV_EF_IGNORE_ERR;
   int result = avcodec_open2(context, codec, NULL);
@@ -283,8 +282,8 @@ int decodePacket(AVCodecContext *context, AVPacket *packet,
 
     // Resample output.
     AVSampleFormat sampleFormat = context->sample_fmt;
-    int channelCount = context->channels;
-    int channelLayout = context->channel_layout;
+    int channelCount = context->ch_layout.nb_channels;
+    int channelLayout = context->ch_layout.u.mask;
     int sampleRate = context->sample_rate;
     int sampleCount = frame->nb_samples;
     int dataSize = av_samples_get_buffer_size(NULL, channelCount, sampleCount,

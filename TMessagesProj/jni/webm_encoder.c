@@ -1,6 +1,7 @@
 #include <jni.h>
 #include "libavformat/avio.h"
 #include "libavcodec/codec.h"
+#include "libavcodec/avcodec.h"
 #include "libavformat/avformat.h"
 #include "c_utils.h"
 #include "libavutil/opt.h"
