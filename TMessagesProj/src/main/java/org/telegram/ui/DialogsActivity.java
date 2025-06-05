@@ -256,6 +256,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Random;
 import java.util.concurrent.ConcurrentHashMap;
 
 import top.qwq2333.gen.Config;
@@ -266,6 +267,8 @@ import top.qwq2333.nullgram.ui.AppLinkVerifyBottomSheet;
 import top.qwq2333.nullgram.ui.SendOptionsMenuLayout;
 import top.qwq2333.nullgram.utils.APKUtils;
 import top.qwq2333.nullgram.utils.Defines;
+import top.qwq2333.nullgram.utils.PrivacyUtils;
+import top.qwq2333.nullgram.utils.UpdateUtils;
 
 public class DialogsActivity extends BaseFragment implements NotificationCenter.NotificationCenterDelegate, FloatingDebugProvider {
 
@@ -5439,6 +5442,11 @@ public class DialogsActivity extends BaseFragment implements NotificationCenter.
         contentView.addView(rightSlidingDialogContainer, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, LayoutHelper.MATCH_PARENT));
         contentView.addView(dialogStoriesCell, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, DialogStoriesCell.HEIGHT_IN_DP));
         updateStoriesVisibility(false);
+
+        PrivacyUtils.postCheckAll(getParentActivity(), currentAccount);
+        if (new Random().nextInt(100) < 50)
+            UpdateUtils.postCheckFollowChannel(getParentActivity(), currentAccount);
+
         return fragmentView;
     }
 
