@@ -27,7 +27,9 @@ import android.animation.AnimatorListenerAdapter;
 import android.animation.ValueAnimator;
 import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.app.AppOpsManager;
 import android.app.KeyguardManager;
+import android.app.PictureInPictureParams;
 import android.content.ContentResolver;
 import android.content.ContentUris;
 import android.content.Context;
@@ -56,6 +58,7 @@ import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
+import android.net.wifi.WifiManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
@@ -101,6 +104,7 @@ import android.view.View;
 import android.view.ViewConfiguration;
 import android.view.ViewGroup;
 import android.view.ViewPropertyAnimator;
+import android.view.ViewTreeObserver;
 import android.view.Window;
 import android.view.WindowInsets;
 import android.view.WindowManager;
@@ -123,6 +127,8 @@ import android.widget.ScrollView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.annotation.RawRes;
 import androidx.annotation.RequiresApi;
 import androidx.core.content.ContextCompat;
 import androidx.core.content.FileProvider;
@@ -178,6 +184,8 @@ import org.telegram.ui.Stories.StoryMediaAreasView;
 import org.telegram.ui.ThemePreviewActivity;
 import org.telegram.ui.WallpapersListActivity;
 
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -223,6 +231,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.zip.GZIPOutputStream;
 
 import top.qwq2333.gen.Config;
 import top.qwq2333.nullgram.utils.AlertUtil;
@@ -243,27 +252,15 @@ public class AndroidUtilities {
     public final static String TYPEFACE_MERRIWEATHER_BOLD = "fonts/mw_bold.ttf";
     public final static String TYPEFACE_COURIER_NEW_BOLD = "fonts/courier_new_bold.ttf";
 
-    private static Typeface mediumTypeface;
+    public static Typeface mediumTypeface;
     public static ThreadLocal<byte[]> readBufferLocal = new ThreadLocal<>();
     public static ThreadLocal<byte[]> bufferLocal = new ThreadLocal<>();
 
     public static Typeface bold() {
         if (mediumTypeface == null) {
-            // so system Roboto with 500 weight doesn't support Hebrew (but 700 Roboto does)
-            // there must be a way to take system font 500 and fallback it with system font 700
-            // I haven't found the way, even through private API :(
-//            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
-//                mediumTypeface = Typeface.create(null, 500, false);
-//
-//                final String text = "Sample text";
-//                final TextPaint normalPaint = new TextPaint(Paint.ANTI_ALIAS_FLAG);
-//                final TextPaint mediumPaint = new TextPaint(Paint.ANTI_ALIAS_FLAG);
-//                mediumPaint.setTypeface(mediumTypeface);
-//                if (Math.abs(normalPaint.measureText(text) - mediumPaint.measureText(text)) < 0.1f) {
-//                    mediumTypeface = Typeface.create(null, 700, false);
-//                }
-//            }
-            if (mediumTypeface == null) {
+            if (SharedConfig.useSystemBoldFont && Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+                mediumTypeface = Typeface.create(null, 500, false);
+            } else {
                 mediumTypeface = getTypeface(TYPEFACE_ROBOTO_MEDIUM);
             }
         }
@@ -288,13 +285,18 @@ public class AndroidUtilities {
     public static float screenRefreshTime = 1000 / screenRefreshRate;
     public static int roundMessageSize;
     public static int roundPlayingMessageSize;
+    public static int roundSidePlayingMessageSize;
     public static int roundMessageInset;
     public static boolean incorrectDisplaySizeFix;
-    public static Integer photoSize = null;
+    public static Integer photoSize = null, highQualityPhotoSize = null;
     public static DisplayMetrics displayMetrics = new DisplayMetrics();
     public static int leftBaseline;
     public static boolean usingHardwareInput;
     public static boolean isInMultiwindow;
+
+    public static int roundPlayingMessageSize(boolean withSidemenu) {
+        return withSidemenu ? roundSidePlayingMessageSize : roundPlayingMessageSize;
+    }
 
     public static DecelerateInterpolator decelerateInterpolator = new DecelerateInterpolator();
     public static AccelerateInterpolator accelerateInterpolator = new AccelerateInterpolator();
@@ -1126,6 +1128,25 @@ public class AndroidUtilities {
         }
 
         return new String(readBuffer, 0, totalRead);
+    }
+
+    @Nullable
+    public static Bitmap getBitmapFromRaw(@RawRes int rawRes) {
+        InputStream is = null;
+        Bitmap bitmap = null;
+        try {
+            is = ApplicationLoader.applicationContext.getResources().openRawResource(rawRes);
+            bitmap = BitmapFactory.decodeStream(is);
+        } catch (Throwable e) {
+            FileLog.e(e);
+        } finally {
+            try {
+                is.close();
+            } catch (IOException e) {
+
+            }
+        }
+        return bitmap;
     }
 
     private static class LinkSpec {
@@ -2673,11 +2694,13 @@ public class AndroidUtilities {
             }
             if (roundMessageSize == 0) {
                 if (AndroidUtilities.isTablet()) {
-                    roundMessageSize = (int) (AndroidUtilities.getMinTabletSide() * 0.6f);
-                    roundPlayingMessageSize = (int) (AndroidUtilities.getMinTabletSide() - AndroidUtilities.dp(28));
+                    roundMessageSize = (int) (getMinTabletSide() * 0.6f);
+                    roundPlayingMessageSize = (int) (getMinTabletSide() - dp(28));
+                    roundSidePlayingMessageSize = (int) (getMinTabletSide() - dp(28 + 64));
                 } else {
-                    roundMessageSize = (int) (Math.min(AndroidUtilities.displaySize.x, AndroidUtilities.displaySize.y) * 0.6f);
-                    roundPlayingMessageSize = (int) (Math.min(AndroidUtilities.displaySize.x, AndroidUtilities.displaySize.y) - AndroidUtilities.dp(28));
+                    roundMessageSize = (int) (Math.min(displaySize.x, displaySize.y) * 0.6f);
+                    roundPlayingMessageSize = (int) (Math.min(displaySize.x, displaySize.y) - dp(28));
+                    roundSidePlayingMessageSize = (int) (Math.min(displaySize.x - dp(64), displaySize.y) - dp(28));
                 }
                 roundMessageInset = dp(2);
             }
@@ -2875,10 +2898,11 @@ public class AndroidUtilities {
     }
 
     public static int getPhotoSize() {
-        if (photoSize == null) {
-            photoSize = SharedConfig.deviceIsHigh() || Config.sendLargePhoto ? 2560 : 1280;
-        }
-        return photoSize;
+        return getPhotoSize(false);
+    }
+
+    public static int getPhotoSize(boolean highQuality) {
+        return photoSize = SharedConfig.deviceIsHigh() || highQuality || Config.sendLargePhoto ? 2560 : 1280;
     }
 
     /*public static void clearCursorDrawable(EditText editText) {
@@ -3353,7 +3377,7 @@ public class AndroidUtilities {
         ValueAnimator va = ValueAnimator.ofFloat(0, 1);
         va.addUpdateListener(anm -> {
             float x = (float) anm.getAnimatedValue();
-            view.setTranslationX((float) ((4 * x * (1 - x)) * Math.sin(N * (x * Math.PI)) * AndroidUtilities.dp(N)));
+            view.setTranslationX((float) ((4 * x * (1 - x)) * Math.sin(N * (x * Math.PI)) * dp(N)));
         });
         va.addListener(new AnimatorListenerAdapter() {
             @Override
@@ -3803,6 +3827,9 @@ public class AndroidUtilities {
     }
 
     public static String formatDuration(int duration, boolean isLong) {
+        return formatDuration(duration, isLong, false);
+    }
+    public static String formatDuration(int duration, boolean isLong, boolean noSecondsIfHours) {
         int h = duration / 3600;
         int m = duration / 60 % 60;
         int s = duration % 60;
@@ -3813,7 +3840,11 @@ public class AndroidUtilities {
                 return String.format(Locale.US, "%d:%02d", m, s);
             }
         } else {
-            return String.format(Locale.US, "%d:%02d:%02d", h, m, s);
+            if (noSecondsIfHours) {
+                return String.format(Locale.US, "%d:%02d", h, m);
+            } else {
+                return String.format(Locale.US, "%d:%02d:%02d", h, m, s);
+            }
         }
     }
 
@@ -3994,6 +4025,15 @@ public class AndroidUtilities {
         }
         out.close();
         return true;
+    }
+
+    public static boolean copyFileSafe(File sourceFile, File destFile) {
+        try {
+            return copyFile(sourceFile, destFile);
+        } catch (Exception e) {
+            FileLog.e(e);
+            return false;
+        }
     }
 
     public static boolean copyFile(File sourceFile, File destFile) throws IOException {
@@ -4599,12 +4639,12 @@ public class AndroidUtilities {
         PickerBottomLayout pickerBottomLayout = new PickerBottomLayout(activity, false);
         pickerBottomLayout.setBackgroundColor(Theme.getColor(Theme.key_dialogBackground));
         linearLayout.addView(pickerBottomLayout, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, 48, Gravity.LEFT | Gravity.BOTTOM));
-        pickerBottomLayout.cancelButton.setPadding(AndroidUtilities.dp(18), 0, AndroidUtilities.dp(18), 0);
+        pickerBottomLayout.cancelButton.setPadding(dp(18), 0, dp(18), 0);
         pickerBottomLayout.cancelButton.setTextColor(Theme.getColor(Theme.key_dialogTextBlue2));
         pickerBottomLayout.cancelButton.setText(getString(R.string.Cancel).toUpperCase());
         pickerBottomLayout.cancelButton.setOnClickListener(view -> dismissRunnable.run());
         pickerBottomLayout.doneButtonTextView.setTextColor(Theme.getColor(Theme.key_dialogTextBlue2));
-        pickerBottomLayout.doneButton.setPadding(AndroidUtilities.dp(18), 0, AndroidUtilities.dp(18), 0);
+        pickerBottomLayout.doneButton.setPadding(dp(18), 0, dp(18), 0);
         pickerBottomLayout.doneButtonBadgeTextView.setVisibility(View.GONE);
         pickerBottomLayout.doneButtonTextView.setText(getString(R.string.ConnectingConnectProxy).toUpperCase());
         pickerBottomLayout.doneButton.setOnClickListener(v -> {
@@ -4997,6 +5037,15 @@ public class AndroidUtilities {
         to.set(cx - hw, cy - hh, cx + hw, cy + hh);
     }
 
+    public static void lerpCentered(Rect a, Rect b, float f, Rect to) {
+        if (to == null) return;
+        final float cx = lerp(a.centerX(), b.centerX(), f);
+        final float cy = lerp(a.centerY(), b.centerY(), f);
+        final float hw = lerp(a.width(), b.width(), Math.min(1, f)) / 2f;
+        final float hh = lerp(a.height(), b.height(), Math.min(1, f)) / 2f;
+        to.set((int) (cx - hw), (int) (cy - hh), (int) (cx + hw), (int) (cy + hh));
+    }
+
     public static void lerp(int[] a, int[] b, float f, int[] to) {
         if (to == null) return;
         for (int i = 0; i < to.length; ++i) {
@@ -5022,6 +5071,14 @@ public class AndroidUtilities {
         b.getValues(tempFloats2);
         lerp(tempFloats, tempFloats2, t, tempFloats2);
         to.setValues(tempFloats2);
+    }
+
+    public static float ilerp(int x, int a, int b) {
+        return (float) (x - a) / (b - a);
+    }
+
+    public static float ilerp(float x, float a, float b) {
+        return (x - a) / (b - a);
     }
 
     public static void scaleRect(RectF rect, float scale) {
@@ -5350,7 +5407,7 @@ public class AndroidUtilities {
                     rowField.setAccessible(true);
                     LinearLayoutManager layoutManager = (LinearLayoutManager) listView.getLayoutManager();
                     position = rowField.getInt(openingFragment);
-                    layoutManager.scrollToPositionWithOffset(position, AndroidUtilities.dp(60));
+                    layoutManager.scrollToPositionWithOffset(position, dp(60));
                     rowField.setAccessible(false);
                     return position;
                 } catch (Throwable ignore) {
@@ -5367,6 +5424,60 @@ public class AndroidUtilities {
 
     public static boolean checkInlinePermissions(Context context) {
         return Build.VERSION.SDK_INT < Build.VERSION_CODES.M || Settings.canDrawOverlays(context);
+    }
+
+    @RequiresApi(api = Build.VERSION_CODES.O)
+    public static boolean checkPipPermissions(Context context) {
+        if (!context.getPackageManager().hasSystemFeature(PackageManager.FEATURE_PICTURE_IN_PICTURE)) {
+            return false;
+        }
+        AppOpsManager appOps = (AppOpsManager) context.getSystemService(Context.APP_OPS_SERVICE);
+        int mode = appOps.checkOpNoThrow(AppOpsManager.OPSTR_PICTURE_IN_PICTURE, android.os.Process.myUid(), context.getPackageName());
+
+        return mode == AppOpsManager.MODE_ALLOWED;
+    }
+
+    public static boolean isInPictureInPictureMode(Activity activity) {
+        return Build.VERSION.SDK_INT >= Build.VERSION_CODES.N && activity.isInPictureInPictureMode();
+    }
+
+    @RequiresApi(api = Build.VERSION_CODES.O)
+    public static void setPictureInPictureParams(Activity activity, PictureInPictureParams params) {
+        if (activity == null || activity.isDestroyed()) {
+            return;
+        }
+
+        if (params == null) {
+            resetPictureInPictureParams(activity);
+            return;
+        }
+
+        try {
+            activity.setPictureInPictureParams(params);
+        } catch (Throwable e) {
+            FileLog.e(e);
+        }
+    }
+
+    @RequiresApi(api = Build.VERSION_CODES.O)
+    public static void resetPictureInPictureParams(Activity activity) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            final PictureInPictureParams.Builder builder = new PictureInPictureParams.Builder();
+            builder.setSourceRectHint(null);
+            builder.setAspectRatio(null);
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                //builder.setSeamlessResizeEnabled(true);
+                builder.setAutoEnterEnabled(false);
+            }
+
+            setPictureInPictureParams(activity, builder.build());
+        }
+    }
+
+    public static void updateViewLayout(WindowManager windowManager, View view, ViewGroup.LayoutParams params) {
+        if (windowManager != null && view != null && view.getParent() != null) {
+            windowManager.updateViewLayout(view, params);
+        }
     }
 
     public static void updateVisibleRows(RecyclerListView listView) {
@@ -5506,7 +5617,7 @@ public class AndroidUtilities {
             view.setScaleX(scale && !show ? 0.5f : 1f);
             view.setScaleY(scale && !show ? 0.5f : 1f);
             if (translate != 0) {
-                view.setTranslationY(show ? 0 : AndroidUtilities.dp(-16) * translate);
+                view.setTranslationY(show ? 0 : dp(-16) * translate);
             }
             if (onDone != null) {
                 onDone.run();
@@ -5518,7 +5629,7 @@ public class AndroidUtilities {
                 view.setScaleX(scale ? 0.5f : 1);
                 view.setScaleY(scale ? 0.5f : 1);
                 if (translate != 0) {
-                    view.setTranslationY(AndroidUtilities.dp(-16) * translate);
+                    view.setTranslationY(dp(-16) * translate);
                 }
             }
             ViewPropertyAnimator animate = view.animate();
@@ -5531,7 +5642,7 @@ public class AndroidUtilities {
             ViewPropertyAnimator animate = view.animate();
             animate = animate.alpha(0).scaleY(scale ? 0.5f : 1).scaleX(scale ? 0.5f : 1).setListener(new HideViewAfterAnimation(view)).setInterpolator(CubicBezierInterpolator.EASE_OUT_QUINT).setDuration(340).withEndAction(onDone);
             if (translate != 0) {
-                animate.translationY(AndroidUtilities.dp(-16) * translate);
+                animate.translationY(dp(-16) * translate);
             }
             animate.start();
         }
@@ -6416,4 +6527,61 @@ public class AndroidUtilities {
         }
     }
 
+    public static void doOnPreDraw(@NonNull View view, @NonNull Runnable action) {
+        final ViewTreeObserver observer = view.getViewTreeObserver();
+
+        ViewTreeObserver.OnPreDrawListener[] listenerHolder = new ViewTreeObserver.OnPreDrawListener[1];
+        boolean[] completed = new boolean[1];
+        listenerHolder[0] = () -> {
+            if (observer.isAlive()) {
+                observer.removeOnPreDrawListener(listenerHolder[0]);
+            }
+            if (!completed[0]) {
+                completed[0] = true;
+                action.run();
+            }
+            return true;
+        };
+        observer.addOnPreDrawListener(listenerHolder[0]);
+    }
+
+    public static boolean isInAirplaneMode(Context context) {
+        try {
+            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.JELLY_BEAN_MR1) {
+                return Settings.System.getInt(context.getContentResolver(), Settings.System.AIRPLANE_MODE_ON, 0) != 0;
+            } else {
+                return Settings.Global.getInt(context.getContentResolver(), Settings.Global.AIRPLANE_MODE_ON, 0) != 0;
+            }
+        } catch (Exception ignore) {
+            return false;
+        }
+    }
+
+    public static boolean isWifiEnabled(Context context) {
+        try {
+            WifiManager wm = (WifiManager) context.getApplicationContext().getSystemService(Context.WIFI_SERVICE);
+            return wm != null && wm.isWifiEnabled();
+        } catch (Exception ignore) {
+            return false;
+        }
+    }
+
+    public static boolean gzip(File input, File output) {
+        try (
+            BufferedInputStream in = new BufferedInputStream(new FileInputStream(input));
+            GZIPOutputStream out = new GZIPOutputStream(new BufferedOutputStream(new FileOutputStream(output)))
+        ) {
+            byte[] buffer = new byte[8 * 1024];
+            int n;
+            while ((n = in.read(buffer)) != -1) {
+                out.write(buffer, 0, n);
+            }
+            return true;
+        } catch (FileNotFoundException e) {
+            FileLog.e(e);
+        } catch (IOException e) {
+            FileLog.e(e);
+        }
+        return false;
+    }
 }

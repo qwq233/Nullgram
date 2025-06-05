@@ -69,6 +69,7 @@ import org.telegram.ui.Components.ScaleStateListAnimator;
 import org.telegram.ui.Components.UItem;
 import org.telegram.ui.Components.UniversalAdapter;
 import org.telegram.ui.Stars.StarsIntroActivity;
+import org.telegram.ui.Components.UniversalRecyclerView;
 
 import java.util.ArrayList;
 import java.util.regex.Pattern;
@@ -558,7 +559,7 @@ public class StoryLinkSheet extends BottomSheetWithRecyclerListView implements N
             }
 
             @Override
-            public void bindView(View view, UItem item, boolean divider) {
+            public void bindView(View view, UItem item, boolean divider, UniversalAdapter adapter, UniversalRecyclerView listView) {
                 ((WebpagePreviewView) view).set(
                     item.object instanceof TLRPC.WebPage ? (TLRPC.WebPage) item.object : null,
                     item.clickCallback,

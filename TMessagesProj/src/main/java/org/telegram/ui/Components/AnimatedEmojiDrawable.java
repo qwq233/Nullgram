@@ -502,6 +502,14 @@ public class AnimatedEmojiDrawable extends Drawable {
         this.initDocument(false);
     }
 
+    @Deprecated
+    public AnimatedEmojiDrawable(int cacheType, int currentAccount) {
+        this.cacheType = cacheType;
+        this.currentAccount = currentAccount;
+        updateSize();
+        updateLiteModeValues();
+    }
+
     public void setupEmojiThumb(String emoji) {
         if (cacheType != CACHE_TYPE_STANDARD_EMOJI && cacheType != CACHE_TYPE_ALERT_STANDARD_EMOJI) {
             return;
@@ -533,6 +541,8 @@ public class AnimatedEmojiDrawable extends Drawable {
             sizedp = 140;
         } else if (this.cacheType == CACHE_TYPE_MESSAGE_EFFECT_MINI) {
             sizedp = 14;
+        } else if (cacheType == CACHE_TYPE_ALERT_STANDARD_EMOJI) {
+            sizedp = 90;
         } else {
             sizedp = 34;
         }
@@ -573,11 +583,17 @@ public class AnimatedEmojiDrawable extends Drawable {
                     return r;
                 }
             };
+            imageReceiver.setCurrentAccount(currentAccount);
             imageReceiver.setAllowLoadingOnAttachedOnly(true);
             if (cacheType == CACHE_TYPE_RENDERING_VIDEO) {
                 imageReceiver.ignoreNotifications = true;
             }
         };
+    }
+
+    public void setupDocument(TLRPC.Document document) {
+        this.document = document;
+        initDocument(false);
     }
 
     private void initDocument(boolean force) {

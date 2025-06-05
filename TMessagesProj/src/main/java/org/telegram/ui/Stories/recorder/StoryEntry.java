@@ -72,11 +72,14 @@ import org.telegram.ui.Components.RLottieDrawable;
 
 import java.io.File;
 import java.io.FileOutputStream;
+import java.nio.file.Files;
+import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.List;
 
 public class StoryEntry {
 
+    public static final int MAX_ENTRIES = 10;
     public final int currentAccount = UserConfig.selectedAccount;
 
     public long draftId;
@@ -670,8 +673,7 @@ public class StoryEntry {
     }
 
     public void destroy(boolean draft) {
-        if (blurredVideoThumb != null && !blurredVideoThumb.isRecycled()) {
-            blurredVideoThumb.recycle();
+        if (blurredVideoThumb != null) {
             blurredVideoThumb = null;
         }
         if (uploadThumbFile != null) {
@@ -716,10 +718,7 @@ public class StoryEntry {
                 roundThumb = null;
             }
         }
-        if (thumbPathBitmap != null) {
-            thumbPathBitmap.recycle();
-            thumbPathBitmap = null;
-        }
+        thumbPathBitmap = null;
         if (collageContent != null) {
             for (int i = 0; i < collageContent.size(); ++i) {
                 collageContent.get(i).destroy(draft);
@@ -961,7 +960,7 @@ public class StoryEntry {
         entry.thumbPath = photoEntry.thumbPath;
         entry.duration = photoEntry.duration * 1000L;
         entry.left = 0;
-        entry.right = Math.min(1, 59_500f / entry.duration);
+        entry.right = Math.min(1, (float) TimelineView.MAX_SELECT_DURATION / entry.duration);
         if (entry.isVideo && entry.thumbPath == null) {
             entry.thumbPath = "vthumb://" + photoEntry.imageId;
         }
@@ -974,6 +973,19 @@ public class StoryEntry {
         }
         entry.setupMatrix();
         return entry;
+    }
+
+    public void setupMultipleStoriesSelector() {
+        if (isVideo && !isCollage() && !isEdit && !isRepost && duration > TimelineView.MAX_SELECT_DURATION + 10_000L && UserConfig.getInstance(currentAccount).isPremium()) {
+            long newDuration = TimelineView.MAX_SELECT_DURATION;
+            if (duration - newDuration > 10_000L) {
+                newDuration += Math.min(TimelineView.MAX_SELECT_DURATION, duration - newDuration);
+            }
+            if (duration - newDuration > 10_000L) {
+                newDuration += Math.min(TimelineView.MAX_SELECT_DURATION, duration - newDuration);
+            }
+            right = Math.min(1, (float) newDuration / duration);
+        }
     }
 
     public boolean isCollage() {
@@ -1176,6 +1188,44 @@ public class StoryEntry {
         }
     }
 
+    public int getTotalCount() {
+        if (!isVideo || isCollage() || isEdit || duration <= 0 || isRepost)
+            return 1;
+        final long totalDuration = (long) ((right - left) * duration);
+        if (totalDuration < TimelineView.MAX_SELECT_DURATION + 9_999L)
+            return 1;
+        return (int) Math.ceil((float) totalDuration / TimelineView.MAX_SELECT_DURATION);
+    }
+
+    public ArrayList<StoryEntry> cutIntoEntries() {
+        if (!isVideo || isCollage() || isEdit || duration <= 0 || isRepost)
+            return null;
+        final long totalDuration = (long) ((right - left) * duration);
+        if (totalDuration < TimelineView.MAX_SELECT_DURATION + 9_999L)
+            return null;
+
+        long runDuration = 0;
+        final ArrayList<StoryEntry> entries = new ArrayList<>();
+        this.right = left + (float) TimelineView.MAX_SELECT_DURATION / duration;
+        runDuration += TimelineView.MAX_SELECT_DURATION;
+        entries.add(this);
+
+        while (runDuration < totalDuration) {
+            final long thisDuration = Math.min(TimelineView.MAX_SELECT_DURATION, totalDuration - runDuration);
+            if (thisDuration < TimelineView.MIN_SELECT_DURATION) {
+                break;
+            }
+            final StoryEntry next = this.copy(true);
+            next.left = this.left + (float) runDuration / duration;
+            next.right = this.left + (float) (runDuration + thisDuration) / duration;
+            next.caption = "";
+            runDuration += TimelineView.MAX_SELECT_DURATION;
+            entries.add(next);
+        }
+
+        return entries;
+    }
+
     public void getVideoEditedInfo(@NonNull Utilities.Callback<VideoEditedInfo> whenDone) {
         if (!wouldBeVideo()) {
             whenDone.run(null);
@@ -1335,6 +1385,10 @@ public class StoryEntry {
                     soundInfo.startTime = 0;
                 }
                 soundInfo.startTime += generalOffset;
+                if (soundInfo.startTime < 0) {
+                    soundInfo.audioOffset -= soundInfo.startTime;
+                    soundInfo.startTime = 0;
+                }
                 soundInfo.duration = (long) ((roundRight - roundLeft) * roundDuration) * 1000L;
                 info.mixedSoundInfos.add(soundInfo);
             }
@@ -1348,6 +1402,10 @@ public class StoryEntry {
                     soundInfo.startTime = 0;
                 }
                 soundInfo.startTime += generalOffset;
+                if (soundInfo.startTime < 0) {
+                    soundInfo.audioOffset -= soundInfo.startTime;
+                    soundInfo.startTime = 0;
+                }
                 soundInfo.duration = (long) ((audioRight - audioLeft) * audioDuration) * 1000L;
                 info.mixedSoundInfos.add(soundInfo);
             }
@@ -1552,6 +1610,10 @@ public class StoryEntry {
     }
 
     public StoryEntry copy() {
+        return copy(false);
+    }
+
+    public StoryEntry copy(boolean withFiles) {
         StoryEntry newEntry = new StoryEntry();
         newEntry.draftId = draftId;
         newEntry.isDraft = isDraft;
@@ -1581,6 +1643,10 @@ public class StoryEntry {
         newEntry.isVideo = isVideo;
         newEntry.file = file;
         newEntry.fileDeletable = fileDeletable;
+        if (fileDeletable) {
+            newEntry.file = StoryEntry.makeCacheFile(currentAccount, ext(file));
+            AndroidUtilities.copyFileSafe(file, newEntry.file);
+        }
         newEntry.thumbPath = thumbPath;
         newEntry.muted = muted;
         newEntry.left = left;
@@ -1608,12 +1674,40 @@ public class StoryEntry {
         newEntry.scheduleDate = scheduleDate;
         newEntry.blurredVideoThumb = blurredVideoThumb;
         newEntry.uploadThumbFile = uploadThumbFile;
+        if (uploadThumbFile != null && uploadThumbFile.exists()) {
+            newEntry.uploadThumbFile = StoryEntry.makeCacheFile(currentAccount, ext(uploadThumbFile));
+            AndroidUtilities.copyFileSafe(uploadThumbFile, newEntry.uploadThumbFile);
+        }
         newEntry.draftThumbFile = draftThumbFile;
+        if (draftThumbFile != null && draftThumbFile.exists()) {
+            newEntry.draftThumbFile = StoryEntry.makeCacheFile(currentAccount, ext(draftThumbFile));
+            AndroidUtilities.copyFileSafe(draftThumbFile, newEntry.draftThumbFile);
+        }
         newEntry.paintFile = paintFile;
+        if (paintFile != null && paintFile.exists()) {
+            newEntry.paintFile = StoryEntry.makeCacheFile(currentAccount, ext(paintFile));
+            AndroidUtilities.copyFileSafe(paintFile, newEntry.paintFile);
+        }
         newEntry.messageFile = messageFile;
+        if (messageFile != null && messageFile.exists()) {
+            newEntry.messageFile = StoryEntry.makeCacheFile(currentAccount, ext(messageFile));
+            AndroidUtilities.copyFileSafe(messageFile, newEntry.messageFile);
+        }
         newEntry.backgroundFile = backgroundFile;
+        if (backgroundFile != null && backgroundFile.exists()) {
+            newEntry.backgroundFile = StoryEntry.makeCacheFile(currentAccount, ext(backgroundFile));
+            AndroidUtilities.copyFileSafe(backgroundFile, newEntry.backgroundFile);
+        }
         newEntry.paintBlurFile = paintBlurFile;
+        if (paintBlurFile != null && paintBlurFile.exists()) {
+            newEntry.paintBlurFile = StoryEntry.makeCacheFile(currentAccount, ext(paintBlurFile));
+            AndroidUtilities.copyFileSafe(paintBlurFile, newEntry.paintBlurFile);
+        }
         newEntry.paintEntitiesFile = paintEntitiesFile;
+        if (paintEntitiesFile != null && paintEntitiesFile.exists()) {
+            newEntry.paintEntitiesFile = StoryEntry.makeCacheFile(currentAccount, ext(paintEntitiesFile));
+            AndroidUtilities.copyFileSafe(paintEntitiesFile, newEntry.paintEntitiesFile);
+        }
         newEntry.averageDuration = averageDuration;
         newEntry.mediaEntities = new ArrayList<>();
         if (mediaEntities != null) {
@@ -1624,6 +1718,10 @@ public class StoryEntry {
         newEntry.stickers = stickers;
         newEntry.editStickers = editStickers;
         newEntry.filterFile = filterFile;
+        if (filterFile != null && filterFile.exists()) {
+            newEntry.filterFile = StoryEntry.makeCacheFile(currentAccount, ext(filterFile));
+            AndroidUtilities.copyFileSafe(filterFile, newEntry.filterFile);
+        }
         newEntry.filterState = filterState;
         newEntry.thumbBitmap = thumbBitmap;
         newEntry.fromCamera = fromCamera;
@@ -1645,6 +1743,7 @@ public class StoryEntry {
         newEntry.collage = collage;
         newEntry.videoLoop = videoLoop;
         newEntry.videoOffset = videoOffset;
+        newEntry.videoVolume = videoVolume;
         return newEntry;
     }
 

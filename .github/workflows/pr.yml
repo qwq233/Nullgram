@@ -64,7 +64,7 @@ jobs:
             df -h
             
             sudo apt-get install bison gcc make curl ninja-build ccache -y
-            echo "y" | sdkmanager --install "ndk;28.0.13004108" --sdk_root=${ANDROID_SDK_ROOT} &> /dev/null
+            echo "y" | sdkmanager --install "ndk;28.1.13356709" --sdk_root=${ANDROID_SDK_ROOT} &> /dev/null
             echo "sdk.dir=${ANDROID_HOME}" >> local.properties
       - name: Debug Build
         run: |

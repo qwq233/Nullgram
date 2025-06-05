@@ -31,8 +31,8 @@ public class BuildVars {
     public static boolean LOGS_ENABLED = true;
     public static boolean USE_CLOUD_STRINGS = true;
     public static boolean NO_SCOPED_STORAGE = Build.VERSION.SDK_INT <= 29;
-    public static final int BUILD_VERSION = 5784;
-    public static final String BUILD_VERSION_STRING = "11.8.2";
+    public static final int BUILD_VERSION = 5997;
+    public static final String BUILD_VERSION_STRING = "11.12.0";
     public static final int APP_ID = 19797609;
     public static final String APP_HASH = "e8f1567dbbf38944a1391c4d23c34b60";
     public static final String APPCENTER_HASH = "PLACEHOLDER";
@@ -53,8 +53,12 @@ public class BuildVars {
             SharedPreferences sharedPreferences = ApplicationLoader.applicationContext.getSharedPreferences("systemConfig", Context.MODE_PRIVATE);
             LOGS_ENABLED = DEBUG_VERSION || sharedPreferences.getBoolean("logsEnabled", DEBUG_VERSION);
             if (LOGS_ENABLED) {
+                final Thread.UncaughtExceptionHandler pastHandler = Thread.getDefaultUncaughtExceptionHandler();
                 Thread.setDefaultUncaughtExceptionHandler((thread, exception) -> {
-                    FileLog.fatal(exception, true);
+                    FileLog.fatal(exception, false);
+                    if (pastHandler != null) {
+                        pastHandler.uncaughtException(thread, exception);
+                    }
                 });
             }
         }

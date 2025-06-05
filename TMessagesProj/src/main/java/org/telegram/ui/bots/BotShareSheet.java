@@ -92,7 +92,7 @@ public class BotShareSheet extends BottomSheetWithRecyclerListView {
                             finalFile[0] = f;
                             progressDialog.dismiss();
                             open.run();
-                        });
+                        }, null);
                         fileLoader.setDestFile(file);
                         fileLoader.setMaxSize(8 * 1024 * 1024);
                         fileLoader.execute(url);
@@ -149,7 +149,7 @@ public class BotShareSheet extends BottomSheetWithRecyclerListView {
                 return false;
             }
         });
-        messageCell.setMessageObject(messageObject, null, false, false);
+        messageCell.setMessageObject(messageObject, null, false, false, false);
 
         chatListView = new LinearLayout(context);
         chatListView.setOrientation(LinearLayout.VERTICAL);

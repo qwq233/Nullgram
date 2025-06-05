@@ -1716,4 +1716,12 @@ public interface ExoPlayer extends Player {
    * @see Player.Listener#onTracksChanged(Tracks)
    */
   boolean isTunnelingEnabled();
+
+
+  /*  */
+
+  void addVideoListener(com.google.android.exoplayer2.video.VideoListener listener);
+
+  void removeVideoListener(com.google.android.exoplayer2.video.VideoListener listener);
+
 }

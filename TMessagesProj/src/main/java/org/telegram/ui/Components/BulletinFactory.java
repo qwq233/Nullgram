@@ -44,6 +44,7 @@ import android.widget.FrameLayout;
 
 import androidx.annotation.CheckResult;
 import androidx.annotation.NonNull;
+import androidx.annotation.StringRes;
 import androidx.core.graphics.ColorUtils;
 
 import org.telegram.messenger.AndroidUtilities;
@@ -256,6 +257,28 @@ public final class BulletinFactory {
         layout.titleTextView.setMaxLines(1);
         layout.titleTextView.setTypeface(null);
         layout.subtitleTextView.setVisibility(View.GONE);
+        return create(layout, text.length() < 20 ? Bulletin.DURATION_SHORT : Bulletin.DURATION_LONG);
+    }
+
+    public Bulletin createSimpleBulletin(TLRPC.Document document, CharSequence title, CharSequence text) {
+        if (document == null) return new Bulletin.EmptyBulletin();
+        final Bulletin.TwoLineLayout layout = new Bulletin.TwoLineLayout(getContext(), resourcesProvider);
+        TLRPC.PhotoSize thumbSize = FileLoader.getClosestPhotoSizeWithSize(document.thumbs, dp(28), true, null, false);
+        TLRPC.PhotoSize photoSize = FileLoader.getClosestPhotoSizeWithSize(document.thumbs, dp(28), true, thumbSize, true);
+        layout.imageView.setImage(
+            ImageLocation.getForDocument(photoSize, document), "28_28",
+            ImageLocation.getForDocument(thumbSize, document), "28_28",
+            null, 0, 0, null
+        );
+        layout.imageView.getImageReceiver().setRoundRadius(dp(5));
+        layout.titleTextView.setText(title);
+        layout.titleTextView.setSingleLine(true);
+        layout.titleTextView.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 15);
+        layout.titleTextView.setMaxLines(1);
+        layout.titleTextView.setTypeface(AndroidUtilities.bold());
+        layout.subtitleTextView.setText(text);
+        layout.subtitleTextView.setSingleLine(false);
+        layout.subtitleTextView.setMaxLines(5);
         return create(layout, text.length() < 20 ? Bulletin.DURATION_SHORT : Bulletin.DURATION_LONG);
     }
 
@@ -1244,10 +1267,22 @@ public final class BulletinFactory {
 
     @CheckResult
     public static Bulletin createForwardedBulletin(Context context, BaseFragment fragment, FrameLayout containerLayout, int dialogsCount, long did, int messagesCount, int backgroundColor, int textColor, int duration) {
+        return createForwardedBulletin(context, fragment, containerLayout, dialogsCount, did, messagesCount, backgroundColor, textColor, duration, null, null);
+    }
+
+    public static Bulletin createForwardedBulletin(Context context, BaseFragment fragment, FrameLayout containerLayout, int dialogsCount, long did, int messagesCount, int backgroundColor, int textColor, int duration, Runnable undoAction, Runnable delayedAction) {
         final Bulletin.LottieLayout layout = UserConfig.getInstance(UserConfig.selectedAccount).isPremium() && fragment != null && dialogsCount <= 1 && did == UserConfig.getInstance(UserConfig.selectedAccount).clientUserId ?
             new Bulletin.LottieLayoutWithReactions(fragment, messagesCount) :
             new Bulletin.LottieLayout(context, fragment != null ? fragment.getResourceProvider() : null, backgroundColor, textColor);
         final CharSequence text;
+        final boolean hasUndoButton = delayedAction != null || undoAction != null;
+        final boolean[] isCanceled = new boolean[]{ false };
+        final Runnable delayedActionOnce = delayedAction != null ? () -> {
+            if (!isCanceled[0]) {
+                isCanceled[0] = true;
+                delayedAction.run();
+            }
+        } : null;
 
         int hapticDelay = -1;
         if (dialogsCount <= 1) {
@@ -1261,6 +1296,9 @@ public final class BulletinFactory {
                 hapticDelay = 300;
             } else {
                 final Runnable onClick = () -> {
+                    if (delayedActionOnce != null) {
+                        delayedActionOnce.run();
+                    }
                     if (fragment != null) {
                         fragment.presentFragment(ChatActivity.of(did));
                     }
@@ -1282,18 +1320,20 @@ public final class BulletinFactory {
                         }
                     }
                 } else {
-                    TLRPC.User user = MessagesController.getInstance(UserConfig.selectedAccount).getUser(did);
+                    final TLRPC.User user = MessagesController.getInstance(UserConfig.selectedAccount).getUser(did);
                     if (messagesCount <= 1) {
+                        final @StringRes int res = hasUndoButton ? R.string.FwdMessageToUserShort : R.string.FwdMessageToUser;
                         if (fragment != null) {
-                            text = AndroidUtilities.replaceSingleTag(LocaleController.formatString(R.string.FwdMessageToUser, UserObject.getFirstName(user)), -1, AndroidUtilities.REPLACING_TAG_TYPE_LINKBOLD, onClick);
+                            text = AndroidUtilities.replaceSingleTag(LocaleController.formatString(res, UserObject.getFirstName(user)), -1, AndroidUtilities.REPLACING_TAG_TYPE_LINKBOLD, onClick);
                         } else {
-                            text = AndroidUtilities.replaceTags(LocaleController.formatString(R.string.FwdMessageToUser, UserObject.getFirstName(user)));
+                            text = AndroidUtilities.replaceTags(LocaleController.formatString(res, UserObject.getFirstName(user)));
                         }
                     } else {
+                        final @StringRes int res = hasUndoButton ? R.string.FwdMessagesToUserShort : R.string.FwdMessagesToUser;
                         if (fragment != null) {
-                            text = AndroidUtilities.replaceSingleTag(LocaleController.formatString(R.string.FwdMessagesToUser, UserObject.getFirstName(user)), -1, AndroidUtilities.REPLACING_TAG_TYPE_LINKBOLD, onClick);
+                            text = AndroidUtilities.replaceSingleTag(LocaleController.formatString(res, UserObject.getFirstName(user)), -1, AndroidUtilities.REPLACING_TAG_TYPE_LINKBOLD, onClick);
                         } else {
-                            text = AndroidUtilities.replaceTags(LocaleController.formatString(R.string.FwdMessagesToUser, UserObject.getFirstName(user)));
+                            text = AndroidUtilities.replaceTags(LocaleController.formatString(res, UserObject.getFirstName(user)));
                         }
                     }
                 }
@@ -1310,6 +1350,13 @@ public final class BulletinFactory {
             hapticDelay = 300;
         }
         layout.textView.setText(text);
+        if (hasUndoButton) {
+            layout.setButton(new Bulletin.UndoButton(layout.getContext(), true, true, fragment != null ? fragment.getResourceProvider() : null)
+                .setUndoAction(undoAction)
+                .setDelayedAction(delayedActionOnce)
+            );
+        }
+
         if (hapticDelay > 0) {
             layout.postDelayed(() -> {
                 layout.performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP, HapticFeedbackConstants.FLAG_IGNORE_GLOBAL_SETTING);

@@ -205,9 +205,9 @@ class Camera2Session implements CameraSession {
         // Also, undo camera orientation, we report it as rotation instead.
         final VideoFrame modifiedFrame =
             new VideoFrame(CameraSession.createTextureBufferWithModifiedTransformMatrix(
-                               (TextureBufferImpl) frame.getBuffer(),
-                               /* mirror= */ isCameraFrontFacing,
-                               /* rotation= */ -cameraOrientation),
+                (TextureBufferImpl) frame.getBuffer(),
+                /* mirror= */ isCameraFrontFacing,
+                /* rotation= */ -cameraOrientation),
                 /* rotation= */ getFrameOrientation(), frame.getTimestampNs());
         events.onFrameCaptured(Camera2Session.this, modifiedFrame);
         modifiedFrame.release();
@@ -273,16 +273,16 @@ class Camera2Session implements CameraSession {
   }
 
   public static void create(CreateSessionCallback callback, Events events,
-      Context applicationContext, CameraManager cameraManager,
-      SurfaceTextureHelper surfaceTextureHelper, String cameraId, int width, int height,
-      int framerate) {
+                            Context applicationContext, CameraManager cameraManager,
+                            SurfaceTextureHelper surfaceTextureHelper, String cameraId, int width, int height,
+                            int framerate) {
     new Camera2Session(callback, events, applicationContext, cameraManager, surfaceTextureHelper,
         cameraId, width, height, framerate);
   }
 
   private Camera2Session(CreateSessionCallback callback, Events events, Context applicationContext,
-      CameraManager cameraManager, SurfaceTextureHelper surfaceTextureHelper, String cameraId,
-      int width, int height, int framerate) {
+                         CameraManager cameraManager, SurfaceTextureHelper surfaceTextureHelper, String cameraId,
+                         int width, int height, int framerate) {
     Logging.d(TAG, "Create new camera2 session on camera " + cameraId);
 
     constructionTimeNs = System.nanoTime();

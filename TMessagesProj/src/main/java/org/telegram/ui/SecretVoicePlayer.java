@@ -20,6 +20,7 @@
 package org.telegram.ui;
 
 import static org.telegram.messenger.AndroidUtilities.dp;
+import static org.telegram.messenger.AndroidUtilities.lerp;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
@@ -431,6 +432,14 @@ public class SecretVoicePlayer extends Dialog {
                 }
 
                 @Override
+                public void drawReactionsLayout(Canvas canvas, float alpha, Integer only) {
+                    canvas.save();
+                    canvas.translate(lerp(0, -reactionsLayoutInBubble.x, openProgress), lerp(cell.getBackgroundDrawableBottom() - getBackgroundDrawableBottom(), reactionsLayoutInBubble.totalHeight, openProgress));
+                    super.drawReactionsLayout(canvas, (1.0f - openProgress) * alpha, only);
+                    canvas.restore();
+                }
+
+                @Override
                 public void drawTime(Canvas canvas, float alpha, boolean fromParent) {
                     canvas.save();
                     if (isRound) {
@@ -546,7 +555,7 @@ public class SecretVoicePlayer extends Dialog {
                     return false;
                 }
             });
-            myCell.setMessageObject(messageObject, cell.getCurrentMessagesGroup(), cell.pinnedBottom, cell.pinnedTop);
+            myCell.setMessageObject(messageObject, cell.getCurrentMessagesGroup(), cell.pinnedBottom, cell.pinnedTop, false);
             if (!isRound) {
                 audioVisualizerDrawable = new AudioVisualizerDrawable();
                 audioVisualizerDrawable.setParentView(myCell);

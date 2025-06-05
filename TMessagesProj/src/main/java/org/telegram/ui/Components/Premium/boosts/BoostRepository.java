@@ -346,6 +346,13 @@ public class BoostRepository {
         }));
     }
 
+    public static void payGiveAwayByGoogle(List<TLObject> chats, List<TLObject> selectedCountries, TLRPC.TL_premiumGiftCodeOption option,
+                                           TLRPC.Chat chat, int date, boolean onlyNewSubscribers, BaseFragment baseFragment,
+                                           boolean winnersVisible, boolean withAdditionPrize, String prizeDesc,
+                                           Utilities.Callback<Void> onSuccess, Utilities.Callback<TLRPC.TL_error> onError) {
+                                            return;
+                                           }
+
     public static List<TLRPC.TL_premiumGiftCodeOption> filterGiftOptions(List<TLRPC.TL_premiumGiftCodeOption> list, int selected) {
         List<TLRPC.TL_premiumGiftCodeOption> result = new ArrayList<>();
         for (TLRPC.TL_premiumGiftCodeOption item : list) {

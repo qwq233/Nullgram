@@ -38,6 +38,7 @@ public class WebViewRequestProps {
     public String buttonUrl;
     public @BotWebViewAttachedSheet.WebViewType int type;
     public int replyToMsgId;
+    public long monoforumTopicId;
     public boolean silent;
     public TLRPC.BotApp app;
     public boolean allowWrite;
@@ -59,6 +60,7 @@ public class WebViewRequestProps {
         String buttonUrl,
         @BotWebViewAttachedSheet.WebViewType int type,
         int replyToMsgId,
+        long monoforumTopicId,
         boolean silent,
         TLRPC.BotApp app,
         boolean allowWrite,
@@ -76,6 +78,7 @@ public class WebViewRequestProps {
         p.buttonUrl = buttonUrl;
         p.type = type;
         p.replyToMsgId = replyToMsgId;
+        p.monoforumTopicId = monoforumTopicId;
         p.silent = silent;
         p.app = app;
         p.allowWrite = allowWrite;

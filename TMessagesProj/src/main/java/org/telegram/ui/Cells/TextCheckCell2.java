@@ -19,6 +19,8 @@
 
 package org.telegram.ui.Cells;
 
+import static org.telegram.messenger.AndroidUtilities.dp;
+
 import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.PorterDuff;
@@ -61,7 +63,7 @@ public class TextCheckCell2 extends FrameLayout {
             collapseViewContainer = new LinearLayout(getContext());
             collapseViewContainer.setOrientation(LinearLayout.HORIZONTAL);
             animatedTextView = new AnimatedTextView(getContext(), false, true, true);
-            animatedTextView.setTextSize(AndroidUtilities.dp(14));
+            animatedTextView.setTextSize(dp(14));
             animatedTextView.getDrawable().setAllowCancel(true);
             animatedTextView.setTextColor(Theme.getColor(Theme.key_windowBackgroundWhiteBlackText));
             animatedTextView.setTypeface(AndroidUtilities.bold());
@@ -81,7 +83,7 @@ public class TextCheckCell2 extends FrameLayout {
                 @Override
                 protected void onDraw(Canvas canvas) {
                     super.onDraw(canvas);
-                    canvas.drawLine(0, AndroidUtilities.dp(14), 2, getMeasuredHeight()- AndroidUtilities.dp(14), Theme.dividerPaint);
+                    canvas.drawLine(0, dp(14), 2, getMeasuredHeight()- dp(14), Theme.dividerPaint);
                 }
             };
             checkBoxClickArea.setBackground(Theme.createSelectorDrawable(Theme.getColor(Theme.key_listSelector), 2));
@@ -91,6 +93,12 @@ public class TextCheckCell2 extends FrameLayout {
         collapsedArrow.animate().cancel();
         collapsedArrow.animate().rotation(collapsed ? 0 : 180).setDuration(340).setInterpolator(CubicBezierInterpolator.EASE_OUT_QUINT).start();
         checkBoxClickArea.setOnClickListener(v -> onCheckClick.run());
+    }
+
+    public void hideCollapseArrow() {
+        if (collapseViewContainer != null) {
+            collapseViewContainer.setVisibility(View.GONE);
+        }
     }
 
     public TextCheckCell2(Context context) {
@@ -131,7 +139,7 @@ public class TextCheckCell2 extends FrameLayout {
         if (isMultiline) {
             super.onMeasure(MeasureSpec.makeMeasureSpec(MeasureSpec.getSize(widthMeasureSpec), MeasureSpec.EXACTLY), MeasureSpec.makeMeasureSpec(0, MeasureSpec.UNSPECIFIED));
         } else {
-            super.onMeasure(MeasureSpec.makeMeasureSpec(MeasureSpec.getSize(widthMeasureSpec), MeasureSpec.EXACTLY), MeasureSpec.makeMeasureSpec(AndroidUtilities.dp(valueTextView.getVisibility() == VISIBLE ? 64 : 50) + (needDivider ? 1 : 0), MeasureSpec.EXACTLY));
+            super.onMeasure(MeasureSpec.makeMeasureSpec(MeasureSpec.getSize(widthMeasureSpec), MeasureSpec.EXACTLY), MeasureSpec.makeMeasureSpec(dp(valueTextView.getVisibility() == VISIBLE ? 64 : 50) + (needDivider ? 1 : 0), MeasureSpec.EXACTLY));
         }
     }
 
@@ -140,9 +148,9 @@ public class TextCheckCell2 extends FrameLayout {
         super.onLayout(changed, left, top, right, bottom);
         if (collapseViewContainer != null) {
             if (LocaleController.isRTL) {
-                collapseViewContainer.setTranslationX(textView.getLeft() - collapseViewContainer.getMeasuredWidth() - AndroidUtilities.dp(4));
+                collapseViewContainer.setTranslationX(textView.getLeft() - collapseViewContainer.getMeasuredWidth() - dp(8));
             } else {
-                collapseViewContainer.setTranslationX(textView.getRight() + AndroidUtilities.dp(4));
+                collapseViewContainer.setTranslationX(textView.getRight() + dp(8));
             }
         }
     }
@@ -176,7 +184,7 @@ public class TextCheckCell2 extends FrameLayout {
             valueTextView.setMaxLines(0);
             valueTextView.setSingleLine(false);
             valueTextView.setEllipsize(null);
-            valueTextView.setPadding(0, 0, 0, AndroidUtilities.dp(11));
+            valueTextView.setPadding(0, 0, 0, dp(11));
         } else {
             valueTextView.setLines(1);
             valueTextView.setMaxLines(1);
@@ -186,7 +194,7 @@ public class TextCheckCell2 extends FrameLayout {
         }
         LayoutParams layoutParams = (LayoutParams) textView.getLayoutParams();
         layoutParams.height = LayoutParams.WRAP_CONTENT;
-        layoutParams.topMargin = AndroidUtilities.dp(10);
+        layoutParams.topMargin = dp(10);
         textView.setLayoutParams(layoutParams);
         setWillNotDraw(!divider);
     }
@@ -265,7 +273,7 @@ public class TextCheckCell2 extends FrameLayout {
     @Override
     protected void onDraw(Canvas canvas) {
         if (needDivider) {
-            canvas.drawLine(LocaleController.isRTL ? 0 : AndroidUtilities.dp(20), getMeasuredHeight() - 1, getMeasuredWidth() - (LocaleController.isRTL ? AndroidUtilities.dp(20) : 0), getMeasuredHeight() - 1, Theme.dividerPaint);
+            canvas.drawLine(LocaleController.isRTL ? 0 : dp(20), getMeasuredHeight() - 1, getMeasuredWidth() - (LocaleController.isRTL ? dp(20) : 0), getMeasuredHeight() - 1, Theme.dividerPaint);
         }
     }
 

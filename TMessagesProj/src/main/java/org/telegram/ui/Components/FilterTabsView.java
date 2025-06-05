@@ -80,6 +80,8 @@ import top.qwq2333.nullgram.utils.Defines;
 
 public class FilterTabsView extends FrameLayout {
 
+    private final Theme.ResourcesProvider resourcesProvider;
+
     public int getCurrentTabStableId() {
         return positionToStableId.get(currentPosition, -1);
     }
@@ -510,10 +512,10 @@ public class FilterTabsView extends FrameLayout {
 
             if (animateCounterEnter || counterText != null || showRemove && (isEditing || editingStartAnimationProgress != 0)) {
                 if (aBackgroundColorKey < 0) {
-                    textCounterPaint.setColor(Theme.getColor(backgroundColorKey));
+                    textCounterPaint.setColor(Theme.getColor(backgroundColorKey, resourcesProvider));
                 } else {
-                    int color1 = Theme.getColor(backgroundColorKey);
-                    int color2 = Theme.getColor(aBackgroundColorKey);
+                    int color1 = Theme.getColor(backgroundColorKey, resourcesProvider);
+                    int color2 = Theme.getColor(aBackgroundColorKey, resourcesProvider);
                     textCounterPaint.setColor(ColorUtils.blendARGB(color1, color2, animationValue));
                 }
                 if (Theme.hasThemeKey(unreadKey) && Theme.hasThemeKey(unreadOtherKey)) {
@@ -881,7 +883,7 @@ public class FilterTabsView extends FrameLayout {
         }
     }
 
-    private final TextPaint textPaint = new TextPaint(Paint.ANTI_ALIAS_FLAG);
+    public final TextPaint textPaint = new TextPaint(Paint.ANTI_ALIAS_FLAG);
     private final TextPaint textCounterPaint = new TextPaint(Paint.ANTI_ALIAS_FLAG);
     private final Paint deletePaint = new TextPaint(Paint.ANTI_ALIAS_FLAG);
     private final Paint counterPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
@@ -986,8 +988,8 @@ public class FilterTabsView extends FrameLayout {
         public void setValue(FilterTabsView object, float value) {
             animationValue = value;
 
-            int color1 = Theme.getColor(tabLineColorKey);
-            int color2 = Theme.getColor(aTabLineColorKey);
+            int color1 = Theme.getColor(tabLineColorKey, resourcesProvider);
+            int color2 = Theme.getColor(aTabLineColorKey, resourcesProvider);
             selectorDrawable.setColor(ColorUtils.blendARGB(color1, color2, value));
 
             listView.invalidateViews();
@@ -1001,8 +1003,9 @@ public class FilterTabsView extends FrameLayout {
         }
     };
 
-    public FilterTabsView(Context context) {
+    public FilterTabsView(Context context, Theme.ResourcesProvider resourcesProvider) {
         super(context);
+        this.resourcesProvider = resourcesProvider;
         textCounterPaint.setTextSize(AndroidUtilities.dp(13));
         textCounterPaint.setTypeface(AndroidUtilities.bold());
         textPaint.setTextSize(AndroidUtilities.dp(15));
@@ -1014,7 +1017,7 @@ public class FilterTabsView extends FrameLayout {
         selectorDrawable = new GradientDrawable(GradientDrawable.Orientation.LEFT_RIGHT, null);
         float rad = AndroidUtilities.dpf2(3);
         selectorDrawable.setCornerRadii(new float[]{rad, rad, rad, rad, 0, 0, 0, 0});
-        selectorDrawable.setColor(Theme.getColor(tabLineColorKey));
+        selectorDrawable.setColor(Theme.getColor(tabLineColorKey, resourcesProvider));
 
         setHorizontalScrollBarEnabled(false);
         listView = new RecyclerListView(context) {
@@ -1368,6 +1371,19 @@ public class FilterTabsView extends FrameLayout {
         listView.setItemAnimator(animated ? itemAnimator : null);
         adapter.notifyDataSetChanged();
         delegate.onTabSelected(tabs.get(currentPosition), false, false);
+    }
+
+    public void setColors(int line, int active, int unactive, int selector, int background) {
+        tabLineColorKey = line;
+        backgroundColorKey = background;
+        activeTextColorKey = active;
+        unactiveTextColorKey = unactive;
+        selectorDrawable.setColor(Theme.getColor(tabLineColorKey, resourcesProvider));
+        listView.setSelectorDrawableColor(Theme.getColor(selector, resourcesProvider));
+
+        listView.invalidateViews();
+        listView.invalidate();
+        invalidate();
     }
 
     public void animateColorsTo(int line, int active, int unactive, int selector, int background) {
@@ -1950,7 +1966,7 @@ public class FilterTabsView extends FrameLayout {
             if (actionState != ItemTouchHelper.ACTION_STATE_IDLE) {
                 listView.cancelClickRunnables(false);
                 viewHolder.itemView.setPressed(true);
-                viewHolder.itemView.setBackgroundColor(Theme.getColor(backgroundColorKey));
+                viewHolder.itemView.setBackgroundColor(Theme.getColor(backgroundColorKey, resourcesProvider));
             } else {
                 AndroidUtilities.cancelRunOnUIThread(resetDefaultPosition);
                 AndroidUtilities.runOnUIThread(resetDefaultPosition, 320);

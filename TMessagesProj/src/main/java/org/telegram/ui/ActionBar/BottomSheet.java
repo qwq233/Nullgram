@@ -1864,6 +1864,7 @@ public class BottomSheet extends Dialog implements BaseFragment.AttachedSheet {
             });
         } else {
             if (!allowCustomAnimation || !onCustomCloseAnimation()) {
+                AndroidUtilities.hideKeyboard(container);
                 currentSheetAnimationType = 2;
                 if (navigationBarAnimation != null) {
                     navigationBarAnimation.cancel();

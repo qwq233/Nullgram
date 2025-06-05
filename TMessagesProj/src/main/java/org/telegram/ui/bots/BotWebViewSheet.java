@@ -94,6 +94,7 @@ import org.telegram.messenger.MessagesController;
 import org.telegram.messenger.NotificationCenter;
 import org.telegram.messenger.R;
 import org.telegram.messenger.SendMessagesHelper;
+import org.telegram.messenger.SharedConfig;
 import org.telegram.messenger.UserConfig;
 import org.telegram.messenger.UserObject;
 import org.telegram.messenger.Utilities;
@@ -230,6 +231,7 @@ public class BotWebViewSheet extends Dialog implements NotificationCenter.Notifi
     private long peerId;
     private long queryId;
     private int replyToMsgId;
+    private long monoforumTopicId;
     private boolean silent;
     private String buttonText;
 
@@ -284,6 +286,14 @@ public class BotWebViewSheet extends Dialog implements NotificationCenter.Notifi
             prolongWebView.silent = silent;
             if (replyToMsgId != 0) {
                 prolongWebView.reply_to = SendMessagesHelper.getInstance(currentAccount).createReplyInput(replyToMsgId);
+                if (monoforumTopicId != 0) {
+                    prolongWebView.reply_to.monoforum_peer_id = MessagesController.getInstance(currentAccount).getInputPeer(monoforumTopicId);
+                    prolongWebView.reply_to.flags |= 32;
+                }
+                prolongWebView.flags |= 1;
+            } else if (monoforumTopicId != 0) {
+                prolongWebView.reply_to = new TLRPC.TL_inputReplyToMonoForum();
+                prolongWebView.reply_to.monoforum_peer_id = MessagesController.getInstance(currentAccount).getInputPeer(monoforumTopicId);
                 prolongWebView.flags |= 1;
             }
             ConnectionsManager.getInstance(currentAccount).sendRequest(prolongWebView, (response, error) -> AndroidUtilities.runOnUIThread(() -> {
@@ -1351,6 +1361,7 @@ public class BotWebViewSheet extends Dialog implements NotificationCenter.Notifi
         this.peerId = props.peerId;
         this.botId = props.botId;
         this.replyToMsgId = props.replyToMsgId;
+        this.monoforumTopicId = props.monoforumTopicId;
         this.silent = props.silent;
         this.buttonText = props.buttonText;
         this.currentWebApp = props.app;
@@ -1366,7 +1377,8 @@ public class BotWebViewSheet extends Dialog implements NotificationCenter.Notifi
         final TLRPC.UserFull userInfo = MessagesController.getInstance(currentAccount).getUserFull(botId);
         if (userbot != null && userbot.verifiedExtended() || userInfo != null && userInfo.user != null && userInfo.user.verifiedExtended()) {
             verifiedDrawable = getContext().getResources().getDrawable(R.drawable.verified_profile).mutate();
-            verifiedDrawable.setColorFilter(new PorterDuffColorFilter(Theme.getColor(Theme.key_featuredStickers_addButton), PorterDuff.Mode.SRC_IN));
+            verifiedDrawable.setColorFilter(new PorterDuffColorFilter(Theme.getColor(Theme.key_featuredStickers_addButton, resourcesProvider), PorterDuff.Mode.SRC_IN));
+            verifiedDrawable.setAlpha(0xFF);
             actionBar.getTitleTextView().setDrawablePadding(dp(2));
             actionBar.getTitleTextView().setRightDrawable(new Drawable() {
                 @Override
@@ -1537,6 +1549,14 @@ public class BotWebViewSheet extends Dialog implements NotificationCenter.Notifi
 
                     if (replyToMsgId != 0) {
                         req.reply_to = SendMessagesHelper.getInstance(currentAccount).createReplyInput(replyToMsgId);
+                        if (monoforumTopicId != 0) {
+                            req.reply_to.monoforum_peer_id = MessagesController.getInstance(currentAccount).getInputPeer(monoforumTopicId);
+                            req.reply_to.flags |= 32;
+                        }
+                        req.flags |= 1;
+                    } else if (monoforumTopicId != 0) {
+                        req.reply_to = new TLRPC.TL_inputReplyToMonoForum();
+                        req.reply_to.monoforum_peer_id = MessagesController.getInstance(currentAccount).getInputPeer(monoforumTopicId);
                         req.flags |= 1;
                     }
 
@@ -1692,11 +1712,29 @@ public class BotWebViewSheet extends Dialog implements NotificationCenter.Notifi
             })
             .addIf(currentBot != null && (currentBot.show_in_side_menu || currentBot.show_in_attach_menu), R.drawable.msg_delete, LocaleController.getString(R.string.BotWebViewDeleteBot), () -> {
                 deleteBot(currentAccount, botId, () -> dismiss());
-            })
+            });
+
+        if (actionBarColor != Theme.getColor(Theme.key_windowBackgroundWhite)) {
+            final int backgroundColor = AndroidUtilities.computePerceivedBrightness(actionBarColor) >= .721f ? 0xffffffff : 0xFF181819;
+            final int textColor = AndroidUtilities.computePerceivedBrightness(backgroundColor) >= .721f ? Color.BLACK : Color.WHITE;
+            final int iconColor = Theme.multAlpha(textColor, .85f);
+            final int selectorColor = Theme.multAlpha(textColor, .10f);
+
+            o.setBackgroundColor(backgroundColor);
+            for (int i = 0; i < o.getItemsCount(); ++i) {
+                View item = o.getItemAt(i);
+                if (item instanceof ActionBarMenuSubItem) {
+                    ((ActionBarMenuSubItem) item).setColors(textColor, iconColor);
+                    ((ActionBarMenuSubItem) item).setSelectorColor(selectorColor);
+                }
+            }
+        }
+        o
             .setGravity(Gravity.RIGHT)
             .translate(-insets.right, 0)
             .forceTop(true)
             .setDrawScrim(false)
+            .setDimAlpha(0)
             .show();
     }
 

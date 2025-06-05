@@ -18,6 +18,7 @@ import android.media.AudioRecord;
 import android.media.AudioTrack;
 import android.os.Build;
 
+import androidx.annotation.Keep;
 import androidx.annotation.Nullable;
 
 import org.webrtc.ContextUtils;
@@ -35,6 +36,7 @@ import java.util.TimerTask;
 // dispose(). This class can also be used without calling init() if the user
 // prefers to set up the audio environment separately. However, it is
 // recommended to always use AudioManager.MODE_IN_COMMUNICATION.
+@Keep
 public class WebRtcAudioManager {
   private static final boolean DEBUG = false;
 

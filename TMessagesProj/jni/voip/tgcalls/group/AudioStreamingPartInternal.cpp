@@ -104,10 +104,7 @@ _avIoContext(std::move(fileData)) {
 
     _frame = av_frame_alloc();
 
-#if LIBAVFORMAT_VERSION_MAJOR >= 59
-    const
-#endif
-    AVInputFormat *inputFormat = av_find_input_format(container.c_str());
+const AVInputFormat *inputFormat = av_find_input_format(container.c_str());
     if (!inputFormat) {
         _didReadToEnd = true;
         return;

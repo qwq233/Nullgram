@@ -44,6 +44,7 @@ import android.graphics.RectF;
 import android.graphics.Shader;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
+import android.text.TextUtils;
 import android.transition.ChangeBounds;
 import android.transition.TransitionManager;
 import android.util.TypedValue;
@@ -68,6 +69,7 @@ import com.google.zxing.common.detector.MathUtils;
 import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.ChatObject;
 import org.telegram.messenger.DialogObject;
+import org.telegram.messenger.Emoji;
 import org.telegram.messenger.ImageReceiver;
 import org.telegram.messenger.LocaleController;
 import org.telegram.messenger.MessageObject;
@@ -83,6 +85,7 @@ import org.telegram.tgnet.ConnectionsManager;
 import org.telegram.tgnet.TLObject;
 import org.telegram.tgnet.TLRPC;
 import org.telegram.tgnet.tl.TL_stars;
+import org.telegram.ui.AccountFrozenAlert;
 import org.telegram.ui.ActionBar.ActionBar;
 import org.telegram.ui.ActionBar.BottomSheet;
 import org.telegram.ui.ActionBar.Theme;
@@ -128,7 +131,7 @@ public class StarsReactionsSheet extends BottomSheet implements NotificationCent
     private final FrameLayout dialogSelectorInnerLayout;
     private final BackupImageView dialogImageView;
     private final ImageView dialogSelectorIconView;
-    private final Space beforeTitleSpace;
+//    private final Space beforeTitleSpace;
     private final TextView titleView;
 //    private final StarsIntroActivity.StarsBalanceView balanceView;
     private final ImageView closeView;
@@ -343,13 +346,13 @@ public class StarsReactionsSheet extends BottomSheet implements NotificationCent
         };
         titleView.setTextColor(Theme.getColor(Theme.key_windowBackgroundWhiteBlackText));
         titleView.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 20);
-        titleView.setGravity(Gravity.LEFT | Gravity.CENTER_VERTICAL);
+        titleView.setGravity(Gravity.CENTER);
         titleView.setText(getString(R.string.StarsReactionTitle2));
         titleView.setTypeface(AndroidUtilities.bold());
-        titleView.setMaxLines(2);
-        toptopLayout.addView(beforeTitleSpace = new Space(context), LayoutHelper.createLinear(0, 0, 1, Gravity.FILL));
-        toptopLayout.addView(titleView, LayoutHelper.createLinear(LayoutHelper.WRAP_CONTENT, LayoutHelper.WRAP_CONTENT, 0, Gravity.CENTER_VERTICAL | Gravity.LEFT, 12 + 6, 0, 6, 0));
-        toptopLayout.addView(new Space(context), LayoutHelper.createLinear(0, 0, 1, Gravity.FILL));
+        titleView.setEllipsize(TextUtils.TruncateAt.END);
+//        toptopLayout.addView(beforeTitleSpace = new Space(context), LayoutHelper.createLinear(0, 0, 1, Gravity.FILL));
+        toptopLayout.addView(titleView, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT, 1, Gravity.FILL, 2, 0, 2, 0));
+//        toptopLayout.addView(new Space(context), LayoutHelper.createLinear(0, 0, 1, Gravity.FILL));
         updateCanSwitchPeer(false);
 
         closeView = new ImageView(context);
@@ -373,7 +376,7 @@ public class StarsReactionsSheet extends BottomSheet implements NotificationCent
 //            });
 //        });
 //        toptopLayout.addView(balanceView, LayoutHelper.createLinear(LayoutHelper.WRAP_CONTENT, LayoutHelper.WRAP_CONTENT, 0, Gravity.TOP | Gravity.RIGHT, 6, 0, 6, 0));
-        toptopLayout.addView(closeView, LayoutHelper.createLinear(48, 48, 0, Gravity.TOP | Gravity.RIGHT, 48, 6, 6, 0));
+        toptopLayout.addView(closeView, LayoutHelper.createLinear(48, 48, 0, Gravity.TOP | Gravity.RIGHT, 0, 6, 6, 0));
 
         LinearLayout topLayoutTextLayout = new LinearLayout(context);
         topLayoutTextLayout.setOrientation(LinearLayout.VERTICAL);
@@ -386,7 +389,7 @@ public class StarsReactionsSheet extends BottomSheet implements NotificationCent
         statusView.setGravity(Gravity.CENTER);
         statusView.setSingleLine(false);
         statusView.setMaxLines(3);
-        statusView.setText(AndroidUtilities.replaceTags(me != null ? LocaleController.formatPluralStringComma("StarsReactionTextSent", me.count) : LocaleController.formatString(R.string.StarsReactionText, chat == null ? "" : chat.title)));
+        statusView.setText(Emoji.replaceEmoji(AndroidUtilities.replaceTags(me != null ? LocaleController.formatPluralStringComma("StarsReactionTextSent", me.count) : LocaleController.formatString(R.string.StarsReactionText, chat == null ? "" : chat.title)), statusView.getPaint().getFontMetricsInt(), false));
         if (sendEnabled) {
             topLayoutTextLayout.addView(statusView, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT, Gravity.TOP | Gravity.FILL_HORIZONTAL, 40,  0, 40, 0));
         }
@@ -506,6 +509,11 @@ public class StarsReactionsSheet extends BottomSheet implements NotificationCent
             if (messageObject == null || chatActivity == null || iconAnimator != null) {
                 return;
             }
+            if (MessagesController.getInstance(currentAccount).isFrozen()) {
+                AccountFrozenAlert.show(currentAccount);
+                return;
+            }
+
             final long totalStars = slider.getValue();
             final StarsController starsController = StarsController.getInstance(currentAccount);
 
@@ -653,7 +661,7 @@ public class StarsReactionsSheet extends BottomSheet implements NotificationCent
 
     private void updateCanSwitchPeer(boolean animated) {
         if ((dialogSelectorLayout.getVisibility() == View.VISIBLE) != canSwitchPeer()) {
-            beforeTitleSpace.setVisibility(canSwitchPeer() ? View.VISIBLE : View.GONE);
+//            beforeTitleSpace.setVisibility(canSwitchPeer() ? View.VISIBLE : View.GONE);
             dialogSelectorLayout.setVisibility(canSwitchPeer() ? View.VISIBLE : View.GONE);
             if (animated) {
                 if (canSwitchPeer()) {
@@ -1200,6 +1208,10 @@ public class StarsReactionsSheet extends BottomSheet implements NotificationCent
         private long pressTime;
         private int pointerId;
         private boolean tracking;
+
+        public boolean isTracking() {
+            return tracking;
+        }
 
         @Override
         public boolean dispatchTouchEvent(MotionEvent event) {

@@ -87,7 +87,7 @@ public class GroupCallTabletGridAdapter extends RecyclerListView.SelectionAdapte
 
         ChatObject.VideoParticipant oldVideoParticipant = cell.getParticipant();
         ChatObject.VideoParticipant videoParticipant;
-        TLRPC.TL_groupCallParticipant participant;
+        TLRPC.GroupCallParticipant participant;
         videoParticipant = videoParticipants.get(position);
         participant = videoParticipants.get(position).participant;
         cell.spanCount = getSpanCount(position);

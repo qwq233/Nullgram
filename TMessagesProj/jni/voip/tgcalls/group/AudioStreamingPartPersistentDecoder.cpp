@@ -24,6 +24,7 @@ bool WrappedCodecParameters::isEqual(AVCodecParameters const *other) {
     if (_value->ch_layout.nb_channels != other->ch_layout.nb_channels) {
         return false;
     }
+
     return true;
 }
 

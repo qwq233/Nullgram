@@ -480,7 +480,7 @@ public class ChatAttachAlert extends BottomSheet implements NotificationCenter.N
                     }
                 });
                 MessageObject replyingObject = ((ChatActivity) baseFragment).getChatActivityEnterView().getReplyingMessageObject();
-                botAttachLayouts.get(id).requestWebView(currentAccount, ((ChatActivity) baseFragment).getDialogId(), id, false, replyingObject != null ? replyingObject.messageOwner.id : 0, startCommand);
+                botAttachLayouts.get(id).requestWebView(currentAccount, ((ChatActivity) baseFragment).getDialogId(), id, false, replyingObject != null ? replyingObject.messageOwner.id : 0, startCommand, ((ChatActivity) baseFragment).getSendMonoForumPeerId());
             }
         }
         if (botAttachLayouts.get(id) != null) {
@@ -715,6 +715,10 @@ public class ChatAttachAlert extends BottomSheet implements NotificationCenter.N
 
         public boolean canDismissWithTouchOutside() {
             return true;
+        }
+
+        public boolean canDismissWithSwipe() {
+            return false;
         }
 
         public void onDismissWithButtonClick(int item) {
@@ -2381,6 +2385,8 @@ public class ChatAttachAlert extends BottomSheet implements NotificationCenter.N
                 currentAttachLayout.onButtonsTranslationYUpdated();
             }
         };
+        buttonsRecyclerView.setClipChildren(true);
+        buttonsRecyclerView.setClipToPadding(true);
         buttonsRecyclerView.setAdapter(buttonsAdapter = new ButtonsAdapter(context));
         buttonsRecyclerView.setLayoutManager(buttonsLayoutManager = new LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false));
         buttonsRecyclerView.setVerticalScrollBarEnabled(false);
@@ -5088,7 +5094,7 @@ public class ChatAttachAlert extends BottomSheet implements NotificationCenter.N
                 plainTextEnabled = ChatObject.canSendPlain(chat);
                 documentsEnabled = ChatObject.canSendDocument(chat);
             } else {
-                pollsEnabled = user != null && user.bot;
+                pollsEnabled = UserObject.isBot(user) || UserObject.isUserSelf(user);
             }
         }
         if (!(baseFragment instanceof ChatActivity && avatarPicker != 2)) {
@@ -5518,9 +5524,10 @@ public class ChatAttachAlert extends BottomSheet implements NotificationCenter.N
                 }
             } else {
                 TLRPC.User user = baseFragment instanceof ChatActivity ? ((ChatActivity) baseFragment).getCurrentUser() : null;
+                TLRPC.Chat chat = baseFragment instanceof ChatActivity ? ((ChatActivity) baseFragment).getCurrentChat() : null;
                 final boolean paidUser = user != null && ((ChatActivity) baseFragment).getMessagesController().getSendPaidMessagesStars(user.id) > 0;
                 galleryButton = buttonsCount++;
-                if ((photosEnabled || videosEnabled) && !paidUser) {
+                if ((photosEnabled || videosEnabled) && !paidUser && (chat == null || !ChatObject.isMonoForum(chat))) {
                     if (baseFragment instanceof ChatActivity && !((ChatActivity) baseFragment).isInScheduleMode() && !((ChatActivity) baseFragment).isSecretChat() && ((ChatActivity) baseFragment).getChatMode() != ChatActivity.MODE_QUICK_REPLIES) {
                         ChatActivity chatActivity = (ChatActivity) baseFragment;
 

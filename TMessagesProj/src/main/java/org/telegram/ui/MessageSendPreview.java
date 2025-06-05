@@ -1008,7 +1008,7 @@ public class MessageSendPreview extends Dialog implements NotificationCenter.Not
                 ChatMessageCell cell = (ChatMessageCell) holder.itemView;
                 MessageObject.GroupedMessages group = getValidGroupedMessage(messageObject);
                 cell.setInvalidatesParent(group != null);
-                cell.setMessageObject(messageObject, group, false, false);
+                cell.setMessageObject(messageObject, group, false, false, false);
                 if (position == getMainMessageCellPosition() && !messageObject.needDrawForwarded()) {
                     mainMessageCell = cell;
                     mainMessageCellId = messageObject.getId();
@@ -1298,7 +1298,7 @@ public class MessageSendPreview extends Dialog implements NotificationCenter.Not
                         messageObject.messageOwner.effect = visibleReaction.effectId;
                     }
                     if (!premiumLocked) {
-                        mainMessageCell.setMessageObject(messageObject, getValidGroupedMessage(messageObject), messageObjects.size() > 1, false);
+                        mainMessageCell.setMessageObject(messageObject, getValidGroupedMessage(messageObject), messageObjects.size() > 1, false, false);
                         effectSelector.setSelectedReactionAnimated(clear ? null : visibleReaction);
                         if (effectSelector.getReactionsWindow() != null && effectSelector.getReactionsWindow().getSelectAnimatedEmojiDialog() != null) {
                             effectSelector.getReactionsWindow().getSelectAnimatedEmojiDialog().setSelectedReaction(clear ? null : visibleReaction);
@@ -1616,8 +1616,9 @@ public class MessageSendPreview extends Dialog implements NotificationCenter.Not
             mainMessageCell.isSavedChat = destCell.isSavedChat;
             mainMessageCell.isBot = destCell.isBot;
             mainMessageCell.isForum = destCell.isForum;
+            // mainMessageCell.isMonoForum = destCell.isMonoForum;
             mainMessageCell.isForumGeneral = destCell.isForumGeneral;
-            mainMessageCell.setMessageObject(cell.getMessageObject(), null, cell.isPinnedBottom(), cell.isPinnedTop());
+            mainMessageCell.setMessageObject(cell.getMessageObject(), null, cell.isPinnedBottom(), cell.isPinnedTop(), cell.isFirstInChat());
 
             final ChatMessageCell.TransitionParams params = mainMessageCell.getTransitionParams();
             params.animateChange = mainMessageCell.getTransitionParams().animateChange();
@@ -1858,7 +1859,7 @@ public class MessageSendPreview extends Dialog implements NotificationCenter.Not
 
         final ChatMessageCell cell = messageCell;
         messageObject.forceUpdate = true;
-        cell.setMessageObject(messageObject, cell.getCurrentMessagesGroup(), cell.isPinnedBottom(), cell.isPinnedTop());
+        cell.setMessageObject(messageObject, cell.getCurrentMessagesGroup(), cell.isPinnedBottom(), cell.isPinnedTop(), cell.isFirstInChat());
         chatListView.getAdapter().notifyItemChanged(position);
     }
 

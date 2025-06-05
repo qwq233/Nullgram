@@ -16,6 +16,9 @@ import android.os.Process;
 import androidx.annotation.Nullable;
 
 import org.webrtc.Logging.Severity;
+import org.webrtc.MediaStreamTrack;
+import org.webrtc.PeerConnection;
+import org.webrtc.RtpCapabilities;
 import org.webrtc.audio.AudioDeviceModule;
 import org.webrtc.audio.JavaAudioDeviceModule;
 
@@ -63,17 +66,19 @@ public class PeerConnectionFactory {
     final Context applicationContext;
     final String fieldTrials;
     final boolean enableInternalTracer;
+    final NativeLibraryLoader nativeLibraryLoader;
     final String nativeLibraryName;
     @Nullable Loggable loggable;
     @Nullable Severity loggableSeverity;
 
     private InitializationOptions(Context applicationContext, String fieldTrials,
-        boolean enableInternalTracer,
+        boolean enableInternalTracer, NativeLibraryLoader nativeLibraryLoader,
         String nativeLibraryName, @Nullable Loggable loggable,
         @Nullable Severity loggableSeverity) {
       this.applicationContext = applicationContext;
       this.fieldTrials = fieldTrials;
       this.enableInternalTracer = enableInternalTracer;
+      this.nativeLibraryLoader = nativeLibraryLoader;
       this.nativeLibraryName = nativeLibraryName;
       this.loggable = loggable;
       this.loggableSeverity = loggableSeverity;
@@ -87,6 +92,7 @@ public class PeerConnectionFactory {
       private final Context applicationContext;
       private String fieldTrials = "";
       private boolean enableInternalTracer;
+      private NativeLibraryLoader nativeLibraryLoader = new NativeLibrary.DefaultLoader();
       private String nativeLibraryName = "jingle_peerconnection_so";
       @Nullable private Loggable loggable;
       @Nullable private Severity loggableSeverity;
@@ -105,6 +111,11 @@ public class PeerConnectionFactory {
         return this;
       }
 
+      public Builder setNativeLibraryLoader(NativeLibraryLoader nativeLibraryLoader) {
+        this.nativeLibraryLoader = nativeLibraryLoader;
+        return this;
+      }
+
       public Builder setNativeLibraryName(String nativeLibraryName) {
         this.nativeLibraryName = nativeLibraryName;
         return this;
@@ -118,7 +129,7 @@ public class PeerConnectionFactory {
 
       public PeerConnectionFactory.InitializationOptions createInitializationOptions() {
         return new PeerConnectionFactory.InitializationOptions(applicationContext, fieldTrials,
-            enableInternalTracer, nativeLibraryName, loggable,
+            enableInternalTracer, nativeLibraryLoader, nativeLibraryName, loggable,
             loggableSeverity);
       }
     }
@@ -127,14 +138,14 @@ public class PeerConnectionFactory {
   public static class Options {
     // Keep in sync with webrtc/rtc_base/network.h!
     //
-    // These bit fields are defined for |networkIgnoreMask| below.
-    static final int ADAPTER_TYPE_UNKNOWN = 0;
-    static final int ADAPTER_TYPE_ETHERNET = 1 << 0;
-    static final int ADAPTER_TYPE_WIFI = 1 << 1;
-    static final int ADAPTER_TYPE_CELLULAR = 1 << 2;
-    static final int ADAPTER_TYPE_VPN = 1 << 3;
-    static final int ADAPTER_TYPE_LOOPBACK = 1 << 4;
-    static final int ADAPTER_TYPE_ANY = 1 << 5;
+    // These bit fields are defined for `networkIgnoreMask` below.
+    public static final int ADAPTER_TYPE_UNKNOWN = 0;
+    public static final int ADAPTER_TYPE_ETHERNET = 1 << 0;
+    public static final int ADAPTER_TYPE_WIFI = 1 << 1;
+    public static final int ADAPTER_TYPE_CELLULAR = 1 << 2;
+    public static final int ADAPTER_TYPE_VPN = 1 << 3;
+    public static final int ADAPTER_TYPE_LOOPBACK = 1 << 4;
+    public static final int ADAPTER_TYPE_ANY = 1 << 5;
 
     public int networkIgnoreMask;
     public boolean disableEncryption;
@@ -285,6 +296,7 @@ public class PeerConnectionFactory {
    */
   public static void initialize(InitializationOptions options) {
     ContextUtils.initialize(options.applicationContext);
+    NativeLibrary.initialize(options.nativeLibraryLoader, options.nativeLibraryName);
     nativeInitializeAndroidGlobals();
     nativeInitializeFieldTrials(options.fieldTrials);
     if (options.enableInternalTracer && !internalTracerInitialized) {
@@ -303,7 +315,7 @@ public class PeerConnectionFactory {
   }
 
   private static void checkInitializeHasBeenCalled() {
-    if (ContextUtils.getApplicationContext() == null) {
+    if (!NativeLibrary.isLoaded() || ContextUtils.getApplicationContext() == null) {
       throw new IllegalStateException(
           "PeerConnectionFactory.initialize was not called before creating a "
           + "PeerConnectionFactory.");
@@ -336,7 +348,7 @@ public class PeerConnectionFactory {
   //   method2();
   // }
   public static String fieldTrialsFindFullName(String name) {
-    return nativeFindFieldTrialsFullName(name);
+    return NativeLibrary.isLoaded() ? nativeFindFieldTrialsFullName(name) : "";
   }
   // Start/stop internal capturing of internal tracing.
   public static boolean startInternalTracingCapture(String tracingFilename) {
@@ -397,6 +409,7 @@ public class PeerConnectionFactory {
   public PeerConnection createPeerConnection(List<PeerConnection.IceServer> iceServers,
       MediaConstraints constraints, PeerConnection.Observer observer) {
     PeerConnection.RTCConfiguration rtcConfig = new PeerConnection.RTCConfiguration(iceServers);
+    rtcConfig.sdpSemantics = PeerConnection.SdpSemantics.UNIFIED_PLAN;
     return createPeerConnection(rtcConfig, constraints, observer);
   }
 
@@ -404,6 +417,7 @@ public class PeerConnectionFactory {
   public PeerConnection createPeerConnection(
       List<PeerConnection.IceServer> iceServers, PeerConnection.Observer observer) {
     PeerConnection.RTCConfiguration rtcConfig = new PeerConnection.RTCConfiguration(iceServers);
+    rtcConfig.sdpSemantics = PeerConnection.SdpSemantics.UNIFIED_PLAN;
     return createPeerConnection(rtcConfig, observer);
   }
 
@@ -460,6 +474,16 @@ public class PeerConnectionFactory {
   public AudioTrack createAudioTrack(String id, AudioSource source) {
     checkPeerConnectionFactoryExists();
     return new AudioTrack(nativeCreateAudioTrack(nativeFactory, id, source.getNativeAudioSource()));
+  }
+
+  public RtpCapabilities getRtpReceiverCapabilities(MediaStreamTrack.MediaType mediaType) {
+    checkPeerConnectionFactoryExists();
+    return nativeGetRtpReceiverCapabilities(nativeFactory, mediaType);
+  }
+
+  public RtpCapabilities getRtpSenderCapabilities(MediaStreamTrack.MediaType mediaType) {
+    checkPeerConnectionFactoryExists();
+    return nativeGetRtpSenderCapabilities(nativeFactory, mediaType);
   }
 
   // Starts recording an AEC dump. Ownership of the file is transfered to the
@@ -540,15 +564,12 @@ public class PeerConnectionFactory {
   /**
    * Print the Java stack traces for the critical threads used by PeerConnectionFactory, namely;
    * signaling thread, worker thread, and network thread. If printNativeStackTraces is true, also
-   * attempt to print the C++ stack traces for these (and some other) threads.
+   * attempt to print the C++ stack traces for these threads.
    */
   public void printInternalStackTraces(boolean printNativeStackTraces) {
     printStackTrace(signalingThread, printNativeStackTraces);
     printStackTrace(workerThread, printNativeStackTraces);
     printStackTrace(networkThread, printNativeStackTraces);
-    if (printNativeStackTraces) {
-      nativePrintStackTracesOfRegisteredThreads();
-    }
   }
 
   @CalledByNative
@@ -609,5 +630,8 @@ public class PeerConnectionFactory {
   private static native void nativeInjectLoggable(JNILogging jniLogging, int severity);
   private static native void nativeDeleteLoggable();
   private static native void nativePrintStackTrace(int tid);
-  private static native void nativePrintStackTracesOfRegisteredThreads();
+  private static native RtpCapabilities nativeGetRtpSenderCapabilities(
+      long factory, MediaStreamTrack.MediaType mediaType);
+  private static native RtpCapabilities nativeGetRtpReceiverCapabilities(
+      long factory, MediaStreamTrack.MediaType mediaType);
 }

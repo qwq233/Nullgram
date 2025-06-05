@@ -324,6 +324,10 @@ public class BillingController {
 
                         awaitingCount.incrementAndGet();
                         AccountInstance acc = opayload.first;
+                        int requestFlags = ConnectionsManager.RequestFlagFailOnServerErrorsExceptFloodWait | ConnectionsManager.RequestFlagInvokeAfter;
+                        if (req.purpose instanceof TLRPC.TL_inputStorePaymentAuthCode) {
+                            requestFlags |= ConnectionsManager.RequestFlagWithoutLogin;
+                        }
                         acc.getConnectionsManager().sendRequest(req, (response, error) -> {
                             AndroidUtilities.runOnUIThread(() -> {
                                 if (progressDialog[0] != null) {
@@ -368,7 +372,7 @@ public class BillingController {
                                     }
                                 });
                             }
-                        }, ConnectionsManager.RequestFlagFailOnServerErrorsExceptFloodWait | ConnectionsManager.RequestFlagInvokeAfter);
+                        }, requestFlags);
                     } else {
                         FileLog.d("BillingController.onPurchasesUpdatedInternal: " + purchase.getOrderId() + " purchase is purchased and acknowledged: consuming");
                         awaitingCount.incrementAndGet();
