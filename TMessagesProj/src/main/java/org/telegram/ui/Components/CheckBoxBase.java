@@ -218,7 +218,7 @@ public class CheckBoxBase {
         }
     }
 
-    private void cancelCheckAnimator() {
+    public void cancelCheckAnimator() {
         if (checkAnimator != null) {
             checkAnimator.cancel();
             checkAnimator = null;

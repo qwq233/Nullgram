@@ -1024,6 +1024,7 @@ public class MediaController implements AudioManager.OnAudioFocusChangeListener,
     private long recordDialogId;
     private long recordTopicId;
     private long recordMonoForumPeerId;
+    private MessageSuggestionParams recordMonoForumSuggestionParams;
     private MessageObject recordReplyingMsg;
     private MessageObject recordReplyingTopMsg;
     private TL_stories.StoryItem recordReplyingStory;
@@ -2247,7 +2248,7 @@ public class MediaController implements AudioManager.OnAudioFocusChangeListener,
         if (recordingAudio != null) {
             toggleRecordingPause(false);
         } else if (raised) {
-            startRecording(raiseChat.getCurrentAccount(), raiseChat.getDialogId(), null, raiseChat.getThreadMessage(), null, raiseChat.getClassGuid(), false, raiseChat != null ? raiseChat.quickReplyShortcut : null, raiseChat != null ? raiseChat.getQuickReplyId() : 0, raiseChat != null ? raiseChat.getSendMonoForumPeerId(): 0);
+            startRecording(raiseChat.getCurrentAccount(), raiseChat.getDialogId(), null, raiseChat.getThreadMessage(), null, raiseChat.getClassGuid(), false, raiseChat != null ? raiseChat.quickReplyShortcut : null, raiseChat != null ? raiseChat.getQuickReplyId() : 0, raiseChat != null ? raiseChat.getSendMonoForumPeerId(): 0, raiseChat != null ? raiseChat.getSendMessageSuggestionParams(): null);
         } else {
             stopRecording(2, false, 0, false, 0);
         }
@@ -2269,7 +2270,7 @@ public class MediaController implements AudioManager.OnAudioFocusChangeListener,
             return;
         }
         raiseToEarRecord = true;
-        startRecording(raiseChat.getCurrentAccount(), raiseChat.getDialogId(), null, raiseChat.getThreadMessage(), null, raiseChat.getClassGuid(), false, raiseChat != null ? raiseChat.quickReplyShortcut : null, raiseChat != null ? raiseChat.getQuickReplyId() : 0, raiseChat != null ? raiseChat.getSendMonoForumPeerId(): 0);
+        startRecording(raiseChat.getCurrentAccount(), raiseChat.getDialogId(), null, raiseChat.getThreadMessage(), null, raiseChat.getClassGuid(), false, raiseChat != null ? raiseChat.quickReplyShortcut : null, raiseChat != null ? raiseChat.getQuickReplyId() : 0, raiseChat != null ? raiseChat.getSendMonoForumPeerId(): 0, raiseChat != null ? raiseChat.getSendMessageSuggestionParams(): null);
         ignoreOnPause = true;
     }
 
@@ -4408,7 +4409,7 @@ public class MediaController implements AudioManager.OnAudioFocusChangeListener,
         }
     }
 
-    public void prepareResumedRecording(int currentAccount, MediaDataController.DraftVoice draft, long dialogId, MessageObject replyToMsg, MessageObject replyToTopMsg, TL_stories.StoryItem replyStory, int guid, String query_shortcut, int query_shortcut_id, long monoForumPeerId) {
+    public void prepareResumedRecording(int currentAccount, MediaDataController.DraftVoice draft, long dialogId, MessageObject replyToMsg, MessageObject replyToTopMsg, TL_stories.StoryItem replyStory, int guid, String query_shortcut, int query_shortcut_id, long monoForumPeerId, MessageSuggestionParams suggestionParams) {
         manualRecording = false;
         requestRecordAudioFocus(true);
         recordQueue.cancelRunnable(recordStartRunnable);
@@ -4443,6 +4444,7 @@ public class MediaController implements AudioManager.OnAudioFocusChangeListener,
                 recordSamples = draft.recordSamples;
                 recordDialogId = dialogId;
                 recordMonoForumPeerId = monoForumPeerId;
+                recordMonoForumSuggestionParams = suggestionParams;
                 recordTopicId = replyToTopMsg == null ? 0 : MessageObject.getTopicId(recordingCurrentAccount, replyToTopMsg.messageOwner, false);
                 recordingCurrentAccount = currentAccount;
                 recordReplyingMsg = replyToMsg;
@@ -4650,7 +4652,7 @@ public class MediaController implements AudioManager.OnAudioFocusChangeListener,
         });
     }
 
-    public void startRecording(int currentAccount, long dialogId, MessageObject replyToMsg, MessageObject replyToTopMsg, TL_stories.StoryItem replyStory, int guid, boolean manual, String quick_shortcut, int quick_shortcut_id, long monoForumPeerId) {
+    public void startRecording(int currentAccount, long dialogId, MessageObject replyToMsg, MessageObject replyToTopMsg, TL_stories.StoryItem replyStory, int guid, boolean manual, String quick_shortcut, int quick_shortcut_id, long monoForumPeerId, MessageSuggestionParams suggestionParams) {
         boolean paused = false;
         if (playingMessageObject != null && isPlayingMessage(playingMessageObject) && !isMessagePaused()) {
             paused = true;
@@ -4721,6 +4723,7 @@ public class MediaController implements AudioManager.OnAudioFocusChangeListener,
                 samplesCount = 0;
                 recordDialogId = dialogId;
                 recordMonoForumPeerId = monoForumPeerId;
+                recordMonoForumSuggestionParams = suggestionParams;
                 recordTopicId = replyToTopMsg == null ? 0 : MessageObject.getTopicId(recordingCurrentAccount, replyToTopMsg.messageOwner, false);
                 recordingCurrentAccount = currentAccount;
                 recordReplyingMsg = replyToMsg;
@@ -4872,6 +4875,7 @@ public class MediaController implements AudioManager.OnAudioFocusChangeListener,
                         if (send == 1) {
                             SendMessagesHelper.SendMessageParams params = SendMessagesHelper.SendMessageParams.of(audioToSend, null, recordingAudioFileToSend.getAbsolutePath(), recordDialogId, recordReplyingMsg, recordReplyingTopMsg, null, null, null, null, notify, scheduleDate, once ? 0x7FFFFFFF : 0, null, null, false);
                             params.monoForumPeer = recordMonoForumPeerId;
+                            params.suggestionParams = recordMonoForumSuggestionParams;
                             params.replyToStoryItem = recordReplyingStory;
                             params.quick_reply_shortcut = recordQuickReplyShortcut;
                             params.quick_reply_shortcut_id = recordQuickReplyShortcutId;

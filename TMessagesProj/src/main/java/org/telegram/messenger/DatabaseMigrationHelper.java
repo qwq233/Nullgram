@@ -1597,6 +1597,12 @@ public class DatabaseMigrationHelper {
             version = 164;
         }
 
+        if (version == 164) {
+            database.executeFast("ALTER TABLE topics ADD COLUMN nopaid_messages_exception INTEGER default 0;").stepThis().dispose();
+            database.executeFast("PRAGMA user_version = 165").stepThis().dispose();
+            version = 165;
+        }
+
         return version;
     }
 

@@ -236,6 +236,7 @@ public class NotificationCenter {
     public static final int boostedChannelByUser = totalEvents++;
     public static final int boostByChannelCreated = totalEvents++;
     public static final int didUpdatePremiumGiftStickers = totalEvents++;
+    public static final int didUpdateTonGiftStickers = totalEvents++;
     public static final int didUpdatePremiumGiftFieldIcon = totalEvents++;
     public static final int storiesEnabledUpdate = totalEvents++;
     public static final int storiesBlocklistUpdate = totalEvents++;
@@ -365,6 +366,8 @@ public class NotificationCenter {
     public static final int onReceivedChannelDifference = totalEvents++;
     public static final int storiesReadUpdated = totalEvents++;
     public static final int nearEarEvent = totalEvents++;
+    public static final int translationModelDownloading = totalEvents++;
+    public static final int translationModelDownloaded = totalEvents++;
 
     public static boolean alreadyLogged;
 

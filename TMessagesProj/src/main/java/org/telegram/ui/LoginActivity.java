@@ -24,6 +24,7 @@ import static org.telegram.messenger.AndroidUtilities.replaceArrows;
 import static org.telegram.messenger.AndroidUtilities.replaceSingleTag;
 import static org.telegram.messenger.LocaleController.formatString;
 import static org.telegram.messenger.LocaleController.getString;
+import static org.telegram.messenger.MessagesController.findUpdatesAndRemove;
 
 import android.Manifest;
 import android.animation.Animator;
@@ -1917,8 +1918,12 @@ public class LoginActivity extends BaseFragment implements NotificationCenter.No
         return str.toUpperCase().replaceAll(" ", "_");
     }
 
-    public void open(TLRPC.auth_SentCode res) {
-        fillNextCodeParams(new Bundle(), res, true);
+    public void open(String phone, TLRPC.auth_SentCode res) {
+        Bundle params = new Bundle();
+        params.putString("phone", "+" + phone);
+        params.putString("ephone", "+" + phone);
+        params.putString("phoneFormated", phone);
+        fillNextCodeParams(params, res, true);
     }
 
     private boolean isRequestingFirebaseSms;
@@ -10203,7 +10208,9 @@ public class LoginActivity extends BaseFragment implements NotificationCenter.No
 
             cells[2] = new ExplainStarsSheet.FeatureCell(context, ExplainStarsSheet.FeatureCell.STYLE_SHEET);
             cells[2].set(R.drawable.menu_feature_hands, AndroidUtilities.replaceArrows(replaceSingleTag(getString(R.string.SMSFee3Title), () -> {
-                presentFragment(new PremiumPreviewFragment("sms"));
+                final PremiumPreviewFragment fragment = new PremiumPreviewFragment("sms");
+                fragment.setCurrentAccount(currentAccount);
+                presentFragment(fragment);
             }), true, dp(8f / 3f), dp(1)), getString(R.string.SMSFee3Text));
             addView(cells[2], LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT, Gravity.FILL_HORIZONTAL | Gravity.TOP, 0, 0, 0, 6));
 

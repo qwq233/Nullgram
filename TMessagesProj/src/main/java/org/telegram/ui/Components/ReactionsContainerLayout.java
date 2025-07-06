@@ -109,6 +109,7 @@ import java.util.List;
 
 public class ReactionsContainerLayout extends FrameLayout implements NotificationCenter.NotificationCenterDelegate {
 
+    public boolean forceAttachToParent = false;
     public final static Property<ReactionsContainerLayout, Float> TRANSITION_PROGRESS_VALUE = new Property<ReactionsContainerLayout, Float>(Float.class, "transitionProgress") {
         @Override
         public Float get(ReactionsContainerLayout reactionsContainerLayout) {
@@ -520,7 +521,7 @@ public class ReactionsContainerLayout extends FrameLayout implements Notificatio
         if (reactionsWindow != null) {
             return;
         }
-        reactionsWindow = new CustomEmojiReactionsWindow(type, fragment, allReactionsList, selectedReactions, this, resourcesProvider);
+        reactionsWindow = new CustomEmojiReactionsWindow(type, fragment, allReactionsList, selectedReactions, this, resourcesProvider, forceAttachToParent);
         invalidateLoopViews();
         reactionsWindow.onDismissListener(() -> {
             reactionsWindow = null;
@@ -531,6 +532,10 @@ public class ReactionsContainerLayout extends FrameLayout implements Notificatio
         });
         onShownCustomEmojiReactionDialog();
         //animatePullingBack();
+    }
+
+    public View getWindowView() {
+        return reactionsWindow == null ? null : reactionsWindow.windowView;
     }
 
     protected void onShownCustomEmojiReactionDialog() {

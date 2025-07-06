@@ -1679,6 +1679,10 @@ public class VoIPService extends Service implements SensorEventListener, AudioMa
 			if (BuildVars.LOGS_ENABLED) {
 				FileLog.d("call discarded, stopping service");
 			}
+			final MessagesController messagesController = MessagesController.getInstance(currentAccount);
+			if (messagesController.voipDebug != null) {
+				messagesController.voipDebug.done(phoneCall.id, phoneCall.need_debug);
+			}
 			if (phoneCall.reason instanceof TLRPC.TL_phoneCallDiscardReasonMigrateConferenceCall) {
 				final TLRPC.TL_phoneCallDiscardReasonMigrateConferenceCall reason = (TLRPC.TL_phoneCallDiscardReasonMigrateConferenceCall) phoneCall.reason;
 				joinConference = new TLRPC.TL_inputGroupCallSlug();
@@ -4571,7 +4575,7 @@ public class VoIPService extends Service implements SensorEventListener, AudioMa
 	}
 
 	private void onTgVoipStop(Instance.FinalState finalState) {
-		if (user == null) {
+		if (user == null || privateCall == null || finalState == null) {
 			return;
 		}
 		if (TextUtils.isEmpty(finalState.debugLog)) {
