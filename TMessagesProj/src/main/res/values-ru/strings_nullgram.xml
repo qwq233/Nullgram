@@ -344,7 +344,7 @@
     <string name="SaveToDownloadCount_few">Сохранение %1$d файлов в Загрузки</string>
     <string name="SaveToDownloadCount_many">Сохранение %1$d файлов в Загрузки</string>
     <string name="SaveToDownloadCount_other">Сохранение %1$d файлов в Загрузки</string>
-    <string name="InvalidPattern">Неверное выражение</string>
+    <string name="InvalidPattern">Неверный шаблон</string>
     <string name="sendLargePhoto">Отправлять большие фото</string>
     <string name="Details">Подробности</string>
 </resources>
