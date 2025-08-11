@@ -28,7 +28,7 @@ plugins {
     alias(libs.plugins.kotlin.jvm) apply false
     alias(libs.plugins.serialization) apply false
     alias(libs.plugins.ksp) apply false
-    alias(libs.plugins.rust) apply false
+    //alias(libs.plugins.rust) apply false
 }
 
 tasks.register<Delete>("clean").configure {
@@ -47,8 +47,8 @@ val verName = if (Version.isStable) {
 val androidTargetSdkVersion by extra(35)
 val androidMinSdkVersion by extra(27)
 val androidCompileSdkVersion by extra(35)
-val androidBuildToolsVersion by extra("34.0.0")
-val androidCompileNdkVersion = "28.1.13356709"
+val androidBuildToolsVersion by extra("35.0.0")
+val androidCompileNdkVersion = "28.2.13676358"
 
 fun Project.configureBaseExtension() {
     extensions.findByType(com.android.build.gradle.BaseExtension::class)?.run {

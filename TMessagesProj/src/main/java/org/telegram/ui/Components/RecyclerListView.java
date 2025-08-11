@@ -1176,6 +1176,8 @@ public class RecyclerListView extends RecyclerView {
                         final View child = viewGroup.getChildAt(i);
                         if (x >= child.getLeft() && x <= child.getRight() && y >= child.getTop() && y <= child.getBottom()) {
                             if (child.isClickable()) {
+                                // todo: recursion search ???
+
                                 currentChildView = null;
                                 break;
                             }
@@ -1364,7 +1366,7 @@ public class RecyclerListView extends RecyclerView {
         resetSelectorOnChanged = value;
     }
 
-    private AdapterDataObserver observer = new AdapterDataObserver() {
+    private final AdapterDataObserver observer = new AdapterDataObserver() {
         @Override
         public void onChanged() {
             checkIfEmpty(true);

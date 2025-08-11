@@ -1239,6 +1239,7 @@ public class StarsReactionsSheet extends BottomSheet implements NotificationCent
         public final Rect rect = new Rect();
 
         private float speed = 1f;
+        private float lifetime = 1f;
         private int visibleCount;
 
         private boolean firstDraw = true;
@@ -1302,6 +1303,10 @@ public class StarsReactionsSheet extends BottomSheet implements NotificationCent
             }
         }
 
+        public void setLifetime(float lifetime) {
+            this.lifetime = lifetime;
+        }
+
         public void setSpeed(float speed) {
             this.speed = speed;
         }
@@ -1337,7 +1342,7 @@ public class StarsReactionsSheet extends BottomSheet implements NotificationCent
 
         public void gen(Particle p, final long now, boolean prefire) {
             p.start = now;
-            p.lifetime = lerp(500, 2500, Utilities.fastRandom.nextFloat());
+            p.lifetime = (long) (lerp(500, 2500, Utilities.fastRandom.nextFloat()) * lifetime);
             if (prefire) {
                 p.start -= (long) (p.lifetime * Utilities.clamp01(Utilities.fastRandom.nextFloat()));
             }

@@ -19,6 +19,7 @@
 
 package org.telegram.ui.Components.Premium;
 
+import static org.telegram.messenger.LocaleController.formatPluralStringComma;
 import static org.telegram.messenger.LocaleController.getString;
 
 import android.animation.Animator;
@@ -64,6 +65,7 @@ import org.telegram.messenger.UserConfig;
 import org.telegram.messenger.Utilities;
 import org.telegram.messenger.browser.Browser;
 import org.telegram.tgnet.TLRPC;
+import org.telegram.tgnet.tl.TL_stars;
 import org.telegram.ui.ActionBar.BaseFragment;
 import org.telegram.ui.ActionBar.SimpleTextView;
 import org.telegram.ui.ActionBar.Theme;
@@ -84,6 +86,7 @@ import org.telegram.ui.Components.Premium.boosts.cells.TextInfoCell;
 import org.telegram.ui.Components.RecyclerListView;
 import org.telegram.ui.PremiumFeatureCell;
 import org.telegram.ui.PremiumPreviewFragment;
+import org.telegram.ui.Stories.recorder.HintView2;
 
 import java.util.ArrayList;
 
@@ -93,6 +96,7 @@ public class PremiumPreviewBottomSheet extends BottomSheetWithRecyclerListView i
     int currentAccount;
     protected TLRPC.User user;
     protected GiftPremiumBottomSheet.GiftTier giftTier;
+    protected TL_stars.StarGift gift;
     boolean isOutboundGift;
 
     PremiumFeatureCell dummyCell;
@@ -139,10 +143,10 @@ public class PremiumPreviewBottomSheet extends BottomSheetWithRecyclerListView i
     FrameLayout bulletinContainer;
 
     public PremiumPreviewBottomSheet(BaseFragment fragment, int currentAccount, TLRPC.User user, Theme.ResourcesProvider resourcesProvider) {
-        this(fragment, currentAccount, user, null, resourcesProvider);
+        this(fragment, currentAccount, user, null, null, resourcesProvider);
     }
 
-    public PremiumPreviewBottomSheet(BaseFragment fragment, int currentAccount, TLRPC.User user, GiftPremiumBottomSheet.GiftTier gift, Theme.ResourcesProvider resourcesProvider) {
+    public PremiumPreviewBottomSheet(BaseFragment fragment, int currentAccount, TLRPC.User user, GiftPremiumBottomSheet.GiftTier gift, TL_stars.StarGift stargift, Theme.ResourcesProvider resourcesProvider) {
         super(fragment, false, false, false, resourcesProvider);
         fixNavigationBar();
         this.fragment = fragment;
@@ -150,6 +154,7 @@ public class PremiumPreviewBottomSheet extends BottomSheetWithRecyclerListView i
         this.user = user;
         this.currentAccount = currentAccount;
         this.giftTier = gift;
+        this.gift = stargift;
         dummyCell = new PremiumFeatureCell(getContext());
         PremiumPreviewFragment.fillPremiumFeaturesList(premiumFeatures, currentAccount, false);
 
@@ -306,7 +311,7 @@ public class PremiumPreviewBottomSheet extends BottomSheetWithRecyclerListView i
         }
     }
 
-    protected TextView subtitleView;
+    protected LinkSpanDrawable.LinksTextView subtitleView;
 
     public void setTitle(boolean animated) {
         if (titleView == null || subtitleView == null) {
@@ -431,6 +436,15 @@ public class PremiumPreviewBottomSheet extends BottomSheetWithRecyclerListView i
                 titleView[0].setText(AndroidUtilities.replaceSingleLink(LocaleController.formatString(R.string.TelegramPremiumUserGiftedPremiumDialogTitleWithPlural, user.first_name, LocaleController.formatPluralString("GiftMonths", giftTier.getMonths())), accentColor == null ? getThemedColor(Theme.key_windowBackgroundWhiteBlueButton) : accentColor));
                 subtitleView.setText(AndroidUtilities.replaceTags(LocaleController.getString(R.string.TelegramPremiumUserGiftedPremiumDialogSubtitle)));
             }
+        } else if (gift != null) {
+            titleView[0].setText(getString(R.string.Gift2PremiumTitle));
+            titleView[0].setTextSize(TypedValue.COMPLEX_UNIT_DIP, 20);
+            if (gift.limited_per_user) {
+                subtitleView.setText(AndroidUtilities.replaceTags(formatPluralStringComma("Gift2PremiumSubtitleMany", gift.per_user_total)));
+            } else {
+                subtitleView.setText(AndroidUtilities.replaceTags(getString(R.string.Gift2PremiumSubtitle)));
+            }
+            subtitleView.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 14);
         } else {
             if (user == null) {
                 titleView[0].setText(LocaleController.getString(R.string.TelegramPremium));
@@ -554,7 +568,7 @@ public class PremiumPreviewBottomSheet extends BottomSheetWithRecyclerListView i
                     if (subtitleView.getParent() != null) {
                         ((ViewGroup) subtitleView.getParent()).removeView(subtitleView);
                     }
-                    linearLayout.addView(subtitleView, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT, 0, 0, 16, 9, 16, 20));
+                    linearLayout.addView(subtitleView, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT, 0, 0, 24, 9, 24, 20));
 
                     setTitle(false);
 

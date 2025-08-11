@@ -3160,6 +3160,17 @@ public class StoryRecorder implements NotificationCenter.NotificationCenterDeleg
                             }
                         }
                     })
+                    .whenSelectedAlbums(albums -> {
+                        if (outputEntry == null) {
+                            return;
+                        }
+                        outputEntry.albums = albums;
+                        if (entries != null) {
+                            for (StoryEntry entry : entries) {
+                                entry.albums = albums;
+                            }
+                        }
+                    })
                     .whenSelectedRules((privacy, allowScreenshots, keepInProfile, sendAs, whenDone) -> {
                         if (outputEntry == null) {
                             return;
@@ -4197,7 +4208,7 @@ public class StoryRecorder implements NotificationCenter.NotificationCenterDeleg
         } else if (currentPage == PAGE_PREVIEW && (outputEntry == null || !outputEntry.isRepost && !outputEntry.isRepostMessage) && !isReposting && (outputEntry == null || !outputEntry.isEdit || (paintView != null && paintView.hasChanges()) || outputEntry.editedMedia || outputEntry.editedCaption)) {
             if (paintView != null && paintView.onBackPressed()) {
                 return false;
-            } else if (botId == 0 && (fromGallery && !collageLayoutView.hasLayout() && (paintView == null || !paintView.hasChanges()) && (outputEntry == null || outputEntry.filterFile == null) || !previewButtons.isShareEnabled()) && (outputEntry == null || !outputEntry.isEdit || !outputEntry.isRepost && !outputEntry.isRepostMessage) && !isReposting) {
+            } else if (botId == 0 && (fromGallery && !collageLayoutView.hasLayout() && (paintView == null || !paintView.hasChanges()) && (outputEntry == null || outputEntry.filterFile == null) || !previewButtons.isShareEnabled()) && (outputEntry == null || !outputEntry.isEdit || !outputEntry.isRepost && !outputEntry.isRepostMessage) && !isReposting && (outputEntry == null || !outputEntry.isShare)) {
                 navigateTo(PAGE_CAMERA, true);
             } else {
                 if (botId != 0) {
@@ -6843,7 +6854,7 @@ public class StoryRecorder implements NotificationCenter.NotificationCenterDeleg
         AlertDialog.Builder builder = new AlertDialog.Builder(getContext(), resourcesProvider);
         builder.setTitle(getString(R.string.DiscardChanges));
         builder.setMessage(getString(R.string.PhotoEditorDiscardAlert));
-        if (outputEntry != null && !outputEntry.isEdit) {
+        if (outputEntry != null && !outputEntry.isEdit && !outputEntry.isShare) {
             builder.setNeutralButton(getString(outputEntry.isDraft ? R.string.StoryKeepDraft : R.string.StorySaveDraft), (di, i) -> {
                 if (outputEntry == null) {
                     return;
@@ -6873,7 +6884,7 @@ public class StoryRecorder implements NotificationCenter.NotificationCenterDeleg
                 MessagesController.getInstance(currentAccount).getStoriesController().getDraftsController().delete(outputEntry);
                 outputEntry = null;
             }
-            if (outputEntry != null && (outputEntry.isEdit || outputEntry.isRepost && !outputEntry.isRepostMessage)) {
+            if (outputEntry != null && (outputEntry.isShare || outputEntry.isEdit || outputEntry.isRepost && !outputEntry.isRepostMessage)) {
                 close(true);
             } else {
                 navigateTo(PAGE_CAMERA, true);
