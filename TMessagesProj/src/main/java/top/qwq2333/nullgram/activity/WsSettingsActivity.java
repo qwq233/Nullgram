@@ -71,7 +71,7 @@ public class WsSettingsActivity extends BaseActivity {
         if (position == enableTLSRow) {
             WebSocketHelper.toggleWsEnableTLS();
             if (view instanceof TextCheckCell) {
-                ((TextCheckCell) view).setChecked(WebSocketHelper.wsEnableTLS);
+                ((TextCheckCell) view).setChecked(WebSocketHelper.wsEnableTLS());
             }
             WebSocketHelper.wsReloadConfig();
         } else if (position == providerRow) {
@@ -221,7 +221,7 @@ public class WsSettingsActivity extends BaseActivity {
                 case TYPE_CHECK: {
                     TextCheckCell textCell = (TextCheckCell) holder.itemView;
                     if (position == enableTLSRow) {
-                        textCell.setTextAndCheck(LocaleController.getString("WsEnableTls", R.string.WsEnableTls), WebSocketHelper.wsEnableTLS, true);
+                        textCell.setTextAndCheck(LocaleController.getString("WsEnableTls", R.string.WsEnableTls), WebSocketHelper.wsEnableTLS(), true);
                     }
                     break;
                 }
