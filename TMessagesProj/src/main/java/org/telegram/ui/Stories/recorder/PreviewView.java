@@ -1,20 +1,18 @@
 /*
- * Copyright (C) 2019-2024 qwq233 <qwq233@qwq2333.top>
+ * Copyright (C) 2019-2025 qwq233 <qwq233@qwq2333.top>
  * https://github.com/qwq233/Nullgram
  *
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * as published by the Free Software Foundation; either version 2
- * of the License, or (at your option) any later version.
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, version 2 of the License.
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
- * You should have received a copy of the GNU General Public License along with this software.
- *  If not, see
- * <https://www.gnu.org/licenses/>
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
 package org.telegram.ui.Stories.recorder;
@@ -71,6 +69,7 @@ import org.telegram.messenger.Utilities;
 import org.telegram.tgnet.TLRPC;
 import org.telegram.ui.ActionBar.EmojiThemes;
 import org.telegram.ui.ActionBar.Theme;
+import org.telegram.ui.ActionBar.theme.ThemeKey;
 import org.telegram.ui.ChatBackgroundDrawable;
 import org.telegram.ui.Components.AnimatedFloat;
 import org.telegram.ui.Components.BlurringShader;
@@ -1849,7 +1848,7 @@ public class PreviewView extends FrameLayout {
 
         EmojiThemes theme = null;
         if (wallpaper != null && wallpaper.settings != null) {
-            theme = ChatThemeController.getInstance(currentAccount).getTheme(wallpaper.settings.emoticon);
+            theme = ChatThemeController.getInstance(currentAccount).getTheme(ThemeKey.ofEmoticon(wallpaper.settings.emoticon));
         }
         if (theme != null) {
             return getBackgroundDrawableFromTheme(currentAccount, theme, 0, isDark);
@@ -1964,7 +1963,7 @@ public class PreviewView extends FrameLayout {
     }
 
     public static Drawable getBackgroundDrawableFromTheme(int currentAccount, String emoticon, boolean isDark, boolean preview) {
-        EmojiThemes theme = ChatThemeController.getInstance(currentAccount).getTheme(emoticon);
+        EmojiThemes theme = ChatThemeController.getInstance(currentAccount).getTheme(ThemeKey.ofEmoticon(emoticon));
         if (theme == null) {
             return Theme.getCachedWallpaper();
         }
@@ -2003,8 +2002,8 @@ public class PreviewView extends FrameLayout {
                     return;
                 }
                 long themeId = pair.first;
-                Bitmap bitmap = pair.second;
-                if (themeId == chatTheme.getTlTheme(isDark ? 1 : 0).id && bitmap != null) {
+                Bitmap bitmap = pair.second.bitmap;
+                if (themeId == chatTheme.getThemeId(isDark ? 1 : 0) && bitmap != null) {
                     int intensity = chatTheme.getWallpaper(isDarkTheme ? 1 : 0).settings.intensity;
                     motionDrawable.setPatternBitmap(intensity, bitmap);
                     motionDrawable.setPatternColorFilter(patternColor);

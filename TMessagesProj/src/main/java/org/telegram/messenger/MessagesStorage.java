@@ -2,19 +2,17 @@
  * Copyright (C) 2019-2025 qwq233 <qwq233@qwq2333.top>
  * https://github.com/qwq233/Nullgram
  *
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * as published by the Free Software Foundation; either version 2
- * of the License, or (at your option) any later version.
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, version 2 of the License.
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
- * You should have received a copy of the GNU General Public License along with this software.
- *  If not, see
- * <https://www.gnu.org/licenses/>
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
 package org.telegram.messenger;
@@ -27,6 +25,7 @@ import static org.telegram.messenger.MessagesController.LOAD_FROM_UNREAD;
 
 import android.appwidget.AppWidgetManager;
 import android.content.SharedPreferences;
+import android.os.Looper;
 import android.os.SystemClock;
 import android.text.SpannableStringBuilder;
 import android.text.Spanned;
@@ -123,7 +122,7 @@ public class MessagesStorage extends BaseController {
         }
     }
 
-    public final static int LAST_DB_VERSION = 167;
+    public final static int LAST_DB_VERSION = 168;
     private boolean databaseMigrationInProgress;
     public boolean showClearDatabaseAlert;
     private final LongSparseIntArray dialogIsForum = new LongSparseIntArray();
@@ -750,6 +749,8 @@ public class MessagesStorage extends BaseController {
         database.executeFast("CREATE TABLE popular_bots(uid INTEGER PRIMARY KEY, time INTEGER, offset TEXT, pos INTEGER);").stepThis().dispose();
 
         database.executeFast("CREATE TABLE star_gifts2(id INTEGER PRIMARY KEY, data BLOB, hash INTEGER, time INTEGER, pos INTEGER);").stepThis().dispose();
+
+        database.executeFast("CREATE TABLE gift_themes (slug TEXT PRIMARY KEY, data BLOB);").stepThis().dispose();
 
         database.executeFast("PRAGMA user_version = " + MessagesStorage.LAST_DB_VERSION).stepThis().dispose();
 
@@ -17657,6 +17658,96 @@ public class MessagesStorage extends BaseController {
             }
         });
     }
+
+
+    public void putGiftChatTheme(TLRPC.ChatTheme theme) {
+        putGiftChatThemes(Collections.singletonList(theme));
+    }
+
+    public void putGiftChatThemes(List<TLRPC.ChatTheme> themes) {
+        executeInStorageQueue(() -> {
+            SQLitePreparedStatement state = null;
+            try {
+                state = database.executeFast("REPLACE INTO gift_themes VALUES(?, ?)");
+                for (TLRPC.ChatTheme theme: themes) {
+                    if (!(theme instanceof TLRPC.TL_chatThemeUniqueGift)) {
+                        continue;
+                    }
+
+                    final TLRPC.TL_chatThemeUniqueGift giftTheme = (TLRPC.TL_chatThemeUniqueGift) theme;
+
+                    state.requery();
+                    state.bindString(1, giftTheme.gift.slug);
+
+                    NativeByteBuffer data = new NativeByteBuffer(giftTheme.getObjectSize());
+                    giftTheme.serializeToStream(data);
+                    state.bindByteBuffer(2, data);
+                    data.reuse();
+
+                    state.step();
+                }
+                state.dispose();
+                state = null;
+            } catch (SQLiteException e) {
+                checkSQLException(e);
+            } catch (Exception e) {
+                FileLog.e(e);
+            } finally {
+                if (state != null) {
+                    state.dispose();
+                }
+            }
+        });
+    }
+
+    public void loadGiftChatTheme(Utilities.Callback<List<TLRPC.TL_chatThemeUniqueGift>> callback) {
+        executeInStorageQueue(() -> {
+            SQLiteCursor cursor = null;
+            boolean success = false;
+            try {
+                List<TLRPC.TL_chatThemeUniqueGift> gifts = new ArrayList<>();
+                cursor = database.queryFinalized("SELECT data FROM gift_themes");
+                while (cursor.next()) {
+                    NativeByteBuffer data = cursor.byteBufferValue(0);
+                    if (data != null) {
+                        TLRPC.ChatTheme chatTheme = TLRPC.ChatTheme.TLdeserialize(data, data.readInt32(false), false);
+                        data.reuse();
+
+                        if (chatTheme instanceof TLRPC.TL_chatThemeUniqueGift) {
+                            gifts.add((TLRPC.TL_chatThemeUniqueGift) chatTheme);
+                        }
+                    }
+                }
+                cursor.dispose();
+                cursor = null;
+
+
+                AndroidUtilities.runOnUIThread(() -> callback.run(gifts));
+                success = true;
+            } catch (SQLiteException e) {
+                checkSQLException(e);
+            } catch (Exception e) {
+                FileLog.e(e);
+            } finally {
+                if (cursor != null) {
+                    cursor.dispose();
+                }
+            }
+
+            if (!success) {
+                AndroidUtilities.runOnUIThread(() -> callback.run(null));
+            }
+        });
+    }
+
+    private void executeInStorageQueue(Runnable runnable) {
+        if (storageQueue.getHandler().getLooper() != Looper.myLooper()) {
+            storageQueue.postRunnable(runnable);
+        } else {
+            runnable.run();
+        }
+    }
+
 
     public void saveStoryAlbumsCache(long dialog_id, List<StoriesController.StoryAlbum> albums) {
         storageQueue.postRunnable(() -> saveStoryAlbumsCacheInternal(dialog_id, albums));

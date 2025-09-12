@@ -1,20 +1,18 @@
 /*
- * Copyright (C) 2019-2023 qwq233 <qwq233@qwq2333.top>
+ * Copyright (C) 2019-2025 qwq233 <qwq233@qwq2333.top>
  * https://github.com/qwq233/Nullgram
  *
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * as published by the Free Software Foundation; either version 2
- * of the License, or (at your option) any later version.
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, version 2 of the License.
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
- * You should have received a copy of the GNU General Public License along with this software.
- *  If not, see
- * <https://www.gnu.org/licenses/>
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
 package top.qwq2333.nullgram.utils
@@ -57,7 +55,7 @@ object PrivacyUtils {
     private fun postCheckPhoneNumberVisible(ctx: Context, account: Int) {
 
         ConnectionsManager.getInstance(account).sendRequest(TL_account.getPrivacy().apply {
-            key = TLRPC.TL_inputPrivacyKeyPhoneNumber()
+            key = TLRPC.InputPrivacyKey.inputPrivacyKeyPhoneNumber
         }, { response, _ ->
             if (response is TL_account.privacyRules) {
                 if (response.rules.isEmpty()) {
@@ -80,7 +78,7 @@ object PrivacyUtils {
 
     private fun postCheckAddMeByPhone(ctx: Context, account: Int) {
         ConnectionsManager.getInstance(account).sendRequest(TL_account.getPrivacy().apply {
-            key = TLRPC.TL_inputPrivacyKeyAddedByPhone()
+            key = TLRPC.InputPrivacyKey.inputPrivacyKeyAddedByPhone
         }, { response, _ ->
             if (response is TL_account.privacyRules) {
                 if (response.rules.isEmpty()) {
@@ -103,7 +101,7 @@ object PrivacyUtils {
 
     private fun postCheckAllowP2p(ctx: Context, account: Int) {
         ConnectionsManager.getInstance(account).sendRequest(TL_account.getPrivacy().apply {
-            key = TLRPC.TL_inputPrivacyKeyPhoneP2P()
+            key = TLRPC.InputPrivacyKey.inputPrivacyKeyPhoneP2P
         }, { response, _ ->
             if (response is TL_account.privacyRules) {
                 if (response.rules.isEmpty()) {
@@ -157,9 +155,9 @@ object PrivacyUtils {
         builder.setPositiveButton(LocaleController.getString("ApplySuggestion", R.string.ApplySuggestion)) { _, _ ->
             ConnectionsManager.getInstance(account).sendRequest(TL_account.setPrivacy().apply {
                 key = when (type) {
-                    0 -> TLRPC.TL_inputPrivacyKeyPhoneNumber()
-                    1 -> TLRPC.TL_inputPrivacyKeyAddedByPhone()
-                    else -> TLRPC.TL_inputPrivacyKeyPhoneP2P()
+                    0 -> TLRPC.InputPrivacyKey.inputPrivacyKeyPhoneNumber
+                    1 -> TLRPC.InputPrivacyKey.inputPrivacyKeyAddedByPhone
+                    else -> TLRPC.InputPrivacyKey.inputPrivacyKeyPhoneP2P
                 }
                 rules = arrayListOf(
                     when (type) {

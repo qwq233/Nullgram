@@ -1,3 +1,20 @@
+/*
+ * Copyright (C) 2019-2025 qwq233 <qwq233@qwq2333.top>
+ * https://github.com/qwq233/Nullgram
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, version 2 of the License.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 package org.telegram.ui;
 
 import android.Manifest;
@@ -91,6 +108,7 @@ import org.telegram.ui.ActionBar.BaseFragment;
 import org.telegram.ui.ActionBar.EmojiThemes;
 import org.telegram.ui.ActionBar.Theme;
 import org.telegram.ui.ActionBar.ThemeDescription;
+import org.telegram.ui.ActionBar.theme.ThemeKey;
 import org.telegram.ui.Cells.SettingsSearchCell;
 import org.telegram.ui.Components.AnimatedFloat;
 import org.telegram.ui.Components.AnimatedTextView;
@@ -536,7 +554,7 @@ public class QrActivity extends BaseFragment {
 
         int selectedPosition = -1;
         for (int i = 0; i != items.size(); ++i) {
-            if (items.get(i).chatTheme.getEmoticon().equals(currentTheme.getEmoticon())) {
+            if (ThemeKey.equals(items.get(i).chatTheme.getThemeKey(), currentTheme.getThemeKey())) {
                 themesViewController.selectedItem = items.get(i);
                 selectedPosition = i;
                 break;
@@ -652,10 +670,11 @@ public class QrActivity extends BaseFragment {
             currMotionDrawable.setPatternBitmap(wallPaper.settings.intensity);
             final long startedLoading = SystemClock.elapsedRealtime();
             currentTheme.loadWallpaper(isDarkTheme ? 1 : 0, pair -> {
-                if (pair != null && currentTheme.getTlTheme(isDarkTheme ? 1 : 0) != null) {
+                final long currentThemeId = currentTheme.getThemeId(isDarkTheme ? 1 : 0);
+                if (pair != null && currentThemeId != 0) {
                     final long themeId = pair.first;
-                    final Bitmap bitmap = pair.second;
-                    if (themeId == currentTheme.getTlTheme(isDarkTheme ? 1 : 0).id && bitmap != null) {
+                    final Bitmap bitmap = pair.second.bitmap;
+                    if (themeId == currentThemeId && bitmap != null) {
                         long elapsed = SystemClock.elapsedRealtime() - startedLoading;
                         onPatternLoaded(bitmap, currMotionDrawable.getIntensity(), elapsed > 150);
                     }

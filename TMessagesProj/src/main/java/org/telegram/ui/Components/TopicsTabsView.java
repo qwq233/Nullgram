@@ -1,3 +1,20 @@
+/*
+ * Copyright (C) 2019-2025 qwq233 <qwq233@qwq2333.top>
+ * https://github.com/qwq233/Nullgram
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, version 2 of the License.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 package org.telegram.ui.Components;
 
 import static org.telegram.messenger.AndroidUtilities.dp;
@@ -72,9 +89,6 @@ public class TopicsTabsView extends FrameLayout implements NotificationCenter.No
     private final boolean mono;
     private final BaseFragment fragment;
     private final boolean canShowProgress;
-
-    private int lastTabId = 0;
-    private final LongSparseLongArray tabToDialog = new LongSparseLongArray();
 
     private final BlurredFrameLayout topTabsContainer;
     private final View topTabsShadowView;
@@ -576,7 +590,7 @@ public class TopicsTabsView extends FrameLayout implements NotificationCenter.No
             items.add(VerticalTabView.Factory.asLoading(-3));
             items.add(VerticalTabView.Factory.asLoading(-4));
         }
-        if (!mono && ChatObject.canManageTopics(currentChat)) {
+        if (!mono && ChatObject.canCreateTopic(currentChat)) {
             items.add(VerticalTabView.Factory.asAdd(false));
         }
     }
@@ -608,7 +622,7 @@ public class TopicsTabsView extends FrameLayout implements NotificationCenter.No
             items.add(HorizontalTabView.Factory.asLoading(-3));
             items.add(HorizontalTabView.Factory.asLoading(-4));
         }
-        if (!mono && ChatObject.canManageTopics(currentChat)) {
+        if (!mono && ChatObject.canCreateTopic(currentChat)) {
             items.add(HorizontalTabView.Factory.asAdd());
         }
     }

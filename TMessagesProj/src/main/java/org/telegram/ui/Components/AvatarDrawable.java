@@ -1,20 +1,18 @@
 /*
- * Copyright (C) 2019-2024 qwq233 <qwq233@qwq2333.top>
+ * Copyright (C) 2019-2025 qwq233 <qwq233@qwq2333.top>
  * https://github.com/qwq233/Nullgram
  *
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * as published by the Free Software Foundation; either version 2
- * of the License, or (at your option) any later version.
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, version 2 of the License.
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
- * You should have received a copy of the GNU General Public License along with this software.
- *  If not, see
- * <https://www.gnu.org/licenses/>
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
 package org.telegram.ui.Components;
@@ -689,7 +687,7 @@ public class AvatarDrawable extends Drawable {
                 drawable = Theme.avatarDrawables[23];
             } else if (avatarType == AVATAR_TYPE_SUGGESTION) {
                 drawable = Theme.avatarDrawables[24];
-            }else {
+            } else {
                 drawable = Theme.avatarDrawables[9];
             }
             if (drawable != null) {
@@ -709,7 +707,10 @@ public class AvatarDrawable extends Drawable {
         } else if (drawDeleted && Theme.avatarDrawables[1] != null) {
             int w = Theme.avatarDrawables[1].getIntrinsicWidth();
             int h = Theme.avatarDrawables[1].getIntrinsicHeight();
-            if (w > size - dp(6) || h > size - dp(6)) {
+            if (isProfile) {
+                w *= scaleSize;
+                h *= scaleSize;
+            } else if (w > size - dp(6) || h > size - dp(6)) {
                 float scale = size / (float) dp(50);
                 w *= scale;
                 h *= scale;

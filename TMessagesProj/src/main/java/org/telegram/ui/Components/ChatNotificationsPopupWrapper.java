@@ -1,3 +1,20 @@
+/*
+ * Copyright (C) 2019-2025 qwq233 <qwq233@qwq2333.top>
+ * https://github.com/qwq233/Nullgram
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, version 2 of the License.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 package org.telegram.ui.Components;
 
 import static org.telegram.messenger.LocaleController.getString;
@@ -267,7 +284,7 @@ public class ChatNotificationsPopupWrapper {
         return LocaleController.formatString("MuteForButton", R.string.MuteForButton, stringBuilder.toString());
     }
 
-    public void showAsOptions(BaseFragment parentFragment, View anchorView, float touchedX, float touchedY) {
+    public void showAsOptions(BaseFragment parentFragment, View anchorView, float touchedX, float touchedY, boolean fromProfileActions) {
         if (parentFragment == null || parentFragment.getFragmentView() == null) {
             return;
         }
@@ -292,8 +309,13 @@ public class ChatNotificationsPopupWrapper {
             y += view.getY();
             view = (View) view.getParent();
         }
-        x -= windowLayout.getMeasuredWidth() / 2f;
-        y -= windowLayout.getMeasuredHeight() / 2f;
+        if (fromProfileActions) {
+            x -= AndroidUtilities.dpf2(8);
+            y -= AndroidUtilities.dpf2(16);
+        } else {
+            x -= windowLayout.getMeasuredWidth() / 2f;
+            y -= windowLayout.getMeasuredHeight() / 2f;
+        }
         popupWindow.showAtLocation(parentFragment.getFragmentView(), 0, (int) x, (int) y);
         popupWindow.dimBehind();
         //  parentFragment.dimBehindView(true);
