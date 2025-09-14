@@ -899,16 +899,6 @@ public class TranslateAlert2 extends BottomSheet implements NotificationCenter.N
     }
 
     public void setNoforwards(boolean noforwards) {
-        if (textView != null) {
-            textView.setTextIsSelectable(!noforwards);
-        }
-        if (noforwards && Config.allowScreenshotOnNoForwardChat) {
-            getWindow().addFlags(WindowManager.LayoutParams.FLAG_SECURE);
-            AndroidUtilities.logFlagSecure();
-        } else {
-            getWindow().clearFlags(WindowManager.LayoutParams.FLAG_SECURE);
-            AndroidUtilities.logFlagSecure();
-        }
     }
 
     @Override
