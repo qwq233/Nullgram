@@ -409,6 +409,9 @@ public class PollEditTextCell extends FrameLayout implements SuggestEmojiView.An
     }
 
     public void setShowCheckBox(boolean show, boolean animated) {
+        if (checkBox == null) {
+            return;
+        }
         if (show == (checkBox.getTag() != null)) {
             return;
         }
