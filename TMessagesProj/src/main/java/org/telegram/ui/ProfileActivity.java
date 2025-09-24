@@ -5599,7 +5599,7 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
             SimpleTextView view = new SimpleTextView(context);
             view.setTextColor(getThemedColor(Theme.key_avatar_subtitleInProfileBlue));
             view.setTextSize(14);
-            view.setGravity(Gravity.LEFT);
+            view.setGravity(Gravity.CENTER_HORIZONTAL);
             view.setPadding(AndroidUtilities.dp(4), AndroidUtilities.dp(2), AndroidUtilities.dp(4), AndroidUtilities.dp(2));
             view.setImportantForAccessibility(View.IMPORTANT_FOR_ACCESSIBILITY_NO);
             return view;
@@ -9074,13 +9074,17 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
                     float nameX = viewportWidth / 2f - (params1.leftMargin + Math.min(nameTextView[a].getExactWidth(), a == 1 ? params1.width : viewportWidth) * nameScale * 0.5f);
                     FrameLayout.LayoutParams params2 = (FrameLayout.LayoutParams) onlineTextView[a].getLayoutParams();
                     float onlineX = viewportWidth / 2f - (params2.leftMargin + Math.min(onlineTextView[hasFallbackPhoto ? 3 : a].getExactWidth(), a == 1 ? params2.width : viewportWidth) * 0.5f);
+                    FrameLayout.LayoutParams params3 = (FrameLayout.LayoutParams) idTextView.getLayoutParams();
+                    float idX = viewportWidth / 2f - (params3.leftMargin + idTextView.getMeasuredWidth() * 0.5f);
 
                     if (a == 1) {
                         this.nameX = nameX;
                         this.onlineX = onlineX;
+                        this.idX = idX;
                     }
                     nameX = AndroidUtilities.lerp(minimizedX, nameX, diff);
                     onlineX = AndroidUtilities.lerp(minimizedX, onlineX, diff);
+                    idX = AndroidUtilities.lerp(minimizedX, idX, diff);
 
                     if (expandAnimator == null || !expandAnimator.isRunning()) {
                         nameTextView[a].setTranslationX(nameX);
@@ -9160,10 +9164,13 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
             float nameX = listView.getMeasuredWidth() / 2f - (params.leftMargin + nameTextView[a].getExactWidth() * nameScale * 0.5f);
             params = (FrameLayout.LayoutParams) onlineTextView[a].getLayoutParams();
             float onlineX = listView.getMeasuredWidth() / 2f - (params.leftMargin + onlineTextView[a].getExactWidth() * 0.5f);
+            params = (FrameLayout.LayoutParams) idTextView.getLayoutParams();
+            float idX = listView.getMeasuredWidth() / 2f - (params.leftMargin + idTextView.getMeasuredWidth() * 0.5f);
 
             if (a == 1) {
                 this.nameX = nameX;
                 this.onlineX = onlineX;
+                this.idX = idX;
             }
         }
 
