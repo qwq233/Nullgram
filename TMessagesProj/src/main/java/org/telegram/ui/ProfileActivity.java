@@ -3071,6 +3071,7 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
                         }
                         updateEmojiStatusDrawableColor(1f);
                         onlineTextView[1].setTextColor(0xB3FFFFFF);
+                        idTextView.setTextColor(0xB3FFFFFF);
                         actionBar.setItemsBackgroundColor(Theme.ACTION_BAR_WHITE_SELECTOR_COLOR, false);
                         actionBar.setItemsColor(Color.WHITE, false);
                         overlaysView.setOverlaysVisible();
@@ -5608,7 +5609,7 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
         idTextView.setInAnimation(context, R.anim.alpha_in);
         idTextView.setOutAnimation(context, R.anim.alpha_out);
         idTextView.setLongClickable(true);
-        avatarContainer2.addView(idTextView, LayoutHelper.createFrame(LayoutHelper.WRAP_CONTENT, LayoutHelper.WRAP_CONTENT, Gravity.LEFT | Gravity.TOP, 118 - 4, -2, 4, 0));
+        avatarContainer2.addView(idTextView, LayoutHelper.createFrame(LayoutHelper.WRAP_CONTENT, LayoutHelper.WRAP_CONTENT, Gravity.LEFT | Gravity.TOP, 118 + 4, -2, 4, 0));
 
         ratingView = new StarRatingView(context);
         ratingView.setLayoutParams(LayoutHelper.createFrame(32, 32, Gravity.LEFT, 118 - 6, -2, 0, 0));
@@ -6440,7 +6441,7 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
         final float onlineTextViewX = (1 - value) * (1 - value) * onlineX + 2 * (1 - value) * value * onlineTextViewCx + value * value * onlineTextViewXEnd;
         final float onlineTextViewY = (1 - value) * (1 - value) * onlineY + 2 * (1 - value) * value * onlineTextViewCy + value * value * onlineTextViewYEnd;
 
-        final float idTextViewXEnd = AndroidUtilities.dpf2(12f) - idTextView.getLeft();
+        final float idTextViewXEnd = AndroidUtilities.dpf2(30f) - idTextView.getLeft();
         final float idTextViewYEnd = newTop + extraHeight - getActionsExtraHeight() - AndroidUtilities.dpf2(3f) - idTextView.getBottom();
         final float idTextViewCx = kx + idX + (idTextViewXEnd - idX) / 2f;
         final float idTextViewCy = ky + idY + (idTextViewYEnd - idY) / 2f;
@@ -6454,7 +6455,7 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
 
         final float minNameY = (float) Math.floor(minEndNameY) + AndroidUtilities.dp(1.3f);
         final float minOnlineY = minNameY + AndroidUtilities.dpf2(22.7f);
-        final float minIdY = minOnlineY + AndroidUtilities.dpf2(10);
+        final float minIdY = minOnlineY;
 
         nameTextView[1].setTranslationX(nameTextViewX);
         nameTextView[1].setTranslationY(Math.max(minNameY, nameTextViewY));
@@ -6478,6 +6479,7 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
             statusColor = getThemedColor(Theme.key_avatar_subtitleInProfileBlue);
         }
         onlineTextView[1].setTextColor(ColorUtils.blendARGB(applyPeerColor(statusColor, true, online), 0xB3FFFFFF, value));
+        idTextView.setTextColor(ColorUtils.blendARGB(applyPeerColor(statusColor, true, online), 0xB3FFFFFF, value));
         if (extraHeight > getHeaderOnlyExtraHeight()) {
             nameTextView[1].setPivotY(AndroidUtilities.lerp(0, nameTextView[1].getMeasuredHeight(), value));
             nameTextView[1].setScaleX(AndroidUtilities.lerp(1f + 0.12f * diff, 1.38f, value));
@@ -8845,8 +8847,8 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
                         nameTextView[1].setTranslationY(newTop + h - getActionsExtraHeight() - dpf2(30f) - nameTextView[1].getBottom() + additionalTranslationY);
                         onlineTextView[1].setTranslationX(getOnlineTextViewTranslationXWithOffsets(dpf2(16) - onlineTextView[1].getLeft()));
                         onlineTextView[1].setTranslationY(getOnlineTextViewTranslationYWithOffsets(newTop + h - getActionsExtraHeight() - dpf2(10) - onlineTextView[1].getBottom() + additionalTranslationY));
-                        idTextView.setTranslationX(AndroidUtilities.dpf2(16f) - onlineTextView[1].getLeft());
-                        idTextView.setTranslationY(newTop + h - AndroidUtilities.dpf2(3f) - idTextView.getBottom() + additionalTranslationY);
+                        idTextView.setTranslationX(getOnlineTextViewTranslationXWithOffsets(dpf2(20) + onlineTextView[1].getPaint().measureText(onlineTextView[1].getText().toString()) - onlineTextView[1].getLeft()));
+                        idTextView.setTranslationY(getOnlineTextViewTranslationYWithOffsets(newTop + h - getActionsExtraHeight() - dpf2(10) - onlineTextView[1].getBottom() + additionalTranslationY));
                         mediaCounterTextView.setTranslationX(onlineTextView[1].getTranslationX());
                         mediaCounterTextView.setTranslationY(onlineTextView[1].getTranslationY());
                         updateCollectibleHint();
@@ -9048,7 +9050,7 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
                 final float avatarBottom = (float) Math.floor(endNameY) + (avatarContainer.getHeight() * avatarContainer.getScaleY() + dpf2(8)) * (openAnimationInProgress ? avatarAnimationProgress : diff);
                 nameY = avatarBottom + AndroidUtilities.dp(1.3f) + AndroidUtilities.dp(7) * diff + titleAnimationsYDiff * (1f - avatarAnimationProgress);
                 onlineY = avatarBottom + AndroidUtilities.dp(24) + (float) Math.floor(11 * AndroidUtilities.density) * diff;
-                idY = avatarBottom + AndroidUtilities.dp(32) + (float) Math.floor(22 * AndroidUtilities.density) * diff;
+                idY = avatarBottom + AndroidUtilities.dp(36) + (float) Math.floor(22 * AndroidUtilities.density) * diff;
                 final float minimizedX = openAnimationInProgress ? 0 : -dpf2(42 + 4);
 
                 if (showStatusButton != null) {
@@ -11642,6 +11644,7 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
                     onlineTextView[1].setTag(key);
                     if (!isPulledDown) {
                         onlineTextView[1].setTextColor(applyPeerColor(getThemedColor(key), true, isOnline[0]));
+                        idTextView.setTextColor(applyPeerColor(getThemedColor(key), true, isOnline[0]));
                     }
                 }
             }
@@ -15432,6 +15435,17 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
                             onlineTextView[i + 1].setTextColor(applyPeerColor(getThemedColor(Theme.key_avatar_subtitleInProfileBlue), true, true));
                         }
                     }
+                    if (idTextView != null) {
+                        if (onlineTextViewTag instanceof Integer) {
+                            idTextView.setTextColor(applyPeerColor(getThemedColor((Integer) onlineTextViewTag), true, isOnline[0]));
+                        } else {
+                            idTextView.setTextColor(applyPeerColor(getThemedColor(Theme.key_avatar_subtitleInProfileBlue), true, true));
+                        }
+                    }
+                } else {
+                    if (idTextView != null) {
+                        idTextView.setTextColor(Theme.getColor(Theme.key_avatar_subtitleInProfileBlue));
+                    }
                 }
                 if (lockIconDrawable != null) {
                     lockIconDrawable.setColorFilter(getThemedColor(Theme.key_chat_lockIcon), PorterDuff.Mode.MULTIPLY);
@@ -15441,9 +15455,6 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
                 }
                 if (nameTextView[1] != null) {
                     nameTextView[1].setTextColor(getThemedColor(Theme.key_profile_title));
-                }
-                if (idTextView != null) {
-                    idTextView.setTextColor(Theme.getColor(Theme.key_avatar_subtitleInProfileBlue));
                 }
                 if (actionBar != null) {
                     actionBar.setItemsColor(peerColor != null ? Color.WHITE : getThemedColor(Theme.key_actionBarDefaultIcon), false);
