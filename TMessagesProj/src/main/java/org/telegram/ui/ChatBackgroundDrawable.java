@@ -1,3 +1,20 @@
+/*
+ * Copyright (C) 2019-2025 qwq233 <qwq233@qwq2333.top>
+ * https://github.com/qwq233/Nullgram
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, version 2 of the License.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 package org.telegram.ui;
 
 import android.graphics.Bitmap;
@@ -108,7 +125,7 @@ public class ChatBackgroundDrawable extends Drawable {
                     wallPaper.settings.fourth_background_color
             );
             EmojiThemes.loadWallpaperImage(UserConfig.selectedAccount, wallPaper.id, wallPaper, result -> {
-                motionBackgroundDrawable.setPatternBitmap(wallPaper.settings.intensity, result.second);
+                motionBackgroundDrawable.setPatternBitmap(wallPaper.settings.intensity, result.bitmap);
                 if (parent != null) {
                     parent.invalidate();
                 }
@@ -250,6 +267,9 @@ public class ChatBackgroundDrawable extends Drawable {
             attached = false;
             imageReceiver.onDetachedFromWindow();
         }
+        if (motionBackgroundDrawable != null) {
+            motionBackgroundDrawable.onAttachedToWindow();
+        }
     }
 
     public void onDetachedFromWindow(View view) {
@@ -262,6 +282,9 @@ public class ChatBackgroundDrawable extends Drawable {
         } else if (!isAttached() && attached) {
             attached = false;
             imageReceiver.onDetachedFromWindow();
+        }
+        if (motionBackgroundDrawable != null) {
+            motionBackgroundDrawable.onDetachedFromWindow();
         }
     }
 

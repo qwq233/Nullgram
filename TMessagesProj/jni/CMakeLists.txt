@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.6.0)
+cmake_minimum_required(VERSION 3.10.2)
 project(tmessages)
 
 find_program(CCACHE ccache)
@@ -499,6 +499,8 @@ target_include_directories(${NATIVE_LIB} PUBLIC
         tde2e/include
 )
 
+target_link_options(${NATIVE_LIB} PRIVATE "-Wl,-z,max-page-size=16384")
+target_link_options(${NATIVE_LIB} PRIVATE "-Wl,-z,common-page-size=16384")
 target_link_libraries(${NATIVE_LIB}
         -Wl,--whole-archive rnnoise openh264 voipandroid -Wl,--no-whole-archive
         tgvoip

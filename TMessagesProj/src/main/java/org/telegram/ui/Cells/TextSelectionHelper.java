@@ -1,20 +1,18 @@
 /*
- * Copyright (C) 2019-2024 qwq233 <qwq233@qwq2333.top>
+ * Copyright (C) 2019-2025 qwq233 <qwq233@qwq2333.top>
  * https://github.com/qwq233/Nullgram
  *
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * as published by the Free Software Foundation; either version 2
- * of the License, or (at your option) any later version.
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, version 2 of the License.
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
- * You should have received a copy of the GNU General Public License along with this software.
- *  If not, see
- * <https://www.gnu.org/licenses/>
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
 package org.telegram.ui.Cells;
@@ -1645,6 +1643,13 @@ public abstract class TextSelectionHelper<Cell extends TextSelectionHelper.Selec
     }
 
     protected void drawSelection(Canvas canvas, Layout layout, int selectionStart, int selectionEnd, boolean hasStart, boolean hasEnd, float minX) {
+        if (layout == null || layout.getText() == null) {
+            return;
+        }
+
+        selectionStart = Utilities.clamp(selectionStart, layout.getText().length(), 0);
+        selectionEnd = Utilities.clamp(selectionEnd, layout.getText().length(), 0);
+
         selectionPath.reset();
         selectionHandlePath.reset();
         final float R = cornerRadius * 1.65f;
@@ -1767,10 +1772,14 @@ public abstract class TextSelectionHelper<Cell extends TextSelectionHelper.Selec
         }
 
         if (tempPath2.rectsCount == 0 && !padAtEnd) {
-            int left = (int) layout.getPrimaryHorizontal(start),
-                right = (int) layout.getPrimaryHorizontal(end);
-            int top = layout.getLineTop(line), bottom = layout.getLineBottom(line);
-            selectionPath.addRect(left - cornerRadius / 2, top, right + cornerRadius / 4, bottom, Path.Direction.CW);
+            try {
+                int left = (int) layout.getPrimaryHorizontal(start),
+                    right = (int) layout.getPrimaryHorizontal(end);
+                int top = layout.getLineTop(line), bottom = layout.getLineBottom(line);
+                selectionPath.addRect(left - cornerRadius / 2, top, right + cornerRadius / 4, bottom, Path.Direction.CW);
+            } catch (Exception e) {
+                FileLog.e(e);
+            }
         }
     }
 
@@ -2752,7 +2761,7 @@ public abstract class TextSelectionHelper<Cell extends TextSelectionHelper.Selec
             arrayList.clear();
             view.fillTextLayoutBlocks(arrayList);
 
-            if (!arrayList.isEmpty()) {
+            if (i >= 0 && i < arrayList.size()) {
                 TextLayoutBlock layoutBlock = arrayList.get(i);
 
                 if (layoutBlock != null && layoutBlock.getLayout() != null && layoutBlock.getLayout().getText() != null) {

@@ -1,20 +1,18 @@
 /*
- * Copyright (C) 2019-2024 qwq233 <qwq233@qwq2333.top>
+ * Copyright (C) 2019-2025 qwq233 <qwq233@qwq2333.top>
  * https://github.com/qwq233/Nullgram
  *
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * as published by the Free Software Foundation; either version 2
- * of the License, or (at your option) any later version.
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, version 2 of the License.
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
- * You should have received a copy of the GNU General Public License along with this software.
- *  If not, see
- * <https://www.gnu.org/licenses/>
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
 package org.telegram.ui.Stories.recorder;
@@ -3160,6 +3158,17 @@ public class StoryRecorder implements NotificationCenter.NotificationCenterDeleg
                             }
                         }
                     })
+                    .whenSelectedAlbums(albums -> {
+                        if (outputEntry == null) {
+                            return;
+                        }
+                        outputEntry.albums = albums;
+                        if (entries != null) {
+                            for (StoryEntry entry : entries) {
+                                entry.albums = albums;
+                            }
+                        }
+                    })
                     .whenSelectedRules((privacy, allowScreenshots, keepInProfile, sendAs, whenDone) -> {
                         if (outputEntry == null) {
                             return;
@@ -4197,7 +4206,7 @@ public class StoryRecorder implements NotificationCenter.NotificationCenterDeleg
         } else if (currentPage == PAGE_PREVIEW && (outputEntry == null || !outputEntry.isRepost && !outputEntry.isRepostMessage) && !isReposting && (outputEntry == null || !outputEntry.isEdit || (paintView != null && paintView.hasChanges()) || outputEntry.editedMedia || outputEntry.editedCaption)) {
             if (paintView != null && paintView.onBackPressed()) {
                 return false;
-            } else if (botId == 0 && (fromGallery && !collageLayoutView.hasLayout() && (paintView == null || !paintView.hasChanges()) && (outputEntry == null || outputEntry.filterFile == null) || !previewButtons.isShareEnabled()) && (outputEntry == null || !outputEntry.isEdit || !outputEntry.isRepost && !outputEntry.isRepostMessage) && !isReposting) {
+            } else if (botId == 0 && (fromGallery && !collageLayoutView.hasLayout() && (paintView == null || !paintView.hasChanges()) && (outputEntry == null || outputEntry.filterFile == null) || !previewButtons.isShareEnabled()) && (outputEntry == null || !outputEntry.isEdit || !outputEntry.isRepost && !outputEntry.isRepostMessage) && !isReposting && (outputEntry == null || !outputEntry.isShare)) {
                 navigateTo(PAGE_CAMERA, true);
             } else {
                 if (botId != 0) {
@@ -4916,7 +4925,7 @@ public class StoryRecorder implements NotificationCenter.NotificationCenterDeleg
                 storiesSelector.set(entries, selectedEntriesOrder, selectedEntries);
                 storiesSelector.setSelected(entries.indexOf(outputEntry));
             }
-            timelineView.setMaxCount(!isBot && !isEdit && entries == null && (outputEntry == null || !outputEntry.isCollage()) ? 3 : 1);
+            timelineView.setMaxCount(!isBot && !isEdit && entries == null && (outputEntry == null || !outputEntry.isCollage() && outputEntry.isVideo) ? 3 : 1);
             if (outputEntry != null && (outputEntry.isDraft || outputEntry.isEdit || isReposting)) {
                 if (outputEntry.paintFile != null) {
                     destroyPhotoPaintView();
@@ -6843,7 +6852,7 @@ public class StoryRecorder implements NotificationCenter.NotificationCenterDeleg
         AlertDialog.Builder builder = new AlertDialog.Builder(getContext(), resourcesProvider);
         builder.setTitle(getString(R.string.DiscardChanges));
         builder.setMessage(getString(R.string.PhotoEditorDiscardAlert));
-        if (outputEntry != null && !outputEntry.isEdit) {
+        if (outputEntry != null && !outputEntry.isEdit && !outputEntry.isShare) {
             builder.setNeutralButton(getString(outputEntry.isDraft ? R.string.StoryKeepDraft : R.string.StorySaveDraft), (di, i) -> {
                 if (outputEntry == null) {
                     return;
@@ -6873,7 +6882,7 @@ public class StoryRecorder implements NotificationCenter.NotificationCenterDeleg
                 MessagesController.getInstance(currentAccount).getStoriesController().getDraftsController().delete(outputEntry);
                 outputEntry = null;
             }
-            if (outputEntry != null && (outputEntry.isEdit || outputEntry.isRepost && !outputEntry.isRepostMessage)) {
+            if (outputEntry != null && (outputEntry.isShare || outputEntry.isEdit || outputEntry.isRepost && !outputEntry.isRepostMessage)) {
                 close(true);
             } else {
                 navigateTo(PAGE_CAMERA, true);

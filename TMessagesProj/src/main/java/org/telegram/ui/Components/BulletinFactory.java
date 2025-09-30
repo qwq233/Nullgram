@@ -260,6 +260,26 @@ public final class BulletinFactory {
         return create(layout, text.length() < 20 ? Bulletin.DURATION_SHORT : Bulletin.DURATION_LONG);
     }
 
+    public Bulletin createSimpleMultiBulletin(TLRPC.Document document, CharSequence text) {
+        if (document == null) return new Bulletin.EmptyBulletin();
+        final Bulletin.TwoLineLayout layout = new Bulletin.TwoLineLayout(getContext(), resourcesProvider);
+        TLRPC.PhotoSize thumbSize = FileLoader.getClosestPhotoSizeWithSize(document.thumbs, dp(28), true, null, false);
+        TLRPC.PhotoSize photoSize = FileLoader.getClosestPhotoSizeWithSize(document.thumbs, dp(28), true, thumbSize, true);
+        layout.imageView.setImage(
+            ImageLocation.getForDocument(photoSize, document), "28_28",
+            ImageLocation.getForDocument(thumbSize, document), "28_28",
+            null, 0, 0, null
+        );
+        layout.imageView.getImageReceiver().setRoundRadius(dp(5));
+        layout.titleTextView.setSingleLine(false);
+        layout.titleTextView.setText(text);
+        layout.titleTextView.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 14);
+        layout.titleTextView.setMaxLines(3);
+        layout.titleTextView.setTypeface(null);
+        layout.subtitleTextView.setVisibility(View.GONE);
+        return create(layout, text.length() < 20 ? Bulletin.DURATION_SHORT : Bulletin.DURATION_LONG);
+    }
+
     public Bulletin createSimpleBulletin(TLRPC.Document document, CharSequence title, CharSequence text) {
         if (document == null) return new Bulletin.EmptyBulletin();
         final Bulletin.TwoLineLayout layout = new Bulletin.TwoLineLayout(getContext(), resourcesProvider);
@@ -1027,7 +1047,7 @@ public final class BulletinFactory {
         }
     }
 
-    private Context getContext() {
+    public Context getContext() {
         Context context = null;
         if (fragment != null) {
             context = fragment.getParentActivity();
@@ -1041,6 +1061,10 @@ public final class BulletinFactory {
             context = ApplicationLoader.applicationContext;
         }
         return context;
+    }
+
+    public Theme.ResourcesProvider getResourcesProvider() {
+        return resourcesProvider;
     }
 
     //region Static Factory
@@ -1231,7 +1255,7 @@ public final class BulletinFactory {
         layout.textView.setSingleLine(false);
         layout.textView.setMaxLines(3);
         layout.textView.setText(text);
-        return Bulletin.make(fragment, layout, Bulletin.DURATION_LONG);
+        return create(layout, Bulletin.DURATION_LONG);
     }
 
     public boolean showForwardedBulletinWithTag(long did, int messagesCount) {

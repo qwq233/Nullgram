@@ -39,10 +39,10 @@ import android.widget.TextView;
 
 import androidx.core.graphics.ColorUtils;
 
-import org.telegram.messenger.AndroidUtilities;
+import org.telegram.messenger.ImageLocation;
 import org.telegram.messenger.LocaleController;
 import org.telegram.ui.Components.AnimatedEmojiSpan;
-import org.telegram.ui.Components.AnimatedTextView;
+import org.telegram.ui.Components.BackupImageView;
 import org.telegram.ui.Components.CheckBox2;
 import org.telegram.ui.Components.CubicBezierInterpolator;
 import org.telegram.ui.Components.LayoutHelper;
@@ -56,6 +56,7 @@ public class ActionBarMenuSubItem extends FrameLayout {
     public boolean checkViewLeft;
     public CheckBox2 checkView;
     private ImageView rightIcon;
+    private BackupImageView backupImageView;
 
     private int textColor;
     private int iconColor;
@@ -236,6 +237,18 @@ public class ActionBarMenuSubItem extends FrameLayout {
             imageView.setVisibility(INVISIBLE);
             textView.setPadding(0, 0, 0, 0);
         }
+    }
+
+    public void setTextAndIcon(CharSequence text, ImageLocation imageLocation, String imageFilter, Drawable thumb, Object parentObject) {
+        textView.setText(text);
+        textView.setPadding(checkViewLeft ? (checkView != null ? dp(43) : 0) : dp(43), 0, checkViewLeft ? dp(43) : (checkView != null ? dp(43) : 0), 0);
+        if (backupImageView == null) {
+            backupImageView = new BackupImageView(getContext());
+            backupImageView.setRoundRadius(dp(5));
+            addView(backupImageView, LayoutHelper.createFrame(28, 28, Gravity.CENTER_VERTICAL | (LocaleController.isRTL ? Gravity.RIGHT : Gravity.LEFT)));
+        }
+        imageView.setVisibility(INVISIBLE);
+        backupImageView.setImage(imageLocation, imageFilter, thumb, parentObject);
     }
 
     public ActionBarMenuSubItem setColors(int textColor, int iconColor) {

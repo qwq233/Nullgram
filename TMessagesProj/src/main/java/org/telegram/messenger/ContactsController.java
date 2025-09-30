@@ -1,20 +1,18 @@
 /*
- * Copyright (C) 2019-2024 qwq233 <qwq233@qwq2333.top>
+ * Copyright (C) 2019-2025 qwq233 <qwq233@qwq2333.top>
  * https://github.com/qwq233/Nullgram
  *
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * as published by the Free Software Foundation; either version 2
- * of the License, or (at your option) any later version.
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, version 2 of the License.
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
- * You should have received a copy of the GNU General Public License along with this software.
- *  If not, see
- * <https://www.gnu.org/licenses/>
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
 package org.telegram.messenger;
@@ -2682,43 +2680,43 @@ public class ContactsController extends BaseController {
 
             switch (num) {
                 case PRIVACY_RULES_TYPE_LASTSEEN:
-                    req.key = new TLRPC.TL_inputPrivacyKeyStatusTimestamp();
+                    req.key = TLRPC.InputPrivacyKey.inputPrivacyKeyStatusTimestamp;
                     break;
                 case PRIVACY_RULES_TYPE_INVITE:
-                    req.key = new TLRPC.TL_inputPrivacyKeyChatInvite();
+                    req.key = TLRPC.InputPrivacyKey.inputPrivacyKeyChatInvite;
                     break;
                 case PRIVACY_RULES_TYPE_CALLS:
-                    req.key = new TLRPC.TL_inputPrivacyKeyPhoneCall();
+                    req.key = TLRPC.InputPrivacyKey.inputPrivacyKeyPhoneCall;
                     break;
                 case PRIVACY_RULES_TYPE_P2P:
-                    req.key = new TLRPC.TL_inputPrivacyKeyPhoneP2P();
+                    req.key = TLRPC.InputPrivacyKey.inputPrivacyKeyPhoneP2P;
                     break;
                 case PRIVACY_RULES_TYPE_PHOTO:
-                    req.key = new TLRPC.TL_inputPrivacyKeyProfilePhoto();
+                    req.key = TLRPC.InputPrivacyKey.inputPrivacyKeyProfilePhoto;
                     break;
                 case PRIVACY_RULES_TYPE_BIO:
-                    req.key = new TLRPC.TL_inputPrivacyKeyAbout();
+                    req.key = TLRPC.InputPrivacyKey.inputPrivacyKeyAbout;
                     break;
                 case PRIVACY_RULES_TYPE_FORWARDS:
-                    req.key = new TLRPC.TL_inputPrivacyKeyForwards();
+                    req.key = TLRPC.InputPrivacyKey.inputPrivacyKeyForwards;
                     break;
                 case PRIVACY_RULES_TYPE_PHONE:
-                    req.key = new TLRPC.TL_inputPrivacyKeyPhoneNumber();
+                    req.key = TLRPC.InputPrivacyKey.inputPrivacyKeyPhoneNumber;
                     break;
                 case PRIVACY_RULES_TYPE_VOICE_MESSAGES:
-                    req.key = new TLRPC.TL_inputPrivacyKeyVoiceMessages();
+                    req.key = TLRPC.InputPrivacyKey.inputPrivacyKeyVoiceMessages;
                     break;
                 case PRIVACY_RULES_TYPE_BIRTHDAY:
-                    req.key = new TLRPC.TL_inputPrivacyKeyBirthday();
+                    req.key = TLRPC.InputPrivacyKey.inputPrivacyKeyBirthday;
                     break;
                 case PRIVACY_RULES_TYPE_GIFTS:
-                    req.key = new TLRPC.TL_inputPrivacyKeyStarGiftsAutoSave();
+                    req.key = TLRPC.InputPrivacyKey.inputPrivacyKeyStarGiftsAutoSave;
                     break;
                 case PRIVACY_RULES_TYPE_NO_PAID_MESSAGES:
-                    req.key = new TLRPC.TL_inputPrivacyKeyNoPaidMessages();
+                    req.key = TLRPC.InputPrivacyKey.inputPrivacyKeyNoPaidMessages;
                     break;
                 case PRIVACY_RULES_TYPE_ADDED_BY_PHONE:
-                    req.key = new TLRPC.TL_inputPrivacyKeyAddedByPhone();
+                    req.key = TLRPC.InputPrivacyKey.inputPrivacyKeyAddedByPhone;
                     break;
                 default:
                     continue;

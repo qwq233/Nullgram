@@ -1,20 +1,18 @@
 /*
- * Copyright (C) 2019-2024 qwq233 <qwq233@qwq2333.top>
+ * Copyright (C) 2019-2025 qwq233 <qwq233@qwq2333.top>
  * https://github.com/qwq233/Nullgram
  *
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * as published by the Free Software Foundation; either version 2
- * of the License, or (at your option) any later version.
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, version 2 of the License.
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
- * You should have received a copy of the GNU General Public License along with this software.
- *  If not, see
- * <https://www.gnu.org/licenses/>
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
 package org.telegram.ui.ActionBar;
@@ -90,8 +88,8 @@ import org.telegram.ui.Components.RadialProgressView;
 import org.telegram.ui.Components.ScaleStateListAnimator;
 import org.telegram.ui.Components.spoilers.SpoilersTextView;
 import org.telegram.ui.LaunchActivity;
+import org.telegram.ui.Stars.BalanceCloud;
 import org.telegram.ui.Stars.StarsIntroActivity;
-import org.telegram.ui.Stars.StarsReactionsSheet;
 
 import java.util.ArrayList;
 import java.util.Map;
@@ -123,6 +121,10 @@ public class AlertDialog extends Dialog implements Drawable.Callback, Notificati
     private AnimatorSet[] shadowAnimation = new AnimatorSet[2];
     private int customViewOffset = 12;
     private boolean withCancelDialog;
+
+    public TextView getMessageTextView() {
+        return messageTextView;
+    }
 
     private int dialogButtonColorKey = Theme.key_dialogButton;
 
@@ -620,8 +622,17 @@ public class AlertDialog extends Dialog implements Drawable.Callback, Notificati
         return this;
     }
 
+    public FrameLayout getFullscreenContainerView() {
+        return fullscreenContainerView;
+    }
+
     private FrameLayout fullscreenContainerView;
-    private StarsReactionsSheet.BalanceCloud starsBalanceCloud;
+
+    public BalanceCloud getStarsBalanceCloud() {
+        return starsBalanceCloud;
+    }
+
+    private BalanceCloud starsBalanceCloud;
 
     private AlertDialogView containerView;
     public AlertDialogView getContainerView() {
@@ -651,7 +662,7 @@ public class AlertDialog extends Dialog implements Drawable.Callback, Notificati
                 drawBackground = false;
             }
         }
-        containerView.setFitsSystemWindows(Build.VERSION.SDK_INT >= 21);
+        containerView.setFitsSystemWindows(21 <= Build.VERSION.SDK_INT && Build.VERSION.SDK_INT < 35);
         View rootView = containerView;
         if (needStarsBalance) {
             if (fullscreenContainerView == null) {
@@ -662,7 +673,7 @@ public class AlertDialog extends Dialog implements Drawable.Callback, Notificati
 //                fullscreenContainerView.setFitsSystemWindows(Build.VERSION.SDK_INT >= 21);
             }
             if (starsBalanceCloud == null) {
-                starsBalanceCloud = new StarsReactionsSheet.BalanceCloud(getContext(), UserConfig.selectedAccount, resourcesProvider);
+                starsBalanceCloud = new BalanceCloud(getContext(), UserConfig.selectedAccount, resourcesProvider);
                 ScaleStateListAnimator.apply(starsBalanceCloud);
                 starsBalanceCloud.setOnClickListener(v -> {
                     new StarsIntroActivity.StarsOptionsSheet(getContext(), resourcesProvider).show();
@@ -1245,8 +1256,14 @@ public class AlertDialog extends Dialog implements Drawable.Callback, Notificati
 
     @NonNull
     public Browser.Progress makeButtonLoading(int type) {
+        return makeButtonLoading(type, true, true);
+    }
+
+    public Browser.Progress makeButtonLoading(int type, boolean dismissWhenEnd, boolean clearDismissDialogByButtons) {
         final View button = getButton(type);
-        dismissDialogByButtons = false;
+        if (clearDismissDialogByButtons) {
+            dismissDialogByButtons = false;
+        }
         return new Browser.Progress(() -> {
             if (button instanceof TextViewWithLoading) {
                 ((TextViewWithLoading) button).setLoading(true, true);
@@ -1255,7 +1272,9 @@ public class AlertDialog extends Dialog implements Drawable.Callback, Notificati
             if (button instanceof TextViewWithLoading) {
                 ((TextViewWithLoading) button).setLoading(false, true);
             }
-            dismiss();
+            if (dismissWhenEnd) {
+                dismiss();
+            }
         });
     }
 

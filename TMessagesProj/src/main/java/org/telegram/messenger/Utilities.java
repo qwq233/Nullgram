@@ -29,6 +29,7 @@ import android.net.Uri;
 import com.carrotsearch.randomizedtesting.Xoroshiro128PlusRandom;
 
 import org.telegram.tgnet.ConnectionsManager;
+import org.telegram.tgnet.TLRPC;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -38,6 +39,7 @@ import java.security.MessageDigest;
 import java.security.SecureRandom;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Random;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -488,6 +490,10 @@ public class Utilities {
         return Math.max(Math.min(value, maxValue), minValue);
     }
 
+    public static float dist(float x1, float y1, float x2, float y2) {
+        return (float) Math.sqrt((x1 - x2) * (x1 - x2) + (y1 - y2) * (y1 - y2));
+    }
+
     public static String generateRandomString() {
         return generateRandomString(16);
     }
@@ -619,6 +625,12 @@ public class Utilities {
         } catch (Exception ignore) {
             return null;
         }
+    }
+
+    public static <T> void swapItems(List<T> list, int index1, int index2) {
+        T temp = list.get(index1);
+        list.set(index1, list.get(index2));
+        list.set(index2, temp);
     }
 
 }

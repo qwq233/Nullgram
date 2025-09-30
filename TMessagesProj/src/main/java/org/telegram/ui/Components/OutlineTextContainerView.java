@@ -84,7 +84,7 @@ public class OutlineTextContainerView extends FrameLayout {
     private float strokeWidthSelected = AndroidUtilities.dp(1.6667f);
 
     private EditText attachedEditText;
-    private boolean forceUseCenter, forceForceUseCenter;
+    private boolean forceUseCenter, forceUseCenter2, forceForceUseCenter;
 
     private final Theme.ResourcesProvider resourcesProvider;
 
@@ -104,6 +104,10 @@ public class OutlineTextContainerView extends FrameLayout {
         updateColor();
 
         setPadding(0, AndroidUtilities.dp(6), 0, 0);
+    }
+
+    public void setForceUseCenter2(boolean forceUseCenter2) {
+        this.forceUseCenter2 = forceUseCenter2;
     }
 
     public void setForceUseCenter(boolean forceUseCenter) {
@@ -211,7 +215,7 @@ public class OutlineTextContainerView extends FrameLayout {
         float textOffset = textPaint.getTextSize() / 2f - AndroidUtilities.dp(1.75f);
         float topY = getPaddingTop() + textOffset;
         float centerY = getHeight() / 2f + textPaint.getTextSize() / 2f;
-        boolean useCenter = attachedEditText != null && attachedEditText.length() == 0 && TextUtils.isEmpty(attachedEditText.getHint()) || forceUseCenter;
+        boolean useCenter = attachedEditText != null && attachedEditText.length() == 0 && TextUtils.isEmpty(attachedEditText.getHint()) || forceUseCenter || forceUseCenter2;
         float textY = useCenter ? topY + (centerY - topY) * (1f - titleProgress) : topY;
         float textX = useCenter ? leftPadding * (1f - titleProgress) : 0;
         float stroke = outlinePaint.getStrokeWidth();

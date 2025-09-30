@@ -222,6 +222,7 @@ public class PremiumPreviewFragment extends BaseFragment implements Notification
     public final static int PREMIUM_FEATURE_BUSINESS_INTRO = 36;
     public final static int PREMIUM_FEATURE_BUSINESS_CHAT_LINKS = 37;
     public final static int PREMIUM_FEATURE_MESSAGE_EFFECTS = 38;
+    public final static int PREMIUM_FEATURE_TODO = 39;
 
     private int statusBarHeight;
     private int firstViewHeight;
@@ -279,6 +280,8 @@ public class PremiumPreviewFragment extends BaseFragment implements Notification
                 return PREMIUM_FEATURE_TRANSLATIONS;
             case "effects":
                 return PREMIUM_FEATURE_MESSAGE_EFFECTS;
+            case "todo":
+                return PREMIUM_FEATURE_TODO;
 
             case "stories":
                 return PREMIUM_FEATURE_STORIES;
@@ -364,6 +367,8 @@ public class PremiumPreviewFragment extends BaseFragment implements Notification
                 return "translations";
             case PREMIUM_FEATURE_MESSAGE_EFFECTS:
                 return "effects";
+            case PREMIUM_FEATURE_TODO:
+                return "todo";
             case PREMIUM_FEATURE_STORIES:
                 return "stories";
             case PREMIUM_FEATURE_STORIES_STEALTH_MODE:
@@ -915,6 +920,7 @@ public class PremiumPreviewFragment extends BaseFragment implements Notification
         premiumFeatures.add(new PremiumFeatureData(PREMIUM_FEATURE_LAST_SEEN, R.drawable.menu_premium_seen, getString(R.string.PremiumPreviewLastSeen), getString(R.string.PremiumPreviewLastSeenDescription)));
         premiumFeatures.add(new PremiumFeatureData(PREMIUM_FEATURE_BUSINESS, R.drawable.filled_premium_business, getString(R.string.TelegramBusiness), getString(R.string.PremiumPreviewBusinessDescription)));
         premiumFeatures.add(new PremiumFeatureData(PREMIUM_FEATURE_MESSAGE_EFFECTS, R.drawable.menu_premium_effects, getString(R.string.PremiumPreviewEffects), getString(R.string.PremiumPreviewEffectsDescription)));
+        premiumFeatures.add(new PremiumFeatureData(PREMIUM_FEATURE_TODO, R.drawable.msg_premium_icons, getString(R.string.PremiumPreviewTodo), getString(R.string.PremiumPreviewTodoDescription)));
 
         if (messagesController.premiumFeaturesTypesToPosition.size() > 0) {
             for (int i = 0; i < premiumFeatures.size(); i++) {
@@ -1247,6 +1253,7 @@ public class PremiumPreviewFragment extends BaseFragment implements Notification
                 return LocaleController.getString(R.string.Loading);
             }
             final boolean isPremium = UserConfig.getInstance(currentAccount).isPremium();
+            final boolean isManyYearsTier = tier.getMonths() > 12 && tier.getMonths() % 12 == 0;
             final boolean isYearTier = tier.getMonths() == 12;
             String price = isYearTier ? tier.getFormattedPricePerYear() : tier.getFormattedPricePerMonth();
             final int resId;
@@ -1260,6 +1267,17 @@ public class PremiumPreviewFragment extends BaseFragment implements Notification
                     } else {
                         resId = R.string.SubscribeToPremiumPerYear;
                         price = tier.getFormattedPrice();
+                    }
+                } else if (isManyYearsTier) {
+                    if (MessagesController.getInstance(currentAccount).showAnnualPerMonth) {
+                        resId = R.string.SubscribeToPremium;
+                        price = tier.getFormattedPricePerMonth();
+                    } else {
+                        return LocaleController.formatString(
+                            R.string.SubscribeToPremiumPerCustom,
+                            tier.getFormattedPrice(),
+                            LocaleController.formatPluralString("Years", tier.getMonths() / 12)
+                        );
                     }
                 } else {
                     resId = R.string.SubscribeToPremium;
@@ -1880,11 +1898,26 @@ public class PremiumPreviewFragment extends BaseFragment implements Notification
             }/* else if (BillingController.getInstance().isReady() && BillingController.PREMIUM_PRODUCT_DETAILS != null) {
                 long pricePerMonthMaxStore = 0;
 
+                boolean hasSomeLoaded = false;
                 for (SubscriptionTier subscriptionTier : subscriptionTiers) {
                     subscriptionTier.setGooglePlayProductDetails(BillingController.PREMIUM_PRODUCT_DETAILS);
 
                     if (subscriptionTier.getPricePerYear() > pricePerMonthMaxStore) {
                         pricePerMonthMaxStore = subscriptionTier.getPricePerYear();
+                    }
+
+                    if (subscriptionTier.getOfferDetails() != null) {
+                        hasSomeLoaded = true;
+                    }
+                }
+
+                if (hasSomeLoaded) {
+                    for (int i = 0; i < subscriptionTiers.size(); ++i) {
+                        final SubscriptionTier tier = subscriptionTiers.get(i);
+                        if (tier.getOfferDetails() == null) {
+                            subscriptionTiers.remove(i);
+                            --i;
+                        }
                     }
                 }
 

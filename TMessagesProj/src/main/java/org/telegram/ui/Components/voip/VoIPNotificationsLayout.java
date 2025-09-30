@@ -1,3 +1,20 @@
+/*
+ * Copyright (C) 2019-2025 qwq233 <qwq233@qwq2333.top>
+ * https://github.com/qwq233/Nullgram
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, version 2 of the License.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 package org.telegram.ui.Components.voip;
 
 import static org.telegram.messenger.AndroidUtilities.dp;
@@ -238,8 +255,12 @@ public class VoIPNotificationsLayout extends LinearLayout {
                     maxWidth, Layout.Alignment.ALIGN_NORMAL, 1.0f, 0,
                     false, TextUtils.TruncateAt.END, maxWidth, 10);
             int maxRowLength = 0;
-            for (int a = 0; a < staticLayout.getLineCount(); ++a) {
-                maxRowLength = (int) Math.max(maxRowLength, Math.ceil(staticLayout.getLineWidth(a)));
+            if (staticLayout != null) {
+                for (int a = 0; a < staticLayout.getLineCount(); ++a) {
+                    maxRowLength = (int) Math.max(maxRowLength, Math.ceil(staticLayout.getLineWidth(a)));
+                }
+            } else {
+                maxRowLength = maxWidth;
             }
             textView.setMaxWidth(maxRowLength);
             textView.setText(text);

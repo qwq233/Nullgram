@@ -327,18 +327,44 @@ int decodePacket(AVCodecContext *context, AVPacket *packet,
     // Resample output.
     AVSampleFormat sampleFormat = context->sample_fmt;
     int channelCount = context->ch_layout.nb_channels;
-    int channelLayout = context->ch_layout.u.mask;
     int sampleRate = context->sample_rate;
     int sampleCount = frame->nb_samples;
+      SwrContext *resampleContext = nullptr;
+    if (context->opaque) {
+      resampleContext = (SwrContext *)context->opaque;
+    } else {
+      AVChannelLayout input_layout, output_layout;
+      av_channel_layout_default(&input_layout, channelCount);
+      av_channel_layout_default(&output_layout, channelCount);
 
-    SwrContext *resampleContext;
-    int result;
-    if ((result = get_swr_context(context, &resampleContext)) < 0) {
+      int ret = swr_alloc_set_opts2(&resampleContext,
+                                    &output_layout, context->request_sample_fmt, sampleRate,
+                                    &input_layout, sampleFormat, sampleRate,
+                                    0, nullptr);
+
+      if (ret < 0 || !resampleContext) {
+          logError("swr_alloc_set_opts2", ret);
+          av_frame_free(&frame);
+          return AUDIO_DECODER_ERROR_INVALID_DATA;
+      }
+
+      ret = swr_init(resampleContext);
+      if (ret < 0) {
+          logError("swr_init", ret);
+          swr_free(&resampleContext);
+          av_frame_free(&frame);
+          return AUDIO_DECODER_ERROR_INVALID_DATA;
+      }
+
+
+      result = swr_init(resampleContext);
+      if (result < 0) {
         logError("swr_init", result);
         av_frame_free(&frame);
         return transformError(result);
+      }
+      context->opaque = resampleContext;
     }
-
     int inSampleSize = av_get_bytes_per_sample(sampleFormat);
     int outSampleSize = av_get_bytes_per_sample(context->request_sample_fmt);
     int outSamples = swr_get_out_samples(resampleContext, sampleCount);

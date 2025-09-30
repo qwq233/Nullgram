@@ -418,7 +418,7 @@ public class ProfileSearchCell extends BaseCell implements NotificationCenter.No
     }
 
     public void buildLayout() {
-        CharSequence nameString;
+        CharSequence nameString = null;
         TextPaint currentNamePaint;
 
         drawNameLock = false;
@@ -440,6 +440,12 @@ public class ProfileSearchCell extends BaseCell implements NotificationCenter.No
         } else if (chat != null) {
             dialog_id = -chat.id;
             drawCheck = chat.verifiedExtended();
+            if (chat.monoforum) {
+                TLRPC.Chat mfChat = MessagesController.getInstance(currentAccount).getChat(chat.linked_monoforum_id);
+                if (mfChat != null) {
+                    drawCheck = mfChat.verifiedExtended();
+                }
+            }
             if (!LocaleController.isRTL) {
                 nameLeft = dp(AndroidUtilities.leftBaseline);
             } else {
@@ -499,31 +505,29 @@ public class ProfileSearchCell extends BaseCell implements NotificationCenter.No
 
         if (currentName != null) {
             nameString = currentName;
-        } else {
-            CharSequence nameString2 = "";
-            if (chat != null) {
-                if (chat.monoforum) {
-                    TLRPC.Chat mfChat = MessagesController.getInstance(currentAccount).getChat(chat.linked_monoforum_id);
-                    if (mfChat != null) {
-                        final SpannableStringBuilder sb = new SpannableStringBuilder(AndroidUtilities.escape(mfChat.title));
-                        sb.append(" ");
-                        final int index = sb.length();
-                        sb.append(getString(R.string.MonoforumSpan));
-                        sb.setSpan(new FilterCreateActivity.TextSpan(getString(R.string.MonoforumSpan), 9.33f, Theme.key_windowBackgroundWhiteGrayText, resourcesProvider), index, sb.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
-                        nameString2 = sb;
-                    } else {
-                        nameString2 = AndroidUtilities.removeRTL(AndroidUtilities.removeDiacritics(chat.title));
-                    }
-                } else {
-                    nameString2 = AndroidUtilities.removeRTL(AndroidUtilities.removeDiacritics(chat.title));
-                }
-            } else if (user != null) {
-                nameString2 = AndroidUtilities.removeRTL(AndroidUtilities.removeDiacritics(UserObject.getUserName(user)));
-            }
-            nameString = AndroidUtilities.replaceNewLines(nameString2);
         }
-        if (nameString.length() == 0) {
-            if (user != null && user.phone != null && user.phone.length() != 0) {
+        if (chat != null) {
+            if (chat.monoforum) {
+                TLRPC.Chat mfChat = MessagesController.getInstance(currentAccount).getChat(chat.linked_monoforum_id);
+                if (mfChat != null) {
+                    final SpannableStringBuilder sb = new SpannableStringBuilder(AndroidUtilities.escape(mfChat.title));
+                    sb.append(" ");
+                    final int index = sb.length();
+                    sb.append(getString(R.string.MonoforumSpan));
+                    sb.setSpan(new FilterCreateActivity.TextSpan(getString(R.string.MonoforumSpan), 9.33f, Theme.key_windowBackgroundWhiteGrayText, resourcesProvider), index, sb.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+                    nameString = sb;
+                } else if (nameString == null) {
+                    nameString = AndroidUtilities.removeRTL(AndroidUtilities.removeDiacritics(chat.title));
+                }
+            } else if (nameString == null) {
+                nameString = AndroidUtilities.removeRTL(AndroidUtilities.removeDiacritics(chat.title));
+            }
+        } else if (nameString == null && user != null) {
+            nameString = AndroidUtilities.removeRTL(AndroidUtilities.removeDiacritics(UserObject.getUserName(user)));
+        }
+        nameString = AndroidUtilities.replaceNewLines(nameString);
+        if (TextUtils.isEmpty(nameString)) {
+            if (user != null && !TextUtils.isEmpty(user.phone)) {
                 nameString = PhoneFormat.getInstance().format("+" + user.phone);
             } else {
                 nameString = getString(R.string.HiddenName);

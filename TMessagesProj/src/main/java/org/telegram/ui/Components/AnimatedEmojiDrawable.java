@@ -1,20 +1,18 @@
 /*
- * Copyright (C) 2019-2024 qwq233 <qwq233@qwq2333.top>
+ * Copyright (C) 2019-2025 qwq233 <qwq233@qwq2333.top>
  * https://github.com/qwq233/Nullgram
  *
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * as published by the Free Software Foundation; either version 2
- * of the License, or (at your option) any later version.
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, version 2 of the License.
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
- * You should have received a copy of the GNU General Public License along with this software.
- *  If not, see
- * <https://www.gnu.org/licenses/>
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
 package org.telegram.ui.Components;
@@ -839,6 +837,20 @@ public class AnimatedEmojiDrawable extends Drawable {
         imageReceiver.draw(canvas, backgroundThreadDrawHolder);
     }
 
+    public void addViewListening(View view) {
+        view.addOnAttachStateChangeListener(new View.OnAttachStateChangeListener() {
+            @Override
+            public void onViewAttachedToWindow(@NonNull View v) {
+                AnimatedEmojiDrawable.this.addView(v);
+            }
+
+            @Override
+            public void onViewDetachedFromWindow(@NonNull View v) {
+                AnimatedEmojiDrawable.this.removeView(v);
+            }
+        });
+    }
+
     public void addView(View callback) {
         if (callback instanceof SelectAnimatedEmojiDialog.EmojiListView) {
             throw new RuntimeException();
@@ -1279,6 +1291,10 @@ public class AnimatedEmojiDrawable extends Drawable {
 
         public boolean isEmpty() {
             return drawables[0] == null;
+        }
+
+        public boolean isStable() {
+            return drawables[0] != null && changeProgress.get() == 1;
         }
 
         public boolean set(long documentId, int cacheType, boolean animated) {

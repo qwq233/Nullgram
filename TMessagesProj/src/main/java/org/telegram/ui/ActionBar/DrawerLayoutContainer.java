@@ -1,20 +1,18 @@
 /*
- * Copyright (C) 2019-2024 qwq233 <qwq233@qwq2333.top>
+ * Copyright (C) 2019-2025 qwq233 <qwq233@qwq2333.top>
  * https://github.com/qwq233/Nullgram
  *
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * as published by the Free Software Foundation; either version 2
- * of the License, or (at your option) any later version.
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, version 2 of the License.
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
- * You should have received a copy of the GNU General Public License along with this software.
- *  If not, see
- * <https://www.gnu.org/licenses/>
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
 package org.telegram.ui.ActionBar;
@@ -29,6 +27,7 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.ColorFilter;
+import android.graphics.Insets;
 import android.graphics.Paint;
 import android.graphics.PixelFormat;
 import android.graphics.Rect;
@@ -50,6 +49,8 @@ import android.widget.FrameLayout;
 import androidx.annotation.Keep;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.core.view.WindowInsetsCompat;
+import androidx.recyclerview.widget.RecyclerView;
 
 import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.R;
@@ -62,8 +63,6 @@ public class DrawerLayoutContainer extends FrameLayout {
     private static final int MIN_DRAWER_MARGIN = 64;
 
     private FrameLayout drawerLayout;
-    private View navigationBar;
-    private Paint navigationBarPaint = new Paint();
     private View drawerListView;
     private INavigationLayout parentActionBarLayout;
 
@@ -115,43 +114,41 @@ public class DrawerLayoutContainer extends FrameLayout {
         setDescendantFocusability(ViewGroup.FOCUS_AFTER_DESCENDANTS);
         setFocusableInTouchMode(true);
 
-        if (Build.VERSION.SDK_INT >= 21) {
-            setFitsSystemWindows(true);
-            setOnApplyWindowInsetsListener((v, insets) -> {
-                if (Build.VERSION.SDK_INT >= 30) {
-                    boolean newKeyboardVisibility = insets.isVisible(WindowInsets.Type.ime());
-                    int imeHeight = insets.getInsets(WindowInsets.Type.ime()).bottom;
-                    if (keyboardVisibility != newKeyboardVisibility || this.imeHeight != imeHeight) {
-                        keyboardVisibility = newKeyboardVisibility;
-                        this.imeHeight = imeHeight;
-                        requestLayout();
-                    }
+        setFitsSystemWindows(Build.VERSION.SDK_INT < 35);
+        setOnApplyWindowInsetsListener((v, insets) -> {
+            if (Build.VERSION.SDK_INT >= 30) {
+                boolean newKeyboardVisibility = insets.isVisible(WindowInsets.Type.ime());
+                int imeHeight = insets.getInsets(WindowInsets.Type.ime()).bottom;
+                if (keyboardVisibility != newKeyboardVisibility || this.imeHeight != imeHeight) {
+                    keyboardVisibility = newKeyboardVisibility;
+                    this.imeHeight = imeHeight;
+                    requestLayout();
                 }
-                final DrawerLayoutContainer drawerLayoutContainer = (DrawerLayoutContainer) v;
-                if (AndroidUtilities.statusBarHeight != insets.getSystemWindowInsetTop()) {
-                    drawerLayoutContainer.requestLayout();
-                }
-                int newTopInset = insets.getSystemWindowInsetTop();
-                if ((newTopInset != 0 || AndroidUtilities.isInMultiwindow || firstLayout) && AndroidUtilities.statusBarHeight != newTopInset) {
-                    AndroidUtilities.statusBarHeight = newTopInset;
-                }
-                firstLayout = false;
-                lastInsets = insets;
-                drawerLayoutContainer.setWillNotDraw(insets.getSystemWindowInsetTop() <= 0 && getBackground() == null);
+            }
+            final DrawerLayoutContainer drawerLayoutContainer = (DrawerLayoutContainer) v;
+            if (AndroidUtilities.statusBarHeight != insets.getSystemWindowInsetTop()) {
+                drawerLayoutContainer.requestLayout();
+            }
+            int newTopInset = insets.getSystemWindowInsetTop();
+            if ((newTopInset != 0 || AndroidUtilities.isInMultiwindow || firstLayout) && AndroidUtilities.statusBarHeight != newTopInset) {
+                AndroidUtilities.statusBarHeight = newTopInset;
+            }
+            firstLayout = false;
+            lastInsets = insets;
+            drawerLayoutContainer.setWillNotDraw(insets.getSystemWindowInsetTop() <= 0 && getBackground() == null);
 
-                if (Build.VERSION.SDK_INT >= 28) {
-                    DisplayCutout cutout = insets.getDisplayCutout();
-                    hasCutout = cutout != null && cutout.getBoundingRects().size() != 0;
-                }
-                invalidate();
-                if (Build.VERSION.SDK_INT >= 30) {
-                    return WindowInsets.CONSUMED;
-                } else {
-                    return insets.consumeSystemWindowInsets();
-                }
-            });
-            setSystemUiVisibility(View.SYSTEM_UI_FLAG_LAYOUT_STABLE | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN);
-        }
+            if (Build.VERSION.SDK_INT >= 28) {
+                DisplayCutout cutout = insets.getDisplayCutout();
+                hasCutout = cutout != null && cutout.getBoundingRects().size() != 0;
+            }
+            invalidate();
+            if (Build.VERSION.SDK_INT >= 30) {
+                return WindowInsets.CONSUMED;
+            } else {
+                return insets.consumeSystemWindowInsets();
+            }
+        });
+        setSystemUiVisibility(View.SYSTEM_UI_FLAG_LAYOUT_STABLE | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN);
 
         shadowLeft = getResources().getDrawable(R.drawable.menu_shadow);
     }
@@ -182,10 +179,7 @@ public class DrawerLayoutContainer extends FrameLayout {
     }
 
     private int getTopInset(Object insets) {
-        if (Build.VERSION.SDK_INT >= 21) {
-            return insets != null ? ((WindowInsets) insets).getSystemWindowInsetTop() : 0;
-        }
-        return 0;
+        return insets != null ? ((WindowInsets) insets).getSystemWindowInsetTop() : 0;
     }
 
     public void setDrawerLayout(FrameLayout layout, View drawerListView) {
@@ -194,8 +188,19 @@ public class DrawerLayoutContainer extends FrameLayout {
         addView(drawerLayout);
         drawerLayout.setVisibility(INVISIBLE);
         drawerListView.setVisibility(GONE);
-        if (Build.VERSION.SDK_INT >= 21) {
-            drawerLayout.setFitsSystemWindows(true);
+        drawerLayout.setFitsSystemWindows(true);
+        if (Build.VERSION.SDK_INT >= 35 && drawerListView instanceof RecyclerView) {
+            ((RecyclerView) drawerListView).setClipToPadding(false);
+            drawerLayout.setOnApplyWindowInsetsListener(new OnApplyWindowInsetsListener() {
+                @NonNull
+                @Override
+                public WindowInsets onApplyWindowInsets(@NonNull View v, @NonNull WindowInsets insets) {
+                    Insets r = insets.getInsets(WindowInsetsCompat.Type.displayCutout() | WindowInsetsCompat.Type.systemBars());
+                    drawerListView.setPadding(0, 0, 0, r.bottom);
+                    drawerLayout.requestLayout();
+                    return WindowInsets.CONSUMED;
+                }
+            });
         }
         AndroidUtilities.runOnUIThread(() -> {
             drawerListView.setVisibility(View.VISIBLE);
@@ -305,12 +310,10 @@ public class DrawerLayoutContainer extends FrameLayout {
         startedTracking = false;
         currentAnimation = null;
         drawerOpened = opened;
-        if (Build.VERSION.SDK_INT >= 19) {
-            for (int i = 0; i < getChildCount(); i++) {
-                View child = getChildAt(i);
-                if (child != drawerLayout) {
-                    child.setImportantForAccessibility(opened ? View.IMPORTANT_FOR_ACCESSIBILITY_NO_HIDE_DESCENDANTS : View.IMPORTANT_FOR_ACCESSIBILITY_AUTO);
-                }
+        for (int i = 0; i < getChildCount(); i++) {
+            View child = getChildAt(i);
+            if (child != drawerLayout) {
+                child.setImportantForAccessibility(opened ? View.IMPORTANT_FOR_ACCESSIBILITY_NO_HIDE_DESCENDANTS : View.IMPORTANT_FOR_ACCESSIBILITY_AUTO);
             }
         }
         sendAccessibilityEvent(AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED);
@@ -615,27 +618,15 @@ public class DrawerLayoutContainer extends FrameLayout {
         int heightSize = MeasureSpec.getSize(heightMeasureSpec);
 
         setMeasuredDimension(widthSize, heightSize);
-        if (Build.VERSION.SDK_INT < 21) {
-            inLayout = true;
-            if (heightSize == AndroidUtilities.displaySize.y + AndroidUtilities.statusBarHeight) {
-                if (getLayoutParams() instanceof MarginLayoutParams) {
-                    setPadding(0, AndroidUtilities.statusBarHeight, 0, 0);
-                }
-                heightSize = AndroidUtilities.displaySize.y;
-            } else {
-                if (getLayoutParams() instanceof MarginLayoutParams) {
-                    setPadding(0, 0, 0, 0);
-                }
-            }
-            inLayout = false;
-        } else {
-            int newSize = heightSize - AndroidUtilities.statusBarHeight;
-            if (newSize > 0 && newSize < 4096) {
-                AndroidUtilities.displaySize.y = newSize;
-            }
+        int newSize = heightSize - AndroidUtilities.statusBarHeight;
+        if (Build.VERSION.SDK_INT >= 35) {
+            newSize -= AndroidUtilities.navigationBarHeight;
+        }
+        if (newSize > 0 && newSize < 4096) {
+            AndroidUtilities.displaySize.y = newSize;
         }
 
-        final boolean applyInsets = lastInsets != null && Build.VERSION.SDK_INT >= 21;
+        final boolean applyInsets = lastInsets != null;
 
         final int childCount = getChildCount();
         for (int i = 0; i < childCount; i++) {
@@ -651,7 +642,7 @@ public class DrawerLayoutContainer extends FrameLayout {
                 if (child.getFitsSystemWindows()) {
                     dispatchChildInsets(child, lastInsets, lp.gravity);
                 } else if (child.getTag() == null) {
-                    applyMarginInsets(lp, lastInsets, lp.gravity, Build.VERSION.SDK_INT >= 21);
+                    applyMarginInsets(lp, lastInsets, lp.gravity, true);
                 }
             }
 
@@ -678,22 +669,15 @@ public class DrawerLayoutContainer extends FrameLayout {
                 child.measure(drawerWidthSpec, drawerHeightSpec);
             }
         }
-
-        if (navigationBar != null) {
-            if (navigationBar.getParent() == null) {
-                ((FrameLayout) AndroidUtilities.findActivity(getContext()).getWindow().getDecorView()).addView(navigationBar);
-            }
-            if (navigationBar.getLayoutParams().height != AndroidUtilities.navigationBarHeight || ((LayoutParams)navigationBar.getLayoutParams()).topMargin != MeasureSpec.getSize(heightMeasureSpec)) {
-                navigationBar.getLayoutParams().height = AndroidUtilities.navigationBarHeight;
-                ((LayoutParams)navigationBar.getLayoutParams()).topMargin = MeasureSpec.getSize(heightMeasureSpec);
-                navigationBar.requestLayout();
-            }
-        }
     }
 
     public void setBehindKeyboardColor(int color) {
         behindKeyboardColor = color;
         invalidate();
+    }
+
+    public int getBehindKeyboardColor() {
+        return behindKeyboardColor;
     }
 
     @Override
@@ -704,7 +688,7 @@ public class DrawerLayoutContainer extends FrameLayout {
                 previewBlurDrawable.setAlpha((int) (parentActionBarLayout.getCurrentPreviewFragmentAlpha() * 255));
                 previewBlurDrawable.draw(canvas);
             }
-            parentActionBarLayout.drawCurrentPreviewFragment(canvas, Build.VERSION.SDK_INT >= 21 ? previewForegroundDrawable : null);
+            parentActionBarLayout.drawCurrentPreviewFragment(canvas, previewForegroundDrawable);
         }
     }
 
@@ -760,7 +744,7 @@ public class DrawerLayoutContainer extends FrameLayout {
 
     @Override
     protected void onDraw(Canvas canvas) {
-        if (Build.VERSION.SDK_INT >= 21 && lastInsets != null) {
+        if (lastInsets != null) {
             WindowInsets insets = (WindowInsets) lastInsets;
 
             int bottomInset = insets.getSystemWindowInsetBottom();
@@ -794,28 +778,6 @@ public class DrawerLayoutContainer extends FrameLayout {
             return false;
         }
         return super.onRequestSendAccessibilityEvent(child, event);
-    }
-
-    public void setNavigationBarColor(int color) {
-        navigationBarPaint.setColor(color);
-        if (navigationBar != null) {
-            navigationBar.invalidate();
-        }
-    }
-
-    public int getNavigationBarColor() {
-        return navigationBarPaint.getColor();
-    }
-
-    public View createNavigationBar() {
-        navigationBar = new View(getContext()) {
-            @Override
-            protected void onDraw(Canvas canvas) {
-                canvas.drawRect(0, 0, getMeasuredWidth(), getMeasuredHeight(), navigationBarPaint);
-            }
-        };
-        navigationBarPaint.setColor(0xff000000);
-        return navigationBar;
     }
 
     private static class PreviewForegroundDrawable extends Drawable {

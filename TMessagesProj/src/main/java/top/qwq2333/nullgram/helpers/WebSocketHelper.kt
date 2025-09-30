@@ -69,8 +69,13 @@ object WebSocketHelper {
         return Pair(names, types)
     }
 
-    @JvmField
-    var wsEnableTLS = Config.wsEnableTLS
+    @JvmStatic
+    @get:JvmName("wsEnableTLS")
+    var wsEnableTLS: Boolean
+        get() = Config.wsEnableTLS
+        set(value) {
+            Config.wsEnableTLS = value
+        }
 
     @JvmStatic
     fun toggleWsEnableTLS() {

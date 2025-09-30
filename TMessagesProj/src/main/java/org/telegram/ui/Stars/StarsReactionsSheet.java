@@ -1,27 +1,24 @@
 /*
- * Copyright (C) 2019-2024 qwq233 <qwq233@qwq2333.top>
+ * Copyright (C) 2019-2025 qwq233 <qwq233@qwq2333.top>
  * https://github.com/qwq233/Nullgram
  *
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * as published by the Free Software Foundation; either version 2
- * of the License, or (at your option) any later version.
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, version 2 of the License.
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
- * You should have received a copy of the GNU General Public License along with this software.
- *  If not, see
- * <https://www.gnu.org/licenses/>
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
 package org.telegram.ui.Stars;
 
 import static org.telegram.messenger.AndroidUtilities.dp;
 import static org.telegram.messenger.AndroidUtilities.lerp;
-import static org.telegram.messenger.AndroidUtilities.premiumText;
 import static org.telegram.messenger.AndroidUtilities.rectTmp;
 import static org.telegram.messenger.LocaleController.getString;
 
@@ -33,6 +30,7 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.ColorFilter;
 import android.graphics.LinearGradient;
 import android.graphics.Matrix;
 import android.graphics.Paint;
@@ -53,16 +51,15 @@ import android.view.HapticFeedbackConstants;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewConfiguration;
-import android.view.ViewGroup;
 import android.view.animation.Interpolator;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.Space;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.core.graphics.ColorUtils;
 
 import com.google.zxing.common.detector.MathUtils;
 
@@ -96,6 +93,7 @@ import org.telegram.ui.Components.AnimatedFloat;
 import org.telegram.ui.Components.AnimatedTextView;
 import org.telegram.ui.Components.AvatarDrawable;
 import org.telegram.ui.Components.BackupImageView;
+import org.telegram.ui.Components.BatchParticlesDrawHelper;
 import org.telegram.ui.Components.ButtonBounce;
 import org.telegram.ui.Components.CheckBox2;
 import org.telegram.ui.Components.ColoredImageSpan;
@@ -116,7 +114,6 @@ import org.telegram.ui.Stories.recorder.ButtonWithCounterView;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.Locale;
 
 public class StarsReactionsSheet extends BottomSheet implements NotificationCenter.NotificationCenterDelegate {
 
@@ -156,68 +153,6 @@ public class StarsReactionsSheet extends BottomSheet implements NotificationCent
     private final ArrayList<TLRPC.MessageReactor> reactors;
 
     private final BalanceCloud balanceCloud;
-
-    public static class BalanceCloud extends LinearLayout implements NotificationCenter.NotificationCenterDelegate {
-
-        private final int currentAccount;
-        private final TextView textView1;
-        private final LinkSpanDrawable.LinksTextView textView2;
-
-        public BalanceCloud(Context context, int currentAccount, Theme.ResourcesProvider resourcesProvider) {
-            super(context);
-            this.currentAccount = currentAccount;
-
-            setOrientation(VERTICAL);
-            setPadding(dp(18), dp(9), dp(18), dp(9));
-            setBackground(Theme.createRoundRectDrawable(dp(24), Theme.getColor(Theme.key_undo_background, resourcesProvider)));
-
-            textView1 = new TextView(context);
-            textView1.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 13);
-            textView1.setTextColor(Theme.getColor(Theme.key_undo_infoColor, resourcesProvider));
-            textView1.setGravity(Gravity.CENTER);
-            addView(textView1, LayoutHelper.createLinear(LayoutHelper.WRAP_CONTENT, LayoutHelper.WRAP_CONTENT, 0, Gravity.CENTER, 0, 0, 0, 0));
-
-            textView2 = new LinkSpanDrawable.LinksTextView(context, resourcesProvider);
-            textView2.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 12);
-            textView2.setTextColor(Theme.getColor(Theme.key_undo_cancelColor, resourcesProvider));
-            textView2.setLinkTextColor(Theme.getColor(Theme.key_undo_cancelColor, resourcesProvider));
-            textView2.setText(AndroidUtilities.replaceArrows(AndroidUtilities.replaceSingleTag(LocaleController.getString(R.string.Gift2MessageStarsInfoLink), () -> {
-                new StarsIntroActivity.StarsOptionsSheet(context, resourcesProvider).show();
-            }), true, dp(8f / 3f), dp(1)));
-            textView2.setGravity(Gravity.CENTER);
-            addView(textView2, LayoutHelper.createLinear(LayoutHelper.WRAP_CONTENT, LayoutHelper.WRAP_CONTENT, 0, Gravity.CENTER, 0, 1, 0, 0));
-
-            updateBalance(false);
-        }
-
-        private void updateBalance(boolean animated) {
-            final StarsController c = StarsController.getInstance(currentAccount);
-            final long stars = c.getBalance().amount;
-            textView1.setText(StarsIntroActivity.replaceStarsWithPlain(LocaleController.formatString(R.string.Gift2MessageStarsInfo, LocaleController.formatNumber(stars, ',')), .60f));
-        }
-
-        @Override
-        protected void onAttachedToWindow() {
-            super.onAttachedToWindow();
-            updateBalance(false);
-            NotificationCenter.getInstance(currentAccount).addObserver(this, NotificationCenter.starBalanceUpdated);
-            NotificationCenter.getInstance(currentAccount).addObserver(this, NotificationCenter.botStarsUpdated);
-        }
-
-        @Override
-        protected void onDetachedFromWindow() {
-            super.onDetachedFromWindow();
-            NotificationCenter.getInstance(currentAccount).removeObserver(this, NotificationCenter.starBalanceUpdated);
-            NotificationCenter.getInstance(currentAccount).removeObserver(this, NotificationCenter.botStarsUpdated);
-        }
-
-        @Override
-        public void didReceivedNotification(int id, int account, Object... args) {
-            if (id == NotificationCenter.starBalanceUpdated) {
-                updateBalance(true);
-            }
-        }
-    }
 
     @Override
     protected void appendOpenAnimator(boolean opening, ArrayList<Animator> animators) {
@@ -530,7 +465,7 @@ public class StarsReactionsSheet extends BottomSheet implements NotificationCent
             };
 
             if (starsController.balanceAvailable() && starsController.getBalance().amount < totalStars) {
-                new StarsIntroActivity.StarsNeededSheet(context, resourcesProvider, totalStars, StarsIntroActivity.StarsNeededSheet.TYPE_REACTIONS, chat == null ? "" : chat.title, send).show();
+                new StarsIntroActivity.StarsNeededSheet(context, resourcesProvider, totalStars, StarsIntroActivity.StarsNeededSheet.TYPE_REACTIONS, chat == null ? "" : chat.title, send, 0).show();
             } else {
                 send.run();
             }
@@ -1305,9 +1240,13 @@ public class StarsReactionsSheet extends BottomSheet implements NotificationCent
         public final Rect rect = new Rect();
 
         private float speed = 1f;
+        private float lifetime = 1f;
         private int visibleCount;
 
         private boolean firstDraw = true;
+
+        private final @Nullable BatchParticlesDrawHelper.BatchParticlesBuffer batchParticlesBuffer;
+        private final @Nullable Paint batchParticlesPaint;
 
         public Particles(int type, int n) {
             this.type = type;
@@ -1337,6 +1276,15 @@ public class StarsReactionsSheet extends BottomSheet implements NotificationCent
             Paint paint = new Paint();
             paint.setColor(Theme.multAlpha(Color.WHITE, .75f));
             canvas.drawPath(path, paint);
+
+            if (BatchParticlesDrawHelper.isAvailable()) {
+                batchParticlesBuffer = new BatchParticlesDrawHelper.BatchParticlesBuffer(n);
+                batchParticlesBuffer.fillParticleTextureCords(0, 0, b.getWidth(), b.getHeight());
+                batchParticlesPaint = BatchParticlesDrawHelper.createBatchParticlesPaint(b);
+            } else {
+                batchParticlesBuffer = null;
+                batchParticlesPaint = null;
+            }
         }
 
         public void setVisible(float x) {
@@ -1368,6 +1316,10 @@ public class StarsReactionsSheet extends BottomSheet implements NotificationCent
             }
         }
 
+        public void setLifetime(float lifetime) {
+            this.lifetime = lifetime;
+        }
+
         public void setSpeed(float speed) {
             this.speed = speed;
         }
@@ -1391,19 +1343,40 @@ public class StarsReactionsSheet extends BottomSheet implements NotificationCent
         }
 
         public void draw(Canvas canvas, int color) {
-            if (bPaintColor != color) {
-                bPaint.setColorFilter(new PorterDuffColorFilter(bPaintColor = color, PorterDuff.Mode.SRC_IN));
-            }
-            for (int i = 0; i < Math.min(visibleCount, particles.size()); ++i) {
-                final Particle p = particles.get(i);
-                p.draw(canvas, color, p.la);
+            draw(canvas, color, 1f);
+        }
+
+        public void draw(Canvas canvas, int color, float alpha) {
+            final int particlesCount = Math.min(visibleCount, particles.size());
+            final boolean useBatchRender = batchParticlesBuffer != null;
+            if (useBatchRender) {
+                final float bWidth = b.getWidth();
+                final float bHeight = b.getHeight();
+                for (int i = 0; i < particlesCount; ++i) {
+                    final Particle p = particles.get(i);
+                    final float pAlpha = p.a * p.s * alpha;
+                    final float halfWidth = bWidth / 2f * pAlpha;
+                    final float halfHeight = bHeight / 2f * pAlpha;
+                    batchParticlesBuffer.setParticleVertexCords(i, p.x - halfWidth, p.y - halfHeight, p.x + halfWidth, p.y + halfHeight);
+                    batchParticlesBuffer.setParticleColor(i, ColorUtils.setAlphaComponent(color, (int) (0xFF * Utilities.clamp01(p.la * alpha))));
+                }
+                BatchParticlesDrawHelper.draw(canvas, batchParticlesBuffer, particlesCount, batchParticlesPaint);
+            } else {
+                if (bPaintColor != color) {
+                    bPaint.setColorFilter(new PorterDuffColorFilter(bPaintColor = color, PorterDuff.Mode.SRC_IN));
+                }
+
+                for (int i = 0; i < particlesCount; ++i) {
+                    final Particle p = particles.get(i);
+                    p.draw(canvas, color, p.la * alpha);
+                }
             }
             firstDraw = false;
         }
 
         public void gen(Particle p, final long now, boolean prefire) {
             p.start = now;
-            p.lifetime = lerp(500, 2500, Utilities.fastRandom.nextFloat());
+            p.lifetime = (long) (lerp(500, 2500, Utilities.fastRandom.nextFloat()) * lifetime);
             if (prefire) {
                 p.start -= (long) (p.lifetime * Utilities.clamp01(Utilities.fastRandom.nextFloat()));
             }

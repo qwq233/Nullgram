@@ -1,20 +1,18 @@
 /*
- * Copyright (C) 2019-2024 qwq233 <qwq233@qwq2333.top>
+ * Copyright (C) 2019-2025 qwq233 <qwq233@qwq2333.top>
  * https://github.com/qwq233/Nullgram
  *
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * as published by the Free Software Foundation; either version 2
- * of the License, or (at your option) any later version.
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, version 2 of the License.
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
- * You should have received a copy of the GNU General Public License along with this software.
- *  If not, see
- * <https://www.gnu.org/licenses/>
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
 package org.telegram.ui.ActionBar;
@@ -1781,7 +1779,24 @@ public class Theme {
             return !isMyMessagesGradientColorsNear;
         }
 
-        private final float[] tempHSV = new float[3];
+        public void resetAccentColorsForMyMessagesGiftThemeLight(SparseIntArray currentColors) {
+            currentColors.put(Theme.key_actionBarDefault, accentColor | 0xFF000000);
+            for (int a = Theme.myMessagesBubblesStartIndex; a < Theme.myMessagesBubblesEndIndex; a++) {
+                currentColors.delete(a);
+                currentColors.put(a, defaultColors[a]);
+            }
+            for (int a = Theme.myMessagesStartIndex; a < Theme.myMessagesEndIndex; a++) {
+                currentColors.delete(a);
+                currentColors.put(a, defaultColors[a]);
+            }
+            for (int a = Theme.myMessages2StartIndex; a < Theme.myMessages2EndIndex; a++) {
+                currentColors.delete(a);
+                currentColors.put(a, defaultColors[a]);
+            }
+        }
+
+
+        private float[] tempHSV = new float[3];
         private int setHue(int color, int hueFromColor) {
             Color.colorToHSV(hueFromColor, tempHSV);
             float hue = tempHSV[0];
@@ -2800,8 +2815,12 @@ public class Theme {
             if (settingsIndex < info.settings.size()) {
                 settings = info.settings.get(settingsIndex);
             }
+            return createNewAccent(info.id, settings, info, account, ignoreThemeInfoId);
+        }
+
+        public ThemeAccent createNewAccent(long themeId, TLRPC.ThemeSettings settings, TLRPC.TL_theme info, int account, boolean ignoreThemeInfoId) {
             if (ignoreThemeInfoId) {
-                ThemeAccent themeAccent = chatAccentsByThemeId.get(info.id);
+                ThemeAccent themeAccent = chatAccentsByThemeId.get(themeId);
                 if (themeAccent != null) {
                     return themeAccent;
                 }
@@ -2813,7 +2832,7 @@ public class Theme {
                 chatAccentsByThemeId.put(id, themeAccent);
                 return themeAccent;
             } else {
-                ThemeAccent themeAccent = accentsByThemeId.get(info.id);
+                ThemeAccent themeAccent = accentsByThemeId.get(themeId);
                 if (themeAccent != null) {
                     return themeAccent;
                 }
@@ -2825,7 +2844,7 @@ public class Theme {
                 themeAccentsMap.put(id, themeAccent);
                 themeAccents.add(0, themeAccent);
                 sortAccents(this);
-                accentsByThemeId.put(info.id, themeAccent);
+                accentsByThemeId.put(themeId, themeAccent);
                 return themeAccent;
             }
         }
@@ -3224,6 +3243,7 @@ public class Theme {
     public static TextPaint chat_msgTextCode3Paint;
     public static TextPaint chat_actionTextPaint;
     public static TextPaint chat_actionTextPaint2;
+    public static TextPaint chat_actionTextPaint3;
     public static TextPaint chat_unlockExtendedMediaTextPaint;
     public static TextPaint chat_msgBotButtonPaint;
     public static TextPaint chat_msgGameTextPaint;
@@ -3334,6 +3354,7 @@ public class Theme {
     public static Drawable chat_botInlineDrawable;
     public static Drawable chat_botWebViewDrawable;
     public static Drawable chat_botInviteDrawable;
+    public static Drawable chat_botLockDrawable;
     public static Drawable chat_commentDrawable;
     public static Drawable chat_commentStickerDrawable;
     public static Drawable chat_commentArrowDrawable;
@@ -3353,7 +3374,7 @@ public class Theme {
     public static Drawable chat_msgCallDownGreenDrawable;
 
     public static Drawable chat_attachEmptyDrawable;
-    public static RLottieDrawable[] chat_attachButtonDrawables = new RLottieDrawable[6];
+    public static RLottieDrawable[] chat_attachButtonDrawables = new RLottieDrawable[7];
     public static Drawable[] chat_locationDrawable = new Drawable[2];
     public static Drawable[] chat_contactDrawable = new Drawable[2];
     public static Drawable[][] chat_fileStatesDrawable = new Drawable[5][2];
@@ -3660,6 +3681,8 @@ public class Theme {
     public static final int key_chat_attachLocationText = colorsCount++;
     public static final int key_chat_attachPollBackground = colorsCount++;
     public static final int key_chat_attachPollText = colorsCount++;
+    public static final int key_chat_attachTodoBackground = colorsCount++;
+    public static final int key_chat_attachTodoText = colorsCount++;
 
     public static final int key_chat_status = colorsCount++;
     public static final int key_chat_inGreenCall = colorsCount++;
@@ -3748,6 +3771,7 @@ public class Theme {
     public static final int key_chat_outReactionButtonBackground = colorsCount++;
     public static final int myMessagesEndIndex = colorsCount;
 
+    public static final int myMessages2StartIndex = colorsCount;
     public static final int key_chat_outTextSelectionHighlight = colorsCount++;
     public static final int key_chat_outTextSelectionCursor = colorsCount++;
     public static final int key_chat_outBubbleLocationPlaceholder = colorsCount++;
@@ -3755,6 +3779,8 @@ public class Theme {
     public static final int key_chat_outPsaNameText = colorsCount++;
     public static final int key_chat_outBubbleGradientAnimated = colorsCount++;
     public static final int key_chat_outBubbleGradientSelectedOverlay = colorsCount++;
+    public static final int myMessages2EndIndex = colorsCount;
+
     public static final int key_chat_inBubbleSelected = colorsCount++;
     public static final int key_chat_messageTextIn = colorsCount++;
     public static final int key_chat_messageTextOut = colorsCount++;
@@ -4198,6 +4224,7 @@ public class Theme {
     public static final String key_drawable_botInline = "drawableBotInline";
     public static final String key_drawable_botLink = "drawableBotLink";
     public static final String key_drawable_botWebView = "drawableBotWebView";
+    public static final String key_drawable_botLock = "drawableBotLock";
     public static final String key_drawable_botInvite = "drawable_botInvite";
     public static final String key_drawable_commentSticker = "drawableCommentSticker";
     public static final String key_drawable_goIcon = "drawableGoIcon";
@@ -4256,6 +4283,7 @@ public class Theme {
     public static final String key_paint_chatMessageBackgroundSelected = "paintChatMessageBackgroundSelected";
     public static final String key_paint_chatActionText = "paintChatActionText";
     public static final String key_paint_chatActionText2 = "paintChatActionText2";
+    public static final String key_paint_chatActionText3 = "paintChatActionText3";
     public static final String key_paint_chatBotButton = "paintChatBotButton";
     public static final String key_paint_chatComposeBackground = "paintChatComposeBackground";
     public static final String key_paint_divider = "paintDivider";
@@ -4346,6 +4374,7 @@ public class Theme {
         fallbackKeys.put(key_groupcreate_spanDelete, key_chats_actionIcon);
         fallbackKeys.put(key_sharedMedia_photoPlaceholder, key_windowBackgroundGray);
         fallbackKeys.put(key_chat_attachPollBackground, key_chat_attachAudioBackground);
+        fallbackKeys.put(key_chat_attachTodoBackground, key_chat_attachAudioBackground);
         fallbackKeys.put(key_chats_onlineCircle, key_windowBackgroundWhiteBlueText);
         fallbackKeys.put(key_windowBackgroundWhiteBlueButton, key_windowBackgroundWhiteValueText);
         fallbackKeys.put(key_windowBackgroundWhiteBlueIcon, key_windowBackgroundWhiteValueText);
@@ -4449,6 +4478,7 @@ public class Theme {
         fallbackKeys.put(key_chat_attachContactText, key_chat_attachContactBackground);
         fallbackKeys.put(key_chat_attachLocationText, key_chat_attachLocationBackground);
         fallbackKeys.put(key_chat_attachPollText, key_chat_attachPollBackground);
+        fallbackKeys.put(key_chat_attachTodoText, key_chat_attachTodoBackground);
 
         fallbackKeys.put(key_chat_inPsaNameText, key_avatar_nameInMessageGreen);
         fallbackKeys.put(key_chat_outPsaNameText, key_avatar_nameInMessageGreen);
@@ -8816,6 +8846,7 @@ public class Theme {
             chat_statusRecordPaint.setStrokeCap(Paint.Cap.ROUND);
             chat_actionTextPaint = new TextPaint(Paint.ANTI_ALIAS_FLAG);
             chat_actionTextPaint2 = new TextPaint(Paint.ANTI_ALIAS_FLAG);
+            chat_actionTextPaint3 = new TextPaint(Paint.ANTI_ALIAS_FLAG);
             chat_actionTextPaint.setTypeface(AndroidUtilities.bold());
             chat_unlockExtendedMediaTextPaint = new TextPaint(Paint.ANTI_ALIAS_FLAG);
             chat_unlockExtendedMediaTextPaint.setTypeface(AndroidUtilities.bold());
@@ -8840,6 +8871,7 @@ public class Theme {
             addChatPaint(key_paint_chatActionBackgroundSelected, chat_actionBackgroundSelectedPaint, key_chat_serviceBackgroundSelected);
             addChatPaint(key_paint_chatActionText, chat_actionTextPaint, key_chat_serviceText);
             addChatPaint(key_paint_chatActionText2, chat_actionTextPaint2, key_chat_serviceText);
+            addChatPaint(key_paint_chatActionText3, chat_actionTextPaint3, key_chat_serviceText);
             addChatPaint(key_paint_chatBotButton, chat_botButtonPaint, key_chat_botButtonText);
             addChatPaint(key_paint_chatComposeBackground, chat_composeBackgroundPaint, key_chat_messagePanelBackground);
             addChatPaint(key_paint_chatTimeBackground, chat_timeBackgroundPaint, key_chat_mediaTimeBackground);
@@ -8945,6 +8977,7 @@ public class Theme {
             chat_botCardDrawable = resources.getDrawable(R.drawable.bot_card);
             chat_botWebViewDrawable = resources.getDrawable(R.drawable.bot_webview);
             chat_botInviteDrawable = resources.getDrawable(R.drawable.bot_invite);
+            chat_botLockDrawable = resources.getDrawable(R.drawable.permission_locked);
 
             chat_commentDrawable = resources.getDrawable(R.drawable.msg_msgbubble);
             chat_commentStickerDrawable = resources.getDrawable(R.drawable.msg_msgbubble2);
@@ -8960,6 +8993,7 @@ public class Theme {
             chat_attachButtonDrawables[3] = new RLottieDrawable(R.raw.attach_contact, "attach_contact", dp(26), dp(26));
             chat_attachButtonDrawables[4] = new RLottieDrawable(R.raw.attach_location, "attach_location", dp(26), dp(26));
             chat_attachButtonDrawables[5] = new RLottieDrawable(R.raw.attach_poll, "attach_poll", dp(26), dp(26));
+            chat_attachButtonDrawables[6] = new RLottieDrawable(R.raw.todo_attach, "todo_attach", dp(26), dp(26));
             chat_attachEmptyDrawable = resources.getDrawable(R.drawable.nophotos3);
 
             chat_shareIconDrawable = resources.getDrawable(R.drawable.filled_button_share).mutate();
@@ -9021,6 +9055,7 @@ public class Theme {
 
             addChatDrawable(key_drawable_botInline, chat_botInlineDrawable, key_chat_serviceIcon);
             addChatDrawable(key_drawable_botWebView, chat_botWebViewDrawable, key_chat_serviceIcon);
+            addChatDrawable(key_drawable_botLock, chat_botLockDrawable, key_chat_serviceIcon);
             addChatDrawable(key_drawable_botLink, chat_botLinkDrawable, key_chat_serviceIcon);
             addChatDrawable(key_drawable_botInvite, chat_botInviteDrawable, key_chat_serviceIcon);
             addChatDrawable(key_drawable_goIcon, chat_goIconDrawable, key_chat_serviceIcon);
@@ -9102,6 +9137,7 @@ public class Theme {
             chat_pollTimerPaint.setStrokeWidth(dp(1.1f));
             chat_actionTextPaint.setTextSize(dp(Math.max(16, SharedConfig.fontSize) - 2));
             chat_actionTextPaint2.setTextSize(dp(Math.max(16, SharedConfig.fontSize) - 2));
+            chat_actionTextPaint3.setTextSize(dp(Math.max(16, SharedConfig.fontSize) - 3));
             chat_unlockExtendedMediaTextPaint.setTextSize(dp(Math.max(16, SharedConfig.fontSize)));
             chat_contextResult_titleTextPaint.setTextSize(dp(15));
             chat_contextResult_descriptionTextPaint.setTextSize(dp(13));
@@ -9162,6 +9198,7 @@ public class Theme {
             chat_statusRecordPaint.setColor(getColor(key_chat_status));
             chat_actionTextPaint.setColor(getColor(key_chat_serviceText));
             chat_actionTextPaint2.setColor(getColor(key_chat_serviceText));
+            chat_actionTextPaint3.setColor(getColor(key_chat_serviceText));
             chat_actionTextPaint.linkColor = getColor(key_chat_serviceLink);
             chat_unlockExtendedMediaTextPaint.setColor(getColor(key_chat_serviceText));
             chat_contextResult_titleTextPaint.setColor(getColor(key_windowBackgroundWhiteBlackText));
@@ -9191,6 +9228,7 @@ public class Theme {
             setDrawableColorByKey(chat_goIconDrawable, key_chat_serviceIcon);
             setDrawableColorByKey(chat_botInlineDrawable, key_chat_serviceIcon);
             setDrawableColorByKey(chat_botWebViewDrawable, key_chat_serviceIcon);
+            setDrawableColorByKey(chat_botLockDrawable, key_chat_lockIcon);
             setDrawableColorByKey(chat_botInviteDrawable, key_chat_serviceIcon);
             setDrawableColorByKey(chat_botLinkDrawable, key_chat_serviceIcon);
             setDrawableColorByKey(chat_msgInViewsDrawable, key_chat_inViews);
@@ -9415,6 +9453,7 @@ public class Theme {
             setDrawableColor(chat_msgStickerRepliesDrawable, 0xffffffff);
             chat_actionTextPaint.setColor(0xffffffff);
             chat_actionTextPaint2.setColor(0xffffffff);
+            chat_actionTextPaint3.setColor(0xffffffff);
             chat_actionTextPaint.linkColor = 0xffffffff;
             chat_unlockExtendedMediaTextPaint.setColor(0xffffffff);
             chat_botButtonPaint.setColor(0xffffffff);
@@ -9424,6 +9463,7 @@ public class Theme {
             setDrawableColor(chat_goIconDrawable, 0xffffffff);
             setDrawableColor(chat_botInlineDrawable, 0xffffffff);
             setDrawableColor(chat_botWebViewDrawable, 0xffffffff);
+            setDrawableColor(chat_botLockDrawable, 0xffffffff);
             setDrawableColor(chat_botInviteDrawable, 0xffffffff);
             setDrawableColor(chat_botLinkDrawable, 0xffffffff);
         } else {
@@ -9445,6 +9485,7 @@ public class Theme {
             setDrawableColorByKey(chat_goIconDrawable, key_chat_serviceIcon);
             setDrawableColorByKey(chat_botInlineDrawable, key_chat_serviceIcon);
             setDrawableColorByKey(chat_botWebViewDrawable, key_chat_serviceIcon);
+            setDrawableColorByKey(chat_botLockDrawable, key_chat_serviceIcon);
             setDrawableColorByKey(chat_botInviteDrawable, key_chat_serviceIcon);
             setDrawableColorByKey(chat_botLinkDrawable, key_chat_serviceIcon);
             chat_botButtonPaint.setColor(getColor(key_chat_botButtonText));
@@ -9883,13 +9924,15 @@ public class Theme {
         }
     }
 
-    public static void setSelectorDrawableColor(Drawable drawable, int color, boolean selected) {
+    public static boolean setSelectorDrawableColor(Drawable drawable, int color, boolean selected) {
+        boolean changed = false;
         if (drawable instanceof StateListDrawable) {
             try {
                 Drawable state;
                 if (selected) {
                     state = getStateDrawable(drawable, 0);
                     if (state instanceof ShapeDrawable) {
+                        changed = ((ShapeDrawable) state).getPaint().getColor() != color || changed;
                         ((ShapeDrawable) state).getPaint().setColor(color);
                     } else {
                         state.setColorFilter(new PorterDuffColorFilter(color, PorterDuff.Mode.MULTIPLY));
@@ -9899,6 +9942,7 @@ public class Theme {
                     state = getStateDrawable(drawable, 2);
                 }
                 if (state instanceof ShapeDrawable) {
+                    changed = ((ShapeDrawable) state).getPaint().getColor() != color || changed;
                     ((ShapeDrawable) state).getPaint().setColor(color);
                 } else {
                     state.setColorFilter(new PorterDuffColorFilter(color, PorterDuff.Mode.MULTIPLY));
@@ -9910,13 +9954,14 @@ public class Theme {
             RippleDrawable rippleDrawable = (RippleDrawable) drawable;
             if (selected) {
                 rippleDrawable.setColor(new ColorStateList(
-                        new int[][]{StateSet.WILD_CARD},
-                        new int[]{color}
+                    new int[][]{StateSet.WILD_CARD},
+                    new int[]{color}
                 ));
             } else {
                 if (rippleDrawable.getNumberOfLayers() > 0) {
                     Drawable drawable1 = rippleDrawable.getDrawable(0);
                     if (drawable1 instanceof ShapeDrawable) {
+                        changed = ((ShapeDrawable) drawable1).getPaint().getColor() != color || changed;
                         ((ShapeDrawable) drawable1).getPaint().setColor(color);
                     } else {
                         drawable1.setColorFilter(new PorterDuffColorFilter(color, PorterDuff.Mode.MULTIPLY));
@@ -9924,6 +9969,7 @@ public class Theme {
                 }
             }
         }
+        return changed;
     }
 
     public static boolean isThemeWallpaperPublic() {

@@ -24,6 +24,7 @@ import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.view.Gravity;
 import android.view.KeyEvent;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
@@ -241,7 +242,7 @@ public class ActionBarPopupWindow extends PopupWindow {
 
                 @Override
                 protected boolean drawChild(Canvas canvas, View child, long drawingTime) {
-                    if (child instanceof GapView) {
+                    if (child instanceof GapView && backgroundDrawable != null) {
                         return false;
                     }
                     return super.drawChild(canvas, child, drawingTime);
@@ -722,7 +723,18 @@ public class ActionBarPopupWindow extends PopupWindow {
     private void init() {
         View contentView = getContentView();
         if (contentView instanceof ActionBarPopupWindowLayout && ((ActionBarPopupWindowLayout) contentView).getSwipeBack() != null) {
-            ((ActionBarPopupWindowLayout) contentView).getSwipeBack().setOnClickListener(e -> dismiss());
+            setTouchInterceptor((v, e) -> {
+                if (e.getAction() == MotionEvent.ACTION_DOWN) {
+                    Drawable backgroundDrawable = ((ActionBarPopupWindowLayout) contentView).getBackgroundDrawable();
+                    AndroidUtilities.rectTmp.set(backgroundDrawable.getBounds());
+                    AndroidUtilities.rectTmp.offset(contentView.getX(), contentView.getY());
+                    if (!AndroidUtilities.rectTmp.contains(e.getX(), e.getY())) {
+                        dismiss();
+                        return true;
+                    }
+                }
+                return false;
+            });
         }
         if (superListenerField != null) {
             try {

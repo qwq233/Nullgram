@@ -1,20 +1,18 @@
 /*
- * Copyright (C) 2019-2024 qwq233 <qwq233@qwq2333.top>
+ * Copyright (C) 2019-2025 qwq233 <qwq233@qwq2333.top>
  * https://github.com/qwq233/Nullgram
  *
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * as published by the Free Software Foundation; either version 2
- * of the License, or (at your option) any later version.
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, version 2 of the License.
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
- * You should have received a copy of the GNU General Public License along with this software.
- *  If not, see
- * <https://www.gnu.org/licenses/>
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
 package org.telegram.ui.Components.Reactions;
@@ -196,8 +194,31 @@ public class ReactionsLayoutInBubble {
                 for (int i = 0; i < messageObject.messageOwner.reactions.results.size(); i++) {
                     totalCount += messageObject.messageOwner.reactions.results.get(i).count;
                 }
-                for (int i = 0; i < messageObject.messageOwner.reactions.results.size(); i++) {
-                    TLRPC.ReactionCount reactionCount = messageObject.messageOwner.reactions.results.get(i);
+                boolean includeEmptyStarButton = false;
+                final TLRPC.ChatFull chatInfo = MessagesController.getInstance(currentAccount).getChatFull(-messageObject.getDialogId());
+                if (!isSmall && !messageObject.messageOwner.reactions.results.isEmpty() && chatInfo != null && chatInfo.paid_reactions_available) {
+                    boolean hasPaidReaction = false;
+                    for (int i = 0; i < messageObject.messageOwner.reactions.results.size(); i++) {
+                        TLRPC.ReactionCount reactionCount = messageObject.messageOwner.reactions.results.get(i);
+                        if (reactionCount.reaction instanceof TLRPC.TL_reactionPaid) {
+                            hasPaidReaction = true;
+                            break;
+                        }
+                    }
+                    if (!hasPaidReaction) {
+                        includeEmptyStarButton = true;
+                    }
+                }
+                for (int i = (includeEmptyStarButton ? -1 : 0); i < messageObject.messageOwner.reactions.results.size(); i++) {
+                    TLRPC.ReactionCount reactionCount;
+                    if (i == -1) {
+                        reactionCount = new TLRPC.TL_reactionCount();
+                        reactionCount.reaction = new TLRPC.TL_reactionPaid();
+                        reactionCount.chosen = false;
+                        reactionCount.count = 0;
+                    } else {
+                        reactionCount = messageObject.messageOwner.reactions.results.get(i);
+                    }
                     ReactionButton old = null;
                     for (int j = 0; j < oldButtons.size(); ++j) {
                         ReactionButton btn = oldButtons.get(j);
@@ -332,8 +353,10 @@ public class ReactionsLayoutInBubble {
                     button.avatarsDrawable.height = dp(26);
                 } else if (button.hasName) {
                     button.width += button.textDrawable.getAnimateToWidth() + dp(8);
-                } else {
+                } else if (button.counterDrawable.getCurrentWidth() > 0) {
                     button.width += button.counterDrawable.getCurrentWidth() + dp(8);
+                } else {
+                    button.width -= dp(1);
                 }
                 button.height = dp(26);
             }
@@ -917,7 +940,7 @@ public class ReactionsLayoutInBubble {
             counterDrawable.gravity = Gravity.LEFT;
         }
 
-        private RectF bounds = new RectF(), rect2 = new RectF();
+        private final RectF bounds = new RectF(), rect2 = new RectF();
         private final Path tagPath = new Path();
         private void drawRoundRect(Canvas canvas, RectF rectF, float r, Paint paint) {
             if (isTag) {
@@ -1432,11 +1455,16 @@ public class ReactionsLayoutInBubble {
         if (isEmpty || isSmall || messageObject == null || messageObject.messageOwner == null || messageObject.messageOwner.reactions == null) {
             return false;
         }
+        float eventX = event.getX();
         float eventY = event.getY();
         if (parentView instanceof ChatMessageCell) {
             eventY -= parentView.getPaddingTop();
+        } else if (parentView instanceof ChatActionCell) {
+            ChatActionCell actionCell = (ChatActionCell) parentView;
+            eventX -= actionCell.sideMenuWidth / 2f;
+            eventY -= parentView.getPaddingTop();
         }
-        float x = event.getX() - this.x;
+        float x = eventX - this.x;
         float y = eventY - this.y;
         if (event.getAction() == MotionEvent.ACTION_DOWN) {
             for (int i = 0, n = reactionButtons.size(); i < n; i++) {
