@@ -1,6 +1,7 @@
 #include <jni.h>
 #include <android/bitmap.h>
 #include <cstdint>
+#include <cmath>
 #include <limits>
 #include <string>
 #include <unistd.h>
@@ -17,12 +18,14 @@
 extern "C" {
 #include <libavformat/avformat.h>
 #include <libavcodec/avcodec.h>
+#include <libavcodec/packet.h>
 #include <libavformat/isom.h>
 #include <libavcodec/bytestream.h>
 #include <libavcodec/get_bits.h>
 #include <libavcodec/golomb.h>
 #include <libavutil/eval.h>
 #include <libavutil/intmath.h>
+#include <libavutil/display.h>
 #include <libswscale/swscale.h>
 }
 
@@ -432,6 +435,19 @@ extern "C" JNIEXPORT void JNICALL Java_org_telegram_ui_Components_AnimatedFileDr
         } else {
             dataArr[PARAM_NUM_ROTATION] = 0;
         }
+        // Fallback: check display matrix for rotation (used by Dolby Vision and some HEVC videos)
+        if (dataArr[PARAM_NUM_ROTATION] == 0) {
+            const AVPacketSideData *sd = av_packet_side_data_get(
+                info->video_stream->codecpar->coded_side_data,
+                info->video_stream->codecpar->nb_coded_side_data,
+                AV_PKT_DATA_DISPLAYMATRIX);
+            if (sd) {
+                double theta = av_display_rotation_get((const int32_t *) sd->data);
+                if (!isnan(theta)) {
+                    dataArr[PARAM_NUM_ROTATION] = (jint) round(-theta);
+                }
+            }
+        }
         if (info->video_stream->codecpar->codec_id == AV_CODEC_ID_H264 || info->video_stream->codecpar->codec_id == AV_CODEC_ID_HEVC) {
             dataArr[PARAM_NUM_FRAMERATE] = (jint) av_q2d(info->video_stream->avg_frame_rate);
         } else {
@@ -535,6 +551,18 @@ extern "C" JNIEXPORT jlong JNICALL Java_org_telegram_ui_Components_AnimatedFileD
             }
         } else {
             dataArr[2] = 0;
+        }
+        if (dataArr[2] == 0) {
+            const AVPacketSideData *sd = av_packet_side_data_get(
+                info->video_stream->codecpar->coded_side_data,
+                info->video_stream->codecpar->nb_coded_side_data,
+                AV_PKT_DATA_DISPLAYMATRIX);
+            if (sd) {
+                double theta = av_display_rotation_get((const int32_t *) sd->data);
+                if (!isnan(theta)) {
+                    dataArr[2] = (jint) round(-theta);
+                }
+            }
         }
         dataArr[4] = (int32_t) (info->fmt_ctx->duration * 1000 / AV_TIME_BASE);
         int video_stream_index = -1;
