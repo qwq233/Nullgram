@@ -442,7 +442,7 @@ public class ChatAttachAlertQuickRepliesLayout extends ChatAttachAlert.AttachAle
     }
 
     @Override
-    public boolean sendSelectedItems(boolean notify, int scheduleDate, long effectId, boolean invertMedia) {
+    public boolean sendSelectedItems(boolean notify, int scheduleDate, int scheduleRepeatPeriod, long effectId, boolean invertMedia) {
         return false;
     }
 

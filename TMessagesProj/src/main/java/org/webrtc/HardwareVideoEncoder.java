@@ -35,6 +35,9 @@ import java.util.concurrent.BlockingDeque;
 import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.TimeUnit;
 
+import org.telegram.messenger.FileLog;
+import org.webrtc.ThreadUtils.ThreadChecker;
+
 /**
  * Android hardware video encoder.
  */
@@ -540,6 +543,7 @@ class HardwareVideoEncoder implements VideoEncoder {
   }
 
   private VideoCodecStatus resetCodec(int newWidth, int newHeight, boolean newUseSurfaceMode) {
+    FileLog.d("resetCodec " + newWidth + "x" + newHeight);
     encodeThreadChecker.checkIsOnValidThread();
     VideoCodecStatus status = release();
     if (status != VideoCodecStatus.OK) {

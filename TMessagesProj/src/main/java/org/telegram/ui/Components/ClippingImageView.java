@@ -51,7 +51,9 @@ public class ClippingImageView extends View {
     private Path roundPath = new Path();
     private static float[] radii = new float[8];
 
+    private boolean in;
     private float animationProgress;
+    private boolean fade;
     private float[][] animationValues;
 
     private float additionalTranslationY;
@@ -70,8 +72,10 @@ public class ClippingImageView extends View {
         shaderMatrix = new Matrix();
     }
 
-    public void setAnimationValues(float[][] values) {
+    public void setAnimationValues(float[][] values, boolean in, boolean fade) {
         animationValues = values;
+        this.in = in;
+        this.fade = fade;
     }
 
     public void setAdditionalTranslationY(float value) {
@@ -115,6 +119,9 @@ public class ClippingImageView extends View {
         if (animationValues[0].length > 11) {
             setImageY((int) (animationValues[0][11] + (animationValues[1][11] - animationValues[0][11]) * animationProgress));
             setImageX((int) (animationValues[0][12] + (animationValues[1][12] - animationValues[0][12]) * animationProgress));
+        }
+        if (fade) {
+            setAlpha(in ? progress : 1 - progress);
         }
         invalidate();
     }

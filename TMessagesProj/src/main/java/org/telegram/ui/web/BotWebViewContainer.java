@@ -54,19 +54,14 @@ import android.os.Environment;
 import android.os.Message;
 import android.text.InputType;
 import android.text.SpannableStringBuilder;
-import android.text.Spanned;
 import android.text.TextUtils;
-import android.util.Log;
 import android.util.Pair;
 import android.util.TypedValue;
-import android.view.ActionMode;
 import android.view.Gravity;
 import android.view.KeyEvent;
-import android.view.Menu;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.inputmethod.EditorInfo;
-import android.webkit.ConsoleMessage;
 import android.webkit.CookieManager;
 import android.webkit.DownloadListener;
 import android.webkit.GeolocationPermissions;
@@ -140,18 +135,14 @@ import org.telegram.ui.ActionBar.Theme;
 import org.telegram.ui.ArticleViewer;
 import org.telegram.ui.CameraScanActivity;
 import org.telegram.ui.Components.AlertsCreator;
-import org.telegram.ui.Components.AnimatedColor;
 import org.telegram.ui.Components.AnimatedFileDrawable;
-import org.telegram.ui.Components.AnimatedTextView;
 import org.telegram.ui.Components.BackupImageView;
 import org.telegram.ui.Components.Bulletin;
 import org.telegram.ui.Components.BulletinFactory;
-import org.telegram.ui.Components.CubicBezierInterpolator;
 import org.telegram.ui.Components.EditTextCaption;
 import org.telegram.ui.Components.LayoutHelper;
 import org.telegram.ui.Components.Paint.Views.LinkPreview;
 import org.telegram.ui.Components.Premium.PremiumFeatureBottomSheet;
-import org.telegram.ui.Components.TypefaceSpan;
 import org.telegram.ui.Components.voip.CellFlickerDrawable;
 import org.telegram.ui.LaunchActivity;
 import org.telegram.ui.PremiumPreviewFragment;
@@ -160,7 +151,6 @@ import org.telegram.ui.Stories.recorder.StoryEntry;
 import org.telegram.ui.Stories.recorder.StoryRecorder;
 import org.telegram.ui.WrappedResourceProvider;
 import org.telegram.ui.bots.BotBiometry;
-import org.telegram.ui.bots.BotBiometrySettings;
 import org.telegram.ui.bots.BotDownloads;
 import org.telegram.ui.bots.BotLocation;
 import org.telegram.ui.bots.BotSensors;
@@ -1983,7 +1973,7 @@ public abstract class BotWebViewContainer extends FrameLayout implements Notific
 
                     if (blocked) {
                         MessagesController.getInstance(currentAccount).unblockPeer(botUser.id, () -> {
-                            SendMessagesHelper.getInstance(currentAccount).sendMessage(SendMessagesHelper.SendMessageParams.of(UserConfig.getInstance(currentAccount).getCurrentUser(), botUser.id, null, null, null, null, true, 0));
+                            SendMessagesHelper.getInstance(currentAccount).sendMessage(SendMessagesHelper.SendMessageParams.of(UserConfig.getInstance(currentAccount).getCurrentUser(), botUser.id, null, null, null, null, true, 0, 0));
 
                             try {
                                 JSONObject data = new JSONObject();
@@ -1994,7 +1984,7 @@ public abstract class BotWebViewContainer extends FrameLayout implements Notific
                             }
                         });
                     } else {
-                        SendMessagesHelper.getInstance(currentAccount).sendMessage(SendMessagesHelper.SendMessageParams.of(UserConfig.getInstance(currentAccount).getCurrentUser(), botUser.id, null, null, null, null, true, 0));
+                        SendMessagesHelper.getInstance(currentAccount).sendMessage(SendMessagesHelper.SendMessageParams.of(UserConfig.getInstance(currentAccount).getCurrentUser(), botUser.id, null, null, null, null, true, 0, 0));
 
                         try {
                             JSONObject data = new JSONObject();
@@ -2673,7 +2663,7 @@ public abstract class BotWebViewContainer extends FrameLayout implements Notific
             case "web_app_secure_storage_restore_key": {
                 if (botUser == null) return;
                 if (secureStorage == null) secureStorage = new BotStorage(getContext(), currentAccount, UserConfig.getInstance(currentAccount).getClientUserId(), botUser.id, true);
-                restoreStorageKey(secureStorage, eventData, "secure_storage_key_restored", "secure_storage_cleared");
+                restoreStorageKey(secureStorage, eventData, "secure_storage_key_restored", "secure_storage_failed");
                 break;
             }
             case "web_app_hide_keyboard": {

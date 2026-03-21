@@ -194,8 +194,8 @@ object QrHelper {
                     bottomSheet.fixNavigationBar(-0xe3ddd7)
                     bottomSheet.setTitleColor(-0x757576)
                     bottomSheet.setCalcMandatoryInsets(true)
-                    AndroidUtilities.setNavigationBarColor(bottomSheet.window, -0xe3ddd7, false)
-                    AndroidUtilities.setLightNavigationBar(bottomSheet.window, false)
+                    AndroidUtilities.setNavigationBarColor(bottomSheet, -0xe3ddd7, false)
+                    AndroidUtilities.setLightNavigationBar(bottomSheet, false)
                     bottomSheet.scrollNavBar = true
                 } else {
                     bottomSheet.show()

@@ -29,11 +29,11 @@ import org.telegram.messenger.ApplicationLoader;
 import org.telegram.messenger.FileLog;
 import org.telegram.messenger.UserConfig;
 import org.telegram.messenger.Utilities;
-import org.telegram.tgnet.AbstractSerializedData;
 import org.telegram.tgnet.InputSerializedData;
 import org.telegram.tgnet.OutputSerializedData;
 import org.telegram.tgnet.SerializedData;
 import org.telegram.tgnet.TLObject;
+import org.telegram.tgnet.TLParseException;
 import org.telegram.tgnet.TLRPC;
 
 import java.io.InputStream;
@@ -188,13 +188,7 @@ public class BillingUtilities {
                     result = new TL_savedPurpose();
                     break;
             }
-            if (result == null && exception) {
-                throw new RuntimeException(String.format("can't parse magic %x in TL_savedPurpose", constructor));
-            }
-            if (result != null) {
-                result.readParams(stream, exception);
-            }
-            return result;
+            return TLdeserialize(TL_savedPurpose.class, result, stream, constructor, exception);
         }
 
         @Override

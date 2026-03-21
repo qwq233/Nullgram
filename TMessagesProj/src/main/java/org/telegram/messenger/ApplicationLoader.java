@@ -26,6 +26,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.pm.ApplicationInfo;
+import android.content.pm.PackageInfo;
 import android.content.res.Configuration;
 import android.net.ConnectivityManager;
 import android.net.Network;
@@ -37,7 +38,6 @@ import android.os.Handler;
 import android.os.PowerManager;
 import android.os.SystemClock;
 import android.telephony.TelephonyManager;
-import android.util.Pair;
 import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;

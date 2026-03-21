@@ -41,11 +41,13 @@ import android.text.TextPaint;
 import android.text.TextUtils;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.ViewParent;
 import android.widget.FrameLayout;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.core.graphics.ColorUtils;
+import androidx.core.view.ViewCompat;
 
 import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.ContactsController;
@@ -987,6 +989,11 @@ public class BottomSheetTabs extends FrameLayout {
         } else {
             bottomTabsProgress = bottomTabsHeight;
             invalidate();
+        }
+
+        final ViewParent parent = getParent();
+        if (parent instanceof View) {
+            ViewCompat.requestApplyInsets((View) parent);
         }
     }
 

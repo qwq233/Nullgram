@@ -27,7 +27,6 @@ import android.graphics.RenderNode;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.RippleDrawable;
 import android.os.Build;
-import android.util.Log;
 import android.view.HapticFeedbackConstants;
 import android.view.MotionEvent;
 import android.view.ViewConfiguration;
@@ -37,14 +36,11 @@ import top.qwq2333.gen.Config;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.annotation.RequiresApi;
 
 import org.telegram.messenger.FileLog;
-import org.telegram.messenger.LiteMode;
 import org.telegram.messenger.SharedConfig;
-import org.telegram.ui.ActionBar.Theme;
-import org.telegram.ui.ChatActivity;
 import org.telegram.ui.Components.SizeNotifierFrameLayout;
+import org.telegram.ui.Components.blur3.DownscaleScrollableNoiseSuppressor;
 
 public abstract class BaseCell extends ViewGroup implements SizeNotifierFrameLayout.IViewWithInvalidateCallback {
 
@@ -194,7 +190,7 @@ public abstract class BaseCell extends ViewGroup implements SizeNotifierFrameLay
     }
 
     @Override
-    public void draw(Canvas canvas) {
+    public void draw(@NonNull Canvas canvas) {
         final boolean cache = (cachingTop || cachingBottom || SharedConfig.useNewBlur) && allowCaching();
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q && cache != (renderNode != null)) {
             if (cache) {
@@ -222,7 +218,6 @@ public abstract class BaseCell extends ViewGroup implements SizeNotifierFrameLay
         return true;
     }
 
-    @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     public static class RippleDrawableSafe extends RippleDrawable {
         public RippleDrawableSafe(@NonNull ColorStateList color, @Nullable Drawable content, @Nullable Drawable mask) {
             super(color, content, mask);
@@ -238,10 +233,13 @@ public abstract class BaseCell extends ViewGroup implements SizeNotifierFrameLay
 
         @Override
         public void draw(@NonNull Canvas canvas) {
+            final int save = canvas.save();
             try {
                 super.draw(canvas);
             } catch (Exception e) {
                 FileLog.e("probably forgot to put setCallback", e);
+            } finally {
+                canvas.restoreToCount(save);
             }
         }
     }

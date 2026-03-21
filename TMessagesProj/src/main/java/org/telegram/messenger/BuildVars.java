@@ -29,8 +29,8 @@ public class BuildVars {
     public static boolean LOGS_ENABLED = true;
     public static boolean USE_CLOUD_STRINGS = true;
     public static boolean NO_SCOPED_STORAGE = Build.VERSION.SDK_INT <= 29;
-    public static final int BUILD_VERSION = 6166;
-    public static final String BUILD_VERSION_STRING = "12.0.1";
+    public static final int BUILD_VERSION = 6341;
+    public static final String BUILD_VERSION_STRING = "12.2.10";
     public static final int APP_ID = 19797609;
     public static final String APP_HASH = "e8f1567dbbf38944a1391c4d23c34b60";
     public static final String APPCENTER_HASH = "PLACEHOLDER";
@@ -39,6 +39,8 @@ public class BuildVars {
     public static String SMS_HASH = "O2P2z+/jBpJ";
     public static final  String PLAYSTORE_APP_URL = "https://play.google.com/store/apps/details?id=top.qwq2333.nullgram";
     public static String HUAWEI_STORE_URL = "";
+    // works only on official app ids, disable on your forks
+    public static boolean SUPPORTS_PASSKEYS = false;
 
     public static String GOOGLE_AUTH_CLIENT_ID = "760348033671-81kmi3pi84p11ub8hp9a1funsv0rn2p9.apps.googleusercontent.com";
 

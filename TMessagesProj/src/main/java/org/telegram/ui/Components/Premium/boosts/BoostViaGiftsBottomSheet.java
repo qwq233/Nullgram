@@ -25,7 +25,6 @@ import org.telegram.messenger.UserConfig;
 import org.telegram.messenger.Utilities;
 import org.telegram.tgnet.TLObject;
 import org.telegram.tgnet.TLRPC;
-import org.telegram.tgnet.tl.TL_payments;
 import org.telegram.tgnet.tl.TL_stars;
 import org.telegram.tgnet.tl.TL_stories;
 import org.telegram.ui.ActionBar.BaseFragment;
@@ -199,7 +198,7 @@ public class BoostViaGiftsBottomSheet extends BottomSheetWithRecyclerListView im
                 updateRows(false, false);
                 adapter.notifyAllVisibleTextDividers();
             } else if (view instanceof DateEndCell) {
-                BoostDialogs.showDatePicker(fragment.getContext(), selectedEndDate, (notify, timeSec) -> {
+                BoostDialogs.showDatePicker(fragment.getContext(), selectedEndDate, (notify, timeSec, scheduleRepeatPeriod) -> {
                     selectedEndDate = timeSec * 1000L;
                     updateRows(false, true);
                 }, resourcesProvider);

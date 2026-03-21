@@ -819,8 +819,8 @@ public class TranslateAlert extends Dialog {
         window.setAttributes(params);
 
         int navigationbarColor = Theme.getColor(Theme.key_windowBackgroundWhite);
-        AndroidUtilities.setNavigationBarColor(window, navigationbarColor);
-        AndroidUtilities.setLightNavigationBar(window, AndroidUtilities.computePerceivedBrightness(navigationbarColor) > .721);
+        AndroidUtilities.setNavigationBarColor(this, navigationbarColor);
+        AndroidUtilities.setLightNavigationBar(this, AndroidUtilities.computePerceivedBrightness(navigationbarColor) > .721);
 
         container.forceLayout();
     }

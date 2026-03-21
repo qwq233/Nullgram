@@ -97,6 +97,7 @@ public class Utilities {
     public static native void drawDitheredGradient(Bitmap bitmap, int[] colors, int startX, int startY, int endX, int endY);
 //    public static native int saveProgressiveJpeg(Bitmap bitmap, int width, int height, int stride, int quality, String path);
     public static native void generateGradient(Bitmap bitmap, boolean unpin, int phase, float progress, int width, int height, int stride, int[] colors);
+    public static native void applyAlphaThreshold(Bitmap bitmap, int threshold);
 
     public static Bitmap stackBlurBitmapMax(Bitmap bitmap) {
         return stackBlurBitmapMax(bitmap, false);
@@ -631,6 +632,14 @@ public class Utilities {
         T temp = list.get(index1);
         list.set(index1, list.get(index2));
         list.set(index2, temp);
+    }
+
+    public static long tryParseLong(String str, long defaultValue) {
+        try {
+            return Long.parseLong(str);
+        } catch (Exception e) {
+            return defaultValue;
+        }
     }
 
 }

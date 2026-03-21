@@ -564,7 +564,7 @@ public class DocumentSelectActivity extends BaseFragment {
 
                         @Override
                         public void actionButtonPressed(boolean canceled, boolean notify,
-                                                        int scheduleDate) {
+                                                        int scheduleDate, int ignored) {
                             removeSelfFromStack();
                             if (!canceled) {
                                 sendSelectedPhotos(selectedPhotos, selectedPhotosOrder, notify,
@@ -1091,6 +1091,10 @@ public class DocumentSelectActivity extends BaseFragment {
     }
 
     private void sendSelectedFiles(boolean notify, int scheduleDate) {
+        sendSelectedFiles(notify, scheduleDate, -1);
+    }
+
+    private void sendSelectedFiles(boolean notify, int scheduleDate, int ignored) {
         if (selectedFiles.size() == 0 || delegate == null || sendPressed) {
             return;
         }

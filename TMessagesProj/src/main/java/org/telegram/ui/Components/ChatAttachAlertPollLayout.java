@@ -88,6 +88,12 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 
+import androidx.recyclerview.widget.DefaultItemAnimator;
+import androidx.recyclerview.widget.ItemTouchHelper;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.LinearSmoothScroller;
+import androidx.recyclerview.widget.RecyclerView;
+
 public class ChatAttachAlertPollLayout extends ChatAttachAlert.AttachAlertLayout implements SizeNotifierFrameLayout.SizeNotifierFrameLayoutDelegate, NotificationCenter.NotificationCenterDelegate {
 
     private final boolean todo;
@@ -571,7 +577,7 @@ public class ChatAttachAlertPollLayout extends ChatAttachAlert.AttachAlertLayout
                 ChatActivity chatActivity = (ChatActivity) parentAlert.baseFragment;
                 AlertsCreator.ensurePaidMessageConfirmation(parentAlert.currentAccount, parentAlert.getDialogId(), 1 + parentAlert.getAdditionalMessagesCount(), payStars -> {
                     if (chatActivity.isInScheduleMode()) {
-                        AlertsCreator.createScheduleDatePickerDialog(chatActivity.getParentActivity(), chatActivity.getDialogId(), (notify, scheduleDate) -> {
+                        AlertsCreator.createScheduleDatePickerDialog(chatActivity.getParentActivity(), chatActivity.getDialogId(), (notify, scheduleDate, scheduleRepeatPeriod) -> {
                             delegate.sendPoll(todo, null, notify, scheduleDate, payStars);
                             parentAlert.dismiss(true);
                         });
@@ -663,7 +669,7 @@ public class ChatAttachAlertPollLayout extends ChatAttachAlert.AttachAlertLayout
                 ChatActivity chatActivity = (ChatActivity) parentAlert.baseFragment;
                 AlertsCreator.ensurePaidMessageConfirmation(parentAlert.currentAccount, parentAlert.getDialogId(), 1 + parentAlert.getAdditionalMessagesCount(), payStars -> {
                     if (chatActivity.isInScheduleMode()) {
-                        AlertsCreator.createScheduleDatePickerDialog(chatActivity.getParentActivity(), chatActivity.getDialogId(), (notify, scheduleDate) -> {
+                        AlertsCreator.createScheduleDatePickerDialog(chatActivity.getParentActivity(), chatActivity.getDialogId(), (notify, scheduleDate, scheduleRepeatPeriod) -> {
                             delegate.sendPoll(poll, params, notify, scheduleDate, payStars);
                             parentAlert.dismiss(true);
                         });
@@ -836,7 +842,7 @@ public class ChatAttachAlertPollLayout extends ChatAttachAlert.AttachAlertLayout
             allowNesterScroll = true;
         }
         parentAlert.setAllowNestedScroll(allowNesterScroll);
-        doneItemEnabled = quizPoll && checksCount == 0 || enabled;
+        doneItemEnabled = enabled;
         parentAlert.updateDoneItemEnabled();
     }
 
@@ -1756,7 +1762,7 @@ public class ChatAttachAlertPollLayout extends ChatAttachAlert.AttachAlertLayout
                                 if (menu.findItem(android.R.id.copy) == null) {
                                     return;
                                 }
-                                ChatActivity.fillActionModeMenu(menu, ((ChatActivity) parentAlert.baseFragment).getCurrentEncryptedChat(), true);
+                                ChatActivity.fillActionModeMenu(menu, ((ChatActivity) parentAlert.baseFragment).getCurrentEncryptedChat(), true, true);
                             }
                         }
 
@@ -1874,7 +1880,7 @@ public class ChatAttachAlertPollLayout extends ChatAttachAlert.AttachAlertLayout
                                 if (menu.findItem(android.R.id.copy) == null) {
                                     return;
                                 }
-                                ChatActivity.fillActionModeMenu(menu, ((ChatActivity) parentAlert.baseFragment).getCurrentEncryptedChat(), true);
+                                ChatActivity.fillActionModeMenu(menu, ((ChatActivity) parentAlert.baseFragment).getCurrentEncryptedChat(), true, true);
                             }
                         }
 

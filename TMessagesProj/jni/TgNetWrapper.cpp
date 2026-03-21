@@ -94,6 +94,10 @@ jint getCurrentDatacenterId(JNIEnv *env, jclass c, jint instanceNum) {
     return ConnectionsManager::getInstance(instanceNum).getCurrentDatacenterId();
 }
 
+jlong getCurrentAuthKeyId(JNIEnv *env, jclass c, jint instanceNum) {
+    return ConnectionsManager::getInstance(instanceNum).getCurrentAuthKeyId();
+}
+
 jint isTestBackend(JNIEnv *env, jclass c, jint instanceNum) {
     return ConnectionsManager::getInstance(instanceNum).isTestBackend() ? 1 : 0;
 }
@@ -291,6 +295,10 @@ void resumeNetwork(JNIEnv *env, jclass c, jint instanceNum, jboolean partial) {
 
 void updateDcSettings(JNIEnv *env, jclass c, jint instanceNum) {
     ConnectionsManager::getInstance(instanceNum).updateDcSettings(0, false, false);
+}
+
+void moveDatacenter(JNIEnv *env, jclass c, jint instanceNum, jint datacenterId) {
+    ConnectionsManager::getInstance(instanceNum).moveToDatacenter(datacenterId);
 }
 
 void setIpStrategy(JNIEnv *env, jclass c, jint instanceNum, jbyte value) {
@@ -545,6 +553,7 @@ static JNINativeMethod ConnectionsManagerMethods[] = {
         {"native_getCurrentTime", "(I)I", (void *) getCurrentTime},
         {"native_getCurrentPingTime", "(I)I", (void *) getCurrentPingTime},
         {"native_getCurrentDatacenterId", "(I)I", (void *) getCurrentDatacenterId},
+        {"native_getCurrentAuthKeyId", "(I)J", (void *) getCurrentAuthKeyId},
         {"native_isTestBackend", "(I)I", (void *) isTestBackend},
         {"native_getTimeDifference", "(I)I", (void *) getTimeDifference},
         {"native_sendRequest", "(IJIIIZI)V", (void *) sendRequest},
@@ -570,6 +579,7 @@ static JNINativeMethod ConnectionsManagerMethods[] = {
         {"native_pauseNetwork", "(I)V", (void *) pauseNetwork},
         {"native_resumeNetwork", "(IZ)V", (void *) resumeNetwork},
         {"native_updateDcSettings", "(I)V", (void *) updateDcSettings},
+        {"native_moveDatacenter", "(II)V", (void *) moveDatacenter},
         {"native_setIpStrategy", "(IB)V", (void *) setIpStrategy},
         {"native_setNetworkAvailable", "(IZIZ)V", (void *) setNetworkAvailable},
         {"native_setPushConnectionEnabled", "(IZ)V", (void *) setPushConnectionEnabled},

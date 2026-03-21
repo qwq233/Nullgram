@@ -832,7 +832,8 @@ public class ImageLoader {
                         imgView.setImageBitmapByKey(bitmapDrawable, kf, ImageReceiver.TYPE_IMAGE, false, finalImageReceiverGuidsArray.get(a));
                     }
 
-                    memCache.put(kf, bitmapDrawable);
+                    if (!kf.contains("nocache"))
+                        memCache.put(kf, bitmapDrawable);
                 });
             } catch (Throwable e) {
                 FileLog.e(e);
@@ -1740,9 +1741,9 @@ public class ImageLoader {
                         if (cacheImage.key.endsWith("_f")) {
                             wallpaperMemCache.put(cacheImage.key, bitmapDrawable);
                             incrementUseCount = false;
-                        } else if (!cacheImage.key.endsWith("_isc") && bitmapDrawable.getBitmap().getWidth() <= 80 * AndroidUtilities.density && bitmapDrawable.getBitmap().getHeight() <= 80 * AndroidUtilities.density) {
+                        } else if (!cacheImage.key.endsWith("_isc") && !cacheImage.key.endsWith("_nocache") && bitmapDrawable.getBitmap().getWidth() <= 80 * AndroidUtilities.density && bitmapDrawable.getBitmap().getHeight() <= 80 * AndroidUtilities.density) {
                             smallImagesMemCache.put(cacheImage.key, bitmapDrawable);
-                        } else {
+                        } else if (!cacheImage.key.endsWith("_nocache")) {
                             memCache.put(cacheImage.key, bitmapDrawable);
                         }
                         toSet = bitmapDrawable;
@@ -2935,6 +2936,7 @@ public class ImageLoader {
     }
 
     public void putImageToCache(BitmapDrawable bitmap, String key, boolean smallImage) {
+        if (key.endsWith("_nocache")) return;
         if (smallImage) {
             smallImagesMemCache.put(key, bitmap);
         } else {
@@ -3691,11 +3693,11 @@ public class ImageLoader {
 
     private void httpFileLoadError(final String location) {
         imageLoadQueue.postRunnable(() -> {
-            CacheImage img = imageLoadingByUrl.get(location);
+            final CacheImage img = imageLoadingByUrl.get(location);
             if (img == null) {
                 return;
             }
-            HttpImageTask oldTask = img.httpTask;
+            final HttpImageTask oldTask = img.httpTask;
             if (oldTask != null) {
                 img.httpTask = new HttpImageTask(oldTask.cacheImage, oldTask.imageSize);
                 httpTasks.add(img.httpTask);
