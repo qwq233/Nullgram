@@ -1,6 +1,6 @@
 [versions]
-agp = "8.12.3"
-aboutlibraries = "12.2.4"
+agp = "9.1.0"
+aboutlibraries = "14.0.0-b03"
 biometric = "1.1.0"
 checkerCompatQual = "2.5.6"
 checkerQual = "3.54.0"
@@ -87,7 +87,7 @@ nanohttpd = { module = "org.nanohttpd:nanohttpd", version.ref = "nanohttpd" }
 recaptcha = { module = "com.google.android.recaptcha:recaptcha", version.ref = "recaptcha" }
 
 [plugins]
-aboutlibraries = { id = "com.mikepenz.aboutlibraries.plugin" , version.ref = "aboutlibraries" }
+aboutlibraries = { id = "com.mikepenz.aboutlibraries.plugin.android" , version.ref = "aboutlibraries" }
 android-application = { id = "com.android.application", version.ref = "agp" }
 android-library = { id = "com.android.library", version.ref = "agp" }
 kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
@@ -95,6 +95,6 @@ kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
 serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
 firebase-crashlytics = { id = "com.google.firebase.crashlytics", version.ref = "crashlytics" }
 google-services = { id = "com.google.gms.google-services", version.ref = "gms" }
-triplet-play = { id = "com.github.triplet.play", version = "3.12.1" }
+triplet-play = { id = "com.github.triplet.play", version = "4.0.0" }
 ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
 rust = { id = "org.mozilla.rust-android-gradle.rust-android", version.ref = "rust" }

@@ -28,7 +28,6 @@ import java.util.Date
 
 plugins {
     alias(libs.plugins.android.application)
-    alias(libs.plugins.kotlin.android)
     alias(libs.plugins.firebase.crashlytics)
     alias(libs.plugins.google.services)
     alias(libs.plugins.triplet.play)
@@ -130,8 +129,8 @@ android {
     namespace = "org.telegram.messenger"
 
     sourceSets.getByName("main") {
-        java.srcDir("src/main/java")
-        jniLibs.srcDirs("./jni/")
+        java.directories.add("src/main/java")
+        jniLibs.directories.add("./jni/")
     }
 
     externalNativeBuild {
@@ -149,10 +148,6 @@ android {
 
     packaging {
         resources.excludes += "**"
-    }
-
-    kotlin {
-        jvmToolchain(Version.java.toString().toInt())
     }
 
     signingConfigs {
@@ -195,6 +190,9 @@ android {
         buildConfig = true
     }
 
+    //noinspection WrongGradleMethod
+    val isBuildingBundle = gradle.startParameter.taskNames.any { it.lowercase().contains("bundle") }
+
     defaultConfig {
         externalNativeBuild {
             cmake {
@@ -208,36 +206,48 @@ android {
                 )
             }
         }
+        ndk {
+            if (isBuildingBundle) {
+                abiFilters.addAll(listOf("arm64-v8a", "armeabi-v7a"))
+            }
+        }
         buildConfigField("String", "BUILD_TIME", "\"${SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(Date())}\"")
     }
 
     splits {
         abi {
-            isEnable = true
+            isEnable = !isBuildingBundle
             reset()
             include("armeabi-v7a", "arm64-v8a")
         }
     }
+}
 
-    androidComponents {
-        onVariants { variant ->
-            variant.buildConfigFields!!.put("isPlay", BuildConfigField("boolean", variant.name.lowercase() == "play", null))
+base {
+    archivesName.set("Nullgram")
+}
+
+androidComponents {
+    onVariants { variant ->
+        variant.buildConfigFields!!.put("isPlay", BuildConfigField("boolean", variant.name.lowercase() == "play", null))
+
+        variant.outputs.forEach { output ->
+            val abi = output.filters.find { it.filterType == FilterConfiguration.FilterType.ABI }?.identifier
+            val mappedAbi = when (abi) {
+                "arm64-v8a" -> "arm64"
+                "armeabi-v7a" -> "arm32"
+                else -> abi ?: "universal"
+            }
+            val vName = android.defaultConfig.versionName
+            val oName = "Nullgram-$vName-$mappedAbi.apk"
+            
+            (output as? com.android.build.api.variant.impl.VariantOutputImpl)?.outputFileName?.set(oName)
         }
     }
-
-    applicationVariants.all {
-        outputs.all {
-            val abi = this.filters.find { it.filterType == FilterConfiguration.FilterType.ABI.name }?.identifier
-            val output = this as? com.android.build.gradle.internal.api.BaseVariantOutputImpl
-            val outputFileName = "Nullgram-${defaultConfig.versionName}-${abiName[abi]}.apk"
-            output?.outputFileName = outputFileName
-        }
-    }
-
-
 }
 
 kotlin {
+    jvmToolchain(Version.java.toString().toInt())
     sourceSets.configureEach {
         kotlin.srcDir("${layout.buildDirectory.asFile.get().absolutePath}/generated/ksp/$name/kotlin/")
     }
