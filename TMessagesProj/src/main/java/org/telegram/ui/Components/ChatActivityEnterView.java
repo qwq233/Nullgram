@@ -10006,8 +10006,9 @@ public class ChatActivityEnterView extends FrameLayout implements
             return;
         }
         createMessageEditText();
-        TLRPC.Chat chat = parentFragment.getMessagesController().getChat(-dialog_id);
-        TLRPC.ChatFull full = parentFragment.getMessagesController().getChatFull(-dialog_id);
+        MessagesController mc = parentFragment != null ? parentFragment.getMessagesController() : accountInstance.getMessagesController();
+        TLRPC.Chat chat = mc != null ? mc.getChat(-dialog_id) : null;
+        TLRPC.ChatFull full = mc != null ? mc.getChatFull(-dialog_id) : null;
         TLRPC.Peer defPeer = full != null ? full.default_send_as : null;
         if (defPeer == null && delegate.getSendAsPeers() != null && !delegate.getSendAsPeers().peers.isEmpty() && !delegate.getSendAsPeers().isModifiedByQuickToggleAnonymous) {
             defPeer = delegate.getSendAsPeers().peers.get(0).peer;
