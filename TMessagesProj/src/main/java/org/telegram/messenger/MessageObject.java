@@ -2379,6 +2379,10 @@ public class MessageObject {
                         rights.append('\n').append(n.pin_messages ? '+' : '-').append(' ');
                         rights.append(getString(R.string.EventLogPromotedPinMessages));
                     }
+                    if (o.manage_ranks != n.manage_ranks) {
+                        rights.append('\n').append(n.manage_ranks ? '+' : '-').append(' ');
+                        rights.append(getString(R.string.EventLogPromotedEditRanks));
+                    }
                 }
                 if (o.manage_direct_messages != n.manage_direct_messages) {
                     rights.append('\n').append(n.manage_direct_messages ? '+' : '-').append(' ');
@@ -2462,6 +2466,20 @@ public class MessageObject {
                 }
                 rights.append('\n').append(!n.pin_messages ? '+' : '-').append(' ');
                 rights.append(getString(R.string.EventLogRestrictedPinMessages));
+            }
+            if (o.edit_rank != n.edit_rank) {
+                if (!added) {
+                    rights.append('\n');
+                }
+                rights.append('\n').append(!n.edit_rank ? '+' : '-').append(' ');
+                rights.append(getString(R.string.EventLogRestrictedEditRank));
+            }
+            if (o.send_reactions != n.send_reactions) {
+                if (!added) {
+                    rights.append('\n');
+                }
+                rights.append('\n').append(!n.send_reactions ? '+' : '-').append(' ');
+                rights.append(getString(R.string.EventLogRestrictedSendReactions));
             }
             messageText = rights.toString();
         } else if (event.action instanceof TLRPC.TL_channelAdminLogEventActionParticipantToggleBan) {
@@ -2604,6 +2622,20 @@ public class MessageObject {
                     }
                     rights.append('\n').append(!n.pin_messages ? '+' : '-').append(' ');
                     rights.append(getString(R.string.EventLogRestrictedPinMessages));
+                }
+                if (o.edit_rank != n.edit_rank) {
+                    if (!added) {
+                        rights.append('\n');
+                    }
+                    rights.append('\n').append(!n.edit_rank ? '+' : '-').append(' ');
+                    rights.append(getString(R.string.EventLogRestrictedEditRank));
+                }
+                if (o.send_reactions != n.send_reactions) {
+                    if (!added) {
+                        rights.append('\n');
+                    }
+                    rights.append('\n').append(!n.send_reactions ? '+' : '-').append(' ');
+                    rights.append(getString(R.string.EventLogRestrictedSendReactions));
                 }
                 messageText = rights.toString();
             } else {
@@ -3039,6 +3071,35 @@ public class MessageObject {
         } else if (event.action instanceof TLRPC.TL_channelAdminLogEventActionSendMessage) {
             message = ((TLRPC.TL_channelAdminLogEventActionSendMessage) event.action).message;
             messageText = replaceWithLink(getString(R.string.EventLogSendMessages), "un1", fromUser);
+        } else if (event.action instanceof TLRPC.TL_channelAdminLogEventActionParticipantEditRank) {
+            final TLRPC.TL_channelAdminLogEventActionParticipantEditRank action = (TLRPC.TL_channelAdminLogEventActionParticipantEditRank) event.action;
+            if (action.user_id == event.user_id) {
+                if (!TextUtils.isEmpty(action.prev_rank) && !TextUtils.isEmpty(action.new_rank)) {
+                    messageText = formatString(R.string.EventLogRankSelfEdit, action.prev_rank, action.new_rank);
+                    messageText = replaceWithLink(messageText, "un1", fromUser);
+                } else if (TextUtils.isEmpty(action.prev_rank) && !TextUtils.isEmpty(action.new_rank)) {
+                    messageText = formatString(R.string.EventLogRankSelfAdd, action.new_rank);
+                    messageText = replaceWithLink(messageText, "un1", fromUser);
+                } else {
+                    messageText = formatString(R.string.EventLogRankSelfRemove, action.prev_rank);
+                    messageText = replaceWithLink(messageText, "un1", fromUser);
+                }
+            } else {
+                final TLRPC.User ofUser = MessagesController.getInstance(currentAccount).getUser(action.user_id);
+                if (!TextUtils.isEmpty(action.prev_rank) && !TextUtils.isEmpty(action.new_rank)) {
+                    messageText = formatString(R.string.EventLogRankEdit, action.prev_rank, action.new_rank);
+                    messageText = replaceWithLink(messageText, "un1", fromUser);
+                    messageText = replaceWithLink(messageText, "un2", ofUser);
+                } else if (TextUtils.isEmpty(action.prev_rank) && !TextUtils.isEmpty(action.new_rank)) {
+                    messageText = formatString(R.string.EventLogRankAdd, action.new_rank);
+                    messageText = replaceWithLink(messageText, "un1", fromUser);
+                    messageText = replaceWithLink(messageText, "un2", ofUser);
+                } else {
+                    messageText = formatString(R.string.EventLogRankRemove, action.prev_rank);
+                    messageText = replaceWithLink(messageText, "un1", fromUser);
+                    messageText = replaceWithLink(messageText, "un2", ofUser);
+                }
+            }
         } else if (event.action instanceof TLRPC.TL_channelAdminLogEventActionChangeAvailableReactions) {
             TLRPC.TL_channelAdminLogEventActionChangeAvailableReactions eventActionChangeAvailableReactions = (TLRPC.TL_channelAdminLogEventActionChangeAvailableReactions) event.action;
             boolean customReactionsChanged = eventActionChangeAvailableReactions.prev_value instanceof TLRPC.TL_chatReactionsSome

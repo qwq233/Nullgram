@@ -46,6 +46,7 @@ configurations {
 
 var serviceAccountCredentialsFile = File(rootProject.projectDir, "service_account_credentials.json")
 val abiName = mapOf("armeabi-v7a" to "arm32", "arm64-v8a" to "arm64")
+val isCi = System.getenv("GITHUB_ACTIONS") == "true"
 
 if (serviceAccountCredentialsFile.isFile) {
     setupPlay(Version.isStable)
@@ -171,7 +172,10 @@ android {
             isShrinkResources = true
             proguardFiles(File(projectDir, "proguard-rules.pro"))
 
-            the<CrashlyticsExtension>().nativeSymbolUploadEnabled = true
+            the<CrashlyticsExtension>().nativeSymbolUploadEnabled = isCi
+            configure<com.google.firebase.crashlytics.buildtools.gradle.CrashlyticsExtension> {
+                mappingFileUploadEnabled = isCi
+            }
         }
 
         getByName("debug") {

@@ -83,6 +83,8 @@ public class ChatObject {
     public static final int ACTION_SEND_GIFS = 23;
 
     public static final int ACTION_MANAGE_DIRECT = 24;
+    public static final int ACTION_MANAGE_TAGS = 25;
+    public static final int ACTION_SEND_REACTIONS = 26;
 
     public final static int VIDEO_FRAME_NO_FRAME = 0;
     public final static int VIDEO_FRAME_REQUESTING = 1;
@@ -1646,6 +1648,7 @@ public class ChatObject {
             case ACTION_SEND_DOCUMENTS:
             case ACTION_SEND_VOICE:
             case ACTION_SEND_ROUND:
+            case ACTION_SEND_REACTIONS:
             case ACTION_SEND_PLAIN:
                 return true;
         }
@@ -1706,6 +1709,8 @@ public class ChatObject {
                 return rights.send_voices;
             case ACTION_SEND_ROUND:
                 return rights.send_roundvideos;
+            case ACTION_SEND_REACTIONS:
+                return rights.send_reactions;
             case ACTION_SEND_PLAIN:
                 return rights.send_plain;
         }
@@ -1816,6 +1821,9 @@ public class ChatObject {
             switch (action) {
                 case ACTION_MANAGE_DIRECT:
                     value = chat.admin_rights.manage_direct_messages;
+                    break;
+                case ACTION_MANAGE_TAGS:
+                    value = chat.admin_rights.manage_ranks;
                     break;
                 case ACTION_PIN:
                     value = chat.admin_rights.pin_messages;
@@ -2019,6 +2027,20 @@ public class ChatObject {
 
     public static boolean canAddAdmins(TLRPC.Chat chat) {
         return canUserDoAction(chat, ACTION_ADD_ADMINS);
+    }
+
+    public static boolean canManageTags(TLRPC.Chat chat) {
+        return canUserDoAction(chat, ACTION_MANAGE_TAGS);
+    }
+
+    public static boolean canManageMyTag(TLRPC.Chat chat) {
+        if (chat == null) return false;
+        if (chat.creator) return true;
+        if (chat.banned_rights == null) {
+            if (chat.default_banned_rights == null) return true;
+            return !chat.default_banned_rights.edit_rank;
+        }
+        return !chat.banned_rights.edit_rank;
     }
 
     public static boolean canBlockUsers(TLRPC.Chat chat) {
@@ -2242,6 +2264,8 @@ public class ChatObject {
         currentBannedRights += bannedRights.send_audios ? 1 : 0;
         currentBannedRights += bannedRights.send_docs ? 1 : 0;
         currentBannedRights += bannedRights.send_plain ? 1 : 0;
+        currentBannedRights += bannedRights.edit_rank ? 1 : 0;
+        currentBannedRights += bannedRights.send_reactions ? 1 : 0;
         currentBannedRights += bannedRights.until_date;
         return currentBannedRights;
     }

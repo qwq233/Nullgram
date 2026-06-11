@@ -2339,6 +2339,7 @@ public class ChannelAdminLogActivity extends BaseFragment implements Notificatio
                     selectedParticipant.banned_rights.send_audios = true;
                     selectedParticipant.banned_rights.send_voices = true;
                     selectedParticipant.banned_rights.send_docs = true;
+                    selectedParticipant.banned_rights.send_reactions = true;
                     getMessagesController().setParticipantBannedRole(currentChat.id, user, null, selectedParticipant.banned_rights, true, getFragmentForAlert(1), () -> {
                         BulletinFactory.of(this).createSimpleBulletin(R.raw.ic_ban, AndroidUtilities.replaceTags(LocaleController.formatString(R.string.RestrictedParticipantSending, UserObject.getFirstName(user)))).show(false);
                         reloadLastMessages();

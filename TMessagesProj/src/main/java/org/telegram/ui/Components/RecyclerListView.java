@@ -2984,6 +2984,10 @@ public class RecyclerListView extends RecyclerView {
         return paint != null ? paint : Theme.getThemePaint(paintKey);
     }
 
+    public Drawable getClipBackground(View child) {
+        return null;
+    }
+
     public interface onMultiSelectionChanged {
         void onSelectionChanged(int position, boolean selected, float x, float y);
         boolean canSelect(int position);

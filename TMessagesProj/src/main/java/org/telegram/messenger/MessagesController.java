@@ -5740,6 +5740,11 @@ public class MessagesController extends BaseController implements NotificationCe
         TLRPC.InputUser inputUser;
         if (user.id == getUserConfig().getClientUserId()) {
             inputUser = new TLRPC.TL_inputUserSelf();
+        } else if (user.access_hash == 0 && user.fromMessageDialogId != 0 && user.fromMessageId != 0) {
+            inputUser = new TLRPC.TL_inputUserFromMessage();
+            inputUser.user_id = user.id;
+            ((TLRPC.TL_inputUserFromMessage) inputUser).peer = getInputPeer(user.fromMessageDialogId);
+            ((TLRPC.TL_inputUserFromMessage) inputUser).msg_id = user.fromMessageId;
         } else {
             inputUser = new TLRPC.TL_inputUser();
             inputUser.user_id = user.id;
@@ -5755,7 +5760,17 @@ public class MessagesController extends BaseController implements NotificationCe
         if (peer instanceof TLRPC.TL_inputPeerSelf) {
             return new TLRPC.TL_inputUserSelf();
         }
-        TLRPC.TL_inputUser inputUser = new TLRPC.TL_inputUser();
+        if (peer.access_hash == 0) {
+            final TLRPC.User user = getUser(peer.user_id);
+            if (user.access_hash == 0 && user.fromMessageDialogId != 0 && user.fromMessageId != 0) {
+                final TLRPC.TL_inputUserFromMessage inputUser = new TLRPC.TL_inputUserFromMessage();
+                inputUser.user_id = peer.user_id;
+                inputUser.peer = getInputPeer(user.fromMessageDialogId);
+                inputUser.msg_id = user.fromMessageId;
+                return inputUser;
+            }
+        }
+        final TLRPC.TL_inputUser inputUser = new TLRPC.TL_inputUser();
         inputUser.user_id = peer.user_id;
         inputUser.access_hash = peer.access_hash;
         return inputUser;
@@ -5767,17 +5782,35 @@ public class MessagesController extends BaseController implements NotificationCe
 
     public static TLRPC.InputChannel getInputChannel(TLRPC.Chat chat) {
         if (chat instanceof TLRPC.TL_channel || chat instanceof TLRPC.TL_channelForbidden) {
-            TLRPC.InputChannel inputChat = new TLRPC.TL_inputChannel();
-            inputChat.channel_id = chat.id;
-            inputChat.access_hash = chat.access_hash;
-            return inputChat;
+            if (chat.access_hash == 0 && chat.fromMessageDialogId != 0 && chat.fromMessageId != 0) {
+                final TLRPC.TL_inputChannelFromMessage inputChat = new TLRPC.TL_inputChannelFromMessage();
+                inputChat.channel_id = chat.id;
+                inputChat.peer = MessagesController.getInstance(UserConfig.selectedAccount).getInputPeer(chat.fromMessageDialogId);
+                inputChat.msg_id = chat.fromMessageId;
+                return inputChat;
+            } else {
+                final TLRPC.InputChannel inputChat = new TLRPC.TL_inputChannel();
+                inputChat.channel_id = chat.id;
+                inputChat.access_hash = chat.access_hash;
+                return inputChat;
+            }
         } else {
             return new TLRPC.TL_inputChannelEmpty();
         }
     }
 
     public static TLRPC.InputChannel getInputChannel(TLRPC.InputPeer peer) {
-        TLRPC.TL_inputChannel inputChat = new TLRPC.TL_inputChannel();
+        if (peer.access_hash == 0) {
+            final TLRPC.Chat chat = MessagesController.getInstance(UserConfig.selectedAccount).getChat(peer.channel_id);
+            if (chat != null && chat.access_hash == 0 && chat.fromMessageId != 0 && chat.fromMessageDialogId != 0) {
+                final TLRPC.TL_inputChannelFromMessage inputChat = new TLRPC.TL_inputChannelFromMessage();
+                inputChat.channel_id = peer.channel_id;
+                inputChat.peer = MessagesController.getInstance(UserConfig.selectedAccount).getInputPeer(chat.fromMessageDialogId);
+                inputChat.msg_id = chat.fromMessageId;
+                return inputChat;
+            }
+        }
+        final TLRPC.TL_inputChannel inputChat = new TLRPC.TL_inputChannel();
         inputChat.channel_id = peer.channel_id;
         inputChat.access_hash = peer.access_hash;
         return inputChat;
@@ -5793,18 +5826,32 @@ public class MessagesController extends BaseController implements NotificationCe
             inputPeer = new TLRPC.TL_inputPeerChat();
             inputPeer.chat_id = peer.chat_id;
         } else if (peer instanceof TLRPC.TL_peerChannel) {
-            inputPeer = new TLRPC.TL_inputPeerChannel();
-            inputPeer.channel_id = peer.channel_id;
-            TLRPC.Chat chat = getChat(peer.channel_id);
-            if (chat != null) {
-                inputPeer.access_hash = chat.access_hash;
+            final TLRPC.Chat chat = getChat(peer.channel_id);
+            if (chat != null && chat.access_hash == 0 && chat.fromMessageDialogId != 0 && chat.fromMessageDialogId != peer.channel_id && chat.fromMessageId != 0) {
+                inputPeer = new TLRPC.TL_inputPeerChannelFromMessage();
+                inputPeer.channel_id = peer.channel_id;
+                inputPeer.peer = getInputPeer(chat.fromMessageDialogId);
+                inputPeer.msg_id = chat.fromMessageId;
+            } else {
+                inputPeer = new TLRPC.TL_inputPeerChannel();
+                inputPeer.channel_id = peer.channel_id;
+                if (chat != null) {
+                    inputPeer.access_hash = chat.access_hash;
+                }
             }
         } else {
-            inputPeer = new TLRPC.TL_inputPeerUser();
-            inputPeer.user_id = peer.user_id;
-            TLRPC.User user = getUser(peer.user_id);
-            if (user != null) {
-                inputPeer.access_hash = user.access_hash;
+            final TLRPC.User user = getUser(peer.user_id);
+            if (user != null && user.access_hash == 0 && user.fromMessageDialogId != 0 && user.fromMessageId != 0) {
+                inputPeer = new TLRPC.TL_inputPeerUserFromMessage();
+                inputPeer.user_id = peer.user_id;
+                inputPeer.peer = getInputPeer(user.fromMessageDialogId);
+                inputPeer.msg_id = user.fromMessageId;
+            } else {
+                inputPeer = new TLRPC.TL_inputPeerUser();
+                inputPeer.user_id = peer.user_id;
+                if (user != null) {
+                    inputPeer.access_hash = user.access_hash;
+                }
             }
         }
         return inputPeer;
@@ -5817,19 +5864,33 @@ public class MessagesController extends BaseController implements NotificationCe
         } else if (id < 0) {
             TLRPC.Chat chat = getChat(-id);
             if (ChatObject.isChannel(chat)) {
-                inputPeer = new TLRPC.TL_inputPeerChannel();
-                inputPeer.channel_id = -id;
-                inputPeer.access_hash = chat.access_hash;
+                if (chat != null && chat.access_hash == 0 && chat.fromMessageDialogId != 0 && chat.fromMessageDialogId != id && chat.fromMessageId != 0) {
+                    inputPeer = new TLRPC.TL_inputPeerChannelFromMessage();
+                    inputPeer.channel_id = -id;
+                    inputPeer.peer = getInputPeer(chat.fromMessageDialogId);
+                    inputPeer.msg_id = chat.fromMessageId;
+                } else {
+                    inputPeer = new TLRPC.TL_inputPeerChannel();
+                    inputPeer.channel_id = -id;
+                    inputPeer.access_hash = chat.access_hash;
+                }
             } else {
                 inputPeer = new TLRPC.TL_inputPeerChat();
                 inputPeer.chat_id = -id;
             }
         } else {
             TLRPC.User user = getUser(id);
-            inputPeer = new TLRPC.TL_inputPeerUser();
-            inputPeer.user_id = id;
-            if (user != null) {
-                inputPeer.access_hash = user.access_hash;
+            if (user != null && user.access_hash == 0 && user.fromMessageDialogId != 0 && user.fromMessageDialogId != id && user.fromMessageId != 0) {
+                inputPeer = new TLRPC.TL_inputPeerUserFromMessage();
+                inputPeer.user_id = id;
+                inputPeer.peer = getInputPeer(user.fromMessageDialogId);
+                inputPeer.msg_id = user.fromMessageId;
+            } else {
+                inputPeer = new TLRPC.TL_inputPeerUser();
+                inputPeer.user_id = id;
+                if (user != null) {
+                    inputPeer.access_hash = user.access_hash;
+                }
             }
         }
         return inputPeer;
@@ -5838,9 +5899,16 @@ public class MessagesController extends BaseController implements NotificationCe
     public static TLRPC.InputPeer getInputPeer(TLRPC.Chat chat) {
         TLRPC.InputPeer inputPeer;
         if (ChatObject.isChannel(chat)) {
-            inputPeer = new TLRPC.TL_inputPeerChannel();
-            inputPeer.channel_id = chat.id;
-            inputPeer.access_hash = chat.access_hash;
+            if (chat != null && chat.access_hash == 0 && chat.fromMessageDialogId != 0 && chat.fromMessageId != 0) {
+                inputPeer = new TLRPC.TL_inputPeerChannelFromMessage();
+                inputPeer.channel_id = chat.id;
+                inputPeer.peer = MessagesController.getInstance(UserConfig.selectedAccount).getInputPeer(chat.fromMessageDialogId);
+                inputPeer.msg_id = chat.fromMessageId;
+            } else {
+                inputPeer = new TLRPC.TL_inputPeerChannel();
+                inputPeer.channel_id = chat.id;
+                inputPeer.access_hash = chat.access_hash;
+            }
         } else {
             inputPeer = new TLRPC.TL_inputPeerChat();
             inputPeer.chat_id = chat.id;
@@ -5849,9 +5917,17 @@ public class MessagesController extends BaseController implements NotificationCe
     }
 
     public static TLRPC.InputPeer getInputPeer(TLRPC.User user) {
-        TLRPC.InputPeer inputPeer = new TLRPC.TL_inputPeerUser();
-        inputPeer.user_id = user.id;
-        inputPeer.access_hash = user.access_hash;
+        TLRPC.InputPeer inputPeer;
+        if (user != null && user.access_hash == 0 && user.fromMessageDialogId != 0 && user.fromMessageId != 0) {
+            inputPeer = new TLRPC.TL_inputPeerUserFromMessage();
+            inputPeer.user_id = user.id;
+            inputPeer.peer = MessagesController.getInstance(UserConfig.selectedAccount).getInputPeer(user.fromMessageDialogId);
+            inputPeer.msg_id = user.fromMessageId;
+        } else {
+            inputPeer = new TLRPC.TL_inputPeerUser();
+            inputPeer.user_id = user.id;
+            inputPeer.access_hash = user.access_hash;
+        }
         return inputPeer;
     }
 
@@ -6673,6 +6749,10 @@ public class MessagesController extends BaseController implements NotificationCe
             }
         }
         updateEmojiStatusUntilUpdate(user.id, user.emoji_status);
+        if (oldUser != null && oldUser.access_hash == 0 && user.fromMessageDialogId != 0 && user.fromMessageId != 0) {
+            oldUser.fromMessageDialogId = user.fromMessageDialogId;
+            oldUser.fromMessageId = user.fromMessageId;
+        }
         if (user.min) {
             if (oldUser != null) {
                 if (!fromCache) {
@@ -6803,6 +6883,10 @@ public class MessagesController extends BaseController implements NotificationCe
             }
         }
         updateEmojiStatusUntilUpdate(-chat.id, chat.emoji_status);
+        if (oldChat != null && oldChat.access_hash == 0 && chat.fromMessageDialogId != 0 && chat.fromMessageId != 0) {
+            oldChat.fromMessageDialogId = chat.fromMessageDialogId;
+            oldChat.fromMessageId = chat.fromMessageId;
+        }
         if (chat.min) {
             if (oldChat != null) {
                 if (!fromCache) {
@@ -7248,14 +7332,132 @@ public class MessagesController extends BaseController implements NotificationCe
             return "";
         }
         LongSparseArray<TLRPC.ChannelParticipant> array = channelAdmins.get(chatId);
+        if (array != null) {
+            TLRPC.ChannelParticipant participant = array.get(uid);
+            if (participant != null) {
+                if (participant.rank != null) {
+                    return participant.rank;
+                }
+                if (participant instanceof TLRPC.TL_channelParticipantCreator) {
+                    return LocaleController.getString(R.string.ChatTagOwner);
+                }
+                if (participant instanceof TLRPC.TL_channelParticipantAdmin) {
+                    return LocaleController.getString(R.string.ChatTagAdmin);
+                }
+            }
+        }
+        TLRPC.ChatFull chatFull = getChatFull(chatId);
+        if (chatFull != null && chatFull.participants != null) {
+            for (int i = 0; i < chatFull.participants.participants.size(); i++) {
+                TLRPC.ChatParticipant participant = chatFull.participants.participants.get(i);
+                if (participant.user_id == uid) {
+                    if (participant.rank != null) {
+                        return participant.rank;
+                    }
+                    if (participant instanceof TLRPC.TL_chatChannelParticipant) {
+                        TLRPC.TL_chatChannelParticipant chatChannelParticipant = (TLRPC.TL_chatChannelParticipant) participant;
+                        if (chatChannelParticipant.channelParticipant != null) {
+                            return chatChannelParticipant.channelParticipant.rank;
+                        }
+                    }
+                    if (participant instanceof TLRPC.TL_chatParticipantCreator) {
+                        return LocaleController.getString(R.string.ChatTagOwner);
+                    }
+                    if (participant instanceof TLRPC.TL_chatParticipantAdmin) {
+                        return LocaleController.getString(R.string.ChatTagAdmin);
+                    }
+                    return null;
+                }
+            }
+        }
+        return null;
+    }
+
+    public void updateRank(long chatId, long uid, String rank) {
+        if (TextUtils.isEmpty(rank)) {
+            rank = null;
+        }
+        final TLRPC.Chat chat = getChat(chatId);
+        LongSparseArray<TLRPC.ChannelParticipant> array = channelAdmins.get(chatId);
+        if (array != null) {
+            TLRPC.ChannelParticipant participant = array.get(uid);
+            if (participant != null) {
+                participant.rank = rank;
+            }
+        }
+        TLRPC.ChatFull chatFull = getChatFull(chatId);
+        if (chatFull != null && chatFull.participants != null) {
+            for (int i = 0; i < chatFull.participants.participants.size(); i++) {
+                TLRPC.ChatParticipant participant = chatFull.participants.participants.get(i);
+                participant.setRank(uid, rank); if (participant.user_id == uid) {
+                    if (participant instanceof TLRPC.TL_chatChannelParticipant) {
+                        final TLRPC.TL_chatChannelParticipant pp = (TLRPC.TL_chatChannelParticipant) participant;
+                        if (pp.channelParticipant != null) {
+                            pp.channelParticipant.rank = rank;
+                        }
+                    } else {
+                        participant.rank = rank;
+                    }
+                }
+            }
+        }
+        getNotificationCenter().postNotificationName(NotificationCenter.updateInterfaces, 0);
+        getNotificationCenter().postNotificationName(NotificationCenter.updatedChatRanks, chatId, uid, rank);
+        getMessagesStorage().updateRanksInLastMessages(-chatId, uid, rank);
+    }
+
+    public TLObject getParticipant(long chatId, long uid) {
+        final LongSparseArray<TLRPC.ChannelParticipant> array = channelAdmins.get(chatId);
         if (array == null) {
-            return null;
+            final TLRPC.ChatFull chatFull = getChatFull(chatId);
+            if (chatFull != null && chatFull.participants != null) {
+                for (int i = 0; i < chatFull.participants.participants.size(); ++i) {
+                    final TLRPC.ChatParticipant p = chatFull.participants.participants.get(i);
+                    if (p.user_id == uid) {
+                        return p;
+                    }
+                }
+            }
         }
-        TLRPC.ChannelParticipant participant = array.get(uid);
-        if (participant == null) {
-            return null;
+        return array.get(uid);
+    }
+
+    public boolean isAdmin(long chatId, long uid) {
+        if (chatId == uid) return true;
+        final LongSparseArray<TLRPC.ChannelParticipant> array = channelAdmins.get(chatId);
+        if (array == null) {
+            final TLRPC.ChatFull chatFull = getChatFull(chatId);
+            if (chatFull != null && chatFull.participants != null) {
+                for (int i = 0; i < chatFull.participants.participants.size(); ++i) {
+                    final TLRPC.ChatParticipant p = chatFull.participants.participants.get(i);
+                    if (p.user_id == uid) {
+                        return p instanceof TLRPC.TL_chatParticipantAdmin || p instanceof TLRPC.TL_chatParticipantCreator;
+                    }
+                }
+            }
         }
-        return participant.rank != null ? participant.rank : "";
+        final TLRPC.ChannelParticipant participant = array.get(uid);
+        return participant instanceof TLRPC.TL_channelParticipantAdmin || participant instanceof TLRPC.TL_channelParticipantCreator;
+    }
+
+    public boolean isOwner(long chatId, long uid) {
+        if (chatId == uid) return true;
+        final TLRPC.Chat chat = getChat(chatId);
+        if (getUserConfig().getClientUserId() == uid && chat != null && chat.creator) return true;
+        final LongSparseArray<TLRPC.ChannelParticipant> array = channelAdmins.get(chatId);
+        if (array == null) {
+            final TLRPC.ChatFull chatFull = getChatFull(chatId);
+            if (chatFull != null && chatFull.participants != null) {
+                for (int i = 0; i < chatFull.participants.participants.size(); ++i) {
+                    final TLRPC.ChatParticipant p = chatFull.participants.participants.get(i);
+                    if (p.user_id == uid) {
+                        return p instanceof TLRPC.TL_chatParticipantCreator;
+                    }
+                }
+            }
+        }
+        final TLRPC.ChannelParticipant participant = array.get(uid);
+        return participant instanceof TLRPC.TL_channelParticipantCreator;
     }
 
     public boolean isChannelAdminsLoaded(long chatId) {
@@ -8478,7 +8680,10 @@ public class MessagesController extends BaseController implements NotificationCe
             req.channel = getInputChannel(chat);
             req.user_id = getInputUser(user);
             req.admin_rights = rights;
-            req.rank = rank;
+            if (!TextUtils.isEmpty(rank)) {
+                req.flags |= 1;
+                req.rank = rank;
+            }
             RequestDelegate requestDelegate = (response, error) -> {
                 if (error == null) {
                     processUpdates((TLRPC.Updates) response, false);
@@ -14808,6 +15013,11 @@ public class MessagesController extends BaseController implements NotificationCe
             if (processInvitedUsers != null) {
                 AndroidUtilities.runOnUIThread(() -> processInvitedUsers.run(null));
             }
+            if (UserObject.isUserSelf(user) && (!isChannel || isMegagroup) && hasJoinMessage) {
+                AndroidUtilities.runOnUIThread(() -> {
+                    getNotificationCenter().postNotificationName(NotificationCenter.joinedGroup, chatId);
+                });
+            }
         });
     }
 
@@ -14859,6 +15069,8 @@ public class MessagesController extends BaseController implements NotificationCe
                 req.banned_rights.send_polls = true;
                 req.banned_rights.invite_users = true;
                 req.banned_rights.change_info = true;
+                req.banned_rights.edit_rank = true;
+                req.banned_rights.send_reactions = true;
                 request = req;
             }
         } else {
@@ -14934,6 +15146,8 @@ public class MessagesController extends BaseController implements NotificationCe
                 req.banned_rights.send_polls = true;
                 req.banned_rights.invite_users = true;
                 req.banned_rights.change_info = true;
+                req.banned_rights.edit_rank = true;
+                req.banned_rights.send_reactions = true;
                 request = req;
             }
         } else {
@@ -19524,6 +19738,9 @@ public class MessagesController extends BaseController implements NotificationCe
                         if (service != null && service.conference != null) {
                             service.conference.applyUpdate(null, (TLRPC.TL_updateGroupCallChainBlocks) baseUpdate, true, null);
                         }
+                    } else if (baseUpdate instanceof TLRPC.TL_updateChatParticipantRank) {
+                        TLRPC.TL_updateChatParticipantRank update = (TLRPC.TL_updateChatParticipantRank) baseUpdate;
+                        updateRank(update.chat_id, update.user_id, update.rank);
                     } else if (ApplicationLoader.applicationLoaderInstance != null) {
                         ApplicationLoader.applicationLoaderInstance.processUpdate(currentAccount, baseUpdate);
                     }

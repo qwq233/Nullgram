@@ -5145,7 +5145,7 @@ public class SendMessagesHelper extends BaseController implements NotificationCe
                                 byte[] answers = Utilities.hexToBytes(params.get("answers"));
                                 if (answers.length > 0) {
                                     for (int a = 0; a < answers.length; a++) {
-                                        inputMediaPoll.correct_answers.add(new byte[]{answers[a]});
+                                        inputMediaPoll.correct_answers.add(answers[a] - 48);
                                     }
                                     inputMediaPoll.flags |= 1;
                                 }

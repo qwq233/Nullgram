@@ -65,6 +65,7 @@ public class AdminLogFilterAlert2 extends BottomSheetWithRecyclerListView {
         if (filter != null) {
             currentFilter.join = filter.join;
             currentFilter.leave = filter.leave;
+            currentFilter.edit_rank = filter.edit_rank;
             currentFilter.invite = filter.invite;
             currentFilter.ban = filter.ban;
             currentFilter.unban = filter.unban;
@@ -82,6 +83,7 @@ public class AdminLogFilterAlert2 extends BottomSheetWithRecyclerListView {
         } else {
             currentFilter.join = true;
             currentFilter.leave = true;
+            currentFilter.edit_rank = true;
             currentFilter.invite = true;
             currentFilter.ban = true;
             currentFilter.unban = true;
@@ -119,10 +121,12 @@ public class AdminLogFilterAlert2 extends BottomSheetWithRecyclerListView {
         buttonContainer.setPadding(dp(10), dp(10), dp(10), dp(10));
         buttonContainer.setBackgroundColor(Theme.getColor(Theme.key_dialogBackground, resourcesProvider));
         actionButton = new ButtonWithCounterView(getContext(), resourcesProvider);
+        actionButton.setRound();
         actionButton.setText(getString(R.string.EventLogFilterApply), false);
         actionButton.setOnClickListener(v -> {
             if (currentFilter.join &&
                 currentFilter.leave &&
+                currentFilter.edit_rank &&
                 currentFilter.invite &&
                 currentFilter.ban &&
                 currentFilter.unban &&
@@ -166,15 +170,16 @@ public class AdminLogFilterAlert2 extends BottomSheetWithRecyclerListView {
     private final static int FILTER_RESTRICTIONS = 4;
     private final static int FILTER_NEW_MEMBERS = 5;
     private final static int FILTER_MEMBERS_LEFT = 6;
-    private final static int FILTER_SECTION_SETTINGS = 7;
-    private final static int FILTER_INFO = 8;
-    private final static int FILTER_INVITES = 9;
-    private final static int FILTER_CALLS = 10;
-    private final static int FILTER_SECTION_MESSAGES = 11;
-    private final static int FILTER_DELETE = 12;
-    private final static int FILTER_EDIT = 13;
-    private final static int FILTER_PIN = 14;
-    private final static int BUTTON_ALL_ADMINS = 15;
+    private final static int FILTER_MEMBERS_RANK = 7;
+    private final static int FILTER_SECTION_SETTINGS = 8;
+    private final static int FILTER_INFO = 9;
+    private final static int FILTER_INVITES = 10;
+    private final static int FILTER_CALLS = 11;
+    private final static int FILTER_SECTION_MESSAGES = 12;
+    private final static int FILTER_DELETE = 13;
+    private final static int FILTER_EDIT = 14;
+    private final static int FILTER_PIN = 15;
+    private final static int BUTTON_ALL_ADMINS = 16;
 
     private boolean sectionMembersExpanded = false;
     private boolean sectionSettingsExpanded = false;
@@ -187,7 +192,8 @@ public class AdminLogFilterAlert2 extends BottomSheetWithRecyclerListView {
                 (isMegagroup && (currentFilter.kick || currentFilter.ban || currentFilter.unkick || currentFilter.unban) ? 1 : 0) +
                 (currentFilter.invite || currentFilter.join ? 1 : 0) +
                 (currentFilter.leave ? 1 : 0) +
-                "/" + (isMegagroup ? 4 : 3)
+                (currentFilter.edit_rank ? 1 : 0) +
+                "/" + (isMegagroup ? 5 : 3)
             );
             case 1: return (
                 (currentFilter.info || currentFilter.settings ? 1 : 0) +
@@ -231,7 +237,7 @@ public class AdminLogFilterAlert2 extends BottomSheetWithRecyclerListView {
             currentFilter.promote || currentFilter.demote ||
             isMegagroup && (currentFilter.kick || currentFilter.ban || currentFilter.unkick || currentFilter.unban) ||
             currentFilter.invite || currentFilter.join ||
-            currentFilter.leave
+            currentFilter.leave || currentFilter.edit_rank
         ).setCollapsed(!sectionMembersExpanded).setClickCallback(getGroupClick(0)));
         if (sectionMembersExpanded) {
             items.add(UItem.asRoundCheckbox(FILTER_NEW_ADMINS, getString(R.string.EventLogFilterSectionAdmin)).pad().setChecked(currentFilter.promote || currentFilter.demote));
@@ -240,6 +246,9 @@ public class AdminLogFilterAlert2 extends BottomSheetWithRecyclerListView {
             }
             items.add(UItem.asRoundCheckbox(FILTER_NEW_MEMBERS, getString(isMegagroup ? R.string.EventLogFilterNewMembers : R.string.EventLogFilterNewSubscribers)).pad().setChecked(currentFilter.invite || currentFilter.join));
             items.add(UItem.asRoundCheckbox(FILTER_MEMBERS_LEFT, getString(isMegagroup ? R.string.EventLogFilterLeavingMembers2 : R.string.EventLogFilterLeavingSubscribers2)).pad().setChecked(currentFilter.leave));
+            if (isMegagroup) {
+                items.add(UItem.asRoundCheckbox(FILTER_MEMBERS_RANK, getString(R.string.EventLogFilterMembersRank)).pad().setChecked(currentFilter.edit_rank));
+            }
         }
         items.add(UItem.asRoundGroupCheckbox(FILTER_SECTION_SETTINGS, getString(isMegagroup ? R.string.EventLogFilterSectionGroupSettings : R.string.EventLogFilterSectionChannelSettings), getGroupCount(1)).setChecked(
             currentFilter.info || currentFilter.settings ||
@@ -286,7 +295,7 @@ public class AdminLogFilterAlert2 extends BottomSheetWithRecyclerListView {
                     if (clickedGroupExpand) {
                         sectionMembersExpanded = !sectionMembersExpanded;
                     } else {
-                        currentFilter.promote = currentFilter.demote = currentFilter.invite = currentFilter.join = currentFilter.leave = cell.isChecked();
+                        currentFilter.promote = currentFilter.demote = currentFilter.invite = currentFilter.join = currentFilter.leave = currentFilter.edit_rank = cell.isChecked();
                         if (isMegagroup) {
                             currentFilter.kick = currentFilter.ban = currentFilter.unkick = currentFilter.unban = cell.isChecked();
                         }
@@ -303,6 +312,9 @@ public class AdminLogFilterAlert2 extends BottomSheetWithRecyclerListView {
                     break;
                 case FILTER_MEMBERS_LEFT:
                     currentFilter.leave = cell.isChecked();
+                    break;
+                case FILTER_MEMBERS_RANK:
+                    currentFilter.edit_rank = cell.isChecked();
                     break;
                 case FILTER_SECTION_SETTINGS:
                     if (clickedGroupExpand) {

@@ -118,6 +118,7 @@ public class DeleteMessagesBottomSheet extends BottomSheetWithRecyclerListView {
     private static final int RIGHT_SEND_STICKERS = 12;
     private static final int RIGHT_SEND_POLLS = 13;
     private static final int RIGHT_SEND_LINKS = 14;
+    private static final int RIGHT_SEND_REACTIONS = 15;
 
     private class Action {
         int type;
@@ -374,6 +375,9 @@ public class DeleteMessagesBottomSheet extends BottomSheetWithRecyclerListView {
         if (defaultBannedRights.send_polls) {
             bannedRights.send_polls = true;
         }
+        if (defaultBannedRights.send_reactions) {
+            bannedRights.send_reactions = true;
+        }
         if (defaultBannedRights.invite_users) {
             bannedRights.invite_users = true;
         }
@@ -484,6 +488,7 @@ public class DeleteMessagesBottomSheet extends BottomSheetWithRecyclerListView {
                 !defaultBannedRights.send_inline ||
                 !defaultBannedRights.embed_links ||
                 !defaultBannedRights.send_polls ||
+                !defaultBannedRights.send_reactions ||
                 !defaultBannedRights.change_info ||
                 !defaultBannedRights.invite_users ||
                 !defaultBannedRights.pin_messages ||
@@ -515,6 +520,7 @@ public class DeleteMessagesBottomSheet extends BottomSheetWithRecyclerListView {
         bannedRights.send_inline = left.send_inline || right.send_inline;
         bannedRights.embed_links = left.embed_links || right.embed_links;
         bannedRights.send_polls = left.send_polls || right.send_polls;
+        bannedRights.send_reactions = left.send_reactions || right.send_reactions;
         bannedRights.change_info = left.change_info || right.change_info;
         bannedRights.invite_users = left.invite_users || right.invite_users;
         bannedRights.pin_messages = left.pin_messages || right.pin_messages;
@@ -536,6 +542,7 @@ public class DeleteMessagesBottomSheet extends BottomSheetWithRecyclerListView {
                 !bannedRights.send_inline && !defaultBannedRights.send_inline ||
                 !bannedRights.embed_links && !bannedRights.send_plain && !defaultBannedRights.embed_links && !defaultBannedRights.send_plain ||
                 !bannedRights.send_polls && !defaultBannedRights.send_polls ||
+                !bannedRights.send_reactions && !defaultBannedRights.send_reactions ||
                 !bannedRights.change_info && !defaultBannedRights.change_info ||
                 !bannedRights.invite_users && !defaultBannedRights.invite_users ||
                 !bannedRights.pin_messages && !defaultBannedRights.pin_messages ||
@@ -607,6 +614,9 @@ public class DeleteMessagesBottomSheet extends BottomSheetWithRecyclerListView {
         if (!bannedRights.send_polls && !defaultBannedRights.send_polls) {
             i++;
         }
+        if (!bannedRights.send_reactions && !defaultBannedRights.send_reactions) {
+            i++;
+        }
         return i;
     }
 
@@ -652,7 +662,8 @@ public class DeleteMessagesBottomSheet extends BottomSheetWithRecyclerListView {
     private boolean allDefaultMediaBanned() {
         return defaultBannedRights.send_photos && defaultBannedRights.send_videos && defaultBannedRights.send_stickers
                 && defaultBannedRights.send_audios && defaultBannedRights.send_docs && defaultBannedRights.send_voices &&
-                defaultBannedRights.send_roundvideos && defaultBannedRights.embed_links && defaultBannedRights.send_polls;
+                defaultBannedRights.send_roundvideos && defaultBannedRights.embed_links && defaultBannedRights.send_polls
+                && defaultBannedRights.send_reactions;
     }
 
     private void fillAction(ArrayList<UItem> items, Action action) {
@@ -706,7 +717,7 @@ public class DeleteMessagesBottomSheet extends BottomSheetWithRecyclerListView {
                         .setLocked(defaultBannedRights.send_plain));
 
                 int sendMediaCount = getSendMediaSelectedCount();
-                items.add(UItem.asExpandableSwitch(RIGHT_SEND_MEDIA, getString(R.string.UserRestrictionsSendMedia), String.format(Locale.US, "%d/9", sendMediaCount))
+                items.add(UItem.asExpandableSwitch(RIGHT_SEND_MEDIA, getString(R.string.UserRestrictionsSendMedia), String.format(Locale.US, "%d/10", sendMediaCount))
                         .setChecked(sendMediaCount > 0)
                         .setLocked(allDefaultMediaBanned())
                         .setCollapsed(sendMediaCollapsed)
@@ -734,6 +745,7 @@ public class DeleteMessagesBottomSheet extends BottomSheetWithRecyclerListView {
                             bannedRights.send_roundvideos = !enabled;
                             bannedRights.embed_links = !enabled;
                             bannedRights.send_polls = !enabled;
+                            bannedRights.send_reactions = !enabled;
                             onRestrictionsChanged();
 
                             adapter.update(true);
@@ -774,6 +786,10 @@ public class DeleteMessagesBottomSheet extends BottomSheetWithRecyclerListView {
                     items.add(UItem.asRoundCheckbox(RIGHT_SEND_LINKS, getString(R.string.UserRestrictionsEmbedLinks))
                             .setChecked(!bannedRights.embed_links && !defaultBannedRights.embed_links && !bannedRights.send_plain && !defaultBannedRights.send_plain)
                             .setLocked(defaultBannedRights.embed_links)
+                            .setPad(1));
+                    items.add(UItem.asRoundCheckbox(RIGHT_SEND_REACTIONS, getString(R.string.UserRestrictionsSendReactions))
+                            .setChecked(!bannedRights.send_reactions && !defaultBannedRights.send_reactions)
+                            .setLocked(defaultBannedRights.send_reactions)
                             .setPad(1));
                 }
 
@@ -890,6 +906,9 @@ public class DeleteMessagesBottomSheet extends BottomSheetWithRecyclerListView {
                     onRestrictionsChanged();
                 } else if (item.id == RIGHT_SEND_VOICE) {
                     bannedRights.send_voices = !bannedRights.send_voices;
+                    onRestrictionsChanged();
+                } else if (item.id == RIGHT_SEND_REACTIONS) {
+                    bannedRights.send_reactions = !bannedRights.send_reactions;
                     onRestrictionsChanged();
                 } else if (item.id == RIGHT_SEND_STICKERS) {
                     bannedRights.send_stickers = bannedRights.send_games = bannedRights.send_gifs = bannedRights.send_inline = !bannedRights.send_stickers;

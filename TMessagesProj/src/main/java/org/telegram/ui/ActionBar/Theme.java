@@ -4041,6 +4041,8 @@ public class Theme {
     public static final int key_profile_verifiedBackground = colorsCount++;
     public static final int key_profile_verifiedCheck = colorsCount++;
     public static final int key_profile_status = colorsCount++;
+    public static final int key_chat_tagAdmin = colorsCount++;
+    public static final int key_chat_tagCreator = colorsCount++;
 
     public static final int key_profile_tabText = colorsCount++;
     public static final int key_profile_tabSelectedText = colorsCount++;

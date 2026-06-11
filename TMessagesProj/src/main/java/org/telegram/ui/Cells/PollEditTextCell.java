@@ -92,6 +92,10 @@ public class PollEditTextCell extends FrameLayout implements SuggestEmojiView.An
         this(context, caption, type, onDelete, null, null);
     }
 
+    public PollEditTextCell(Context context, boolean caption, int type, OnClickListener onDelete, Theme.ResourcesProvider resourcesProvider) {
+        this(context, caption, type, onDelete, null, resourcesProvider);
+    }
+
     public PollEditTextCell(Context context, boolean caption, int type, Theme.ResourcesProvider resourcesProvider) {
         this(context, caption, type, null, null, resourcesProvider);
     }
@@ -297,6 +301,11 @@ public class PollEditTextCell extends FrameLayout implements SuggestEmojiView.An
         addView(textView2, LayoutHelper.createFrame(48, 24, (LocaleController.isRTL ? Gravity.LEFT : Gravity.RIGHT) | Gravity.TOP, LocaleController.isRTL ? 20 : 0, 17, LocaleController.isRTL ? 0 : 20, 0));
     }
 
+    private Integer right;
+    public void setTextRight(int r) {
+        this.right = r;
+    }
+
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         int width = MeasureSpec.getSize(widthMeasureSpec);
@@ -319,7 +328,9 @@ public class PollEditTextCell extends FrameLayout implements SuggestEmojiView.An
             checkBox.measure(MeasureSpec.makeMeasureSpec(AndroidUtilities.dp(48), MeasureSpec.EXACTLY), MeasureSpec.makeMeasureSpec(AndroidUtilities.dp(48), MeasureSpec.EXACTLY));
         }
         int right;
-        if (textView2 == null) {
+        if (this.right != null) {
+            right = this.right;
+        } else if (textView2 == null) {
             right = 42;
         } else if (deleteImageView == null) {
             right = 70;

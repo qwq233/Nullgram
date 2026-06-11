@@ -341,11 +341,11 @@ public class JoinGroupAlert extends BottomSheet {
                                 chat.kicked = false;
                                 MessagesController.getInstance(currentAccount).putUsers(updates.users, false);
                                 MessagesController.getInstance(currentAccount).putChats(updates.chats, false);
-                                openChat(chat.id);
+                                openChat(chat.id, !ChatObject.isChannelAndNotMegaGroup(chat));
                             }
                         } else {
                             if ("USER_ALREADY_PARTICIPANT".equals(error.text) && origination == ORIGINATION_SPONSORED_CHAT && chatInvite != null && chatInvite.chat != null) {
-                                openChat(chatInvite.chat.id);
+                                openChat(chatInvite.chat.id, false);
                             } else {
                                 AlertsCreator.processError(currentAccount, error, fragment, req);
                             }
@@ -396,11 +396,35 @@ public class JoinGroupAlert extends BottomSheet {
         return type == 0 ? Theme.dialogs_scamDrawable : Theme.dialogs_fakeDrawable;
     }
 
-    private void openChat(long chatId) {
+    private void openChat(long chatId, boolean showJoined) {
         Bundle args = new Bundle();
         args.putLong("chat_id", chatId);
         if (MessagesController.getInstance(currentAccount).checkCanOpenChat(args, fragment)) {
-            ChatActivity chatActivity = new ChatActivity(args);
+            ChatActivity chatActivity = new ChatActivity(args) {
+                private boolean shownToast = false;
+                @Override
+                public void onBecomeFullyVisible() {
+                    super.onBecomeFullyVisible();
+                    if (!shownToast && showJoined) {
+                        shownToast = true;
+                        final TLRPC.Chat chat = getMessagesController().getChat(chatId);
+                        if (ChatObject.canManageMyTag(chat)) {
+                            BulletinFactory.of(this)
+                                .createSimpleBulletin(R.raw.contact_check, getString(R.string.JoinedGroup), getString(R.string.JoinedGroupAddTag), () -> {
+                                    if (!AndroidUtilities.isContextSafe(getContext())) return;
+                                    TagEditCell.showSheet(getContext(), currentAccount, -chatId, getUserConfig().getCurrentUser(), null, chat.admin_rights != null, chat.creator, resourcesProvider);
+                                })
+                                .hideAfterBottomSheet(false)
+                                .show(true);
+                        } else {
+                            BulletinFactory.of(this)
+                                .createSimpleBulletin(R.raw.contact_check, getString(R.string.JoinedGroup))
+                                .hideAfterBottomSheet(false)
+                                .show(true);
+                        }
+                    }
+                }
+            };
             fragment.presentFragment(chatActivity, fragment instanceof ChatActivity);
         }
     }

@@ -1605,6 +1605,7 @@ public class SharedMediaLayout extends FrameLayout implements NotificationCenter
         profileActivity.getNotificationCenter().addObserver(this, NotificationCenter.savedMessagesDialogsUpdate);
         profileActivity.getNotificationCenter().addObserver(this, NotificationCenter.dialogsNeedReload);
         profileActivity.getNotificationCenter().addObserver(this, NotificationCenter.starUserGiftsLoaded);
+        profileActivity.getNotificationCenter().addObserver(this, NotificationCenter.updatedChatRanks);
 
         for (int a = 0; a < 10; a++) {
             //cellCache.add(new SharedPhotoVideoCell(context));
@@ -4749,6 +4750,7 @@ public class SharedMediaLayout extends FrameLayout implements NotificationCenter
         profileActivity.getNotificationCenter().removeObserver(this, NotificationCenter.savedMessagesDialogsUpdate);
         profileActivity.getNotificationCenter().removeObserver(this, NotificationCenter.dialogsNeedReload);
         profileActivity.getNotificationCenter().removeObserver(this, NotificationCenter.starUserGiftsLoaded);
+        profileActivity.getNotificationCenter().removeObserver(this, NotificationCenter.updatedChatRanks);
         if (searchTagsList != null) {
             searchTagsList.detach();
         }
@@ -6198,6 +6200,19 @@ public class SharedMediaLayout extends FrameLayout implements NotificationCenter
             long dialogId = (long) args[0];
             if (dialogId == dialog_id) {
                 updateTabs(true);
+            }
+        } else if (id == NotificationCenter.updatedChatRanks) {
+            final long chatId = (long) args[0];
+            final long userId = (long) args[1];
+            if (dialog_id != -chatId) return;
+            final String rank = (String) args[2];
+            if (chatUsersAdapter != null) {
+                chatUsersAdapter.updateRank(userId, rank);
+                for (int i = 0; i < mediaPages.length; ++i) {
+                    if (mediaPages[i].selectedType == TAB_GROUPUSERS) {
+                        AndroidUtilities.updateVisibleRows(mediaPages[i].listView);
+                    }
+                }
             }
         }
     }
@@ -10122,6 +10137,15 @@ public class SharedMediaLayout extends FrameLayout implements NotificationCenter
             return chatInfo != null ? chatInfo.participants.participants.size() : 0;
         }
 
+        public void updateRank(long userId, String rank) {
+            if (chatInfo == null) return;
+            if (chatInfo.participants == null) return;
+            for (int i = 0; i < chatInfo.participants.participants.size(); ++i) {
+                final TLRPC.ChatParticipant p = chatInfo.participants.participants.get(i);
+                p.setRank(userId, rank);
+            }
+        }
+
         @Override
         public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
             if (viewType == VIEW_TYPE_GROUPUSER_EMPTY) {
@@ -10148,30 +10172,50 @@ public class SharedMediaLayout extends FrameLayout implements NotificationCenter
             }
             if (part != null) {
                 String role;
+                final boolean isAdmin, isOwner, canEditAdmin;
                 if (part instanceof TLRPC.TL_chatChannelParticipant) {
-                    TLRPC.ChannelParticipant channelParticipant = ((TLRPC.TL_chatChannelParticipant) part).channelParticipant;
-                    if (!TextUtils.isEmpty(channelParticipant.rank)) {
-                        role = channelParticipant.rank;
+                    final TLRPC.ChannelParticipant channelParticipant = ((TLRPC.TL_chatChannelParticipant) part).channelParticipant;
+                    role = channelParticipant.rank;
+                    if (channelParticipant instanceof TLRPC.TL_channelParticipantCreator) {
+                        if (TextUtils.isEmpty(role)) role = getString("ChannelCreator", R.string.ChannelCreator);
+                        isAdmin = true;
+                        isOwner = true;
+                        canEditAdmin = false;
+                    } else if (channelParticipant instanceof TLRPC.TL_channelParticipantAdmin) {
+                        if (TextUtils.isEmpty(role)) role = getString("ChannelAdmin", R.string.ChannelAdmin);
+                        isAdmin = true;
+                        isOwner = false;
+                        canEditAdmin = channelParticipant.promoted_by == profileActivity.getUserConfig().getClientUserId();
                     } else {
-                        if (channelParticipant instanceof TLRPC.TL_channelParticipantCreator) {
-                            role = getString("ChannelCreator", R.string.ChannelCreator);
-                        } else if (channelParticipant instanceof TLRPC.TL_channelParticipantAdmin) {
-                            role = getString("ChannelAdmin", R.string.ChannelAdmin);
-                        } else {
-                            role = null;
-                        }
+                        isAdmin = false;
+                        isOwner = false;
+                        canEditAdmin = false;
                     }
                 } else {
+                    role = part.rank;
                     if (part instanceof TLRPC.TL_chatParticipantCreator) {
-                        role = getString("ChannelCreator", R.string.ChannelCreator);
+                        if (TextUtils.isEmpty(role)) role = getString("ChannelCreator", R.string.ChannelCreator);
+                        isAdmin = true;
+                        isOwner = true;
+                        canEditAdmin = false;
                     } else if (part instanceof TLRPC.TL_chatParticipantAdmin) {
-                        role = getString("ChannelAdmin", R.string.ChannelAdmin);
+                        if (TextUtils.isEmpty(role)) role = getString("ChannelAdmin", R.string.ChannelAdmin);
+                        isAdmin = true;
+                        isOwner = false;
+                        canEditAdmin = part.inviter_id == profileActivity.getUserConfig().getClientUserId();
                     } else {
-                        role = null;
+                        isAdmin = false;
+                        isOwner = false;
+                        canEditAdmin = false;
                     }
                 }
-                userCell.setAdminRole(role);
-                userCell.setData(profileActivity.getMessagesController().getUser(part.user_id), null, null, 0, position != chatInfo.participants.participants.size() - 1);
+                final String finalRole = role;
+                final TLRPC.User user = profileActivity.getMessagesController().getUser(part.user_id);
+                final boolean showAddTag = UserObject.isUserSelf(user) && ChatObject.canManageMyTag(profileActivity.getMessagesController().getChat(-dialog_id));
+                userCell.setAdminRole(role, isAdmin, isOwner, showAddTag, v -> {
+                    TagEditCell.showInfoSheet(getContext(), profileActivity.getCurrentAccount(), dialog_id, user, finalRole, isAdmin, isOwner, canEditAdmin, resourcesProvider);
+                });
+                userCell.setData(user, null, null, 0, position != chatInfo.participants.participants.size() - 1);
             }
         }
 

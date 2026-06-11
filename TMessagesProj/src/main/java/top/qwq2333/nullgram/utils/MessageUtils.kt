@@ -773,23 +773,26 @@ class MessageUtils(num: Int) : BaseController(num) {
     }
 
     fun getLastMessageFromUnblockUser(dialogId: Long): MessageObject? {
-        val cursor: SQLiteCursor
         var resp: MessageObject? = null
         try {
-            cursor = messagesStorage.database.queryFinalized(
+            val cursor = messagesStorage.database.queryFinalized(
                 String.format(
                     Locale.US,
-                    "SELECT data,send_state,mid,date FROM messages WHERE uid = %d ORDER BY date DESC LIMIT %d,%d",
+                    "SELECT data,send_state,mid,date FROM messages_v2 WHERE uid = %d ORDER BY date DESC LIMIT %d,%d",
                     dialogId,
                     0,
                     10
                 )
             )
-            while (cursor.next()) {
-                val data = cursor.byteBufferValue(0) ?: continue
-                val message = TLRPC.Message.TLdeserialize(data, data.readInt32(false), false)
-                data.reuse()
-                if (messagesController.blockePeers.indexOfKey(message.from_id.user_id) < 0) {
+            try {
+                while (cursor.next()) {
+                    val data = cursor.byteBufferValue(0) ?: continue
+                    val message = TLRPC.Message.TLdeserialize(data, data.readInt32(false), false)
+                    data.reuse()
+                    val fromId = message?.from_id
+                    if (message == null || fromId is TLRPC.TL_peerUser && messagesController.blockePeers.indexOfKey(fromId.user_id) >= 0) {
+                        continue
+                    }
                     resp = MessageObject(currentAccount, message, true, true)
                     message.send_state = cursor.intValue(1)
                     message.id = cursor.intValue(2)
@@ -803,8 +806,9 @@ class MessageUtils(num: Int) : BaseController(num) {
                     }
                     break
                 }
+            } finally {
+                cursor.dispose()
             }
-            cursor.dispose()
         } catch (sqLiteException: SQLiteException) {
             Log.e("SQLiteException when read last message from unblocked user", sqLiteException)
             return null
