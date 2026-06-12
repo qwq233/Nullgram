@@ -2809,7 +2809,7 @@ public class StarGiftSheet extends BottomSheetWithRecyclerListView implements No
             name = getString(R.string.Gift2AttributeBackdrop);
         } else return;
 
-        tableView.addRow(name, attr.name, percents(attr.rarity_permille), null);
+        tableView.addRow(name, attr.name, percents(attr.getRarityPermille()), null);
     }
 
     private void addAttributeRow(TL_stars.StarGiftAttribute attr) {
@@ -2847,7 +2847,7 @@ public class StarGiftSheet extends BottomSheetWithRecyclerListView implements No
             }
         } else {
             final ButtonSpan.TextViewButtons[] textViewArr = new ButtonSpan.TextViewButtons[1];
-            final TableRow row = tableView.addRow(name, attr.name, percents(attr.rarity_permille), () -> showHint(LocaleController.formatString(R.string.Gift2RarityHint, percents(attr.rarity_permille)), textViewArr[0], false));
+            final TableRow row = tableView.addRow(name, attr.name, percents(attr.getRarityPermille()), () -> showHint(LocaleController.formatString(R.string.Gift2RarityHint, percents(attr.getRarityPermille())), textViewArr[0], false));
             textViewArr[0] = (ButtonSpan.TextViewButtons) ((TableView.TableRowContent) row.getChildAt(1)).getChildAt(0);
         }
     }
@@ -3288,7 +3288,7 @@ public class StarGiftSheet extends BottomSheetWithRecyclerListView implements No
 
             public Sticker(View parentView, TL_stars.starGiftAttributeModel model) {
                 name = model.name;
-                rarity_permille = model.rarity_permille;
+                rarity_permille = model.getRarityPermille();
 
                 mine = true;
                 imageReceiver = new ImageReceiver(parentView);
@@ -3297,7 +3297,7 @@ public class StarGiftSheet extends BottomSheetWithRecyclerListView implements No
 
             public Sticker(BackupImageView fromView, TL_stars.starGiftAttributeModel model) {
                 name = model.name;
-                rarity_permille = model.rarity_permille;
+                rarity_permille = model.getRarityPermille();
 
                 mine = false;
                 imageReceiver = fromView.getImageReceiver();
@@ -3323,7 +3323,7 @@ public class StarGiftSheet extends BottomSheetWithRecyclerListView implements No
 
             public Symbol(TL_stars.starGiftAttributePattern pattern) {
                 name = pattern.name;
-                rarity_permille = pattern.rarity_permille;
+                rarity_permille = pattern.getRarityPermille();
 
                 attr = pattern;
             }
@@ -3340,7 +3340,7 @@ public class StarGiftSheet extends BottomSheetWithRecyclerListView implements No
 
             public Background(TL_stars.starGiftAttributeBackdrop backdrop) {
                 this.name = backdrop.name;
-                this.rarity_permille = backdrop.rarity_permille;
+                this.rarity_permille = backdrop.getRarityPermille();
 
                 if (backdrop != null) {
                     backgroundPaint = new Paint(Paint.ANTI_ALIAS_FLAG);

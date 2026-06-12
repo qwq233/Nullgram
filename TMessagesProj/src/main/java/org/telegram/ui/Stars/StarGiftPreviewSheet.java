@@ -398,11 +398,11 @@ public class StarGiftPreviewSheet extends BottomSheetWithRecyclerListView {
         }
 
         buttons[0].titleView.setText(topView.getUpgradeImageViewAttribute().name, animated);
-        buttons[0].percentView.setText(AffiliateProgramFragment.percents(topView.getUpgradeImageViewAttribute().rarity_permille), animated);
+        buttons[0].percentView.setText(AffiliateProgramFragment.percents(topView.getUpgradeImageViewAttribute().getRarityPermille()), animated);
         buttons[1].titleView.setText(topView.getUpgradeBackdropAttribute().name, animated);
-        buttons[1].percentView.setText(AffiliateProgramFragment.percents(topView.getUpgradeBackdropAttribute().rarity_permille), animated);
+        buttons[1].percentView.setText(AffiliateProgramFragment.percents(topView.getUpgradeBackdropAttribute().getRarityPermille()), animated);
         buttons[2].titleView.setText(topView.getUpgradePatternAttribute().name, animated);
-        buttons[2].percentView.setText(AffiliateProgramFragment.percents(topView.getUpgradePatternAttribute().rarity_permille), animated);
+        buttons[2].percentView.setText(AffiliateProgramFragment.percents(topView.getUpgradePatternAttribute().getRarityPermille()), animated);
     }
 
     private void fillItems(ArrayList<UItem> items, UniversalAdapter adapter) {
@@ -549,7 +549,7 @@ public class StarGiftPreviewSheet extends BottomSheetWithRecyclerListView {
                     cell.setSticker(attributes.model.document, 90, item.object);
                     cell.imageView.setColorFilter(null);
 
-                    percent = attributes.model.rarity_permille;
+                    percent = attributes.model.getRarityPermille();
                 } else if (tab == TAB_BACKDROPS) {
                     cell.cardBackground.setBackdrop(attributes.backdrop);
                     cell.cardBackground.setPattern(attributes.pattern);
@@ -558,7 +558,7 @@ public class StarGiftPreviewSheet extends BottomSheetWithRecyclerListView {
                     cell.setSticker(attributes.pattern.document, 48, item.object);
                     cell.imageView.setColorFilter(new PorterDuffColorFilter(ColorUtils.setAlphaComponent(attributes.backdrop.pattern_color, 64), PorterDuff.Mode.SRC_IN));
 
-                    percent = attributes.backdrop.rarity_permille;
+                    percent = attributes.backdrop.getRarityPermille();
                 } else if (tab == TAB_PATTERNS) {
                     cell.cardBackground.setBackdrop(attributes.backdrop);
                     cell.cardBackground.setPattern(attributes.pattern);
@@ -567,7 +567,7 @@ public class StarGiftPreviewSheet extends BottomSheetWithRecyclerListView {
                     cell.setSticker(attributes.pattern.document, 64, item.object);
                     cell.imageView.setColorFilter(new PorterDuffColorFilter(Color.WHITE, PorterDuff.Mode.SRC_IN));
 
-                    percent = attributes.pattern.rarity_permille;
+                    percent = attributes.pattern.getRarityPermille();
                 }
 
                 cell.textView.setTextColor(tab == TAB_MODELS ? Theme.getColor(Theme.key_dialogTextBlack, cell.resourcesProvider) : Color.WHITE);

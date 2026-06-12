@@ -522,6 +522,7 @@ public class DraftsController {
         public TLRPC.TL_error error;
 
         public String audioPath;
+        public TLRPC.InputDocument audioDocument;
         public String audioAuthor, audioTitle;
         public long audioDuration;
         public long audioOffset;
@@ -585,6 +586,7 @@ public class DraftsController {
             this.error = entry.error;
 
             this.audioPath = entry.audioPath;
+            this.audioDocument = entry.audioDocument;
             this.audioAuthor = entry.audioAuthor;
             this.audioTitle = entry.audioTitle;
             this.audioDuration = entry.audioDuration;
@@ -684,6 +686,7 @@ public class DraftsController {
             entry.error = error;
 
             entry.audioPath = audioPath;
+            entry.audioDocument = audioDocument;
             entry.audioAuthor = audioAuthor;
             entry.audioTitle = audioTitle;
             entry.audioDuration = audioDuration;
@@ -860,6 +863,12 @@ public class DraftsController {
                 stream.writeInt32(TLRPC.TL_null.constructor);
             } else {
                 crop.serializeToStream(stream);
+            }
+
+            if (audioDocument == null) {
+                stream.writeInt32(TLRPC.TL_null.constructor);
+            } else {
+                audioDocument.serializeToStream(stream);
             }
         }
 
@@ -1072,6 +1081,12 @@ public class DraftsController {
                 if (magic == MediaController.CropState.constructor) {
                     crop = new MediaController.CropState();
                     crop.readParams(stream, exception);
+                }
+            }
+            if (stream.remaining() > 0) {
+                magic = stream.readInt32(exception);
+                if (magic == TLRPC.TL_inputDocument.constructor) {
+                    audioDocument = TLRPC.InputDocument.TLdeserialize(stream, magic, exception);
                 }
             }
         }

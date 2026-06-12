@@ -1,22 +1,3 @@
-/*
- * Copyright (C) 2019-2024 qwq233 <qwq233@qwq2333.top>
- * https://github.com/qwq233/Nullgram
- *
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * as published by the Free Software Foundation; either version 2
- * of the License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License along with this software.
- *  If not, see
- * <https://www.gnu.org/licenses/>
- */
-
 package org.telegram.tgnet.tl;
 
 import androidx.annotation.NonNull;
@@ -36,6 +17,7 @@ import org.telegram.ui.Stories.recorder.StoryPrivacyBottomSheet;
 import java.util.ArrayList;
 
 public class TL_stories {
+
     public static class TL_stories_storyViews extends TLObject {
         public static final int constructor = 0xde9eed1d;
 
@@ -93,23 +75,23 @@ public class TL_stories {
 
         public void readParams(InputSerializedData stream, boolean exception) {
             flags = stream.readInt32(exception);
-            blocked = (flags & 1) != 0;
-            blocked_my_stories_from = (flags & 2) != 0;
+            blocked = hasFlag(flags, 1);
+            blocked_my_stories_from = hasFlag(flags, 2);
             user_id = stream.readInt64(exception);
             date = stream.readInt32(exception);
-            if ((flags & 4) != 0) {
+            if (hasFlag(flags, 4)) {
                 reaction = TLRPC.Reaction.TLdeserialize(stream, stream.readInt32(exception), exception);
             }
         }
 
         public void serializeToStream(OutputSerializedData stream) {
             stream.writeInt32(constructor);
-            flags = blocked ? (flags | 1) : (flags &~ 1);
-            flags = blocked_my_stories_from ? (flags | 2) : (flags &~ 2);
+            flags = setFlag(flags, 1, blocked);
+            flags = setFlag(flags, 2, blocked_my_stories_from);
             stream.writeInt32(flags);
             stream.writeInt64(user_id);
             stream.writeInt32(date);
-            if ((flags & 4) != 0) {
+            if (hasFlag(flags, 4)) {
                 reaction.serializeToStream(stream);
             }
         }
@@ -120,15 +102,15 @@ public class TL_stories {
 
         public void readParams(InputSerializedData stream, boolean exception) {
             flags = stream.readInt32(exception);
-            blocked = (flags & 1) != 0;
-            blocked_my_stories_from = (flags & 2) != 0;
+            blocked = hasFlag(flags, 1);
+            blocked_my_stories_from = hasFlag(flags, 2);
             message = TLRPC.Message.TLdeserialize(stream, stream.readInt32(exception), exception);
         }
 
         public void serializeToStream(OutputSerializedData stream) {
             stream.writeInt32(constructor);
-            flags = blocked ? (flags | 1) : (flags &~ 1);
-            flags = blocked_my_stories_from ? (flags | 2) : (flags &~ 2);
+            flags = setFlag(flags, 1, blocked);
+            flags = setFlag(flags, 2, blocked_my_stories_from);
             stream.writeInt32(flags);
             message.serializeToStream(stream);
         }
@@ -139,16 +121,16 @@ public class TL_stories {
 
         public void readParams(InputSerializedData stream, boolean exception) {
             flags = stream.readInt32(exception);
-            blocked = (flags & 1) != 0;
-            blocked_my_stories_from = (flags & 2) != 0;
+            blocked = hasFlag(flags, 1);
+            blocked_my_stories_from = hasFlag(flags, 2);
             peer_id = TLRPC.Peer.TLdeserialize(stream, stream.readInt32(exception), exception);
             story = StoryItem.TLdeserialize(stream, stream.readInt32(exception), exception);
         }
 
         public void serializeToStream(OutputSerializedData stream) {
             stream.writeInt32(constructor);
-            flags = blocked ? (flags | 1) : (flags &~ 1);
-            flags = blocked_my_stories_from ? (flags | 2) : (flags &~ 2);
+            flags = setFlag(flags, 1, blocked);
+            flags = setFlag(flags, 2, blocked_my_stories_from);
             stream.writeInt32(flags);
             peer_id.serializeToStream(stream);
             story.serializeToStream(stream);
@@ -183,7 +165,7 @@ public class TL_stories {
         public void readParams(InputSerializedData stream, boolean exception) {
             flags = stream.readInt32(exception);
             peer = TLRPC.Peer.TLdeserialize(stream, stream.readInt32(exception), exception);
-            if ((flags & 1) != 0) {
+            if (hasFlag(flags, 1)) {
                 max_read_id = stream.readInt32(exception);
             }
             stories = Vector.deserialize(stream, StoryItem::TLdeserialize, exception);
@@ -193,7 +175,7 @@ public class TL_stories {
             stream.writeInt32(constructor);
             stream.writeInt32(flags);
             peer.serializeToStream(stream);
-            if ((flags & 1) != 0) {
+            if (hasFlag(flags, 1)) {
                 stream.writeInt32(max_read_id);
             }
             Vector.serialize(stream, stories);
@@ -208,7 +190,7 @@ public class TL_stories {
             long user_id = stream.readInt64(exception);
             peer = new TLRPC.TL_peerUser();
             peer.user_id = user_id;
-            if ((flags & 1) != 0) {
+            if (hasFlag(flags, 1)) {
                 max_read_id = stream.readInt32(exception);
             }
             stories = Vector.deserialize(stream, StoryItem::TLdeserialize, exception);
@@ -218,7 +200,7 @@ public class TL_stories {
             stream.writeInt32(constructor);
             stream.writeInt32(flags);
             stream.writeInt64(peer.user_id);
-            if ((flags & 1) != 0) {
+            if (hasFlag(flags, 1)) {
                 stream.writeInt32(max_read_id);
             }
             Vector.serialize(stream, stories);
@@ -302,7 +284,7 @@ public class TL_stories {
 
         public void readParams(InputSerializedData stream, boolean exception) {
             flags = stream.readInt32(exception);
-            has_more = (flags & 1) != 0;
+            has_more = hasFlag(flags, 1);
             count = stream.readInt32(exception);
             state = stream.readString(exception);
             peer_stories = Vector.deserialize(stream, PeerStories::TLdeserialize, exception);
@@ -313,7 +295,7 @@ public class TL_stories {
 
         public void serializeToStream(OutputSerializedData stream) {
             stream.writeInt32(constructor);
-            flags = has_more ? (flags | 1) : (flags &~ 1);
+            flags = setFlag(flags, 1, has_more);
             stream.writeInt32(flags);
             stream.writeInt32(count);
             stream.writeString(state);
@@ -362,7 +344,7 @@ public class TL_stories {
     }
 
     public static class TL_stories_sendStory extends TLObject {
-        public static final int constructor = 0x737fc2ec;
+        public static final int constructor = 0x8f9e6898;
 
         public int flags;
         public boolean pinned;
@@ -379,6 +361,7 @@ public class TL_stories {
         public TLRPC.InputPeer fwd_from_id;
         public int fwd_from_story;
         public ArrayList<Integer> albums;
+        public TLRPC.InputDocument music;
 
         public TLObject deserializeResponse(InputSerializedData stream, int constructor, boolean exception) {
             return TLRPC.Updates.TLdeserialize(stream, constructor, exception);
@@ -386,35 +369,38 @@ public class TL_stories {
 
         public void serializeToStream(OutputSerializedData stream) {
             stream.writeInt32(constructor);
-            flags = pinned ? (flags | 4) : (flags &~ 4);
-            flags = noforwards ? (flags | 16) : (flags &~ 16);
-            flags = fwd_modified ? (flags | 128) : (flags &~ 128);
+            flags = setFlag(flags, 4, pinned);
+            flags = setFlag(flags, 16, noforwards);
+            flags = setFlag(flags, FLAG_7, fwd_modified);
             flags = setFlag(flags, FLAG_8, albums != null);
             stream.writeInt32(flags);
             peer.serializeToStream(stream);
             media.serializeToStream(stream);
-            if ((flags & 32) != 0) {
+            if (hasFlag(flags, FLAG_5)) {
                 Vector.serialize(stream, media_areas);
             }
-            if ((flags & 1) != 0) {
+            if (hasFlag(flags, 1)) {
                 stream.writeString(caption);
             }
-            if ((flags & 2) != 0) {
+            if (hasFlag(flags, 2)) {
                 Vector.serialize(stream, entities);
             }
             Vector.serialize(stream, privacy_rules);
             stream.writeInt64(random_id);
-            if ((flags & 8) != 0) {
+            if (hasFlag(flags, 8)) {
                 stream.writeInt32(period);
             }
-            if ((flags & 64) != 0) {
+            if (hasFlag(flags, FLAG_6)) {
                 fwd_from_id.serializeToStream(stream);
             }
-            if ((flags & 64) != 0) {
+            if (hasFlag(flags, FLAG_6)) {
                 stream.writeInt32(fwd_from_story);
             }
             if (hasFlag(flags, FLAG_8)) {
                 Vector.serializeInt(stream, albums);
+            }
+            if (hasFlag(flags, FLAG_9)) {
+                music.serializeToStream(stream);
             }
         }
     }
@@ -456,7 +442,7 @@ public class TL_stories {
     }
 
     public static class TL_stories_editStory extends TLObject {
-        public static final int constructor = 0xb583ba46;
+        public static final int constructor = 0x2c63a72b;
 
         public int flags;
         public TLRPC.InputPeer peer;
@@ -466,6 +452,7 @@ public class TL_stories {
         public String caption;
         public ArrayList<TLRPC.MessageEntity> entities = new ArrayList<>();
         public ArrayList<TLRPC.InputPrivacyRule> privacy_rules = new ArrayList<>();
+        public TLRPC.InputDocument music;
 
         public TLObject deserializeResponse(InputSerializedData stream, int constructor, boolean exception) {
             return TLRPC.Updates.TLdeserialize(stream, constructor, exception);
@@ -476,20 +463,23 @@ public class TL_stories {
             stream.writeInt32(flags);
             peer.serializeToStream(stream);
             stream.writeInt32(id);
-            if ((flags & 1) != 0) {
+            if (hasFlag(flags, 1)) {
                 media.serializeToStream(stream);
             }
-            if ((flags & 8) != 0) {
+            if (hasFlag(flags, 8)) {
                 Vector.serialize(stream, media_areas);
             }
-            if ((flags & 2) != 0) {
+            if (hasFlag(flags, 2)) {
                 stream.writeString(caption);
             }
-            if ((flags & 2) != 0) {
+            if (hasFlag(flags, 2)) {
                 Vector.serialize(stream, entities);
             }
-            if ((flags & 4) != 0) {
+            if (hasFlag(flags, 4)) {
                 Vector.serialize(stream, privacy_rules);
+            }
+            if (hasFlag(flags, FLAG_4)) {
+                music.serializeToStream(stream);
             }
         }
     }
@@ -508,10 +498,10 @@ public class TL_stories {
 
         public void serializeToStream(OutputSerializedData stream) {
             stream.writeInt32(constructor);
-            flags = next ? (flags | 2) : (flags &~ 2);
-            flags = include_hidden ? (flags | 4) : (flags &~ 4);
+            flags = setFlag(flags, 2, next);
+            flags = setFlag(flags, 4, include_hidden);
             stream.writeInt32(flags);
-            if ((flags & 1) != 0) {
+            if (hasFlag(flags, 1)) {
                 stream.writeString(state);
             }
         }
@@ -553,7 +543,7 @@ public class TL_stories {
             flags = stream.readInt32(exception);
             count = stream.readInt32(exception);
             stories = Vector.deserialize(stream, StoryItem::TLdeserialize, exception);
-            if ((flags & 1) != 0) {
+            if (hasFlag(flags, 1)) {
                 pinned_to_top = Vector.deserializeInt(stream, exception);
             }
             chats = Vector.deserialize(stream, TLRPC.Chat::TLdeserialize, exception);
@@ -565,7 +555,7 @@ public class TL_stories {
             stream.writeInt32(flags);
             stream.writeInt32(count);
             Vector.serialize(stream, stories);
-            if ((flags & 1) != 0) {
+            if (hasFlag(flags, 1)) {
                 Vector.serializeInt(stream, pinned_to_top);
             }
             Vector.serialize(stream, chats);
@@ -700,7 +690,7 @@ public class TL_stories {
             views = Vector.deserialize(stream, StoryView::TLdeserialize, exception);
             chats = Vector.deserialize(stream, TLRPC.Chat::TLdeserialize, exception);
             users = Vector.deserialize(stream, TLRPC.User::TLdeserialize, exception);
-            if ((flags & 1) != 0) {
+            if (hasFlag(flags, 1)) {
                 next_offset = stream.readString(exception);
             }
         }
@@ -715,7 +705,7 @@ public class TL_stories {
             Vector.serialize(stream, views);
             Vector.serialize(stream, chats);
             Vector.serialize(stream, users);
-            if ((flags & 1) != 0) {
+            if (hasFlag(flags, 1)) {
                 stream.writeString(next_offset);
             }
         }
@@ -731,7 +721,7 @@ public class TL_stories {
             reactions_count = stream.readInt32(exception);
             views = Vector.deserialize(stream, StoryView::TLdeserialize, exception);
             users = Vector.deserialize(stream, TLRPC.User::TLdeserialize, exception);
-            if ((flags & 1) != 0) {
+            if (hasFlag(flags, 1)) {
                 next_offset = stream.readString(exception);
             }
         }
@@ -743,7 +733,7 @@ public class TL_stories {
             stream.writeInt32(reactions_count);
             Vector.serialize(stream, views);
             Vector.serialize(stream, users);
-            if ((flags & 1) != 0) {
+            if (hasFlag(flags, 1)) {
                 stream.writeString(next_offset);
             }
         }
@@ -802,12 +792,12 @@ public class TL_stories {
 
         public void serializeToStream(OutputSerializedData stream) {
             stream.writeInt32(constructor);
-            flags = just_contacts ? (flags | 1) : (flags &~ 1);
-            flags = reactions_first ? (flags | 4) : (flags &~ 4);
-            flags = forwards_first ? (flags | 8) : (flags &~ 8);
+            flags = setFlag(flags, 1, just_contacts);
+            flags = setFlag(flags, 4, reactions_first);
+            flags = setFlag(flags, 8, forwards_first);
             stream.writeInt32(flags);
             peer.serializeToStream(stream);
-            if ((flags & 2) != 0) {
+            if (hasFlag(flags, 2)) {
                 stream.writeString(q);
             }
             stream.writeInt32(id);
@@ -877,7 +867,7 @@ public class TL_stories {
             flags = stream.readInt32(exception);
             this.count = stream.readInt32(exception);
             stories = Vector.deserialize(stream, TL_foundStory::TLdeserialize, exception);
-            if ((flags & 1) != 0) {
+            if (hasFlag(flags, 1)) {
                 next_offset = stream.readString(exception);
             }
             chats = Vector.deserialize(stream, TLRPC.Chat::TLdeserialize, exception);
@@ -890,7 +880,7 @@ public class TL_stories {
             stream.writeInt32(flags);
             stream.writeInt32(this.count);
             Vector.serialize(stream, stories);
-            if ((flags & 1) != 0) {
+            if (hasFlag(flags, 1)) {
                 stream.writeString(next_offset);
             }
             Vector.serialize(stream, chats);
@@ -917,13 +907,13 @@ public class TL_stories {
         public void serializeToStream(OutputSerializedData stream) {
             stream.writeInt32(constructor);
             stream.writeInt32(flags);
-            if ((flags & 1) != 0) {
+            if (hasFlag(flags, 1)) {
                 stream.writeString(hashtag);
             }
-            if ((flags & 2) != 0) {
+            if (hasFlag(flags, 2)) {
                 area.serializeToStream(stream);
             }
-            if ((flags & 4) != 0) {
+            if (hasFlag(flags, 4)) {
                 peer.serializeToStream(stream);
             }
             stream.writeString(offset);
@@ -1064,10 +1054,10 @@ public class TL_stories {
 
         public void readParams(InputSerializedData stream, boolean exception) {
             flags = stream.readInt32(exception);
-            if ((flags & 1) != 0) {
+            if (hasFlag(flags, 1)) {
                 active_until_date = stream.readInt32(exception);
             }
-            if ((flags & 2) != 0) {
+            if (hasFlag(flags, 2)) {
                 cooldown_until_date = stream.readInt32(exception);
             }
         }
@@ -1075,10 +1065,10 @@ public class TL_stories {
         public void serializeToStream(OutputSerializedData stream) {
             stream.writeInt32(constructor);
             stream.writeInt32(flags);
-            if ((flags & 1) != 0) {
+            if (hasFlag(flags, 1)) {
                 stream.writeInt32(active_until_date);
             }
-            if ((flags & 2) != 0) {
+            if (hasFlag(flags, 2)) {
                 stream.writeInt32(cooldown_until_date);
             }
         }
@@ -1097,8 +1087,8 @@ public class TL_stories {
 
         public void serializeToStream(OutputSerializedData stream) {
             stream.writeInt32(constructor);
-            flags = past ? (flags | 1) : (flags &~ 1);
-            flags = future ? (flags | 2) : (flags &~ 2);
+            flags = setFlag(flags, 1, past);
+            flags = setFlag(flags, 2, future);
             stream.writeInt32(flags);
         }
     }
@@ -1118,7 +1108,7 @@ public class TL_stories {
 
         public void serializeToStream(OutputSerializedData stream) {
             stream.writeInt32(constructor);
-            flags = add_to_recent ? (flags | 1) : (flags &~ 1);
+            flags = setFlag(flags, 1, add_to_recent);
             stream.writeInt32(flags);
             peer.serializeToStream(stream);
             stream.writeInt32(story_id);
@@ -1156,12 +1146,12 @@ public class TL_stories {
         public void readParams(InputSerializedData stream, boolean exception) {
             flags = stream.readInt32(exception);
             slot = stream.readInt32(exception);
-            if ((flags & 1) != 0) {
+            if (hasFlag(flags, 1)) {
                 peer = TLRPC.Peer.TLdeserialize(stream, stream.readInt32(exception), exception);
             }
             date = stream.readInt32(exception);
             expires = stream.readInt32(exception);
-            if ((flags & 2) != 0) {
+            if (hasFlag(flags, 2)) {
                 cooldown_until_date = stream.readInt32(exception);
             }
         }
@@ -1170,12 +1160,12 @@ public class TL_stories {
             stream.writeInt32(constructor);
             stream.writeInt32(flags);
             stream.writeInt32(slot);
-            if ((flags & 1) != 0) {
+            if (hasFlag(flags, 1)) {
                 peer.serializeToStream(stream);
             }
             stream.writeInt32(date);
             stream.writeInt32(expires);
-            if ((flags & 2) != 0) {
+            if (hasFlag(flags, 2)) {
                 stream.writeInt32(cooldown_until_date);
             }
         }
@@ -1242,49 +1232,49 @@ public class TL_stories {
 
         public void readParams(InputSerializedData stream, boolean exception) {
             flags = stream.readInt32(exception);
-            my_boost = (flags & 4) != 0;
+            my_boost = hasFlag(flags, 4);
             level = stream.readInt32(exception);
             current_level_boosts = stream.readInt32(exception);
             boosts = stream.readInt32(exception);
-            if ((flags & 16) != 0) {
+            if (hasFlag(flags, 16)) {
                 gift_boosts = stream.readInt32(exception);
             }
-            if ((flags & 1) != 0) {
+            if (hasFlag(flags, 1)) {
                 next_level_boosts = stream.readInt32(exception);
             }
-            if ((flags & 2) != 0) {
+            if (hasFlag(flags, 2)) {
                 premium_audience = TL_stats.TL_statsPercentValue.TLdeserialize(stream, stream.readInt32(exception), exception);
             }
             boost_url = stream.readString(exception);
-            if ((flags & 8) != 0) {
+            if (hasFlag(flags, 8)) {
                 prepaid_giveaways = Vector.deserialize(stream, PrepaidGiveaway::TLdeserialize, exception);
             }
-            if ((flags & 4) != 0) {
+            if (hasFlag(flags, 4)) {
                 my_boost_slots = Vector.deserializeInt(stream, exception);
             }
         }
 
         public void serializeToStream(OutputSerializedData stream) {
             stream.writeInt32(constructor);
-            flags = my_boost ? (flags | 4) : (flags &~ 4);
+            flags = setFlag(flags, 4, my_boost);
             stream.writeInt32(flags);
             stream.writeInt32(level);
             stream.writeInt32(current_level_boosts);
             stream.writeInt32(boosts);
-            if ((flags & 16) != 0) {
+            if (hasFlag(flags, 16)) {
                 stream.writeInt32(gift_boosts);
             }
-            if ((flags & 1) != 0) {
+            if (hasFlag(flags, 1)) {
                 stream.writeInt32(next_level_boosts);
             }
-            if ((flags & 2) != 0) {
+            if (hasFlag(flags, 2)) {
                 premium_audience.serializeToStream(stream);
             }
             stream.writeString(boost_url);
-            if ((flags & 8) != 0) {
+            if (hasFlag(flags, 8)) {
                 Vector.serialize(stream, prepaid_giveaways);
             }
-            if ((flags & 4) != 0) {
+            if (hasFlag(flags, 4)) {
                 Vector.serializeInt(stream, my_boost_slots);
             }
         }
@@ -1319,7 +1309,7 @@ public class TL_stories {
         public void serializeToStream(OutputSerializedData stream) {
             stream.writeInt32(constructor);
             stream.writeInt32(flags);
-            if ((flags & 1) != 0) {
+            if (hasFlag(flags, 1)) {
                 Vector.serializeInt(stream, slots);
             }
             peer.serializeToStream(stream);
@@ -1361,51 +1351,51 @@ public class TL_stories {
 
         public void readParams(InputSerializedData stream, boolean exception) {
             flags = stream.readInt32(exception);
-            gift = (flags & 2) != 0;
-            giveaway = (flags & 4) != 0;
-            unclaimed = (flags & 8) != 0;
+            gift = hasFlag(flags, 2);
+            giveaway = hasFlag(flags, 4);
+            unclaimed = hasFlag(flags, 8);
             id = stream.readString(exception);
-            if ((flags & 1) != 0) {
+            if (hasFlag(flags, 1)) {
                 user_id = stream.readInt64(exception);
             }
-            if ((flags & 4) != 0) {
+            if (hasFlag(flags, 4)) {
                 giveaway_msg_id = stream.readInt32(exception);
             }
             date = stream.readInt32(exception);
             expires = stream.readInt32(exception);
-            if ((flags & 16) != 0) {
+            if (hasFlag(flags, 16)) {
                 used_gift_slug = stream.readString(exception);
             }
-            if ((flags & 32) != 0) {
+            if (hasFlag(flags, FLAG_5)) {
                 multiplier = stream.readInt32(exception);
             }
-            if ((flags & 64) != 0) {
+            if (hasFlag(flags, FLAG_6)) {
                 stars = stream.readInt64(exception);
             }
         }
 
         public void serializeToStream(OutputSerializedData stream) {
             stream.writeInt32(constructor);
-            flags = gift ? (flags | 2) : (flags &~ 2);
-            flags = giveaway ? (flags | 4) : (flags &~ 4);
-            flags = unclaimed ? (flags | 8) : (flags &~ 8);
+            flags = setFlag(flags, 2, gift);
+            flags = setFlag(flags, 4, giveaway);
+            flags = setFlag(flags, 8, unclaimed);
             stream.writeInt32(flags);
             stream.writeString(id);
-            if ((flags & 1) != 0) {
+            if (hasFlag(flags, 1)) {
                 stream.writeInt64(user_id);
             }
-            if ((flags & 4) != 0) {
+            if (hasFlag(flags, 4)) {
                 stream.writeInt32(giveaway_msg_id);
             }
             stream.writeInt32(date);
             stream.writeInt32(expires);
-            if ((flags & 16) != 0) {
+            if (hasFlag(flags, 16)) {
                 stream.writeString(used_gift_slug);
             }
-            if ((flags & 32) != 0) {
+            if (hasFlag(flags, FLAG_5)) {
                 stream.writeInt32(multiplier);
             }
-            if ((flags & 64) != 0) {
+            if (hasFlag(flags, FLAG_6)) {
                 stream.writeInt64(stars);
             }
         }
@@ -1416,45 +1406,45 @@ public class TL_stories {
 
         public void readParams(InputSerializedData stream, boolean exception) {
             flags = stream.readInt32(exception);
-            gift = (flags & 2) != 0;
-            giveaway = (flags & 4) != 0;
-            unclaimed = (flags & 8) != 0;
+            gift = hasFlag(flags, 2);
+            giveaway = hasFlag(flags, 4);
+            unclaimed = hasFlag(flags, 8);
             id = stream.readString(exception);
-            if ((flags & 1) != 0) {
+            if (hasFlag(flags, 1)) {
                 user_id = stream.readInt64(exception);
             }
-            if ((flags & 4) != 0) {
+            if (hasFlag(flags, 4)) {
                 giveaway_msg_id = stream.readInt32(exception);
             }
             date = stream.readInt32(exception);
             expires = stream.readInt32(exception);
-            if ((flags & 16) != 0) {
+            if (hasFlag(flags, 16)) {
                 used_gift_slug = stream.readString(exception);
             }
-            if ((flags & 32) != 0) {
+            if (hasFlag(flags, FLAG_5)) {
                 multiplier = stream.readInt32(exception);
             }
         }
 
         public void serializeToStream(OutputSerializedData stream) {
             stream.writeInt32(constructor);
-            flags = gift ? (flags | 2) : (flags &~ 2);
-            flags = giveaway ? (flags | 4) : (flags &~ 4);
-            flags = unclaimed ? (flags | 8) : (flags &~ 8);
+            flags = setFlag(flags, 2, gift);
+            flags = setFlag(flags, 4, giveaway);
+            flags = setFlag(flags, 8, unclaimed);
             stream.writeInt32(flags);
             stream.writeString(id);
-            if ((flags & 1) != 0) {
+            if (hasFlag(flags, 1)) {
                 stream.writeInt64(user_id);
             }
-            if ((flags & 4) != 0) {
+            if (hasFlag(flags, 4)) {
                 stream.writeInt32(giveaway_msg_id);
             }
             stream.writeInt32(date);
             stream.writeInt32(expires);
-            if ((flags & 16) != 0) {
+            if (hasFlag(flags, 16)) {
                 stream.writeString(used_gift_slug);
             }
-            if ((flags & 32) != 0) {
+            if (hasFlag(flags, FLAG_5)) {
                 stream.writeInt32(multiplier);
             }
         }
@@ -1478,7 +1468,7 @@ public class TL_stories {
             flags = stream.readInt32(exception);
             count = stream.readInt32(exception);
             boosts = Vector.deserialize(stream, Boost::TLdeserialize, exception);
-            if ((flags & 1) != 0) {
+            if (hasFlag(flags, 1)) {
                 next_offset = stream.readString(exception);
             }
             users = Vector.deserialize(stream, TLRPC.User::TLdeserialize, exception);
@@ -1489,7 +1479,7 @@ public class TL_stories {
             stream.writeInt32(flags);
             stream.writeInt32(count);
             Vector.serialize(stream, boosts);
-            if ((flags & 1) != 0) {
+            if (hasFlag(flags, 1)) {
                 stream.writeString(next_offset);
             }
             Vector.serialize(stream, users);
@@ -1511,7 +1501,7 @@ public class TL_stories {
 
         public void serializeToStream(OutputSerializedData stream) {
             stream.writeInt32(constructor);
-            flags = gifts ? (flags | 1) : (flags &~ 1);
+            flags = setFlag(flags, 1, gifts);
             stream.writeInt32(flags);
             peer.serializeToStream(stream);
             stream.writeString(offset);
@@ -1544,6 +1534,7 @@ public class TL_stories {
         public StoryViews views;
         public TLRPC.Reaction sent_reaction;
         public @Nullable ArrayList<Integer> albums;
+        public TLRPC.Document music;
         public long lastUpdateTime; //custom
         public String attachPath; //custom
         public String firstFramePath; //custom
@@ -1563,6 +1554,9 @@ public class TL_stories {
             switch (constructor) {
                 case TL_storyItem.constructor:
                     result = new TL_storyItem();
+                    break;
+                case TL_storyItem_layer223.constructor:
+                    result = new TL_storyItem_layer223();
                     break;
                 case TL_storyItem_layer210.constructor:
                     result = new TL_storyItem_layer210();
@@ -1620,7 +1614,7 @@ public class TL_stories {
         public void readParams(InputSerializedData stream, boolean exception) {
             flags = stream.readInt32(exception);
             views_count = stream.readInt32(exception);
-            if ((flags & 1) != 0) {
+            if (hasFlag(flags, 1)) {
                 recent_viewers = Vector.deserializeLong(stream, exception);
             }
         }
@@ -1629,7 +1623,7 @@ public class TL_stories {
             stream.writeInt32(constructor);
             stream.writeInt32(flags);
             stream.writeInt32(views_count);
-            if ((flags & 1) != 0) {
+            if (hasFlag(flags, 1)) {
                 Vector.serializeLong(stream, recent_viewers);
             }
         }
@@ -1642,7 +1636,7 @@ public class TL_stories {
             flags = stream.readInt32(exception);
             views_count = stream.readInt32(exception);
             reactions_count = stream.readInt32(exception);
-            if ((flags & 1) != 0) {
+            if (hasFlag(flags, 1)) {
                 recent_viewers = Vector.deserializeLong(stream, exception);
             }
         }
@@ -1652,7 +1646,7 @@ public class TL_stories {
             stream.writeInt32(flags);
             stream.writeInt32(views_count);
             stream.writeInt32(reactions_count);
-            if ((flags & 1) != 0) {
+            if (hasFlag(flags, 1)) {
                 Vector.serializeLong(stream, recent_viewers);
             }
         }
@@ -1663,18 +1657,18 @@ public class TL_stories {
 
         public void readParams(InputSerializedData stream, boolean exception) {
             flags = stream.readInt32(exception);
-            has_viewers = (flags & 2) != 0;
+            has_viewers = hasFlag(flags, 2);
             views_count = stream.readInt32(exception);
-            if ((flags & 4) != 0) {
+            if (hasFlag(flags, 4)) {
                 forwards_count = stream.readInt32(exception);
             }
-            if ((flags & 8) != 0) {
+            if (hasFlag(flags, 8)) {
                 reactions = Vector.deserialize(stream, TLRPC.ReactionCount::TLdeserialize, exception);
             }
-            if ((flags & 16) != 0) {
+            if (hasFlag(flags, 16)) {
                 reactions_count = stream.readInt32(exception);
             }
-            if ((flags & 1) != 0) {
+            if (hasFlag(flags, 1)) {
                 recent_viewers = Vector.deserializeLong(stream, exception);
             }
         }
@@ -1684,16 +1678,16 @@ public class TL_stories {
             flags = has_viewers ? (flags | 2) : (flags & ~2);
             stream.writeInt32(flags);
             stream.writeInt32(views_count);
-            if ((flags & 4) != 0) {
+            if (hasFlag(flags, 4)) {
                 stream.writeInt32(forwards_count);
             }
-            if ((flags & 8) != 0) {
+            if (hasFlag(flags, 8)) {
                 Vector.serialize(stream, reactions);
             }
-            if ((flags & 16) != 0) {
+            if (hasFlag(flags, 16)) {
                 stream.writeInt32(reactions_count);
             }
-            if ((flags & 1) != 0) {
+            if (hasFlag(flags, 1)) {
                 Vector.serializeLong(stream, recent_viewers);
             }
         }
@@ -1742,14 +1736,14 @@ public class TL_stories {
         @Override
         public void readParams(InputSerializedData stream, boolean exception) {
             flags = stream.readInt32(exception);
-            modified = (flags & 8) != 0;
-            if ((flags & 1) != 0) {
+            modified = hasFlag(flags, 8);
+            if (hasFlag(flags, 1)) {
                 from = TLRPC.Peer.TLdeserialize(stream, stream.readInt32(exception), exception);
             }
-            if ((flags & 2) != 0) {
+            if (hasFlag(flags, 2)) {
                 from_name = stream.readString(exception);
             }
-            if ((flags & 4) != 0) {
+            if (hasFlag(flags, 4)) {
                 story_id = stream.readInt32(exception);
             }
         }
@@ -1757,15 +1751,15 @@ public class TL_stories {
         @Override
         public void serializeToStream(OutputSerializedData stream) {
             stream.writeInt32(constructor);
-            flags = modified ? (flags | 8) : (flags &~ 8);
+            flags = setFlag(flags, 8, modified);
             stream.writeInt32(flags);
-            if ((flags & 1) != 0) {
+            if (hasFlag(flags, 1)) {
                 from.serializeToStream(stream);
             }
-            if ((flags & 2) != 0) {
+            if (hasFlag(flags, 2)) {
                 stream.writeString(from_name);
             }
-            if ((flags & 4) != 0) {
+            if (hasFlag(flags, 4)) {
                 stream.writeInt32(story_id);
             }
         }
@@ -1867,45 +1861,145 @@ public class TL_stories {
     }
 
     public static class TL_storyItem extends StoryItem {
+        public static final int constructor = 0x16a4b93c;
+
+        public void readParams(InputSerializedData stream, boolean exception) {
+            flags = stream.readInt32(exception);
+            pinned = hasFlag(flags, FLAG_5);
+            isPublic = hasFlag(flags, FLAG_7);
+            close_friends = hasFlag(flags, FLAG_8);
+            min = hasFlag(flags, FLAG_9);
+            noforwards = hasFlag(flags, FLAG_10);
+            edited = hasFlag(flags, FLAG_11);
+            contacts = hasFlag(flags, FLAG_12);
+            selected_contacts = hasFlag(flags, FLAG_13);
+            out = hasFlag(flags, FLAG_16);
+            id = stream.readInt32(exception);
+            date = stream.readInt32(exception);
+            if (hasFlag(flags, FLAG_18)) {
+                from_id = TLRPC.Peer.TLdeserialize(stream, stream.readInt32(exception), exception);
+            }
+            if (hasFlag(flags, FLAG_17)) {
+                fwd_from = TL_storyFwdHeader.TLdeserialize(stream, stream.readInt32(exception), exception);
+            }
+            expire_date = stream.readInt32(exception);
+            if (hasFlag(flags, 1)) {
+                caption = stream.readString(exception);
+            }
+            if (hasFlag(flags, 2)) {
+                entities = Vector.deserialize(stream, TLRPC.MessageEntity::TLdeserialize, exception);
+            }
+            media = TLRPC.MessageMedia.TLdeserialize(stream, stream.readInt32(exception), exception);
+            if (hasFlag(flags, FLAG_14)) {
+                media_areas = Vector.deserialize(stream, MediaArea::TLdeserialize, exception);
+            }
+            if (hasFlag(flags, 4)) {
+                privacy = Vector.deserialize(stream, TLRPC.PrivacyRule::TLdeserialize, exception);
+            }
+            if (hasFlag(flags, 8)) {
+                views = StoryViews.TLdeserialize(stream, stream.readInt32(exception), exception);
+            }
+            if (hasFlag(flags, FLAG_15)) {
+                sent_reaction = TLRPC.Reaction.TLdeserialize(stream, stream.readInt32(exception), exception);
+            }
+            if (hasFlag(flags, FLAG_19)) {
+                albums = Vector.deserializeInt(stream, exception);
+            }
+            if (hasFlag(flags, FLAG_20)) {
+                music = TLRPC.Document.TLdeserialize(stream, stream.readInt32(exception), exception);
+            }
+        }
+
+        public void serializeToStream(OutputSerializedData stream) {
+            stream.writeInt32(constructor);
+            flags = setFlag(flags, FLAG_5, pinned);
+            flags = setFlag(flags, FLAG_7, isPublic);
+            flags = setFlag(flags, FLAG_8, close_friends);
+            flags = setFlag(flags, FLAG_9, min);
+            flags = setFlag(flags, FLAG_10, noforwards);
+            flags = setFlag(flags, FLAG_11, edited);
+            flags = setFlag(flags, FLAG_12, contacts);
+            flags = setFlag(flags, FLAG_13, selected_contacts);
+            flags = setFlag(flags, FLAG_16, out);
+            flags = setFlag(flags, FLAG_19, albums != null);
+            stream.writeInt32(flags);
+            stream.writeInt32(id);
+            stream.writeInt32(date);
+            if (hasFlag(flags, FLAG_18)) {
+                from_id.serializeToStream(stream);
+            }
+            if (hasFlag(flags, FLAG_17)) {
+                fwd_from.serializeToStream(stream);
+            }
+            stream.writeInt32(expire_date);
+            if (hasFlag(flags, 1)) {
+                stream.writeString(caption);
+            }
+            if (hasFlag(flags, 2)) {
+                Vector.serialize(stream, entities);
+            }
+            media.serializeToStream(stream);
+            if (hasFlag(flags, FLAG_14)) {
+                Vector.serialize(stream, media_areas);
+            }
+            if (hasFlag(flags, 4)) {
+                Vector.serialize(stream, privacy);
+            }
+            if (hasFlag(flags, 8)) {
+                views.serializeToStream(stream);
+            }
+            if (hasFlag(flags, FLAG_15)) {
+                sent_reaction.serializeToStream(stream);
+            }
+            if (hasFlag(flags, FLAG_19)) {
+                Vector.serializeInt(stream, albums);
+            }
+            if (hasFlag(flags, FLAG_20)) {
+                music.serializeToStream(stream);
+            }
+        }
+    }
+
+    public static class TL_storyItem_layer223 extends TL_storyItem {
         public static final int constructor = 0xedf164f1;
 
         public void readParams(InputSerializedData stream, boolean exception) {
             flags = stream.readInt32(exception);
-            pinned = (flags & 32) != 0;
-            isPublic = (flags & 128) != 0;
-            close_friends = (flags & 256) != 0;
-            min = (flags & 512) != 0;
-            noforwards = (flags & 1024) != 0;
-            edited = (flags & 2048) != 0;
-            contacts = (flags & 4096) != 0;
-            selected_contacts = (flags & 8192) != 0;
-            out = (flags & 65536) != 0;
+            pinned = hasFlag(flags, FLAG_5);
+            isPublic = hasFlag(flags, FLAG_7);
+            close_friends = hasFlag(flags, FLAG_8);
+            min = hasFlag(flags, FLAG_9);
+            noforwards = hasFlag(flags, FLAG_10);
+            edited = hasFlag(flags, FLAG_11);
+            contacts = hasFlag(flags, FLAG_12);
+            selected_contacts = hasFlag(flags, FLAG_13);
+            out = hasFlag(flags, FLAG_16);
             id = stream.readInt32(exception);
             date = stream.readInt32(exception);
-            if ((flags & 262144) != 0) {
+            if (hasFlag(flags, FLAG_18)) {
                 from_id = TLRPC.Peer.TLdeserialize(stream, stream.readInt32(exception), exception);
             }
-            if ((flags & 131072) != 0) {
+            if (hasFlag(flags, FLAG_17)) {
                 fwd_from = TL_storyFwdHeader.TLdeserialize(stream, stream.readInt32(exception), exception);
             }
             expire_date = stream.readInt32(exception);
-            if ((flags & 1) != 0) {
+            if (hasFlag(flags, 1)) {
                 caption = stream.readString(exception);
             }
-            if ((flags & 2) != 0) {
+            if (hasFlag(flags, 2)) {
                 entities = Vector.deserialize(stream, TLRPC.MessageEntity::TLdeserialize, exception);
             }
             media = TLRPC.MessageMedia.TLdeserialize(stream, stream.readInt32(exception), exception);
-            if ((flags & 16384) != 0) {
+            if (hasFlag(flags, FLAG_14)) {
                 media_areas = Vector.deserialize(stream, MediaArea::TLdeserialize, exception);
             }
-            if ((flags & 4) != 0) {
+            if (hasFlag(flags, 4)) {
                 privacy = Vector.deserialize(stream, TLRPC.PrivacyRule::TLdeserialize, exception);
             }
-            if ((flags & 8) != 0) {
+            if (hasFlag(flags, 8)) {
                 views = StoryViews.TLdeserialize(stream, stream.readInt32(exception), exception);
             }
-            if ((flags & 32768) != 0) {
+            if (hasFlag(flags, FLAG_15)) {
                 sent_reaction = TLRPC.Reaction.TLdeserialize(stream, stream.readInt32(exception), exception);
             }
             if (hasFlag(flags, FLAG_19)) {
@@ -1915,43 +2009,43 @@ public class TL_stories {
 
         public void serializeToStream(OutputSerializedData stream) {
             stream.writeInt32(constructor);
-            flags = pinned ? (flags | 32) : (flags &~ 32);
-            flags = isPublic ? (flags | 128) : (flags &~ 128);
-            flags = close_friends ? (flags | 256) : (flags &~ 256);
-            flags = min ? (flags | 512) : (flags &~ 512);
-            flags = noforwards ? (flags | 1024) : (flags &~ 1024);
-            flags = edited ? (flags | 2048) : (flags &~ 2048);
-            flags = contacts ? (flags | 4096) : (flags &~ 4096);
-            flags = selected_contacts ? (flags | 8192) : (flags &~ 8192);
-            flags = out ? (flags | 65536) : (flags &~ 65536);
+            flags = setFlag(flags, FLAG_5, pinned);
+            flags = setFlag(flags, FLAG_7, isPublic);
+            flags = setFlag(flags, FLAG_8, close_friends);
+            flags = setFlag(flags, FLAG_9, min);
+            flags = setFlag(flags, FLAG_10, noforwards);
+            flags = setFlag(flags, FLAG_11, edited);
+            flags = setFlag(flags, FLAG_12, contacts);
+            flags = setFlag(flags, FLAG_13, selected_contacts);
+            flags = setFlag(flags, FLAG_16, out);
             flags = setFlag(flags, FLAG_19, albums != null);
             stream.writeInt32(flags);
             stream.writeInt32(id);
             stream.writeInt32(date);
-            if ((flags & 262144) != 0) {
+            if (hasFlag(flags, FLAG_18)) {
                 from_id.serializeToStream(stream);
             }
-            if ((flags & 131072) != 0) {
+            if (hasFlag(flags, FLAG_17)) {
                 fwd_from.serializeToStream(stream);
             }
             stream.writeInt32(expire_date);
-            if ((flags & 1) != 0) {
+            if (hasFlag(flags, 1)) {
                 stream.writeString(caption);
             }
-            if ((flags & 2) != 0) {
+            if (hasFlag(flags, 2)) {
                 Vector.serialize(stream, entities);
             }
             media.serializeToStream(stream);
-            if ((flags & 16384) != 0) {
+            if (hasFlag(flags, FLAG_14)) {
                 Vector.serialize(stream, media_areas);
             }
-            if ((flags & 4) != 0) {
+            if (hasFlag(flags, 4)) {
                 Vector.serialize(stream, privacy);
             }
-            if ((flags & 8) != 0) {
+            if (hasFlag(flags, 8)) {
                 views.serializeToStream(stream);
             }
-            if ((flags & 32768) != 0) {
+            if (hasFlag(flags, FLAG_15)) {
                 sent_reaction.serializeToStream(stream);
             }
             if (hasFlag(flags, FLAG_19)) {
@@ -1965,83 +2059,83 @@ public class TL_stories {
 
         public void readParams(InputSerializedData stream, boolean exception) {
             flags = stream.readInt32(exception);
-            pinned = (flags & 32) != 0;
-            isPublic = (flags & 128) != 0;
-            close_friends = (flags & 256) != 0;
-            min = (flags & 512) != 0;
-            noforwards = (flags & 1024) != 0;
-            edited = (flags & 2048) != 0;
-            contacts = (flags & 4096) != 0;
-            selected_contacts = (flags & 8192) != 0;
-            out = (flags & 65536) != 0;
+            pinned = hasFlag(flags, FLAG_5);
+            isPublic = hasFlag(flags, FLAG_7);
+            close_friends = hasFlag(flags, FLAG_8);
+            min = hasFlag(flags, FLAG_9);
+            noforwards = hasFlag(flags, FLAG_10);
+            edited = hasFlag(flags, FLAG_11);
+            contacts = hasFlag(flags, FLAG_12);
+            selected_contacts = hasFlag(flags, FLAG_13);
+            out = hasFlag(flags, FLAG_16);
             id = stream.readInt32(exception);
             date = stream.readInt32(exception);
-            if ((flags & 262144) != 0) {
+            if (hasFlag(flags, FLAG_18)) {
                 from_id = TLRPC.Peer.TLdeserialize(stream, stream.readInt32(exception), exception);
             }
-            if ((flags & 131072) != 0) {
+            if (hasFlag(flags, FLAG_17)) {
                 fwd_from = TL_storyFwdHeader.TLdeserialize(stream, stream.readInt32(exception), exception);
             }
             expire_date = stream.readInt32(exception);
-            if ((flags & 1) != 0) {
+            if (hasFlag(flags, 1)) {
                 caption = stream.readString(exception);
             }
-            if ((flags & 2) != 0) {
+            if (hasFlag(flags, 2)) {
                 entities = Vector.deserialize(stream, TLRPC.MessageEntity::TLdeserialize, exception);
             }
             media = TLRPC.MessageMedia.TLdeserialize(stream, stream.readInt32(exception), exception);
-            if ((flags & 16384) != 0) {
+            if (hasFlag(flags, FLAG_14)) {
                 media_areas = Vector.deserialize(stream, MediaArea::TLdeserialize, exception);
             }
-            if ((flags & 4) != 0) {
+            if (hasFlag(flags, 4)) {
                 privacy = Vector.deserialize(stream, TLRPC.PrivacyRule::TLdeserialize, exception);
             }
-            if ((flags & 8) != 0) {
+            if (hasFlag(flags, 8)) {
                 views = StoryViews.TLdeserialize(stream, stream.readInt32(exception), exception);
             }
-            if ((flags & 32768) != 0) {
+            if (hasFlag(flags, FLAG_15)) {
                 sent_reaction = TLRPC.Reaction.TLdeserialize(stream, stream.readInt32(exception), exception);
             }
         }
 
         public void serializeToStream(OutputSerializedData stream) {
             stream.writeInt32(constructor);
-            flags = pinned ? (flags | 32) : (flags &~ 32);
-            flags = isPublic ? (flags | 128) : (flags &~ 128);
-            flags = close_friends ? (flags | 256) : (flags &~ 256);
-            flags = min ? (flags | 512) : (flags &~ 512);
-            flags = noforwards ? (flags | 1024) : (flags &~ 1024);
-            flags = edited ? (flags | 2048) : (flags &~ 2048);
-            flags = contacts ? (flags | 4096) : (flags &~ 4096);
-            flags = selected_contacts ? (flags | 8192) : (flags &~ 8192);
-            flags = out ? (flags | 65536) : (flags &~ 65536);
+            flags = setFlag(flags, FLAG_5, pinned);
+            flags = setFlag(flags, FLAG_7, isPublic);
+            flags = setFlag(flags, FLAG_8, close_friends);
+            flags = setFlag(flags, FLAG_9, min);
+            flags = setFlag(flags, FLAG_10, noforwards);
+            flags = setFlag(flags, FLAG_11, edited);
+            flags = setFlag(flags, FLAG_12, contacts);
+            flags = setFlag(flags, FLAG_13, selected_contacts);
+            flags = setFlag(flags, FLAG_16, out);
             stream.writeInt32(flags);
             stream.writeInt32(id);
             stream.writeInt32(date);
-            if ((flags & 262144) != 0) {
+            if (hasFlag(flags, FLAG_18)) {
                 from_id.serializeToStream(stream);
             }
-            if ((flags & 131072) != 0) {
+            if (hasFlag(flags, FLAG_17)) {
                 fwd_from.serializeToStream(stream);
             }
             stream.writeInt32(expire_date);
-            if ((flags & 1) != 0) {
+            if (hasFlag(flags, 1)) {
                 stream.writeString(caption);
             }
-            if ((flags & 2) != 0) {
+            if (hasFlag(flags, 2)) {
                 Vector.serialize(stream, entities);
             }
             media.serializeToStream(stream);
-            if ((flags & 16384) != 0) {
+            if (hasFlag(flags, FLAG_14)) {
                 Vector.serialize(stream, media_areas);
             }
-            if ((flags & 4) != 0) {
+            if (hasFlag(flags, 4)) {
                 Vector.serialize(stream, privacy);
             }
-            if ((flags & 8) != 0) {
+            if (hasFlag(flags, 8)) {
                 views.serializeToStream(stream);
             }
-            if ((flags & 32768) != 0) {
+            if (hasFlag(flags, FLAG_15)) {
                 sent_reaction.serializeToStream(stream);
             }
         }
@@ -2052,77 +2146,77 @@ public class TL_stories {
 
         public void readParams(InputSerializedData stream, boolean exception) {
             flags = stream.readInt32(exception);
-            pinned = (flags & 32) != 0;
-            isPublic = (flags & 128) != 0;
-            close_friends = (flags & 256) != 0;
-            min = (flags & 512) != 0;
-            noforwards = (flags & 1024) != 0;
-            edited = (flags & 2048) != 0;
-            contacts = (flags & 4096) != 0;
-            selected_contacts = (flags & 8192) != 0;
-            out = (flags & 65536) != 0;
+            pinned = hasFlag(flags, FLAG_5);
+            isPublic = hasFlag(flags, FLAG_7);
+            close_friends = hasFlag(flags, FLAG_8);
+            min = hasFlag(flags, FLAG_9);
+            noforwards = hasFlag(flags, FLAG_10);
+            edited = hasFlag(flags, FLAG_11);
+            contacts = hasFlag(flags, FLAG_12);
+            selected_contacts = hasFlag(flags, FLAG_13);
+            out = hasFlag(flags, FLAG_16);
             id = stream.readInt32(exception);
             date = stream.readInt32(exception);
-            if ((flags & 131072) != 0) {
+            if (hasFlag(flags, FLAG_17)) {
                 fwd_from = TL_storyFwdHeader.TLdeserialize(stream, stream.readInt32(exception), exception);
             }
             expire_date = stream.readInt32(exception);
-            if ((flags & 1) != 0) {
+            if (hasFlag(flags, 1)) {
                 caption = stream.readString(exception);
             }
-            if ((flags & 2) != 0) {
+            if (hasFlag(flags, 2)) {
                 entities = Vector.deserialize(stream, TLRPC.MessageEntity::TLdeserialize, exception);
             }
             media = TLRPC.MessageMedia.TLdeserialize(stream, stream.readInt32(exception), exception);
-            if ((flags & 16384) != 0) {
+            if (hasFlag(flags, FLAG_14)) {
                 media_areas = Vector.deserialize(stream, MediaArea::TLdeserialize, exception);
             }
-            if ((flags & 4) != 0) {
+            if (hasFlag(flags, 4)) {
                 privacy = Vector.deserialize(stream, TLRPC.PrivacyRule::TLdeserialize, exception);
             }
-            if ((flags & 8) != 0) {
+            if (hasFlag(flags, 8)) {
                 views = StoryViews.TLdeserialize(stream, stream.readInt32(exception), exception);
             }
-            if ((flags & 32768) != 0) {
+            if (hasFlag(flags, FLAG_15)) {
                 sent_reaction = TLRPC.Reaction.TLdeserialize(stream, stream.readInt32(exception), exception);
             }
         }
 
         public void serializeToStream(OutputSerializedData stream) {
             stream.writeInt32(constructor);
-            flags = pinned ? (flags | 32) : (flags &~ 32);
-            flags = isPublic ? (flags | 128) : (flags &~ 128);
-            flags = close_friends ? (flags | 256) : (flags &~ 256);
-            flags = min ? (flags | 512) : (flags &~ 512);
-            flags = noforwards ? (flags | 1024) : (flags &~ 1024);
-            flags = edited ? (flags | 2048) : (flags &~ 2048);
-            flags = contacts ? (flags | 4096) : (flags &~ 4096);
-            flags = selected_contacts ? (flags | 8192) : (flags &~ 8192);
-            flags = out ? (flags | 65536) : (flags &~ 65536);
+            flags = setFlag(flags, FLAG_5, pinned);
+            flags = setFlag(flags, FLAG_7, isPublic);
+            flags = setFlag(flags, FLAG_8, close_friends);
+            flags = setFlag(flags, FLAG_9, min);
+            flags = setFlag(flags, FLAG_10, noforwards);
+            flags = setFlag(flags, FLAG_11, edited);
+            flags = setFlag(flags, FLAG_12, contacts);
+            flags = setFlag(flags, FLAG_13, selected_contacts);
+            flags = setFlag(flags, FLAG_16, out);
             stream.writeInt32(flags);
             stream.writeInt32(id);
             stream.writeInt32(date);
-            if ((flags & 131072) != 0) {
+            if (hasFlag(flags, FLAG_17)) {
                 fwd_from.serializeToStream(stream);
             }
             stream.writeInt32(expire_date);
-            if ((flags & 1) != 0) {
+            if (hasFlag(flags, 1)) {
                 stream.writeString(caption);
             }
-            if ((flags & 2) != 0) {
+            if (hasFlag(flags, 2)) {
                 Vector.serialize(stream, entities);
             }
             media.serializeToStream(stream);
-            if ((flags & 16384) != 0) {
+            if (hasFlag(flags, FLAG_14)) {
                 Vector.serialize(stream, media_areas);
             }
-            if ((flags & 4) != 0) {
+            if (hasFlag(flags, 4)) {
                 Vector.serialize(stream, privacy);
             }
-            if ((flags & 8) != 0) {
+            if (hasFlag(flags, 8)) {
                 views.serializeToStream(stream);
             }
-            if ((flags & 32768) != 0) {
+            if (hasFlag(flags, FLAG_15)) {
                 sent_reaction.serializeToStream(stream);
             }
         }
@@ -2133,71 +2227,71 @@ public class TL_stories {
 
         public void readParams(InputSerializedData stream, boolean exception) {
             flags = stream.readInt32(exception);
-            pinned = (flags & 32) != 0;
-            isPublic = (flags & 128) != 0;
-            close_friends = (flags & 256) != 0;
-            min = (flags & 512) != 0;
-            noforwards = (flags & 1024) != 0;
-            edited = (flags & 2048) != 0;
-            contacts = (flags & 4096) != 0;
-            selected_contacts = (flags & 8192) != 0;
-            out = (flags & 65536) != 0;
+            pinned = hasFlag(flags, FLAG_5);
+            isPublic = hasFlag(flags, FLAG_7);
+            close_friends = hasFlag(flags, FLAG_8);
+            min = hasFlag(flags, FLAG_9);
+            noforwards = hasFlag(flags, FLAG_10);
+            edited = hasFlag(flags, FLAG_11);
+            contacts = hasFlag(flags, FLAG_12);
+            selected_contacts = hasFlag(flags, FLAG_13);
+            out = hasFlag(flags, FLAG_16);
             id = stream.readInt32(exception);
             date = stream.readInt32(exception);
             expire_date = stream.readInt32(exception);
-            if ((flags & 1) != 0) {
+            if (hasFlag(flags, 1)) {
                 caption = stream.readString(exception);
             }
-            if ((flags & 2) != 0) {
+            if (hasFlag(flags, 2)) {
                 entities = Vector.deserialize(stream, TLRPC.MessageEntity::TLdeserialize, exception);
             }
             media = TLRPC.MessageMedia.TLdeserialize(stream, stream.readInt32(exception), exception);
-            if ((flags & 16384) != 0) {
+            if (hasFlag(flags, FLAG_14)) {
                 media_areas = Vector.deserialize(stream, MediaArea::TLdeserialize, exception);
             }
-            if ((flags & 4) != 0) {
+            if (hasFlag(flags, 4)) {
                 privacy = Vector.deserialize(stream, TLRPC.PrivacyRule::TLdeserialize, exception);
             }
-            if ((flags & 8) != 0) {
+            if (hasFlag(flags, 8)) {
                 views = StoryViews.TLdeserialize(stream, stream.readInt32(exception), exception);
             }
-            if ((flags & 32768) != 0) {
+            if (hasFlag(flags, FLAG_15)) {
                 sent_reaction = TLRPC.Reaction.TLdeserialize(stream, stream.readInt32(exception), exception);
             }
         }
 
         public void serializeToStream(OutputSerializedData stream) {
             stream.writeInt32(constructor);
-            flags = pinned ? (flags | 32) : (flags &~ 32);
-            flags = isPublic ? (flags | 128) : (flags &~ 128);
-            flags = close_friends ? (flags | 256) : (flags &~ 256);
-            flags = min ? (flags | 512) : (flags &~ 512);
-            flags = noforwards ? (flags | 1024) : (flags &~ 1024);
-            flags = edited ? (flags | 2048) : (flags &~ 2048);
-            flags = contacts ? (flags | 4096) : (flags &~ 4096);
-            flags = selected_contacts ? (flags | 8192) : (flags &~ 8192);
-            flags = out ? (flags | 65536) : (flags &~ 65536);
+            flags = setFlag(flags, FLAG_5, pinned);
+            flags = setFlag(flags, FLAG_7, isPublic);
+            flags = setFlag(flags, FLAG_8, close_friends);
+            flags = setFlag(flags, FLAG_9, min);
+            flags = setFlag(flags, FLAG_10, noforwards);
+            flags = setFlag(flags, FLAG_11, edited);
+            flags = setFlag(flags, FLAG_12, contacts);
+            flags = setFlag(flags, FLAG_13, selected_contacts);
+            flags = setFlag(flags, FLAG_16, out);
             stream.writeInt32(flags);
             stream.writeInt32(id);
             stream.writeInt32(date);
             stream.writeInt32(expire_date);
-            if ((flags & 1) != 0) {
+            if (hasFlag(flags, 1)) {
                 stream.writeString(caption);
             }
-            if ((flags & 2) != 0) {
+            if (hasFlag(flags, 2)) {
                 Vector.serialize(stream, entities);
             }
             media.serializeToStream(stream);
-            if ((flags & 16384) != 0) {
+            if (hasFlag(flags, FLAG_14)) {
                 Vector.serialize(stream, media_areas);
             }
-            if ((flags & 4) != 0) {
+            if (hasFlag(flags, 4)) {
                 Vector.serialize(stream, privacy);
             }
-            if ((flags & 8) != 0) {
+            if (hasFlag(flags, 8)) {
                 views.serializeToStream(stream);
             }
-            if ((flags & 32768) != 0) {
+            if (hasFlag(flags, FLAG_15)) {
                 sent_reaction.serializeToStream(stream);
             }
         }
@@ -2208,57 +2302,57 @@ public class TL_stories {
 
         public void readParams(InputSerializedData stream, boolean exception) {
             flags = stream.readInt32(exception);
-            pinned = (flags & 32) != 0;
-            isPublic = (flags & 128) != 0;
-            close_friends = (flags & 256) != 0;
-            min = (flags & 512) != 0;
-            noforwards = (flags & 1024) != 0;
-            edited = (flags & 2048) != 0;
-            contacts = (flags & 4096) != 0;
-            selected_contacts = (flags & 8192) != 0;
+            pinned = hasFlag(flags, FLAG_5);
+            isPublic = hasFlag(flags, FLAG_7);
+            close_friends = hasFlag(flags, FLAG_8);
+            min = hasFlag(flags, FLAG_9);
+            noforwards = hasFlag(flags, FLAG_10);
+            edited = hasFlag(flags, FLAG_11);
+            contacts = hasFlag(flags, FLAG_12);
+            selected_contacts = hasFlag(flags, FLAG_13);
             id = stream.readInt32(exception);
             date = stream.readInt32(exception);
             expire_date = stream.readInt32(exception);
-            if ((flags & 1) != 0) {
+            if (hasFlag(flags, 1)) {
                 caption = stream.readString(exception);
             }
-            if ((flags & 2) != 0) {
+            if (hasFlag(flags, 2)) {
                 entities = Vector.deserialize(stream, TLRPC.MessageEntity::TLdeserialize, exception);
             }
             media = TLRPC.MessageMedia.TLdeserialize(stream, stream.readInt32(exception), exception);
-            if ((flags & 4) != 0) {
+            if (hasFlag(flags, 4)) {
                 privacy = Vector.deserialize(stream, TLRPC.PrivacyRule::TLdeserialize, exception);
             }
-            if ((flags & 8) != 0) {
+            if (hasFlag(flags, 8)) {
                 views = StoryViews.TLdeserialize(stream, stream.readInt32(exception), exception);
             }
         }
 
         public void serializeToStream(OutputSerializedData stream) {
             stream.writeInt32(constructor);
-            flags = pinned ? (flags | 32) : (flags &~ 32);
-            flags = isPublic ? (flags | 128) : (flags &~ 128);
-            flags = close_friends ? (flags | 256) : (flags &~ 256);
-            flags = min ? (flags | 512) : (flags &~ 512);
-            flags = noforwards ? (flags | 1024) : (flags &~ 1024);
-            flags = edited ? (flags | 2048) : (flags &~ 2048);
-            flags = contacts ? (flags | 4096) : (flags &~ 4096);
-            flags = selected_contacts ? (flags | 8192) : (flags &~ 8192);
+            flags = setFlag(flags, FLAG_5, pinned);
+            flags = setFlag(flags, FLAG_7, isPublic);
+            flags = setFlag(flags, FLAG_8, close_friends);
+            flags = setFlag(flags, FLAG_9, min);
+            flags = setFlag(flags, FLAG_10, noforwards);
+            flags = setFlag(flags, FLAG_11, edited);
+            flags = setFlag(flags, FLAG_12, contacts);
+            flags = setFlag(flags, FLAG_13, selected_contacts);
             stream.writeInt32(flags);
             stream.writeInt32(id);
             stream.writeInt32(date);
             stream.writeInt32(expire_date);
-            if ((flags & 1) != 0) {
+            if (hasFlag(flags, 1)) {
                 stream.writeString(caption);
             }
-            if ((flags & 2) != 0) {
+            if (hasFlag(flags, 2)) {
                 Vector.serialize(stream, entities);
             }
             media.serializeToStream(stream);
-            if ((flags & 4) != 0) {
+            if (hasFlag(flags, 4)) {
                 Vector.serialize(stream, privacy);
             }
-            if ((flags & 8) != 0) {
+            if (hasFlag(flags, 8)) {
                 views.serializeToStream(stream);
             }
         }
@@ -2337,7 +2431,7 @@ public class TL_stories {
             w = stream.readDouble(exception);
             h = stream.readDouble(exception);
             rotation = stream.readDouble(exception);
-            if ((flags & 1) != 0) {
+            if (hasFlag(flags, 1)) {
                 radius = stream.readDouble(exception);
             }
         }
@@ -2351,7 +2445,7 @@ public class TL_stories {
             stream.writeDouble(w);
             stream.writeDouble(h);
             stream.writeDouble(rotation);
-            if ((flags & 1) != 0) {
+            if (hasFlag(flags, 1)) {
                 stream.writeDouble(radius);
             }
         }
@@ -2436,16 +2530,16 @@ public class TL_stories {
 
         public void readParams(InputSerializedData stream, boolean exception) {
             flags = stream.readInt32(exception);
-            dark = (flags & 1) != 0;
-            flipped = (flags & 2) != 0;
+            dark = hasFlag(flags, 1);
+            flipped = hasFlag(flags, 2);
             coordinates = MediaAreaCoordinates.TLdeserialize(stream, stream.readInt32(exception), exception);
             reaction = TLRPC.Reaction.TLdeserialize(stream, stream.readInt32(exception), exception);
         }
 
         public void serializeToStream(OutputSerializedData stream) {
             stream.writeInt32(constructor);
-            flags = dark ? (flags | 1) : (flags &~ 1);
-            flags = flipped ? (flags | 2) : (flags &~ 2);
+            flags = setFlag(flags, 1, dark);
+            flags = setFlag(flags, 2, flipped);
             stream.writeInt32(flags);
             coordinates.serializeToStream(stream);
             reaction.serializeToStream(stream);
@@ -2554,7 +2648,7 @@ public class TL_stories {
         @Override
         public void readParams(InputSerializedData stream, boolean exception) {
             flags = stream.readInt32(exception);
-            dark = (flags & 1) != 0;
+            dark = hasFlag(flags, 1);
             coordinates = MediaAreaCoordinates.TLdeserialize(stream, stream.readInt32(exception), exception);
             emoji = stream.readString(exception);
             temperature_c = stream.readInt32(exception);
@@ -2563,7 +2657,7 @@ public class TL_stories {
         @Override
         public void serializeToStream(OutputSerializedData stream) {
             stream.writeInt32(constructor);
-            flags = dark ? flags | 1 : flags &~ 1;
+            flags = setFlag(flags, 1, dark);
             stream.writeInt32(flags);
             coordinates.serializeToStream(stream);
             stream.writeString(emoji);
@@ -2605,7 +2699,7 @@ public class TL_stories {
         @Override
         public void readParams(InputSerializedData stream, boolean exception) {
             flags = stream.readInt32(exception);
-            dark = (flags & 1) != 0;
+            dark = hasFlag(flags, 1);
             coordinates = MediaAreaCoordinates.TLdeserialize(stream, stream.readInt32(exception), exception);
             emoji = stream.readString(exception);
             temperature_c = stream.readDouble(exception);
@@ -2614,7 +2708,7 @@ public class TL_stories {
         @Override
         public void serializeToStream(OutputSerializedData stream) {
             stream.writeInt32(constructor);
-            flags = dark ? flags | 1 : flags &~ 1;
+            flags = setFlag(flags, 1, dark);
             stream.writeInt32(flags);
             coordinates.serializeToStream(stream);
             stream.writeString(emoji);
@@ -2690,13 +2784,13 @@ public class TL_stories {
         public void readParams(InputSerializedData stream, boolean exception) {
             flags = stream.readInt32(exception);
             country_iso2 = stream.readString(exception);
-            if ((flags & 1) != 0) {
+            if (hasFlag(flags, 1)) {
                 state = stream.readString(exception);
             }
-            if ((flags & 2) != 0) {
+            if (hasFlag(flags, 2)) {
                 city = stream.readString(exception);
             }
-            if ((flags & 4) != 0) {
+            if (hasFlag(flags, 4)) {
                 street = stream.readString(exception);
             }
         }
@@ -2706,13 +2800,13 @@ public class TL_stories {
             stream.writeInt32(constructor);
             stream.writeInt32(flags);
             stream.writeString(country_iso2);
-            if ((flags & 1) != 0) {
+            if (hasFlag(flags, 1)) {
                 stream.writeString(state);
             }
-            if ((flags & 2) != 0) {
+            if (hasFlag(flags, 2)) {
                 stream.writeString(city);
             }
-            if ((flags & 4) != 0) {
+            if (hasFlag(flags, 4)) {
                 stream.writeString(street);
             }
         }
@@ -2729,7 +2823,7 @@ public class TL_stories {
             flags = stream.readInt32(exception);
             coordinates = MediaAreaCoordinates.TLdeserialize(stream, stream.readInt32(exception), exception);
             geo = TLRPC.GeoPoint.TLdeserialize(stream, stream.readInt32(exception), exception);
-            if ((flags & 1) != 0) {
+            if (hasFlag(flags, 1)) {
                 address = TL_geoPointAddress.TLdeserialize(stream, stream.readInt32(exception), exception);
             }
         }
@@ -2740,7 +2834,7 @@ public class TL_stories {
             stream.writeInt32(flags);
             coordinates.serializeToStream(stream);
             geo.serializeToStream(stream);
-            if ((flags & 1) != 0) {
+            if (hasFlag(flags, 1)) {
                 address.serializeToStream(stream);
             }
         }
@@ -2975,7 +3069,7 @@ public class TL_stories {
             Vector.serialize(stream, reactions);
             Vector.serialize(stream, chats);
             Vector.serialize(stream, users);
-            if ((flags & 1) != 0) {
+            if (hasFlag(flags, 1)) {
                 stream.writeString(next_offset);
             }
         }
@@ -2987,7 +3081,7 @@ public class TL_stories {
             reactions = Vector.deserialize(stream, StoryReaction::TLdeserialize, exception);
             chats = Vector.deserialize(stream, TLRPC.Chat::TLdeserialize, exception);
             users = Vector.deserialize(stream, TLRPC.User::TLdeserialize, exception);
-            if ((flags & 1) != 0) {
+            if (hasFlag(flags, 1)) {
                 next_offset = stream.readString(exception);
             }
         }
@@ -3012,14 +3106,14 @@ public class TL_stories {
         @Override
         public void serializeToStream(OutputSerializedData stream) {
             stream.writeInt32(constructor);
-            flags = forwards_first ? (flags | 4) : (flags &~ 4);
+            flags = setFlag(flags, 4, forwards_first);
             stream.writeInt32(flags);
             peer.serializeToStream(stream);
             stream.writeInt32(id);
-            if ((flags & 1) != 0) {
+            if (hasFlag(flags, 1)) {
                 reaction.serializeToStream(stream);
             }
-            if ((flags & 2) != 0) {
+            if (hasFlag(flags, 2)) {
                 stream.writeString(offset);
             }
             stream.writeInt32(limit);

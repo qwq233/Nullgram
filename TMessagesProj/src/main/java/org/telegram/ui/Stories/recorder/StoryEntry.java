@@ -110,6 +110,7 @@ public class StoryEntry {
     public TLRPC.TL_error error;
 
     public String audioPath;
+    public TLRPC.InputDocument audioDocument;
     public String audioAuthor, audioTitle;
     public long audioDuration;
     public long audioOffset;
@@ -1652,6 +1653,7 @@ public class StoryEntry {
         newEntry.isError = isError;
         newEntry.error = error;
         newEntry.audioPath = audioPath;
+        newEntry.audioDocument = audioDocument;
         newEntry.audioAuthor = audioAuthor;
         newEntry.audioTitle = audioTitle;
         newEntry.audioDuration = audioDuration;

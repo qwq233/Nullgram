@@ -1292,6 +1292,9 @@ public class FileRefController extends BaseController {
                 TL_stories.StoryItem newStoryItem = null;
                 if (!stories.stories.isEmpty()) {
                     TL_stories.StoryItem storyItem = stories.stories.get(0);
+                    if (result == null && storyItem.music != null) {
+                        result = getFileReference(storyItem.music, null, requester.location, needReplacement, locationReplacement);
+                    }
                     if (storyItem.media != null) {
                         newStoryItem = storyItem;
                         if (result == null && storyItem.media.photo != null) {
