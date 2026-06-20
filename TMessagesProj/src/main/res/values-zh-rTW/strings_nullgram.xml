@@ -23,7 +23,7 @@
     <string name="OfficialChannel">官方頻道</string>
     <string name="Chat">聊天</string>
     <string name="Experiment">實驗性功能</string>
-    <string name="OfficialSite">官方網站</string>
+    <string name="OfficialSite">官方網路站點</string>
     <string name="ViewSourceCode">檢視原始碼</string>
     <string name="Categories">分類</string>
     <string name="About">關於</string>
@@ -248,7 +248,7 @@
     <string name="NoUpdateAvailablePlayDelay">由於 Google 的審核，Play 商店中的更新通常比直接的 APK 安裝慢。</string>
     <string name="UpdateInstalledNotification">更新安裝完成，點擊啟動應用程式。</string>
     <string name="UpdateFailedToInstall">無法安裝更新：%d</string>
-    <string name="Translator">翻譯人員</string>
+    <string name="Translator">翻譯</string>
     <string name="ProviderGoogleTranslate">Google 翻譯</string>
     <string name="ProviderYandexTranslate">Yandex 翻譯</string>
     <string name="ProviderTelegramTranslate">TELEOFFICIAL 翻譯</string>
@@ -336,7 +336,7 @@
     <string name="StickerPackNotFound">找不到貼圖集。</string>
     <string name="MessageFilter">訊息過濾器</string>
     <string name="Pattern">匹配模式</string>
-    <string name="MessageFilterDesc">使用正規式來匹配訊息，匹配到的訊息將被隱藏。\n留空則表示禁用此功能</string>
+    <string name="MessageFilterDesc">使用正規表示式來匹配訊息，匹配到的訊息將被隱藏。\n留空則表示禁用此功能</string>
     <string name="SaveToDownloadCount_zero">正在儲存 %1$d 個檔案至下載目錄</string>
     <string name="SaveToDownloadCount_one">正在儲存 %1$d 個檔案至下載目錄</string>
     <string name="SaveToDownloadCount_two">正在儲存 %1$d 個檔案至下載目錄</string>
