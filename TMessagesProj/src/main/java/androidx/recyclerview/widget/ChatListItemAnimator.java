@@ -1222,8 +1222,14 @@ public class ChatListItemAnimator extends DefaultItemAnimator {
                 view.setTranslationY(0);
             }
         } else if (view instanceof ChatMessageCell) {
-            ((ChatMessageCell) view).getTransitionParams().resetAnimation();
-            ((ChatMessageCell) view).setAnimationOffsetX(0f);
+            ChatMessageCell cell = (ChatMessageCell) view;
+            MessageObject messageObject = cell.getMessageObject();
+            if (messageObject != null && messageObject.richLayout != null && messageObject.richLayout.detailsAnimating) {
+                messageObject.richLayout.detailsAnimating = false;
+                messageObject.richLayout.snapshotForDetailsAnimation();
+            }
+            cell.getTransitionParams().resetAnimation();
+            cell.setAnimationOffsetX(0f);
         } else if (view instanceof ChatActionCell) {
             ((ChatActionCell) view).getTransitionParams().resetAnimation();
         } else {

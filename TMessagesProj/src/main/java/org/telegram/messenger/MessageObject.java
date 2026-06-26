@@ -18,6 +18,7 @@
 package org.telegram.messenger;
 
 import static org.telegram.messenger.AndroidUtilities.dp;
+import static org.telegram.messenger.AndroidUtilities.find;
 import static org.telegram.messenger.AndroidUtilities.replaceTags;
 import static org.telegram.messenger.LocaleController.formatPluralSpannable;
 import static org.telegram.messenger.LocaleController.formatPluralString;
@@ -66,11 +67,13 @@ import org.telegram.tgnet.ConnectionsManager;
 import org.telegram.tgnet.SerializedData;
 import org.telegram.tgnet.TLObject;
 import org.telegram.tgnet.TLRPC;
+import org.telegram.tgnet.tl.TL_iv;
 import org.telegram.tgnet.tl.TL_stories;
 import org.telegram.ui.ActionBar.Theme;
 import org.telegram.ui.Business.QuickRepliesController;
 import org.telegram.ui.Cells.ChatMessageCell;
 import org.telegram.ui.ChatActivity;
+import org.telegram.ui.MultiLayoutTypingAnimator;
 import org.telegram.ui.Components.AnimatedEmojiDrawable;
 import org.telegram.ui.Components.AnimatedEmojiSpan;
 import org.telegram.ui.Components.AvatarDrawable;
@@ -79,6 +82,7 @@ import org.telegram.ui.Components.ColoredImageSpan;
 import org.telegram.ui.Components.EllipsizeSpanAnimator;
 import org.telegram.ui.Components.Forum.ForumBubbleDrawable;
 import org.telegram.ui.Components.Forum.ForumUtilities;
+import org.telegram.ui.Components.LatexInliner;
 import org.telegram.ui.Components.QuoteSpan;
 import org.telegram.ui.Components.Reactions.ReactionsLayoutInBubble;
 import org.telegram.ui.Components.Reactions.ReactionsUtils;
@@ -171,6 +175,7 @@ public class MessageObject {
     public static final int TYPE_SUGGEST_BIRTHDAY = 32;
     public static final int TYPE_GIFT_OFFER = 33;
     public static final int TYPE_GIFT_OFFER_REJECTED = 34;
+    public static final int TYPE_ARTICLE = 36;
 
     public int localType;
     public String localName;
@@ -954,8 +959,18 @@ public class MessageObject {
         return a != null && a.equals(b);
     }
 
-    public static class TextLayoutBlock {
+    public static class TextLayoutBlock implements MultiLayoutTypingAnimator.Block {
         public final static int FLAG_RTL = 1, FLAG_NOT_RTL = 2;
+
+        @Override
+        public Layout getLayout() {
+            return textLayout;
+        }
+
+        @Override
+        public View getParentView() {
+            return null;
+        }
 
         public boolean first, last;
         public int index;
@@ -1787,10 +1802,18 @@ public class MessageObject {
     private static final int LINES_PER_BLOCK = 10;
     private static final int LINES_PER_BLOCK_WITH_EMOJI = 5;
 
+    public int getLastLineWidth() {
+        if (richLayout != null) {
+            return richLayout.getLastLineWidth();
+        }
+        return lastLineWidth;
+    }
+
     public int lastLineWidth;
     public int textWidth;
     public boolean hasRtl;
     public float textXOffset;
+    public RichMessageLayout richLayout;
     public ArrayList<TextLayoutBlock> textLayoutBlocks;
     public boolean hasCode;
     public boolean hasWideCode;
@@ -4166,10 +4189,10 @@ public class MessageObject {
         return false;
     }
 
-    private MessageObject getMessageObjectForBlock(TLRPC.WebPage webPage, TLRPC.PageBlock pageBlock) {
+    private MessageObject getMessageObjectForBlock(TLRPC.WebPage webPage, TL_iv.PageBlock pageBlock) {
         TLRPC.TL_message message = null;
-        if (pageBlock instanceof TLRPC.TL_pageBlockPhoto) {
-            TLRPC.TL_pageBlockPhoto pageBlockPhoto = (TLRPC.TL_pageBlockPhoto) pageBlock;
+        if (pageBlock instanceof TL_iv.pageBlockPhoto) {
+            TL_iv.pageBlockPhoto pageBlockPhoto = (TL_iv.pageBlockPhoto) pageBlock;
             TLRPC.Photo photo = getPhotoWithId(webPage, pageBlockPhoto.photo_id);
             if (photo == webPage.photo) {
                 return this;
@@ -4177,8 +4200,8 @@ public class MessageObject {
             message = new TLRPC.TL_message();
             message.media = new TLRPC.TL_messageMediaPhoto();
             message.media.photo = photo;
-        } else if (pageBlock instanceof TLRPC.TL_pageBlockVideo) {
-            TLRPC.TL_pageBlockVideo pageBlockVideo = (TLRPC.TL_pageBlockVideo) pageBlock;
+        } else if (pageBlock instanceof TL_iv.pageBlockVideo) {
+            TL_iv.pageBlockVideo pageBlockVideo = (TL_iv.pageBlockVideo) pageBlock;
             TLRPC.Document document = getDocumentWithId(webPage, pageBlockVideo.video_id);
             if (document == webPage.document) {
                 return this;
@@ -4197,7 +4220,7 @@ public class MessageObject {
         return new MessageObject(currentAccount, message, false, true);
     }
 
-    public ArrayList<MessageObject> getWebPagePhotos(ArrayList<MessageObject> array, ArrayList<TLRPC.PageBlock> blocksToSearch) {
+    public ArrayList<MessageObject> getWebPagePhotos(ArrayList<MessageObject> array, ArrayList<TL_iv.PageBlock> blocksToSearch) {
         ArrayList<MessageObject> messageObjects = array == null ? new ArrayList<>() : array;
         if (getMedia(messageOwner) == null || getMedia(messageOwner).webpage == null) {
             return messageObjects;
@@ -4206,16 +4229,16 @@ public class MessageObject {
         if (webPage.cached_page == null) {
             return messageObjects;
         }
-        ArrayList<TLRPC.PageBlock> blocks = blocksToSearch == null ? webPage.cached_page.blocks : blocksToSearch;
+        ArrayList<TL_iv.PageBlock> blocks = blocksToSearch == null ? webPage.cached_page.blocks : blocksToSearch;
         for (int a = 0; a < blocks.size(); a++) {
-            TLRPC.PageBlock block = blocks.get(a);
-            if (block instanceof TLRPC.TL_pageBlockSlideshow) {
-                TLRPC.TL_pageBlockSlideshow slideshow = (TLRPC.TL_pageBlockSlideshow) block;
+            TL_iv.PageBlock block = blocks.get(a);
+            if (block instanceof TL_iv.pageBlockSlideshow) {
+                TL_iv.pageBlockSlideshow slideshow = (TL_iv.pageBlockSlideshow) block;
                 for (int b = 0; b < slideshow.items.size(); b++) {
                     messageObjects.add(getMessageObjectForBlock(webPage, slideshow.items.get(b)));
                 }
-            } else if (block instanceof TLRPC.TL_pageBlockCollage) {
-                TLRPC.TL_pageBlockCollage slideshow = (TLRPC.TL_pageBlockCollage) block;
+            } else if (block instanceof TL_iv.pageBlockCollage) {
+                TL_iv.pageBlockCollage slideshow = (TL_iv.pageBlockCollage) block;
                 for (int b = 0; b < slideshow.items.size(); b++) {
                     messageObjects.add(getMessageObjectForBlock(webPage, slideshow.items.get(b)));
                 }
@@ -5651,6 +5674,8 @@ public class MessageObject {
             if (!TextUtils.isEmpty(restrictionReason)) {
                 messageText = restrictionReason;
                 isRestrictedMessage = true;
+            } else if (messageOwner.rich_message != null) {
+                messageText = formatRichMessage(messageOwner.rich_message, isOutOwner());
             } else if (!isMediaEmpty() && !isSponsored()) {
 //                messageText = getMediaTitle(getMedia(messageOwner)); // I'm afraid doing this
                 if (getMedia(messageOwner) instanceof TLRPC.TL_messageMediaGiveaway) {
@@ -5835,6 +5860,252 @@ public class MessageObject {
         taskText = Emoji.replaceEmoji(taskText, paint.getFontMetricsInt(), false);
         taskText = replaceAnimatedEmoji(taskText, text.entities, paint.getFontMetricsInt());
         return taskText;
+    }
+
+    public static CharSequence formatRichMessage(TL_iv.RichMessage richMessage, boolean isOut) {
+        return formatRichMessage(richMessage, isOut, false, 1024);
+    }
+    public static CharSequence formatRichMessage(TL_iv.RichMessage richMessage, boolean isOut, boolean photoViewer, int maxLength) {
+        final SpannableStringBuilder out = new SpannableStringBuilder();
+        if (richMessage != null) {
+            for (int i = 0 ; i < richMessage.blocks.size(); ++i) {
+                final TL_iv.PageBlock block = richMessage.blocks.get(i);
+                if (i > 0) out.append("  ");
+                formatRichBlock(block, isOut, photoViewer, maxLength, out, richMessage);
+                if (out.length() >= maxLength) {
+                    out.delete(maxLength, out.length());
+                    out.append("…");
+                    break;
+                }
+            }
+        }
+        return out;
+    }
+    public static CharSequence formatRichBlock(TL_iv.PageBlock block, boolean isOut, boolean photoViewer, int maxLength, SpannableStringBuilder out, TL_iv.RichMessage richMessage) {
+        if (
+            block instanceof TL_iv.pageBlockTitle ||
+            block instanceof TL_iv.pageBlockHeader ||
+            block instanceof TL_iv.pageBlockSubheader ||
+            block instanceof TL_iv.pageBlockHeading1 ||
+            block instanceof TL_iv.pageBlockHeading2 ||
+            block instanceof TL_iv.pageBlockHeading3 ||
+            block instanceof TL_iv.pageBlockHeading4 ||
+            block instanceof TL_iv.pageBlockHeading5 ||
+            block instanceof TL_iv.pageBlockHeading6 ||
+            block instanceof TL_iv.pageBlockBlockquote ||
+            block instanceof TL_iv.pageBlockPullquote
+        ) {
+            formatRichText(block.text, isOut, photoViewer, maxLength, out, TextStyleSpan.FLAG_STYLE_BOLD);
+        } else if (
+            block instanceof TL_iv.pageBlockParagraph ||
+            block instanceof TL_iv.pageBlockFooter ||
+            block instanceof TL_iv.pageBlockKicker
+        ) {
+            formatRichText(block.text, isOut, photoViewer, maxLength, out, 0);
+        } else if (block instanceof TL_iv.pageBlockBlockquoteBlocks) {
+            final TL_iv.pageBlockBlockquoteBlocks quote = (TL_iv.pageBlockBlockquoteBlocks) block;
+            for (int i = 0; i < quote.blocks.size(); ++i) {
+                if (i > 0) out.append("  ");
+                formatRichBlock(quote.blocks.get(i), isOut, photoViewer, maxLength, out, richMessage);
+                if (out.length() >= maxLength) {
+                    out.delete(maxLength, out.length());
+                    out.append("…");
+                    return out;
+                }
+            }
+        } else if (block instanceof TL_iv.pageBlockDetails) {
+            formatRichText(((TL_iv.pageBlockDetails) block).title, isOut, photoViewer, maxLength, out, 0);
+        } else if (block instanceof TL_iv.pageBlockAuthorDate) {
+            formatRichText(((TL_iv.pageBlockAuthorDate) block).author, isOut, photoViewer, maxLength, out, 0);
+        } else if (block instanceof TL_iv.pageBlockMath) {
+            out.append(LatexInliner.inlineLatex(((TL_iv.pageBlockMath) block).source));
+        } else if (block instanceof TL_iv.pageBlockMap) {
+            out.append(getString(R.string.Map));
+            if (block.caption != null && !(block.caption.text instanceof TL_iv.textEmpty)) {
+                out.append("  ");
+                formatRichText(block.caption.text, isOut, photoViewer, maxLength, out, 0);
+            }
+        } else if (block instanceof TL_iv.pageBlockPreformatted) {
+            formatRichText(block.text, isOut, photoViewer, maxLength, out, TextStyleSpan.FLAG_STYLE_MONO);
+        } else if (block instanceof TL_iv.pageBlockList) {
+            final TL_iv.pageBlockList list = (TL_iv.pageBlockList) block;
+            for (int j = 0; j < list.items.size(); ++j) {
+                final TL_iv.PageListItem item = list.items.get(j);
+                if (item instanceof TL_iv.TL_pageListItemText) {
+                    final TL_iv.TL_pageListItemText i = (TL_iv.TL_pageListItemText) item;
+                    if (i.checkbox) {
+                        out.append(i.checked ? "✅ " : "☑️ ");
+                    } else {
+                        out.append("• ");
+                    }
+                    formatRichText(i.text, isOut, photoViewer, maxLength, out, 0);
+                } else if (item instanceof TL_iv.TL_pageListItemBlocks) {
+                    final TL_iv.TL_pageListItemBlocks i = (TL_iv.TL_pageListItemBlocks) item;
+                    if (i.checkbox) {
+                        out.append(i.checked ? "✅ " : "☑️ ");
+                    } else {
+                        out.append("• ");
+                    }
+                    for (int k = 0; k < i.blocks.size(); ++k) {
+                        if (k > 0) out.append("\n");
+                        final TL_iv.PageBlock block0 = i.blocks.get(k);
+                        formatRichBlock(block0, isOut, photoViewer, maxLength, out, richMessage);
+                        if (out.length() >= maxLength) {
+                            out.delete(maxLength, out.length());
+                            out.append("…");
+                            return out;
+                        }
+                    }
+                }
+                if (out.length() >= maxLength) {
+                    out.delete(maxLength, out.length());
+                    out.append("…");
+                    return out;
+                }
+            }
+        } else if (block instanceof TL_iv.pageBlockOrderedList) {
+            final TL_iv.pageBlockOrderedList list = (TL_iv.pageBlockOrderedList) block;
+            for (int j = 0; j < list.items.size(); ++j) {
+                final TL_iv.PageListOrderedItem item = list.items.get(j);
+                if (item instanceof TL_iv.TL_pageListOrderedItemText) {
+                    final TL_iv.TL_pageListOrderedItemText i = (TL_iv.TL_pageListOrderedItemText) item;
+                    out.append(i.num);
+                    out.append(". ");
+                    if (i.checkbox) {
+                        out.append(i.checked ? "✅ " : "☑️ ");
+                    }
+                    formatRichText(i.text, isOut, photoViewer, maxLength, out, 0);
+                } else if (item instanceof TL_iv.TL_pageListOrderedItemBlocks) {
+                    final TL_iv.TL_pageListOrderedItemBlocks i = (TL_iv.TL_pageListOrderedItemBlocks) item;
+                    out.append(i.num);
+                    out.append(". ");
+                    if (i.checkbox) {
+                        out.append(i.checked ? "✅ " : "☑️ ");
+                    }
+                    for (int k = 0; k < i.blocks.size(); ++k) {
+                        if (k > 0) out.append("\n");
+                        final TL_iv.PageBlock block0 = i.blocks.get(k);
+                        formatRichBlock(block0, isOut, photoViewer, maxLength, out, richMessage);
+                        if (out.length() >= maxLength) {
+                            out.delete(maxLength, out.length());
+                            out.append("…");
+                            return out;
+                        }
+                    }
+                }
+                if (out.length() >= maxLength) {
+                    out.delete(maxLength, out.length());
+                    out.append("…");
+                    return out;
+                }
+            }
+        } else if (block instanceof TL_iv.pageBlockTable) {
+            final TL_iv.pageBlockTable table = (TL_iv.pageBlockTable) block;
+            if (table.title != null && !(table.title instanceof TL_iv.textEmpty)) {
+                formatRichText(table.title, isOut, photoViewer, maxLength, out, TextStyleSpan.FLAG_STYLE_BOLD);
+            } else {
+                out.append(getString(R.string.AccDescrIVTable));
+            }
+        } else if (block instanceof TL_iv.pageBlockAudio) {
+            final TL_iv.pageBlockAudio audio = (TL_iv.pageBlockAudio) block;
+            TLRPC.Document document = null;
+            for (int i = 0; i < richMessage.documents.size(); ++i) {
+                if (richMessage.documents.get(i).id == audio.audio_id) {
+                    document = richMessage.documents.get(i);
+                    break;
+                }
+            }
+            if (document != null) {
+                final TLRPC.TL_documentAttributeAudio audioAttr = find(document.attributes, TLRPC.TL_documentAttributeAudio.class);
+                final TLRPC.TL_documentAttributeFilename fileAttr = find(document.attributes, TLRPC.TL_documentAttributeFilename.class);
+                if (audioAttr != null) {
+                    if (!TextUtils.isEmpty(audioAttr.title) && !TextUtils.isEmpty(audioAttr.performer)) {
+                        out.append("🎵 ").append(audioAttr.performer).append(" – ").append(audioAttr.title);
+                    } else if (!TextUtils.isEmpty(audioAttr.title)) {
+                        out.append("🎵 ").append(audioAttr.title);
+                    } else if (fileAttr != null && fileAttr.file_name != null) {
+                        out.append("🎵 ").append(fileAttr.file_name);
+                    }
+                } else if (fileAttr != null && fileAttr.file_name != null) {
+                    out.append("🎵 ").append(fileAttr.file_name);
+                }
+            }
+        } else if (block instanceof TL_iv.pageBlockCover) {
+            formatRichBlock(((TL_iv.pageBlockCover) block).cover, isOut, photoViewer, maxLength, out, richMessage);
+        } else if (block instanceof TL_iv.pageBlockPhoto) {
+            out.append(getString(R.string.AttachPhoto));
+        } else if (block instanceof TL_iv.pageBlockVideo) {
+            out.append(getString(R.string.AttachVideo));
+        } else if (block instanceof TL_iv.pageBlockCollage) {
+            out.append(getString(R.string.AccDescrCollage));
+        } else if (block instanceof TL_iv.pageBlockSlideshow) {
+            out.append(getString(R.string.AccDescrIVSlideshow));
+        } else if (block instanceof TL_iv.pageBlockUnsupported) {
+            out.append(getString(R.string.UnsupportedAttachment));
+        }
+        return out;
+    }
+    public static CharSequence formatRichText(TL_iv.RichText text, boolean isOut, boolean photoViewer, int maxLength, SpannableStringBuilder out, int flags) {
+        if (text == null) return out;
+        int start = out.length();
+        if (text instanceof TL_iv.textPlain) {
+            out.append(((TL_iv.textPlain) text).text);
+        } else if (text instanceof TL_iv.textBold) {
+            formatRichText(text.text, isOut, photoViewer, maxLength, out, flags | TextStyleSpan.FLAG_STYLE_BOLD);
+        } else if (text instanceof TL_iv.textItalic) {
+            formatRichText(text.text, isOut, photoViewer, maxLength, out, flags | TextStyleSpan.FLAG_STYLE_ITALIC);
+        } else if (text instanceof TL_iv.textUnderline) {
+            formatRichText(text.text, isOut, photoViewer, maxLength, out, flags | TextStyleSpan.FLAG_STYLE_UNDERLINE);
+        } else if (text instanceof TL_iv.textStrike) {
+            formatRichText(text.text, isOut, photoViewer, maxLength, out, flags | TextStyleSpan.FLAG_STYLE_STRIKE);
+        } else if (text instanceof TL_iv.textFixed) {
+            formatRichText(text.text, isOut, photoViewer, maxLength, out, flags | TextStyleSpan.FLAG_STYLE_MONO);
+        } else if (text instanceof TL_iv.textSpoiler) {
+            formatRichText(text.text, isOut, photoViewer, maxLength, out, flags | TextStyleSpan.FLAG_STYLE_SPOILER);
+        } else if (text instanceof TL_iv.textUrl) {
+            formatRichText(text.text, isOut, photoViewer, maxLength, out, flags);
+            if (out.length() > start) {
+                final TextStyleSpan.TextStyleRun run = new TextStyleSpan.TextStyleRun();
+                run.flags = flags;
+                out.setSpan(new URLSpanBrowser(text.url, run), start, out.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+            }
+        } else if (text instanceof TL_iv.textEmail) {
+            formatRichText(text.text, isOut, photoViewer, maxLength, out, flags);
+            if (out.length() > start) {
+                final TextStyleSpan.TextStyleRun run = new TextStyleSpan.TextStyleRun();
+                run.flags = flags;
+                out.setSpan(new URLSpanReplacement("mailto:" + text.email, run), start, out.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+            }
+        } else if (text instanceof TL_iv.textMath) {
+            out.append(LatexInliner.inlineLatex(((TL_iv.textMath) text).source));
+        } else if (text instanceof TL_iv.textPhone) {
+            formatRichText(text.text, isOut, photoViewer, maxLength, out, flags);
+            if (out.length() > start) {
+                String tel = PhoneFormat.stripExceptNumbers(((TL_iv.textPhone) text).phone);
+                if (((TL_iv.textPhone) text).phone.startsWith("+")) {
+                    tel = "+" + tel;
+                }
+                final TextStyleSpan.TextStyleRun run = new TextStyleSpan.TextStyleRun();
+                run.flags = flags;
+                out.setSpan(new URLSpanNoUnderline("tel:" + tel, run), start, out.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+            }
+        } else if (text instanceof TL_iv.textConcat) {
+            final TL_iv.textConcat concat = (TL_iv.textConcat) text;
+            for (TL_iv.RichText textChild : concat.texts) {
+                formatRichText(textChild, isOut, photoViewer, maxLength, out, flags);
+                if (out.length() >= maxLength) {
+                    out.delete(maxLength, out.length());
+                    out.append("…");
+                    return out;
+                }
+            }
+        }
+        if (out.length() > start && flags != 0) {
+            final TextStyleSpan.TextStyleRun run = new TextStyleSpan.TextStyleRun();
+            run.flags = flags;
+            out.setSpan(new TextStyleSpan(run), start, out.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+        }
+        return out;
     }
 
     public static TLRPC.TL_textWithEntities removeLinks(TLRPC.TL_textWithEntities text) {
@@ -6039,6 +6310,8 @@ public class MessageObject {
         } else if (messageOwner instanceof TLRPC.TL_message || messageOwner instanceof TLRPC.TL_messageForwarded_old2) {
             if (isRestrictedMessage) {
                 type = TYPE_TEXT;
+            } else if (messageOwner.rich_message != null) {
+                type = TYPE_ARTICLE;
             } else if (emojiAnimatedSticker != null || emojiAnimatedStickerId != null) {
                 if (isSticker()) {
                     type = TYPE_STICKER;
@@ -6203,7 +6476,7 @@ public class MessageObject {
     }
 
     public boolean checkLayout() {
-        if (type != TYPE_TEXT && type != TYPE_EMOJIS || messageOwner.peer_id == null || messageText == null || messageText.length() == 0) {
+        if (type != TYPE_TEXT && type != TYPE_EMOJIS && type != TYPE_ARTICLE || messageOwner.peer_id == null || messageText == null || messageText.length() == 0 && !isBotPendingDraft) {
             return false;
         }
         if (layoutCreated) {
@@ -6233,6 +6506,7 @@ public class MessageObject {
             checkEmojiOnly(emojiOnly);
             checkBigAnimatedEmoji();
             setType();
+            generateLayout(fromUser);
             return true;
         }
         return false;
@@ -6553,6 +6827,27 @@ public class MessageObject {
                         photoThumbsObject = document;
                     }
                 }
+            }
+        } else if (messageOwner != null && messageOwner.rich_message != null) {
+            final TLRPC.Document video = findVideo(messageOwner.rich_message);
+            final TLRPC.Photo photo = findPhoto(messageOwner.rich_message);
+            if (video != null) {
+                if (isDocumentHasThumb(video)) {
+                    if (!update) {
+                        photoThumbs = new ArrayList<>();
+                        photoThumbs.addAll(video.thumbs);
+                    } else if (photoThumbs != null && !photoThumbs.isEmpty()) {
+                        updatePhotoSizeLocations(photoThumbs, video.thumbs);
+                    }
+                    photoThumbsObject = video;
+                }
+            } else if (photo != null) {
+                if (!update || photoThumbs == null) {
+                    photoThumbs = new ArrayList<>(photo.sizes);
+                } else if (!photoThumbs.isEmpty()) {
+                    updatePhotoSizeLocations(photoThumbs, photo.sizes);
+                }
+                photoThumbsObject = photo;
             }
         } else if (sponsoredMedia != null) {
             TLRPC.Photo photo = sponsoredMedia.photo;
@@ -7772,7 +8067,7 @@ public class MessageObject {
             maxWidth = dp(200);
         }
         if (maxWidth == 0) {
-            maxWidth = generatedWithMinSize - dp(80);
+            maxWidth = generatedWithMinSize - dp(type == TYPE_ARTICLE ? 40 : 80);
             if (sideMenuEnabled) {
                 maxWidth -= dp(64);
             } else if (needDrawAvatarInternal() && !isOutOwner() && !messageOwner.isThreadMessage) {
@@ -7911,6 +8206,17 @@ public class MessageObject {
     }
 
     public void generateLayout(TLRPC.User fromUser) {
+        if (type == TYPE_ARTICLE) {
+            final int maxWidth = getMaxMessageTextWidth();
+            if (richLayout == null || messageOwner != null && richLayout.needsUpdate(messageOwner.rich_message, maxWidth)) {
+                final RichMessageLayout old = richLayout;
+                richLayout = new RichMessageLayout(this, maxWidth, old);
+                if (old != null && old.view != null) {
+                    old.detach(old.view);
+                }
+            }
+            return;
+        }
         if (type != TYPE_TEXT && type != TYPE_EMOJIS && type != TYPE_STORY_MENTION || messageOwner.peer_id == null || TextUtils.isEmpty(messageText)) {
             return;
         }
@@ -8343,6 +8649,7 @@ public class MessageObject {
 
     private Integer cachedTextHeight;
     public int textHeightCached() {
+        if (richLayout != null) return richLayout.getHeight();
         if (cachedTextHeight != null) return cachedTextHeight;
         if (textLayoutBlocks == null) return cachedTextHeight = 0;
         int h = 0;
@@ -8352,6 +8659,7 @@ public class MessageObject {
         return cachedTextHeight = h;
     }
     public int textHeight() {
+        if (richLayout != null) return richLayout.getHeight();
         if (textLayoutBlocks == null) return 0;
         int h = 0;
         for (int i = 0; i < textLayoutBlocks.size(); ++i) {
@@ -9686,6 +9994,9 @@ public class MessageObject {
     }
 
     public static TLRPC.Document getDocument(TLRPC.Message message) {
+        if (message != null && message.rich_message != null) {
+            return findVideo(message.rich_message);
+        }
         if (getMedia(message) instanceof TLRPC.TL_messageMediaWebPage) {
             return getMedia(message).webpage.document;
         } else if (getMedia(message) instanceof TLRPC.TL_messageMediaGame) {
@@ -9704,10 +10015,67 @@ public class MessageObject {
     }
 
     public static TLRPC.Photo getPhoto(TLRPC.Message message) {
+        if (message != null && message.rich_message != null) {
+            return findPhoto(message.rich_message);
+        }
         if (getMedia(message) instanceof TLRPC.TL_messageMediaWebPage) {
             return getMedia(message).webpage.photo;
         }
         return getMedia(message) != null ? getMedia(message).photo : null;
+    }
+
+    public static TLRPC.Document findVideo(TL_iv.RichMessage rich_message) {
+        if (rich_message == null) return null;
+        return findVideo(rich_message.blocks, rich_message);
+    }
+    public static TLRPC.Document findVideo(ArrayList<TL_iv.PageBlock> blocks, TL_iv.RichMessage rich_message) {
+        if (blocks == null || rich_message == null) return null;
+        for (final TL_iv.PageBlock block : blocks) {
+            if (block instanceof TL_iv.pageBlockVideo) {
+                return AndroidUtilities.findDocument(rich_message.documents, ((TL_iv.pageBlockVideo) block).video_id);
+            } else if (block instanceof TL_iv.pageBlockCollage) {
+                return findVideo(((TL_iv.pageBlockCollage) block).items, rich_message);
+            } else if (block instanceof TL_iv.pageBlockSlideshow) {
+                return findVideo(((TL_iv.pageBlockSlideshow) block).items, rich_message);
+            }
+        }
+        return null;
+    }
+
+    public static TLRPC.Document findAudio(TL_iv.RichMessage rich_message) {
+        if (rich_message == null) return null;
+        return findAudio(rich_message.blocks, rich_message);
+    }
+    public static TLRPC.Document findAudio(ArrayList<TL_iv.PageBlock> blocks, TL_iv.RichMessage rich_message) {
+        if (blocks == null || rich_message == null) return null;
+        for (final TL_iv.PageBlock block : blocks) {
+            if (block instanceof TL_iv.pageBlockAudio) {
+                return AndroidUtilities.findDocument(rich_message.documents, ((TL_iv.pageBlockAudio) block).audio_id);
+            } else if (block instanceof TL_iv.pageBlockCollage) {
+                return findAudio(((TL_iv.pageBlockCollage) block).items, rich_message);
+            } else if (block instanceof TL_iv.pageBlockSlideshow) {
+                return findAudio(((TL_iv.pageBlockSlideshow) block).items, rich_message);
+            }
+        }
+        return null;
+    }
+
+    public static TLRPC.Photo findPhoto(TL_iv.RichMessage rich_message) {
+        if (rich_message == null) return null;
+        return findPhoto(rich_message.blocks, rich_message);
+    }
+    public static TLRPC.Photo findPhoto(ArrayList<TL_iv.PageBlock> blocks, TL_iv.RichMessage rich_message) {
+        if (blocks == null || rich_message == null) return null;
+        for (final TL_iv.PageBlock block : blocks) {
+            if (block instanceof TL_iv.pageBlockPhoto) {
+                return AndroidUtilities.findPhoto(rich_message.photos, ((TL_iv.pageBlockPhoto) block).photo_id);
+            } else if (block instanceof TL_iv.pageBlockCollage) {
+                return findPhoto(((TL_iv.pageBlockCollage) block).items, rich_message);
+            } else if (block instanceof TL_iv.pageBlockSlideshow) {
+                return findPhoto(((TL_iv.pageBlockSlideshow) block).items, rich_message);
+            }
+        }
+        return null;
     }
 
     public static boolean isStickerMessage(TLRPC.Message message) {
@@ -9752,6 +10120,9 @@ public class MessageObject {
     }
 
     public static boolean isPhoto(TLRPC.Message message) {
+        if (message != null && message.rich_message != null) {
+            return findPhoto(message.rich_message) != null;
+        }
         if (getMedia(message) instanceof TLRPC.TL_messageMediaWebPage) {
             return getMedia(message).webpage.photo instanceof TLRPC.TL_photo && !(getMedia(message).webpage.document instanceof TLRPC.TL_document);
         }
@@ -9780,6 +10151,9 @@ public class MessageObject {
     }
 
     public static boolean isVideoMessage(TLRPC.Message message) {
+        if (message != null && message.rich_message != null) {
+            return isVideoDocument(findVideo(message.rich_message));
+        }
         if (getMedia(message) != null && isVideoSticker(getMedia(message).document)) {
             return false;
         }
@@ -10707,6 +11081,9 @@ public class MessageObject {
             return false;
         }
         if (chat != null && (chat.left || chat.kicked) && (!chat.megagroup || !chat.has_link)) {
+            return false;
+        }
+        if (message == null || message.rich_message != null) {
             return false;
         }
         TLRPC.MessageMedia media = getMedia(message);

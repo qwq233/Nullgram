@@ -34,6 +34,7 @@ import org.telegram.messenger.voip.VoipAudioManager;
 import org.telegram.tgnet.ConnectionsManager;
 import org.telegram.tgnet.TLObject;
 import org.telegram.tgnet.TLRPC;
+import org.telegram.tgnet.tl.TL_update;
 import org.telegram.tgnet.Vector;
 import org.telegram.tgnet.tl.TL_phone;
 import org.telegram.tgnet.tl.TL_stories;
@@ -253,18 +254,18 @@ public class LivePlayer implements NotificationCenter.NotificationCenterDelegate
                             final TLRPC.Updates updates = (TLRPC.Updates) res;
                             MessagesController.getInstance(currentAccount).putUsers(updates.users, false);
                             MessagesController.getInstance(currentAccount).putChats(updates.chats, false);
-                            for (TLRPC.TL_updateGroupCall upd : findUpdates(updates, TLRPC.TL_updateGroupCall.class)) {
+                            for (TL_update.TL_updateGroupCall upd : findUpdates(updates, TL_update.TL_updateGroupCall.class)) {
                                 this.call = upd.call;
                             }
-                            final ArrayList<TLRPC.TL_updateGroupCallMessage> history = findUpdatesAndRemove(updates, TLRPC.TL_updateGroupCallMessage.class);
+                            final ArrayList<TL_update.TL_updateGroupCallMessage> history = findUpdatesAndRemove(updates, TL_update.TL_updateGroupCallMessage.class);
                             AndroidUtilities.runOnUIThread(() -> {
-                                for (TLRPC.TL_updateGroupCallMessage u : history) {
+                                for (TL_update.TL_updateGroupCallMessage u : history) {
                                     NotificationCenter.getInstance(currentAccount).postNotificationName(NotificationCenter.liveStoryMessageUpdate, u.call.id, u, true);
                                 }
                             });
                             MessagesController.getInstance(currentAccount).processUpdates(updates, false);
                             final boolean isRtmpStream = call != null && call.rtmp_stream;
-                            for (TLRPC.TL_updateGroupCallParticipants upd : findUpdates(updates, TLRPC.TL_updateGroupCallParticipants.class)) {
+                            for (TL_update.TL_updateGroupCallParticipants upd : findUpdates(updates, TL_update.TL_updateGroupCallParticipants.class)) {
                                 if (upd.call.id == getCallId() && !isRtmpStream) {
                                     for (int i = 0; i < upd.participants.size(); ++i) {
                                         if (DialogObject.getPeerDialogId(upd.participants.get(i).peer) == dialogId) {
@@ -277,7 +278,7 @@ public class LivePlayer implements NotificationCenter.NotificationCenterDelegate
                                 }
                             }
                             TLRPC.TL_dataJSON params = null;
-                            for (TLRPC.TL_updateGroupCallConnection upd : findUpdates(updates, TLRPC.TL_updateGroupCallConnection.class)) {
+                            for (TL_update.TL_updateGroupCallConnection upd : findUpdates(updates, TL_update.TL_updateGroupCallConnection.class)) {
                                 params = upd.params;
                             }
 

@@ -68,6 +68,7 @@ import org.telegram.tgnet.RequestDelegate;
 import org.telegram.tgnet.SerializedData;
 import org.telegram.tgnet.TLObject;
 import org.telegram.tgnet.TLRPC;
+import org.telegram.tgnet.tl.TL_update;
 import org.telegram.tgnet.Vector;
 import org.telegram.tgnet.tl.TL_account;
 import org.telegram.tgnet.tl.TL_bots;
@@ -8257,7 +8258,7 @@ public class MediaDataController extends BaseController {
         });
     }
 
-    public void updateBotInfo(long dialogId, TLRPC.TL_updateBotCommands update) {
+    public void updateBotInfo(long dialogId, TL_update.TL_updateBotCommands update) {
         TL_bots.BotInfo botInfo = botInfos.get(update.bot_id + "_" + dialogId);
         if (botInfo != null) {
             botInfo.commands = update.commands;

@@ -2050,6 +2050,10 @@ public class Theme {
         );
     }
 
+    public static int capAlpha(int color, float maxAlpha) {
+        return ColorUtils.setAlphaComponent(color, MathUtils.clamp(Color.alpha(color), 0, (int) (0xFF * maxAlpha)));
+    }
+
     public static int multAlpha(int color, float multiply) {
         if (multiply == 1f)
             return color;
@@ -3882,6 +3886,9 @@ public class Theme {
     public static final int key_chat_messagePanelCursor = colorsCount++;
     public static final int key_chat_messagePanelIcons = colorsCount++;
     public static final int key_chat_messagePanelSend = colorsCount++;
+    public static final int key_pollCreateIcons = key_windowBackgroundWhiteGrayIcon;
+    public static final int key_telegram_color = key_chat_messagePanelSend;
+    public static final int key_telegram_color_text = key_windowBackgroundWhiteBlueText4;
     public static final int key_chat_messagePanelVoiceLock = colorsCount++;
     public static final int key_chat_messagePanelVoiceLockBackground = colorsCount++;
     public static final int key_chat_messagePanelVoiceLockShadow = colorsCount++;

@@ -210,6 +210,7 @@ import org.telegram.messenger.video.VideoPlayerRewinder;
 import org.telegram.tgnet.ConnectionsManager;
 import org.telegram.tgnet.TLObject;
 import org.telegram.tgnet.TLRPC;
+import org.telegram.tgnet.tl.TL_iv;
 import org.telegram.ui.ActionBar.ActionBar;
 import org.telegram.ui.ActionBar.ActionBarMenu;
 import org.telegram.ui.ActionBar.ActionBarMenuItem;
@@ -1970,7 +1971,7 @@ public class PhotoViewer implements NotificationCenter.NotificationCenterDelegat
     private String currentPathObject;
     private String currentImagePath;
     private boolean currentVideoFinishedLoading;
-    private TLRPC.PageBlock currentPageBlock;
+    private TL_iv.PageBlock currentPageBlock;
     private ImageReceiver.BitmapHolder currentThumb;
     private boolean ignoreDidSetImage;
     private boolean dontAutoPlay;
@@ -2086,15 +2087,15 @@ public class PhotoViewer implements NotificationCenter.NotificationCenterDelegat
 
     public interface PageBlocksAdapter {
         int getItemsCount();
-        TLRPC.PageBlock get(int index);
-        List<TLRPC.PageBlock> getAll();
+        TL_iv.PageBlock get(int index);
+        List<TL_iv.PageBlock> getAll();
         boolean isVideo(int index);
         TLObject getMedia(int index);
         File getFile(int index);
         String getFileName(int index);
         CharSequence getCaption(int index);
         TLRPC.PhotoSize getFileLocation(TLObject media, int[] size);
-        void updateSlideshowCell(TLRPC.PageBlock currentPageBlock);
+        void updateSlideshowCell(TL_iv.PageBlock currentPageBlock);
         Object getParentObject();
         boolean isHardwarePlayer(int index);
     }
@@ -5913,7 +5914,7 @@ public class PhotoViewer implements NotificationCenter.NotificationCenterDelegat
             }
 
             @Override
-            public List<TLRPC.PageBlock> getPageBlockArr() {
+            public List<TL_iv.PageBlock> getPageBlockArr() {
                 return pageBlocksAdapter != null ? pageBlocksAdapter.getAll() : null;
             }
 
@@ -13849,11 +13850,11 @@ public class PhotoViewer implements NotificationCenter.NotificationCenterDelegat
                         if (!TextUtils.isEmpty(webPage.author)) {
                             nameOverride = webPage.author;
                         }
-                        if (webPage.cached_page instanceof TLRPC.TL_page) {
+                        if (webPage.cached_page instanceof TL_iv.TL_page) {
                             for (int a = 0; a < webPage.cached_page.blocks.size(); a++) {
-                                TLRPC.PageBlock block = webPage.cached_page.blocks.get(a);
-                                if (block instanceof TLRPC.TL_pageBlockAuthorDate) {
-                                    dateOverride = ((TLRPC.TL_pageBlockAuthorDate) block).published_date;
+                                TL_iv.PageBlock block = webPage.cached_page.blocks.get(a);
+                                if (block instanceof TL_iv.pageBlockAuthorDate) {
+                                    dateOverride = ((TL_iv.pageBlockAuthorDate) block).published_date;
                                     break;
                                 }
                             }
@@ -14832,7 +14833,7 @@ public class PhotoViewer implements NotificationCenter.NotificationCenterDelegat
                 return;
             }
             allowShare = !MessagesController.getInstance(currentAccount).isChatNoForwards(-currentDialogId) && (currentMessageObject == null || !currentMessageObject.hasRevealedExtendedMedia());
-            TLRPC.PageBlock pageBlock = pageBlocksAdapter.get(switchingToIndex);
+            TL_iv.PageBlock pageBlock = pageBlocksAdapter.get(switchingToIndex);
             caption = pageBlocksAdapter.getCaption(switchingToIndex);
             isVideo = pageBlocksAdapter.isVideo(switchingToIndex);
             if (isVideo) {
@@ -15441,7 +15442,7 @@ public class PhotoViewer implements NotificationCenter.NotificationCenterDelegat
                 closePhoto(false, false);
                 return;
             }
-            final TLRPC.PageBlock pageBlock = pageBlocksAdapter.get(currentIndex);
+            final TL_iv.PageBlock pageBlock = pageBlocksAdapter.get(currentIndex);
             sameImage = currentPageBlock != null && currentPageBlock == pageBlock;
             currentPageBlock = pageBlock;
             isVideo = pageBlocksAdapter.isVideo(currentIndex) || pageBlocksAdapter.isHardwarePlayer(currentIndex);

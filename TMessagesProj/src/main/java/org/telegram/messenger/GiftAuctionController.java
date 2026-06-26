@@ -9,6 +9,7 @@ import androidx.annotation.UiThread;
 
 import org.telegram.tgnet.ConnectionsManager;
 import org.telegram.tgnet.TLRPC;
+import org.telegram.tgnet.tl.TL_update;
 import org.telegram.tgnet.tl.TL_payments;
 import org.telegram.tgnet.tl.TL_stars;
 import org.telegram.ui.Gifts.AuctionBidSheet;
@@ -350,7 +351,7 @@ public class GiftAuctionController extends BaseController {
     /* * */
 
     @UiThread
-    public void processUpdate(TLRPC.TL_updateStarGiftAuctionState update) {
+    public void processUpdate(TL_update.TL_updateStarGiftAuctionState update) {
         final AuctionInternal auction = auctions.get(update.gift_id);
         if (auction == null || auction.internalState == null) {
             return;
@@ -364,7 +365,7 @@ public class GiftAuctionController extends BaseController {
     }
 
     @UiThread
-    public void processUpdate(TLRPC.TL_updateStarGiftAuctionUserState update) {
+    public void processUpdate(TL_update.TL_updateStarGiftAuctionUserState update) {
         final AuctionInternal auction = auctions.get(update.gift_id);
         if (auction == null || auction.internalState == null) {
             return;

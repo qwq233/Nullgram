@@ -114,6 +114,7 @@ import org.telegram.messenger.utils.tlutils.AmountUtils;
 import org.telegram.tgnet.ConnectionsManager;
 import org.telegram.tgnet.TLObject;
 import org.telegram.tgnet.TLRPC;
+import org.telegram.tgnet.tl.TL_update;
 import org.telegram.tgnet.tl.TL_account;
 import org.telegram.tgnet.tl.TL_stars;
 import org.telegram.ui.AccountFrozenAlert;
@@ -5525,18 +5526,18 @@ public class StarGiftSheet extends BottomSheetWithRecyclerListView implements No
             return 0;
         }
         TLRPC.Message message = null;
-        if (updates.update instanceof TLRPC.TL_updateNewMessage) {
-            message = ((TLRPC.TL_updateNewMessage) updates.update).message;
-//        } else if (updates.update instanceof TLRPC.TL_updateEditMessage) {
-//            message = ((TLRPC.TL_updateEditMessage) updates.update).message;
+        if (updates.update instanceof TL_update.TL_updateNewMessage) {
+            message = ((TL_update.TL_updateNewMessage) updates.update).message;
+//        } else if (updates.update instanceof TL_update.TL_updateEditMessage) {
+//            message = ((TL_update.TL_updateEditMessage) updates.update).message;
         } else if (updates.updates != null) {
             for (int i = 0; i < updates.updates.size(); ++i) {
                 final TLRPC.Update update = updates.updates.get(i);
-                if (update instanceof TLRPC.TL_updateNewMessage) {
-                    message = ((TLRPC.TL_updateNewMessage) update).message;
+                if (update instanceof TL_update.TL_updateNewMessage) {
+                    message = ((TL_update.TL_updateNewMessage) update).message;
                     break;
-                }// else if (update instanceof TLRPC.TL_updateEditMessage) {
-//                    message = ((TLRPC.TL_updateEditMessage) update).message;
+                }// else if (update instanceof TL_update.TL_updateEditMessage) {
+//                    message = ((TL_update.TL_updateEditMessage) update).message;
 //                    break;
 //                }
             }

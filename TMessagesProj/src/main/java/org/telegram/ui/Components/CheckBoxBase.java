@@ -94,6 +94,7 @@ public class CheckBoxBase {
     private int background2ColorKey = Theme.key_chat_serviceBackground;
     private int strokeBackgroundKey = Theme.key_dialogBackground;
     private int strokeBackgroundWidth = -1;
+    private float customRadius = 0;
 
     private int backgroundColor;
 
@@ -156,6 +157,14 @@ public class CheckBoxBase {
         bounds.top = y;
         bounds.right = x + width;
         bounds.bottom = y + height;
+    }
+
+    public void setCustomRadius(float customRadius) {
+        if (this.customRadius == customRadius) {
+            return;
+        }
+        this.customRadius = customRadius;
+        invalidate();
     }
 
     public void setDrawUnchecked(boolean value) {

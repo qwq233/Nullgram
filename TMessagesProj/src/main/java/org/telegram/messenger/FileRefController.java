@@ -28,6 +28,7 @@ import org.telegram.tgnet.TLRPC;
 import org.telegram.tgnet.Vector;
 import org.telegram.tgnet.tl.TL_account;
 import org.telegram.tgnet.tl.TL_bots;
+import org.telegram.tgnet.tl.TL_iv;
 import org.telegram.tgnet.tl.TL_stories;
 import org.telegram.ui.ActionBar.Theme;
 import org.telegram.ui.Stories.StoriesController;
@@ -1020,6 +1021,8 @@ public class FileRefController extends BaseController {
                             if (result == null && message.media.video_cover != null) {
                                 result = getFileReference(message.media.video_cover, requester.location, needReplacement, locationReplacement);
                             }
+                        } else if (message.rich_message != null) {
+                            result = getFileReferenceForRichMessage(message.rich_message, requester.location, needReplacement, locationReplacement);
                         } else if (message.action instanceof TLRPC.TL_messageActionChatEditPhoto || message.action instanceof TLRPC.TL_messageActionSuggestProfilePhoto) {
                             result = getFileReference(message.action.photo, requester.location, needReplacement, locationReplacement);
                         }
@@ -1885,6 +1888,20 @@ public class FileRefController extends BaseController {
             cachedResult.firstQueryTime = System.currentTimeMillis();
             responseCache.put(key, cachedResult);
         }
+    }
+
+    private byte[] getFileReferenceForRichMessage(TL_iv.RichMessage richMessage, TLRPC.InputFileLocation location, boolean[] needReplacement, TLRPC.InputFileLocation[] locationReplacement) {
+        if (richMessage == null) return null;
+        byte[] result = null;
+        for (TLRPC.Photo photo : richMessage.photos) {
+            result = getFileReference(photo, location, needReplacement, locationReplacement);
+            if (result != null) return result;
+        }
+        for (TLRPC.Document document : richMessage.documents) {
+            result = getFileReference(document, null, location, needReplacement, locationReplacement);
+            if (result != null) return result;
+        }
+        return result;
     }
 
     private byte[] getFileReference(TLRPC.Document document, ArrayList<TLRPC.Document> alt_documents, TLRPC.InputFileLocation location, boolean[] needReplacement, TLRPC.InputFileLocation[] replacement) {

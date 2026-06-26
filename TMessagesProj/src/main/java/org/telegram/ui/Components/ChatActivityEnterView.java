@@ -157,9 +157,11 @@ import org.telegram.messenger.browser.Browser;
 import org.telegram.messenger.camera.CameraController;
 import org.telegram.tgnet.ConnectionsManager;
 import org.telegram.tgnet.SerializedData;
+import org.telegram.tgnet.TLObject;
 import org.telegram.tgnet.TLRPC;
 import org.telegram.tgnet.tl.TL_account;
 import org.telegram.tgnet.tl.TL_bots;
+import org.telegram.tgnet.tl.TL_iv;
 import org.telegram.tgnet.tl.TL_stories;
 import org.telegram.ui.ActionBar.ActionBar;
 import org.telegram.ui.ActionBar.ActionBarMenuSubItem;
@@ -4664,9 +4666,17 @@ public class ChatActivityEnterView extends FrameLayout implements
             message.peer_id = MessagesController.getInstance(currentAccount).getPeer(dialog_id);
             message.from_id = MessagesController.getInstance(currentAccount).getPeer(UserConfig.getInstance(currentAccount).getClientUserId());
             CharSequence[] text = new CharSequence[]{ new SpannableStringBuilder(messageEditText == null ? "" : messageEditText.getTextToUse()) };
-            MessageObject.addLinks(true, text[0]);
-            message.entities.addAll(MediaDataController.getInstance(currentAccount).getEntities(text, true));
-            message.message = text[0].toString();
+            final ArrayList<TL_iv.PageBlock> blocks = new ArrayList<>();
+            MarkdownParser.parse(text[0].toString(), blocks);
+            if (BuildVars.DEBUG_PRIVATE_VERSION && MarkdownParser.isMarkdown(blocks)) {
+                message.flags2 |= TLObject.FLAG_13;
+                message.rich_message = new TL_iv.RichMessage();
+                message.rich_message.blocks = blocks;
+            } else {
+                MessageObject.addLinks(true, text[0]);
+                message.entities.addAll(MediaDataController.getInstance(currentAccount).getEntities(text, true));
+                message.message = text[0].toString();
+            }
             if (replyingMessageObject != null && !replyingMessageObject.isTopicMainMessage) {
                 TLRPC.TL_messageReplyHeader reply_to = new TLRPC.TL_messageReplyHeader();
                 if (replyingTopMessage != null) {
@@ -7238,6 +7248,31 @@ public class ChatActivityEnterView extends FrameLayout implements
         boolean hasOnlyEmoji = emojiOnly[0] > 0;
         if (!hasOnlyEmoji) {
             text = AndroidUtilities.getTrimmedString(text);
+        }
+        if (BuildVars.DEBUG_PRIVATE_VERSION && text.length() != 0 && (parentFragment == null || parentFragment.getCurrentEncryptedChat() == null)) {
+            final ArrayList<TL_iv.PageBlock> blocks = new ArrayList<>();
+            MarkdownParser.parse(text.toString(), blocks);
+            if (MarkdownParser.isMarkdown(blocks)) {
+                if (delegate != null && parentFragment != null && (scheduleDate != 0) == parentFragment.isInScheduleMode()) {
+                    delegate.prepareMessageSending();
+                }
+                MessageObject replyToTopMsg = getThreadMessage();
+                if (replyToTopMsg == null && replyingTopMessage != null) {
+                    replyToTopMsg = replyingTopMessage;
+                }
+                SendMessagesHelper.prepareSendingArticle(accountInstance, blocks, false, dialog_id, replyingMessageObject, replyToTopMsg, notify, scheduleDate, scheduleRepeatPeriod, parentFragment != null ? parentFragment.quickReplyShortcut : null, parentFragment != null ? parentFragment.getQuickReplyId() : 0, effectId, getSendMonoForumPeerId(), payStars);
+                sendButton.setEffect(effectId = 0);
+                if (parentFragment != null) {
+                    parentFragment.editingMessageObject = null;
+                    parentFragment.foundWebPage = null;
+                    if (parentFragment.messagePreviewParams != null) {
+                        parentFragment.messagePreviewParams.updateLink(currentAccount, null, "", null, null, null);
+                    }
+                    setWebPage(null, true);
+                    parentFragment.fallbackFieldPanel();
+                }
+                return true;
+            }
         }
         boolean supportsNewEntities = supportsSendingNewEntities();
         int maxLength = accountInstance.getMessagesController().maxMessageLength;

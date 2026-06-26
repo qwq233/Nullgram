@@ -6774,4 +6774,50 @@ public class AndroidUtilities {
             window.setNavigationBarContrastEnforced(false);
         }
     }
+
+    public static <A, B> B find(List<A> array, Class<B> clazz) {
+        if (array == null) {
+            return null;
+        }
+        for (int i = 0; i < array.size(); ++i) {
+            final A obj = array.get(i);
+            if (clazz.isInstance(obj)) {
+                return clazz.cast(obj);
+            }
+        }
+        return null;
+    }
+
+    public static <A, B> B findLast(List<A> array, Class<B> clazz) {
+        if (array == null) {
+            return null;
+        }
+        for (int i = array.size() - 1; i >= 0; --i) {
+            final A obj = array.get(i);
+            if (clazz.isInstance(obj)) {
+                return clazz.cast(obj);
+            }
+        }
+        return null;
+    }
+
+    public static TLRPC.Photo findPhoto(List<TLRPC.Photo> array, long id) {
+        if (array == null) return null;
+        for (int i = 0; i < array.size(); ++i) {
+            final TLRPC.Photo photo = array.get(i);
+            if (photo != null && photo.id == id)
+                return photo;
+        }
+        return null;
+    }
+
+    public static TLRPC.Document findDocument(List<TLRPC.Document> array, long id) {
+        if (array == null) return null;
+        for (int i = 0; i < array.size(); ++i) {
+            final TLRPC.Document doc = array.get(i);
+            if (doc != null && doc.id == id)
+                return doc;
+        }
+        return null;
+    }
 }

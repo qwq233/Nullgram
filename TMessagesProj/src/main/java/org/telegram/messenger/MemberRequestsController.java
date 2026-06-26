@@ -8,6 +8,7 @@ import androidx.annotation.Nullable;
 
 import org.telegram.tgnet.RequestDelegate;
 import org.telegram.tgnet.TLRPC;
+import org.telegram.tgnet.tl.TL_update;
 
 public class MemberRequestsController extends BaseController {
 
@@ -66,7 +67,7 @@ public class MemberRequestsController extends BaseController {
         });
     }
 
-    public void onPendingRequestsUpdated(TLRPC.TL_updatePendingJoinRequests update) {
+    public void onPendingRequestsUpdated(TL_update.TL_updatePendingJoinRequests update) {
         long peerId = MessageObject.getPeerId(update.peer);
         firstImportersCache.put(-peerId, null);
         TLRPC.ChatFull chatFull = getMessagesController().getChatFull(-peerId);

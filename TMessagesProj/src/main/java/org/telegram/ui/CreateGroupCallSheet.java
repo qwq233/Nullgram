@@ -25,6 +25,7 @@ import org.telegram.messenger.Utilities;
 import org.telegram.tgnet.ConnectionsManager;
 import org.telegram.tgnet.TLObject;
 import org.telegram.tgnet.TLRPC;
+import org.telegram.tgnet.tl.TL_update;
 import org.telegram.tgnet.tl.TL_phone;
 import org.telegram.ui.ActionBar.Theme;
 import org.telegram.ui.Cells.CheckBoxCell;
@@ -192,7 +193,7 @@ public class CreateGroupCallSheet extends BottomSheetWithRecyclerListView {
                 MessagesController.getInstance(currentAccount).putChats(updates.chats, false);
 
                 TLRPC.GroupCall groupCall = null;
-                for (TLRPC.TL_updateGroupCall upd : findUpdates(updates, TLRPC.TL_updateGroupCall.class)) {
+                for (TL_update.TL_updateGroupCall upd : findUpdates(updates, TL_update.TL_updateGroupCall.class)) {
                     groupCall = upd.call;
                 }
 

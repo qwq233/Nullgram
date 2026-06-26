@@ -1208,6 +1208,7 @@
     <string name="RevenueSharingAdsInfo4Subtitle2Bot">Anyone can create an ad to display in this bot — with minimal budgets. Check out the **Telegram Ad Platform** for details. %1$s</string>
     <string name="PromoteUrl">https://ads.telegram.org</string>
     <string name="InstantViewReference">Reference</string>
+    <string name="InstantViewReferences">References</string>
     <string name="IsSendingGame">%1$s is playing a game...</string>
     <string name="IsSelectingLocation">%1$s is selecting location to share...</string>
     <string name="IsSelectingContact">%1$s is selecting contact to share...</string>
@@ -4908,11 +4909,14 @@
     <string name="AccDescrPhotoEditor">Photo editor</string>
     <string name="AccDescrPhotoAdjust">Adjustments</string>
     <string name="AccDescrPhotoViewer">Photo viewer</string>
+    <string name="AccDescrCollage">Collage</string>
     <string name="AccDescrPageDown">Go to bottom</string>
     <string name="AccDescrMentionDown">Go to next mention</string>
     <string name="AccDescrReactionMentionDown">Go to next unread reactions</string>
     <string name="AccDescrIVTitle">Title</string>
     <string name="AccDescrIVHeading">Heading</string>
+    <string name="AccDescrIVTable">Table</string>
+    <string name="AccDescrIVSlideshow">Slideshow</string>
     <string name="AccDescrMyLocation">My location</string>
     <string name="AccDescrLocationNotify">Notify when in range</string>
     <string name="AccDescrVideoQuality">Video quality</string>
@@ -4926,6 +4930,7 @@
     <string name="AccDescrSearchNext">Next search result</string>
     <string name="AccDescrSearchPrev">Previous search result</string>
     <string name="AccDescrSearchByUser">Filter by user</string>
+    <string name="RelativeDateFormatterWeek2">%1$s, %2$s</string>
     <string name="AccActionTakePicture">Take a picture</string>
     <string name="AccActionRecordVideo">Record video</string>
     <string name="AccSwipeForArchive">Swipe down for archive</string>

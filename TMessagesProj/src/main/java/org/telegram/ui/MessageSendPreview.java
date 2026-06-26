@@ -91,6 +91,7 @@ import org.telegram.ui.Components.ReactionsContainerLayout;
 import org.telegram.ui.Components.RecyclerListView;
 import org.telegram.ui.Components.SizeNotifierFrameLayout;
 import org.telegram.ui.Components.Text;
+import org.telegram.ui.Components.chat.ViewPositionWatcher;
 import org.telegram.ui.Components.spoilers.SpoilerEffect2;
 import org.telegram.ui.Stars.StarsIntroActivity;
 import org.telegram.ui.Stories.recorder.KeyboardNotifier;
@@ -492,6 +493,8 @@ public class MessageSendPreview extends Dialog implements NotificationCenter.Not
 
             @Override
             protected void dispatchDraw(Canvas canvas) {
+                updateMessagesVisiblePart();
+
                 canvas.saveLayerAlpha(0, getScrollY() + 1, getWidth(), getScrollY() + getHeight() - 1, 0xFF, Canvas.ALL_SAVE_FLAG);
                 canvas.save();
                 drawChatBackgroundElements(canvas);
@@ -1066,6 +1069,40 @@ public class MessageSendPreview extends Dialog implements NotificationCenter.Not
                 }
             }
         };
+    }
+
+    private void updateMessagesVisiblePart() {
+        final int height = containerView.getMeasuredHeight();
+        final int recyclerChatViewHeight = height;
+
+        for (int a = 0, N = chatListView.getChildCount(); a < N; a++) {
+            final View view = chatListView.getChildAt(a);
+            if (view instanceof ChatMessageCell) {
+                float y = ViewPositionWatcher.computeYCoordinateInParent(view, containerView);
+
+                final ChatMessageCell cell = (ChatMessageCell) view;
+
+                final int top = (int) y;
+                final int bottom = top + view.getMeasuredHeight();
+                int viewTop = top >= 0 ? 0 : -top;
+                int viewBottom = view.getMeasuredHeight();
+                if (viewBottom > height) {
+                    viewBottom = viewTop + height;
+                }
+
+                cell.setVisiblePart(
+                    viewTop,
+                    viewBottom - viewTop,
+                    recyclerChatViewHeight,
+                    y,
+                    y,
+                    containerView.getMeasuredWidth(),
+                    containerView.getMeasuredHeight(),
+                    0,
+                    0,
+                    0);
+            }
+        }
     }
 
     @Override

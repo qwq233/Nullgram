@@ -183,6 +183,7 @@ import org.telegram.tgnet.ConnectionsManager;
 import org.telegram.tgnet.SerializedData;
 import org.telegram.tgnet.TLObject;
 import org.telegram.tgnet.TLRPC;
+import org.telegram.tgnet.tl.TL_iv;
 import org.telegram.tgnet.tl.TL_account;
 import org.telegram.tgnet.tl.TL_bots;
 import org.telegram.tgnet.tl.TL_fragment;
@@ -15280,21 +15281,21 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
                     TLRPC.WebPage page = (TLRPC.WebPage) response2;
                     if (page.cached_page != null) {
                         for (int a = 0, N = page.cached_page.blocks.size(); a < N; a++) {
-                            TLRPC.PageBlock block = page.cached_page.blocks.get(a);
-                            if (block instanceof TLRPC.TL_pageBlockList) {
+                            TL_iv.PageBlock block = page.cached_page.blocks.get(a);
+                            if (block instanceof TL_iv.pageBlockList) {
                                 String paragraph = null;
                                 if (a != 0) {
-                                    TLRPC.PageBlock prevBlock = page.cached_page.blocks.get(a - 1);
-                                    if (prevBlock instanceof TLRPC.TL_pageBlockParagraph) {
-                                        TLRPC.TL_pageBlockParagraph pageBlockParagraph = (TLRPC.TL_pageBlockParagraph) prevBlock;
+                                    TL_iv.PageBlock prevBlock = page.cached_page.blocks.get(a - 1);
+                                    if (prevBlock instanceof TL_iv.pageBlockParagraph) {
+                                        TL_iv.pageBlockParagraph pageBlockParagraph = (TL_iv.pageBlockParagraph) prevBlock;
                                         paragraph = ArticleViewer.getPlainText(pageBlockParagraph.text).toString();
                                     }
                                 }
-                                TLRPC.TL_pageBlockList list = (TLRPC.TL_pageBlockList) block;
+                                TL_iv.pageBlockList list = (TL_iv.pageBlockList) block;
                                 for (int b = 0, N2 = list.items.size(); b < N2; b++) {
-                                    TLRPC.PageListItem item = list.items.get(b);
-                                    if (item instanceof TLRPC.TL_pageListItemText) {
-                                        TLRPC.TL_pageListItemText itemText = (TLRPC.TL_pageListItemText) item;
+                                    TL_iv.PageListItem item = list.items.get(b);
+                                    if (item instanceof TL_iv.TL_pageListItemText) {
+                                        TL_iv.TL_pageListItemText itemText = (TL_iv.TL_pageListItemText) item;
                                         String url = ArticleViewer.getUrl(itemText.text);
                                         String text = ArticleViewer.getPlainText(itemText.text).toString();
                                         if (TextUtils.isEmpty(url) || TextUtils.isEmpty(text)) {
@@ -15309,7 +15310,7 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
                                         arrayList.add(new MessagesController.FaqSearchResult(text, path, url));
                                     }
                                 }
-                            } else if (block instanceof TLRPC.TL_pageBlockAnchor) {
+                            } else if (block instanceof TL_iv.pageBlockAnchor) {
                                 break;
                             }
                         }

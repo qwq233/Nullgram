@@ -10,6 +10,7 @@ import org.telegram.tgnet.OutputSerializedData;
 import org.telegram.tgnet.TLObject;
 import org.telegram.tgnet.TLParseException;
 import org.telegram.tgnet.TLRPC;
+import org.telegram.tgnet.tl.TL_update;
 import org.telegram.tgnet.tl.TL_account;
 
 import java.util.ArrayList;
@@ -121,7 +122,7 @@ public class UnconfirmedAuthController {
     private boolean debug = false;
     public void putDebug() {
         debug = true;
-        TLRPC.TL_updateNewAuthorization update = new TLRPC.TL_updateNewAuthorization();
+        TL_update.TL_updateNewAuthorization update = new TL_update.TL_updateNewAuthorization();
         update.unconfirmed = true;
         update.device = "device";
         update.location = "location";
@@ -129,7 +130,7 @@ public class UnconfirmedAuthController {
         processUpdate(update);
     }
 
-    public void processUpdate(TLRPC.TL_updateNewAuthorization update) {
+    public void processUpdate(TL_update.TL_updateNewAuthorization update) {
         for (int i = 0; i < auths.size(); ++i) {
             UnconfirmedAuth auth = auths.get(i);
             if (auth != null && auth.hash == update.hash) {
@@ -279,7 +280,7 @@ public class UnconfirmedAuthController {
             location = stream.readString(true);
         }
 
-        public UnconfirmedAuth(TLRPC.TL_updateNewAuthorization update) {
+        public UnconfirmedAuth(TL_update.TL_updateNewAuthorization update) {
             hash = update.hash;
             date = update.date;
             device = update.device;

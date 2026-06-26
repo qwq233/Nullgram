@@ -207,6 +207,7 @@ import org.telegram.tgnet.TLObject;
 import org.telegram.tgnet.TLRPC;
 import org.telegram.tgnet.tl.TL_account;
 import org.telegram.tgnet.tl.TL_bots;
+import org.telegram.tgnet.tl.TL_iv;
 import org.telegram.tgnet.tl.TL_phone;
 import org.telegram.tgnet.tl.TL_stories;
 import org.telegram.ui.ActionBar.ActionBar;
@@ -15841,8 +15842,19 @@ public class ChatActivity extends BaseFragment implements
                 }
                 hasTopicSeparator = messageCell.topicSeparator != null;
 
-                messageCell.setParentBounds((SharedConfig.chatBlurEnabled() && contentView.DRAW_USING_RENDERNODE() ? 0 : chatListViewPaddingTop) - chatListViewPaddingVisibleOffset - dp(4), chatListView.getMeasuredHeight() - blurredViewBottomOffset);
-                messageCell.setVisiblePart(viewTop, viewBottom - viewTop, recyclerChatViewHeight, 0, view.getY() + (isKeyboardVisible() ? chatListView.getTop() : actionBar.getMeasuredHeight()) - contentView.getBackgroundTranslationY() - (1f - contentPanTranslationT) * chatListViewPaddingTop, contentView.getMeasuredWidth(), contentView.getBackgroundSizeY(), blurredViewTopOffset, blurredViewBottomOffset);
+                messageCell.setParentBounds(0, chatListView.getMeasuredHeight());
+                messageCell.setVisiblePart(
+                    viewTop,
+                    viewBottom - viewTop,
+                    recyclerChatViewHeight,
+                    0,
+                    view.getY() + (isKeyboardVisible() ? chatListView.getTop() : actionBar.getMeasuredHeight()) - contentView.getBackgroundTranslationY() - (1f - contentPanTranslationT) * chatListViewPaddingTop,
+                    contentView.getMeasuredWidth(),
+                    contentView.getBackgroundSizeY(),
+                    blurredViewTopOffset,
+                    blurredViewBottomOffset,
+                    top - (int) chatListViewPaddingTop
+                );
 
                 if (messageObject.isSponsored()) {
                     final float rTop = ViewPositionWatcher.computeYCoordinateInParent(messageCell, contentView);
@@ -16562,6 +16574,7 @@ public class ChatActivity extends BaseFragment implements
     public static final int PROGRESS_GIFT = 4;
     public static final int PROGRESS_PAID_MEDIA = 5;
     public static final int PROGRESS_FORWARD = 6;
+    public static final int PROGRESS_FULL_ARTICLE = 7;
 
     private int progressDialogAtMessageId;
     private int progressDialogAtMessageType;
@@ -35779,6 +35792,336 @@ public class ChatActivity extends BaseFragment implements
         };
     }
 
+    private void loadFullRichMessage(ChatMessageCell cell) {
+        if (cell == null) return;
+        final MessageObject messageObject = cell.getMessageObject();
+        if (messageObject == null || messageObject.messageOwner == null) return;
+
+        final int messageId = messageObject.getId();
+        if (progressDialogAtMessageId == messageId && progressDialogAtMessageType == PROGRESS_FULL_ARTICLE) return;
+        final long dialogId = messageObject.getDialogId();
+        final TLRPC.InputPeer peer = getMessagesController().getInputPeer(dialogId);
+        if (peer == null) return;
+
+        final TL_iv.getRichMessage req = new TL_iv.getRichMessage();
+        req.peer = peer;
+        req.id = messageId;
+
+        if (progressDialogCurrent != null) {
+            progressDialogCurrent.cancel(true);
+            progressDialogCurrent = null;
+        }
+        final int[] reqId = new int[1];
+        final Browser.Progress progress = new Browser.Progress() {
+            @Override
+            public void init() {
+                progressDialogAtMessageId = messageId;
+                progressDialogAtMessageType = PROGRESS_FULL_ARTICLE;
+                cell.invalidate();
+            }
+            @Override
+            public void end(boolean replaced) {
+                if (!replaced) {
+                    AndroidUtilities.runOnUIThread(() -> {
+                        if (progressDialogAtMessageId == messageId) {
+                            resetProgressDialogLoading();
+                        }
+                    }, 240);
+                }
+            }
+        };
+        progress.onCancel(() -> {
+            if (reqId[0] != 0) {
+                getConnectionsManager().cancelRequest(reqId[0], true);
+                reqId[0] = 0;
+            }
+        });
+        progressDialogCurrent = progress;
+        progress.init();
+
+        reqId[0] = getConnectionsManager().sendRequestTyped(req, AndroidUtilities::runOnUIThread, (response, error) -> {
+            if (progressDialogCurrent != progress) return;
+            reqId[0] = 0;
+            progress.end();
+            if (!(response instanceof TLRPC.messages_Messages)) return;
+            final TLRPC.messages_Messages res = (TLRPC.messages_Messages) response;
+            getMessagesController().putUsers(res.users, false);
+            getMessagesController().putChats(res.chats, false);
+            TL_iv.RichMessage full = null;
+            for (int i = 0; i < res.messages.size(); ++i) {
+                final TLRPC.Message m = res.messages.get(i);
+                if (m != null && m.rich_message != null) {
+                    full = m.rich_message;
+                    break;
+                }
+            }
+            if (full == null) return;
+            applyFullRichMessageLocally(cell, messageObject, full);
+        });
+    }
+
+    private void applyFullRichMessageLocally(ChatMessageCell cell, MessageObject messageObject, TL_iv.RichMessage richMessage) {
+        if (messageObject == null || messageObject.messageOwner == null || richMessage == null) return;
+        messageObject.messageOwner.rich_message = richMessage;
+        messageObject.richLayout = null;
+        if (chatMessageCellDelegate != null && cell != null) {
+            chatMessageCellDelegate.forceUpdate(cell, true);
+        }
+    }
+
+    private boolean openArticlePhoto(ChatMessageCell messageCell, TL_iv.PageBlock targetBlock) {
+        if (messageCell == null || targetBlock == null || getParentActivity() == null) return false;
+        MessageObject messageObject = messageCell.getMessageObject();
+        if (messageObject == null || messageObject.messageOwner == null || messageObject.richLayout == null) return false;
+        final TL_iv.RichMessage richMessage = messageObject.messageOwner.rich_message;
+        if (richMessage == null) return false;
+
+        final ArrayList<TL_iv.PageBlock> pageBlocks = new ArrayList<>();
+        messageObject.richLayout.collectMediaBlocks(pageBlocks);
+        final int index = pageBlocks.indexOf(targetBlock);
+        if (index < 0) return false;
+
+        PhotoViewer photoViewer = PhotoViewer.getInstance();
+        photoViewer.setParentActivity(this);
+        return photoViewer.openPhoto(index,
+            new ChatArticlePageBlocksAdapter(richMessage, pageBlocks),
+            new ChatArticlePhotoViewerProvider(pageBlocks));
+    }
+
+    private static TLRPC.Photo getArticlePhotoWithId(TL_iv.RichMessage page, long id) {
+        if (page == null || page.photos == null) return null;
+        for (int a = 0; a < page.photos.size(); a++) {
+            TLRPC.Photo photo = page.photos.get(a);
+            if (photo != null && photo.id == id) {
+                return photo;
+            }
+        }
+        return null;
+    }
+
+    private static TLRPC.Document getArticleDocumentWithId(TL_iv.RichMessage page, long id) {
+        if (page == null || page.documents == null) return null;
+        for (int a = 0; a < page.documents.size(); a++) {
+            TLRPC.Document document = page.documents.get(a);
+            if (document != null && document.id == id) {
+                return document;
+            }
+        }
+        return null;
+    }
+
+    private static TLObject getArticleMedia(TL_iv.RichMessage page, TL_iv.PageBlock block) {
+        if (block instanceof TL_iv.pageBlockPhoto) {
+            return getArticlePhotoWithId(page, ((TL_iv.pageBlockPhoto) block).photo_id);
+        } else if (block instanceof TL_iv.pageBlockVideo) {
+            return getArticleDocumentWithId(page, ((TL_iv.pageBlockVideo) block).video_id);
+        } else {
+            return null;
+        }
+    }
+
+    private static File getArticleMediaFile(TL_iv.RichMessage page, TL_iv.PageBlock block) {
+        if (block instanceof TL_iv.pageBlockPhoto) {
+            TLRPC.Photo photo = getArticlePhotoWithId(page, ((TL_iv.pageBlockPhoto) block).photo_id);
+            if (photo != null) {
+                TLRPC.PhotoSize sizeFull = FileLoader.getClosestPhotoSizeWithSize(photo.sizes, AndroidUtilities.getPhotoSize());
+                if (sizeFull != null) {
+                    return FileLoader.getInstance(UserConfig.selectedAccount).getPathToAttach(sizeFull, true);
+                }
+            }
+        } else if (block instanceof TL_iv.pageBlockVideo) {
+            TLRPC.Document document = getArticleDocumentWithId(page, ((TL_iv.pageBlockVideo) block).video_id);
+            if (document != null) {
+                return FileLoader.getInstance(UserConfig.selectedAccount).getPathToAttach(document, true);
+            }
+        }
+        return null;
+    }
+
+    private static boolean isArticleVideo(TL_iv.RichMessage page, TL_iv.PageBlock block) {
+        if (block instanceof TL_iv.pageBlockVideo) {
+            TLRPC.Document document = getArticleDocumentWithId(page, ((TL_iv.pageBlockVideo) block).video_id);
+            return MessageObject.isVideoDocument(document);
+        }
+        return false;
+    }
+
+    private static TL_iv.PageCaption emptyArticleCaption() {
+        TL_iv.PageCaption caption = new TL_iv.PageCaption();
+        caption.text = new TL_iv.textEmpty();
+        caption.credit = new TL_iv.textEmpty();
+        return caption;
+    }
+
+    private static TL_iv.PageBlock toLegacyArticleBlock(TL_iv.PageBlock block) {
+        if (block instanceof TL_iv.pageBlockPhoto) {
+            TL_iv.pageBlockPhoto src = (TL_iv.pageBlockPhoto) block;
+            TL_iv.pageBlockPhoto dst = new TL_iv.pageBlockPhoto();
+            dst.flags = src.flags;
+            dst.photo_id = src.photo_id;
+            dst.url = src.url;
+            dst.webpage_id = src.webpage_id;
+            dst.caption = emptyArticleCaption();
+            return dst;
+        } else if (block instanceof TL_iv.pageBlockVideo) {
+            TL_iv.pageBlockVideo src = (TL_iv.pageBlockVideo) block;
+            TL_iv.pageBlockVideo dst = new TL_iv.pageBlockVideo();
+            dst.flags = src.flags & ~TLObject.FLAG_2;
+            dst.autoplay = src.autoplay;
+            dst.loop = src.loop;
+            dst.video_id = src.video_id;
+            dst.caption = emptyArticleCaption();
+            return dst;
+        }
+        return null;
+    }
+
+    private static class ChatArticlePageBlocksAdapter implements PhotoViewer.PageBlocksAdapter {
+        private final TL_iv.RichMessage page;
+        private final List<TL_iv.PageBlock> blocks;
+        private final ArrayList<TL_iv.PageBlock> legacyBlocks = new ArrayList<>();
+
+        ChatArticlePageBlocksAdapter(TL_iv.RichMessage page, List<TL_iv.PageBlock> blocks) {
+            this.page = page;
+            this.blocks = blocks;
+            for (int i = 0; i < blocks.size(); i++) {
+                legacyBlocks.add(toLegacyArticleBlock(blocks.get(i)));
+            }
+        }
+
+        @Override
+        public int getItemsCount() {
+            return blocks.size();
+        }
+
+        @Override
+        public TL_iv.PageBlock get(int index) {
+            return legacyBlocks.get(index);
+        }
+
+        @Override
+        public List<TL_iv.PageBlock> getAll() {
+            return legacyBlocks;
+        }
+
+        @Override
+        public boolean isVideo(int index) {
+            if (index < 0 || index >= blocks.size()) return false;
+            return isArticleVideo(page, blocks.get(index));
+        }
+
+        @Override
+        public TLObject getMedia(int index) {
+            if (index < 0 || index >= blocks.size()) return null;
+            return getArticleMedia(page, blocks.get(index));
+        }
+
+        @Override
+        public File getFile(int index) {
+            if (index < 0 || index >= blocks.size()) return null;
+            return getArticleMediaFile(page, blocks.get(index));
+        }
+
+        @Override
+        public String getFileName(int index) {
+            TLObject media = getMedia(index);
+            if (media instanceof TLRPC.Photo) {
+                media = FileLoader.getClosestPhotoSizeWithSize(((TLRPC.Photo) media).sizes, AndroidUtilities.getPhotoSize());
+            }
+            return FileLoader.getAttachFileName(media);
+        }
+
+        @Override
+        public CharSequence getCaption(int index) {
+            return null;
+        }
+
+        @Override
+        public TLRPC.PhotoSize getFileLocation(TLObject media, int[] size) {
+            if (media instanceof TLRPC.Photo) {
+                TLRPC.Photo photo = (TLRPC.Photo) media;
+                TLRPC.PhotoSize sizeFull = FileLoader.getClosestPhotoSizeWithSize(photo.sizes, AndroidUtilities.getPhotoSize());
+                if (sizeFull != null) {
+                    size[0] = sizeFull.size;
+                    if (size[0] == 0) size[0] = -1;
+                    return sizeFull;
+                } else {
+                    size[0] = -1;
+                }
+            } else if (media instanceof TLRPC.Document) {
+                TLRPC.Document document = (TLRPC.Document) media;
+                TLRPC.PhotoSize thumb = FileLoader.getClosestPhotoSizeWithSize(document.thumbs, 90);
+                if (thumb != null) {
+                    size[0] = thumb.size;
+                    if (size[0] == 0) size[0] = -1;
+                    return thumb;
+                }
+            }
+            return null;
+        }
+
+        @Override
+        public void updateSlideshowCell(TL_iv.PageBlock currentPageBlock) {
+        }
+
+        @Override
+        public Object getParentObject() {
+            return page;
+        }
+
+        @Override
+        public boolean isHardwarePlayer(int index) {
+            return false;
+        }
+    }
+
+    private class ChatArticlePhotoViewerProvider extends PhotoViewer.EmptyPhotoViewerProvider {
+        private final List<TL_iv.PageBlock> blocks;
+        private final int[] tempCoords = new int[2];
+
+        ChatArticlePhotoViewerProvider(List<TL_iv.PageBlock> blocks) {
+            this.blocks = blocks;
+        }
+
+        @Override
+        public PhotoViewer.PlaceProviderObject getPlaceForPhoto(MessageObject messageObject, TLRPC.FileLocation fileLocation, int index, boolean needPreview, boolean closing) {
+            if (chatListView == null || index < 0 || index >= blocks.size()) return null;
+            final TL_iv.PageBlock targetBlock = blocks.get(index);
+            for (int a = 0, count = chatListView.getChildCount(); a < count; a++) {
+                View view = chatListView.getChildAt(a);
+                ImageReceiver imageReceiver = null;
+                if (view instanceof ChatMessageCell) {
+                    final ChatMessageCell cell = (ChatMessageCell) view;
+                    final MessageObject mo = cell.getMessageObject();
+                    if (mo != null && mo.richLayout != null) {
+                        final int[] off = new int[2];
+                        imageReceiver = mo.richLayout.findMediaImageReceiver(targetBlock, off);
+                        if (imageReceiver != null) {
+                            view.getLocationInWindow(tempCoords);
+                            tempCoords[0] += cell.getTextX() + off[0];
+                            tempCoords[1] += cell.getTextY() + off[1];
+                        }
+                    }
+                }
+                if (imageReceiver == null) continue;
+                PhotoViewer.PlaceProviderObject object = new PhotoViewer.PlaceProviderObject();
+                object.viewX = tempCoords[0];
+                object.viewY = tempCoords[1];
+                object.parentView = chatListView;
+                object.imageReceiver = imageReceiver;
+                object.thumb = imageReceiver.getBitmapSafe();
+                object.radius = imageReceiver.getRoundRadius(true);
+                object.clipTopAddition = (int) (chatListViewPaddingTop - chatListViewPaddingVisibleOffset - AndroidUtilities.dp(4));
+                object.clipBottomAddition = (int) (blurredViewBottomOffset
+                    + dp(9)
+                    + windowInsetsStateHolder.getAnimatedMaxBottomInset()
+                    + inputIslandHeightCurrent);
+                return object;
+            }
+            return null;
+        }
+    }
+
     private void processExternalUrl(int type, String url, CharacterStyle span, ChatMessageCell cell, boolean forceAlert, boolean forceNoIV) {
         try {
             String host = AndroidUtilities.getHostAuthority(url);
@@ -38064,6 +38407,16 @@ public class ChatActivity extends BaseFragment implements
         @Override
         public boolean isReplyOrSelf() {
             return UserObject.isReplyUser(currentUser) || UserObject.isUserSelf(currentUser);
+        }
+
+        @Override
+        public boolean openArticlePhoto(ChatMessageCell cell, TL_iv.PageBlock block) {
+            return ChatActivity.this.openArticlePhoto(cell, block);
+        }
+
+        @Override
+        public void didPressShowMore(ChatMessageCell cell) {
+            ChatActivity.this.loadFullRichMessage(cell);
         }
 
         @Override

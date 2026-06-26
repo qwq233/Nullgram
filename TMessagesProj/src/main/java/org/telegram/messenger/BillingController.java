@@ -28,6 +28,7 @@ import org.checkerframework.checker.units.qual.A;
 import org.telegram.messenger.utils.BillingUtilities;
 import org.telegram.tgnet.ConnectionsManager;
 import org.telegram.tgnet.TLRPC;
+import org.telegram.tgnet.tl.TL_update;
 import org.telegram.ui.ActionBar.AlertDialog;
 import org.telegram.ui.ActionBar.BaseFragment;
 import org.telegram.ui.LaunchActivity;
@@ -358,7 +359,7 @@ public class BillingController {
                                 FileLog.d("BillingController.onPurchasesUpdatedInternal: " + purchase.getOrderId() + " purchase is purchased and now assigned");
 
                                 if (req.purpose instanceof TLRPC.TL_inputStorePaymentAuthCode) {
-                                    for (TLRPC.TL_updateSentPhoneCode u : findUpdatesAndRemove((TLRPC.Updates) response, TLRPC.TL_updateSentPhoneCode.class)) {
+                                    for (TL_update.TL_updateSentPhoneCode u : findUpdatesAndRemove((TLRPC.Updates) response, TL_update.TL_updateSentPhoneCode.class)) {
                                         AndroidUtilities.runOnUIThread(() -> {
                                             LoginActivity fragment = LaunchActivity.findFragment(LoginActivity.class);
                                             if (fragment == null) {

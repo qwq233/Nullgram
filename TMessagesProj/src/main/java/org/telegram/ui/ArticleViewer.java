@@ -156,6 +156,8 @@ import org.telegram.messenger.video.VideoPlayerHolderBase;
 import org.telegram.tgnet.ConnectionsManager;
 import org.telegram.tgnet.TLObject;
 import org.telegram.tgnet.TLRPC;
+import org.telegram.tgnet.tl.TL_update;
+import org.telegram.tgnet.tl.TL_iv;
 import org.telegram.ui.ActionBar.ActionBar;
 import org.telegram.ui.ActionBar.ActionBarLayout;
 import org.telegram.ui.ActionBar.ActionBarMenuSubItem;
@@ -417,26 +419,26 @@ public class ArticleViewer implements NotificationCenter.NotificationCenterDeleg
     private int selectedFont = 0;
     private FontCell[] fontCells = new FontCell[2];
 
-    private static class TL_pageBlockRelatedArticlesChild extends TLRPC.PageBlock {
-        private TLRPC.TL_pageBlockRelatedArticles parent;
+    private static class TL_pageBlockRelatedArticlesChild extends TL_iv.PageBlock {
+        private TL_iv.pageBlockRelatedArticles parent;
         private int num;
     }
 
-    private static class TL_pageBlockRelatedArticlesShadow extends TLRPC.PageBlock {
-        private TLRPC.TL_pageBlockRelatedArticles parent;
+    private static class TL_pageBlockRelatedArticlesShadow extends TL_iv.PageBlock {
+        private TL_iv.pageBlockRelatedArticles parent;
     }
 
-    private static class TL_pageBlockDetailsChild extends TLRPC.PageBlock {
-        private TLRPC.PageBlock parent;
-        private TLRPC.PageBlock block;
+    private static class TL_pageBlockDetailsChild extends TL_iv.PageBlock {
+        private TL_iv.PageBlock parent;
+        private TL_iv.PageBlock block;
     }
 
-    private static class TL_pageBlockDetailsBottom extends TLRPC.PageBlock {
-        private TLRPC.TL_pageBlockDetails parent;
+    private static class TL_pageBlockDetailsBottom extends TL_iv.PageBlock {
+        private TL_iv.pageBlockDetails parent;
     }
 
-    private static class TL_pageBlockListParent extends TLRPC.PageBlock {
-        private TLRPC.TL_pageBlockList pageBlockList;
+    private static class TL_pageBlockListParent extends TL_iv.PageBlock {
+        private TL_iv.pageBlockList pageBlockList;
         private ArrayList<TL_pageBlockListItem> items = new ArrayList<>();
         private int maxNumWidth;
         private int lastMaxNumCalcWidth;
@@ -444,17 +446,17 @@ public class ArticleViewer implements NotificationCenter.NotificationCenterDeleg
         private int level;
     }
 
-    private static class TL_pageBlockListItem extends TLRPC.PageBlock {
+    private static class TL_pageBlockListItem extends TL_iv.PageBlock {
         private TL_pageBlockListParent parent;
-        private TLRPC.PageBlock blockItem;
-        private TLRPC.RichText textItem;
+        private TL_iv.PageBlock blockItem;
+        private TL_iv.RichText textItem;
         private String num;
         private DrawingText numLayout;
         private int index = Integer.MAX_VALUE;
     }
 
-    private static class TL_pageBlockOrderedListParent extends TLRPC.PageBlock {
-        private TLRPC.TL_pageBlockOrderedList pageBlockOrderedList;
+    private static class TL_pageBlockOrderedListParent extends TL_iv.PageBlock {
+        private TL_iv.pageBlockOrderedList pageBlockOrderedList;
         private ArrayList<TL_pageBlockOrderedListItem> items = new ArrayList<>();
         private int maxNumWidth;
         private int lastMaxNumCalcWidth;
@@ -462,21 +464,33 @@ public class ArticleViewer implements NotificationCenter.NotificationCenterDeleg
         private int level;
     }
 
-    private static class TL_pageBlockOrderedListItem extends TLRPC.PageBlock {
+    private static class TL_pageBlockOrderedListItem extends TL_iv.PageBlock {
         private TL_pageBlockOrderedListParent parent;
-        private TLRPC.PageBlock blockItem;
-        private TLRPC.RichText textItem;
+        private TL_iv.PageBlock blockItem;
+        private TL_iv.RichText textItem;
         private String num;
         private DrawingText numLayout;
         private int index = Integer.MAX_VALUE;
     }
 
-    private static class TL_pageBlockEmbedPostCaption extends TLRPC.TL_pageBlockEmbedPost {
-        private TLRPC.TL_pageBlockEmbedPost parent;
+    private static class TL_pageBlockEmbedPostCaption extends TL_iv.pageBlockEmbedPost {
+        private TL_iv.pageBlockEmbedPost parent;
     }
 
-    public class DrawingText implements TextSelectionHelper.TextLayoutBlock {
+    public static boolean isHeadingBlock(TL_iv.PageBlock block) {
+        return (
+            block instanceof TL_iv.pageBlockHeading1 ||
+            block instanceof TL_iv.pageBlockHeading2 ||
+            block instanceof TL_iv.pageBlockHeading3 ||
+            block instanceof TL_iv.pageBlockHeading4 ||
+            block instanceof TL_iv.pageBlockHeading5 ||
+            block instanceof TL_iv.pageBlockHeading6
+        );
+    }
+
+    public class DrawingText implements TextSelectionHelper.TextLayoutBlock, MultiLayoutTypingAnimator.Block, TableLayout.CellText {
         private View latestParentView;
+        private View attachedToView;
 
         private boolean isDrawing;
         public StaticLayout textLayout;
@@ -484,7 +498,7 @@ public class ArticleViewer implements NotificationCenter.NotificationCenterDeleg
         public LinkPath markPath;
         public LinkPath searchPath;
         public int searchIndex = -1;
-        public TLRPC.PageBlock parentBlock;
+        public TL_iv.PageBlock parentBlock;
         public Object parentText;
         public int x;
         public int y;
@@ -542,6 +556,18 @@ public class ArticleViewer implements NotificationCenter.NotificationCenterDeleg
             isDrawing = false;
         }
 
+        @Override
+        public void attach(View view) {
+            attachedToView = view;
+        }
+
+        @Override
+        public void detach(View view) {
+            if (view == null || attachedToView == view) {
+                attachedToView = null;
+            }
+        }
+
         public void invalidateParent() {
             if (!isDrawing && latestParentView != null) {
                 latestParentView.invalidate();
@@ -582,8 +608,18 @@ public class ArticleViewer implements NotificationCenter.NotificationCenterDeleg
         }
 
         @Override
+        public View getParentView() {
+            return attachedToView != null ? attachedToView : latestParentView;
+        }
+
+        @Override
         public int getX() {
             return x;
+        }
+
+        @Override
+        public void setX(int x) {
+            this.x = x;
         }
 
         @Override
@@ -592,8 +628,18 @@ public class ArticleViewer implements NotificationCenter.NotificationCenterDeleg
         }
 
         @Override
+        public void setY(int y) {
+            this.y = y;
+        }
+
+        @Override
         public int getRow() {
             return row;
+        }
+
+        @Override
+        public void setRow(int row) {
+            this.row = row;
         }
 
         @Override
@@ -1500,14 +1546,14 @@ public class ArticleViewer implements NotificationCenter.NotificationCenterDeleg
         popupWindow.startAnimation();
     }
 
-    private TLRPC.RichText getBlockCaption(TLRPC.PageBlock block, int type) {
+    private TL_iv.RichText getBlockCaption(TL_iv.PageBlock block, int type) {
         if (type == 2) {
-            TLRPC.RichText text1 = getBlockCaption(block, 0);
-            if (text1 instanceof TLRPC.TL_textEmpty) {
+            TL_iv.RichText text1 = getBlockCaption(block, 0);
+            if (text1 instanceof TL_iv.textEmpty) {
                 text1 = null;
             }
-            TLRPC.RichText text2 = getBlockCaption(block, 1);
-            if (text2 instanceof TLRPC.TL_textEmpty) {
+            TL_iv.RichText text2 = getBlockCaption(block, 1);
+            if (text2 instanceof TL_iv.textEmpty) {
                 text2 = null;
             }
             if (text1 != null && text2 == null) {
@@ -1515,10 +1561,10 @@ public class ArticleViewer implements NotificationCenter.NotificationCenterDeleg
             } else if (text1 == null && text2 != null) {
                 return text2;
             } else if (text1 != null && text2 != null) {
-                TLRPC.TL_textPlain text3 = new TLRPC.TL_textPlain();
+                TL_iv.textPlain text3 = new TL_iv.textPlain();
                 text3.text = " ";
 
-                TLRPC.TL_textConcat textConcat = new TLRPC.TL_textConcat();
+                TL_iv.textConcat textConcat = new TL_iv.textConcat();
                 textConcat.texts.add(text1);
                 textConcat.texts.add(text3);
                 textConcat.texts.add(text2);
@@ -1527,66 +1573,66 @@ public class ArticleViewer implements NotificationCenter.NotificationCenterDeleg
                 return null;
             }
         }
-        if (block instanceof TLRPC.TL_pageBlockEmbedPost) {
-            TLRPC.TL_pageBlockEmbedPost blockEmbedPost = (TLRPC.TL_pageBlockEmbedPost) block;
+        if (block instanceof TL_iv.pageBlockEmbedPost) {
+            TL_iv.pageBlockEmbedPost blockEmbedPost = (TL_iv.pageBlockEmbedPost) block;
             if (type == 0) {
                 return blockEmbedPost.caption.text;
             } else if (type == 1) {
                 return blockEmbedPost.caption.credit;
             }
-        } else if (block instanceof TLRPC.TL_pageBlockSlideshow) {
-            TLRPC.TL_pageBlockSlideshow pageBlockSlideshow = (TLRPC.TL_pageBlockSlideshow) block;
+        } else if (block instanceof TL_iv.pageBlockSlideshow) {
+            TL_iv.pageBlockSlideshow pageBlockSlideshow = (TL_iv.pageBlockSlideshow) block;
             if (type == 0) {
                 return pageBlockSlideshow.caption.text;
             } else if (type == 1) {
                 return pageBlockSlideshow.caption.credit;
             }
-        } else if (block instanceof TLRPC.TL_pageBlockPhoto) {
-            TLRPC.TL_pageBlockPhoto pageBlockPhoto = (TLRPC.TL_pageBlockPhoto) block;
+        } else if (block instanceof TL_iv.pageBlockPhoto) {
+            TL_iv.pageBlockPhoto pageBlockPhoto = (TL_iv.pageBlockPhoto) block;
             if (type == 0) {
                 return pageBlockPhoto.caption.text;
             } else if (type == 1) {
                 return pageBlockPhoto.caption.credit;
             }
-        } else if (block instanceof TLRPC.TL_pageBlockCollage) {
-            TLRPC.TL_pageBlockCollage pageBlockCollage = (TLRPC.TL_pageBlockCollage) block;
+        } else if (block instanceof TL_iv.pageBlockCollage) {
+            TL_iv.pageBlockCollage pageBlockCollage = (TL_iv.pageBlockCollage) block;
             if (type == 0) {
                 return pageBlockCollage.caption.text;
             } else if (type == 1) {
                 return pageBlockCollage.caption.credit;
             }
-        } else if (block instanceof TLRPC.TL_pageBlockEmbed) {
-            TLRPC.TL_pageBlockEmbed pageBlockEmbed = (TLRPC.TL_pageBlockEmbed) block;
+        } else if (block instanceof TL_iv.pageBlockEmbed) {
+            TL_iv.pageBlockEmbed pageBlockEmbed = (TL_iv.pageBlockEmbed) block;
             if (type == 0) {
                 return pageBlockEmbed.caption.text;
             } else if (type == 1) {
                 return pageBlockEmbed.caption.credit;
             }
-        } else if (block instanceof TLRPC.TL_pageBlockBlockquote) {
-            TLRPC.TL_pageBlockBlockquote pageBlockBlockquote = (TLRPC.TL_pageBlockBlockquote) block;
+        } else if (block instanceof TL_iv.pageBlockBlockquote) {
+            TL_iv.pageBlockBlockquote pageBlockBlockquote = (TL_iv.pageBlockBlockquote) block;
             return pageBlockBlockquote.caption;
-        } else if (block instanceof TLRPC.TL_pageBlockVideo) {
-            TLRPC.TL_pageBlockVideo pageBlockVideo = (TLRPC.TL_pageBlockVideo) block;
+        } else if (block instanceof TL_iv.pageBlockVideo) {
+            TL_iv.pageBlockVideo pageBlockVideo = (TL_iv.pageBlockVideo) block;
             if (type == 0) {
                 return pageBlockVideo.caption.text;
             } else if (type == 1) {
                 return pageBlockVideo.caption.credit;
             }
-        } else if (block instanceof TLRPC.TL_pageBlockPullquote) {
-            TLRPC.TL_pageBlockPullquote pageBlockPullquote = (TLRPC.TL_pageBlockPullquote) block;
+        } else if (block instanceof TL_iv.pageBlockPullquote) {
+            TL_iv.pageBlockPullquote pageBlockPullquote = (TL_iv.pageBlockPullquote) block;
             return pageBlockPullquote.caption;
-        } else if (block instanceof TLRPC.TL_pageBlockAudio) {
-            TLRPC.TL_pageBlockAudio pageBlockAudio = (TLRPC.TL_pageBlockAudio) block;
+        } else if (block instanceof TL_iv.pageBlockAudio) {
+            TL_iv.pageBlockAudio pageBlockAudio = (TL_iv.pageBlockAudio) block;
             if (type == 0) {
                 return pageBlockAudio.caption.text;
             } else if (type == 1) {
                 return pageBlockAudio.caption.credit;
             }
-        } else if (block instanceof TLRPC.TL_pageBlockCover) {
-            TLRPC.TL_pageBlockCover pageBlockCover = (TLRPC.TL_pageBlockCover) block;
+        } else if (block instanceof TL_iv.pageBlockCover) {
+            TL_iv.pageBlockCover pageBlockCover = (TL_iv.pageBlockCover) block;
             return getBlockCaption(pageBlockCover.cover, type);
-        } else if (block instanceof TLRPC.TL_pageBlockMap) {
-            TLRPC.TL_pageBlockMap pageBlockMap = (TLRPC.TL_pageBlockMap) block;
+        } else if (block instanceof TL_iv.pageBlockMap) {
+            TL_iv.pageBlockMap pageBlockMap = (TL_iv.pageBlockMap) block;
             if (type == 0) {
                 return pageBlockMap.caption.text;
             } else if (type == 1) {
@@ -1611,11 +1657,11 @@ public class ArticleViewer implements NotificationCenter.NotificationCenterDeleg
         return view;
     }
 
-    private boolean isListItemBlock(TLRPC.PageBlock block) {
+    private boolean isListItemBlock(TL_iv.PageBlock block) {
         return block instanceof TL_pageBlockListItem || block instanceof TL_pageBlockOrderedListItem;
     }
 
-    private TLRPC.PageBlock getLastNonListPageBlock(TLRPC.PageBlock block) {
+    private TL_iv.PageBlock getLastNonListPageBlock(TL_iv.PageBlock block) {
         if (block instanceof TL_pageBlockListItem) {
             TL_pageBlockListItem blockListItem = (TL_pageBlockListItem) block;
             if (blockListItem.blockItem != null) {
@@ -1635,9 +1681,9 @@ public class ArticleViewer implements NotificationCenter.NotificationCenterDeleg
     }
 
     private boolean openAllParentBlocks(TL_pageBlockDetailsChild child) {
-        TLRPC.PageBlock parentBlock = getLastNonListPageBlock(child.parent);
-        if (parentBlock instanceof TLRPC.TL_pageBlockDetails) {
-            TLRPC.TL_pageBlockDetails blockDetails = (TLRPC.TL_pageBlockDetails) parentBlock;
+        TL_iv.PageBlock parentBlock = getLastNonListPageBlock(child.parent);
+        if (parentBlock instanceof TL_iv.pageBlockDetails) {
+            TL_iv.pageBlockDetails blockDetails = (TL_iv.pageBlockDetails) parentBlock;
             if (!blockDetails.open) {
                 blockDetails.open = true;
                 return true;
@@ -1647,8 +1693,8 @@ public class ArticleViewer implements NotificationCenter.NotificationCenterDeleg
             TL_pageBlockDetailsChild parent = (TL_pageBlockDetailsChild) parentBlock;
             parentBlock = getLastNonListPageBlock(parent.block);
             boolean opened = false;
-            if (parentBlock instanceof TLRPC.TL_pageBlockDetails) {
-                TLRPC.TL_pageBlockDetails blockDetails = (TLRPC.TL_pageBlockDetails) parentBlock;
+            if (parentBlock instanceof TL_iv.pageBlockDetails) {
+                TL_iv.pageBlockDetails blockDetails = (TL_iv.pageBlockDetails) parentBlock;
                 if (!blockDetails.open) {
                     blockDetails.open = true;
                     opened = true;
@@ -1659,7 +1705,7 @@ public class ArticleViewer implements NotificationCenter.NotificationCenterDeleg
         return false;
     }
 
-    private TLRPC.PageBlock fixListBlock(TLRPC.PageBlock parentBlock, TLRPC.PageBlock childBlock) {
+    private TL_iv.PageBlock fixListBlock(TL_iv.PageBlock parentBlock, TL_iv.PageBlock childBlock) {
         if (parentBlock instanceof TL_pageBlockListItem) {
             TL_pageBlockListItem blockListItem = (TL_pageBlockListItem) parentBlock;
             blockListItem.blockItem = childBlock;
@@ -1672,7 +1718,7 @@ public class ArticleViewer implements NotificationCenter.NotificationCenterDeleg
         return childBlock;
     }
 
-    private TLRPC.PageBlock wrapInTableBlock(TLRPC.PageBlock parentBlock, TLRPC.PageBlock childBlock) {
+    private TL_iv.PageBlock wrapInTableBlock(TL_iv.PageBlock parentBlock, TL_iv.PageBlock childBlock) {
         if (parentBlock instanceof TL_pageBlockListItem) {
             TL_pageBlockListItem parent = (TL_pageBlockListItem) parentBlock;
 
@@ -1786,17 +1832,17 @@ public class ArticleViewer implements NotificationCenter.NotificationCenterDeleg
             int numBlocks = 0;
             int count = webPage.cached_page.blocks.size();
             for (int a = 0; a < count; a++) {
-                TLRPC.PageBlock block = webPage.cached_page.blocks.get(a);
+                TL_iv.PageBlock block = webPage.cached_page.blocks.get(a);
                 if (a == 0) {
                     block.first = true;
-                    if (block instanceof TLRPC.TL_pageBlockCover) {
-                        TLRPC.TL_pageBlockCover pageBlockCover = (TLRPC.TL_pageBlockCover) block;
-                        TLRPC.RichText caption = getBlockCaption(pageBlockCover, 0);
-                        TLRPC.RichText credit = getBlockCaption(pageBlockCover, 1);
-                        if ((caption != null && !(caption instanceof TLRPC.TL_textEmpty) || credit != null && !(credit instanceof TLRPC.TL_textEmpty)) && count > 1) {
-                            TLRPC.PageBlock next = webPage.cached_page.blocks.get(1);
-                            if (next instanceof TLRPC.TL_pageBlockChannel) {
-                                adapter.channelBlock = (TLRPC.TL_pageBlockChannel) next;
+                    if (block instanceof TL_iv.pageBlockCover) {
+                        TL_iv.pageBlockCover pageBlockCover = (TL_iv.pageBlockCover) block;
+                        TL_iv.RichText caption = getBlockCaption(pageBlockCover, 0);
+                        TL_iv.RichText credit = getBlockCaption(pageBlockCover, 1);
+                        if ((caption != null && !(caption instanceof TL_iv.textEmpty) || credit != null && !(credit instanceof TL_iv.textEmpty)) && count > 1) {
+                            TL_iv.PageBlock next = webPage.cached_page.blocks.get(1);
+                            if (next instanceof TL_iv.pageBlockChannel) {
+                                adapter.channelBlock = (TL_iv.pageBlockChannel) next;
                             }
                         }
                     }
@@ -2186,9 +2232,9 @@ public class ArticleViewer implements NotificationCenter.NotificationCenterDeleg
         anchor = anchor.toLowerCase();
         Integer row = pages[0].adapter.anchors.get(anchor);
         if (row != null) {
-            TLRPC.TL_textAnchor textAnchor = pages[0].adapter.anchorsParent.get(anchor);
+            TL_iv.textAnchor textAnchor = pages[0].adapter.anchorsParent.get(anchor);
             if (textAnchor != null) {
-                TLRPC.TL_pageBlockParagraph paragraph = new TLRPC.TL_pageBlockParagraph();
+                TL_iv.pageBlockParagraph paragraph = new TL_iv.pageBlockParagraph();
                 String webPageUrl;
                 if (!TextUtils.isEmpty(pages[0].adapter.currentPage.cached_page.url)) {
                     webPageUrl = pages[0].adapter.currentPage.cached_page.url.toLowerCase();
@@ -2291,8 +2337,8 @@ public class ArticleViewer implements NotificationCenter.NotificationCenterDeleg
                 if (row < 0 || row >= pages[0].adapter.blocks.size()) {
                     return false;
                 }
-                TLRPC.PageBlock originalBlock = pages[0].adapter.blocks.get(row);
-                TLRPC.PageBlock block = getLastNonListPageBlock(originalBlock);
+                TL_iv.PageBlock originalBlock = pages[0].adapter.blocks.get(row);
+                TL_iv.PageBlock block = getLastNonListPageBlock(originalBlock);
 
                 if (block instanceof TL_pageBlockDetailsChild) {
                     if (openAllParentBlocks((TL_pageBlockDetailsChild) block)) {
@@ -2435,33 +2481,33 @@ public class ArticleViewer implements NotificationCenter.NotificationCenterDeleg
     private static Paint webpageSearchPaint;
     private static Paint webpageMarkPaint;
 
-    private int getTextFlags(TLRPC.RichText richText) {
-        if (richText instanceof TLRPC.TL_textFixed) {
+    private int getTextFlags(TL_iv.RichText richText) {
+        if (richText instanceof TL_iv.textFixed) {
             return getTextFlags(richText.parentRichText) | TEXT_FLAG_MONO;
-        } else if (richText instanceof TLRPC.TL_textItalic) {
+        } else if (richText instanceof TL_iv.textItalic) {
             return getTextFlags(richText.parentRichText) | TEXT_FLAG_ITALIC;
-        } else if (richText instanceof TLRPC.TL_textBold) {
+        } else if (richText instanceof TL_iv.textBold) {
             return getTextFlags(richText.parentRichText) | TEXT_FLAG_MEDIUM;
-        } else if (richText instanceof TLRPC.TL_textUnderline) {
+        } else if (richText instanceof TL_iv.textUnderline) {
             return getTextFlags(richText.parentRichText) | TEXT_FLAG_UNDERLINE;
-        } else if (richText instanceof TLRPC.TL_textStrike) {
+        } else if (richText instanceof TL_iv.textStrike) {
             return getTextFlags(richText.parentRichText) | TEXT_FLAG_STRIKE;
-        } else if (richText instanceof TLRPC.TL_textEmail) {
+        } else if (richText instanceof TL_iv.textEmail) {
             return getTextFlags(richText.parentRichText) | TEXT_FLAG_URL;
-        } else if (richText instanceof TLRPC.TL_textPhone) {
+        } else if (richText instanceof TL_iv.textPhone) {
             return getTextFlags(richText.parentRichText) | TEXT_FLAG_URL;
-        } else if (richText instanceof TLRPC.TL_textUrl) {
-            TLRPC.TL_textUrl textUrl = (TLRPC.TL_textUrl) richText;
+        } else if (richText instanceof TL_iv.textUrl) {
+            TL_iv.textUrl textUrl = (TL_iv.textUrl) richText;
             if (textUrl.webpage_id != 0) {
                 return getTextFlags(richText.parentRichText) | TEXT_FLAG_WEBPAGE_URL;
             } else {
                 return getTextFlags(richText.parentRichText) | TEXT_FLAG_URL;
             }
-        } else if (richText instanceof TLRPC.TL_textSubscript) {
+        } else if (richText instanceof TL_iv.textSubscript) {
             return getTextFlags(richText.parentRichText) | TEXT_FLAG_SUB;
-        } else if (richText instanceof TLRPC.TL_textSuperscript) {
+        } else if (richText instanceof TL_iv.textSuperscript) {
             return getTextFlags(richText.parentRichText) | TEXT_FLAG_SUP;
-        } else if (richText instanceof TLRPC.TL_textMarked) {
+        } else if (richText instanceof TL_iv.textMarked) {
             return getTextFlags(richText.parentRichText) | TEXT_FLAG_MARKED;
         } else if (richText != null) {
             return getTextFlags(richText.parentRichText);
@@ -2469,66 +2515,66 @@ public class ArticleViewer implements NotificationCenter.NotificationCenterDeleg
         return TEXT_FLAG_REGULAR;
     }
 
-    private TLRPC.RichText getLastRichText(TLRPC.RichText richText) {
+    private TL_iv.RichText getLastRichText(TL_iv.RichText richText) {
         if (richText == null) {
             return null;
         }
-        if (richText instanceof TLRPC.TL_textFixed) {
-            return getLastRichText(((TLRPC.TL_textFixed) richText).text);
-        } else if (richText instanceof TLRPC.TL_textItalic) {
-            return getLastRichText(((TLRPC.TL_textItalic) richText).text);
-        } else if (richText instanceof TLRPC.TL_textBold) {
-            return getLastRichText(((TLRPC.TL_textBold) richText).text);
-        } else if (richText instanceof TLRPC.TL_textUnderline) {
-            return getLastRichText(((TLRPC.TL_textUnderline) richText).text);
-        } else if (richText instanceof TLRPC.TL_textStrike) {
-            return getLastRichText(((TLRPC.TL_textStrike) richText).text);
-        } else if (richText instanceof TLRPC.TL_textEmail) {
-            return getLastRichText(((TLRPC.TL_textEmail) richText).text);
-        } else if (richText instanceof TLRPC.TL_textUrl) {
-            return getLastRichText(((TLRPC.TL_textUrl) richText).text);
-        } else if (richText instanceof TLRPC.TL_textAnchor) {
-            getLastRichText(((TLRPC.TL_textAnchor) richText).text);
-        } else if (richText instanceof TLRPC.TL_textSubscript) {
-            return getLastRichText(((TLRPC.TL_textSubscript) richText).text);
-        } else if (richText instanceof TLRPC.TL_textSuperscript) {
-            return getLastRichText(((TLRPC.TL_textSuperscript) richText).text);
-        } else if (richText instanceof TLRPC.TL_textMarked) {
-            return getLastRichText(((TLRPC.TL_textMarked) richText).text);
-        } else if (richText instanceof TLRPC.TL_textPhone) {
-            return getLastRichText(((TLRPC.TL_textPhone) richText).text);
+        if (richText instanceof TL_iv.textFixed) {
+            return getLastRichText(((TL_iv.textFixed) richText).text);
+        } else if (richText instanceof TL_iv.textItalic) {
+            return getLastRichText(((TL_iv.textItalic) richText).text);
+        } else if (richText instanceof TL_iv.textBold) {
+            return getLastRichText(((TL_iv.textBold) richText).text);
+        } else if (richText instanceof TL_iv.textUnderline) {
+            return getLastRichText(((TL_iv.textUnderline) richText).text);
+        } else if (richText instanceof TL_iv.textStrike) {
+            return getLastRichText(((TL_iv.textStrike) richText).text);
+        } else if (richText instanceof TL_iv.textEmail) {
+            return getLastRichText(((TL_iv.textEmail) richText).text);
+        } else if (richText instanceof TL_iv.textUrl) {
+            return getLastRichText(((TL_iv.textUrl) richText).text);
+        } else if (richText instanceof TL_iv.textAnchor) {
+            getLastRichText(((TL_iv.textAnchor) richText).text);
+        } else if (richText instanceof TL_iv.textSubscript) {
+            return getLastRichText(((TL_iv.textSubscript) richText).text);
+        } else if (richText instanceof TL_iv.textSuperscript) {
+            return getLastRichText(((TL_iv.textSuperscript) richText).text);
+        } else if (richText instanceof TL_iv.textMarked) {
+            return getLastRichText(((TL_iv.textMarked) richText).text);
+        } else if (richText instanceof TL_iv.textPhone) {
+            return getLastRichText(((TL_iv.textPhone) richText).text);
         }
         return richText;
     }
 
-    private CharSequence getText(WebpageAdapter adapter, View parentView, TLRPC.RichText parentRichText, TLRPC.RichText richText, TLRPC.PageBlock parentBlock, int maxWidth) {
+    private CharSequence getText(WebpageAdapter adapter, View parentView, TL_iv.RichText parentRichText, TL_iv.RichText richText, TL_iv.PageBlock parentBlock, int maxWidth) {
         return getText(adapter.currentPage, parentView, parentRichText, richText, parentBlock, maxWidth);
     }
 
-    private CharSequence getText(TLRPC.WebPage page, View parentView, TLRPC.RichText parentRichText, TLRPC.RichText richText, TLRPC.PageBlock parentBlock, int maxWidth) {
+    private CharSequence getText(TLRPC.WebPage page, View parentView, TL_iv.RichText parentRichText, TL_iv.RichText richText, TL_iv.PageBlock parentBlock, int maxWidth) {
         if (richText == null) {
             return null;
         }
-        if (richText instanceof TLRPC.TL_textFixed) {
-            return getText(page, parentView, parentRichText, ((TLRPC.TL_textFixed) richText).text, parentBlock, maxWidth);
-        } else if (richText instanceof TLRPC.TL_textItalic) {
-            return getText(page, parentView, parentRichText, ((TLRPC.TL_textItalic) richText).text, parentBlock, maxWidth);
-        } else if (richText instanceof TLRPC.TL_textBold) {
-            return getText(page, parentView, parentRichText, ((TLRPC.TL_textBold) richText).text, parentBlock, maxWidth);
-        } else if (richText instanceof TLRPC.TL_textUnderline) {
-            return getText(page, parentView, parentRichText, ((TLRPC.TL_textUnderline) richText).text, parentBlock, maxWidth);
-        } else if (richText instanceof TLRPC.TL_textStrike) {
-            return getText(page, parentView, parentRichText, ((TLRPC.TL_textStrike) richText).text, parentBlock, maxWidth);
-        } else if (richText instanceof TLRPC.TL_textEmail) {
-            SpannableStringBuilder spannableStringBuilder = new SpannableStringBuilder(getText(page, parentView, parentRichText, ((TLRPC.TL_textEmail) richText).text, parentBlock, maxWidth));
+        if (richText instanceof TL_iv.textFixed) {
+            return getText(page, parentView, parentRichText, ((TL_iv.textFixed) richText).text, parentBlock, maxWidth);
+        } else if (richText instanceof TL_iv.textItalic) {
+            return getText(page, parentView, parentRichText, ((TL_iv.textItalic) richText).text, parentBlock, maxWidth);
+        } else if (richText instanceof TL_iv.textBold) {
+            return getText(page, parentView, parentRichText, ((TL_iv.textBold) richText).text, parentBlock, maxWidth);
+        } else if (richText instanceof TL_iv.textUnderline) {
+            return getText(page, parentView, parentRichText, ((TL_iv.textUnderline) richText).text, parentBlock, maxWidth);
+        } else if (richText instanceof TL_iv.textStrike) {
+            return getText(page, parentView, parentRichText, ((TL_iv.textStrike) richText).text, parentBlock, maxWidth);
+        } else if (richText instanceof TL_iv.textEmail) {
+            SpannableStringBuilder spannableStringBuilder = new SpannableStringBuilder(getText(page, parentView, parentRichText, ((TL_iv.textEmail) richText).text, parentBlock, maxWidth));
             MetricAffectingSpan[] innerSpans = spannableStringBuilder.getSpans(0, spannableStringBuilder.length(), MetricAffectingSpan.class);
             if (spannableStringBuilder.length() != 0) {
                 spannableStringBuilder.setSpan(new TextPaintUrlSpan(innerSpans == null || innerSpans.length == 0 ? getTextPaint(parentRichText, richText, parentBlock) : null, "mailto:" + getUrl(richText)), 0, spannableStringBuilder.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
             }
             return spannableStringBuilder;
-        } else if (richText instanceof TLRPC.TL_textUrl) {
-            TLRPC.TL_textUrl textUrl = (TLRPC.TL_textUrl) richText;
-            SpannableStringBuilder spannableStringBuilder = new SpannableStringBuilder(getText(page, parentView, parentRichText, ((TLRPC.TL_textUrl) richText).text, parentBlock, maxWidth));
+        } else if (richText instanceof TL_iv.textUrl) {
+            TL_iv.textUrl textUrl = (TL_iv.textUrl) richText;
+            SpannableStringBuilder spannableStringBuilder = new SpannableStringBuilder(getText(page, parentView, parentRichText, ((TL_iv.textUrl) richText).text, parentBlock, maxWidth));
             MetricAffectingSpan[] innerSpans = spannableStringBuilder.getSpans(0, spannableStringBuilder.length(), MetricAffectingSpan.class);
             TextPaint paint = innerSpans == null || innerSpans.length == 0 ? getTextPaint(parentRichText, richText, parentBlock) : null;
             MetricAffectingSpan span;
@@ -2541,22 +2587,22 @@ public class ArticleViewer implements NotificationCenter.NotificationCenterDeleg
                 spannableStringBuilder.setSpan(span, 0, spannableStringBuilder.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
             }
             return spannableStringBuilder;
-        } else if (richText instanceof TLRPC.TL_textPlain) {
-            return ((TLRPC.TL_textPlain) richText).text;
-        } else if (richText instanceof TLRPC.TL_textAnchor) {
-            TLRPC.TL_textAnchor textAnchor = (TLRPC.TL_textAnchor) richText;
+        } else if (richText instanceof TL_iv.textPlain) {
+            return ((TL_iv.textPlain) richText).text;
+        } else if (richText instanceof TL_iv.textAnchor) {
+            TL_iv.textAnchor textAnchor = (TL_iv.textAnchor) richText;
             SpannableStringBuilder spannableStringBuilder = new SpannableStringBuilder(getText(page, parentView, parentRichText, textAnchor.text, parentBlock, maxWidth));
             spannableStringBuilder.setSpan(new AnchorSpan(textAnchor.name), 0, spannableStringBuilder.length(), Spanned.SPAN_INCLUSIVE_EXCLUSIVE);
             return spannableStringBuilder;
-        } else if (richText instanceof TLRPC.TL_textEmpty) {
+        } else if (richText instanceof TL_iv.textEmpty) {
             return "";
-        } else if (richText instanceof TLRPC.TL_textConcat) {
+        } else if (richText instanceof TL_iv.textConcat) {
             SpannableStringBuilder spannableStringBuilder = new SpannableStringBuilder();
             int count = richText.texts.size();
             for (int a = 0; a < count; a++) {
-                TLRPC.RichText innerRichText = richText.texts.get(a);
-                TLRPC.RichText lastRichText = getLastRichText(innerRichText);
-                boolean extraSpace = maxWidth >= 0 && innerRichText instanceof TLRPC.TL_textUrl && ((TLRPC.TL_textUrl) innerRichText).webpage_id != 0;
+                TL_iv.RichText innerRichText = richText.texts.get(a);
+                TL_iv.RichText lastRichText = getLastRichText(innerRichText);
+                boolean extraSpace = maxWidth >= 0 && innerRichText instanceof TL_iv.textUrl && ((TL_iv.textUrl) innerRichText).webpage_id != 0;
                 if (extraSpace && spannableStringBuilder.length() != 0 && spannableStringBuilder.charAt(spannableStringBuilder.length() - 1) != '\n') {
                     spannableStringBuilder.append(" ");
                     spannableStringBuilder.setSpan(new TextSelectionHelper.IgnoreCopySpannable(), spannableStringBuilder.length() - 1, spannableStringBuilder.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
@@ -2593,26 +2639,26 @@ public class ArticleViewer implements NotificationCenter.NotificationCenterDeleg
                 }
             }
             return spannableStringBuilder;
-        } else if (richText instanceof TLRPC.TL_textSubscript) {
-            return getText(page, parentView, parentRichText, ((TLRPC.TL_textSubscript) richText).text, parentBlock, maxWidth);
-        } else if (richText instanceof TLRPC.TL_textSuperscript) {
-            return getText(page, parentView, parentRichText, ((TLRPC.TL_textSuperscript) richText).text, parentBlock, maxWidth);
-        } else if (richText instanceof TLRPC.TL_textMarked) {
-            SpannableStringBuilder spannableStringBuilder = new SpannableStringBuilder(getText(page, parentView, parentRichText, ((TLRPC.TL_textMarked) richText).text, parentBlock, maxWidth));
+        } else if (richText instanceof TL_iv.textSubscript) {
+            return getText(page, parentView, parentRichText, ((TL_iv.textSubscript) richText).text, parentBlock, maxWidth);
+        } else if (richText instanceof TL_iv.textSuperscript) {
+            return getText(page, parentView, parentRichText, ((TL_iv.textSuperscript) richText).text, parentBlock, maxWidth);
+        } else if (richText instanceof TL_iv.textMarked) {
+            SpannableStringBuilder spannableStringBuilder = new SpannableStringBuilder(getText(page, parentView, parentRichText, ((TL_iv.textMarked) richText).text, parentBlock, maxWidth));
             MetricAffectingSpan[] innerSpans = spannableStringBuilder.getSpans(0, spannableStringBuilder.length(), MetricAffectingSpan.class);
             if (spannableStringBuilder.length() != 0) {
                 spannableStringBuilder.setSpan(new TextPaintMarkSpan(innerSpans == null || innerSpans.length == 0 ? getTextPaint(parentRichText, richText, parentBlock) : null), 0, spannableStringBuilder.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
             }
             return spannableStringBuilder;
-        } else if (richText instanceof TLRPC.TL_textPhone) {
-            SpannableStringBuilder spannableStringBuilder = new SpannableStringBuilder(getText(page, parentView, parentRichText, ((TLRPC.TL_textPhone) richText).text, parentBlock, maxWidth));
+        } else if (richText instanceof TL_iv.textPhone) {
+            SpannableStringBuilder spannableStringBuilder = new SpannableStringBuilder(getText(page, parentView, parentRichText, ((TL_iv.textPhone) richText).text, parentBlock, maxWidth));
             MetricAffectingSpan[] innerSpans = spannableStringBuilder.getSpans(0, spannableStringBuilder.length(), MetricAffectingSpan.class);
             if (spannableStringBuilder.length() != 0) {
                 spannableStringBuilder.setSpan(new TextPaintUrlSpan(innerSpans == null || innerSpans.length == 0 ? getTextPaint(parentRichText, richText, parentBlock) : null, "tel:" + getUrl(richText)), 0, spannableStringBuilder.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
             }
             return spannableStringBuilder;
-        } else if (richText instanceof TLRPC.TL_textImage) {
-            TLRPC.TL_textImage textImage = (TLRPC.TL_textImage) richText;
+        } else if (richText instanceof TL_iv.textImage) {
+            TL_iv.textImage textImage = (TL_iv.textImage) richText;
             TLRPC.Document document = WebPageUtils.getDocumentWithId(page, textImage.document_id);
             TLRPC.Photo photo = WebPageUtils.getPhotoWithId(page, textImage.photo_id);
             if (document != null) {
@@ -2654,68 +2700,68 @@ public class ArticleViewer implements NotificationCenter.NotificationCenterDeleg
         return "not supported " + richText;
     }
 
-    public static CharSequence getPlainText(TLRPC.RichText richText) {
+    public static CharSequence getPlainText(TL_iv.RichText richText) {
         if (richText == null) {
             return "";
         }
-        if (richText instanceof TLRPC.TL_textFixed) {
-            return getPlainText(((TLRPC.TL_textFixed) richText).text);
-        } else if (richText instanceof TLRPC.TL_textItalic) {
-            return getPlainText(((TLRPC.TL_textItalic) richText).text);
-        } else if (richText instanceof TLRPC.TL_textBold) {
-            return getPlainText(((TLRPC.TL_textBold) richText).text);
-        } else if (richText instanceof TLRPC.TL_textUnderline) {
-            return getPlainText(((TLRPC.TL_textUnderline) richText).text);
-        } else if (richText instanceof TLRPC.TL_textStrike) {
-            return getPlainText(((TLRPC.TL_textStrike) richText).text);
-        } else if (richText instanceof TLRPC.TL_textEmail) {
-            return getPlainText(((TLRPC.TL_textEmail) richText).text);
-        } else if (richText instanceof TLRPC.TL_textUrl) {
-            return getPlainText(((TLRPC.TL_textUrl) richText).text);
-        } else if (richText instanceof TLRPC.TL_textPlain) {
-            return ((TLRPC.TL_textPlain) richText).text;
-        } else if (richText instanceof TLRPC.TL_textAnchor) {
-            return getPlainText(((TLRPC.TL_textAnchor) richText).text);
-        } else if (richText instanceof TLRPC.TL_textEmpty) {
+        if (richText instanceof TL_iv.textFixed) {
+            return getPlainText(((TL_iv.textFixed) richText).text);
+        } else if (richText instanceof TL_iv.textItalic) {
+            return getPlainText(((TL_iv.textItalic) richText).text);
+        } else if (richText instanceof TL_iv.textBold) {
+            return getPlainText(((TL_iv.textBold) richText).text);
+        } else if (richText instanceof TL_iv.textUnderline) {
+            return getPlainText(((TL_iv.textUnderline) richText).text);
+        } else if (richText instanceof TL_iv.textStrike) {
+            return getPlainText(((TL_iv.textStrike) richText).text);
+        } else if (richText instanceof TL_iv.textEmail) {
+            return getPlainText(((TL_iv.textEmail) richText).text);
+        } else if (richText instanceof TL_iv.textUrl) {
+            return getPlainText(((TL_iv.textUrl) richText).text);
+        } else if (richText instanceof TL_iv.textPlain) {
+            return ((TL_iv.textPlain) richText).text;
+        } else if (richText instanceof TL_iv.textAnchor) {
+            return getPlainText(((TL_iv.textAnchor) richText).text);
+        } else if (richText instanceof TL_iv.textEmpty) {
             return "";
-        } else if (richText instanceof TLRPC.TL_textConcat) {
+        } else if (richText instanceof TL_iv.textConcat) {
             StringBuilder stringBuilder = new StringBuilder();
             int count = richText.texts.size();
             for (int a = 0; a < count; a++) {
                 stringBuilder.append(getPlainText(richText.texts.get(a)));
             }
             return stringBuilder;
-        } else if (richText instanceof TLRPC.TL_textSubscript) {
-            return getPlainText(((TLRPC.TL_textSubscript) richText).text);
-        } else if (richText instanceof TLRPC.TL_textSuperscript) {
-            return getPlainText(((TLRPC.TL_textSuperscript) richText).text);
-        } else if (richText instanceof TLRPC.TL_textMarked) {
-            return getPlainText(((TLRPC.TL_textMarked) richText).text);
-        } else if (richText instanceof TLRPC.TL_textPhone) {
-            return getPlainText(((TLRPC.TL_textPhone) richText).text);
-        } else if (richText instanceof TLRPC.TL_textImage) {
+        } else if (richText instanceof TL_iv.textSubscript) {
+            return getPlainText(((TL_iv.textSubscript) richText).text);
+        } else if (richText instanceof TL_iv.textSuperscript) {
+            return getPlainText(((TL_iv.textSuperscript) richText).text);
+        } else if (richText instanceof TL_iv.textMarked) {
+            return getPlainText(((TL_iv.textMarked) richText).text);
+        } else if (richText instanceof TL_iv.textPhone) {
+            return getPlainText(((TL_iv.textPhone) richText).text);
+        } else if (richText instanceof TL_iv.textImage) {
             return "";
         }
         return "";
     }
 
-    public static String getUrl(TLRPC.RichText richText) {
-        if (richText instanceof TLRPC.TL_textFixed) {
-            return getUrl(((TLRPC.TL_textFixed) richText).text);
-        } else if (richText instanceof TLRPC.TL_textItalic) {
-            return getUrl(((TLRPC.TL_textItalic) richText).text);
-        } else if (richText instanceof TLRPC.TL_textBold) {
-            return getUrl(((TLRPC.TL_textBold) richText).text);
-        } else if (richText instanceof TLRPC.TL_textUnderline) {
-            return getUrl(((TLRPC.TL_textUnderline) richText).text);
-        } else if (richText instanceof TLRPC.TL_textStrike) {
-            return getUrl(((TLRPC.TL_textStrike) richText).text);
-        } else if (richText instanceof TLRPC.TL_textEmail) {
-            return ((TLRPC.TL_textEmail) richText).email;
-        } else if (richText instanceof TLRPC.TL_textUrl) {
-            return ((TLRPC.TL_textUrl) richText).url;
-        } else if (richText instanceof TLRPC.TL_textPhone) {
-            return ((TLRPC.TL_textPhone) richText).phone;
+    public static String getUrl(TL_iv.RichText richText) {
+        if (richText instanceof TL_iv.textFixed) {
+            return getUrl(((TL_iv.textFixed) richText).text);
+        } else if (richText instanceof TL_iv.textItalic) {
+            return getUrl(((TL_iv.textItalic) richText).text);
+        } else if (richText instanceof TL_iv.textBold) {
+            return getUrl(((TL_iv.textBold) richText).text);
+        } else if (richText instanceof TL_iv.textUnderline) {
+            return getUrl(((TL_iv.textUnderline) richText).text);
+        } else if (richText instanceof TL_iv.textStrike) {
+            return getUrl(((TL_iv.textStrike) richText).text);
+        } else if (richText instanceof TL_iv.textEmail) {
+            return ((TL_iv.textEmail) richText).email;
+        } else if (richText instanceof TL_iv.textUrl) {
+            return ((TL_iv.textUrl) richText).url;
+        } else if (richText instanceof TL_iv.textPhone) {
+            return ((TL_iv.textPhone) richText).phone;
         }
         return null;
     }
@@ -2732,7 +2778,7 @@ public class ArticleViewer implements NotificationCenter.NotificationCenterDeleg
         return getThemedColor(Theme.key_windowBackgroundWhiteGrayText);
     }
 
-    private TextPaint getTextPaint(TLRPC.RichText parentRichText, TLRPC.RichText richText, TLRPC.PageBlock parentBlock) {
+    private TextPaint getTextPaint(TL_iv.RichText parentRichText, TL_iv.RichText richText, TL_iv.PageBlock parentBlock) {
         int flags = getTextFlags(richText);
         SparseArray<TextPaint> currentMap = null;
         int textSize = dp(14);
@@ -2740,8 +2786,8 @@ public class ArticleViewer implements NotificationCenter.NotificationCenterDeleg
 
         int additionalSize = dp(SharedConfig.ivFontSize - 16);
 
-        if (parentBlock instanceof TLRPC.TL_pageBlockPhoto) {
-            TLRPC.TL_pageBlockPhoto pageBlockPhoto = (TLRPC.TL_pageBlockPhoto) parentBlock;
+        if (parentBlock instanceof TL_iv.pageBlockPhoto) {
+            TL_iv.pageBlockPhoto pageBlockPhoto = (TL_iv.pageBlockPhoto) parentBlock;
             if (pageBlockPhoto.caption.text == richText || pageBlockPhoto.caption.text == parentRichText) {
                 currentMap = photoCaptionTextPaints;
                 textSize = dp(14);
@@ -2750,8 +2796,8 @@ public class ArticleViewer implements NotificationCenter.NotificationCenterDeleg
                 textSize = dp(12);
             }
             textColor = getGrayTextColor();
-        } else if (parentBlock instanceof TLRPC.TL_pageBlockMap) {
-            TLRPC.TL_pageBlockMap pageBlockMap = (TLRPC.TL_pageBlockMap) parentBlock;
+        } else if (parentBlock instanceof TL_iv.pageBlockMap) {
+            TL_iv.pageBlockMap pageBlockMap = (TL_iv.pageBlockMap) parentBlock;
             if (pageBlockMap.caption.text == richText || pageBlockMap.caption.text == parentRichText) {
                 currentMap = photoCaptionTextPaints;
                 textSize = dp(14);
@@ -2760,36 +2806,36 @@ public class ArticleViewer implements NotificationCenter.NotificationCenterDeleg
                 textSize = dp(12);
             }
             textColor = getGrayTextColor();
-        } else if (parentBlock instanceof TLRPC.TL_pageBlockTitle) {
+        } else if (parentBlock instanceof TL_iv.pageBlockTitle) {
             currentMap = titleTextPaints;
             textSize = dp(23);
             textColor = getTextColor();
-        } else if (parentBlock instanceof TLRPC.TL_pageBlockKicker) {
+        } else if (parentBlock instanceof TL_iv.pageBlockKicker) {
             currentMap = kickerTextPaints;
             textSize = dp(14);
             textColor = getTextColor();
-        } else if (parentBlock instanceof TLRPC.TL_pageBlockAuthorDate) {
+        } else if (parentBlock instanceof TL_iv.pageBlockAuthorDate) {
             currentMap = authorTextPaints;
             textSize = dp(14);
             textColor = getGrayTextColor();
-        } else if (parentBlock instanceof TLRPC.TL_pageBlockFooter) {
+        } else if (parentBlock instanceof TL_iv.pageBlockFooter) {
             currentMap = footerTextPaints;
             textSize = dp(14);
             textColor = getGrayTextColor();
-        } else if (parentBlock instanceof TLRPC.TL_pageBlockSubtitle) {
+        } else if (parentBlock instanceof TL_iv.pageBlockSubtitle) {
             currentMap = subtitleTextPaints;
             textSize = dp(20);
             textColor = getTextColor();
-        } else if (parentBlock instanceof TLRPC.TL_pageBlockHeader) {
+        } else if (parentBlock instanceof TL_iv.pageBlockHeader) {
             currentMap = headerTextPaints;
             textSize = dp(20);
             textColor = getTextColor();
-        } else if (parentBlock instanceof TLRPC.TL_pageBlockSubheader) {
+        } else if (parentBlock instanceof TL_iv.pageBlockSubheader) {
             currentMap = subheaderTextPaints;
             textSize = dp(17);
             textColor = getTextColor();
-        } else if (parentBlock instanceof TLRPC.TL_pageBlockBlockquote) {
-            TLRPC.TL_pageBlockBlockquote pageBlockBlockquote = (TLRPC.TL_pageBlockBlockquote) parentBlock;
+        } else if (parentBlock instanceof TL_iv.pageBlockBlockquote) {
+            TL_iv.pageBlockBlockquote pageBlockBlockquote = (TL_iv.pageBlockBlockquote) parentBlock;
             if (pageBlockBlockquote.text == parentRichText) {
                 currentMap = quoteTextPaints;
                 textSize = dp(15);
@@ -2799,8 +2845,8 @@ public class ArticleViewer implements NotificationCenter.NotificationCenterDeleg
                 textSize = dp(14);
                 textColor = getGrayTextColor();
             }
-        } else if (parentBlock instanceof TLRPC.TL_pageBlockPullquote) {
-            TLRPC.TL_pageBlockPullquote pageBlockBlockquote = (TLRPC.TL_pageBlockPullquote) parentBlock;
+        } else if (parentBlock instanceof TL_iv.pageBlockPullquote) {
+            TL_iv.pageBlockPullquote pageBlockBlockquote = (TL_iv.pageBlockPullquote) parentBlock;
             if (pageBlockBlockquote.text == parentRichText) {
                 currentMap = quoteTextPaints;
                 textSize = dp(15);
@@ -2810,11 +2856,11 @@ public class ArticleViewer implements NotificationCenter.NotificationCenterDeleg
                 textSize = dp(14);
                 textColor = getGrayTextColor();
             }
-        } else if (parentBlock instanceof TLRPC.TL_pageBlockPreformatted) {
+        } else if (parentBlock instanceof TL_iv.pageBlockPreformatted) {
             currentMap = preformattedTextPaints;
             textSize = dp(14);
             textColor = getTextColor();
-        } else if (parentBlock instanceof TLRPC.TL_pageBlockParagraph) {
+        } else if (parentBlock instanceof TL_iv.pageBlockParagraph) {
             currentMap = paragraphTextPaints;
             textSize = dp(16);
             textColor = getTextColor();
@@ -2822,8 +2868,8 @@ public class ArticleViewer implements NotificationCenter.NotificationCenterDeleg
             currentMap = listTextPaints;
             textSize = dp(16);
             textColor = getTextColor();
-        } else if (parentBlock instanceof TLRPC.TL_pageBlockEmbed) {
-            TLRPC.TL_pageBlockEmbed pageBlockEmbed = (TLRPC.TL_pageBlockEmbed) parentBlock;
+        } else if (parentBlock instanceof TL_iv.pageBlockEmbed) {
+            TL_iv.pageBlockEmbed pageBlockEmbed = (TL_iv.pageBlockEmbed) parentBlock;
             if (pageBlockEmbed.caption.text == richText || pageBlockEmbed.caption.text == parentRichText) {
                 currentMap = photoCaptionTextPaints;
                 textSize = dp(14);
@@ -2832,8 +2878,8 @@ public class ArticleViewer implements NotificationCenter.NotificationCenterDeleg
                 textSize = dp(12);
             }
             textColor = getGrayTextColor();
-        } else if (parentBlock instanceof TLRPC.TL_pageBlockSlideshow) {
-            TLRPC.TL_pageBlockSlideshow pageBlockSlideshow = (TLRPC.TL_pageBlockSlideshow) parentBlock;
+        } else if (parentBlock instanceof TL_iv.pageBlockSlideshow) {
+            TL_iv.pageBlockSlideshow pageBlockSlideshow = (TL_iv.pageBlockSlideshow) parentBlock;
             if (pageBlockSlideshow.caption.text == richText || pageBlockSlideshow.caption.text == parentRichText) {
                 currentMap = photoCaptionTextPaints;
                 textSize = dp(14);
@@ -2842,8 +2888,8 @@ public class ArticleViewer implements NotificationCenter.NotificationCenterDeleg
                 textSize = dp(12);
             }
             textColor = getGrayTextColor();
-        } else if (parentBlock instanceof TLRPC.TL_pageBlockCollage) {
-            TLRPC.TL_pageBlockCollage pageBlockCollage = (TLRPC.TL_pageBlockCollage) parentBlock;
+        } else if (parentBlock instanceof TL_iv.pageBlockCollage) {
+            TL_iv.pageBlockCollage pageBlockCollage = (TL_iv.pageBlockCollage) parentBlock;
             if (pageBlockCollage.caption.text == richText || pageBlockCollage.caption.text == parentRichText) {
                 currentMap = photoCaptionTextPaints;
                 textSize = dp(14);
@@ -2852,8 +2898,8 @@ public class ArticleViewer implements NotificationCenter.NotificationCenterDeleg
                 textSize = dp(12);
             }
             textColor = getGrayTextColor();
-        } else if (parentBlock instanceof TLRPC.TL_pageBlockEmbedPost) {
-            TLRPC.TL_pageBlockEmbedPost pageBlockEmbedPost = (TLRPC.TL_pageBlockEmbedPost) parentBlock;
+        } else if (parentBlock instanceof TL_iv.pageBlockEmbedPost) {
+            TL_iv.pageBlockEmbedPost pageBlockEmbedPost = (TL_iv.pageBlockEmbedPost) parentBlock;
             if (richText == pageBlockEmbedPost.caption.text) {
                 currentMap = photoCaptionTextPaints;
                 textSize = dp(14);
@@ -2867,8 +2913,8 @@ public class ArticleViewer implements NotificationCenter.NotificationCenterDeleg
                 textSize = dp(14);
                 textColor = getTextColor();
             }
-        } else if (parentBlock instanceof TLRPC.TL_pageBlockVideo) {
-            TLRPC.TL_pageBlockVideo pageBlockVideo = (TLRPC.TL_pageBlockVideo) parentBlock;
+        } else if (parentBlock instanceof TL_iv.pageBlockVideo) {
+            TL_iv.pageBlockVideo pageBlockVideo = (TL_iv.pageBlockVideo) parentBlock;
             if (richText == pageBlockVideo.caption.text) {
                 currentMap = mediaCaptionTextPaints;
                 textSize = dp(14);
@@ -2877,8 +2923,8 @@ public class ArticleViewer implements NotificationCenter.NotificationCenterDeleg
                 textSize = dp(12);
             }
             textColor = getTextColor();
-        } else if (parentBlock instanceof TLRPC.TL_pageBlockAudio) {
-            TLRPC.TL_pageBlockAudio pageBlockAudio = (TLRPC.TL_pageBlockAudio) parentBlock;
+        } else if (parentBlock instanceof TL_iv.pageBlockAudio) {
+            TL_iv.pageBlockAudio pageBlockAudio = (TL_iv.pageBlockAudio) parentBlock;
             if (richText == pageBlockAudio.caption.text) {
                 currentMap = mediaCaptionTextPaints;
                 textSize = dp(14);
@@ -2887,15 +2933,15 @@ public class ArticleViewer implements NotificationCenter.NotificationCenterDeleg
                 textSize = dp(12);
             }
             textColor = getTextColor();
-        } else if (parentBlock instanceof TLRPC.TL_pageBlockRelatedArticles) {
+        } else if (parentBlock instanceof TL_iv.pageBlockRelatedArticles) {
             currentMap = relatedArticleTextPaints;
             textSize = dp(15);
             textColor = getGrayTextColor();
-        } else if (parentBlock instanceof TLRPC.TL_pageBlockDetails) {
+        } else if (parentBlock instanceof TL_iv.pageBlockDetails) {
             currentMap = detailsTextPaints;
             textSize = dp(15);
             textColor = getTextColor();
-        } else if (parentBlock instanceof TLRPC.TL_pageBlockTable) {
+        } else if (parentBlock instanceof TL_iv.pageBlockTable) {
             currentMap = tableTextPaints;
             textSize = dp(15);
             textColor = getTextColor();
@@ -2917,10 +2963,10 @@ public class ArticleViewer implements NotificationCenter.NotificationCenterDeleg
             if ((flags & TEXT_FLAG_MONO) != 0) {
                 paint.setTypeface(AndroidUtilities.getTypeface("fonts/rmono.ttf"));
             } else {
-                if (parentBlock instanceof TLRPC.TL_pageBlockRelatedArticles) {
+                if (parentBlock instanceof TL_iv.pageBlockRelatedArticles) {
                     paint.setTypeface(AndroidUtilities.bold());
-                } else if (selectedFont == 1 || parentBlock instanceof TLRPC.TL_pageBlockTitle || parentBlock instanceof TLRPC.TL_pageBlockKicker || parentBlock instanceof TLRPC.TL_pageBlockHeader || parentBlock instanceof TLRPC.TL_pageBlockSubtitle || parentBlock instanceof TLRPC.TL_pageBlockSubheader) {
-                    if (parentBlock instanceof TLRPC.TL_pageBlockTitle || parentBlock instanceof TLRPC.TL_pageBlockHeader || parentBlock instanceof TLRPC.TL_pageBlockSubtitle || parentBlock instanceof TLRPC.TL_pageBlockSubheader) {
+                } else if (selectedFont == 1 || parentBlock instanceof TL_iv.pageBlockTitle || parentBlock instanceof TL_iv.pageBlockKicker || parentBlock instanceof TL_iv.pageBlockHeader || parentBlock instanceof TL_iv.pageBlockSubtitle || parentBlock instanceof TL_iv.pageBlockSubheader) {
+                    if (parentBlock instanceof TL_iv.pageBlockTitle || parentBlock instanceof TL_iv.pageBlockHeader || parentBlock instanceof TL_iv.pageBlockSubtitle || parentBlock instanceof TL_iv.pageBlockSubheader) {
                         paint.setTypeface(AndroidUtilities.getTypeface("fonts/mw_bold.ttf"));
                     } else {
                         if ((flags & TEXT_FLAG_MEDIUM) != 0 && (flags & TEXT_FLAG_ITALIC) != 0) {
@@ -2965,16 +3011,16 @@ public class ArticleViewer implements NotificationCenter.NotificationCenterDeleg
         return paint;
     }
 
-    private DrawingText createLayoutForText(View parentView, CharSequence plainText, TLRPC.RichText richText, int width, int textY, TLRPC.PageBlock parentBlock, Layout.Alignment align, WebpageAdapter parentAdapter) {
+    private DrawingText createLayoutForText(View parentView, CharSequence plainText, TL_iv.RichText richText, int width, int textY, TL_iv.PageBlock parentBlock, Layout.Alignment align, WebpageAdapter parentAdapter) {
         return createLayoutForText(parentView, plainText, richText, width, 0, parentBlock, align, 0, parentAdapter);
     }
 
-    private DrawingText createLayoutForText(View parentView, CharSequence plainText, TLRPC.RichText richText, int width, int textY, TLRPC.PageBlock parentBlock, WebpageAdapter parentAdapter) {
+    private DrawingText createLayoutForText(View parentView, CharSequence plainText, TL_iv.RichText richText, int width, int textY, TL_iv.PageBlock parentBlock, WebpageAdapter parentAdapter) {
         return createLayoutForText(parentView, plainText, richText, width, textY, parentBlock, Layout.Alignment.ALIGN_NORMAL, 0, parentAdapter);
     }
 
-    private DrawingText createLayoutForText(View parentView, CharSequence plainText, TLRPC.RichText richText, int width, int textY, TLRPC.PageBlock parentBlock, Layout.Alignment align, int maxLines, WebpageAdapter parentAdapter) {
-        if (plainText == null && (richText == null || richText instanceof TLRPC.TL_textEmpty)) {
+    private DrawingText createLayoutForText(View parentView, CharSequence plainText, TL_iv.RichText richText, int width, int textY, TL_iv.PageBlock parentBlock, Layout.Alignment align, int maxLines, WebpageAdapter parentAdapter) {
+        if (plainText == null && (richText == null || richText instanceof TL_iv.textEmpty)) {
             return null;
         }
         if (width < 0) {
@@ -2994,8 +3040,8 @@ public class ArticleViewer implements NotificationCenter.NotificationCenterDeleg
         int additionalSize = dp(SharedConfig.ivFontSize - 16);
 
         TextPaint paint;
-        if (parentBlock instanceof TLRPC.TL_pageBlockEmbedPost && richText == null) {
-            TLRPC.TL_pageBlockEmbedPost pageBlockEmbedPost = (TLRPC.TL_pageBlockEmbedPost) parentBlock;
+        if (parentBlock instanceof TL_iv.pageBlockEmbedPost && richText == null) {
+            TL_iv.pageBlockEmbedPost pageBlockEmbedPost = (TL_iv.pageBlockEmbedPost) parentBlock;
             if (pageBlockEmbedPost.author == plainText) {
                 if (embedPostAuthorPaint == null) {
                     embedPostAuthorPaint = new TextPaint(Paint.ANTI_ALIAS_FLAG);
@@ -3011,7 +3057,7 @@ public class ArticleViewer implements NotificationCenter.NotificationCenterDeleg
                 embedPostDatePaint.setTextSize(dp(14) + additionalSize);
                 paint = embedPostDatePaint;
             }
-        } else if (parentBlock instanceof TLRPC.TL_pageBlockChannel) {
+        } else if (parentBlock instanceof TL_iv.pageBlockChannel) {
             if (channelNamePaint == null) {
                 channelNamePaint = new TextPaint(Paint.ANTI_ALIAS_FLAG);
                 channelNamePaint.setTypeface(AndroidUtilities.bold());
@@ -3066,7 +3112,7 @@ public class ArticleViewer implements NotificationCenter.NotificationCenterDeleg
         text = Emoji.replaceEmoji(text, paint.getFontMetricsInt(), false, null, DynamicDrawableSpan.ALIGN_BASELINE);
         StaticLayout result;
         if (maxLines != 0) {
-            if (parentBlock instanceof TLRPC.TL_pageBlockPullquote) {
+            if (parentBlock instanceof TL_iv.pageBlockPullquote) {
                 result = StaticLayoutEx.createStaticLayout(text, paint, width, Layout.Alignment.ALIGN_CENTER, 1.0f, 0.0f, false, TextUtils.TruncateAt.END, width, maxLines);
             } else {
                 result = StaticLayoutEx.createStaticLayout(text, paint, width, align, 1.0f, dp(4), false, TextUtils.TruncateAt.END, width, maxLines);
@@ -3075,7 +3121,7 @@ public class ArticleViewer implements NotificationCenter.NotificationCenterDeleg
             if (text.charAt(text.length() - 1) == '\n') {
                 text = text.subSequence(0, text.length() - 1);
             }
-            if (parentBlock instanceof TLRPC.TL_pageBlockPullquote) {
+            if (parentBlock instanceof TL_iv.pageBlockPullquote) {
                 result = new StaticLayout(text, paint, width, Layout.Alignment.ALIGN_CENTER, 1.0f, 0.0f, false);
             } else {
                 result = new StaticLayout(text, paint, width, align, 1.0f, dp(4), false);
@@ -3409,7 +3455,7 @@ public class ArticleViewer implements NotificationCenter.NotificationCenterDeleg
                     TLRPC.TL_messages_webPage res = (TLRPC.TL_messages_webPage) response;
                     MessagesController.getInstance(currentAccount).putUsers(res.users, false);
                     MessagesController.getInstance(currentAccount).putChats(res.chats, false);
-                    if (res.webpage != null && res.webpage.cached_page instanceof TLRPC.TL_page) {
+                    if (res.webpage != null && res.webpage.cached_page instanceof TL_iv.TL_page) {
                         addPageToStack(res.webpage, anchor, 1);
                     } else if (!checkInternal.run()) {
                         if (SharedConfig.inappBrowser) {
@@ -3418,7 +3464,7 @@ public class ArticleViewer implements NotificationCenter.NotificationCenterDeleg
                             Browser.openUrl(parentActivity, req.url);
                         }
                     }
-                } else if (response instanceof TLRPC.TL_webPage && ((TLRPC.TL_webPage) response).cached_page instanceof TLRPC.TL_page) {
+                } else if (response instanceof TLRPC.TL_webPage && ((TLRPC.TL_webPage) response).cached_page instanceof TL_iv.TL_page) {
                     addPageToStack((TLRPC.TL_webPage) response, anchor, 1);
                 } else if (!checkInternal.run()) {
                     if (SharedConfig.inappBrowser) {
@@ -3820,21 +3866,21 @@ public class ArticleViewer implements NotificationCenter.NotificationCenterDeleg
                         }));
                     }
                 } else if (position >= 0 && position < adapter.localBlocks.size()) {
-                    TLRPC.PageBlock pageBlock = adapter.localBlocks.get(position);
-                    TLRPC.PageBlock originalBlock = pageBlock;
+                    TL_iv.PageBlock pageBlock = adapter.localBlocks.get(position);
+                    TL_iv.PageBlock originalBlock = pageBlock;
                     pageBlock = getLastNonListPageBlock(pageBlock);
                     if (pageBlock instanceof TL_pageBlockDetailsChild) {
                         TL_pageBlockDetailsChild detailsChild = (TL_pageBlockDetailsChild) pageBlock;
                         pageBlock = detailsChild.block;
                     }
-                    if (pageBlock instanceof TLRPC.TL_pageBlockChannel) {
-                        TLRPC.TL_pageBlockChannel pageBlockChannel = (TLRPC.TL_pageBlockChannel) pageBlock;
+                    if (pageBlock instanceof TL_iv.pageBlockChannel) {
+                        TL_iv.pageBlockChannel pageBlockChannel = (TL_iv.pageBlockChannel) pageBlock;
                         MessagesController.getInstance(currentAccount).openByUserName(ChatObject.getPublicUsername(pageBlockChannel.channel), parentFragment, 2);
                         close(false, true);
                     } else if (pageBlock instanceof TL_pageBlockRelatedArticlesChild) {
                         TL_pageBlockRelatedArticlesChild pageBlockRelatedArticlesChild = (TL_pageBlockRelatedArticlesChild) pageBlock;
                         openWebpageUrl(pageBlockRelatedArticlesChild.parent.articles.get(pageBlockRelatedArticlesChild.num).url, null, null);
-                    } else if (pageBlock instanceof TLRPC.TL_pageBlockDetails) {
+                    } else if (pageBlock instanceof TL_iv.pageBlockDetails) {
                         view = getLastNonListCell(view);
                         if (!(view instanceof BlockDetailsCell)) {
                             return;
@@ -3846,7 +3892,7 @@ public class ArticleViewer implements NotificationCenter.NotificationCenterDeleg
                         if (index < 0) {
                             return;
                         }
-                        TLRPC.TL_pageBlockDetails pageBlockDetails = (TLRPC.TL_pageBlockDetails) pageBlock;
+                        TL_iv.pageBlockDetails pageBlockDetails = (TL_iv.pageBlockDetails) pageBlock;
                         pageBlockDetails.open = !pageBlockDetails.open;
 
                         int oldCount = adapter.getItemCount();
@@ -4816,7 +4862,7 @@ public class ArticleViewer implements NotificationCenter.NotificationCenterDeleg
     private static class SearchResult {
         private int index;
         private Object text;
-        private TLRPC.PageBlock block;
+        private TL_iv.PageBlock block;
     }
 
     private void processSearch(final String text) {
@@ -4850,17 +4896,17 @@ public class ArticleViewer implements NotificationCenter.NotificationCenterDeleg
             }
         } else {
             AndroidUtilities.runOnUIThread(searchRunnable = () -> {
-                HashMap<Object, TLRPC.PageBlock> copy = new HashMap<>(pages[0].adapter.textToBlocks);
+                HashMap<Object, TL_iv.PageBlock> copy = new HashMap<>(pages[0].adapter.textToBlocks);
                 ArrayList<Object> array = new ArrayList<>(pages[0].adapter.textBlocks);
                 searchRunnable = null;
                 Utilities.searchQueue.postRunnable(() -> {
                     ArrayList<SearchResult> results = new ArrayList<>();
                     for (int b = 0, N = array.size(); b < N; b++) {
                         Object object = array.get(b);
-                        TLRPC.PageBlock block = copy.get(object);
+                        TL_iv.PageBlock block = copy.get(object);
                         String textToSearchIn = null;
-                        if (object instanceof TLRPC.RichText) {
-                            TLRPC.RichText richText = (TLRPC.RichText) object;
+                        if (object instanceof TL_iv.RichText) {
+                            TL_iv.RichText richText = (TL_iv.RichText) object;
                             CharSequence innerText = getText(pages[0].adapter, null, richText, richText, block, 1000);
                             if (!TextUtils.isEmpty(innerText)) {
                                 textToSearchIn = innerText.toString().toLowerCase();
@@ -4933,11 +4979,11 @@ public class ArticleViewer implements NotificationCenter.NotificationCenterDeleg
         currentSearchIndex = index;
         updateSearchButtons();
         SearchResult result = searchResults.get(index);
-        TLRPC.PageBlock block = getLastNonListPageBlock(result.block);
+        TL_iv.PageBlock block = getLastNonListPageBlock(result.block);
 
         int row = -1;
         for (int a = 0, N = pages[0].adapter.blocks.size(); a < N; a++) {
-            TLRPC.PageBlock localBlock = pages[0].adapter.blocks.get(a);
+            TL_iv.PageBlock localBlock = pages[0].adapter.blocks.get(a);
             if (localBlock instanceof TL_pageBlockDetailsChild) {
                 TL_pageBlockDetailsChild child = (TL_pageBlockDetailsChild) localBlock;
                 if (child.block == result.block || child.block == block) {
@@ -4950,7 +4996,7 @@ public class ArticleViewer implements NotificationCenter.NotificationCenterDeleg
             }
         }
         for (int a = 0, N = pages[0].adapter.localBlocks.size(); a < N; a++) {
-            TLRPC.PageBlock localBlock = pages[0].adapter.localBlocks.get(a);
+            TL_iv.PageBlock localBlock = pages[0].adapter.localBlocks.get(a);
             if (localBlock == result.block || localBlock == block) {
                 row = a;
                 break;
@@ -5154,7 +5200,7 @@ public class ArticleViewer implements NotificationCenter.NotificationCenterDeleg
             final String anchorFinal = !scrolledToAnchor && anchor != null ? anchor : null;
             TLRPC.TL_messages_getWebPage req = new TLRPC.TL_messages_getWebPage();
             req.url = webpage.url;
-            if (webpage.cached_page instanceof TLRPC.TL_pagePart_layer82 || webpage.cached_page.part) {
+            if (webpage.cached_page instanceof TL_iv.TL_pagePart_layer82 || webpage.cached_page.part) {
                 req.hash = 0;
             } else {
                 req.hash = webpage.hash;
@@ -5633,8 +5679,8 @@ public class ArticleViewer implements NotificationCenter.NotificationCenterDeleg
             TLRPC.Updates updates = (TLRPC.Updates) response;
             for (int a = 0; a < updates.updates.size(); a++) {
                 TLRPC.Update update = updates.updates.get(a);
-                if (update instanceof TLRPC.TL_updateNewChannelMessage) {
-                    if (((TLRPC.TL_updateNewChannelMessage) update).message.action instanceof TLRPC.TL_messageActionChatAddUser) {
+                if (update instanceof TL_update.TL_updateNewChannelMessage) {
+                    if (((TL_update.TL_updateNewChannelMessage) update).message.action instanceof TLRPC.TL_messageActionChatAddUser) {
                         hasJoinMessage = true;
                         break;
                     }
@@ -5756,9 +5802,9 @@ public class ArticleViewer implements NotificationCenter.NotificationCenterDeleg
             return null;
         }
 
-        public static boolean isVideo(TLRPC.WebPage page, TLRPC.PageBlock block) {
-            if (block instanceof TLRPC.TL_pageBlockVideo) {
-                TLRPC.Document document = getDocumentWithId(page, ((TLRPC.TL_pageBlockVideo) block).video_id);
+        public static boolean isVideo(TLRPC.WebPage page, TL_iv.PageBlock block) {
+            if (block instanceof TL_iv.pageBlockVideo) {
+                TLRPC.Document document = getDocumentWithId(page, ((TL_iv.pageBlockVideo) block).video_id);
                 if (document != null) {
                     return MessageObject.isVideoDocument(document);
                 }
@@ -5766,27 +5812,27 @@ public class ArticleViewer implements NotificationCenter.NotificationCenterDeleg
             return false;
         }
 
-        public static TLObject getMedia(TLRPC.WebPage page, TLRPC.PageBlock block) {
-            if (block instanceof TLRPC.TL_pageBlockPhoto) {
-                return getPhotoWithId(page, ((TLRPC.TL_pageBlockPhoto) block).photo_id);
-            } else if (block instanceof TLRPC.TL_pageBlockVideo) {
-                return getDocumentWithId(page, ((TLRPC.TL_pageBlockVideo) block).video_id);
+        public static TLObject getMedia(TLRPC.WebPage page, TL_iv.PageBlock block) {
+            if (block instanceof TL_iv.pageBlockPhoto) {
+                return getPhotoWithId(page, ((TL_iv.pageBlockPhoto) block).photo_id);
+            } else if (block instanceof TL_iv.pageBlockVideo) {
+                return getDocumentWithId(page, ((TL_iv.pageBlockVideo) block).video_id);
             } else {
                 return null;
             }
         }
 
-        public static File getMediaFile(TLRPC.WebPage page, TLRPC.PageBlock block) {
-            if (block instanceof TLRPC.TL_pageBlockPhoto) {
-                TLRPC.Photo photo = getPhotoWithId(page, ((TLRPC.TL_pageBlockPhoto) block).photo_id);
+        public static File getMediaFile(TLRPC.WebPage page, TL_iv.PageBlock block) {
+            if (block instanceof TL_iv.pageBlockPhoto) {
+                TLRPC.Photo photo = getPhotoWithId(page, ((TL_iv.pageBlockPhoto) block).photo_id);
                 if (photo != null) {
                     TLRPC.PhotoSize sizeFull = FileLoader.getClosestPhotoSizeWithSize(photo.sizes, AndroidUtilities.getPhotoSize());
                     if (sizeFull != null) {
                         return FileLoader.getInstance(UserConfig.selectedAccount).getPathToAttach(sizeFull, true);
                     }
                 }
-            } else if (block instanceof TLRPC.TL_pageBlockVideo) {
-                TLRPC.Document document = getDocumentWithId(page, ((TLRPC.TL_pageBlockVideo) block).video_id);
+            } else if (block instanceof TL_iv.pageBlockVideo) {
+                TLRPC.Document document = getDocumentWithId(page, ((TL_iv.pageBlockVideo) block).video_id);
                 if (document != null) {
                     return FileLoader.getInstance(UserConfig.selectedAccount).getPathToAttach(document, true);
                 }
@@ -5800,20 +5846,20 @@ public class ArticleViewer implements NotificationCenter.NotificationCenterDeleg
     private class WebpageAdapter extends RecyclerListView.SelectionAdapter {
 
         private Context context;
-        private ArrayList<TLRPC.PageBlock> localBlocks = new ArrayList<>();
-        private ArrayList<TLRPC.PageBlock> blocks = new ArrayList<>();
-        private ArrayList<TLRPC.PageBlock> photoBlocks = new ArrayList<>();
+        private ArrayList<TL_iv.PageBlock> localBlocks = new ArrayList<>();
+        private ArrayList<TL_iv.PageBlock> blocks = new ArrayList<>();
+        private ArrayList<TL_iv.PageBlock> photoBlocks = new ArrayList<>();
         private HashMap<String, Integer> anchors = new HashMap<>();
         private HashMap<String, Integer> anchorsOffset = new HashMap<>();
-        private HashMap<String, TLRPC.TL_textAnchor> anchorsParent = new HashMap<>();
-        private HashMap<TLRPC.TL_pageBlockAudio, MessageObject> audioBlocks = new HashMap<>();
+        private HashMap<String, TL_iv.textAnchor> anchorsParent = new HashMap<>();
+        private HashMap<TL_iv.pageBlockAudio, MessageObject> audioBlocks = new HashMap<>();
         private ArrayList<MessageObject> audioMessages = new ArrayList<>();
-        private HashMap<Object, TLRPC.PageBlock> textToBlocks = new HashMap<>();
+        private HashMap<Object, TL_iv.PageBlock> textToBlocks = new HashMap<>();
         private ArrayList<Object> textBlocks = new ArrayList<>();
         private HashMap<String, Integer> searchTextOffset = new HashMap<>();
 
         private TLRPC.WebPage currentPage;
-        private TLRPC.TL_pageBlockChannel channelBlock;
+        private TL_iv.pageBlockChannel channelBlock;
         private boolean isRtl;
         private final boolean padding;
 
@@ -5830,96 +5876,96 @@ public class ArticleViewer implements NotificationCenter.NotificationCenterDeleg
             return WebPageUtils.getDocumentWithId(currentPage, id);
         }
 
-        private void setRichTextParents(TLRPC.RichText parentRichText, TLRPC.RichText richText) {
+        private void setRichTextParents(TL_iv.RichText parentRichText, TL_iv.RichText richText) {
             if (richText == null) {
                 return;
             }
             richText.parentRichText = parentRichText;
-            if (richText instanceof TLRPC.TL_textFixed) {
-                setRichTextParents(richText, ((TLRPC.TL_textFixed) richText).text);
-            } else if (richText instanceof TLRPC.TL_textItalic) {
-                setRichTextParents(richText, ((TLRPC.TL_textItalic) richText).text);
-            } else if (richText instanceof TLRPC.TL_textBold) {
-                setRichTextParents(richText, ((TLRPC.TL_textBold) richText).text);
-            } else if (richText instanceof TLRPC.TL_textUnderline) {
-                setRichTextParents(richText, ((TLRPC.TL_textUnderline) richText).text);
-            } else if (richText instanceof TLRPC.TL_textStrike) {
-                setRichTextParents(richText, ((TLRPC.TL_textStrike) richText).text);
-            } else if (richText instanceof TLRPC.TL_textEmail) {
-                setRichTextParents(richText, ((TLRPC.TL_textEmail) richText).text);
-            } else if (richText instanceof TLRPC.TL_textPhone) {
-                setRichTextParents(richText, ((TLRPC.TL_textPhone) richText).text);
-            } else if (richText instanceof TLRPC.TL_textUrl) {
-                setRichTextParents(richText, ((TLRPC.TL_textUrl) richText).text);
-            } else if (richText instanceof TLRPC.TL_textConcat) {
+            if (richText instanceof TL_iv.textFixed) {
+                setRichTextParents(richText, ((TL_iv.textFixed) richText).text);
+            } else if (richText instanceof TL_iv.textItalic) {
+                setRichTextParents(richText, ((TL_iv.textItalic) richText).text);
+            } else if (richText instanceof TL_iv.textBold) {
+                setRichTextParents(richText, ((TL_iv.textBold) richText).text);
+            } else if (richText instanceof TL_iv.textUnderline) {
+                setRichTextParents(richText, ((TL_iv.textUnderline) richText).text);
+            } else if (richText instanceof TL_iv.textStrike) {
+                setRichTextParents(richText, ((TL_iv.textStrike) richText).text);
+            } else if (richText instanceof TL_iv.textEmail) {
+                setRichTextParents(richText, ((TL_iv.textEmail) richText).text);
+            } else if (richText instanceof TL_iv.textPhone) {
+                setRichTextParents(richText, ((TL_iv.textPhone) richText).text);
+            } else if (richText instanceof TL_iv.textUrl) {
+                setRichTextParents(richText, ((TL_iv.textUrl) richText).text);
+            } else if (richText instanceof TL_iv.textConcat) {
                 int count = richText.texts.size();
                 for (int a = 0; a < count; a++) {
                     setRichTextParents(richText, richText.texts.get(a));
                 }
-            } else if (richText instanceof TLRPC.TL_textSubscript) {
-                setRichTextParents(richText, ((TLRPC.TL_textSubscript) richText).text);
-            } else if (richText instanceof TLRPC.TL_textSuperscript) {
-                setRichTextParents(richText, ((TLRPC.TL_textSuperscript) richText).text);
-            } else if (richText instanceof TLRPC.TL_textMarked) {
-                setRichTextParents(richText, ((TLRPC.TL_textMarked) richText).text);
-            } else if (richText instanceof TLRPC.TL_textAnchor) {
-                TLRPC.TL_textAnchor textAnchor = (TLRPC.TL_textAnchor) richText;
+            } else if (richText instanceof TL_iv.textSubscript) {
+                setRichTextParents(richText, ((TL_iv.textSubscript) richText).text);
+            } else if (richText instanceof TL_iv.textSuperscript) {
+                setRichTextParents(richText, ((TL_iv.textSuperscript) richText).text);
+            } else if (richText instanceof TL_iv.textMarked) {
+                setRichTextParents(richText, ((TL_iv.textMarked) richText).text);
+            } else if (richText instanceof TL_iv.textAnchor) {
+                TL_iv.textAnchor textAnchor = (TL_iv.textAnchor) richText;
                 setRichTextParents(richText, textAnchor.text);
                 String name = textAnchor.name.toLowerCase();
                 anchors.put(name, blocks.size());
-                if (textAnchor.text instanceof TLRPC.TL_textPlain) {
-                    TLRPC.TL_textPlain textPlain = (TLRPC.TL_textPlain) textAnchor.text;
+                if (textAnchor.text instanceof TL_iv.textPlain) {
+                    TL_iv.textPlain textPlain = (TL_iv.textPlain) textAnchor.text;
                     if (!TextUtils.isEmpty(textPlain.text)) {
                         anchorsParent.put(name, textAnchor);
                     }
-                } else if (!(textAnchor.text instanceof TLRPC.TL_textEmpty)) {
+                } else if (!(textAnchor.text instanceof TL_iv.textEmpty)) {
                     anchorsParent.put(name, textAnchor);
                 }
                 anchorsOffset.put(name, -1);
             }
         }
 
-        private void addTextBlock(Object text, TLRPC.PageBlock block) {
-            if (text instanceof TLRPC.TL_textEmpty || textToBlocks.containsKey(text)) {
+        private void addTextBlock(Object text, TL_iv.PageBlock block) {
+            if (text instanceof TL_iv.textEmpty || textToBlocks.containsKey(text)) {
                 return;
             }
             textToBlocks.put(text, block);
             textBlocks.add(text);
         }
 
-        private void setRichTextParents(TLRPC.PageBlock block) {
-            if (block instanceof TLRPC.TL_pageBlockEmbedPost) {
-                TLRPC.TL_pageBlockEmbedPost blockEmbedPost = (TLRPC.TL_pageBlockEmbedPost) block;
+        private void setRichTextParents(TL_iv.PageBlock block) {
+            if (block instanceof TL_iv.pageBlockEmbedPost) {
+                TL_iv.pageBlockEmbedPost blockEmbedPost = (TL_iv.pageBlockEmbedPost) block;
                 setRichTextParents(null, blockEmbedPost.caption.text);
                 setRichTextParents(null, blockEmbedPost.caption.credit);
                 addTextBlock(blockEmbedPost.caption.text, blockEmbedPost);
                 addTextBlock(blockEmbedPost.caption.credit, blockEmbedPost);
-            } else if (block instanceof TLRPC.TL_pageBlockParagraph) {
-                TLRPC.TL_pageBlockParagraph pageBlockParagraph = (TLRPC.TL_pageBlockParagraph) block;
+            } else if (block instanceof TL_iv.pageBlockParagraph) {
+                TL_iv.pageBlockParagraph pageBlockParagraph = (TL_iv.pageBlockParagraph) block;
                 setRichTextParents(null, pageBlockParagraph.text);
                 addTextBlock(pageBlockParagraph.text, pageBlockParagraph);
-            } else if (block instanceof TLRPC.TL_pageBlockKicker) {
-                TLRPC.TL_pageBlockKicker pageBlockKicker = (TLRPC.TL_pageBlockKicker) block;
+            } else if (block instanceof TL_iv.pageBlockKicker) {
+                TL_iv.pageBlockKicker pageBlockKicker = (TL_iv.pageBlockKicker) block;
                 setRichTextParents(null, pageBlockKicker.text);
                 addTextBlock(pageBlockKicker.text, pageBlockKicker);
-            } else if (block instanceof TLRPC.TL_pageBlockFooter) {
-                TLRPC.TL_pageBlockFooter pageBlockFooter = (TLRPC.TL_pageBlockFooter) block;
+            } else if (block instanceof TL_iv.pageBlockFooter) {
+                TL_iv.pageBlockFooter pageBlockFooter = (TL_iv.pageBlockFooter) block;
                 setRichTextParents(null, pageBlockFooter.text);
                 addTextBlock(pageBlockFooter.text, pageBlockFooter);
-            } else if (block instanceof TLRPC.TL_pageBlockHeader) {
-                TLRPC.TL_pageBlockHeader pageBlockHeader = (TLRPC.TL_pageBlockHeader) block;
+            } else if (block instanceof TL_iv.pageBlockHeader) {
+                TL_iv.pageBlockHeader pageBlockHeader = (TL_iv.pageBlockHeader) block;
                 setRichTextParents(null, pageBlockHeader.text);
                 addTextBlock(pageBlockHeader.text, pageBlockHeader);
-            } else if (block instanceof TLRPC.TL_pageBlockPreformatted) {
-                TLRPC.TL_pageBlockPreformatted pageBlockPreformatted = (TLRPC.TL_pageBlockPreformatted) block;
+            } else if (block instanceof TL_iv.pageBlockPreformatted) {
+                TL_iv.pageBlockPreformatted pageBlockPreformatted = (TL_iv.pageBlockPreformatted) block;
                 setRichTextParents(null, pageBlockPreformatted.text);
                 addTextBlock(pageBlockPreformatted.text, pageBlockPreformatted);
-            } else if (block instanceof TLRPC.TL_pageBlockSubheader) {
-                TLRPC.TL_pageBlockSubheader pageBlockTitle = (TLRPC.TL_pageBlockSubheader) block;
+            } else if (block instanceof TL_iv.pageBlockSubheader) {
+                TL_iv.pageBlockSubheader pageBlockTitle = (TL_iv.pageBlockSubheader) block;
                 setRichTextParents(null, pageBlockTitle.text);
                 addTextBlock(pageBlockTitle.text, pageBlockTitle);
-            } else if (block instanceof TLRPC.TL_pageBlockSlideshow) {
-                TLRPC.TL_pageBlockSlideshow pageBlockSlideshow = (TLRPC.TL_pageBlockSlideshow) block;
+            } else if (block instanceof TL_iv.pageBlockSlideshow) {
+                TL_iv.pageBlockSlideshow pageBlockSlideshow = (TL_iv.pageBlockSlideshow) block;
                 setRichTextParents(null, pageBlockSlideshow.caption.text);
                 setRichTextParents(null, pageBlockSlideshow.caption.credit);
                 addTextBlock(pageBlockSlideshow.caption.text, pageBlockSlideshow);
@@ -5927,8 +5973,8 @@ public class ArticleViewer implements NotificationCenter.NotificationCenterDeleg
                 for (int a = 0, size = pageBlockSlideshow.items.size(); a < size; a++) {
                     setRichTextParents(pageBlockSlideshow.items.get(a));
                 }
-            } else if (block instanceof TLRPC.TL_pageBlockPhoto) {
-                TLRPC.TL_pageBlockPhoto pageBlockPhoto = (TLRPC.TL_pageBlockPhoto) block;
+            } else if (block instanceof TL_iv.pageBlockPhoto) {
+                TL_iv.pageBlockPhoto pageBlockPhoto = (TL_iv.pageBlockPhoto) block;
                 setRichTextParents(null, pageBlockPhoto.caption.text);
                 setRichTextParents(null, pageBlockPhoto.caption.credit);
                 addTextBlock(pageBlockPhoto.caption.text, pageBlockPhoto);
@@ -5949,8 +5995,8 @@ public class ArticleViewer implements NotificationCenter.NotificationCenterDeleg
                 } else if (pageBlockOrderedListItem.blockItem != null) {
                     setRichTextParents(pageBlockOrderedListItem.blockItem);
                 }
-            } else if (block instanceof TLRPC.TL_pageBlockCollage) {
-                TLRPC.TL_pageBlockCollage pageBlockCollage = (TLRPC.TL_pageBlockCollage) block;
+            } else if (block instanceof TL_iv.pageBlockCollage) {
+                TL_iv.pageBlockCollage pageBlockCollage = (TL_iv.pageBlockCollage) block;
                 setRichTextParents(null, pageBlockCollage.caption.text);
                 setRichTextParents(null, pageBlockCollage.caption.credit);
                 addTextBlock(pageBlockCollage.caption.text, pageBlockCollage);
@@ -5958,106 +6004,106 @@ public class ArticleViewer implements NotificationCenter.NotificationCenterDeleg
                 for (int a = 0, size = pageBlockCollage.items.size(); a < size; a++) {
                     setRichTextParents(pageBlockCollage.items.get(a));
                 }
-            } else if (block instanceof TLRPC.TL_pageBlockEmbed) {
-                TLRPC.TL_pageBlockEmbed pageBlockEmbed = (TLRPC.TL_pageBlockEmbed) block;
+            } else if (block instanceof TL_iv.pageBlockEmbed) {
+                TL_iv.pageBlockEmbed pageBlockEmbed = (TL_iv.pageBlockEmbed) block;
                 setRichTextParents(null, pageBlockEmbed.caption.text);
                 setRichTextParents(null, pageBlockEmbed.caption.credit);
                 addTextBlock(pageBlockEmbed.caption.text, pageBlockEmbed);
                 addTextBlock(pageBlockEmbed.caption.credit, pageBlockEmbed);
-            } else if (block instanceof TLRPC.TL_pageBlockSubtitle) {
-                TLRPC.TL_pageBlockSubtitle pageBlockSubtitle = (TLRPC.TL_pageBlockSubtitle) block;
+            } else if (block instanceof TL_iv.pageBlockSubtitle) {
+                TL_iv.pageBlockSubtitle pageBlockSubtitle = (TL_iv.pageBlockSubtitle) block;
                 setRichTextParents(null, pageBlockSubtitle.text);
                 addTextBlock(pageBlockSubtitle.text, pageBlockSubtitle);
-            } else if (block instanceof TLRPC.TL_pageBlockBlockquote) {
-                TLRPC.TL_pageBlockBlockquote pageBlockBlockquote = (TLRPC.TL_pageBlockBlockquote) block;
+            } else if (block instanceof TL_iv.pageBlockBlockquote) {
+                TL_iv.pageBlockBlockquote pageBlockBlockquote = (TL_iv.pageBlockBlockquote) block;
                 setRichTextParents(null, pageBlockBlockquote.text);
                 setRichTextParents(null, pageBlockBlockquote.caption);
                 addTextBlock(pageBlockBlockquote.text, pageBlockBlockquote);
                 addTextBlock(pageBlockBlockquote.caption, pageBlockBlockquote);
-            } else if (block instanceof TLRPC.TL_pageBlockDetails) {
-                TLRPC.TL_pageBlockDetails pageBlockDetails = (TLRPC.TL_pageBlockDetails) block;
+            } else if (block instanceof TL_iv.pageBlockDetails) {
+                TL_iv.pageBlockDetails pageBlockDetails = (TL_iv.pageBlockDetails) block;
                 setRichTextParents(null, pageBlockDetails.title);
                 addTextBlock(pageBlockDetails.title, pageBlockDetails);
                 for (int a = 0, size = pageBlockDetails.blocks.size(); a < size; a++) {
                     setRichTextParents(pageBlockDetails.blocks.get(a));
                 }
-            } else if (block instanceof TLRPC.TL_pageBlockVideo) {
-                TLRPC.TL_pageBlockVideo pageBlockVideo = (TLRPC.TL_pageBlockVideo) block;
+            } else if (block instanceof TL_iv.pageBlockVideo) {
+                TL_iv.pageBlockVideo pageBlockVideo = (TL_iv.pageBlockVideo) block;
                 setRichTextParents(null, pageBlockVideo.caption.text);
                 setRichTextParents(null, pageBlockVideo.caption.credit);
                 addTextBlock(pageBlockVideo.caption.text, pageBlockVideo);
                 addTextBlock(pageBlockVideo.caption.credit, pageBlockVideo);
-            } else if (block instanceof TLRPC.TL_pageBlockPullquote) {
-                TLRPC.TL_pageBlockPullquote pageBlockPullquote = (TLRPC.TL_pageBlockPullquote) block;
+            } else if (block instanceof TL_iv.pageBlockPullquote) {
+                TL_iv.pageBlockPullquote pageBlockPullquote = (TL_iv.pageBlockPullquote) block;
                 setRichTextParents(null, pageBlockPullquote.text);
                 setRichTextParents(null, pageBlockPullquote.caption);
                 addTextBlock(pageBlockPullquote.text, pageBlockPullquote);
                 addTextBlock(pageBlockPullquote.caption, pageBlockPullquote);
-            } else if (block instanceof TLRPC.TL_pageBlockAudio) {
-                TLRPC.TL_pageBlockAudio pageBlockAudio = (TLRPC.TL_pageBlockAudio) block;
+            } else if (block instanceof TL_iv.pageBlockAudio) {
+                TL_iv.pageBlockAudio pageBlockAudio = (TL_iv.pageBlockAudio) block;
                 setRichTextParents(null, pageBlockAudio.caption.text);
                 setRichTextParents(null, pageBlockAudio.caption.credit);
                 addTextBlock(pageBlockAudio.caption.text, pageBlockAudio);
                 addTextBlock(pageBlockAudio.caption.credit, pageBlockAudio);
-            } else if (block instanceof TLRPC.TL_pageBlockTable) {
-                TLRPC.TL_pageBlockTable pageBlockTable = (TLRPC.TL_pageBlockTable) block;
+            } else if (block instanceof TL_iv.pageBlockTable) {
+                TL_iv.pageBlockTable pageBlockTable = (TL_iv.pageBlockTable) block;
                 setRichTextParents(null, pageBlockTable.title);
                 addTextBlock(pageBlockTable.title, pageBlockTable);
                 for (int a = 0, size = pageBlockTable.rows.size(); a < size; a++) {
-                    TLRPC.TL_pageTableRow row = pageBlockTable.rows.get(a);
+                    TL_iv.pageTableRow row = pageBlockTable.rows.get(a);
                     for (int b = 0, size2 = row.cells.size(); b < size2; b++) {
-                        TLRPC.TL_pageTableCell cell = row.cells.get(b);
+                        TL_iv.pageTableCell cell = row.cells.get(b);
                         setRichTextParents(null, cell.text);
                         addTextBlock(cell.text, pageBlockTable);
                     }
                 }
-            } else if (block instanceof TLRPC.TL_pageBlockTitle) {
-                TLRPC.TL_pageBlockTitle pageBlockTitle = (TLRPC.TL_pageBlockTitle) block;
+            } else if (block instanceof TL_iv.pageBlockTitle) {
+                TL_iv.pageBlockTitle pageBlockTitle = (TL_iv.pageBlockTitle) block;
                 setRichTextParents(null, pageBlockTitle.text);
                 addTextBlock(pageBlockTitle.text, pageBlockTitle);
-            } else if (block instanceof TLRPC.TL_pageBlockCover) {
-                TLRPC.TL_pageBlockCover pageBlockCover = (TLRPC.TL_pageBlockCover) block;
+            } else if (block instanceof TL_iv.pageBlockCover) {
+                TL_iv.pageBlockCover pageBlockCover = (TL_iv.pageBlockCover) block;
                 setRichTextParents(pageBlockCover.cover);
-            } else if (block instanceof TLRPC.TL_pageBlockAuthorDate) {
-                TLRPC.TL_pageBlockAuthorDate pageBlockAuthorDate = (TLRPC.TL_pageBlockAuthorDate) block;
+            } else if (block instanceof TL_iv.pageBlockAuthorDate) {
+                TL_iv.pageBlockAuthorDate pageBlockAuthorDate = (TL_iv.pageBlockAuthorDate) block;
                 setRichTextParents(null, pageBlockAuthorDate.author);
                 addTextBlock(pageBlockAuthorDate.author, pageBlockAuthorDate);
-            } else if (block instanceof TLRPC.TL_pageBlockMap) {
-                TLRPC.TL_pageBlockMap pageBlockMap = (TLRPC.TL_pageBlockMap) block;
+            } else if (block instanceof TL_iv.pageBlockMap) {
+                TL_iv.pageBlockMap pageBlockMap = (TL_iv.pageBlockMap) block;
                 setRichTextParents(null, pageBlockMap.caption.text);
                 setRichTextParents(null, pageBlockMap.caption.credit);
                 addTextBlock(pageBlockMap.caption.text, pageBlockMap);
                 addTextBlock(pageBlockMap.caption.credit, pageBlockMap);
-            } else if (block instanceof TLRPC.TL_pageBlockRelatedArticles) {
-                TLRPC.TL_pageBlockRelatedArticles pageBlockRelatedArticles = (TLRPC.TL_pageBlockRelatedArticles) block;
+            } else if (block instanceof TL_iv.pageBlockRelatedArticles) {
+                TL_iv.pageBlockRelatedArticles pageBlockRelatedArticles = (TL_iv.pageBlockRelatedArticles) block;
                 setRichTextParents(null, pageBlockRelatedArticles.title);
                 addTextBlock(pageBlockRelatedArticles.title, pageBlockRelatedArticles);
             }
         }
 
-        private void addBlock(WebpageAdapter adapter, TLRPC.PageBlock block, int level, int listLevel, int position) {
-            TLRPC.PageBlock originalBlock = block;
+        private void addBlock(WebpageAdapter adapter, TL_iv.PageBlock block, int level, int listLevel, int position) {
+            TL_iv.PageBlock originalBlock = block;
             if (block instanceof TL_pageBlockDetailsChild) {
                 TL_pageBlockDetailsChild blockDetailsChild = (TL_pageBlockDetailsChild) block;
                 block = blockDetailsChild.block;
             }
-            if (!(block instanceof TLRPC.TL_pageBlockList || block instanceof TLRPC.TL_pageBlockOrderedList)) {
+            if (!(block instanceof TL_iv.pageBlockList || block instanceof TL_iv.pageBlockOrderedList)) {
                 setRichTextParents(block);
                 addAllMediaFromBlock(adapter, block);
             }
             block = getLastNonListPageBlock(block);
-            if (block instanceof TLRPC.TL_pageBlockUnsupported) {
+            if (block instanceof TL_iv.pageBlockUnsupported) {
                 return;
-            } else if (block instanceof TLRPC.TL_pageBlockAnchor) {
-                anchors.put(((TLRPC.TL_pageBlockAnchor) block).name.toLowerCase(), blocks.size());
+            } else if (block instanceof TL_iv.pageBlockAnchor) {
+                anchors.put(((TL_iv.pageBlockAnchor) block).name.toLowerCase(), blocks.size());
                 return;
             }
-            if (!(block instanceof TLRPC.TL_pageBlockList || block instanceof TLRPC.TL_pageBlockOrderedList)) {
+            if (!(block instanceof TL_iv.pageBlockList || block instanceof TL_iv.pageBlockOrderedList)) {
                 blocks.add(originalBlock);
             }
 
-            if (block instanceof TLRPC.TL_pageBlockAudio) {
-                TLRPC.TL_pageBlockAudio blockAudio = (TLRPC.TL_pageBlockAudio) block;
+            if (block instanceof TL_iv.pageBlockAudio) {
+                TL_iv.pageBlockAudio blockAudio = (TL_iv.pageBlockAudio) block;
                 TLRPC.TL_message message = new TLRPC.TL_message();
                 message.out = true;
                 message.id = block.mid = -((Long) blockAudio.audio_id).hashCode();
@@ -6088,16 +6134,16 @@ public class ArticleViewer implements NotificationCenter.NotificationCenterDeleg
                     }
                 }
 
-            } else if (block instanceof TLRPC.TL_pageBlockEmbedPost) {
-                TLRPC.TL_pageBlockEmbedPost pageBlockEmbedPost = (TLRPC.TL_pageBlockEmbedPost) block;
+            } else if (block instanceof TL_iv.pageBlockEmbedPost) {
+                TL_iv.pageBlockEmbedPost pageBlockEmbedPost = (TL_iv.pageBlockEmbedPost) block;
                 if (!pageBlockEmbedPost.blocks.isEmpty()) {
                     block.level = -1;
                     for (int b = 0; b < pageBlockEmbedPost.blocks.size(); b++) {
-                        TLRPC.PageBlock innerBlock = pageBlockEmbedPost.blocks.get(b);
-                        if (innerBlock instanceof TLRPC.TL_pageBlockUnsupported) {
+                        TL_iv.PageBlock innerBlock = pageBlockEmbedPost.blocks.get(b);
+                        if (innerBlock instanceof TL_iv.pageBlockUnsupported) {
                             continue;
-                        } else if (innerBlock instanceof TLRPC.TL_pageBlockAnchor) {
-                            TLRPC.TL_pageBlockAnchor pageBlockAnchor = (TLRPC.TL_pageBlockAnchor) innerBlock;
+                        } else if (innerBlock instanceof TL_iv.pageBlockAnchor) {
+                            TL_iv.pageBlockAnchor pageBlockAnchor = (TL_iv.pageBlockAnchor) innerBlock;
                             anchors.put(pageBlockAnchor.name.toLowerCase(), blocks.size());
                             continue;
                         }
@@ -6115,8 +6161,8 @@ public class ArticleViewer implements NotificationCenter.NotificationCenterDeleg
                         blocks.add(pageBlockEmbedPostCaption);
                     }
                 }
-            } else if (block instanceof TLRPC.TL_pageBlockRelatedArticles) {
-                TLRPC.TL_pageBlockRelatedArticles pageBlockRelatedArticles = (TLRPC.TL_pageBlockRelatedArticles) block;
+            } else if (block instanceof TL_iv.pageBlockRelatedArticles) {
+                TL_iv.pageBlockRelatedArticles pageBlockRelatedArticles = (TL_iv.pageBlockRelatedArticles) block;
 
                 TL_pageBlockRelatedArticlesShadow shadow = new TL_pageBlockRelatedArticlesShadow();
                 shadow.parent = pageBlockRelatedArticles;
@@ -6133,8 +6179,8 @@ public class ArticleViewer implements NotificationCenter.NotificationCenterDeleg
                     shadow.parent = pageBlockRelatedArticles;
                     blocks.add(shadow);
                 }
-            } else if (block instanceof TLRPC.TL_pageBlockDetails) {
-                TLRPC.TL_pageBlockDetails pageBlockDetails = (TLRPC.TL_pageBlockDetails) block;
+            } else if (block instanceof TL_iv.pageBlockDetails) {
+                TL_iv.pageBlockDetails pageBlockDetails = (TL_iv.pageBlockDetails) block;
                 for (int b = 0, size = pageBlockDetails.blocks.size(); b < size; b++) {
                     TL_pageBlockDetailsChild child = new TL_pageBlockDetailsChild();
                     child.parent = originalBlock;
@@ -6154,15 +6200,15 @@ public class ArticleViewer implements NotificationCenter.NotificationCenterDeleg
                     child.block = bottom;
                     blocks.add(wrapInTableBlock(originalBlock, child));
                 }*/
-            } else if (block instanceof TLRPC.TL_pageBlockList) {
-                TLRPC.TL_pageBlockList pageBlockList = (TLRPC.TL_pageBlockList) block;
+            } else if (block instanceof TL_iv.pageBlockList) {
+                TL_iv.pageBlockList pageBlockList = (TL_iv.pageBlockList) block;
 
                 TL_pageBlockListParent pageBlockListParent = new TL_pageBlockListParent();
                 pageBlockListParent.pageBlockList = pageBlockList;
                 pageBlockListParent.level = listLevel;
 
                 for (int b = 0, size = pageBlockList.items.size(); b < size; b++) {
-                    TLRPC.PageListItem item = pageBlockList.items.get(b);
+                    TL_iv.PageListItem item = pageBlockList.items.get(b);
 
                     TL_pageBlockListItem pageBlockListItem = new TL_pageBlockListItem();
                     pageBlockListItem.index = b;
@@ -6178,15 +6224,15 @@ public class ArticleViewer implements NotificationCenter.NotificationCenterDeleg
                     }
                     pageBlockListParent.items.add(pageBlockListItem);
 
-                    if (item instanceof TLRPC.TL_pageListItemText) {
-                        pageBlockListItem.textItem = ((TLRPC.TL_pageListItemText) item).text;
-                    } else if (item instanceof TLRPC.TL_pageListItemBlocks) {
-                        TLRPC.TL_pageListItemBlocks pageListItemBlocks = (TLRPC.TL_pageListItemBlocks) item;
+                    if (item instanceof TL_iv.TL_pageListItemText) {
+                        pageBlockListItem.textItem = ((TL_iv.TL_pageListItemText) item).text;
+                    } else if (item instanceof TL_iv.TL_pageListItemBlocks) {
+                        TL_iv.TL_pageListItemBlocks pageListItemBlocks = (TL_iv.TL_pageListItemBlocks) item;
                         if (!pageListItemBlocks.blocks.isEmpty()) {
                             pageBlockListItem.blockItem = pageListItemBlocks.blocks.get(0);
                         } else {
-                            TLRPC.TL_pageListItemText text = new TLRPC.TL_pageListItemText();
-                            TLRPC.TL_textPlain textPlain = new TLRPC.TL_textPlain();
+                            TL_iv.TL_pageListItemText text = new TL_iv.TL_pageListItemText();
+                            TL_iv.textPlain textPlain = new TL_iv.textPlain();
                             textPlain.text = " ";
                             text.text = textPlain;
                             item = text;
@@ -6199,7 +6245,7 @@ public class ArticleViewer implements NotificationCenter.NotificationCenterDeleg
                         child.block = pageBlockListItem;
                         addBlock(adapter, child, level, listLevel + 1, position);
                     } else {
-                        TLRPC.PageBlock finalBlock;
+                        TL_iv.PageBlock finalBlock;
                         if (b == 0) {
                             finalBlock = fixListBlock(originalBlock, pageBlockListItem);
                         } else {
@@ -6208,8 +6254,8 @@ public class ArticleViewer implements NotificationCenter.NotificationCenterDeleg
                         addBlock(adapter, finalBlock, level, listLevel + 1, position);
                     }
 
-                    if (item instanceof TLRPC.TL_pageListItemBlocks) {
-                        TLRPC.TL_pageListItemBlocks pageListItemBlocks = (TLRPC.TL_pageListItemBlocks) item;
+                    if (item instanceof TL_iv.TL_pageListItemBlocks) {
+                        TL_iv.TL_pageListItemBlocks pageListItemBlocks = (TL_iv.TL_pageListItemBlocks) item;
                         for (int c = 1, size2 = pageListItemBlocks.blocks.size(); c < size2; c++) {
                             pageBlockListItem = new TL_pageBlockListItem();
                             pageBlockListItem.blockItem = pageListItemBlocks.blocks.get(c);
@@ -6228,23 +6274,23 @@ public class ArticleViewer implements NotificationCenter.NotificationCenterDeleg
                         }
                     }
                 }
-            } else if (block instanceof TLRPC.TL_pageBlockOrderedList) {
-                TLRPC.TL_pageBlockOrderedList pageBlockOrderedList = (TLRPC.TL_pageBlockOrderedList) block;
+            } else if (block instanceof TL_iv.pageBlockOrderedList) {
+                TL_iv.pageBlockOrderedList pageBlockOrderedList = (TL_iv.pageBlockOrderedList) block;
 
                 TL_pageBlockOrderedListParent pageBlockOrderedListParent = new TL_pageBlockOrderedListParent();
                 pageBlockOrderedListParent.pageBlockOrderedList = pageBlockOrderedList;
                 pageBlockOrderedListParent.level = listLevel;
 
                 for (int b = 0, size = pageBlockOrderedList.items.size(); b < size; b++) {
-                    TLRPC.PageListOrderedItem item = pageBlockOrderedList.items.get(b);
+                    TL_iv.PageListOrderedItem item = pageBlockOrderedList.items.get(b);
 
                     TL_pageBlockOrderedListItem pageBlockOrderedListItem = new TL_pageBlockOrderedListItem();
                     pageBlockOrderedListItem.index = b;
                     pageBlockOrderedListItem.parent = pageBlockOrderedListParent;
                     pageBlockOrderedListParent.items.add(pageBlockOrderedListItem);
 
-                    if (item instanceof TLRPC.TL_pageListOrderedItemText) {
-                        TLRPC.TL_pageListOrderedItemText pageListOrderedItemText = (TLRPC.TL_pageListOrderedItemText) item;
+                    if (item instanceof TL_iv.TL_pageListOrderedItemText) {
+                        TL_iv.TL_pageListOrderedItemText pageListOrderedItemText = (TL_iv.TL_pageListOrderedItemText) item;
                         pageBlockOrderedListItem.textItem = pageListOrderedItemText.text;
 
                         if (TextUtils.isEmpty(pageListOrderedItemText.num)) {
@@ -6260,13 +6306,13 @@ public class ArticleViewer implements NotificationCenter.NotificationCenterDeleg
                                 pageBlockOrderedListItem.num = pageListOrderedItemText.num + ".";
                             }
                         }
-                    } else if (item instanceof TLRPC.TL_pageListOrderedItemBlocks) {
-                        TLRPC.TL_pageListOrderedItemBlocks pageListOrderedItemBlocks = (TLRPC.TL_pageListOrderedItemBlocks) item;
+                    } else if (item instanceof TL_iv.TL_pageListOrderedItemBlocks) {
+                        TL_iv.TL_pageListOrderedItemBlocks pageListOrderedItemBlocks = (TL_iv.TL_pageListOrderedItemBlocks) item;
                         if (!pageListOrderedItemBlocks.blocks.isEmpty()) {
                             pageBlockOrderedListItem.blockItem = pageListOrderedItemBlocks.blocks.get(0);
                         } else {
-                            TLRPC.TL_pageListOrderedItemText text = new TLRPC.TL_pageListOrderedItemText();
-                            TLRPC.TL_textPlain textPlain = new TLRPC.TL_textPlain();
+                            TL_iv.TL_pageListOrderedItemText text = new TL_iv.TL_pageListOrderedItemText();
+                            TL_iv.textPlain textPlain = new TL_iv.textPlain();
                             textPlain.text = " ";
                             text.text = textPlain;
                             item = text;
@@ -6293,7 +6339,7 @@ public class ArticleViewer implements NotificationCenter.NotificationCenterDeleg
                         child.block = pageBlockOrderedListItem;
                         addBlock(adapter, child, level, listLevel + 1, position);
                     } else {
-                        TLRPC.PageBlock finalBlock;
+                        TL_iv.PageBlock finalBlock;
                         if (b == 0) {
                             finalBlock = fixListBlock(originalBlock, pageBlockOrderedListItem);
                         } else {
@@ -6302,8 +6348,8 @@ public class ArticleViewer implements NotificationCenter.NotificationCenterDeleg
                         addBlock(adapter, finalBlock, level, listLevel + 1, position);
                     }
 
-                    if (item instanceof TLRPC.TL_pageListOrderedItemBlocks) {
-                        TLRPC.TL_pageListOrderedItemBlocks pageListOrderedItemBlocks = (TLRPC.TL_pageListOrderedItemBlocks) item;
+                    if (item instanceof TL_iv.TL_pageListOrderedItemBlocks) {
+                        TL_iv.TL_pageListOrderedItemBlocks pageListOrderedItemBlocks = (TL_iv.TL_pageListOrderedItemBlocks) item;
                         for (int c = 1, size2 = pageListOrderedItemBlocks.blocks.size(); c < size2; c++) {
                             pageBlockOrderedListItem = new TL_pageBlockOrderedListItem();
                             pageBlockOrderedListItem.blockItem = pageListOrderedItemBlocks.blocks.get(c);
@@ -6325,43 +6371,43 @@ public class ArticleViewer implements NotificationCenter.NotificationCenterDeleg
             }
         }
 
-        private void addAllMediaFromBlock(WebpageAdapter adapter, TLRPC.PageBlock block) {
-            if (block instanceof TLRPC.TL_pageBlockPhoto) {
-                TLRPC.TL_pageBlockPhoto pageBlockPhoto = (TLRPC.TL_pageBlockPhoto) block;
+        private void addAllMediaFromBlock(WebpageAdapter adapter, TL_iv.PageBlock block) {
+            if (block instanceof TL_iv.pageBlockPhoto) {
+                TL_iv.pageBlockPhoto pageBlockPhoto = (TL_iv.pageBlockPhoto) block;
                 TLRPC.Photo photo = getPhotoWithId(pageBlockPhoto.photo_id);
                 if (photo != null) {
                     pageBlockPhoto.thumb = FileLoader.getClosestPhotoSizeWithSize(photo.sizes, 56, true);
                     pageBlockPhoto.thumbObject = photo;
                     photoBlocks.add(block);
                 }
-            } else if (block instanceof TLRPC.TL_pageBlockVideo && WebPageUtils.isVideo(adapter.currentPage, block)) {
-                TLRPC.TL_pageBlockVideo pageBlockVideo = (TLRPC.TL_pageBlockVideo) block;
+            } else if (block instanceof TL_iv.pageBlockVideo && WebPageUtils.isVideo(adapter.currentPage, block)) {
+                TL_iv.pageBlockVideo pageBlockVideo = (TL_iv.pageBlockVideo) block;
                 TLRPC.Document document = getDocumentWithId(pageBlockVideo.video_id);
                 if (document != null) {
                     pageBlockVideo.thumb = FileLoader.getClosestPhotoSizeWithSize(document.thumbs, 56, true);
                     pageBlockVideo.thumbObject = document;
                     photoBlocks.add(block);
                 }
-            } else if (block instanceof TLRPC.TL_pageBlockSlideshow) {
-                TLRPC.TL_pageBlockSlideshow slideshow = (TLRPC.TL_pageBlockSlideshow) block;
+            } else if (block instanceof TL_iv.pageBlockSlideshow) {
+                TL_iv.pageBlockSlideshow slideshow = (TL_iv.pageBlockSlideshow) block;
                 int count = slideshow.items.size();
                 for (int a = 0; a < count; a++) {
-                    TLRPC.PageBlock innerBlock = slideshow.items.get(a);
+                    TL_iv.PageBlock innerBlock = slideshow.items.get(a);
                     innerBlock.groupId = lastBlockNum;
                     addAllMediaFromBlock(adapter, innerBlock);
                 }
                 lastBlockNum++;
-            } else if (block instanceof TLRPC.TL_pageBlockCollage) {
-                TLRPC.TL_pageBlockCollage collage = (TLRPC.TL_pageBlockCollage) block;
+            } else if (block instanceof TL_iv.pageBlockCollage) {
+                TL_iv.pageBlockCollage collage = (TL_iv.pageBlockCollage) block;
                 int count = collage.items.size();
                 for (int a = 0; a < count; a++) {
-                    TLRPC.PageBlock innerBlock = collage.items.get(a);
+                    TL_iv.PageBlock innerBlock = collage.items.get(a);
                     innerBlock.groupId = lastBlockNum;
                     addAllMediaFromBlock(adapter, innerBlock);
                 }
                 lastBlockNum++;
-            } else if (block instanceof TLRPC.TL_pageBlockCover) {
-                TLRPC.TL_pageBlockCover pageBlockCover = (TLRPC.TL_pageBlockCover) block;
+            } else if (block instanceof TL_iv.pageBlockCover) {
+                TL_iv.pageBlockCover pageBlockCover = (TL_iv.pageBlockCover) block;
                 addAllMediaFromBlock(adapter, pageBlockCover.cover);
             }
         }
@@ -6534,7 +6580,7 @@ public class ArticleViewer implements NotificationCenter.NotificationCenterDeleg
                 position--;
             }
             if (position >= 0 && position < localBlocks.size()) {
-                TLRPC.PageBlock block = localBlocks.get(position);
+                TL_iv.PageBlock block = localBlocks.get(position);
                 bindBlockToHolder(holder.getItemViewType(), holder, block, position, localBlocks.size(), false);
             }
         }
@@ -6547,10 +6593,10 @@ public class ArticleViewer implements NotificationCenter.NotificationCenterDeleg
             }
         }
 
-        private void bindBlockToHolder(int type, RecyclerView.ViewHolder holder, TLRPC.PageBlock block, int position, int total, boolean calcHeight) {
-            TLRPC.PageBlock originalBlock = block;
-            if (block instanceof TLRPC.TL_pageBlockCover) {
-                block = ((TLRPC.TL_pageBlockCover) block).cover;
+        private void bindBlockToHolder(int type, RecyclerView.ViewHolder holder, TL_iv.PageBlock block, int position, int total, boolean calcHeight) {
+            TL_iv.PageBlock originalBlock = block;
+            if (block instanceof TL_iv.pageBlockCover) {
+                block = ((TL_iv.pageBlockCover) block).cover;
             } else if (block instanceof TL_pageBlockDetailsChild) {
                 TL_pageBlockDetailsChild pageBlockDetailsChild = (TL_pageBlockDetailsChild) block;
                 block = pageBlockDetailsChild.block;
@@ -6558,12 +6604,12 @@ public class ArticleViewer implements NotificationCenter.NotificationCenterDeleg
             switch (type) {
                 case 0: {
                     BlockParagraphCell cell = (BlockParagraphCell) holder.itemView;
-                    cell.setBlock((TLRPC.TL_pageBlockParagraph) block);
+                    cell.setBlock((TL_iv.pageBlockParagraph) block);
                     break;
                 }
                 case 1: {
                     BlockHeaderCell cell = (BlockHeaderCell) holder.itemView;
-                    cell.setBlock((TLRPC.TL_pageBlockHeader) block);
+                    cell.setBlock((TL_iv.pageBlockHeader) block);
                     break;
                 }
                 case 2: {
@@ -6572,50 +6618,50 @@ public class ArticleViewer implements NotificationCenter.NotificationCenterDeleg
                 }
                 case 3: {
                     BlockEmbedCell cell = (BlockEmbedCell) holder.itemView;
-                    cell.setBlock((TLRPC.TL_pageBlockEmbed) block);
+                    cell.setBlock((TL_iv.pageBlockEmbed) block);
                     break;
                 }
                 case 4: {
                     BlockSubtitleCell cell = (BlockSubtitleCell) holder.itemView;
-                    cell.setBlock((TLRPC.TL_pageBlockSubtitle) block);
+                    cell.setBlock((TL_iv.pageBlockSubtitle) block);
                     break;
                 }
                 case 5: {
                     BlockVideoCell cell = (BlockVideoCell) holder.itemView;
-                    TLRPC.TL_pageBlockVideo blockVideo = (TLRPC.TL_pageBlockVideo) block;
+                    TL_iv.pageBlockVideo blockVideo = (TL_iv.pageBlockVideo) block;
                     cell.setBlock(blockVideo, videoStates.get(blockVideo.video_id), calcHeight, position == 0, position == total - 1);
                     cell.setParentBlock(channelBlock, originalBlock);
                     break;
                 }
                 case 6: {
                     BlockPullquoteCell cell = (BlockPullquoteCell) holder.itemView;
-                    cell.setBlock((TLRPC.TL_pageBlockPullquote) block);
+                    cell.setBlock((TL_iv.pageBlockPullquote) block);
                     break;
                 }
                 case 7: {
                     BlockBlockquoteCell cell = (BlockBlockquoteCell) holder.itemView;
-                    cell.setBlock((TLRPC.TL_pageBlockBlockquote) block);
+                    cell.setBlock((TL_iv.pageBlockBlockquote) block);
                     break;
                 }
                 case 8: {
                     BlockSlideshowCell cell = (BlockSlideshowCell) holder.itemView;
-                    cell.setBlock((TLRPC.TL_pageBlockSlideshow) block);
+                    cell.setBlock((TL_iv.pageBlockSlideshow) block);
                     break;
                 }
                 case 9: {
                     BlockPhotoCell cell = (BlockPhotoCell) holder.itemView;
-                    cell.setBlock((TLRPC.TL_pageBlockPhoto) block, calcHeight, position == 0, position == total - 1);
+                    cell.setBlock((TL_iv.pageBlockPhoto) block, calcHeight, position == 0, position == total - 1);
                     cell.setParentBlock(originalBlock);
                     break;
                 }
                 case 10: {
                     BlockAuthorDateCell cell = (BlockAuthorDateCell) holder.itemView;
-                    cell.setBlock((TLRPC.TL_pageBlockAuthorDate) block);
+                    cell.setBlock((TL_iv.pageBlockAuthorDate) block);
                     break;
                 }
                 case 11: {
                     BlockTitleCell cell = (BlockTitleCell) holder.itemView;
-                    cell.setBlock((TLRPC.TL_pageBlockTitle) block);
+                    cell.setBlock((TL_iv.pageBlockTitle) block);
                     break;
                 }
                 case 12: {
@@ -6625,42 +6671,42 @@ public class ArticleViewer implements NotificationCenter.NotificationCenterDeleg
                 }
                 case 13: {
                     BlockFooterCell cell = (BlockFooterCell) holder.itemView;
-                    cell.setBlock((TLRPC.TL_pageBlockFooter) block);
+                    cell.setBlock((TL_iv.pageBlockFooter) block);
                     break;
                 }
                 case 14: {
                     BlockPreformattedCell cell = (BlockPreformattedCell) holder.itemView;
-                    cell.setBlock((TLRPC.TL_pageBlockPreformatted) block);
+                    cell.setBlock((TL_iv.pageBlockPreformatted) block);
                     break;
                 }
                 case 15: {
                     BlockSubheaderCell cell = (BlockSubheaderCell) holder.itemView;
-                    cell.setBlock((TLRPC.TL_pageBlockSubheader) block);
+                    cell.setBlock((TL_iv.pageBlockSubheader) block);
                     break;
                 }
                 case 16: {
                     BlockEmbedPostCell cell = (BlockEmbedPostCell) holder.itemView;
-                    cell.setBlock((TLRPC.TL_pageBlockEmbedPost) block);
+                    cell.setBlock((TL_iv.pageBlockEmbedPost) block);
                     break;
                 }
                 case 17: {
                     BlockCollageCell cell = (BlockCollageCell) holder.itemView;
-                    cell.setBlock((TLRPC.TL_pageBlockCollage) block);
+                    cell.setBlock((TL_iv.pageBlockCollage) block);
                     break;
                 }
                 case 18: {
                     BlockChannelCell cell = (BlockChannelCell) holder.itemView;
-                    cell.setBlock((TLRPC.TL_pageBlockChannel) block);
+                    cell.setBlock((TL_iv.pageBlockChannel) block);
                     break;
                 }
                 case 19: {
                     BlockAudioCell cell = (BlockAudioCell) holder.itemView;
-                    cell.setBlock((TLRPC.TL_pageBlockAudio) block, position == 0, position == total - 1);
+                    cell.setBlock((TL_iv.pageBlockAudio) block, position == 0, position == total - 1);
                     break;
                 }
                 case 20: {
                     BlockKickerCell cell = (BlockKickerCell) holder.itemView;
-                    cell.setBlock((TLRPC.TL_pageBlockKicker) block);
+                    cell.setBlock((TL_iv.pageBlockKicker) block);
                     break;
                 }
                 case 21: {
@@ -6670,7 +6716,7 @@ public class ArticleViewer implements NotificationCenter.NotificationCenterDeleg
                 }
                 case 22: {
                     BlockMapCell cell = (BlockMapCell) holder.itemView;
-                    cell.setBlock((TLRPC.TL_pageBlockMap) block, position == 0, position == total - 1);
+                    cell.setBlock((TL_iv.pageBlockMap) block, position == 0, position == total - 1);
                     break;
                 }
                 case 23: {
@@ -6680,17 +6726,17 @@ public class ArticleViewer implements NotificationCenter.NotificationCenterDeleg
                 }
                 case 24: {
                     BlockDetailsCell cell = (BlockDetailsCell) holder.itemView;
-                    cell.setBlock((TLRPC.TL_pageBlockDetails) block);
+                    cell.setBlock((TL_iv.pageBlockDetails) block);
                     break;
                 }
                 case 25: {
                     BlockTableCell cell = (BlockTableCell) holder.itemView;
-                    cell.setBlock((TLRPC.TL_pageBlockTable) block);
+                    cell.setBlock((TL_iv.pageBlockTable) block);
                     break;
                 }
                 case 26: {
                     BlockRelatedArticlesHeaderCell cell = (BlockRelatedArticlesHeaderCell) holder.itemView;
-                    cell.setBlock((TLRPC.TL_pageBlockRelatedArticles) block);
+                    cell.setBlock((TL_iv.pageBlockRelatedArticles) block);
                     break;
                 }
                 case 27: {
@@ -6705,60 +6751,60 @@ public class ArticleViewer implements NotificationCenter.NotificationCenterDeleg
             }
         }
 
-        private int getTypeForBlock(TLRPC.PageBlock block) {
-            if (block instanceof TLRPC.TL_pageBlockParagraph) {
+        private int getTypeForBlock(TL_iv.PageBlock block) {
+            if (block instanceof TL_iv.pageBlockParagraph) {
                 return 0;
-            } else if (block instanceof TLRPC.TL_pageBlockHeader) {
+            } else if (block instanceof TL_iv.pageBlockHeader) {
                 return 1;
-            } else if (block instanceof TLRPC.TL_pageBlockDivider) {
+            } else if (block instanceof TL_iv.pageBlockDivider) {
                 return 2;
-            } else if (block instanceof TLRPC.TL_pageBlockEmbed) {
+            } else if (block instanceof TL_iv.pageBlockEmbed) {
                 return 3;
-            } else if (block instanceof TLRPC.TL_pageBlockSubtitle) {
+            } else if (block instanceof TL_iv.pageBlockSubtitle) {
                 return 4;
-            } else if (block instanceof TLRPC.TL_pageBlockVideo) {
+            } else if (block instanceof TL_iv.pageBlockVideo) {
                 return 5;
-            } else if (block instanceof TLRPC.TL_pageBlockPullquote) {
+            } else if (block instanceof TL_iv.pageBlockPullquote) {
                 return 6;
-            } else if (block instanceof TLRPC.TL_pageBlockBlockquote) {
+            } else if (block instanceof TL_iv.pageBlockBlockquote) {
                 return 7;
-            } else if (block instanceof TLRPC.TL_pageBlockSlideshow) {
+            } else if (block instanceof TL_iv.pageBlockSlideshow) {
                 return 8;
-            } else if (block instanceof TLRPC.TL_pageBlockPhoto) {
+            } else if (block instanceof TL_iv.pageBlockPhoto) {
                 return 9;
-            } else if (block instanceof TLRPC.TL_pageBlockAuthorDate) {
+            } else if (block instanceof TL_iv.pageBlockAuthorDate) {
                 return 10;
-            } else if (block instanceof TLRPC.TL_pageBlockTitle) {
+            } else if (block instanceof TL_iv.pageBlockTitle) {
                 return 11;
             } else if (block instanceof TL_pageBlockListItem) {
                 return 12;
-            } else if (block instanceof TLRPC.TL_pageBlockFooter) {
+            } else if (block instanceof TL_iv.pageBlockFooter) {
                 return 13;
-            } else if (block instanceof TLRPC.TL_pageBlockPreformatted) {
+            } else if (block instanceof TL_iv.pageBlockPreformatted) {
                 return 14;
-            } else if (block instanceof TLRPC.TL_pageBlockSubheader) {
+            } else if (block instanceof TL_iv.pageBlockSubheader) {
                 return 15;
-            } else if (block instanceof TLRPC.TL_pageBlockEmbedPost) {
+            } else if (block instanceof TL_iv.pageBlockEmbedPost) {
                 return 16;
-            } else if (block instanceof TLRPC.TL_pageBlockCollage) {
+            } else if (block instanceof TL_iv.pageBlockCollage) {
                 return 17;
-            } else if (block instanceof TLRPC.TL_pageBlockChannel) {
+            } else if (block instanceof TL_iv.pageBlockChannel) {
                 return 18;
-            } else if (block instanceof TLRPC.TL_pageBlockAudio) {
+            } else if (block instanceof TL_iv.pageBlockAudio) {
                 return 19;
-            } else if (block instanceof TLRPC.TL_pageBlockKicker) {
+            } else if (block instanceof TL_iv.pageBlockKicker) {
                 return 20;
             } else if (block instanceof TL_pageBlockOrderedListItem) {
                 return 21;
-            } else if (block instanceof TLRPC.TL_pageBlockMap) {
+            } else if (block instanceof TL_iv.pageBlockMap) {
                 return 22;
             } else if (block instanceof TL_pageBlockRelatedArticlesChild) {
                 return 23;
-            } else if (block instanceof TLRPC.TL_pageBlockDetails) {
+            } else if (block instanceof TL_iv.pageBlockDetails) {
                 return 24;
-            } else if (block instanceof TLRPC.TL_pageBlockTable) {
+            } else if (block instanceof TL_iv.pageBlockTable) {
                 return 25;
-            } else if (block instanceof TLRPC.TL_pageBlockRelatedArticles) {
+            } else if (block instanceof TL_iv.pageBlockRelatedArticles) {
                 return 26;
             } else if (block instanceof TL_pageBlockDetailsBottom) {
                 return 27;
@@ -6767,8 +6813,8 @@ public class ArticleViewer implements NotificationCenter.NotificationCenterDeleg
             } else if (block instanceof TL_pageBlockDetailsChild) {
                 TL_pageBlockDetailsChild pageBlockDetailsChild = (TL_pageBlockDetailsChild) block;
                 return getTypeForBlock(pageBlockDetailsChild.block);
-            } else if (block instanceof TLRPC.TL_pageBlockCover) {
-                TLRPC.TL_pageBlockCover pageBlockCover = (TLRPC.TL_pageBlockCover) block;
+            } else if (block instanceof TL_iv.pageBlockCover) {
+                TL_iv.pageBlockCover pageBlockCover = (TL_iv.pageBlockCover) block;
                 return getTypeForBlock(pageBlockCover.cover);
             } else {
                 return 100;
@@ -6788,7 +6834,7 @@ public class ArticleViewer implements NotificationCenter.NotificationCenterDeleg
             return getTypeForBlock(localBlocks.get(position));
         }
 
-        public TLRPC.PageBlock getItem(int position) {
+        public TL_iv.PageBlock getItem(int position) {
             return localBlocks.get(position);
         }
 
@@ -6805,13 +6851,13 @@ public class ArticleViewer implements NotificationCenter.NotificationCenterDeleg
         }
 
         private boolean isBlockOpened(TL_pageBlockDetailsChild child) {
-            TLRPC.PageBlock parentBlock = getLastNonListPageBlock(child.parent);
-            if (parentBlock instanceof TLRPC.TL_pageBlockDetails) {
-                return ((TLRPC.TL_pageBlockDetails) parentBlock).open;
+            TL_iv.PageBlock parentBlock = getLastNonListPageBlock(child.parent);
+            if (parentBlock instanceof TL_iv.pageBlockDetails) {
+                return ((TL_iv.pageBlockDetails) parentBlock).open;
             } else if (parentBlock instanceof TL_pageBlockDetailsChild) {
                 TL_pageBlockDetailsChild parent = (TL_pageBlockDetailsChild) parentBlock;
                 parentBlock = getLastNonListPageBlock(parent.block);
-                if (parentBlock instanceof TLRPC.TL_pageBlockDetails && !((TLRPC.TL_pageBlockDetails) parentBlock).open) {
+                if (parentBlock instanceof TL_iv.pageBlockDetails && !((TL_iv.pageBlockDetails) parentBlock).open) {
                     return false;
                 }
                 return isBlockOpened(parent);
@@ -6821,7 +6867,7 @@ public class ArticleViewer implements NotificationCenter.NotificationCenterDeleg
 
         public void resetCachedHeights() {
             for (int i = 0; i < localBlocks.size(); ++i) {
-                TLRPC.PageBlock pageBlock = localBlocks.get(i);
+                TL_iv.PageBlock pageBlock = localBlocks.get(i);
                 if (pageBlock != null) {
                     pageBlock.cachedWidth = 0;
                     pageBlock.cachedHeight = 0;
@@ -6833,8 +6879,8 @@ public class ArticleViewer implements NotificationCenter.NotificationCenterDeleg
         private void updateRows() {
             localBlocks.clear();
             for (int a = 0, size = blocks.size(); a < size; a++) {
-                TLRPC.PageBlock originalBlock = blocks.get(a);
-                TLRPC.PageBlock block = getLastNonListPageBlock(originalBlock);
+                TL_iv.PageBlock originalBlock = blocks.get(a);
+                TL_iv.PageBlock block = getLastNonListPageBlock(originalBlock);
                 if (block instanceof TL_pageBlockDetailsChild) {
                     TL_pageBlockDetailsChild pageBlockDetailsChild = (TL_pageBlockDetailsChild) block;
                     if (!isBlockOpened(pageBlockDetailsChild)) {
@@ -6859,7 +6905,7 @@ public class ArticleViewer implements NotificationCenter.NotificationCenterDeleg
         }
 
         private final Runnable calculateContentHeightRunnable = () -> {
-            final ArrayList<TLRPC.PageBlock> blocks = new ArrayList<>(localBlocks);
+            final ArrayList<TL_iv.PageBlock> blocks = new ArrayList<>(localBlocks);
             final int itemCount = blocks.size() + (sheet != null && sheet.halfSize() ? 1 : 0);
             int fullHeight = 0;
             final int[] itemHeights = new int[itemCount];
@@ -6874,7 +6920,7 @@ public class ArticleViewer implements NotificationCenter.NotificationCenterDeleg
                     itemHeights[0] = 0;
                 } else {
                     final int position = ArticleViewer.WebpageAdapter.this.padding ? i - 1 : i;
-                    TLRPC.PageBlock page = position < 0 || position >= blocks.size() ? null : blocks.get(position);
+                    TL_iv.PageBlock page = position < 0 || position >= blocks.size() ? null : blocks.get(position);
                     if (page != null && page.cachedHeight != 0 && page.cachedWidth == View.MeasureSpec.getSize(widthSpec)) {
                         itemHeights[i] = page.cachedHeight;
                     } else {
@@ -7050,9 +7096,9 @@ public class ArticleViewer implements NotificationCenter.NotificationCenterDeleg
 
         private int TAG;
 
-        private TLRPC.TL_pageBlockVideo currentBlock;
+        private TL_iv.pageBlockVideo currentBlock;
         private BlockVideoCellState videoState;
-        private TLRPC.PageBlock parentBlock;
+        private TL_iv.PageBlock parentBlock;
         private TLRPC.Document currentDocument;
         private boolean isGif;
         private boolean calcHeight;
@@ -7101,7 +7147,7 @@ public class ArticleViewer implements NotificationCenter.NotificationCenterDeleg
             return super.drawChild(canvas, child, drawingTime);
         }
 
-        public void setBlock(TLRPC.TL_pageBlockVideo block, BlockVideoCellState state, boolean calcHeight, boolean first, boolean last) {
+        public void setBlock(TL_iv.pageBlockVideo block, BlockVideoCellState state, boolean calcHeight, boolean first, boolean last) {
             if (currentBlock != null && videoPlayer != null && currentPlayer == this) {
                 videoStates.put(currentBlock.video_id, videoState = BlockVideoCellState.fromPlayer(videoPlayer, this));
             }
@@ -7118,9 +7164,9 @@ public class ArticleViewer implements NotificationCenter.NotificationCenterDeleg
             requestLayout();
         }
 
-        public void setParentBlock(TLRPC.TL_pageBlockChannel channelBlock, TLRPC.PageBlock block) {
+        public void setParentBlock(TL_iv.pageBlockChannel channelBlock, TL_iv.PageBlock block) {
             parentBlock = block;
-            if (channelBlock != null && parentBlock instanceof TLRPC.TL_pageBlockCover) {
+            if (channelBlock != null && parentBlock instanceof TL_iv.pageBlockCover) {
                 channelCell.setBlock(channelBlock);
                 channelCell.setVisibility(VISIBLE);
             }
@@ -7214,7 +7260,7 @@ public class ArticleViewer implements NotificationCenter.NotificationCenterDeleg
                             scale = photoWidth / w;
                             height = (int) (scale * h);
                         }
-                        if (parentBlock instanceof TLRPC.TL_pageBlockCover) {
+                        if (parentBlock instanceof TL_iv.pageBlockCover) {
                             height = Math.min(height, photoWidth);
                         } else {
                             int maxHeight = (int) ((Math.max(AndroidUtilities.displaySize.x, AndroidUtilities.displaySize.y) - dp(56)) * 0.9f);
@@ -7288,7 +7334,7 @@ public class ArticleViewer implements NotificationCenter.NotificationCenterDeleg
                 if (!isFirst && currentType == 0 && currentBlock.level <= 0) {
                     height += dp(8);
                 }
-                boolean nextIsChannel = parentBlock instanceof TLRPC.TL_pageBlockCover && parentAdapter.blocks.size() > 1 && parentAdapter.blocks.get(1) instanceof TLRPC.TL_pageBlockChannel;
+                boolean nextIsChannel = parentBlock instanceof TL_iv.pageBlockCover && parentAdapter.blocks.size() > 1 && parentAdapter.blocks.get(1) instanceof TL_iv.pageBlockChannel;
                 if (currentType != 2 && !nextIsChannel) {
                     height += dp(8);
                 }
@@ -7591,7 +7637,7 @@ public class ArticleViewer implements NotificationCenter.NotificationCenterDeleg
 
         private int TAG;
 
-        private TLRPC.TL_pageBlockAudio currentBlock;
+        private TL_iv.pageBlockAudio currentBlock;
         private TLRPC.Document currentDocument;
         private MessageObject currentMessageObject;
 
@@ -7616,7 +7662,7 @@ public class ArticleViewer implements NotificationCenter.NotificationCenterDeleg
             });
         }
 
-        public void setBlock(TLRPC.TL_pageBlockAudio block, boolean first, boolean last) {
+        public void setBlock(TL_iv.pageBlockAudio block, boolean first, boolean last) {
             currentBlock = block;
 
             currentMessageObject = parentAdapter.audioBlocks.get(currentBlock);
@@ -7968,7 +8014,7 @@ public class ArticleViewer implements NotificationCenter.NotificationCenterDeleg
 
         private int lineHeight;
 
-        private TLRPC.TL_pageBlockEmbedPost currentBlock;
+        private TL_iv.pageBlockEmbedPost currentBlock;
 
         private WebpageAdapter parentAdapter;
 
@@ -7983,7 +8029,7 @@ public class ArticleViewer implements NotificationCenter.NotificationCenterDeleg
             avatarDrawable = new AvatarDrawable();
         }
 
-        public void setBlock(TLRPC.TL_pageBlockEmbedPost block) {
+        public void setBlock(TL_iv.pageBlockEmbedPost block) {
             currentBlock = block;
             requestLayout();
         }
@@ -8142,7 +8188,7 @@ public class ArticleViewer implements NotificationCenter.NotificationCenterDeleg
         public int textX;
         public int textY;
 
-        private TLRPC.TL_pageBlockParagraph currentBlock;
+        private TL_iv.pageBlockParagraph currentBlock;
 
         private WebpageAdapter parentAdapter;
 
@@ -8151,7 +8197,7 @@ public class ArticleViewer implements NotificationCenter.NotificationCenterDeleg
             parentAdapter = adapter;
         }
 
-        public void setBlock(TLRPC.TL_pageBlockParagraph block) {
+        public void setBlock(TL_iv.pageBlockParagraph block) {
             currentBlock = block;
             requestLayout();
         }
@@ -8261,7 +8307,7 @@ public class ArticleViewer implements NotificationCenter.NotificationCenterDeleg
         private int exactWebViewHeight;
         private boolean wasUserInteraction;
 
-        private TLRPC.TL_pageBlockEmbed currentBlock;
+        private TL_iv.pageBlockEmbed currentBlock;
 
         private WebpageAdapter parentAdapter;
 
@@ -8500,8 +8546,8 @@ public class ArticleViewer implements NotificationCenter.NotificationCenterDeleg
             }
         }
 
-        public void setBlock(TLRPC.TL_pageBlockEmbed block) {
-            TLRPC.TL_pageBlockEmbed previousBlock = currentBlock;
+        public void setBlock(TL_iv.pageBlockEmbed block) {
+            TL_iv.pageBlockEmbed previousBlock = currentBlock;
             currentBlock = block;
             if (webView != null) {
                 webView.setBackgroundColor(getThemedColor(Theme.key_windowBackgroundWhite));
@@ -8721,7 +8767,7 @@ public class ArticleViewer implements NotificationCenter.NotificationCenterDeleg
 
         private boolean firstLayout;
 
-        private TLRPC.TL_pageBlockTable currentBlock;
+        private TL_iv.pageBlockTable currentBlock;
 
         private WebpageAdapter parentAdapter;
 
@@ -8785,7 +8831,7 @@ public class ArticleViewer implements NotificationCenter.NotificationCenterDeleg
         }
 
         @Override
-        public DrawingText createTextLayout(TLRPC.TL_pageTableCell cell, int maxWidth) {
+        public DrawingText createTextLayout(TL_iv.pageTableCell cell, int maxWidth) {
             if (cell == null) {
                 return null;
             }
@@ -8821,7 +8867,11 @@ public class ArticleViewer implements NotificationCenter.NotificationCenterDeleg
         }
 
         @Override
-        public void onLayoutChild(DrawingText text, int x, int y) {
+        public void onLayoutChild(TableLayout.CellText cellText, int x, int y) {
+            if (!(cellText instanceof DrawingText)) {
+                return;
+            }
+            DrawingText text = (DrawingText) cellText;
             if (text != null && !searchResults.isEmpty() && searchText != null) {
                 String lowerString = text.textLayout.getText().toString().toLowerCase();
                 int startIndex = 0;
@@ -8835,7 +8885,7 @@ public class ArticleViewer implements NotificationCenter.NotificationCenterDeleg
             }
         }
 
-        public void setBlock(TLRPC.TL_pageBlockTable block) {
+        public void setBlock(TL_iv.pageBlockTable block) {
             currentBlock = block;
             AndroidUtilities.setScrollViewEdgeEffectColor(scrollView, getThemedColor(Theme.key_windowBackgroundWhite));
             tableLayout.removeAllChildrens();
@@ -8846,18 +8896,18 @@ public class ArticleViewer implements NotificationCenter.NotificationCenterDeleg
             int maxCols = 0;
 
             if (!currentBlock.rows.isEmpty()) {
-                TLRPC.TL_pageTableRow row = currentBlock.rows.get(0);
+                TL_iv.pageTableRow row = currentBlock.rows.get(0);
                 for (int c = 0, size2 = row.cells.size(); c < size2; c++) {
-                    TLRPC.TL_pageTableCell cell = row.cells.get(c);
+                    TL_iv.pageTableCell cell = row.cells.get(c);
                     maxCols += (cell.colspan != 0 ? cell.colspan : 1);
                 }
             }
 
             for (int r = 0, size = currentBlock.rows.size(); r < size; r++) {
-                TLRPC.TL_pageTableRow row = currentBlock.rows.get(r);
+                TL_iv.pageTableRow row = currentBlock.rows.get(r);
                 int cols = 0;
                 for (int c = 0, size2 = row.cells.size(); c < size2; c++) {
-                    TLRPC.TL_pageTableCell cell = row.cells.get(c);
+                    TL_iv.pageTableCell cell = row.cells.get(c);
                     int colspan = (cell.colspan != 0 ? cell.colspan : 1);
                     int rowspan = (cell.rowspan != 0 ? cell.rowspan : 1);
                     if (cell.text != null) {
@@ -8877,7 +8927,7 @@ public class ArticleViewer implements NotificationCenter.NotificationCenterDeleg
         public boolean onTouchEvent(MotionEvent event) {
             for (int i = 0, N = tableLayout.getChildCount(); i < N; i++) {
                 TableLayout.Child c = tableLayout.getChildAt(i);
-                if (checkLayoutForLinks(parentAdapter, event, this, c.textLayout, scrollView.getPaddingLeft() - scrollView.getScrollX() + listX + c.getTextX(), listY + c.getTextY())) {
+                if (c.textLayout instanceof DrawingText && checkLayoutForLinks(parentAdapter, event, this, (DrawingText) c.textLayout, scrollView.getPaddingLeft() - scrollView.getScrollX() + listX + c.getTextX(), listY + c.getTextY())) {
                     return true;
                 }
             }
@@ -8937,9 +8987,9 @@ public class ArticleViewer implements NotificationCenter.NotificationCenterDeleg
             for (int i = 0, N = tableLayout.getChildCount(); i < N; i++) {
                 TableLayout.Child c = tableLayout.getChildAt(i);
                 if (c.textLayout != null) {
-                    c.textLayout.x = c.getTextX() + listX + dp(18) - scrollView.getScrollX();
-                    c.textLayout.y = c.getTextY() + listY;
-                    c.textLayout.row = c.getRow();
+                    c.textLayout.setX(c.getTextX() + listX + dp(18) - scrollView.getScrollX());
+                    c.textLayout.setY(c.getTextY() + listY);
+                    c.textLayout.setRow(c.getRow());
                     c.setSelectionIndex(count++);
                 }
             }
@@ -9003,7 +9053,7 @@ public class ArticleViewer implements NotificationCenter.NotificationCenterDeleg
 
         private boolean inLayout;
 
-        private TLRPC.TL_pageBlockCollage currentBlock;
+        private TL_iv.pageBlockCollage currentBlock;
         private GroupedMessages group = new GroupedMessages();
 
         private WebpageAdapter parentAdapter;
@@ -9064,15 +9114,15 @@ public class ArticleViewer implements NotificationCenter.NotificationCenterDeleg
                     TLRPC.PhotoSize photoSize;
 
                     TLObject object = currentBlock.items.get(a);
-                    if (object instanceof TLRPC.TL_pageBlockPhoto) {
-                        TLRPC.TL_pageBlockPhoto pageBlockPhoto = (TLRPC.TL_pageBlockPhoto) object;
+                    if (object instanceof TL_iv.pageBlockPhoto) {
+                        TL_iv.pageBlockPhoto pageBlockPhoto = (TL_iv.pageBlockPhoto) object;
                         TLRPC.Photo photo = parentAdapter.getPhotoWithId(pageBlockPhoto.photo_id);
                         if (photo == null) {
                             continue;
                         }
                         photoSize = FileLoader.getClosestPhotoSizeWithSize(photo.sizes, AndroidUtilities.getPhotoSize());
-                    } else if (object instanceof TLRPC.TL_pageBlockVideo) {
-                        TLRPC.TL_pageBlockVideo pageBlockVideo = (TLRPC.TL_pageBlockVideo) object;
+                    } else if (object instanceof TL_iv.pageBlockVideo) {
+                        TL_iv.pageBlockVideo pageBlockVideo = (TL_iv.pageBlockVideo) object;
                         TLRPC.Document document = parentAdapter.getDocumentWithId(pageBlockVideo.video_id);
                         if (document == null) {
                             continue;
@@ -9449,19 +9499,19 @@ public class ArticleViewer implements NotificationCenter.NotificationCenterDeleg
 
                 @Override
                 public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
-                    TLRPC.PageBlock pageBlock = currentBlock.items.get(currentBlock.items.size() - position - 1);
+                    TL_iv.PageBlock pageBlock = currentBlock.items.get(currentBlock.items.size() - position - 1);
                     switch (holder.getItemViewType()) {
                         case 0: {
                             BlockPhotoCell cell = (BlockPhotoCell) holder.itemView;
                             cell.groupPosition = group.positions.get(pageBlock);
-                            cell.setBlock((TLRPC.TL_pageBlockPhoto) pageBlock, false, true, true);
+                            cell.setBlock((TL_iv.pageBlockPhoto) pageBlock, false, true, true);
                             break;
                         }
                         case 1:
                         default: {
                             BlockVideoCell cell = (BlockVideoCell) holder.itemView;
                             cell.groupPosition = group.positions.get(pageBlock);
-                            TLRPC.TL_pageBlockVideo blockVideo = (TLRPC.TL_pageBlockVideo) pageBlock;
+                            TL_iv.pageBlockVideo blockVideo = (TL_iv.pageBlockVideo) pageBlock;
                             cell.setBlock(blockVideo, videoStates.get(blockVideo.video_id), false, true, true);
                             break;
                         }
@@ -9478,8 +9528,8 @@ public class ArticleViewer implements NotificationCenter.NotificationCenterDeleg
 
                 @Override
                 public int getItemViewType(int position) {
-                    TLRPC.PageBlock block = currentBlock.items.get(currentBlock.items.size() - position - 1);
-                    if (block instanceof TLRPC.TL_pageBlockPhoto) {
+                    TL_iv.PageBlock block = currentBlock.items.get(currentBlock.items.size() - position - 1);
+                    if (block instanceof TL_iv.pageBlockPhoto) {
                         return 0;
                     } else {
                         return 1;
@@ -9490,7 +9540,7 @@ public class ArticleViewer implements NotificationCenter.NotificationCenterDeleg
             setWillNotDraw(false);
         }
 
-        public void setBlock(TLRPC.TL_pageBlockCollage block) {
+        public void setBlock(TL_iv.pageBlockCollage block) {
             if (currentBlock != block) {
                 currentBlock = block;
                 group.calculate();
@@ -9607,7 +9657,7 @@ public class ArticleViewer implements NotificationCenter.NotificationCenterDeleg
         private PagerAdapter innerAdapter;
         private View dotsContainer;
 
-        private TLRPC.TL_pageBlockSlideshow currentBlock;
+        private TL_iv.pageBlockSlideshow currentBlock;
         private DrawingText captionLayout;
         private DrawingText creditLayout;
         private int textX = dp(18);
@@ -9666,7 +9716,7 @@ public class ArticleViewer implements NotificationCenter.NotificationCenterDeleg
             innerListView.setAdapter(innerAdapter = new PagerAdapter() {
 
                 class ObjectContainer {
-                    private TLRPC.PageBlock block;
+                    private TL_iv.PageBlock block;
                     private View view;
                 }
 
@@ -9695,13 +9745,13 @@ public class ArticleViewer implements NotificationCenter.NotificationCenterDeleg
                 @Override
                 public Object instantiateItem(ViewGroup container, int position) {
                     View view;
-                    TLRPC.PageBlock block = currentBlock.items.get(position);
-                    if (block instanceof TLRPC.TL_pageBlockPhoto) {
+                    TL_iv.PageBlock block = currentBlock.items.get(position);
+                    if (block instanceof TL_iv.pageBlockPhoto) {
                         view = new BlockPhotoCell(getContext(), parentAdapter, 1);
-                        ((BlockPhotoCell) view).setBlock((TLRPC.TL_pageBlockPhoto) block, false, true, true);
+                        ((BlockPhotoCell) view).setBlock((TL_iv.pageBlockPhoto) block, false, true, true);
                     } else {
                         view = new BlockVideoCell(getContext(), parentAdapter, 1);
-                        TLRPC.TL_pageBlockVideo videoBlock = (TLRPC.TL_pageBlockVideo) block;
+                        TL_iv.pageBlockVideo videoBlock = (TL_iv.pageBlockVideo) block;
                         ((BlockVideoCell) view).setBlock(videoBlock, videoStates.get(videoBlock.video_id), false, true, true);
                     }
                     container.addView(view);
@@ -9765,7 +9815,7 @@ public class ArticleViewer implements NotificationCenter.NotificationCenterDeleg
             setWillNotDraw(false);
         }
 
-        public void setBlock(TLRPC.TL_pageBlockSlideshow block) {
+        public void setBlock(TL_iv.pageBlockSlideshow block) {
             currentBlock = block;
             innerAdapter.notifyDataSetChanged();
             innerListView.setCurrentItem(0, false);
@@ -9990,7 +10040,7 @@ public class ArticleViewer implements NotificationCenter.NotificationCenterDeleg
                                 numOffsetY = (currentBlock.numLayout.getLineAscent(0) + dp(2.5f)) - ascent;
                             }
                         }
-                        if (currentBlock.blockItem instanceof TLRPC.TL_pageBlockDetails) {
+                        if (currentBlock.blockItem instanceof TL_iv.pageBlockDetails) {
                             verticalAlign = true;
                             blockY = 0;
                             if (currentBlock.index == 0 && currentBlock.parent.level == 0) {
@@ -10227,7 +10277,7 @@ public class ArticleViewer implements NotificationCenter.NotificationCenterDeleg
                                 numOffsetY = currentBlock.numLayout.getLineAscent(0) - ascent;
                             }
                         }
-                        if (currentBlock.blockItem instanceof TLRPC.TL_pageBlockDetails) {
+                        if (currentBlock.blockItem instanceof TL_iv.pageBlockDetails) {
                             verticalAlign = true;
                             blockY = 0;
                             height -= dp(8);
@@ -10340,7 +10390,7 @@ public class ArticleViewer implements NotificationCenter.NotificationCenterDeleg
         private int textY = dp(11) + 1;
         private AnimatedArrowDrawable arrow;
 
-        private TLRPC.TL_pageBlockDetails currentBlock;
+        private TL_iv.pageBlockDetails currentBlock;
 
         private WebpageAdapter parentAdapter;
 
@@ -10366,7 +10416,7 @@ public class ArticleViewer implements NotificationCenter.NotificationCenterDeleg
 
         }
 
-        public void setBlock(TLRPC.TL_pageBlockDetails block) {
+        public void setBlock(TL_iv.pageBlockDetails block) {
             currentBlock = block;
             arrow.setAnimationProgress(block.open ? 0.0f : 1.0f);
             arrow.setCallback(this);
@@ -10470,7 +10520,7 @@ public class ArticleViewer implements NotificationCenter.NotificationCenterDeleg
         private int textX = dp(18);
         private int textY;
 
-        private TLRPC.TL_pageBlockRelatedArticles currentBlock;
+        private TL_iv.pageBlockRelatedArticles currentBlock;
 
         private WebpageAdapter parentAdapter;
 
@@ -10479,7 +10529,7 @@ public class ArticleViewer implements NotificationCenter.NotificationCenterDeleg
             parentAdapter = adapter;
         }
 
-        public void setBlock(TLRPC.TL_pageBlockRelatedArticles block) {
+        public void setBlock(TL_iv.pageBlockRelatedArticles block) {
             currentBlock = block;
             requestLayout();
         }
@@ -10565,7 +10615,7 @@ public class ArticleViewer implements NotificationCenter.NotificationCenterDeleg
             int width = MeasureSpec.getSize(widthMeasureSpec);
 
             divider = currentBlock.num != currentBlock.parent.articles.size() - 1;
-            TLRPC.TL_pageRelatedArticle item = currentBlock.parent.articles.get(currentBlock.num);
+            TL_iv.pageRelatedArticle item = currentBlock.parent.articles.get(currentBlock.num);
 
             int additionalHeight = dp(SharedConfig.ivFontSize - 16);
 
@@ -10682,7 +10732,7 @@ public class ArticleViewer implements NotificationCenter.NotificationCenterDeleg
         private int textX = dp(18);
         private int textY = dp(8);
 
-        private TLRPC.TL_pageBlockHeader currentBlock;
+        private TL_iv.pageBlockHeader currentBlock;
 
         private WebpageAdapter parentAdapter;
 
@@ -10691,7 +10741,7 @@ public class ArticleViewer implements NotificationCenter.NotificationCenterDeleg
             parentAdapter = adapter;
         }
 
-        public void setBlock(TLRPC.TL_pageBlockHeader block) {
+        public void setBlock(TL_iv.pageBlockHeader block) {
             currentBlock = block;
             requestLayout();
         }
@@ -10779,7 +10829,7 @@ public class ArticleViewer implements NotificationCenter.NotificationCenterDeleg
         private int textX = dp(18);
         private int textY = dp(8);
 
-        private TLRPC.TL_pageBlockSubtitle currentBlock;
+        private TL_iv.pageBlockSubtitle currentBlock;
 
         private WebpageAdapter parentAdapter;
 
@@ -10788,7 +10838,7 @@ public class ArticleViewer implements NotificationCenter.NotificationCenterDeleg
             parentAdapter = adapter;
         }
 
-        public void setBlock(TLRPC.TL_pageBlockSubtitle block) {
+        public void setBlock(TL_iv.pageBlockSubtitle block) {
             currentBlock = block;
             requestLayout();
         }
@@ -10858,7 +10908,7 @@ public class ArticleViewer implements NotificationCenter.NotificationCenterDeleg
         private int textX = dp(18);
         private int textY = dp(8);
 
-        private TLRPC.TL_pageBlockPullquote currentBlock;
+        private TL_iv.pageBlockPullquote currentBlock;
 
         private WebpageAdapter parentAdapter;
 
@@ -10867,7 +10917,7 @@ public class ArticleViewer implements NotificationCenter.NotificationCenterDeleg
             parentAdapter = adapter;
         }
 
-        public void setBlock(TLRPC.TL_pageBlockPullquote block) {
+        public void setBlock(TL_iv.pageBlockPullquote block) {
             currentBlock = block;
             requestLayout();
         }
@@ -10947,7 +10997,7 @@ public class ArticleViewer implements NotificationCenter.NotificationCenterDeleg
         private int textX;
         private int textY = dp(8);
 
-        private TLRPC.TL_pageBlockBlockquote currentBlock;
+        private TL_iv.pageBlockBlockquote currentBlock;
 
         private WebpageAdapter parentAdapter;
 
@@ -10956,7 +11006,7 @@ public class ArticleViewer implements NotificationCenter.NotificationCenterDeleg
             parentAdapter = adapter;
         }
 
-        public void setBlock(TLRPC.TL_pageBlockBlockquote block) {
+        public void setBlock(TL_iv.pageBlockBlockquote block) {
             currentBlock = block;
             requestLayout();
         }
@@ -11086,8 +11136,8 @@ public class ArticleViewer implements NotificationCenter.NotificationCenterDeleg
 
         private int TAG;
 
-        private TLRPC.TL_pageBlockPhoto currentBlock;
-        private TLRPC.PageBlock parentBlock;
+        private TL_iv.pageBlockPhoto currentBlock;
+        private TL_iv.PageBlock parentBlock;
         private boolean calcHeight;
 
         private MessageObject.GroupedMessagePosition groupPosition;
@@ -11112,7 +11162,7 @@ public class ArticleViewer implements NotificationCenter.NotificationCenterDeleg
             currentType = type;
         }
 
-        public void setBlock(TLRPC.TL_pageBlockPhoto block, boolean calcHeight, boolean first, boolean last) {
+        public void setBlock(TL_iv.pageBlockPhoto block, boolean calcHeight, boolean first, boolean last) {
             parentBlock = null;
             currentBlock = block;
             calcHeight = calcHeight;
@@ -11135,9 +11185,9 @@ public class ArticleViewer implements NotificationCenter.NotificationCenterDeleg
             requestLayout();
         }
 
-        public void setParentBlock(TLRPC.PageBlock block) {
+        public void setParentBlock(TL_iv.PageBlock block) {
             parentBlock = block;
-            if (parentAdapter.channelBlock != null && parentBlock instanceof TLRPC.TL_pageBlockCover) {
+            if (parentAdapter.channelBlock != null && parentBlock instanceof TL_iv.pageBlockCover) {
                 channelCell.setBlock(parentAdapter.channelBlock);
                 channelCell.setVisibility(VISIBLE);
             }
@@ -11230,7 +11280,7 @@ public class ArticleViewer implements NotificationCenter.NotificationCenterDeleg
                         float scale;
                         scale = photoWidth / (float) w;
                         height = (int) (scale * h);
-                        if (parentBlock instanceof TLRPC.TL_pageBlockCover) {
+                        if (parentBlock instanceof TL_iv.pageBlockCover) {
                             height = Math.min(height, photoWidth);
                         } else {
                             int maxHeight = (int) ((Math.max(AndroidUtilities.displaySize.x, AndroidUtilities.displaySize.y) - dp(56)) * 0.9f);
@@ -11302,7 +11352,7 @@ public class ArticleViewer implements NotificationCenter.NotificationCenterDeleg
                 if (!isFirst && currentType == 0 && currentBlock.level <= 0) {
                     height += dp(8);
                 }
-                boolean nextIsChannel = parentBlock instanceof TLRPC.TL_pageBlockCover && parentAdapter.blocks != null && parentAdapter.blocks.size() > 1 && parentAdapter.blocks.get(1) instanceof TLRPC.TL_pageBlockChannel;
+                boolean nextIsChannel = parentBlock instanceof TL_iv.pageBlockCover && parentAdapter.blocks != null && parentAdapter.blocks.size() > 1 && parentAdapter.blocks.get(1) instanceof TL_iv.pageBlockChannel;
                 if (currentType != 2 && !nextIsChannel) {
                     height += dp(8);
                 }
@@ -11498,7 +11548,7 @@ public class ArticleViewer implements NotificationCenter.NotificationCenterDeleg
         private boolean photoPressed;
         private int currentMapProvider;
 
-        private TLRPC.TL_pageBlockMap currentBlock;
+        private TL_iv.pageBlockMap currentBlock;
 
         private WebpageAdapter parentAdapter;
 
@@ -11511,7 +11561,7 @@ public class ArticleViewer implements NotificationCenter.NotificationCenterDeleg
             currentType = type;
         }
 
-        public void setBlock(TLRPC.TL_pageBlockMap block, boolean first, boolean last) {
+        public void setBlock(TL_iv.pageBlockMap block, boolean first, boolean last) {
             currentBlock = block;
             isFirst = first;
             requestLayout();
@@ -11703,7 +11753,7 @@ public class ArticleViewer implements NotificationCenter.NotificationCenterDeleg
         private AnimatorSet currentAnimation;
         private int currentType;
 
-        private TLRPC.TL_pageBlockChannel currentBlock;
+        private TL_iv.pageBlockChannel currentBlock;
 
         private WebpageAdapter parentAdapter;
 
@@ -11737,7 +11787,7 @@ public class ArticleViewer implements NotificationCenter.NotificationCenterDeleg
             addView(progressView, LayoutHelper.createFrame(39, 39, Gravity.RIGHT | Gravity.TOP));
         }
 
-        public void setBlock(TLRPC.TL_pageBlockChannel block) {
+        public void setBlock(TL_iv.pageBlockChannel block) {
             currentBlock = block;
 
             if (currentType == 0) {
@@ -11879,7 +11929,7 @@ public class ArticleViewer implements NotificationCenter.NotificationCenterDeleg
         private int textX;
         private int textY = dp(8);
 
-        private TLRPC.TL_pageBlockAuthorDate currentBlock;
+        private TL_iv.pageBlockAuthorDate currentBlock;
 
         private WebpageAdapter parentAdapter;
 
@@ -11888,7 +11938,7 @@ public class ArticleViewer implements NotificationCenter.NotificationCenterDeleg
             parentAdapter = adapter;
         }
 
-        public void setBlock(TLRPC.TL_pageBlockAuthorDate block) {
+        public void setBlock(TL_iv.pageBlockAuthorDate block) {
             currentBlock = block;
             requestLayout();
         }
@@ -11989,7 +12039,7 @@ public class ArticleViewer implements NotificationCenter.NotificationCenterDeleg
 
         private DrawingText textLayout;
 
-        private TLRPC.TL_pageBlockTitle currentBlock;
+        private TL_iv.pageBlockTitle currentBlock;
         private int textX = dp(18);
         private int textY;
 
@@ -12000,7 +12050,7 @@ public class ArticleViewer implements NotificationCenter.NotificationCenterDeleg
             parentAdapter = adapter;
         }
 
-        public void setBlock(TLRPC.TL_pageBlockTitle block) {
+        public void setBlock(TL_iv.pageBlockTitle block) {
             currentBlock = block;
             requestLayout();
         }
@@ -12071,7 +12121,7 @@ public class ArticleViewer implements NotificationCenter.NotificationCenterDeleg
 
         private DrawingText textLayout;
 
-        private TLRPC.TL_pageBlockKicker currentBlock;
+        private TL_iv.pageBlockKicker currentBlock;
         private int textX = dp(18);
         private int textY;
 
@@ -12082,7 +12132,7 @@ public class ArticleViewer implements NotificationCenter.NotificationCenterDeleg
             parentAdapter = adapter;
         }
 
-        public void setBlock(TLRPC.TL_pageBlockKicker block) {
+        public void setBlock(TL_iv.pageBlockKicker block) {
             currentBlock = block;
             requestLayout();
         }
@@ -12146,7 +12196,7 @@ public class ArticleViewer implements NotificationCenter.NotificationCenterDeleg
         private int textX = dp(18);
         private int textY = dp(8);
 
-        private TLRPC.TL_pageBlockFooter currentBlock;
+        private TL_iv.pageBlockFooter currentBlock;
 
         private WebpageAdapter parentAdapter;
 
@@ -12155,7 +12205,7 @@ public class ArticleViewer implements NotificationCenter.NotificationCenterDeleg
             parentAdapter = adapter;
         }
 
-        public void setBlock(TLRPC.TL_pageBlockFooter block) {
+        public void setBlock(TL_iv.pageBlockFooter block) {
             currentBlock = block;
             requestLayout();
         }
@@ -12228,7 +12278,7 @@ public class ArticleViewer implements NotificationCenter.NotificationCenterDeleg
         private HorizontalScrollView scrollView;
         private View textContainer;
 
-        private TLRPC.TL_pageBlockPreformatted currentBlock;
+        private TL_iv.pageBlockPreformatted currentBlock;
 
         private WebpageAdapter parentAdapter;
 
@@ -12310,7 +12360,7 @@ public class ArticleViewer implements NotificationCenter.NotificationCenterDeleg
             setWillNotDraw(false);
         }
 
-        public void setBlock(TLRPC.TL_pageBlockPreformatted block) {
+        public void setBlock(TL_iv.pageBlockPreformatted block) {
             currentBlock = block;
             scrollView.setScrollX(0);
             textContainer.requestLayout();
@@ -12351,7 +12401,7 @@ public class ArticleViewer implements NotificationCenter.NotificationCenterDeleg
         private int textX = dp(18);
         private int textY = dp(8);
 
-        private TLRPC.TL_pageBlockSubheader currentBlock;
+        private TL_iv.pageBlockSubheader currentBlock;
 
         private WebpageAdapter parentAdapter;
 
@@ -12360,7 +12410,7 @@ public class ArticleViewer implements NotificationCenter.NotificationCenterDeleg
             parentAdapter = adapter;
         }
 
-        public void setBlock(TLRPC.TL_pageBlockSubheader block) {
+        public void setBlock(TL_iv.pageBlockSubheader block) {
             currentBlock = block;
             requestLayout();
         }
@@ -12484,13 +12534,13 @@ public class ArticleViewer implements NotificationCenter.NotificationCenterDeleg
         }
     }
 
-    public boolean openPhoto(TLRPC.PageBlock block, WebpageAdapter adapter) {
+    public boolean openPhoto(TL_iv.PageBlock block, WebpageAdapter adapter) {
         if (parentFragment == null || parentFragment.getParentActivity() == null) {
             return false;
         }
         final int index;
-        final List<TLRPC.PageBlock> pageBlocks;
-        if (!(block instanceof TLRPC.TL_pageBlockVideo) || WebPageUtils.isVideo(adapter.currentPage, block)) {
+        final List<TL_iv.PageBlock> pageBlocks;
+        if (!(block instanceof TL_iv.pageBlockVideo) || WebPageUtils.isVideo(adapter.currentPage, block)) {
             pageBlocks = new ArrayList<>(adapter.photoBlocks);
             index = adapter.photoBlocks.indexOf(block);
         } else {
@@ -12510,9 +12560,9 @@ public class ArticleViewer implements NotificationCenter.NotificationCenterDeleg
     private class RealPageBlocksAdapter implements PhotoViewer.PageBlocksAdapter {
 
         private final TLRPC.WebPage page;
-        private final List<TLRPC.PageBlock> pageBlocks;
+        private final List<TL_iv.PageBlock> pageBlocks;
 
-        private RealPageBlocksAdapter(TLRPC.WebPage page, List<TLRPC.PageBlock> pageBlocks) {
+        private RealPageBlocksAdapter(TLRPC.WebPage page, List<TL_iv.PageBlock> pageBlocks) {
             this.page = page;
             this.pageBlocks = pageBlocks;
         }
@@ -12523,12 +12573,12 @@ public class ArticleViewer implements NotificationCenter.NotificationCenterDeleg
         }
 
         @Override
-        public TLRPC.PageBlock get(int index) {
+        public TL_iv.PageBlock get(int index) {
             return pageBlocks.get(index);
         }
 
         @Override
-        public List<TLRPC.PageBlock> getAll() {
+        public List<TL_iv.PageBlock> getAll() {
             return pageBlocks;
         }
 
@@ -12570,9 +12620,9 @@ public class ArticleViewer implements NotificationCenter.NotificationCenterDeleg
         @Override
         public CharSequence getCaption(int index) {
             CharSequence caption = null;
-            final TLRPC.PageBlock pageBlock = get(index);
-            if (pageBlock instanceof TLRPC.TL_pageBlockPhoto) {
-                String url = ((TLRPC.TL_pageBlockPhoto) pageBlock).url;
+            final TL_iv.PageBlock pageBlock = get(index);
+            if (pageBlock instanceof TL_iv.pageBlockPhoto) {
+                String url = ((TL_iv.pageBlockPhoto) pageBlock).url;
                 if (!TextUtils.isEmpty(url)) {
                     SpannableStringBuilder stringBuilder = new SpannableStringBuilder(url);
                     stringBuilder.setSpan(new URLSpan(url) {
@@ -12585,7 +12635,7 @@ public class ArticleViewer implements NotificationCenter.NotificationCenterDeleg
                 }
             }
             if (caption == null) {
-                TLRPC.RichText captionRichText = getBlockCaption(pageBlock, 2);
+                TL_iv.RichText captionRichText = getBlockCaption(pageBlock, 2);
                 caption = getText(page, null, captionRichText, captionRichText, pageBlock, -dp(100));
                 if (caption instanceof Spannable) {
                     Spannable spannable = (Spannable) caption;
@@ -12636,7 +12686,7 @@ public class ArticleViewer implements NotificationCenter.NotificationCenterDeleg
         }
 
         @Override
-        public void updateSlideshowCell(TLRPC.PageBlock currentPageBlock) {
+        public void updateSlideshowCell(TL_iv.PageBlock currentPageBlock) {
             int count = pages[0].listView.getChildCount();
             for (int a = 0; a < count; a++) {
                 View child = pages[0].listView.getChildAt(a);
@@ -12660,9 +12710,9 @@ public class ArticleViewer implements NotificationCenter.NotificationCenterDeleg
     private class PageBlocksPhotoViewerProvider extends PhotoViewer.EmptyPhotoViewerProvider {
 
         private final int[] tempArr = new int[2];
-        private final List<TLRPC.PageBlock> pageBlocks;
+        private final List<TL_iv.PageBlock> pageBlocks;
 
-        public PageBlocksPhotoViewerProvider(List<TLRPC.PageBlock> pageBlocks) {
+        public PageBlocksPhotoViewerProvider(List<TL_iv.PageBlock> pageBlocks) {
             this.pageBlocks = pageBlocks;
         }
 
@@ -12686,7 +12736,7 @@ public class ArticleViewer implements NotificationCenter.NotificationCenterDeleg
             return object;
         }
 
-        private ImageReceiver getImageReceiverFromListView(ViewGroup listView, TLRPC.PageBlock pageBlock, int[] coords) {
+        private ImageReceiver getImageReceiverFromListView(ViewGroup listView, TL_iv.PageBlock pageBlock, int[] coords) {
             int count = listView.getChildCount();
             for (int a = 0; a < count; a++) {
                 ImageReceiver imageReceiver = getImageReceiverView(listView.getChildAt(a), pageBlock, coords);
@@ -12697,7 +12747,7 @@ public class ArticleViewer implements NotificationCenter.NotificationCenterDeleg
             return null;
         }
 
-        private ImageReceiver getImageReceiverView(View view, TLRPC.PageBlock pageBlock, int[] coords) {
+        private ImageReceiver getImageReceiverView(View view, TL_iv.PageBlock pageBlock, int[] coords) {
             if (view instanceof BlockPhotoCell) {
                 BlockPhotoCell cell = (BlockPhotoCell) view;
                 if (cell.currentBlock == pageBlock) {
@@ -12761,7 +12811,7 @@ public class ArticleViewer implements NotificationCenter.NotificationCenterDeleg
 
         @Override
         public void onReleasePlayerBeforeClose(int photoIndex) {
-            TLRPC.PageBlock pageBlock = null;
+            TL_iv.PageBlock pageBlock = null;
             if (photoIndex >= 0 && photoIndex < pageBlocks.size()) {
                 pageBlock = pageBlocks.get(photoIndex);
             }
@@ -12788,7 +12838,7 @@ public class ArticleViewer implements NotificationCenter.NotificationCenterDeleg
             checkVideoPlayer();
         }
 
-        private BlockVideoCell getViewFromListView(ViewGroup listView, TLRPC.PageBlock pageBlock) {
+        private BlockVideoCell getViewFromListView(ViewGroup listView, TL_iv.PageBlock pageBlock) {
             int count = listView.getChildCount();
             for (int a = 0; a < count; a++) {
                 View view = listView.getChildAt(a);

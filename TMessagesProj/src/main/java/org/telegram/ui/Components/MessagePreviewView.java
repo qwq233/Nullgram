@@ -231,6 +231,12 @@ public class MessagePreviewView extends FrameLayout {
             return getReplyMessage(null);
         }
 
+        public boolean isReplyToRichMessage() {
+            if (currentTab != TAB_REPLY) return false;
+            MessageObject msg = getReplyMessage();
+            return msg != null && msg.messageOwner != null && msg.messageOwner.rich_message != null;
+        }
+
         public MessageObject getReplyMessage(MessageObject fallback) {
             if (messagePreviewParams.replyMessage != null) {
                 if (messagePreviewParams.replyMessage.groupedMessagesMap != null && messagePreviewParams.replyMessage.groupedMessagesMap.size() > 0) {
@@ -311,6 +317,7 @@ public class MessagePreviewView extends FrameLayout {
 
                 @Override
                 protected boolean canCopy() {
+                    if (isReplyToRichMessage()) return false;
                     return messagePreviewParams == null || !messagePreviewParams.noforwards;
                 }
 
@@ -329,7 +336,7 @@ public class MessagePreviewView extends FrameLayout {
 
                 @Override
                 protected boolean canShowQuote() {
-                    return currentTab == TAB_REPLY && !messagePreviewParams.isSecret;
+                    return currentTab == TAB_REPLY && !messagePreviewParams.isSecret && !isReplyToRichMessage();
                 }
 
                 @Override
@@ -964,13 +971,23 @@ public class MessagePreviewView extends FrameLayout {
 
             } else if (tab == TAB_FORWARD && messagePreviewParams.forwardMessages != null) {
 
+                boolean canHideSenderName = true;
+                for (int i = 0; i < messagePreviewParams.forwardMessages.messages.size(); ++i) {
+                    if (messagePreviewParams.forwardMessages.messages.get(i).type == MessageObject.TYPE_ARTICLE) {
+                        canHideSenderName = false;
+                        break;
+                    }
+                }
+
                 ToggleButton sendersNameButton = new ToggleButton(
                     context,
                     R.raw.name_hide, messagePreviewParams.multipleUsers ? LocaleController.getString(R.string.ShowSenderNames) : LocaleController.getString(R.string.ShowSendersName),
                     R.raw.name_show, messagePreviewParams.multipleUsers ? LocaleController.getString(R.string.HideSenderNames) : LocaleController.getString(R.string.HideSendersName),
                     resourcesProvider
                 );
-                menu.addView(sendersNameButton, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, 48));
+                if (canHideSenderName) {
+                    menu.addView(sendersNameButton, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, 48));
+                }
 
                 final ToggleButton captionButton;
                 if (messagePreviewParams.hasCaption) {

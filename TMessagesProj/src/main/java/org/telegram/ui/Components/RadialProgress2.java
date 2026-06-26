@@ -101,6 +101,13 @@ public class RadialProgress2 {
         overlayPaint.setColor(0x64000000);
     }
 
+    public void setParent(View parent) {
+        this.parent = parent;
+        overlayImageView.setParentView(parent);
+        mediaActionDrawable.setDelegate(parent::invalidate);
+        miniMediaActionDrawable.setDelegate(parent::invalidate);
+    }
+
     public void setResourcesProvider(Theme.ResourcesProvider resourcesProvider) {
         this.resourcesProvider = resourcesProvider;
     }

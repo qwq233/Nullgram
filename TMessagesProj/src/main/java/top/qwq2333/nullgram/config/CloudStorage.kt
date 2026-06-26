@@ -29,6 +29,7 @@ import kotlinx.serialization.json.Json
 import org.telegram.messenger.AccountInstance
 import org.telegram.messenger.UserConfig
 import org.telegram.tgnet.TLRPC
+import org.telegram.tgnet.tl.TL_bots
 import top.qwq2333.nullgram.utils.Log
 import java.util.concurrent.CompletableFuture
 
@@ -50,7 +51,7 @@ class CloudStorage(instance: Int) : AccountInstance(instance) {
         if (botUser == null) {
             throw IllegalStateException("For some reason, unable to get bot user")
         }
-        val req = TLRPC.TL_bots_invokeWebViewCustomMethod().apply {
+        val req = TL_bots.invokeWebViewCustomMethod().apply {
             bot = messagesController.getInputUser(botUser)
             custom_method = method.method
             this.params = TLRPC.TL_dataJSON().apply {

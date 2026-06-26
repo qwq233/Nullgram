@@ -37,9 +37,12 @@ import android.text.Spanned;
 import android.text.TextPaint;
 import android.text.TextUtils;
 import android.text.format.DateFormat;
+import android.text.format.DateUtils;
 import android.util.Xml;
 
+import android.icu.text.RelativeDateTimeFormatter;
 import androidx.annotation.StringRes;
+import androidx.annotation.RequiresApi;
 
 import org.telegram.messenger.time.FastDateFormat;
 import org.telegram.tgnet.Vector;
@@ -4346,6 +4349,127 @@ public class LocaleController {
             }
         }
         return name;
+    }
+
+    public static String formatEntityFormattedDate(TLRPC.TL_messageEntityFormattedDate e) {
+        return formatEntityFormattedDate(e, System.currentTimeMillis(), Locale.getDefault(), false);
+    }
+
+    public static String formatEntityFormattedDate(TLRPC.TL_messageEntityFormattedDate e, boolean forceFull) {
+        return formatEntityFormattedDate(e, System.currentTimeMillis(), Locale.getDefault(), forceFull);
+    }
+
+    private static String formatEntityFormattedDate(
+            TLRPC.TL_messageEntityFormattedDate e,
+            long nowMillis,
+            Locale locale,
+            boolean forceFull
+    ) {
+        final long whenMillis = e.date * 1000L;
+
+        if (e.relative && !forceFull) {
+            return formatEntityFormattedDateRelative(whenMillis, nowMillis, locale);
+        }
+
+        String weekComponent = "";
+        String dateComponent = "";
+        String timeComponent = "";
+        forceFull |= e.flags == 0;
+
+        if (e.day_of_week) {
+            weekComponent = getInstance().getFormatterWeekLong().format(whenMillis);
+        }
+        if (forceFull) {
+            dateComponent = getInstance().getFormatterGiveawayCard().format(whenMillis);
+        } else if (e.long_date) {
+            dateComponent = getInstance().getChatFullDate().format(whenMillis);
+        } else if (e.short_date) {
+            dateComponent = getInstance().getFormatterYear().format(whenMillis);
+        }
+
+        if (forceFull) {
+            final Calendar calendar = Calendar.getInstance();
+            calendar.setTimeInMillis(whenMillis);
+            final boolean hasSeconds = calendar.get(Calendar.SECOND) != 0;
+
+            timeComponent = hasSeconds ?
+                getInstance().getFormatterDayWithSeconds().format(whenMillis) :
+                getInstance().getFormatterDay().format(whenMillis);
+        } else if (e.long_time) {
+            timeComponent = getInstance().getFormatterDayWithSeconds().format(whenMillis);
+        } else if (e.short_time) {
+            timeComponent = getInstance().getFormatterDay().format(whenMillis);
+        }
+
+        final boolean hasWeek = !TextUtils.isEmpty(weekComponent);
+        final boolean hasDate = !TextUtils.isEmpty(dateComponent);
+        final boolean hasTime = !TextUtils.isEmpty(timeComponent);
+
+        if (!hasDate && !hasTime) {
+            return weekComponent;
+        }
+
+        String result;
+        if (hasDate && hasTime) {
+            result = formatString(R.string.formatDateAtTime, dateComponent, timeComponent);
+        } else {
+            result = hasDate ? dateComponent : timeComponent;
+        }
+        if (hasWeek) {
+            result = formatString(R.string.RelativeDateFormatterWeek2, weekComponent, result);
+        }
+        return result;
+    }
+
+    private static String formatEntityFormattedDateRelative(long whenMillis, long nowMillis, Locale locale) {
+        final long diffMillis = whenMillis - nowMillis;
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            return RelativeIcu.format(diffMillis, locale);
+        }
+        return DateUtils.getRelativeTimeSpanString(
+            whenMillis,
+            nowMillis,
+            1000L,
+            DateUtils.FORMAT_ABBREV_RELATIVE
+        ).toString();
+    }
+
+    @RequiresApi(api = Build.VERSION_CODES.N)
+    private static final class RelativeIcu {
+        static String format(long diffMillis, Locale locale) {
+            RelativeDateTimeFormatter f = RelativeDateTimeFormatter.getInstance(locale);
+
+            final boolean future = diffMillis > 0;
+            final long absSeconds = Math.max(1, Math.round(Math.abs(diffMillis) / 1000.0));
+            final RelativeDateTimeFormatter.RelativeUnit unit;
+            final long value;
+
+            if (absSeconds < 60) {
+                unit = RelativeDateTimeFormatter.RelativeUnit.SECONDS;
+                value = absSeconds;
+            } else if (absSeconds < 3600) {
+                unit = RelativeDateTimeFormatter.RelativeUnit.MINUTES;
+                value = Math.round(absSeconds / 60.0);
+            } else if (absSeconds < 86400) {
+                unit = RelativeDateTimeFormatter.RelativeUnit.HOURS;
+                value = Math.round(absSeconds / 3600.0);
+            } else if (absSeconds < 86400L * 30L) {
+                unit = RelativeDateTimeFormatter.RelativeUnit.DAYS;
+                value = Math.round(absSeconds / 86400.0);
+            } else if (absSeconds < 86400L * 365L) {
+                unit = RelativeDateTimeFormatter.RelativeUnit.MONTHS;
+                value = Math.round(absSeconds / (86400.0 * 30.0));
+            } else {
+                unit = RelativeDateTimeFormatter.RelativeUnit.YEARS;
+                value = Math.round(absSeconds / (86400.0 * 365.0));
+            }
+
+            RelativeDateTimeFormatter.Direction dir = future ?
+                RelativeDateTimeFormatter.Direction.NEXT :
+                RelativeDateTimeFormatter.Direction.LAST;
+
+            return f.format(value, dir, unit);
+        }
     }
 
     public static CharSequence getCountryWithFlag(String code, int textSizeDp) {

@@ -114,7 +114,7 @@ public class ExperimentSettingActivity extends BaseActivity {
             }
         } else if (position == disableFilteringRow) {
             sensitiveEnabled = !sensitiveEnabled;
-            TLRPC.TL_account_setContentSettings req = new TLRPC.TL_account_setContentSettings();
+            TL_account.setContentSettings req = new TL_account.setContentSettings();
             req.sensitive_enabled = sensitiveEnabled;
             AlertDialog progressDialog = new AlertDialog(getParentActivity(), 3);
             progressDialog.show();

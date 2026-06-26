@@ -18,6 +18,7 @@ import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.RectF;
+import android.text.Layout;
 import android.util.Pair;
 import android.view.View;
 import android.view.ViewGroup;
@@ -25,6 +26,7 @@ import android.widget.LinearLayout;
 
 import org.telegram.messenger.AndroidUtilities;
 import org.telegram.tgnet.TLRPC;
+import org.telegram.tgnet.tl.TL_iv;
 import org.telegram.ui.ArticleViewer;
 import org.telegram.ui.Cells.TextSelectionHelper;
 
@@ -77,10 +79,47 @@ public class TableLayout extends View {
     private RectF rect = new RectF();
     private float[] radii = new float[8];
 
+    public interface CellText extends TextSelectionHelper.TextLayoutBlock {
+        void draw(Canvas canvas, View view);
+        void attach(View view);
+        void detach(View view);
+        void setX(int x);
+        void setY(int y);
+        void setRow(int row);
+        default CharSequence getText() {
+            return getLayout() == null ? null : getLayout().getText();
+        }
+    }
+
+    private static boolean cellValignMiddle(Object cell) {
+        return cell instanceof TL_iv.pageTableCell ? ((TL_iv.pageTableCell) cell).valign_middle : ((TL_iv.pageTableCell) cell).valign_middle;
+    }
+
+    private static boolean cellValignBottom(Object cell) {
+        return cell instanceof TL_iv.pageTableCell ? ((TL_iv.pageTableCell) cell).valign_bottom : ((TL_iv.pageTableCell) cell).valign_bottom;
+    }
+
+    private static boolean cellAlignCenter(Object cell) {
+        return cell instanceof TL_iv.pageTableCell ? ((TL_iv.pageTableCell) cell).align_center : ((TL_iv.pageTableCell) cell).align_center;
+    }
+
+    private static boolean cellAlignRight(Object cell) {
+        return cell instanceof TL_iv.pageTableCell ? ((TL_iv.pageTableCell) cell).align_right : ((TL_iv.pageTableCell) cell).align_right;
+    }
+
+    private static boolean cellHeader(Object cell) {
+        return cell instanceof TL_iv.pageTableCell ? ((TL_iv.pageTableCell) cell).header : ((TL_iv.pageTableCell) cell).header;
+    }
+
+    private static int cellRowspan(Object cell) {
+        int rowspan = cell instanceof TL_iv.pageTableCell ? ((TL_iv.pageTableCell) cell).rowspan : ((TL_iv.pageTableCell) cell).rowspan;
+        return rowspan != 0 ? rowspan : 1;
+    }
+
     public class Child {
         private LayoutParams layoutParams;
-        public ArticleViewer.DrawingText textLayout;
-        private TLRPC.TL_pageTableCell cell;
+        public CellText textLayout;
+        private Object cell;
         private int index;
 
         public int textWidth;
@@ -120,26 +159,27 @@ public class TableLayout extends View {
                 fixedHeight = measuredHeight;
             }
             if (cell != null) {
-                if (cell.valign_middle) {
+                if (cellValignMiddle(cell)) {
                     textY = (measuredHeight - textHeight) / 2;
-                } else if (cell.valign_bottom) {
+                } else if (cellValignBottom(cell)) {
                     textY = measuredHeight - textHeight - itemPaddingTop;
                 } else {
                     textY = itemPaddingTop;
                 }
 
                 if (textLayout != null) {
-                    int lineCount = textLayout.getLineCount();
-                    if (!first && (lineCount > 1 || lineCount > 0 && (cell.align_center || cell.align_right))) {
-                        setTextLayout(delegate.createTextLayout(cell, measuredWidth - itemPaddingLeft * 2));
+                    Layout layout = textLayout.getLayout();
+                    int lineCount = layout == null ? 0 : layout.getLineCount();
+                    if (!first && (lineCount > 1 || lineCount > 0 && (cellAlignCenter(cell) || cellAlignRight(cell)))) {
+                        setTextLayout(createTextLayout(cell, measuredWidth - itemPaddingLeft * 2));
                         fixedHeight = textHeight + itemPaddingTop * 2;
                     }
 
                     if (textLeft != 0) {
                         textX = -textLeft;
-                        if (cell.align_right) {
+                        if (cellAlignRight(cell)) {
                             textX += (measuredWidth - textWidth - itemPaddingLeft);
-                        } else if (cell.align_center) {
+                        } else if (cellAlignCenter(cell)) {
                             textX += Math.round((measuredWidth - textWidth) / 2);
                         } else {
                             textX += itemPaddingLeft;
@@ -151,18 +191,19 @@ public class TableLayout extends View {
             }
         }
 
-        public void setTextLayout(ArticleViewer.DrawingText layout) {
+        public void setTextLayout(CellText layout) {
             textLayout = layout;
 
             if (layout != null) {
+                Layout text = layout.getLayout();
                 textWidth = 0;
                 textLeft = 0;
-                for (int a = 0, N = layout.getLineCount(); a < N; a++) {
-                    float lineLeft = layout.getLineLeft(a);
+                for (int a = 0, N = text == null ? 0 : text.getLineCount(); a < N; a++) {
+                    float lineLeft = text.getLineLeft(a);
                     textLeft = a == 0 ? (int) Math.ceil(lineLeft) : Math.min(textLeft, (int) Math.ceil(lineLeft));
-                    textWidth = (int) Math.ceil(Math.max(layout.getLineWidth(a), textWidth));
+                    textWidth = (int) Math.ceil(Math.max(text.getLineWidth(a), textWidth));
                 }
-                textHeight = layout.getHeight();
+                textHeight = text == null ? 0 : text.getHeight();
             } else {
                 textLeft = 0;
                 textWidth = 0;
@@ -185,14 +226,18 @@ public class TableLayout extends View {
 
         public void setFixedHeight(int value) {
             measuredHeight = fixedHeight;
-            if (cell.valign_middle) {
+            if (cellValignMiddle(cell)) {
                 textY = (measuredHeight - textHeight) / 2;
-            } else if (cell.valign_bottom) {
+            } else if (cellValignBottom(cell)) {
                 textY = measuredHeight - textHeight - itemPaddingTop;
             }
         }
 
         public void draw(Canvas canvas, View view) {
+            draw(canvas, view, true);
+        }
+
+        public void draw(Canvas canvas, View view, boolean drawText) {
             if (cell == null) {
                 return;
             }
@@ -200,7 +245,7 @@ public class TableLayout extends View {
             boolean isLastX = x + measuredWidth == TableLayout.this.getMeasuredWidth();
             boolean isLastY = y + measuredHeight == TableLayout.this.getMeasuredHeight();
             int rad = AndroidUtilities.dp(3);
-            if (cell.header || isStriped && layoutParams.rowSpec.span.min % 2 == 0) {
+            if (cellHeader(cell) || isStriped && layoutParams.rowSpec.span.min % 2 == 0) {
                 boolean hasCorners = false;
                 if (x == 0 && y == 0) {
                     radii[0] = radii[1] = rad;
@@ -230,23 +275,23 @@ public class TableLayout extends View {
                     rect.set(x, y, x + measuredWidth, y + measuredHeight);
                     backgroundPath.reset();
                     backgroundPath.addRoundRect(rect, radii, Path.Direction.CW);
-                    if (cell.header) {
+                    if (cellHeader(cell)) {
                         canvas.drawPath(backgroundPath, delegate.getHeaderPaint());
                     } else {
                         canvas.drawPath(backgroundPath, delegate.getStripPaint());
                     }
                 } else {
-                    if (cell.header) {
+                    if (cellHeader(cell)) {
                         canvas.drawRect(x, y, x + measuredWidth, y + measuredHeight, delegate.getHeaderPaint());
                     } else {
                         canvas.drawRect(x, y, x + measuredWidth, y + measuredHeight, delegate.getStripPaint());
                     }
                 }
             }
-            if (textLayout != null) {
+            if (drawText && textLayout != null) {
                 canvas.save();
                 canvas.translate(getTextX(), getTextY());
-                if (selectionIndex >= 0) {
+                if (selectionIndex >= 0 && textSelectionHelper != null) {
                     textSelectionHelper.draw(canvas, (TextSelectionHelper.ArticleSelectableView) getParent().getParent(), selectionIndex);
                 }
                 textLayout.draw(canvas, view);
@@ -340,17 +385,26 @@ public class TableLayout extends View {
     }
 
     public interface TableLayoutDelegate {
-        ArticleViewer.DrawingText createTextLayout(TLRPC.TL_pageTableCell cell, int maxWidth);
+        default CellText createTextLayout(TL_iv.pageTableCell cell, int maxWidth) {
+            return null;
+        }
         Paint getLinePaint();
         Paint getHalfLinePaint();
         Paint getHeaderPaint();
         Paint getStripPaint();
-        void onLayoutChild(ArticleViewer.DrawingText text, int x, int y);
+        default void onLayoutChild(CellText text, int x, int y) {}
     }
 
     private TableLayoutDelegate delegate;
 
     private ArrayList<Child> childrens = new ArrayList<>();
+
+    private CellText createTextLayout(Object cell, int maxWidth) {
+        if (cell instanceof TL_iv.pageTableCell) {
+            return delegate.createTextLayout((TL_iv.pageTableCell) cell, maxWidth);
+        }
+        return null;
+    }
 
     public void addChild(int x, int y, int colspan, int rowspan) {
         Child child = new Child(childrens.size());
@@ -363,14 +417,14 @@ public class TableLayout extends View {
         invalidateStructure();
     }
 
-    public void addChild(TLRPC.TL_pageTableCell cell, int x, int y, int colspan) {
+    public void addChild(TL_iv.pageTableCell cell, int x, int y, int colspan) {
         if (colspan == 0) {
             colspan = 1;
         }
         Child child = new Child(childrens.size());
         child.cell = cell;
         LayoutParams layoutParams = new LayoutParams();
-        layoutParams.rowSpec = new Spec(false, new Interval(y, y + (cell.rowspan != 0 ? cell.rowspan : 1)), FILL, 0.0f);
+        layoutParams.rowSpec = new Spec(false, new Interval(y, y + cellRowspan(cell)), FILL, 0.0f);
         layoutParams.columnSpec = new Spec(false, new Interval(x, x + colspan), FILL, 1.0f);
         child.layoutParams = layoutParams;
         child.rowspan = y;
@@ -747,7 +801,7 @@ public class TableLayout extends View {
                 } else {
                     maxCellWidth = (int) (width / 1.5f);
                 }
-                c.setTextLayout(delegate.createTextLayout(c.cell, maxCellWidth));
+                c.setTextLayout(createTextLayout(c.cell, maxCellWidth));
                 if (c.textLayout != null) {
                     lp.width = c.textWidth + itemPaddingLeft * 2;
                     lp.height = c.textHeight + itemPaddingTop * 2;
