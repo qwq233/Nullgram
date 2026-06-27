@@ -10662,6 +10662,12 @@ public class ChatActivityEnterView extends FrameLayout implements
         return sizeNotifierLayout;
     }
 
+    private EditTextBoldCursor mOverrideEditTextView;
+
+    public void overrideEditTextView(EditTextBoldCursor editText) {
+        mOverrideEditTextView = editText;
+    }
+
     private void createEmojiView() {
         if (emojiView != null && emojiView.currentAccount != UserConfig.selectedAccount) {
             viewParentForEmojiView.removeView(emojiView);
@@ -10700,6 +10706,9 @@ public class ChatActivityEnterView extends FrameLayout implements
 
             @Override
             public boolean onBackspace() {
+                final EditTextBoldCursor messageEditText = mOverrideEditTextView != null ?
+                    mOverrideEditTextView : ChatActivityEnterView.this.messageEditText;
+
                 if (messageEditText == null || messageEditText.length() == 0) {
                     return false;
                 }
@@ -10709,6 +10718,9 @@ public class ChatActivityEnterView extends FrameLayout implements
 
             @Override
             public void onEmojiSelected(String symbol) {
+                final EditTextBoldCursor messageEditText = mOverrideEditTextView != null ?
+                    mOverrideEditTextView : ChatActivityEnterView.this.messageEditText;
+
                 if (messageEditText == null) {
                     return;
                 }
@@ -10730,6 +10742,9 @@ public class ChatActivityEnterView extends FrameLayout implements
             }
 
             public void onCustomEmojiSelected(long documentId, TLRPC.Document document,  String emoticon, boolean isRecent) {
+                final EditTextBoldCursor messageEditText = mOverrideEditTextView != null ?
+                    mOverrideEditTextView : ChatActivityEnterView.this.messageEditText;
+
                 AndroidUtilities.runOnUIThread(() -> {
                     if (messageEditText == null) {
                         return;

@@ -77,6 +77,8 @@ import org.telegram.ui.ActionBar.BaseFragment;
 import org.telegram.ui.ActionBar.Theme;
 import org.telegram.ui.Cells.SharedPhotoVideoCell2;
 import org.telegram.ui.Cells.UserCell;
+import org.telegram.ui.Components.blur3.BlurredBackgroundDrawableViewFactory;
+import org.telegram.ui.Components.blur3.drawable.color.BlurredBackgroundProvider;
 import org.telegram.ui.Gifts.GiftSheet;
 import org.telegram.ui.ProfileActivity;
 import org.telegram.ui.Stories.StoriesController;
@@ -722,6 +724,35 @@ public class ItemOptions {
         return this;
     }
 
+    public ItemOptions addProfileCustom(TLObject obj, CharSequence text, Runnable onClickListener) {
+        final FrameLayout userButton = new FrameLayout(context);
+        userButton.setBackground(Theme.createRadSelectorDrawable(Theme.getColor(Theme.key_listSelector, resourcesProvider), 0, 12));
+
+        final BackupImageView imageView = new BackupImageView(context);
+        imageView.setRoundRadius(dp(17));
+        AvatarDrawable avatarDrawable = new AvatarDrawable();
+        avatarDrawable.setInfo(obj);
+        imageView.setForUserOrChat(obj, avatarDrawable);
+        userButton.addView(imageView, LayoutHelper.createFrame(34, 34, Gravity.LEFT | Gravity.TOP, 13, 11, 0, 11));
+
+        final TextView titleText = new TextView(context);
+        titleText.setTextColor(Theme.getColor(Theme.key_dialogTextBlack, resourcesProvider));
+        titleText.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 14);
+        titleText.setText(text);
+        titleText.setMaxWidth(dp(150));
+        titleText.setLineSpacing(dp(3), 1);
+        userButton.addView(titleText, LayoutHelper.createFrame(LayoutHelper.WRAP_CONTENT, LayoutHelper.WRAP_CONTENT, Gravity.FILL_HORIZONTAL | Gravity.TOP, 59, 8, 16, 0));
+        userButton.setOnClickListener(v -> {
+            dismiss();
+            if (onClickListener != null) {
+                onClickListener.run();
+            }
+        });
+        addView(userButton, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT));
+
+        return this;
+    }
+
 
     public ItemOptions addText(CharSequence text, int textSizeDp) {
         return addText(text, textSizeDp, -1);
@@ -874,6 +905,25 @@ public class ItemOptions {
 
     public ViewGroup getLayout() {
         return layout;
+    }
+
+    public ItemOptions setBlurBackgroundForSwipeback(BlurredBackgroundDrawableViewFactory factory, BlurredBackgroundProvider colorProvider, boolean multiwindow) {
+        if (linearLayout != null) {
+            linearLayout.setBackground(factory.create(linearLayout, multiwindow)
+                .setColorProvider(colorProvider));
+        }
+        return this;
+    }
+
+    public ItemOptions setBlurBackground(BlurredBackgroundDrawableViewFactory factory, BlurredBackgroundProvider colorProvider, boolean multiwindow) {
+        if (layout instanceof ActionBarPopupWindow.ActionBarPopupWindowLayout) {
+            layout.setBackground(factory.create(layout, multiwindow)
+                .setColorProvider(colorProvider)
+                .setPadding(dp(8))
+                .setHasPadding(true)
+                .setRadius(dp(16)));
+        }
+        return this;
     }
 
     public ItemOptions setBlurBackground(BlurringShader.BlurManager blurManager, float ox, float oy) {

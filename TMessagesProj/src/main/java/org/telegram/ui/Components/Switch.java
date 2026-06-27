@@ -313,6 +313,10 @@ public class Switch extends View {
         invalidate();
     }
 
+    public void setIconVisible(boolean visible, boolean animated) {
+        invalidate();
+    }
+
     public void setDrawIconType(int iconType, boolean animated) {
         if (drawIconType != iconType) {
             drawIconType = iconType;

@@ -47,7 +47,7 @@ public class HintView extends FrameLayout {
 
     public TextView textView;
     private ImageView imageView;
-    private ImageView arrowImageView;
+    public ImageView arrowImageView;
     private ChatMessageCell messageCell;
     private View currentView;
     private AnimatorSet animatorSet;

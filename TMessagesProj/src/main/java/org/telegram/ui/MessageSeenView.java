@@ -344,7 +344,7 @@ public class MessageSeenView extends FrameLayout {
         return listView;
     }
 
-    private static class UserCell extends FrameLayout implements NotificationCenter.NotificationCenterDelegate {
+    public static class UserCell extends FrameLayout implements NotificationCenter.NotificationCenterDelegate {
 
         private int currentAccount = UserConfig.selectedAccount;
 
@@ -398,6 +398,10 @@ public class MessageSeenView extends FrameLayout {
         }
 
         public void setUser(TLObject object, int date) {
+            setUser(object, date, false);
+        }
+
+        public void setUser(TLObject object, int date, boolean isVote) {
             this.object = object;
             updateStatus(false);
 

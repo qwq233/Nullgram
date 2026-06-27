@@ -69,7 +69,7 @@ public abstract class BottomSheetWithRecyclerListView extends BottomSheet {
     public NestedSizeNotifierLayout nestedSizeNotifierLayout;
 
     public float topPadding = 0.4f;
-    boolean showShadow = true;
+    protected boolean showShadow = true;
     private float shadowAlpha = 1f;
 
     private boolean showHandle = false;
@@ -494,6 +494,11 @@ public abstract class BottomSheetWithRecyclerListView extends BottomSheet {
             super.setTranslationY(translationY);
             containerView.invalidate();
         }
+    }
+
+    @SuppressLint("AppCompatCustomView")
+    public BottomSheetWithRecyclerListView(Context context, BaseFragment fragment, boolean needFocus, boolean edgeToEdge, boolean hasFixedSize, boolean useNested, boolean stackFromEnd, ActionBarType actionBarType, Theme.ResourcesProvider resourcesProvider) {
+        this(context, fragment, needFocus, hasFixedSize, useNested, stackFromEnd, actionBarType, resourcesProvider);
     }
 
     protected void resetAdapter(Context context) {

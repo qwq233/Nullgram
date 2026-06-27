@@ -55,6 +55,10 @@ public class GraySectionCell extends FrameLayout implements Theme.Colorable {
     }
 
     public GraySectionCell(Context context, Theme.ResourcesProvider resourcesProvider) {
+        this(context, 16, resourcesProvider);
+    }
+
+    public GraySectionCell(Context context, int padding, Theme.ResourcesProvider resourcesProvider) {
         super(context);
         this.resourcesProvider = resourcesProvider;
 
@@ -65,7 +69,7 @@ public class GraySectionCell extends FrameLayout implements Theme.Colorable {
         textView.setTypeface(AndroidUtilities.bold());
         textView.setTextColor(getThemedColor(Theme.key_graySectionText));
         textView.setGravity((LocaleController.isRTL ? Gravity.RIGHT : Gravity.LEFT) | Gravity.CENTER_VERTICAL);
-        addView(textView, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, LayoutHelper.MATCH_PARENT, (LocaleController.isRTL ? Gravity.RIGHT : Gravity.LEFT) | Gravity.TOP, 16, 0, 16, 0));
+        addView(textView, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, LayoutHelper.MATCH_PARENT, (LocaleController.isRTL ? Gravity.RIGHT : Gravity.LEFT) | Gravity.TOP, padding, 0, padding, 0));
 
         rightTextView = new AnimatedTextView(getContext(), true, true, true) {
             @Override

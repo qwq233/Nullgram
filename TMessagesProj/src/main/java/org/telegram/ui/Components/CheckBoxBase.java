@@ -95,6 +95,7 @@ public class CheckBoxBase {
     private int strokeBackgroundKey = Theme.key_dialogBackground;
     private int strokeBackgroundWidth = -1;
     private float customRadius = 0;
+    private float customRadiusFactor = 1;
 
     private int backgroundColor;
 
@@ -140,6 +141,14 @@ public class CheckBoxBase {
         backgroundPaint.setStrokeWidth(dp(1.2f));
     }
 
+    public void setSize(float size) {
+        if (this.size == size) {
+            return;
+        }
+        this.size = size;
+        invalidate();
+    }
+
     public void setResourcesProvider(Theme.ResourcesProvider resourcesProvider) {
         this.resourcesProvider = resourcesProvider;
     }
@@ -167,8 +176,20 @@ public class CheckBoxBase {
         invalidate();
     }
 
+    public void setCustomRadiusFactor(float customRadiusFactor) {
+        if (this.customRadiusFactor == customRadiusFactor) {
+            return;
+        }
+        this.customRadiusFactor = customRadiusFactor;
+        invalidate();
+    }
+
     public void setDrawUnchecked(boolean value) {
+        if (drawUnchecked == value) {
+            return;
+        }
         drawUnchecked = value;
+        invalidate();
     }
 
     public boolean getDrawUnchecked() {
@@ -196,6 +217,7 @@ public class CheckBoxBase {
     }
 
     private void invalidate() {
+        if (parentView == null) return;
         if (parentView.getParent() != null) {
             View parent = (View) parentView.getParent();
             parent.invalidate();
@@ -217,10 +239,17 @@ public class CheckBoxBase {
     }
 
     public void setEnabled(boolean value) {
+        if (enabled == value) {
+            return;
+        }
         enabled = value;
+        invalidate();
     }
 
     public void setBackgroundType(int type) {
+        if (backgroundType == type) {
+            return;
+        }
         backgroundType = type;
         if (type == 12 || type == 13) {
             backgroundPaint.setStrokeWidth(dp(1));
@@ -234,6 +263,7 @@ public class CheckBoxBase {
         } else if (type != 0) {
             backgroundPaint.setStrokeWidth(dp(1.5f));
         }
+        invalidate();
     }
 
     public void cancelCheckAnimator() {
@@ -385,7 +415,13 @@ public class CheckBoxBase {
             if (backgroundType == 12 || backgroundType == 13) {
                 //draw nothing
             } else if (backgroundType == 8 || backgroundType == 10 || backgroundType == 14) {
-                canvas.drawCircle(cx, cy, rad - dp(1.5f), backgroundPaint);
+                if (customRadius > 0) {
+                    final float r = rad - dp(1.5f);
+                    final float rr = lerp(r, customRadius, customRadiusFactor);
+                    canvas.drawRoundRect(cx - r, cy - r, cx + r, cy + r, rr, rr, backgroundPaint);
+                } else {
+                    canvas.drawCircle(cx, cy, rad - dp(1.5f), backgroundPaint);
+                }
             } else if (backgroundType == 6 || backgroundType == 7) {
                 canvas.drawCircle(cx, cy, rad - dp(1), paint);
                 canvas.drawCircle(cx, cy, rad - dp(1.5f), backgroundPaint);
@@ -475,7 +511,11 @@ public class CheckBoxBase {
                 float sizeHalf = dp(size) / 2f;
                 int restoreCount = canvas.save();
                 canvas.translate(cx - sizeHalf, cy - sizeHalf);
-                canvas.saveLayerAlpha(0, 0, dp(size), dp(size), 255, Canvas.ALL_SAVE_FLAG);
+
+                final boolean needSaveLayer = roundProgress < 1;
+                if (needSaveLayer) {
+                    canvas.saveLayerAlpha(0, 0, dp(size), dp(size), 255, Canvas.ALL_SAVE_FLAG);
+                }
                 Paint circlePaint = circlePaintProvider.provide(null);
                 if (backgroundType == 12 || backgroundType == 13) {
                     int a = circlePaint.getAlpha();
@@ -484,10 +524,22 @@ public class CheckBoxBase {
                     if (circlePaint != paint) {
                         circlePaint.setAlpha(a);
                     }
+                } else if (customRadius > 0) {
+                    rad -= dp(0.5f);
+                    final float rad2 = lerp(rad, customRadius, customRadiusFactor);
+                    canvas.drawRoundRect(sizeHalf - rad, sizeHalf - rad, sizeHalf + rad, sizeHalf + rad, rad2, rad2, circlePaint);
+                    final float r = rad * (1.0f - roundProgress);
+                    final float rr = lerp(r, customRadius, customRadiusFactor);
+                    if (needSaveLayer && r > 0) {
+                        canvas.drawRoundRect(sizeHalf - r, sizeHalf - r, sizeHalf + r, sizeHalf + r, rr, rr, Theme.PAINT_CLEAR);
+                    }
                 } else {
                     rad -= dp(0.5f);
                     canvas.drawCircle(sizeHalf, sizeHalf, rad, circlePaint);
-                    canvas.drawCircle(sizeHalf, sizeHalf, rad * (1.0f - roundProgress), eraser);
+                    final float r = rad * (1.0f - roundProgress);
+                    if (needSaveLayer && r > 0) {
+                        canvas.drawCircle(sizeHalf, sizeHalf, r, Theme.PAINT_CLEAR);
+                    }
                 }
                 canvas.restoreToCount(restoreCount);
             }

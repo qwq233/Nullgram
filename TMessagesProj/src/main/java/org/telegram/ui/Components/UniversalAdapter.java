@@ -382,7 +382,7 @@ public class UniversalAdapter extends AdapterWithDiffUtils {
         if (viewType >= UItem.factoryViewTypeStartsWith) {
             UItem.UItemFactory<?> factory = UItem.findFactory(viewType);
             if (factory != null) {
-                view = factory.createView(context, currentAccount, classGuid, resourcesProvider);
+                view = factory.createView(context, listView, currentAccount, classGuid, resourcesProvider);
             } else {
                 view = new View(context);
             }

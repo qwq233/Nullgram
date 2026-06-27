@@ -1093,6 +1093,9 @@ public class PhotoViewer implements NotificationCenter.NotificationCenterDelegat
     public final static int SELECT_TYPE_WALLPAPER = 3;
     public final static int SELECT_TYPE_QR = 10;
     public final static int SELECT_TYPE_STICKER = 11;
+    public final static int SELECT_TYPE_GIF = 12;
+    public final static int SELECT_TYPE_POLL_MEDIA = 13;
+    public final static int SELECT_TYPE_POLL_MEDIA_EDIT = 14;
 
     OldVideoPlayerRewinder longVideoPlayerRewinder = new OldVideoPlayerRewinder() {
         @Override
@@ -2913,6 +2916,8 @@ public class PhotoViewer implements NotificationCenter.NotificationCenterDelegat
         }
         default void onReleasePlayerBeforeClose(int currentIndex) {};
         default long getDialogId() { return 0; }
+        default boolean canSchedule() { return false; }
+        default boolean canSetTimer() { return false; }
 
         default boolean forceAllInGroup() {
             return false;
@@ -2929,8 +2934,23 @@ public class PhotoViewer implements NotificationCenter.NotificationCenterDelegat
         default boolean isEditingMessage() {
             return false;
         }
+        default boolean isEditingSticker() {
+            return false;
+        }
 
         default boolean isEditingMessageResend() {
+            return false;
+        }
+
+        default void onPollAttachReplace() {
+
+        }
+
+        default void onPollAttachDelete() {
+
+        }
+
+        default boolean allowLivePhotos() {
             return false;
         }
     }

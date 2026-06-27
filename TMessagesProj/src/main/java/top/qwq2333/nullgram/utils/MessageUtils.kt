@@ -70,8 +70,10 @@ import org.telegram.messenger.UserConfig
 import org.telegram.messenger.Utilities
 import org.telegram.tgnet.ConnectionsManager
 import org.telegram.tgnet.RequestDelegate
+import org.telegram.tgnet.SerializedData
 import org.telegram.tgnet.TLObject
 import org.telegram.tgnet.TLRPC
+import org.telegram.tgnet.tl.TL_iv
 import org.telegram.ui.ActionBar.AlertDialog
 import org.telegram.ui.ActionBar.BaseFragment
 import org.telegram.ui.ActionBar.Theme
@@ -90,6 +92,7 @@ import org.telegram.ui.Components.EditTextBoldCursor
 import org.telegram.ui.Components.Forum.ForumUtilities
 import org.telegram.ui.Components.LayoutHelper
 import org.telegram.ui.Components.TranscribeButton
+import top.qwq2333.nullgram.helpers.TranslateHelper
 import top.qwq2333.nullgram.helpers.QrHelper
 import top.qwq2333.nullgram.helpers.QrHelper.readQr
 import top.qwq2333.nullgram.tryOrLog
@@ -548,6 +551,8 @@ class MessageUtils(num: Int) : BaseController(num) {
         }
         return if (messageObject.isPoll) {
             true
+        } else if (hasTranslatableRichMessage(messageObject)) {
+            true
         } else !TextUtils.isEmpty(messageObject.messageOwner.message) && !isLinkOrEmojiOnlyMessage(messageObject)
     }
 
@@ -576,6 +581,8 @@ class MessageUtils(num: Int) : BaseController(num) {
             pollText.toString()
         } else if (messageObject.isVoiceTranscriptionOpen) {
             messageObject.messageOwner.voiceTranscription
+        } else if (hasTranslatableRichMessage(messageObject)) {
+            getRichMessagePlainText(messageObject.messageOwner.rich_message)
         } else {
             messageObject.messageOwner.message
         }
@@ -589,12 +596,231 @@ class MessageUtils(num: Int) : BaseController(num) {
             selectedObject
         } else if (selectedObject.isVoiceTranscriptionOpen && !TextUtils.isEmpty(selectedObject.messageOwner.voiceTranscription) && !TranscribeButton.isTranscribing(selectedObject)) {
             selectedObject
+        } else if (hasTranslatableRichMessage(selectedObject)) {
+            selectedObject
         } else if (!selectedObject.isVoiceTranscriptionOpen && !TextUtils.isEmpty(selectedObject.messageOwner.message) && !isLinkOrEmojiOnlyMessage(selectedObject)) {
             selectedObject
         } else null
         return if (messageObject != null && messageObject.translating) {
             null
         } else messageObject
+    }
+
+    fun hasTranslatableRichMessage(messageObject: MessageObject?): Boolean {
+        val richMessage = messageObject?.messageOwner?.rich_message ?: return false
+        val units = ArrayList<RichTranslationUnit>()
+        collectRichMessageUnits(richMessage, units)
+        return units.isNotEmpty()
+    }
+
+    fun translateRichMessage(
+        richMessage: TL_iv.RichMessage?,
+        sourceLanguage: String?,
+        onSuccess: (TL_iv.RichMessage, String?, String?) -> Unit,
+        onError: (Exception) -> Unit
+    ) {
+        val translatedRichMessage = copyRichMessage(richMessage)
+        if (translatedRichMessage == null) {
+            onError(IllegalArgumentException("Invalid rich message"))
+            return
+        }
+        val units = ArrayList<RichTranslationUnit>()
+        collectRichMessageUnits(translatedRichMessage, units)
+        if (units.isEmpty()) {
+            onError(UnsupportedOperationException("Unsupported translation query"))
+            return
+        }
+        translateRichUnit(translatedRichMessage, units, 0, sourceLanguage.orEmpty(), null, null, onSuccess, onError)
+    }
+
+    private class RichTranslationUnit(
+        val get: () -> String?,
+        val set: (String) -> Unit
+    )
+
+    private fun translateRichUnit(
+        richMessage: TL_iv.RichMessage,
+        units: ArrayList<RichTranslationUnit>,
+        index: Int,
+        sourceLanguage: String,
+        detectedSourceLanguage: String?,
+        targetLanguage: String?,
+        onSuccess: (TL_iv.RichMessage, String?, String?) -> Unit,
+        onError: (Exception) -> Unit
+    ) {
+        if (index >= units.size) {
+            onSuccess(richMessage, detectedSourceLanguage ?: sourceLanguage, targetLanguage)
+            return
+        }
+        val unit = units[index]
+        val original = unit.get()
+        if (!isTranslatableRichText(original)) {
+            translateRichUnit(richMessage, units, index + 1, sourceLanguage, detectedSourceLanguage, targetLanguage, onSuccess, onError)
+            return
+        }
+        TranslateHelper.translate(original!!, sourceLanguage, onSuccess = { translation, sourceLanguageT, targetLanguageT ->
+            if (translation !is String) {
+                onError(UnsupportedOperationException("Unsupported translation query"))
+                return@translate Unit
+            }
+            unit.set(if (TranslateHelper.showOriginal) "$original\n--------\n$translation" else translation)
+            translateRichUnit(
+                richMessage,
+                units,
+                index + 1,
+                if (sourceLanguage.isEmpty()) sourceLanguageT else sourceLanguage,
+                detectedSourceLanguage ?: sourceLanguageT,
+                targetLanguage ?: targetLanguageT,
+                onSuccess,
+                onError
+            )
+            Unit
+        }, onError = { e ->
+            onError(e)
+            Unit
+        })
+    }
+
+    private fun copyRichMessage(richMessage: TL_iv.RichMessage?): TL_iv.RichMessage? {
+        if (richMessage == null) {
+            return null
+        }
+        var output: SerializedData? = null
+        var input: SerializedData? = null
+        return try {
+            output = SerializedData()
+            richMessage.serializeToStream(output)
+            input = SerializedData(output.toByteArray())
+            TL_iv.RichMessage.TLdeserialize(input, input.readInt32(false), false)
+        } catch (e: Exception) {
+            null
+        } finally {
+            output?.cleanup()
+            input?.cleanup()
+        }
+    }
+
+    private fun getRichMessagePlainText(richMessage: TL_iv.RichMessage?): String {
+        if (richMessage == null) {
+            return ""
+        }
+        val units = ArrayList<RichTranslationUnit>()
+        collectRichMessageUnits(richMessage, units)
+        return units.mapNotNull { it.get() }.joinToString("\n")
+    }
+
+    private fun collectRichMessageUnits(richMessage: TL_iv.RichMessage, units: ArrayList<RichTranslationUnit>) {
+        richMessage.blocks?.forEach { collectRichBlockUnits(it, units) }
+    }
+
+    private fun collectRichBlocksUnits(blocks: ArrayList<TL_iv.PageBlock>?, units: ArrayList<RichTranslationUnit>) {
+        blocks?.forEach { collectRichBlockUnits(it, units) }
+    }
+
+    private fun collectRichBlockUnits(block: TL_iv.PageBlock?, units: ArrayList<RichTranslationUnit>) {
+        if (block == null || block is TL_iv.pageBlockPreformatted || block is TL_iv.pageBlockMath) {
+            return
+        }
+        collectRichTextUnits(block.text, units)
+        collectPageCaptionUnits(block.caption, units)
+        when (block) {
+            is TL_iv.pageBlockAuthorDate -> collectRichTextUnits(block.author, units)
+            is TL_iv.pageBlockBlockquote -> collectRichTextUnits(block.caption, units)
+            is TL_iv.pageBlockBlockquoteBlocks -> {
+                collectRichBlocksUnits(block.blocks, units)
+                collectRichTextUnits(block.caption, units)
+            }
+            is TL_iv.pageBlockPullquote -> collectRichTextUnits(block.caption, units)
+            is TL_iv.pageBlockList -> block.items?.forEach { collectRichListItemUnits(it, units) }
+            is TL_iv.pageBlockCover -> collectRichBlockUnits(block.cover, units)
+            is TL_iv.pageBlockEmbedPost -> {
+                collectStringUnit({ block.author }, { block.author = it }, units)
+                collectRichBlocksUnits(block.blocks, units)
+            }
+            is TL_iv.pageBlockCollage -> collectRichBlocksUnits(block.items, units)
+            is TL_iv.pageBlockSlideshow -> collectRichBlocksUnits(block.items, units)
+            is TL_iv.pageBlockTable -> {
+                collectRichTextUnits(block.title, units)
+                block.rows?.forEach { row ->
+                    row.cells?.forEach { cell -> collectRichTextUnits(cell.text, units) }
+                }
+            }
+            is TL_iv.pageBlockOrderedList -> block.items?.forEach { collectRichOrderedListItemUnits(it, units) }
+            is TL_iv.pageBlockDetails -> {
+                collectRichBlocksUnits(block.blocks, units)
+                collectRichTextUnits(block.title, units)
+            }
+            is TL_iv.pageBlockRelatedArticles -> {
+                collectRichTextUnits(block.title, units)
+                block.articles?.forEach { article ->
+                    collectStringUnit({ article.title }, { article.title = it }, units)
+                    collectStringUnit({ article.description }, { article.description = it }, units)
+                    collectStringUnit({ article.author }, { article.author = it }, units)
+                }
+            }
+        }
+    }
+
+    private fun collectStringUnit(get: () -> String?, set: (String) -> Unit, units: ArrayList<RichTranslationUnit>) {
+        if (isTranslatableRichText(get())) {
+            units.add(RichTranslationUnit(get, set))
+        }
+    }
+
+    private fun collectRichOrderedListItemUnits(item: TL_iv.PageListOrderedItem?, units: ArrayList<RichTranslationUnit>) {
+        when (item) {
+            is TL_iv.TL_pageListOrderedItemText -> collectRichTextUnits(item.text, units)
+            is TL_iv.TL_pageListOrderedItemBlocks -> collectRichBlocksUnits(item.blocks, units)
+        }
+    }
+
+    private fun collectRichListItemUnits(item: TL_iv.PageListItem?, units: ArrayList<RichTranslationUnit>) {
+        when (item) {
+            is TL_iv.TL_pageListItemText -> collectRichTextUnits(item.text, units)
+            is TL_iv.TL_pageListItemBlocks -> collectRichBlocksUnits(item.blocks, units)
+        }
+    }
+
+    private fun collectPageCaptionUnits(caption: TL_iv.PageCaption?, units: ArrayList<RichTranslationUnit>) {
+        if (caption == null) {
+            return
+        }
+        collectRichTextUnits(caption.text, units)
+        collectRichTextUnits(caption.credit, units)
+    }
+
+    private fun collectRichTextUnits(text: TL_iv.RichText?, units: ArrayList<RichTranslationUnit>) {
+        when (text) {
+            null,
+            is TL_iv.textEmpty,
+            is TL_iv.textFixed,
+            is TL_iv.textImage,
+            is TL_iv.textMath,
+            is TL_iv.textCustomEmoji,
+            is TL_iv.textEmail,
+            is TL_iv.textPhone,
+            is TL_iv.textMention,
+            is TL_iv.textHashtag,
+            is TL_iv.textBotCommand,
+            is TL_iv.textCashtag,
+            is TL_iv.textAutoUrl,
+            is TL_iv.textAutoEmail,
+            is TL_iv.textAutoPhone,
+            is TL_iv.textBankCard,
+            is TL_iv.textMentionName,
+            is TL_iv.textDate -> return
+
+            is TL_iv.textPlain -> if (isTranslatableRichText(text.text)) {
+                units.add(RichTranslationUnit({ text.text }, { text.text = it }))
+            }
+
+            is TL_iv.textConcat -> text.texts?.forEach { collectRichTextUnits(it, units) }
+            else -> collectRichTextUnits(text.text, units)
+        }
+    }
+
+    private fun isTranslatableRichText(text: String?): Boolean {
+        return !text.isNullOrBlank() && !Emoji.fullyConsistsOfEmojis(text)
     }
 
     fun resetMessageContent(dialogId: Long, messageObject: MessageObject, translated: Boolean) {

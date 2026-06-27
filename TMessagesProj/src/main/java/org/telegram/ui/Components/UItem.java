@@ -391,6 +391,19 @@ public class UItem extends AdapterWithDiffUtils.Item {
         return item;
     }
 
+    public static UItem asSpace(int tag, int height) {
+        UItem item = new UItem(UniversalAdapter.VIEW_TYPE_SPACE, false);
+        item.id = tag;
+        item.intValue = height;
+        return item;
+    }
+
+    public static UItem asSpace(int tag, int height, int bg) {
+        UItem item = asSpace(tag, height);
+        item.accent = bg != 0;
+        return item;
+    }
+
     public static UItem asRoundCheckbox(CharSequence text) {
         UItem item = new UItem(UniversalAdapter.VIEW_TYPE_ROUND_CHECKBOX, false);
         item.text = text;
@@ -700,6 +713,10 @@ public class UItem extends AdapterWithDiffUtils.Item {
 
         public V createView(Context context, int currentAccount, int classGuid, Theme.ResourcesProvider resourcesProvider) {
             return null;
+        }
+
+        public V createView(Context context, RecyclerListView listView, int currentAccount, int classGuid, Theme.ResourcesProvider resourcesProvider) {
+            return createView(context, currentAccount, classGuid, resourcesProvider);
         }
 
         public void bindView(View view, UItem item, boolean divider, UniversalAdapter adapter, UniversalRecyclerView listView) {

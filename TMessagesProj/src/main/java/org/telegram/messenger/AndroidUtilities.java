@@ -49,8 +49,12 @@ import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.ColorMatrix;
+import android.graphics.ColorMatrixColorFilter;
 import android.graphics.Matrix;
+import android.graphics.Paint;
 import android.graphics.Point;
+import android.graphics.PorterDuff;
+import android.graphics.PorterDuffXfermode;
 import android.graphics.Rect;
 import android.graphics.RectF;
 import android.graphics.Typeface;
@@ -6809,6 +6813,17 @@ public class AndroidUtilities {
                 return photo;
         }
         return null;
+    }
+
+    public static Bitmap applyColorMatrix(Bitmap bitmap, ColorMatrix matrix) {
+        final Paint paint = new Paint();
+        paint.setColorFilter(new ColorMatrixColorFilter(matrix));
+        paint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.SRC));
+
+        final Bitmap result = Bitmap.createBitmap(bitmap.getWidth(), bitmap.getHeight(), Bitmap.Config.ARGB_8888);
+        final Canvas canvas = new Canvas(result);
+        canvas.drawBitmap(bitmap, 0, 0, paint);
+        return result;
     }
 
     public static TLRPC.Document findDocument(List<TLRPC.Document> array, long id) {

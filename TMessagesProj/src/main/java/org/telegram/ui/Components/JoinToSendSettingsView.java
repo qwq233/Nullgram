@@ -4,17 +4,24 @@ import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.ValueAnimator;
 import android.content.Context;
+import android.os.Bundle;
 import android.view.View;
 import android.widget.LinearLayout;
 
 import org.telegram.messenger.AndroidUtilities;
+import org.telegram.messenger.ChatObject;
+import org.telegram.messenger.DialogObject;
 import org.telegram.messenger.LocaleController;
+import org.telegram.messenger.MessagesController;
 import org.telegram.messenger.R;
+import org.telegram.messenger.UserConfig;
 import org.telegram.tgnet.TLRPC;
+import org.telegram.ui.ActionBar.BaseFragment;
 import org.telegram.ui.ActionBar.Theme;
 import org.telegram.ui.Cells.HeaderCell;
 import org.telegram.ui.Cells.TextCheckCell;
 import org.telegram.ui.Cells.TextInfoPrivacyCell;
+import org.telegram.ui.ProfileActivity;
 
 public class JoinToSendSettingsView extends LinearLayout {
 
@@ -154,6 +161,33 @@ public class JoinToSendSettingsView extends LinearLayout {
             updateToggleValue(1);
         }
         requestLayout();
+    }
+
+    public void setFullInfo(BaseFragment fragment, TLRPC.ChatFull chatFull) {
+        final boolean isChannel = ChatObject.isChannelAndNotMegaGroup(currentChat);
+        final boolean isPublic = ChatObject.isPublic(currentChat);
+
+        if (chatFull != null && chatFull.guard_bot_id != 0) {
+            final String name = "@" + DialogObject.getPublicUsername(MessagesController.getInstance(UserConfig.selectedAccount).getUser(chatFull.guard_bot_id));
+            joinRequestInfoCell.setText(AndroidUtilities.replaceSingleLink(LocaleController.formatString(
+                isChannel ?
+                    R.string.ChannelSettingsJoinRequestInfoManagedBy :
+                    (isPublic ?
+                        R.string.GroupPublicSettingsJoinRequestInfoManagedBy :
+                        R.string.GroupPrivateSettingsJoinRequestInfoManagedBy), name
+            ), Theme.getColor(Theme.key_telegram_color_text), () -> {
+                Bundle bundle = new Bundle();
+                bundle.putLong("user_id", chatFull.guard_bot_id);
+                fragment.presentFragment(new ProfileActivity(bundle));
+            }));
+        } else {
+            joinRequestInfoCell.setText(LocaleController.getString(isChannel ?
+                R.string.ChannelSettingsJoinRequestInfo2 :
+                (isPublic ?
+                    R.string.GroupPublicSettingsJoinRequestInfo2 :
+                    R.string.GroupPrivateSettingsJoinRequestInfo2)
+            ));
+        }
     }
 
     public void setJoinRequest(boolean newJoinRequest) {

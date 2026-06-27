@@ -53,6 +53,7 @@ import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.GradientDrawable;
+import android.graphics.drawable.InsetDrawable;
 import android.graphics.drawable.NinePatchDrawable;
 import android.graphics.drawable.RippleDrawable;
 import android.graphics.drawable.ShapeDrawable;
@@ -3279,6 +3280,7 @@ public class Theme {
     public static TextPaint chat_replyNamePaint;
     public static TextPaint chat_replyTextPaint;
     public static TextPaint chat_quoteTextPaint;
+    public static TextPaint chat_explanationTextPaint;
     public static TextPaint chat_titleLabelTextPaint;
     public static TextPaint chat_topicTextPaint;
     public static TextPaint chat_commentTextPaint;
@@ -4179,6 +4181,8 @@ public class Theme {
     public static final int key_chat_reactionServiceButtonBackgroundSelected = colorsCount++;
     public static final int key_chat_reactionServiceButtonTextSelected = colorsCount++;
     public static final int key_reactionStarSelector = colorsCount++;
+    public static final int key_glass_targetMainTabs = colorsCount++;
+    public static final int key_glass_targetMainTopPanel = colorsCount++;
 
     public static final int key_premiumGradient0 = colorsCount++;
     public static final int key_premiumGradient1 = colorsCount++;
@@ -4480,6 +4484,8 @@ public class Theme {
         fallbackKeys.put(key_chat_outPollWrongAnswer, key_chat_attachAudioBackground);
         fallbackKeys.put(key_chat_editMediaButton, key_dialogFloatingButton);
         fallbackKeys.put(key_chat_attachCheckBoxBackground, key_dialogRoundCheckBox);
+        fallbackKeys.put(key_glass_targetMainTabs, key_dialogBackground);
+        fallbackKeys.put(key_glass_targetMainTopPanel, key_dialogBackground);
 
         fallbackKeys.put(key_profile_tabText, key_windowBackgroundWhiteGrayText);
         fallbackKeys.put(key_profile_tabSelectedText, key_windowBackgroundWhiteBlueHeader);
@@ -5501,6 +5507,10 @@ public class Theme {
         return defaultDrawable;
     }
 
+    public static InsetDrawable createRoundRectDrawableShadowed(int rad, int defaultColor) {
+        return new InsetDrawable(createRoundRectDrawable(rad, defaultColor), 0);
+    }
+
     public static GradientDrawable createRoundRectGradientDrawable(int rad, int topColor, int bottomColor) {
         GradientDrawable gd = new GradientDrawable(
                 GradientDrawable.Orientation.RIGHT_LEFT,
@@ -5521,6 +5531,18 @@ public class Theme {
         ShapeDrawable defaultDrawable = new ShapeDrawable(new RoundRectShape(new float[]{topRad, topRad, topRad, topRad, bottomRad, bottomRad, bottomRad, bottomRad}, null, null));
         defaultDrawable.getPaint().setColor(defaultColor);
         return defaultDrawable;
+    }
+
+    public static Drawable createInsetRoundRectDrawable(int color, float radius, int inset) {
+        return createInsetRoundRectDrawable(color, radius, inset, inset);
+    }
+
+    public static Drawable createInsetRoundRectDrawable(int color, float radius, int insetW, int insetH) {
+        return createInsetRoundRectDrawable(color, radius, insetW, insetH, insetW, insetH);
+    }
+
+    public static Drawable createInsetRoundRectDrawable(int color, float radius, int insetL, int insetT, int insetR, int insetB) {
+        return new InsetDrawable(createRoundRectDrawable((int) radius, color), insetL, insetT, insetR, insetB);
     }
 
     public static Drawable createServiceDrawable(int rad, View view, View containerView) {
@@ -8633,6 +8655,7 @@ public class Theme {
                 chat_replyNamePaint.setTypeface(AndroidUtilities.bold());
                 chat_replyTextPaint = new TextPaint(TextPaint.ANTI_ALIAS_FLAG);
                 chat_quoteTextPaint = new TextPaint(TextPaint.ANTI_ALIAS_FLAG);
+                chat_explanationTextPaint = new TextPaint(TextPaint.ANTI_ALIAS_FLAG);
                 chat_titleLabelTextPaint = new TextPaint(TextPaint.ANTI_ALIAS_FLAG);
                 chat_topicTextPaint = new TextPaint(TextPaint.ANTI_ALIAS_FLAG);
                 chat_topicTextPaint.setTypeface(AndroidUtilities.bold());
@@ -8664,6 +8687,7 @@ public class Theme {
             chat_replyNamePaint.setTextSize(dp(smallerDp));
             chat_replyTextPaint.setTextSize(dp(smallerDp));
             chat_quoteTextPaint.setTextSize(dp(smallerDp - 1));
+            chat_explanationTextPaint.setTextSize(dp(smallerDp));
             chat_topicTextPaint.setTextSize(dp(smallerDp - 1));
             chat_titleLabelTextPaint.setTextSize(dp(smallerDp - 2));
             chat_forwardNamePaint.setTextSize(dp(smallerDp));
@@ -10720,5 +10744,8 @@ public class Theme {
         DEBUG_GREEN_STROKE.setColor(0xff00ff00);
         DEBUG_GREEN_STROKE.setStrokeWidth(2);
         DEBUG_GREEN_STROKE.setStyle(Paint.Style.STROKE);
+    }
+    public static Paint PAINT_CLEAR = new Paint(Paint.ANTI_ALIAS_FLAG); static {
+        PAINT_CLEAR.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.CLEAR));
     }
 }

@@ -55,24 +55,37 @@ public abstract class BlurredBackgroundDrawable extends Drawable {
         }
     }
 
-    public void setPadding(int padding) {
+    public BlurredBackgroundDrawable setPadding(int padding) {
         if (boundProps.padding != padding) {
             boundProps.padding = padding;
             boundProps.build();
 
             onBoundPropsChanged();
         }
+        return this;
     }
 
-    public void setRadius(float radius) {
+    public BlurredBackgroundDrawable setHasPadding(boolean hasPadding) {
+        boundProps.hasPadding = hasPadding;
+        return this;
+    }
+
+    @Override
+    public boolean getPadding(@NonNull Rect padding) {
+        padding.set(boundProps.padding, boundProps.padding, boundProps.padding, boundProps.padding);
+        return boundProps.hasPadding;
+    }
+
+    public BlurredBackgroundDrawable setRadius(float radius) {
         Arrays.fill(boundProps.radii, radius);
         Arrays.fill(boundProps.shaderRadii, radius);
         boundProps.build();
 
         onBoundPropsChanged();
+        return this;
     }
 
-    public void setRadius(float topLeft, float topRight, float bottomRight, float bottomLeft) {
+    public BlurredBackgroundDrawable setRadius(float topLeft, float topRight, float bottomRight, float bottomLeft) {
         boundProps.radii[0] = boundProps.radii[1] = topLeft;
         boundProps.radii[2] = boundProps.radii[3] = topRight;
         boundProps.radii[4] = boundProps.radii[5] = bottomRight;
@@ -80,9 +93,10 @@ public abstract class BlurredBackgroundDrawable extends Drawable {
         boundProps.build();
 
         onBoundPropsChanged();
+        return this;
     }
 
-    public void setRadius(float topLeft, float topRight, float bottomRight, float bottomLeft, boolean forceBottomZero) {
+    public BlurredBackgroundDrawable setRadius(float topLeft, float topRight, float bottomRight, float bottomLeft, boolean forceBottomZero) {
         boundProps.radii[0] = boundProps.radii[1] = topLeft;
         boundProps.radii[2] = boundProps.radii[3] = topRight;
         boundProps.radii[4] = boundProps.radii[5] = forceBottomZero ? 0 : bottomRight;
@@ -94,6 +108,7 @@ public abstract class BlurredBackgroundDrawable extends Drawable {
         boundProps.build();
 
         onBoundPropsChanged();
+        return this;
     }
 
     public void setThickness(int thickness) {
@@ -151,9 +166,10 @@ public abstract class BlurredBackgroundDrawable extends Drawable {
     protected BlurredBackgroundColorProvider colorProvider;
     protected int shadowColor, backgroundColor, strokeColorTop, strokeColorBottom;
 
-    public void setColorProvider(BlurredBackgroundColorProvider colorProvider) {
+    public BlurredBackgroundDrawable setColorProvider(BlurredBackgroundColorProvider colorProvider) {
         this.colorProvider = colorProvider;
         updateColors();
+        return this;
     }
 
     @CallSuper
@@ -177,6 +193,7 @@ public abstract class BlurredBackgroundDrawable extends Drawable {
         public final float[] radii = new float[8];
         public final float[] shaderRadii = new float[8];
         public int padding;
+        public boolean hasPadding;
         public int liquidThickness;
         public float liquidIntensity = 0.75f;
         public float liquidIndex = 1.5f;
@@ -537,6 +554,11 @@ public abstract class BlurredBackgroundDrawable extends Drawable {
     @CallSuper
     protected void onSourceRelativePositionChanged(RectF position) {
 
+    }
+
+    public void setStrokeWidth(float strokeWidthTop, float strokeWidthBottom) {
+        boundProps.strokeWidthTop = strokeWidthTop;
+        boundProps.strokeWidthBottom = strokeWidthBottom;
     }
 
     public void getPositionRelativeSource(RectF position) {

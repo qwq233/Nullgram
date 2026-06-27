@@ -69,6 +69,7 @@ import android.view.ViewGroup;
 import android.view.ViewOutlineProvider;
 import android.view.WindowManager;
 import android.view.inputmethod.EditorInfo;
+import android.view.inputmethod.InputConnection;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.FrameLayout;
@@ -78,6 +79,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.annotation.RawRes;
 import androidx.annotation.RequiresApi;
 import androidx.core.util.Consumer;
@@ -169,6 +171,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
+import java.util.regex.Pattern;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 
@@ -299,6 +302,8 @@ public class AlertsCreator {
                     }, dialogId).show();
                 }, true);
             }
+        } else if (error.text.equals("JOIN_GUARD_TIMEOUT")) {
+            showSimpleAlert(fragment, LocaleController.getString(R.string.GuardBotTimeoutTitle), LocaleController.getString(R.string.GuardBotTimeout));
         } else if (request instanceof TLRPC.TL_messages_sendMessage && error.text.contains("PRIVACY_PREMIUM_REQUIRED")) {
             TLRPC.TL_messages_sendMessage req = (TLRPC.TL_messages_sendMessage) request;
             long dialogId = DialogObject.getPeerDialogId(req.peer);
@@ -989,6 +994,116 @@ public class AlertsCreator {
 
         dialog[0].setDismissDialogByButtons(false);
         editText.setSelection(editText.getText().length());
+    }
+
+    public static void showAddLinkToPoll(Context context, Theme.ResourcesProvider resourcesProvider, String existingUrl, TLRPC.WebPage webPage, Utilities.Callback<String> whenDone, @Nullable Runnable onDelete) {
+        final Activity activity = AndroidUtilities.findActivity(context);
+        final View currentFocus = activity != null ? activity.getCurrentFocus() : null;
+
+        final AlertDialog[] dialog = new AlertDialog[1];
+
+        final AlertDialog.Builder builder = new AlertDialog.Builder(context, resourcesProvider);
+        builder.setTitle(getString(R.string.PollV2AddLinkTitle));
+        builder.setMessage(getString(R.string.PollV2AddLinkMessage));
+
+        EditTextBoldCursor editText = new EditTextBoldCursor(context) {
+            @Override
+            public InputConnection onCreateInputConnection(EditorInfo outAttrs) {
+                InputConnection conn = super.onCreateInputConnection(outAttrs);
+                outAttrs.imeOptions &= ~EditorInfo.IME_FLAG_NO_ENTER_ACTION;
+                return conn;
+            }
+        };
+        editText.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 16);
+        editText.setTextColor(Theme.getColor(Theme.key_dialogTextBlack, resourcesProvider));
+        editText.setHintTextColor(Theme.getColor(Theme.key_groupcreate_hintText, resourcesProvider));
+        editText.setHint(getString(R.string.PollV2AddLinkUrlHint));
+        editText.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_URI);
+        editText.setImeOptions(EditorInfo.IME_ACTION_DONE);
+        editText.setMaxLines(10);
+        editText.setSingleLine(false);
+        editText.setPadding(dp(16), dp(13), dp(16), dp(13));
+        editText.setCursorWidth(1.5f);
+        editText.setCursorColor(Theme.getColor(Theme.key_windowBackgroundWhiteBlueText4, resourcesProvider));
+        if (existingUrl != null) {
+            editText.setText(existingUrl);
+            editText.setSelection(existingUrl.length());
+        }
+        editText.setOnEditorActionListener((v, actionId, event) -> {
+            if (actionId == EditorInfo.IME_ACTION_DONE) {
+                final String text = editText.getText().toString().trim();
+                if (!isValidUrl(text)) {
+                    AndroidUtilities.shakeView(editText);
+                    return true;
+                }
+                whenDone.run(text);
+                if (dialog[0] != null) {
+                    dialog[0].dismiss();
+                }
+                if (currentFocus != null) {
+                    currentFocus.requestFocus();
+                }
+                return true;
+            }
+            return false;
+        });
+
+        GradientDrawable fieldBackground = new GradientDrawable();
+        fieldBackground.setCornerRadius(dp(22));
+        fieldBackground.setColor(Theme.multAlpha(Theme.getColor(Theme.key_dialogTextBlack, resourcesProvider), 0.06f));
+        editText.setBackground(fieldBackground);
+
+        LinearLayout container = new LinearLayout(context);
+        container.setOrientation(LinearLayout.VERTICAL);
+        container.addView(editText, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT, 24, 4, 24, 9));
+
+        if (WebPagePreviewView.hasPreview(webPage)) {
+            final WebPagePreviewView previewView = new WebPagePreviewView(context, resourcesProvider, UserConfig.selectedAccount);
+            previewView.setWebPage(webPage);
+            container.addView(previewView, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT, 22, 3, 22, 7));
+        }
+
+        builder.makeCustomMaxHeight();
+        builder.setView(container);
+        builder.setWidth(Math.min(dp(320), AndroidUtilities.displaySize.x * 85 / 100));
+
+        builder.setPositiveButton(getString(R.string.Done), (dialogInterface, i) -> {
+            final String text = editText.getText().toString().trim();
+            if (!isValidUrl(text)) {
+                AndroidUtilities.shakeView(editText);
+                return;
+            }
+            whenDone.run(text);
+            dialogInterface.dismiss();
+        });
+        builder.setNegativeButton(getString(R.string.Cancel), (dialogInterface, i) -> dialogInterface.dismiss());
+        if (onDelete != null) {
+            builder.setNeutralButton(getString(R.string.Delete), (alertDialog, which) -> {
+                onDelete.run();
+                alertDialog.dismiss();
+            });
+        }
+
+        dialog[0] = builder.create();
+        dialog[0].setDismissDialogByButtons(false);
+        dialog[0].setOnDismissListener(d -> AndroidUtilities.hideKeyboard(editText));
+        dialog[0].setOnShowListener(d -> {
+            editText.requestFocus();
+            AndroidUtilities.showKeyboard(editText);
+        });
+        dialog[0].show();
+
+        TextView button = (TextView) dialog[0].getButton(AlertDialog.BUTTON_NEUTRAL);
+        if (button != null) {
+            button.setTextColor(Theme.getColor(Theme.key_text_RedBold));
+        }
+    }
+
+    private static final Pattern URL_PATTERN = Pattern.compile("^([a-zA-Z][a-zA-Z0-9+\\-.]*://)?([a-zA-Z0-9\\-]+\\.)+[a-zA-Z]{2,}(:\\d+)?(/[^\\s]*)?$");
+
+    private static boolean isValidUrl(String url) {
+        if (TextUtils.isEmpty(url)) return false;
+        return URL_PATTERN.matcher(url.trim()).matches();
     }
 
     public static Dialog showSimpleAlert(BaseFragment baseFragment, final String text) {
@@ -4607,6 +4722,231 @@ public class AlertsCreator {
 
     public interface StatusUntilDatePickerDelegate {
         void didSelectDate(int date);
+    }
+
+    private static String formatPollCloseCustomDeadline(int seconds) {
+        final int days = seconds / 86400;
+        final int hours = (seconds % 86400) / 3600;
+        final int minutes = (seconds % 3600) / 60;
+
+        final String daysS = days > 0 ? LocaleController.formatPluralString("Days", days) : "";
+        final String hoursS = hours > 0 ? LocaleController.formatPluralString("Hours", hours) : "";
+        final String minutesS = minutes > 0 ? LocaleController.formatPluralString("Minutes", minutes) : "";
+        final String fmt = formatString(R.string.PollCustomDeadlineClosesInFmt, daysS, hoursS, minutesS).trim();
+        return formatString(R.string.PollCustomDeadlineClosesIn, fmt);
+    }
+
+    public static void checkPollCloseCustomDeadline(TextView button, NumberPicker dayPicker, NumberPicker hourPicker, NumberPicker minutePicker) {
+        int day = dayPicker.getValue();
+        int hour = hourPicker.getValue();
+        int minute = minutePicker.getValue();
+        Calendar calendar = Calendar.getInstance();
+
+        long systemTime = System.currentTimeMillis();
+        calendar.setTimeInMillis(systemTime);
+        calendar.add(Calendar.DAY_OF_YEAR, day);
+        calendar.set(Calendar.HOUR_OF_DAY, hour);
+        calendar.set(Calendar.MINUTE, minute);
+        calendar.set(Calendar.SECOND, 0);
+        calendar.set(Calendar.MILLISECOND, 0);
+        long currentTime = calendar.getTimeInMillis();
+
+        if (button != null) {
+            button.setText(formatPollCloseCustomDeadline((int) ((currentTime - systemTime) / 1000)));
+        }
+    }
+
+    public static BottomSheet.Builder createPollCloseDatePickerDialog(Context context, long currentDate, final ScheduleDatePickerDelegate datePickerDelegate, final Runnable cancelRunnable, final ScheduleDatePickerColors datePickerColors, Theme.ResourcesProvider resourcesProvider) {
+        if (context == null) {
+            return null;
+        }
+
+        final int maxDate = (int) MessagesController.getInstance(UserConfig.selectedAccount).config.pollClosePeriodMax.get(TimeUnit.SECONDS);
+
+        BottomSheet.Builder builder = new BottomSheet.Builder(context, false, resourcesProvider);
+        builder.setApplyBottomPadding(false);
+
+        final NumberPicker dayPicker = new NumberPicker(context, resourcesProvider);
+        dayPicker.setTextColor(datePickerColors.textColor);
+        dayPicker.setTextOffset(dp(10));
+        dayPicker.setItemCount(5);
+        final NumberPicker hourPicker = new NumberPicker(context, resourcesProvider) {
+            @Override
+            protected CharSequence getContentDescription(int value) {
+                return LocaleController.formatPluralString("Hours", value);
+            }
+        };
+        hourPicker.setWrapSelectorWheel(true);
+        hourPicker.setAllItemsCount(24);
+        hourPicker.setItemCount(5);
+        hourPicker.setTextColor(datePickerColors.textColor);
+        hourPicker.setTextOffset(-dp(10));
+        final NumberPicker minutePicker = new NumberPicker(context, resourcesProvider) {
+            @Override
+            protected CharSequence getContentDescription(int value) {
+                return LocaleController.formatPluralString("Minutes", value);
+            }
+        };
+        minutePicker.setWrapSelectorWheel(true);
+        minutePicker.setAllItemsCount(60);
+        minutePicker.setItemCount(5);
+        minutePicker.setTextColor(datePickerColors.textColor);
+        minutePicker.setTextOffset(-dp(34));
+
+        FrameLayout frameLayout = new FrameLayout(context);
+        LinearLayout container = new LinearLayout(context) {
+            boolean ignoreLayout = false;
+
+            @Override
+            protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+                ignoreLayout = true;
+                int count = AndroidUtilities.displaySize.x > AndroidUtilities.displaySize.y ? 3 : 5;
+                dayPicker.setItemCount(count);
+                hourPicker.setItemCount(count);
+                minutePicker.setItemCount(count);
+                dayPicker.getLayoutParams().height = dp(NumberPicker.DEFAULT_SIZE_PER_COUNT) * count;
+                hourPicker.getLayoutParams().height = dp(NumberPicker.DEFAULT_SIZE_PER_COUNT) * count;
+                minutePicker.getLayoutParams().height = dp(NumberPicker.DEFAULT_SIZE_PER_COUNT) * count;
+                ignoreLayout = false;
+                super.onMeasure(widthMeasureSpec, heightMeasureSpec);
+            }
+
+            @Override
+            public void requestLayout() {
+                if (ignoreLayout) {
+                    return;
+                }
+                super.requestLayout();
+            }
+        };
+        container.setOrientation(LinearLayout.VERTICAL);
+        frameLayout.addView(container, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, LayoutHelper.MATCH_PARENT));
+
+        FrameLayout titleLayout = new FrameLayout(context);
+        container.addView(titleLayout, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT, Gravity.LEFT | Gravity.TOP, 22, 0, 0, 4));
+
+        TextView titleView = new TextView(context);
+        titleView.setText(LocaleController.getString(R.string.StopPollDeadlineHeader));
+        titleView.setTextColor(datePickerColors.textColor);
+        titleView.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 20);
+        titleView.setTypeface(AndroidUtilities.bold());
+        titleLayout.addView(titleView, LayoutHelper.createFrame(LayoutHelper.WRAP_CONTENT, LayoutHelper.WRAP_CONTENT, Gravity.LEFT | Gravity.TOP, 0, 12, 0, 0));
+        titleView.setOnTouchListener((v, event) -> true);
+
+        LinearLayout linearLayout = new LinearLayout(context);
+        linearLayout.setOrientation(LinearLayout.HORIZONTAL);
+        linearLayout.setWeightSum(1.0f);
+        container.addView(linearLayout, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT, 1f, 0, 0, 23, 0, 23));
+
+        TextView closesInTextView = new TextView(context);
+        closesInTextView.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 12);
+        closesInTextView.setTextColor(Theme.getColor(Theme.key_dialogTextGray2, resourcesProvider));
+        closesInTextView.setGravity(Gravity.CENTER);
+
+        Calendar calendar = Calendar.getInstance();
+
+        TextView buttonTextView = new TextView(context) {
+            @Override
+            public CharSequence getAccessibilityClassName() {
+                return Button.class.getName();
+            }
+        };
+        buttonTextView.setText(getString(R.string.StopPollDeadlineButton));
+        ScaleStateListAnimator.apply(buttonTextView, 0.02f, 1.2f);
+
+        linearLayout.addView(dayPicker, LayoutHelper.createLinear(0, 54 * 5, 0.5f));
+        dayPicker.setMinValue(0);
+        dayPicker.setMaxValue(365);
+        dayPicker.setWrapSelectorWheel(false);
+        dayPicker.setFormatter(value -> {
+            if (value == 0) {
+                return LocaleController.getString(R.string.MessageScheduleToday);
+            }
+            Calendar c = Calendar.getInstance();
+            int nowYear = c.get(Calendar.YEAR);
+            c.add(Calendar.DAY_OF_YEAR, value);
+            long date = c.getTimeInMillis();
+            int year = c.get(Calendar.YEAR);
+            if (year == nowYear) {
+                return LocaleController.getInstance().getFormatterWeek().format(date) + ", " + LocaleController.getInstance().getFormatterScheduleDay().format(date);
+            } else {
+                return LocaleController.getInstance().getFormatterScheduleYear().format(date);
+            }
+        });
+        final NumberPicker.OnValueChangeListener onValueChangeListener = (picker, oldVal, newVal) -> {
+            checkScheduleDate(null, null, maxDate, 3, dayPicker, hourPicker, minutePicker);
+            checkPollCloseCustomDeadline(closesInTextView, dayPicker, hourPicker, minutePicker);
+        };
+        dayPicker.setOnValueChangedListener(onValueChangeListener);
+
+        hourPicker.setMinValue(0);
+        hourPicker.setMaxValue(23);
+        linearLayout.addView(hourPicker, LayoutHelper.createLinear(0, 54 * 5, 0.2f));
+        hourPicker.setFormatter(value -> String.format("%02d", value));
+        hourPicker.setOnValueChangedListener(onValueChangeListener);
+
+        minutePicker.setMinValue(0);
+        minutePicker.setMaxValue(59);
+        minutePicker.setValue(0);
+        minutePicker.setFormatter(value -> String.format("%02d", value));
+        linearLayout.addView(minutePicker, LayoutHelper.createLinear(0, 54 * 5, 0.3f));
+        minutePicker.setOnValueChangedListener(onValueChangeListener);
+
+        if (currentDate > 0 && currentDate != 0x7FFFFFFE) {
+            currentDate *= 1000;
+            calendar.setTimeInMillis(System.currentTimeMillis());
+            calendar.set(Calendar.MINUTE, 0);
+            calendar.set(Calendar.SECOND, 0);
+            calendar.set(Calendar.MILLISECOND, 0);
+            calendar.set(Calendar.HOUR_OF_DAY, 0);
+            int days = (int) ((currentDate - calendar.getTimeInMillis()) / (24 * 60 * 60 * 1000));
+            calendar.setTimeInMillis(currentDate);
+            if (days >= 0) {
+                minutePicker.setValue(calendar.get(Calendar.MINUTE));
+                hourPicker.setValue(calendar.get(Calendar.HOUR_OF_DAY));
+                dayPicker.setValue(days);
+            }
+        }
+        final boolean[] canceled = {true};
+
+        checkScheduleDate(null, null, maxDate, 3, dayPicker, hourPicker, minutePicker);
+        checkPollCloseCustomDeadline(closesInTextView, dayPicker, hourPicker, minutePicker);
+
+        buttonTextView.setPadding(dp(34), 0, dp(34), 0);
+        buttonTextView.setGravity(Gravity.CENTER);
+        buttonTextView.setTextColor(datePickerColors.buttonTextColor);
+        buttonTextView.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 14);
+        buttonTextView.setTypeface(AndroidUtilities.bold());
+        buttonTextView.setBackground(Theme.AdaptiveRipple.filledRect(datePickerColors.buttonBackgroundColor, 24));
+        container.addView(buttonTextView, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, 48, Gravity.LEFT | Gravity.BOTTOM, 14, 15, 14, 16));
+        buttonTextView.setOnClickListener(v -> {
+            canceled[0] = false;
+            boolean setSeconds = checkScheduleDate(null, null, maxDate, 3, dayPicker, hourPicker, minutePicker);
+            checkPollCloseCustomDeadline(closesInTextView, dayPicker, hourPicker, minutePicker);
+            calendar.setTimeInMillis(System.currentTimeMillis());
+            calendar.add(Calendar.DAY_OF_YEAR, dayPicker.getValue());
+            calendar.set(Calendar.HOUR_OF_DAY, hourPicker.getValue());
+            calendar.set(Calendar.MINUTE, minutePicker.getValue());
+            if (setSeconds) {
+                calendar.set(Calendar.SECOND, 0);
+                calendar.set(Calendar.MILLISECOND, 0);
+            }
+            datePickerDelegate.didSelectDate(true, (int) (calendar.getTimeInMillis() / 1000), 0);
+            builder.getDismissRunnable().run();
+        });
+
+        container.addView(closesInTextView, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT, Gravity.LEFT | Gravity.BOTTOM, 14, 0, 14, 16));
+        builder.setCustomView(frameLayout);
+        BottomSheet bottomSheet = builder.show();
+        bottomSheet.setOnDismissListener(dialog -> {
+            if (cancelRunnable != null && canceled[0]) {
+                cancelRunnable.run();
+            }
+        });
+        bottomSheet.setBackgroundColor(datePickerColors.backgroundColor);
+        bottomSheet.fixNavigationBar(datePickerColors.backgroundColor);
+
+        return builder;
     }
 
     public static BottomSheet.Builder createStatusUntilDatePickerDialog(Context context, long currentDate, final StatusUntilDatePickerDelegate delegate) {

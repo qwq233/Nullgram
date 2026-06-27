@@ -198,6 +198,12 @@ public class RadialProgress {
         alphaForMiniPrevious = value;
     }
 
+    private float rotationSpeed = 3000;
+
+    public void setRotationTime(float rotationSpeed) {
+        this.rotationSpeed = rotationSpeed;
+    }
+
     private void updateAnimation(boolean progress) {
         if (disableUpdate) {
             return;
@@ -213,7 +219,7 @@ public class RadialProgress {
 
         if (progress) {
             if (animatedProgressValue != 1) {
-                radOffset += 360 * dt / 3000.0f;
+                radOffset += 360 * dt / rotationSpeed;
                 float progressDiff = currentProgress - animationProgressStart;
                 if (progressDiff > 0) {
                     currentProgressTime += dt;

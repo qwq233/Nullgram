@@ -118,6 +118,7 @@ public class NotificationCenter {
     public static final int wasUnableToFindCurrentLocation = totalEvents++;
     public static final int reloadHints = totalEvents++;
     public static final int reloadInlineHints = totalEvents++;
+    public static final int reloadGuestBotHints = totalEvents++;
     public static final int reloadWebappsHints = totalEvents++;
     public static final int newDraftReceived = totalEvents++;
     public static final int recentDocumentsDidLoad = totalEvents++;
@@ -384,6 +385,7 @@ public class NotificationCenter {
     public static final int botForumTopicDidCreate = totalEvents++;
     public static final int botForumDraftUpdate = totalEvents++;
     public static final int botForumDraftDelete = totalEvents++;
+    public static final int guardBotDecisionResult = totalEvents++;
     public static final int tlSchemeParseException = totalEvents++;
 
     public static boolean alreadyLogged;

@@ -2084,12 +2084,16 @@ public class ActionBarMenuItem extends FrameLayout {
         return Theme.getColor(key, resourcesProvider);
     }
 
-    private static class ReactionFilterView extends SearchFilterView {
+    public static class ReactionFilterView extends SearchFilterView {
 
         private ReactionsLayoutInBubble.ReactionButton reactionButton;
 
         public ReactionFilterView(Context context, Theme.ResourcesProvider resourcesProvider) {
-            super(context, resourcesProvider);
+            this(context, resourcesProvider, false);
+        }
+
+        public ReactionFilterView(Context context, Theme.ResourcesProvider resourcesProvider, boolean whiteBg) {
+            super(context, resourcesProvider, whiteBg);
             removeAllViews();
             setBackground(null);
 
@@ -2158,7 +2162,7 @@ public class ActionBarMenuItem extends FrameLayout {
         }
     }
 
-    private static class SearchFilterView extends FrameLayout {
+    public static class SearchFilterView extends FrameLayout {
 
         Drawable thumbDrawable;
         BackupImageView avatarImageView;
@@ -2181,10 +2185,16 @@ public class ActionBarMenuItem extends FrameLayout {
         };
 
         protected final Theme.ResourcesProvider resourcesProvider;
+        private final boolean whiteBg;
 
         public SearchFilterView(Context context, Theme.ResourcesProvider resourcesProvider) {
+            this(context, resourcesProvider, false);
+        }
+
+        public SearchFilterView(Context context, Theme.ResourcesProvider resourcesProvider, boolean whiteBg) {
             super(context);
             this.resourcesProvider = resourcesProvider;
+            this.whiteBg = whiteBg;
             avatarImageView = new BackupImageView(context);
             addView(avatarImageView, LayoutHelper.createFrame(32, 32));
 
@@ -2200,8 +2210,8 @@ public class ActionBarMenuItem extends FrameLayout {
             updateColors();
         }
 
-        private void updateColors() {
-            int defaultBackgroundColor = getThemedColor(Theme.key_groupcreate_spanBackground);
+        public void updateColors() {
+            int defaultBackgroundColor = getThemedColor(whiteBg ? Theme.key_windowBackgroundWhite : Theme.key_groupcreate_spanBackground);
             int selectedBackgroundColor = getThemedColor(Theme.key_avatar_backgroundBlue);
             int textDefaultColor = getThemedColor(Theme.key_windowBackgroundWhiteBlackText);
             int textSelectedColor = getThemedColor(Theme.key_avatar_actionBarIconBlue);
@@ -2223,6 +2233,10 @@ public class ActionBarMenuItem extends FrameLayout {
                 setData(data);
             }
             invalidate();
+        }
+
+        public boolean isSelectedForDelete() {
+            return selectedForDelete;
         }
 
         public void setData(FiltersView.MediaFilterData data) {

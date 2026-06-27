@@ -15700,6 +15700,9 @@ public class MessagesStorage extends BaseController {
         if (message.via_bot_id != 0 && !usersToLoad.contains(message.via_bot_id)) {
             usersToLoad.add(message.via_bot_id);
         }
+        if (message.guestchat_via_from != null) {
+            addLoadPeerInfo(message.guestchat_via_from, usersToLoad, chatsToLoad);
+        }
         if (message.action != null) {
             if (message.action.user_id != 0 && !usersToLoad.contains(message.action.user_id)) {
                 usersToLoad.add(message.action.user_id);

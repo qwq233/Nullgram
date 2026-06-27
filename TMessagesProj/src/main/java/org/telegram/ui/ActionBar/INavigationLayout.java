@@ -44,6 +44,10 @@ public interface INavigationLayout {
     int FORCE_NOT_ATTACH_VIEW = -2;
     int FORCE_ATTACH_VIEW_AS_FIRST = -3;
 
+    default boolean isLayersLayout() {
+        return false;
+    }
+
     boolean presentFragment(NavigationParams params);
     boolean checkTransitionAnimation();
     boolean addFragmentToStack(BaseFragment fragment, int position);

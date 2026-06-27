@@ -139,6 +139,7 @@ public class ChatEditTypeActivity extends BaseFragment implements NotificationCe
 
     private boolean isPrivate;
 
+    private boolean applyToAllInviteLinks;
     private TLRPC.Chat currentChat;
     private TLRPC.ChatFull info;
     private long chatId;
@@ -599,8 +600,43 @@ public class ChatEditTypeActivity extends BaseFragment implements NotificationCe
         manageLinksInfoCell = new TextInfoPrivacyCell(context);
         linearLayout.addView(manageLinksInfoCell, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT));
 
-        joinContainer = new JoinToSendSettingsView(context, currentChat);
-        joinContainer.showJoinToSend(info != null && info.linked_chat_id != 0);
+        joinContainer = new JoinToSendSettingsView(context, currentChat) {
+            @Override
+            public boolean onJoinRequestToggle(boolean newValue, Runnable cancel) {
+                if (!isPrivate || info == null) {
+                    return true;
+                }
+
+                final int linksCount = info.invitesCount;
+                if (linksCount == 0) {
+                    return true;
+                }
+
+                final String key;
+                if (isChannel) {
+                    key = newValue ? "ApproveNewMembersEnableForLinksChannel" : "ApproveNewMembersDisableForLinksChannel";
+                } else {
+                    key = newValue ? "ApproveNewMembersEnableForLinks" : "ApproveNewMembersDisableForLinks";
+                }
+
+                AlertDialog.Builder builder = new AlertDialog.Builder(context, getResourceProvider());
+                builder.setTitle(LocaleController.getString(R.string.ApproveNewMembersApplyToLinksTitle));
+                builder.setMessage(AndroidUtilities.replaceTags(LocaleController.formatPluralString(key, linksCount)));
+                builder.setPositiveButton(LocaleController.getString(R.string.ApproveNewMembersApplyToLinksApply), (dialogInterface, i) -> {
+                    setJoinRequest(newValue);
+                    applyToAllInviteLinks = true;
+                });
+                builder.setNegativeButton(LocaleController.getString(R.string.ApproveNewMembersApplyToLinksDontApply), (dialogInterface, i) -> {
+                    setJoinRequest(newValue);
+                    applyToAllInviteLinks = false;
+                });
+                AlertDialog dialog = builder.create();
+                showDialog(dialog);
+                return false;
+            }
+        };
+        joinContainer.showJoinToSend(info != null && info.linked_chat_id != 0 && !isChannel);
+        joinContainer.setFullInfo(this, info);
         linearLayout.addView(joinContainer);
 
         saveContainer = new LinearLayout(context);
@@ -715,13 +751,13 @@ public class ChatEditTypeActivity extends BaseFragment implements NotificationCe
     }
 
     private boolean tryUpdateJoinSettings() {
-        if (isChannel || joinContainer == null) {
+        if (joinContainer == null) {
             return true;
         }
         if (getParentActivity() == null) {
             return false;
         }
-        boolean needToMigrate = !ChatObject.isChannel(currentChat) && (joinContainer.isJoinToSend || joinContainer.isJoinRequest);
+        boolean needToMigrate = !isChannel && !ChatObject.isChannel(currentChat) && (joinContainer.isJoinToSend || joinContainer.isJoinRequest);
         if (needToMigrate) {
             getMessagesController().convertToMegaGroup(getParentActivity(), chatId, this, param -> {
                 if (param != 0) {
@@ -735,8 +771,10 @@ public class ChatEditTypeActivity extends BaseFragment implements NotificationCe
             if (currentChat.join_to_send != joinContainer.isJoinToSend) {
                 getMessagesController().toggleChatJoinToSend(chatId, currentChat.join_to_send = joinContainer.isJoinToSend, null, null);
             }
-            if (currentChat.join_request != joinContainer.isJoinRequest) {
-                getMessagesController().toggleChatJoinRequest(chatId, currentChat.join_request = joinContainer.isJoinRequest, null, null);
+            if (currentChat.join_request != joinContainer.isJoinRequest || applyToAllInviteLinks) {
+                getMessagesController().toggleChatJoinRequest(chatId, 0,
+                    currentChat.join_request = joinContainer.isJoinRequest,
+                    applyToAllInviteLinks, false, null, null);
             }
             return true;
         }
@@ -1401,8 +1439,9 @@ public class ChatEditTypeActivity extends BaseFragment implements NotificationCe
         radioButtonCell2.setChecked(isPrivate, true);
         usernameTextView.clearFocus();
         if (joinContainer != null) {
-            joinContainer.setVisibility(!isChannel && !isPrivate ? View.VISIBLE : View.GONE);
-            joinContainer.showJoinToSend(info != null && info.linked_chat_id != 0);
+            joinContainer.setVisibility(!isChannel || isPrivate ? View.VISIBLE : View.GONE);
+            joinContainer.showJoinToSend(info != null && info.linked_chat_id != 0 && !isChannel);
+            joinContainer.setFullInfo(this, info);
         }
         if (usernamesListView != null) {
             usernamesListView.setVisibility(isPrivate || usernames.isEmpty() ? View.GONE : View.VISIBLE);

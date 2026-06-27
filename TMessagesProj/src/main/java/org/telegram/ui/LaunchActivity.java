@@ -105,6 +105,7 @@ import org.telegram.messenger.AutoDeleteMediaTask;
 import org.telegram.messenger.BackupAgent;
 import org.telegram.messenger.BetaUpdate;
 import org.telegram.messenger.BirthdayController;
+import org.telegram.messenger.BotGuardHelper;
 import org.telegram.messenger.BotWebViewVibrationEffect;
 import org.telegram.messenger.BuildConfig;
 import org.telegram.messenger.BuildVars;
@@ -883,6 +884,7 @@ public class LaunchActivity extends BasePermissionsActivity implements INavigati
         NotificationCenter.getGlobalInstance().addObserver(this, NotificationCenter.billingConfirmPurchaseError);
         NotificationCenter.getGlobalInstance().addObserver(this, NotificationCenter.tlSchemeParseException);
         NotificationCenter.getInstance(currentAccount).addObserver(this, NotificationCenter.currentUserPremiumStatusChanged);
+        NotificationCenter.getInstance(currentAccount).addObserver(this, NotificationCenter.guardBotDecisionResult);
         LiteMode.addOnPowerSaverAppliedListener(onPowerSaverCallback = this::onPowerSaver);
         if (actionBarLayout.getFragmentStack().isEmpty() && (layersActionBarLayout == null || layersActionBarLayout.getFragmentStack().isEmpty())) {
             if (!UserConfig.getInstance(currentAccount).isClientActivated()) {
@@ -1659,6 +1661,7 @@ public class LaunchActivity extends BasePermissionsActivity implements INavigati
             NotificationCenter.getInstance(currentAccount).removeObserver(this, NotificationCenter.currentUserPremiumStatusChanged);
             NotificationCenter.getInstance(currentAccount).removeObserver(this, NotificationCenter.chatSwitchedForum);
             NotificationCenter.getInstance(currentAccount).removeObserver(this, NotificationCenter.storiesEnabledUpdate);
+            NotificationCenter.getInstance(currentAccount).removeObserver(this, NotificationCenter.guardBotDecisionResult);
         }
         currentAccount = UserConfig.selectedAccount;
         NotificationCenter.getInstance(currentAccount).addObserver(this, NotificationCenter.openBoostForUsersDialog);
@@ -1682,6 +1685,7 @@ public class LaunchActivity extends BasePermissionsActivity implements INavigati
         NotificationCenter.getInstance(currentAccount).addObserver(this, NotificationCenter.currentUserPremiumStatusChanged);
         NotificationCenter.getInstance(currentAccount).addObserver(this, NotificationCenter.chatSwitchedForum);
         NotificationCenter.getInstance(currentAccount).addObserver(this, NotificationCenter.storiesEnabledUpdate);
+        NotificationCenter.getInstance(currentAccount).addObserver(this, NotificationCenter.guardBotDecisionResult);
     }
 
     private void checkLayout() {
@@ -5275,9 +5279,21 @@ public class LaunchActivity extends BasePermissionsActivity implements INavigati
                 TLRPC.TL_messages_importChatInvite req = new TLRPC.TL_messages_importChatInvite();
                 req.hash = group;
                 ConnectionsManager.getInstance(intentAccount).sendRequest(req, (response, error) -> {
-                    if (error == null) {
-                        TLRPC.Updates updates = (TLRPC.Updates) response;
-                        MessagesController.getInstance(intentAccount).processUpdates(updates, false);
+                    final TLRPC.Updates updates;
+                    if (response instanceof TLRPC.TL_chatInviteJoinResultOk) {
+                        updates = ((TLRPC.TL_chatInviteJoinResultOk) response).updates;
+                        MessagesController.getInstance(currentAccount).processUpdates(updates, false);
+                    } else if (response instanceof TLRPC.TL_chatInviteJoinResultWebView) {
+                        TLRPC.TL_chatInviteJoinResultWebView resultWebView = (TLRPC.TL_chatInviteJoinResultWebView) response;
+                        AndroidUtilities.runOnUIThread(() -> {
+                            MessagesController.getInstance(currentAccount).putUsers(resultWebView.users, false);
+                            BotGuardHelper.getInstance(currentAccount).openGuardBotWebApp(resultWebView.bot_id,
+                                    resultWebView.bot_id, resultWebView.webview);
+                        });
+
+                        updates = null;
+                    } else {
+                        updates = null;
                     }
                     AndroidUtilities.runOnUIThread(() -> {
                         if (!LaunchActivity.this.isFinishing()) {
@@ -5288,8 +5304,7 @@ public class LaunchActivity extends BasePermissionsActivity implements INavigati
                             }
                             if (error == null) {
                                 if (actionBarLayout != null) {
-                                    TLRPC.Updates updates = (TLRPC.Updates) response;
-                                    if (!updates.chats.isEmpty()) {
+                                    if (updates != null && !updates.chats.isEmpty()) {
                                         TLRPC.Chat chat = updates.chats.get(0);
                                         chat.left = false;
                                         chat.kicked = false;
@@ -6718,6 +6733,7 @@ public class LaunchActivity extends BasePermissionsActivity implements INavigati
             NotificationCenter.getInstance(currentAccount).removeObserver(this, NotificationCenter.newSuggestionsAvailable);
             NotificationCenter.getInstance(currentAccount).removeObserver(this, NotificationCenter.currentUserShowLimitReachedDialog);
             NotificationCenter.getInstance(currentAccount).removeObserver(this, NotificationCenter.currentUserPremiumStatusChanged);
+            NotificationCenter.getInstance(currentAccount).removeObserver(this, NotificationCenter.guardBotDecisionResult);
         }
 
         NotificationCenter.getGlobalInstance().removeObserver(this, NotificationCenter.needShowAlert);
@@ -7872,6 +7888,34 @@ public class LaunchActivity extends BasePermissionsActivity implements INavigati
             if (drawerLayoutAdapter != null) {
                 drawerLayoutAdapter.notifyDataSetChanged();
             }
+        } else if (id == NotificationCenter.guardBotDecisionResult) {
+            final BotGuardHelper.GuardBotDecisionResultNotification decision =
+                    (BotGuardHelper.GuardBotDecisionResultNotification) args[0];
+
+            final BaseFragment fragment = getLastFragment();
+            final BulletinFactory factory;
+            if (fragment instanceof ChatActivity) {
+                factory = BulletinFactory.of(fragment);
+            } else {
+                factory = BulletinFactory.global();
+            }
+
+            final String chatName = DialogObject.getShortName(currentAccount, decision.dialogId);
+            final Bulletin bulletin;
+            if (decision.result instanceof TLRPC.TL_joinChatBotResultApproved) {
+                bulletin = factory.createSimpleBulletin(R.raw.contact_check, AndroidUtilities.replaceTags(LocaleController.formatString(R.string.GuardBotJoinRequestApproved, chatName)));
+            } else if (decision.result instanceof TLRPC.TL_joinChatBotResultDeclined) {
+                bulletin = factory.createSimpleBulletin(R.raw.hand_2, AndroidUtilities.replaceTags(LocaleController.formatString(R.string.GuardBotJoinRequestDeclined, chatName)));
+            } else if (decision.result instanceof TLRPC.TL_joinChatBotResultQueued) {
+                bulletin = factory.createSimpleBulletinWithIconSize(R.raw.timer_3, AndroidUtilities.replaceTags(LocaleController.formatString(R.string.GuardBotJoinRequestQueued, chatName)), 24);
+            } else {
+                bulletin = null;
+            }
+            AndroidUtilities.runOnUIThread(() -> {
+                if (!finished && isResumed) {
+                    bulletin.show();
+                }
+            }, 400);
         } else if (id == NotificationCenter.tlSchemeParseException) {
             if (tlErrorAlertDialog == null) {
                 final TLParseException error = (TLParseException) args[0];

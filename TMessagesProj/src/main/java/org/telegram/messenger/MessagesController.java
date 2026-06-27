@@ -144,6 +144,8 @@ import top.qwq2333.gen.Config;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 
+import me.vkryl.core.BitwiseUtils;
+
 public class MessagesController extends BaseController implements NotificationCenter.NotificationCenterDelegate {
 
     public int lastKnownSessionsCount;
@@ -14625,13 +14627,34 @@ public class MessagesController extends BaseController implements NotificationCe
     }
 
     public void toggleChatJoinRequest(long chatId, boolean enabled, Runnable onSuccess, Runnable onError) {
+        toggleChatJoinRequest(chatId, 0, enabled, false, false, onSuccess, onError);
+    }
+
+    public void toggleChatJoinRequest(long chatId, long guardBotId, boolean enabled, boolean applyToInvites, boolean applyGuardBot, Runnable onSuccess, Runnable onError) {
         TLRPC.TL_channels_toggleJoinRequest req = new TLRPC.TL_channels_toggleJoinRequest();
         req.channel = getInputChannel(chatId);
         req.enabled = enabled;
+        req.apply_to_invites = applyToInvites;
+        if (applyGuardBot) {
+            req.guard_bot = guardBotId != 0 ?
+                getInputUser(guardBotId) :
+                new TLRPC.TL_inputUserEmpty();
+        }
         getConnectionsManager().sendRequest(req, (response, error) -> {
             if (response != null) {
                 processUpdates((TLRPC.Updates) response, false);
-                AndroidUtilities.runOnUIThread(() -> getNotificationCenter().postNotificationName(NotificationCenter.updateInterfaces, UPDATE_MASK_CHAT));
+                AndroidUtilities.runOnUIThread(() -> {
+                    if (applyGuardBot) {
+                        TLRPC.ChatFull chatFull = getChatFull(chatId);
+                        if (chatFull != null) {
+                            chatFull.flags2 = BitwiseUtils.setFlag(chatFull.flags2, TLObject.FLAG_23, guardBotId != 0);
+                            chatFull.guard_bot_id = guardBotId;
+                            getMessagesStorage().updateChatInfo(chatFull, false);
+                            getNotificationCenter().postNotificationName(NotificationCenter.chatInfoDidLoad, chatFull, 0, false, false);
+                        }
+                    }
+                    getNotificationCenter().postNotificationName(NotificationCenter.updateInterfaces, UPDATE_MASK_CHAT);
+                }, 100);
                 if (onSuccess != null) {
                     onSuccess.run();
                 }
@@ -14913,6 +14936,17 @@ public class MessagesController extends BaseController implements NotificationCe
                 AndroidUtilities.runOnUIThread(() -> joiningToChannels.remove(chatId));
             }
             if (error != null) {
+                if ("JOIN_GUARD_TIMEOUT".equals(error.text)) {
+                    AndroidUtilities.runOnUIThread(() -> {
+                        if (processInvitedUsers != null) {
+                            processInvitedUsers.run(null);
+                        }
+                        if (onFinishRunnable != null) {
+                            onFinishRunnable.run();
+                        }
+                    });
+                    return;
+                }
                 if ("PRIVACY_PREMIUM_REQUIRED".equals(error.text)) {
                     TLRPC.TL_messages_invitedUsers invitedUsers = new TLRPC.TL_messages_invitedUsers();
                     invitedUsers.updates = new TLRPC.TL_updates();
@@ -14962,7 +14996,19 @@ public class MessagesController extends BaseController implements NotificationCe
             boolean hasJoinMessage = false;
             TLRPC.Updates updates;
             TLRPC.TL_messages_invitedUsers invitedUsers;
-            if (response instanceof TLRPC.TL_messages_invitedUsers) {
+            if (response instanceof TLRPC.TL_chatInviteJoinResultOk) {
+                invitedUsers = null;
+                updates = ((TLRPC.TL_chatInviteJoinResultOk) response).updates;
+            } else if (response instanceof TLRPC.TL_chatInviteJoinResultWebView) {
+                final TLRPC.TL_chatInviteJoinResultWebView resultWebView = (TLRPC.TL_chatInviteJoinResultWebView) response;
+                AndroidUtilities.runOnUIThread(() -> {
+                    putUsers(resultWebView.users, false);
+                    BotGuardHelper.getInstance(currentAccount).openGuardBotWebApp(-chatId,
+                        resultWebView.bot_id, resultWebView.webview);
+                });
+
+                return;
+            } else if (response instanceof TLRPC.TL_messages_invitedUsers) {
                 invitedUsers = (TLRPC.TL_messages_invitedUsers) response;
                 updates = invitedUsers.updates;
             } else if (response instanceof TLRPC.Updates) {
@@ -17599,6 +17645,7 @@ public class MessagesController extends BaseController implements NotificationCe
         ArrayList<TL_update.TL_updateEncryptedMessagesRead> tasks = null;
         ArrayList<Long> contactsIds = null;
         ArrayList<ImageLoader.MessageThumb> messageThumbs = null;
+        ArrayList<Long> guestBotCalledByUser = null;
         HashMap<MessagesStorage.TopicKey, Integer> topicsReadOutbox = null;
         HashMap<MessagesStorage.TopicKey, Integer> topicsReadInbox = null;
         HashMap<MessagesStorage.TopicKey, Integer> savedReadOutbox = null;
@@ -17838,6 +17885,12 @@ public class MessagesController extends BaseController implements NotificationCe
                             pushMessages = new ArrayList<>();
                         }
                         pushMessages.add(obj);
+                    }
+                    if (DialogObject.getPeerDialogId(message.guestchat_via_from) == getUserConfig().clientUserId) {
+                        if (guestBotCalledByUser == null) {
+                            guestBotCalledByUser = new ArrayList<>(1);
+                        }
+                        guestBotCalledByUser.add(DialogObject.getPeerDialogId(message.from_id));
                     }
                 }
             } else if (baseUpdate instanceof TL_update.TL_updateGroupCallMessage) {
@@ -18866,6 +18919,7 @@ public class MessagesController extends BaseController implements NotificationCe
         ArrayList<TL_update.TL_updateFolderPeers> folderUpdatesFinal = folderUpdates;
         LongSparseArray<ArrayList<Long>> groupSpeakingActionsFinal = groupSpeakingActions;
         LongSparseIntArray importingActionsFinal = importingActions;
+        ArrayList<Long> finalGuestBotCalledByUser = guestBotCalledByUser;
 
         AndroidUtilities.runOnUIThread(() -> {
             int updateMask = interfaceUpdateMaskFinal;
@@ -19609,6 +19663,9 @@ public class MessagesController extends BaseController implements NotificationCe
                         getNotificationCenter().postNotificationName(NotificationCenter.webViewResultSent, resultSent.query_id);
                     } else if (baseUpdate instanceof TL_update.TL_updateAttachMenuBots) {
                         getMediaDataController().loadAttachMenuBots(false, true);
+                    } else if (baseUpdate instanceof TL_update.TL_updateJoinChatWebViewDecision) {
+                        TL_update.TL_updateJoinChatWebViewDecision update = (TL_update.TL_updateJoinChatWebViewDecision) baseUpdate;
+                        BotGuardHelper.getInstance(currentAccount).closeGuardBotWebApp(DialogObject.getPeerDialogId(update.peer), update.query_id, update.result);
                     } else if (baseUpdate instanceof TL_bots.TL_updateBotMenuButton) {
                         TL_bots.TL_updateBotMenuButton updateBotMenuButton = (TL_bots.TL_updateBotMenuButton) baseUpdate;
                         getNotificationCenter().postNotificationName(NotificationCenter.updateBotMenuButton, updateBotMenuButton.bot_id, updateBotMenuButton.button);
@@ -19931,6 +19988,12 @@ public class MessagesController extends BaseController implements NotificationCe
                 getNotificationCenter().postNotificationName(NotificationCenter.updateInterfaces, updateMask);
             }
 
+            if (finalGuestBotCalledByUser != null) {
+                for (int a = 0, N = finalGuestBotCalledByUser.size(); a < N; a++) {
+                    final long guestBotUserId = finalGuestBotCalledByUser.get(a);
+                    getMediaDataController().increaseGuestRating(guestBotUserId);
+                }
+            }
             if (updateMessageThumbs != null) {
                 ImageLoader.getInstance().putThumbsToCache(updateMessageThumbs);
             }

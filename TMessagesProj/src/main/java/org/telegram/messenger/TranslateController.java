@@ -151,6 +151,30 @@ public class TranslateController extends BaseController {
         messagesController.getMainSettings().edit().putBoolean("translate_chat_button", chatTranslateEnabled = enable).apply();
     }
 
+    public static boolean isSummarizable(MessageObject messageObject) {
+        return (
+            messageObject != null &&
+            messageObject.messageOwner != null &&
+            messageObject.messageOwner.summary_from_language != null &&
+            !messageObject.isOutOwner() &&
+            !messageObject.isRestrictedMessage &&
+            !messageObject.isSponsored() &&
+            (
+                messageObject.type == MessageObject.TYPE_TEXT ||
+                messageObject.type == MessageObject.TYPE_VIDEO ||
+                messageObject.type == MessageObject.TYPE_PHOTO ||
+//                messageObject.type == MessageObject.TYPE_VOICE ||
+//                messageObject.type == MessageObject.TYPE_ROUND_VIDEO ||
+                messageObject.type == MessageObject.TYPE_FILE ||
+                messageObject.type == MessageObject.TYPE_MUSIC ||
+                messageObject.type == MessageObject.TYPE_POLL
+            ) && (
+                !TextUtils.isEmpty(messageObject.messageOwner.message) &&
+                messageObject.messageOwner.message.length() > 100
+            )
+        );
+    }
+
     public static boolean isTranslatable(MessageObject messageObject) {
         return (
             messageObject != null &&

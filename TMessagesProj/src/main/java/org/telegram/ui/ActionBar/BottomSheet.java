@@ -617,6 +617,8 @@ public class BottomSheet extends Dialog implements BaseFragment.AttachedSheet {
         protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
             bottom -= internalPaddingBottom;
 
+            onContainerLayout(left, top, right, bottom);
+
             layoutCount--;
             if (containerView != null) {
                 int t = (bottom - top) - containerView.getMeasuredHeight();
@@ -920,6 +922,20 @@ public class BottomSheet extends Dialog implements BaseFragment.AttachedSheet {
         }
         Insets insets = lastInsets.getSystemGestureInsets();
         return !keyboardVisible && drawNavigationBar && insets != null && (insets.left != 0 || insets.right != 0) ? insets.bottom : 0;
+    }
+
+    protected void onContainerLayout(int l, int t, int r, int b) {
+
+    }
+
+    protected void processLegacyContainerInsets(WindowInsets insets) {
+        if (insets == null) {
+            return;
+        }
+        lastInsets = insets;
+        if (container != null) {
+            container.requestLayout();
+        }
     }
 
     public boolean isKeyboardVisible() {

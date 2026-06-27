@@ -116,6 +116,22 @@ object StringUtils {
     }
 
     @JvmStatic
+    fun spacingPoll(poll: TLRPC.Poll?) {
+        if (poll == null) return
+        poll.question = spacingText(poll.question)
+        poll.answers?.forEach { answer ->
+            if (answer?.text != null) {
+                answer.text = spacingText(answer.text)
+            }
+        }
+        poll.shuffled_answers?.forEach { answer ->
+            if (answer?.text != null) {
+                answer.text = spacingText(answer.text)
+            }
+        }
+    }
+
+    @JvmStatic
     fun spacingText(text: String, entities: ArrayList<TLRPC.MessageEntity>?): Pair<String, ArrayList<TLRPC.MessageEntity>?> {
         if (text.startsWith("/")) return Pair(text, entities) // command
         if (entities.isNullOrEmpty()) return Pair(pangu.spacingText(text), entities)

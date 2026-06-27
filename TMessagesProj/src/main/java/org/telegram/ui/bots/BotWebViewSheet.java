@@ -1024,6 +1024,16 @@ public class BotWebViewSheet extends Dialog implements NotificationCenter.Notifi
         }
     }
 
+    public boolean isGuardBotTab(long peerId, long queryId) {
+        if (requestProps != null && requestProps.type == BotWebViewAttachedSheet.TYPE_WEB_VIEW_GUARD && (requestProps.peerId == peerId || requestProps.peerId == 0)) {
+            if (requestProps.response instanceof TLRPC.TL_webViewResultUrl) {
+                final long bQueryId = ((TLRPC.TL_webViewResultUrl) requestProps.response).query_id;
+                return bQueryId == queryId;
+            }
+        }
+        return false;
+    }
+
     private void relayout() {
         updateFullscreenLayout();
     }

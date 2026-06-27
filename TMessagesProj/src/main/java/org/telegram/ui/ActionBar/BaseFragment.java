@@ -570,11 +570,16 @@ public abstract class BaseFragment {
 
     }
 
-    public boolean onBackPressed() {
-        if (closeSheet()) {
+    public boolean onBackPressed(boolean invoked) {
+        if (hasShownSheet()) {
+            if (invoked) closeSheet();
             return false;
         }
         return true;
+    }
+
+    public boolean onBackPressed() {
+        return onBackPressed(true);
     }
 
     public boolean closeSheet() {

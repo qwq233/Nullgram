@@ -407,10 +407,12 @@ public class MediaDataController extends BaseController {
         loaded = false;
         hints.clear();
         inlineBots.clear();
+        guestBots.clear();
         webapps.clear();
         AndroidUtilities.runOnUIThread(() -> {
             getNotificationCenter().postNotificationName(NotificationCenter.reloadHints);
             getNotificationCenter().postNotificationName(NotificationCenter.reloadInlineHints);
+            getNotificationCenter().postNotificationName(NotificationCenter.reloadGuestBotHints);
             getNotificationCenter().postNotificationName(NotificationCenter.reloadWebappsHints);
         });
 
@@ -4091,8 +4093,8 @@ public class MediaDataController extends BaseController {
     public final static int MEDIA_GIF = 5;
     public final static int MEDIA_PHOTOS_ONLY = 6;
     public final static int MEDIA_VIDEOS_ONLY = 7;
-    public final static int MEDIA_TYPES_COUNT = 8;
-    public final static int MEDIA_STORIES = 8;
+    public final static int MEDIA_POLL = 8;
+    public final static int MEDIA_TYPES_COUNT = 9;
 
 
     public void loadMedia(long dialogId, int count, int max_id, int min_id, int type, long topicId, int fromCache, int classGuid, int requestIndex, ReactionsLayoutInBubble.VisibleReaction tag, String query) {
@@ -4133,6 +4135,8 @@ public class MediaDataController extends BaseController {
                 req.filter = new TLRPC.TL_inputMessagesFilterMusic();
             } else if (type == MEDIA_GIF) {
                 req.filter = new TLRPC.TL_inputMessagesFilterGif();
+            } else if (type == MEDIA_POLL) {
+                req.filter = new TLRPC.TL_inputMessagesFilterPoll();
             }
             if (!TextUtils.isEmpty(query)) {
                 req.q = query;
@@ -4237,6 +4241,8 @@ public class MediaDataController extends BaseController {
                                 req.filters.add(new TLRPC.TL_inputMessagesFilterPhotos());
                             } else if (a == MEDIA_VIDEOS_ONLY) {
                                 req.filters.add(new TLRPC.TL_inputMessagesFilterVideo());
+                            } else if (a == MEDIA_POLL) {
+                                req.filters.add(new TLRPC.TL_inputMessagesFilterPoll());
                             } else {
                                 req.filters.add(new TLRPC.TL_inputMessagesFilterGif());
                             }
@@ -4275,6 +4281,8 @@ public class MediaDataController extends BaseController {
                                         type = MEDIA_PHOTOS_ONLY;
                                     } else if (searchCounter.filter instanceof TLRPC.TL_inputMessagesFilterVideo) {
                                         type = MEDIA_VIDEOS_ONLY;
+                                    } else if (searchCounter.filter instanceof TLRPC.TL_inputMessagesFilterPoll) {
+                                        type = MEDIA_POLL;
                                     } else {
                                         continue;
                                     }
@@ -4313,6 +4321,8 @@ public class MediaDataController extends BaseController {
                 req.filters.add(new TLRPC.TL_inputMessagesFilterMusic());
             } else if (type == MEDIA_GIF) {
                 req.filters.add(new TLRPC.TL_inputMessagesFilterGif());
+            } else if (type == MEDIA_POLL) {
+                req.filters.add(new TLRPC.TL_inputMessagesFilterPoll());
             }
             if (topicId != 0) {
                 if (dialogId == getUserConfig().getClientUserId()) {
@@ -4344,7 +4354,9 @@ public class MediaDataController extends BaseController {
         if (message == null) {
             return -1;
         }
-        if (MessageObject.getMedia(message) instanceof TLRPC.TL_messageMediaPhoto) {
+        if (MessageObject.getMedia(message) instanceof TLRPC.TL_messageMediaPoll) {
+            return MEDIA_POLL;
+        } else if (MessageObject.getMedia(message) instanceof TLRPC.TL_messageMediaPhoto) {
             return MEDIA_PHOTOVIDEO;
         } else if (MessageObject.getMedia(message) instanceof TLRPC.TL_messageMediaDocument) {
             TLRPC.Document document = MessageObject.getMedia(message).document;
@@ -4912,6 +4924,7 @@ public class MediaDataController extends BaseController {
 
     public ArrayList<TLRPC.TL_topPeer> hints = new ArrayList<>();
     public ArrayList<TLRPC.TL_topPeer> inlineBots = new ArrayList<>();
+    public ArrayList<TLRPC.TL_topPeer> guestBots = new ArrayList<>();
     public ArrayList<TLRPC.TL_topPeer> webapps = new ArrayList<>();
     boolean loaded;
     boolean loading;
@@ -5110,6 +5123,9 @@ public class MediaDataController extends BaseController {
         });
     }
 
+    private static final int TOP_PEER_TYPE_BOT_INLINE = 1;
+    private static final int TOP_PEER_TYPE_BOT_GUEST = 3;
+
     public void loadHints(boolean cache) {
         if (loading || !getUserConfig().suggestContacts) {
             return;
@@ -5122,6 +5138,7 @@ public class MediaDataController extends BaseController {
             getMessagesStorage().getStorageQueue().postRunnable(() -> {
                 ArrayList<TLRPC.TL_topPeer> hintsNew = new ArrayList<>();
                 ArrayList<TLRPC.TL_topPeer> inlineBotsNew = new ArrayList<>();
+                ArrayList<TLRPC.TL_topPeer> guestsBotsNew = new ArrayList<>();
                 ArrayList<TLRPC.TL_topPeer> webappsNew = new ArrayList<>();
                 ArrayList<TLRPC.User> users = new ArrayList<>();
                 ArrayList<TLRPC.Chat> chats = new ArrayList<>();
@@ -5149,10 +5166,12 @@ public class MediaDataController extends BaseController {
                         }
                         if (type == 0) {
                             hintsNew.add(peer);
-                        } else if (type == 1) {
+                        } else if (type == TOP_PEER_TYPE_BOT_INLINE) {
                             inlineBotsNew.add(peer);
                         } else if (type == 2) {
                             webappsNew.add(peer);
+                        } else if (type == TOP_PEER_TYPE_BOT_GUEST) {
+                            guestsBotsNew.add(peer);
                         }
                     }
                     cursor.dispose();
@@ -5170,10 +5189,12 @@ public class MediaDataController extends BaseController {
                         loaded = true;
                         hints = hintsNew;
                         inlineBots = inlineBotsNew;
+                        guestBots = guestsBotsNew;
                         webapps = webappsNew;
                         buildShortcuts();
                         getNotificationCenter().postNotificationName(NotificationCenter.reloadHints);
                         getNotificationCenter().postNotificationName(NotificationCenter.reloadInlineHints);
+                        getNotificationCenter().postNotificationName(NotificationCenter.reloadGuestBotHints);
                         getNotificationCenter().postNotificationName(NotificationCenter.reloadWebappsHints);
                         if (Math.abs(getUserConfig().lastHintsSyncTime - (int) (System.currentTimeMillis() / 1000)) >= 24 * 60 * 60 || BuildVars.DEBUG_PRIVATE_VERSION) {
                             loadHints(false);
@@ -5193,6 +5214,7 @@ public class MediaDataController extends BaseController {
             req.groups = false;
             req.channels = false;
             req.bots_inline = true;
+            req.bots_guestchat = true;
             req.bots_app = true;
             req.offset = 0;
             req.limit = 20;
@@ -5210,6 +5232,9 @@ public class MediaDataController extends BaseController {
                             } else if (category.category instanceof TLRPC.TL_topPeerCategoryBotsApp) {
                                 webapps = category.peers;
                                 getUserConfig().webappRatingLoadTime = (int) (System.currentTimeMillis() / 1000);
+                            } else if (category.category instanceof TLRPC.TL_topPeerCategoryBotsGuestChat) {
+                                guestBots = category.peers;
+                                getUserConfig().botGuestRatingLoadTime = (int) (System.currentTimeMillis() / 1000);
                             } else {
                                 hints = category.peers;
                                 long selfUserId = getUserConfig().getClientUserId();
@@ -5227,6 +5252,7 @@ public class MediaDataController extends BaseController {
                         buildShortcuts();
                         getNotificationCenter().postNotificationName(NotificationCenter.reloadHints);
                         getNotificationCenter().postNotificationName(NotificationCenter.reloadInlineHints);
+                        getNotificationCenter().postNotificationName(NotificationCenter.reloadGuestBotHints);
                         getNotificationCenter().postNotificationName(NotificationCenter.reloadWebappsHints);
                         getMessagesStorage().getStorageQueue().postRunnable(() -> {
                             try {
@@ -5239,9 +5265,11 @@ public class MediaDataController extends BaseController {
                                     int type;
                                     TLRPC.TL_topPeerCategoryPeers category = topPeers.categories.get(a);
                                     if (category.category instanceof TLRPC.TL_topPeerCategoryBotsInline) {
-                                        type = 1;
+                                        type = TOP_PEER_TYPE_BOT_INLINE;
                                     } else if (category.category instanceof TLRPC.TL_topPeerCategoryBotsApp) {
                                         type = 2;
+                                    } else if (category.category instanceof TLRPC.TL_topPeerCategoryBotsGuestChat) {
+                                        type = TOP_PEER_TYPE_BOT_GUEST;
                                     } else {
                                         type = 0;
                                     }
@@ -5284,9 +5312,11 @@ public class MediaDataController extends BaseController {
     public void clearTopPeers() {
         hints.clear();
         inlineBots.clear();
+        guestBots.clear();
         webapps.clear();
         getNotificationCenter().postNotificationName(NotificationCenter.reloadHints);
         getNotificationCenter().postNotificationName(NotificationCenter.reloadInlineHints);
+        getNotificationCenter().postNotificationName(NotificationCenter.reloadGuestBotHints);
         getNotificationCenter().postNotificationName(NotificationCenter.reloadWebappsHints);
         getMessagesStorage().getStorageQueue().postRunnable(() -> {
             try {
@@ -5299,19 +5329,30 @@ public class MediaDataController extends BaseController {
     }
 
     public void increaseInlineRating(long uid) {
+        increaseInlineRating(uid, false);
+    }
+
+    public void increaseGuestRating(long uid) {
+        increaseInlineRating(uid, true);
+    }
+
+    private void increaseInlineRating(long uid, boolean guest) {
         if (!getUserConfig().suggestContacts) {
             return;
         }
+        final int lastUpdateTime = guest ? getUserConfig().botGuestRatingLoadTime : getUserConfig().botRatingLoadTime;
         int dt;
-        if (getUserConfig().botRatingLoadTime != 0) {
-            dt = Math.max(1, ((int) (System.currentTimeMillis() / 1000)) - getUserConfig().botRatingLoadTime);
+        if (lastUpdateTime != 0) {
+            dt = Math.max(1, ((int) (System.currentTimeMillis() / 1000)) - lastUpdateTime);
         } else {
             dt = 60;
         }
 
+        final ArrayList<TLRPC.TL_topPeer> topPeers = guest ? guestBots : inlineBots;
+
         TLRPC.TL_topPeer peer = null;
-        for (int a = 0; a < inlineBots.size(); a++) {
-            TLRPC.TL_topPeer p = inlineBots.get(a);
+        for (int a = 0; a < topPeers.size(); a++) {
+            TLRPC.TL_topPeer p = topPeers.get(a);
             if (p.peer.user_id == uid) {
                 peer = p;
                 break;
@@ -5321,10 +5362,10 @@ public class MediaDataController extends BaseController {
             peer = new TLRPC.TL_topPeer();
             peer.peer = new TLRPC.TL_peerUser();
             peer.peer.user_id = uid;
-            inlineBots.add(peer);
+            topPeers.add(peer);
         }
         peer.rating += Math.exp(dt / getMessagesController().ratingDecay);
-        Collections.sort(inlineBots, (lhs, rhs) -> {
+        Collections.sort(topPeers, (lhs, rhs) -> {
             if (lhs.rating > rhs.rating) {
                 return -1;
             } else if (lhs.rating < rhs.rating) {
@@ -5332,11 +5373,11 @@ public class MediaDataController extends BaseController {
             }
             return 0;
         });
-        if (inlineBots.size() > 20) {
-            inlineBots.remove(inlineBots.size() - 1);
+        if (topPeers.size() > 20) {
+            topPeers.remove(topPeers.size() - 1);
         }
-        savePeer(uid, 1, peer.rating);
-        getNotificationCenter().postNotificationName(NotificationCenter.reloadInlineHints);
+        savePeer(uid, guest ? TOP_PEER_TYPE_BOT_GUEST : TOP_PEER_TYPE_BOT_INLINE, peer.rating);
+        getNotificationCenter().postNotificationName(guest ? NotificationCenter.reloadGuestBotHints : NotificationCenter.reloadInlineHints);
     }
 
     public void increaseWebappRating(long uid) {
@@ -5351,8 +5392,8 @@ public class MediaDataController extends BaseController {
         }
 
         TLRPC.TL_topPeer peer = null;
-        for (int a = 0; a < inlineBots.size(); a++) {
-            TLRPC.TL_topPeer p = inlineBots.get(a);
+        for (int a = 0; a < webapps.size(); a++) {
+            TLRPC.TL_topPeer p = webapps.get(a);
             if (p.peer.user_id == uid) {
                 peer = p;
                 break;
@@ -5365,7 +5406,7 @@ public class MediaDataController extends BaseController {
             webapps.add(peer);
         }
         peer.rating += Math.exp(dt / getMessagesController().ratingDecay);
-        Collections.sort(inlineBots, (lhs, rhs) -> {
+        Collections.sort(webapps, (lhs, rhs) -> {
             if (lhs.rating > rhs.rating) {
                 return -1;
             } else if (lhs.rating < rhs.rating) {
@@ -5381,17 +5422,22 @@ public class MediaDataController extends BaseController {
     }
 
     public void removeInline(long dialogId) {
-        for (int a = 0; a < inlineBots.size(); a++) {
-            if (inlineBots.get(a).peer.user_id == dialogId) {
-                inlineBots.remove(a);
+        removeInline(dialogId, false);
+    }
+
+    private void removeInline(long dialogId, boolean guest) {
+        final ArrayList<TLRPC.TL_topPeer> topPeers = guest ? guestBots : inlineBots;
+        for (int a = 0; a < topPeers.size(); a++) {
+            if (topPeers.get(a).peer.user_id == dialogId) {
+                topPeers.remove(a);
                 TLRPC.TL_contacts_resetTopPeerRating req = new TLRPC.TL_contacts_resetTopPeerRating();
                 req.category = new TLRPC.TL_topPeerCategoryBotsInline();
                 req.peer = getMessagesController().getInputPeer(dialogId);
                 getConnectionsManager().sendRequest(req, (response, error) -> {
 
                 });
-                deletePeer(dialogId, 1);
-                getNotificationCenter().postNotificationName(NotificationCenter.reloadInlineHints);
+                deletePeer(dialogId, guest ? TOP_PEER_TYPE_BOT_GUEST : TOP_PEER_TYPE_BOT_INLINE);
+                getNotificationCenter().postNotificationName(guest ? NotificationCenter.reloadGuestBotHints : NotificationCenter.reloadInlineHints);
                 return;
             }
         }

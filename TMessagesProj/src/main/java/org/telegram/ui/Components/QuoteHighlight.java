@@ -31,6 +31,8 @@ public class QuoteHighlight extends Path {
     public final ChatMessageCell cell;
     public final int id, start, end;
     public final boolean todo;
+    public final boolean poll;
+    public byte[] pollOptionId;
 
     private int cornerPathEffectSize;
     public final Paint paint = new Paint(Paint.ANTI_ALIAS_FLAG);
@@ -68,6 +70,27 @@ public class QuoteHighlight extends Path {
         this.start = -taskId;
         this.end = -taskId;
         this.todo = true;
+        this.poll = false;
+
+        paint.setPathEffect(new CornerPathEffect(cornerPathEffectSize = dp(4)));
+    }
+
+    public QuoteHighlight(
+            ChatMessageCell cell,
+            int id,
+            byte[] taskId
+    ) {
+        this.cell = cell;
+        this.t = new AnimatedFloat(0, () -> {
+            if (cell != null) cell.invalidate();
+            if (cell.getParent() instanceof View) ((View) cell.getParent()).invalidate();
+        }, 350, 420, CubicBezierInterpolator.EASE_OUT_QUINT);
+        this.id = id;
+        this.pollOptionId = taskId;
+        this.start = 0;
+        this.end = 0;
+        this.todo = false;
+        this.poll = true;
 
         paint.setPathEffect(new CornerPathEffect(cornerPathEffectSize = dp(4)));
     }
@@ -88,6 +111,7 @@ public class QuoteHighlight extends Path {
         this.start = start;
         this.end = end;
         this.todo = false;
+        this.poll = false;
         if (blocks == null) return;
 
         paint.setPathEffect(new CornerPathEffect(cornerPathEffectSize = dp(4)));

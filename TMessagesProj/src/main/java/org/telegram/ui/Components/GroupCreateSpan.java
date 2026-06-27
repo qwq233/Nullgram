@@ -43,6 +43,7 @@ public class GroupCreateSpan extends View {
 
     private long uid;
     private String key;
+    private String countryIso2;
     public boolean isFlag;
     private static TextPaint textPaint = new TextPaint(Paint.ANTI_ALIAS_FLAG);
     private static Paint backPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
@@ -205,6 +206,7 @@ public class GroupCreateSpan extends View {
             avatarDrawable.setColor(Theme.multAlpha(Theme.getColor(Theme.key_text_RedRegular, resourcesProvider), 0.7f));
             avatarDrawable.setDrawAvatarBackground(drawAvatarBackground = false);
             uid = country.default_name.hashCode();
+            countryIso2 = country.iso2;
             imageLocation = null;
             imageParent = null;
         } else {
@@ -267,6 +269,10 @@ public class GroupCreateSpan extends View {
         colors[7] = Color.alpha(color);
         deleteDrawable.setColorFilter(new PorterDuffColorFilter(delete, PorterDuff.Mode.MULTIPLY));
         backPaint.setColor(back);
+    }
+
+    public String getCountryIso2() {
+        return countryIso2;
     }
 
     public boolean isDeleting() {

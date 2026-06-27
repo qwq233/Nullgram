@@ -75,6 +75,7 @@ import org.telegram.messenger.SharedConfig;
 import org.telegram.ui.ActionBar.Theme;
 import org.telegram.ui.Cells.ChatActionCell;
 import org.telegram.ui.Cells.ChatMessageCell;
+import org.telegram.ui.Components.blur3.capture.IBlur3Capture;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -85,7 +86,21 @@ import java.util.HashSet;
 import java.util.Objects;
 
 @SuppressWarnings("JavaReflectionMemberAccess")
-public class RecyclerListView extends RecyclerView {
+public class RecyclerListView extends RecyclerView implements IBlur3Capture {
+    public static final int TAG_NOT_SECTION = -33024;
+
+    public void setSections(boolean topPadding) {
+    }
+
+    public void setPaddingWithoutRequestLayout(int left, int top, int right, int bottom) {
+        super.setPadding(left, top, right, bottom);
+    }
+
+    @Override
+    public void capture(Canvas canvas, RectF position) {
+        draw(canvas);
+    }
+
     public final static int SECTIONS_TYPE_SIMPLE = 0,
             SECTIONS_TYPE_STICKY_HEADERS = 1,
             SECTIONS_TYPE_DATE = 2,

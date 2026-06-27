@@ -2240,6 +2240,10 @@ public class LocaleController {
     }
 
     public static String formatDate(long date) {
+        return formatDate(date, false);
+    }
+
+    public static String formatDate(long date, boolean withToday) {
         try {
             date *= 1000;
             Calendar rightNow = Calendar.getInstance();
@@ -2249,7 +2253,7 @@ public class LocaleController {
             int dateDay = rightNow.get(Calendar.DAY_OF_YEAR);
             int dateYear = rightNow.get(Calendar.YEAR);
 
-            if (dateDay == day && year == dateYear) {
+            if (!withToday && dateDay == day && year == dateYear) {
                 return getInstance().getFormatterDay().format(new Date(date));
             } else if (dateDay + 1 == day && year == dateYear) {
                 return getString("Yesterday", R.string.Yesterday);
@@ -2416,6 +2420,14 @@ public class LocaleController {
             FileLog.e(e);
         }
         return "LOC_ERR";
+    }
+
+    public static String formatPollEndTime(int seconds, boolean resultsHidden) {
+        final String s = seconds < 86400 ?
+                formatShortDuration(seconds) :
+                formatPluralString("Days", seconds / 86400);
+
+        return formatString(resultsHidden ? R.string.PollResultsIn : R.string.PollEndsIn, s);
     }
 
     public static String formatShortDuration2(int time) {

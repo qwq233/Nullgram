@@ -1,22 +1,3 @@
-/*
- * Copyright (C) 2019-2024 qwq233 <qwq233@qwq2333.top>
- * https://github.com/qwq233/Nullgram
- *
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * as published by the Free Software Foundation; either version 2
- * of the License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License along with this software.
- *  If not, see
- * <https://www.gnu.org/licenses/>
- */
-
 package org.telegram.ui;
 
 import static org.telegram.messenger.AndroidUtilities.dp;
@@ -48,11 +29,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.EditorInfo;
 import android.widget.FrameLayout;
-
-import androidx.recyclerview.widget.DefaultItemAnimator;
-import androidx.recyclerview.widget.ItemTouchHelper;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
 
 import org.telegram.messenger.AccountInstance;
 import org.telegram.messenger.AndroidUtilities;
@@ -182,7 +158,7 @@ public class PollCreateActivity extends BaseFragment implements NotificationCent
     private static final int done_button = 1;
 
     public interface PollCreateActivityDelegate {
-        void sendPoll(TLRPC.MessageMedia poll, HashMap<String, String> params, boolean notify, int scheduleDate);
+        void sendPoll(TLRPC.MessageMedia poll, ArrayList<Integer> correctAnswers, boolean notify, int scheduleDate);
     }
 
     @Override
@@ -271,7 +247,7 @@ public class PollCreateActivity extends BaseFragment implements NotificationCent
     public PollCreateActivity(ChatActivity chatActivity, boolean todo, Boolean quiz) {
         super();
         this.todo = todo;
-        this.maxAnswersCount = todo ? getMessagesController().todoItemsMax : getMessagesController().pollAnswersMax;
+        this.maxAnswersCount = todo ? getMessagesController().todoItemsMax : getMessagesController().config.pollAnswersMax.get();
         answers = new CharSequence[maxAnswersCount];
         answersChecks = new boolean[maxAnswersCount];
         parentFragment = chatActivity;
@@ -375,7 +351,7 @@ public class PollCreateActivity extends BaseFragment implements NotificationCent
         } else {
             actionBar.setTitle(getString(R.string.NewPoll));
         }
-        if (AndroidUtilities.isTablet()) {
+        if (parentLayout != null && parentLayout.isLayersLayout()) {
             actionBar.setOccupyStatusBar(false);
         }
         actionBar.setAllowOverlayTitle(true);
@@ -383,7 +359,7 @@ public class PollCreateActivity extends BaseFragment implements NotificationCent
             @Override
             public void onItemClick(int id) {
                 if (id == -1) {
-                    if (checkDiscard()) {
+                    if (checkDiscard(true)) {
                         finishFragment();
                     }
                 } else if (id == done_button) {
@@ -485,7 +461,7 @@ public class PollCreateActivity extends BaseFragment implements NotificationCent
                         poll.poll.question.text = questionText.toString();
                         poll.poll.question.entities = questionEntities;
 
-                        SerializedData serializedData = new SerializedData(maxAnswersCount);
+                        ArrayList<Integer> correctAnswers = new ArrayList<>(maxAnswersCount);
                         for (int a = 0; a < answers.length; a++) {
                             if (TextUtils.isEmpty(ChatAttachAlertPollLayout.getFixedString(answers[a]))) {
                                 continue;
@@ -507,13 +483,11 @@ public class PollCreateActivity extends BaseFragment implements NotificationCent
                             answer.text.entities = answerEntities;
                             answer.option = new byte[1];
                             answer.option[0] = (byte) (48 + poll.poll.answers.size());
-                            poll.poll.answers.add(answer);
                             if ((multipleChoise || quizPoll) && answersChecks[a]) {
-                                serializedData.writeByte(answer.option[0]);
+                                correctAnswers.add(poll.poll.answers.size());
                             }
+                            poll.poll.answers.add(answer);
                         }
-                        HashMap<String, String> params = new HashMap<>();
-                        params.put("answers", Utilities.bytesToHex(serializedData.toByteArray()));
                         poll.results = new TLRPC.TL_pollResults();
                         CharSequence solution = ChatAttachAlertPollLayout.getFixedString(solutionString);
                         if (solution != null) {
@@ -529,11 +503,11 @@ public class PollCreateActivity extends BaseFragment implements NotificationCent
                         }
                         if (parentFragment.isInScheduleMode()) {
                             AlertsCreator.createScheduleDatePickerDialog(parentFragment.getParentActivity(), parentFragment.getDialogId(), (notify, scheduleDate, scheduleRepeatPeriod) -> {
-                                delegate.sendPoll(poll, params, notify, scheduleDate);
+                                delegate.sendPoll(poll, correctAnswers, notify, scheduleDate);
                                 finishFragment();
                             });
                         } else {
-                            delegate.sendPoll(poll, params, true, 0);
+                            delegate.sendPoll(poll, correctAnswers, true, 0);
                             finishFragment();
                         }
                     }
@@ -935,15 +909,17 @@ public class PollCreateActivity extends BaseFragment implements NotificationCent
                 }
             }
         }
+        final int maxQuestionLength = todo ? getMessagesController().todoTitleLengthMax : ChatAttachAlertPollLayout.MAX_QUESTION_LENGTH;
+        final int maxAnswerLength = todo ? getMessagesController().todoItemLengthMax : ChatAttachAlertPollLayout.MAX_ANSWER_LENGTH;
         if (!TextUtils.isEmpty(ChatAttachAlertPollLayout.getFixedString(solutionString)) && solutionString.length() > ChatAttachAlertPollLayout.MAX_SOLUTION_LENGTH) {
             enabled = false;
-        } else if (TextUtils.isEmpty(ChatAttachAlertPollLayout.getFixedString(questionString)) || questionString.length() > ChatAttachAlertPollLayout.MAX_QUESTION_LENGTH) {
+        } else if (TextUtils.isEmpty(ChatAttachAlertPollLayout.getFixedString(questionString)) || questionString.length() > maxQuestionLength) {
             enabled = false;
         } else {
             int count = 0;
             for (int a = 0; a < answers.length; a++) {
                 if (!TextUtils.isEmpty(ChatAttachAlertPollLayout.getFixedString(answers[a]))) {
-                    if (answers[a].length() > ChatAttachAlertPollLayout.MAX_ANSWER_LENGTH) {
+                    if (answers[a].length() > maxAnswerLength) {
                         count = 0;
                         break;
                     }
@@ -1017,15 +993,15 @@ public class PollCreateActivity extends BaseFragment implements NotificationCent
     }
 
     @Override
-    public boolean onBackPressed() {
+    public boolean onBackPressed(boolean invoked) {
         if (emojiViewVisible) {
-            hideEmojiPopup(true);
+            if (invoked) hideEmojiPopup(true);
             return false;
         }
-        return checkDiscard();
+        return checkDiscard(invoked);
     }
 
-    private boolean checkDiscard() {
+    private boolean checkDiscard(boolean invoked) {
         boolean allowDiscard = true;
         if (editing instanceof TLRPC.TL_messageMediaToDo) {
             final TLRPC.TL_messageMediaToDo media = (TLRPC.TL_messageMediaToDo) editing;
@@ -1058,8 +1034,8 @@ public class PollCreateActivity extends BaseFragment implements NotificationCent
                 }
             }
         }
-        if (!allowDiscard) {
-            AlertDialog.Builder builder = new AlertDialog.Builder(getParentActivity());
+        if (invoked && !allowDiscard) {
+            final AlertDialog.Builder builder = new AlertDialog.Builder(getParentActivity());
             builder.setTitle(getString(todo ? R.string.CancelTodoAlertTitle : R.string.CancelPollAlertTitle));
             builder.setMessage(getString(todo ? R.string.CancelTodoAlertText : R.string.CancelPollAlertText));
             builder.setPositiveButton(getString(R.string.PassportDiscard), (dialogInterface, i) -> finishFragment());
@@ -1081,15 +1057,15 @@ public class PollCreateActivity extends BaseFragment implements NotificationCent
         int max;
         int left;
         if (index == questionRow) {
-            max = ChatAttachAlertPollLayout.MAX_QUESTION_LENGTH;
-            left = ChatAttachAlertPollLayout.MAX_QUESTION_LENGTH - (questionString != null ? questionString.length() : 0);
+            max = todo ? getMessagesController().todoTitleLengthMax : ChatAttachAlertPollLayout.MAX_QUESTION_LENGTH;
+            left = max - (questionString != null ? questionString.length() : 0);
         } else if (index == solutionRow) {
             max = ChatAttachAlertPollLayout.MAX_SOLUTION_LENGTH;
             left = ChatAttachAlertPollLayout.MAX_SOLUTION_LENGTH - (solutionString != null ? solutionString.length() : 0);
         } else if (index >= answerStartRow && index < answerStartRow + answersCount) {
             index -= answerStartRow;
-            max = ChatAttachAlertPollLayout.MAX_ANSWER_LENGTH;
-            left = ChatAttachAlertPollLayout.MAX_ANSWER_LENGTH - (answers[index] != null ? answers[index].length() : 0);
+            max = todo ? getMessagesController().todoItemLengthMax : ChatAttachAlertPollLayout.MAX_ANSWER_LENGTH;
+            left = max - (answers[index] != null ? answers[index].length() : 0);
         } else {
             return;
         }
@@ -1562,12 +1538,12 @@ public class PollCreateActivity extends BaseFragment implements NotificationCent
                 case 0: {
                     HeaderCell cell = (HeaderCell) holder.itemView;
                     if (position == questionHeaderRow) {
-                        cell.setText(getString(todo ? editing != null ? R.string.TodoEditTitle : R.string.TodoTitle : R.string.PollQuestion));
+                        cell.setText(getString(todo ? editing != null ? R.string.TodoEditTitle : R.string.TodoTitle : R.string.PollQuestion2));
                     } else if (position == answerHeaderRow) {
                         if (quizOnly == 1) {
                             cell.setText(getString(R.string.QuizAnswers));
                         } else {
-                            cell.setText(getString(todo ? R.string.TodoItemsTitle : R.string.AnswerOptions));
+                            cell.setText(getString(todo ? R.string.TodoItemsTitle : R.string.AnswerOptions2));
                         }
                     } else if (position == settingsHeaderRow) {
                         cell.setText(getString(R.string.Settings));
@@ -1581,12 +1557,8 @@ public class PollCreateActivity extends BaseFragment implements NotificationCent
                     if (position == solutionInfoRow) {
                         cell.setText(getString(R.string.AddAnExplanationInfo));
                     } else if (position == settingsSectionRow) {
-                        if (quizOnly != 0) {
-                            cell.setFixedSize(12);
-                            cell.setText(null);
-                        } else {
-                            cell.setText(getString(R.string.QuizInfo));
-                        }
+                        cell.setFixedSize(12);
+                        cell.setText(null);
                     } else if (maxAnswersCount - answersCount <= 0) {
                         cell.setText(getString(todo ? R.string.TodoAddTaskInfoMax : R.string.AddAnOptionInfoMax));
                     } else if (todo) {
@@ -1727,7 +1699,7 @@ public class PollCreateActivity extends BaseFragment implements NotificationCent
                     view.setBackgroundColor(Theme.getColor(Theme.key_windowBackgroundWhite));
                     break;
                 case 4: {
-                    PollEditTextCell cell = new PollEditTextCell(mContext, false, isPremium ? PollEditTextCell.TYPE_EMOJI : PollEditTextCell.TYPE_DEFAULT, null, null, resourceProvider) {
+                    PollEditTextCell cell = new PollEditTextCell(mContext, false, isPremium ? PollEditTextCell.TYPE_EMOJI : PollEditTextCell.TYPE_DEFAULT, null) {
                         @Override
                         protected void onActionModeStart(EditTextBoldCursor editText, ActionMode actionMode) {
 //                            if (editText.isFocused() && editText.hasSelection()) {
@@ -1818,7 +1790,7 @@ public class PollCreateActivity extends BaseFragment implements NotificationCent
                     view.setBackgroundColor(Theme.getColor(Theme.key_windowBackgroundWhite));
                     break;
                 case 7: {
-                    PollEditTextCell cell = new PollEditTextCell(mContext, false, isPremium ? PollEditTextCell.TYPE_EMOJI : PollEditTextCell.TYPE_DEFAULT, null, null, resourceProvider) {
+                    PollEditTextCell cell = new PollEditTextCell(mContext, false, isPremium ? PollEditTextCell.TYPE_EMOJI : PollEditTextCell.TYPE_DEFAULT, null) {
                         @Override
                         protected void onActionModeStart(EditTextBoldCursor editText, ActionMode actionMode) {
                             if (editText.isFocused() && editText.hasSelection()) {

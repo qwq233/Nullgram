@@ -13,6 +13,7 @@ import org.telegram.messenger.LocaleController;
 import org.telegram.messenger.MessageObject;
 import org.telegram.messenger.MessagesController;
 import org.telegram.messenger.MessagesStorage;
+import org.telegram.messenger.R;
 import org.telegram.messenger.UserConfig;
 import org.telegram.messenger.UserObject;
 import org.telegram.messenger.Utilities;
@@ -405,6 +406,56 @@ public class BoostRepository {
                     if (country.iso2.equalsIgnoreCase("FT")) {
                         continue;
                     }
+                    String letter = country.default_name.substring(0, 1).toUpperCase();
+                    List<TLRPC.TL_help_country> arr = countriesMap.get(letter);
+                    if (arr == null) {
+                        arr = new ArrayList<>();
+                        countriesMap.put(letter, arr);
+                        sortedLetters.add(letter);
+                    }
+                    arr.add(country);
+                }
+
+                Comparator<String> comparator;
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                    Collator collator = Collator.getInstance(LocaleController.getInstance().getCurrentLocale() != null ? LocaleController.getInstance().getCurrentLocale() : Locale.getDefault());
+                    comparator = collator::compare;
+                } else {
+                    comparator = String::compareTo;
+                }
+                Collections.sort(sortedLetters, comparator);
+                for (List<TLRPC.TL_help_country> arr : countriesMap.values()) {
+                    Collections.sort(arr, (country, country2) -> comparator.compare(country.default_name, country2.default_name));
+                }
+                AndroidUtilities.runOnUIThread(() -> onDone.run(new Pair<>(countriesMap, sortedLetters)));
+            }
+        });
+    }
+
+    public static void loadCountriesForPolls(Utilities.Callback<Pair<Map<String, List<TLRPC.TL_help_country>>, List<String>>> onDone) {
+        ConnectionsManager connection = ConnectionsManager.getInstance(UserConfig.selectedAccount);
+
+        TLRPC.TL_help_getCountriesList req = new TLRPC.TL_help_getCountriesList();
+        req.lang_code = LocaleController.getInstance().getCurrentLocaleInfo() != null ? LocaleController.getInstance().getCurrentLocaleInfo().getLangCode() : Locale.getDefault().getCountry();
+        int reqId = connection.sendRequest(req, (response, error) -> {
+            if (response != null) {
+                TLRPC.TL_help_countriesList help_countriesList = (TLRPC.TL_help_countriesList) response;
+                Map<String, List<TLRPC.TL_help_country>> countriesMap = new HashMap<>();
+                List<String> sortedLetters = new ArrayList<>();
+
+                for (int i = 0; i < help_countriesList.countries.size(); i++) {
+                    TLRPC.TL_help_country country = help_countriesList.countries.get(i);
+                    final boolean isFragment = country.iso2.equalsIgnoreCase("FT");
+                    if (country.name != null) {
+                        country.default_name = country.name;
+                    }
+                    if (country.hidden && !isFragment) {
+                        continue;
+                    }
+                    if (isFragment) {
+                        country.name = country.default_name = LocaleController.getString(R.string.Fragment);
+                    }
+
                     String letter = country.default_name.substring(0, 1).toUpperCase();
                     List<TLRPC.TL_help_country> arr = countriesMap.get(letter);
                     if (arr == null) {

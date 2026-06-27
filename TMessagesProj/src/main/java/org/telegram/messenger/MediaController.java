@@ -502,6 +502,12 @@ public class MediaController implements AudioManager.OnAudioFocusChangeListener,
         public String croppedPaintPath;
         public String fullPaintPath;
 
+        public boolean isLivePhoto() {
+            return this instanceof PhotoEntry && ((PhotoEntry) this).isLivePhoto();
+        }
+
+        public long livePhotoVideoOffset;
+
         public ArrayList<TLRPC.MessageEntity> entities;
         public SavedFilterState savedFilterState;
         public ArrayList<VideoEditedInfo.MediaEntity> mediaEntities;
@@ -566,6 +572,7 @@ public class MediaController implements AudioManager.OnAudioFocusChangeListener,
             isFiltered = state.isFiltered;
             isPainted = state.isPainted;
             isCropped = state.isCropped;
+            livePhotoVideoOffset = state.livePhotoVideoOffset;
             ttl = state.ttl;
 
             cropState = state.cropState;
@@ -592,6 +599,13 @@ public class MediaController implements AudioManager.OnAudioFocusChangeListener,
         public boolean hasSpoiler;
         public long starsAmount;
         public String emoji;
+        public Boolean discardLivePhoto;
+
+        public boolean isUnalivePhoto() {
+            return discardLivePhoto != null && discardLivePhoto;
+        }
+
+        public long livePhotoTimestampUs;
 
         public int videoOrientation = -1;
 
@@ -602,6 +616,12 @@ public class MediaController implements AudioManager.OnAudioFocusChangeListener,
         public int gradientTopColor, gradientBottomColor;
 
         public BitmapDrawable thumb;
+        public boolean isLivePhoto;
+
+        @Override
+        public boolean isLivePhoto() {
+            return isLivePhoto;
+        }
 
         public PhotoEntry(int bucketId, int imageId, long dateTaken, String path, int orientationOrDuration, boolean isVideo, int width, int height, long size) {
             this.bucketId = bucketId;
@@ -649,6 +669,9 @@ public class MediaController implements AudioManager.OnAudioFocusChangeListener,
             super.copyFrom(state);
             this.hasSpoiler = state instanceof PhotoEntry && ((PhotoEntry) state).hasSpoiler;
             this.starsAmount = state instanceof PhotoEntry ? ((PhotoEntry) state).starsAmount : 0;
+            this.isLivePhoto = state instanceof PhotoEntry && ((PhotoEntry) state).isLivePhoto;
+            this.livePhotoVideoOffset = state instanceof PhotoEntry ? ((PhotoEntry) state).livePhotoVideoOffset : 0;
+            this.livePhotoTimestampUs = state instanceof PhotoEntry ? ((PhotoEntry) state).livePhotoTimestampUs : 0;
         }
 
         public PhotoEntry clone() {
@@ -663,6 +686,7 @@ public class MediaController implements AudioManager.OnAudioFocusChangeListener,
             photoEntry.emojiMarkup = emojiMarkup;
             photoEntry.gradientTopColor = gradientTopColor;
             photoEntry.gradientBottomColor = gradientBottomColor;
+            photoEntry.discardLivePhoto = discardLivePhoto;
             photoEntry.copyFrom(this);
             return photoEntry;
         }

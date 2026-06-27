@@ -89,6 +89,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 
 public class MentionsAdapter extends RecyclerListView.SelectionAdapter implements NotificationCenter.NotificationCenterDelegate {
 
@@ -975,6 +976,18 @@ public class MentionsAdapter extends RecyclerListView.SelectionAdapter implement
         }
     }
 
+    private static ArrayList<TLRPC.TL_topPeer> sortAndDeduplicateTopPeers(ArrayList<TLRPC.TL_topPeer> peers) {
+        peers.sort((a, b) -> Double.compare(b.rating, a.rating));
+
+        LinkedHashMap<Long, TLRPC.TL_topPeer> seen = new LinkedHashMap<>();
+        for (TLRPC.TL_topPeer peer : peers) {
+            long dialogId = DialogObject.getPeerDialogId(peer.peer);
+            seen.putIfAbsent(dialogId, peer);
+        }
+
+        return new ArrayList<>(seen.values());
+    }
+
     public void searchUsernameOrHashtag(CharSequence charSequence, int position, ArrayList<MessageObject> messageObjects, boolean usernameOnly, boolean forSearch) {
         final String text = charSequence == null ? "" : charSequence.toString();
         TLRPC.Chat currentChat = chat;
@@ -1290,7 +1303,14 @@ public class MentionsAdapter extends RecyclerListView.SelectionAdapter implement
             ArrayList<TLObject> newResult = new ArrayList<>();
             final LongSparseArray<TLRPC.User> newResultsHashMap = new LongSparseArray<>();
             final LongSparseArray<TLObject> newMap = new LongSparseArray<>();
-            ArrayList<TLRPC.TL_topPeer> inlineBots = MediaDataController.getInstance(currentAccount).inlineBots;
+            final ArrayList<TLRPC.TL_topPeer> bots = new ArrayList<>();
+            bots.addAll(MediaDataController.getInstance(currentAccount).inlineBots);
+
+            if (currentChat == null || !(ChatObject.isMonoForum(currentChat) || ChatObject.isChannelAndNotMegaGroup(currentChat))) {
+                bots.addAll(MediaDataController.getInstance(currentAccount).guestBots);
+            }
+
+            final ArrayList<TLRPC.TL_topPeer> inlineBots = sortAndDeduplicateTopPeers(bots);
             if (!usernameOnly && needBotContext && dogPostion == 0 && !inlineBots.isEmpty()) {
                 int count = 0;
                 for (int a = 0; a < inlineBots.size(); a++) {

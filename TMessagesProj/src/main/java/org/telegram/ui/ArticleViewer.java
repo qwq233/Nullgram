@@ -129,6 +129,7 @@ import org.json.JSONObject;
 import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.AnimationNotificationsLocker;
 import org.telegram.messenger.ApplicationLoader;
+import org.telegram.messenger.BotGuardHelper;
 import org.telegram.messenger.ChatObject;
 import org.telegram.messenger.DownloadController;
 import org.telegram.messenger.Emoji;
@@ -5676,17 +5677,27 @@ public class ArticleViewer implements NotificationCenter.NotificationCenterDeleg
                 return;
             }
             boolean hasJoinMessage = false;
-            TLRPC.Updates updates = (TLRPC.Updates) response;
-            for (int a = 0; a < updates.updates.size(); a++) {
-                TLRPC.Update update = updates.updates.get(a);
-                if (update instanceof TL_update.TL_updateNewChannelMessage) {
-                    if (((TL_update.TL_updateNewChannelMessage) update).message.action instanceof TLRPC.TL_messageActionChatAddUser) {
-                        hasJoinMessage = true;
-                        break;
+            if (response instanceof TLRPC.TL_chatInviteJoinResultOk) {
+                final TLRPC.Updates updates = ((TLRPC.TL_chatInviteJoinResultOk) response).updates;
+                for (int a = 0; a < updates.updates.size(); a++) {
+                    TLRPC.Update update = updates.updates.get(a);
+                    if (update instanceof TL_update.TL_updateNewChannelMessage) {
+                        if (((TL_update.TL_updateNewChannelMessage) update).message.action instanceof TLRPC.TL_messageActionChatAddUser) {
+                            hasJoinMessage = true;
+                            break;
+                        }
                     }
                 }
+                MessagesController.getInstance(currentAccount).processUpdates(updates, false);
+            } else if (response instanceof TLRPC.TL_chatInviteJoinResultWebView) {
+                TLRPC.TL_chatInviteJoinResultWebView resultWebView = (TLRPC.TL_chatInviteJoinResultWebView) response;
+                AndroidUtilities.runOnUIThread(() -> {
+                    MessagesController.getInstance(currentAccount).putUsers(resultWebView.users, false);
+                    BotGuardHelper.getInstance(currentAccount).openGuardBotWebApp(-channel.id,
+                        resultWebView.bot_id, resultWebView.webview);
+                });
+                hasJoinMessage = true;
             }
-            MessagesController.getInstance(currentAccount).processUpdates(updates, false);
             if (!hasJoinMessage) {
                 MessagesController.getInstance(currentAccount).generateJoinMessage(channel.id, true);
             }
