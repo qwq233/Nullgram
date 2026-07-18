@@ -86,6 +86,7 @@ dependencies {
     implementation(libs.androidx.biometric)
     implementation(libs.androidx.mediarouter)
     implementation(libs.androidx.credentials)
+    implementation(libs.androidx.security.crypto)
 
     compileOnly(libs.checker.compat.qual)
     compileOnly(libs.checker.qual)
@@ -258,7 +259,4 @@ androidComponents {
 
 kotlin {
     jvmToolchain(Version.java.toString().toInt())
-    sourceSets.configureEach {
-        kotlin.srcDir("${layout.buildDirectory.asFile.get().absolutePath}/generated/ksp/$name/kotlin/")
-    }
 }

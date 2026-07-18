@@ -22,7 +22,6 @@ package org.telegram.ui.Stories;
 import static org.telegram.messenger.AndroidUtilities.dp;
 import static org.telegram.messenger.AndroidUtilities.lerp;
 import static org.telegram.messenger.LocaleController.getString;
-import static org.telegram.ui.Components.blur3.drawable.BlurredBackgroundDrawable.drawStroke;
 import static org.telegram.ui.Stories.HighlightMessageSheet.TIER_EMOJIS;
 import static org.telegram.ui.Stories.HighlightMessageSheet.TIER_LENGTH;
 import static org.telegram.ui.Stories.HighlightMessageSheet.getMaxLength;
@@ -42,7 +41,6 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.ColorFilter;
 import android.graphics.Paint;
-import android.graphics.Path;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffColorFilter;
 import android.graphics.Rect;
@@ -196,13 +194,7 @@ import org.telegram.ui.Components.URLSpanMono;
 import org.telegram.ui.Components.URLSpanNoUnderline;
 import org.telegram.ui.Components.URLSpanReplacement;
 import org.telegram.ui.Components.URLSpanUserMention;
-import org.telegram.ui.Components.blur3.BlurredBackgroundDrawableViewFactory;
-import org.telegram.ui.Components.blur3.drawable.BlurredBackgroundDrawable;
 import org.telegram.ui.Components.blur3.drawable.color.BlurredBackgroundColorProviderThemed;
-import org.telegram.ui.Components.blur3.source.BlurredBackgroundSource;
-import org.telegram.ui.Components.blur3.source.BlurredBackgroundSourceColor;
-import org.telegram.ui.Components.blur3.source.BlurredBackgroundSourceRenderNode;
-import org.telegram.ui.Components.chat.ViewPositionWatcher;
 import org.telegram.ui.Components.voip.CellFlickerDrawable;
 import org.telegram.ui.DialogsActivity;
 import org.telegram.ui.EmojiAnimationsOverlay;
@@ -352,12 +344,7 @@ public class PeerStoriesView extends SizeNotifierFrameLayout implements Notifica
     private StoryFailView failView;
     private ViewPropertyAnimator failViewAnimator;
 
-    BlurredBackgroundDrawable inputFieldBackground;
-    BlurredBackgroundDrawable emojiKeyboardBackground;
-
     Paint inputBackgroundPaint;
-    Paint inputTopBorderPaint;
-    Paint inputBottomBorderPaint;
 
     int lastKeyboardHeight;
     ValueAnimator keyboardAnimator;
@@ -434,11 +421,6 @@ public class PeerStoriesView extends SizeNotifierFrameLayout implements Notifica
     private ActionBarMenuSubItem albumItem;
     private ViewGroup albumLayout;
 
-    private BlurredBackgroundDrawableViewFactory blurredBackgroundDrawableFactory;
-
-    private final @NonNull BlurredBackgroundSourceColor blurredBackgroundSourceFallback;
-    private final @NonNull BlurredBackgroundSource blurredBackgroundSourceWithSaturation;
-    private final @Nullable BlurredBackgroundSourceRenderNode blurredBackgroundSourceRenderNodeWithSaturation;
     private BlurredBackgroundColorProviderThemed blurredBackgroundColorProvider;
 
     public PeerStoriesView(@NonNull Context context, StoryViewer storyViewer, SharedResources sharedResources, Theme.ResourcesProvider resourcesProvider) {
@@ -504,12 +486,6 @@ public class PeerStoriesView extends SizeNotifierFrameLayout implements Notifica
         storiesController = MessagesController.getInstance(UserConfig.selectedAccount).getStoriesController();
         sharedResources.dimPaint.setColor(Color.BLACK);
         inputBackgroundPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
-        inputTopBorderPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
-        inputTopBorderPaint.setStyle(Paint.Style.STROKE);
-        inputTopBorderPaint.setColor(0x28FFFFFF);
-        inputBottomBorderPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
-        inputBottomBorderPaint.setStyle(Paint.Style.STROKE);
-        inputBottomBorderPaint.setColor(0x14FFFFFF);
         this.resourcesProvider = resourcesProvider;
         setClipChildren(false);
 
@@ -560,24 +536,6 @@ public class PeerStoriesView extends SizeNotifierFrameLayout implements Notifica
 
         blurredBackgroundColorProvider = new BlurredBackgroundColorProviderThemed(resourcesProvider, Theme.key_chat_messagePanelBackground, 0.8f);
 
-        blurredBackgroundSourceFallback = new BlurredBackgroundSourceColor();
-        blurredBackgroundSourceFallback.setColor(ColorUtils.blendARGB(Color.BLACK, Color.WHITE, 0.2f));
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && SharedConfig.canBlurChat()) {
-            blurredBackgroundSourceRenderNodeWithSaturation = new BlurredBackgroundSourceRenderNode(blurredBackgroundSourceFallback);
-            blurredBackgroundSourceRenderNodeWithSaturation.setBlur(dp(8));
-            blurredBackgroundSourceWithSaturation = blurredBackgroundSourceRenderNodeWithSaturation;
-        } else {
-            blurredBackgroundSourceRenderNodeWithSaturation = null;
-
-            blurredBackgroundSourceWithSaturation = blurredBackgroundSourceFallback;
-        }
-
-        blurredBackgroundDrawableFactory = new BlurredBackgroundDrawableViewFactory(new ViewPositionWatcher(this), this, blurredBackgroundSourceWithSaturation);
-
-        inputFieldBackground = blurredBackgroundDrawableFactory.create(this, blurredBackgroundColorProvider);
-        emojiKeyboardBackground = blurredBackgroundDrawableFactory.create(this, blurredBackgroundColorProvider);
-        emojiKeyboardBackground.setThickness(dp(32));
-
         storyContainer = new HwFrameLayout(context) {
 
             final AnimatedFloat progressToAudio = new AnimatedFloat(this, 150, CubicBezierInterpolator.DEFAULT);
@@ -621,14 +579,8 @@ public class PeerStoriesView extends SizeNotifierFrameLayout implements Notifica
                                 canvas.scale(sx, sy);
                                 canvas.drawBitmap(playerSharedScope.player.playerStubBitmap, 0, 0, playerSharedScope.player.playerStubPaint);
                                 canvas.restore();
-                            } else {
-                                final boolean isInSourceRecording = Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q
-                                    && blurredBackgroundSourceRenderNodeWithSaturation != null
-                                    && blurredBackgroundSourceRenderNodeWithSaturation.isRecordingCanvas(canvas);
-
-                                if (!storyViewer.USE_SURFACE_VIEW || allowDrawSurface && storyViewer.isShown() && !isInSourceRecording) {
-                                    playerSharedScope.renderView.draw(canvas);
-                                }
+                            } else if (!storyViewer.USE_SURFACE_VIEW || allowDrawSurface && storyViewer.isShown()) {
+                                playerSharedScope.renderView.draw(canvas);
                             }
                         }
 
@@ -3029,7 +2981,7 @@ public class PeerStoriesView extends SizeNotifierFrameLayout implements Notifica
         Theme.ResourcesProvider emojiResourceProvider = new WrappedResourceProvider(resourcesProvider) {
             @Override
             public void appendColors() {
-                sparseIntArray.put(Theme.key_chat_emojiPanelBackground, 0xC020242A);
+                sparseIntArray.put(Theme.key_chat_emojiPanelBackground, ColorUtils.setAlphaComponent(Color.WHITE, 30));
             }
         };
         chatActivityEnterView = new ChatActivityEnterView(AndroidUtilities.findActivity(getContext()), this, null, true, emojiResourceProvider) {
@@ -3115,7 +3067,7 @@ public class PeerStoriesView extends SizeNotifierFrameLayout implements Notifica
             public void setHorizontalPadding(float leftPadding, float rightPadding, float progress, boolean allowShare) {
 //                float leftPadding = -padding * (1f - progress);
                 if (premiumBlockedText != null) {
-                    premiumBlockedText.setTranslationX(leftPadding * (1f - progress));
+                    premiumBlockedText.setTranslationX(-leftPadding * (1f - progress));
                 }
                 super.setHorizontalPadding(leftPadding, rightPadding, progress, allowShare);
             }
@@ -3263,7 +3215,6 @@ public class PeerStoriesView extends SizeNotifierFrameLayout implements Notifica
             }
         };
         chatActivityEnterView.getEditField().useAnimatedTextDrawable();
-        chatActivityEnterView.getEditField().setScaleX(0);
         chatActivityEnterView.setOverrideKeyboardAnimation(true);
         chatActivityEnterView.setClipChildren(false);
         chatActivityEnterView.setDelegate(new ChatActivityEnterView.ChatActivityEnterViewDelegate() {
@@ -3508,7 +3459,7 @@ public class PeerStoriesView extends SizeNotifierFrameLayout implements Notifica
         }
         chatActivityEnterView.updateColors();
         chatActivityEnterView.isStories = true;
-        addView(chatActivityEnterView, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT, Gravity.LEFT | Gravity.BOTTOM, 7, 0, 7, 0));
+        addView(chatActivityEnterView, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT, Gravity.LEFT | Gravity.BOTTOM));
         if (sendAsPeersObj != null) {
             chatActivityEnterView.updateSendAsButton(false);
         }
@@ -7303,16 +7254,14 @@ public class PeerStoriesView extends SizeNotifierFrameLayout implements Notifica
         boolean popupVisible = chatActivityEnterView != null && chatActivityEnterView.isPopupShowing();
         float hideInterfaceAlpha = getHideInterfaceAlpha();
         if (BIG_SCREEN) {
-            inputBackgroundPaint.setColor(
-                ColorUtils.blendARGB(
-                    0xFF1C2229,
-                    Theme.multAlpha(Color.BLACK, 0.44f),
-                    progressToKeyboard
-                )
-            );
+            inputBackgroundPaint.setColor(ColorUtils.blendARGB(
+                ColorUtils.blendARGB(Color.BLACK, Color.WHITE, 0.13f),
+                ColorUtils.setAlphaComponent(Color.BLACK, 170),
+                progressToKeyboard
+            ));
             inputBackgroundPaint.setAlpha((int) (inputBackgroundPaint.getAlpha() * (1f - progressToDismiss) * hideInterfaceAlpha * (1f - outT)));
         } else {
-            inputBackgroundPaint.setColor(ColorUtils.setAlphaComponent(Color.BLACK, (int) (0xFF * 0.54f * hideInterfaceAlpha * (1f - outT))));
+            inputBackgroundPaint.setColor(ColorUtils.setAlphaComponent(Color.BLACK, (int) (140 * hideInterfaceAlpha * (1f - outT))));
         }
         if (
             forceUpdateOffsets ||
@@ -7404,7 +7353,7 @@ public class PeerStoriesView extends SizeNotifierFrameLayout implements Notifica
                 }
 
                 float alpha;
-                float translationY = -enterViewBottomOffset * (1f - keyboard) - dp(7) * keyboard - animatingKeyboardHeight - dp(8) * (1f - keyboard) - dp(20) * storyViewer.swipeToReplyProgress;
+                float translationY = -enterViewBottomOffset * (1f - keyboard) - animatingKeyboardHeight - dp(8) * (1f - keyboard) - dp(20) * storyViewer.swipeToReplyProgress;
                 if (child == commentButton || child == starsButton || child == muteButton || child == starsButtonEffectsView) {
                     translationY += animatingKeyboardHeight;
                 }
@@ -7507,8 +7456,6 @@ public class PeerStoriesView extends SizeNotifierFrameLayout implements Notifica
         return (1f - progressToHideInterface.get()) * (1f - storyViewer.getProgressToSelfViews());
     }
 
-    private final Path clipPath = new Path();
-
     @Override
     protected boolean drawChild(Canvas canvas, View child, long drawingTime) {
         if (child == mentionContainer) {
@@ -7525,10 +7472,10 @@ public class PeerStoriesView extends SizeNotifierFrameLayout implements Notifica
             }
 
             sharedResources.rect1.set(
-                chatActivityEnterView.getX(),
-                chatActivityEnterView.getY() + chatActivityEnterView.getAnimatedTop() + dp(1.33f),
-                chatActivityEnterView.getX() + chatActivityEnterView.getMeasuredWidth(),
-                chatActivityEnterView.getY() + chatActivityEnterView.getMeasuredHeight()
+                0,
+                chatActivityEnterView.getY() + chatActivityEnterView.getAnimatedTop(),
+                getMeasuredWidth(),
+                getMeasuredHeight()
             );
             float leftOffset = 0;
             float rightOffset = dp(40);
@@ -7550,29 +7497,30 @@ public class PeerStoriesView extends SizeNotifierFrameLayout implements Notifica
                     rightOffset += dp(46);
                 }
             }
+            final float enterViewBottom = chatActivityEnterView.getY() + chatActivityEnterView.getMeasuredHeight();
             sharedResources.rect2.set(
                 dp(10) + leftOffset,
-                (chatActivityEnterView.getY() + chatActivityEnterView.getMeasuredHeight() - dp(5) - dp(38)),
+                enterViewBottom - dp(48) + dp(2),
                 getMeasuredWidth() - dp(10) - rightOffset,
-                (chatActivityEnterView.getY() + chatActivityEnterView.getMeasuredHeight() - dp(5))
+                enterViewBottom - dp(2)
             );
             chatActivityEnterView.setTranslationX(leftOffset * (1f - progressToKeyboard));
-            float editFieldTy = 0;
             if (chatActivityEnterView.getMeasuredHeight() > dp(50)) {
-                editFieldTy += (1f - progressToKeyboard) * (chatActivityEnterView.getMeasuredHeight() - dp(50));
-            }
-            editFieldTy += -dp(2) * (1f - progressToKeyboard);
-            chatActivityEnterView.getEditField().setTranslationY(editFieldTy);
-            float radius = dp(50) / 2f;
-            AndroidUtilities.lerp(sharedResources.rect2, sharedResources.rect1, progressToKeyboard, sharedResources.finalRect);
-            if (inputFieldBackground != null) {
-                inputFieldBackground.setBounds((int) sharedResources.finalRect.left, (int) sharedResources.finalRect.top, (int) sharedResources.finalRect.right, (int) sharedResources.finalRect.bottom);
-                inputFieldBackground.setRadius(radius);
-                inputFieldBackground.setAlpha((int) (0xFF * (1f - progressToDismiss) * getHideInterfaceAlpha() * (1f - outT)));
-                inputFieldBackground.draw(canvas);
+                chatActivityEnterView.getEditField().setTranslationY(
+                    (1f - progressToKeyboard) * (chatActivityEnterView.getMeasuredHeight() - dp(50)));
             } else {
-                canvas.drawRoundRect(sharedResources.finalRect, radius, radius, inputBackgroundPaint);
+                chatActivityEnterView.getEditField().setTranslationY(0);
             }
+            float radius = dp(25) * (1f - progressToKeyboard);
+            bitmapShaderTools.setBounds(0, 0, getMeasuredWidth(), getMeasuredHeight());
+            AndroidUtilities.lerp(sharedResources.rect2, sharedResources.rect1, progressToKeyboard, sharedResources.finalRect);
+            if (progressToKeyboard > 0) {
+                final int oldAlpha = bitmapShaderTools.paint.getAlpha();
+                bitmapShaderTools.paint.setAlpha((int) (255 * progressToKeyboard));
+                canvas.drawRoundRect(sharedResources.finalRect, radius, radius, bitmapShaderTools.paint);
+                bitmapShaderTools.paint.setAlpha(oldAlpha);
+            }
+            canvas.drawRoundRect(sharedResources.finalRect, radius, radius, inputBackgroundPaint);
             if (progressToKeyboard < 0.5f) {
                 canvas.save();
                 canvas.clipRect(sharedResources.finalRect);
@@ -7581,29 +7529,11 @@ public class PeerStoriesView extends SizeNotifierFrameLayout implements Notifica
                 return rez;
             }
         } else if (chatActivityEnterView != null && chatActivityEnterView.isPopupView(child)) {
-            final float radius = dp(30);
-            sharedResources.popupRect.set(
-                0,
-                child.getY() + dp(1),
-                getWidth(),
-                getHeight() + dp(20)
-            );
-            clipPath.rewind();
-            clipPath.addRoundRect(sharedResources.popupRect, radius, radius, Path.Direction.CW);
             canvas.save();
-            canvas.clipPath(clipPath);
-
-            if (emojiKeyboardBackground != null) {
-                emojiKeyboardBackground.setBounds((int) sharedResources.popupRect.left, (int) sharedResources.popupRect.top, (int) sharedResources.popupRect.right, (int) sharedResources.popupRect.bottom);
-                emojiKeyboardBackground.setRadius(radius, radius, radius, radius);
-                emojiKeyboardBackground.setAlpha(0xFF);
-                emojiKeyboardBackground.draw(canvas);
-            } else {
-                canvas.drawRoundRect(sharedResources.popupRect, radius, radius, inputBackgroundPaint);
-            }
-            boolean r = super.drawChild(canvas, child, drawingTime);
+            canvas.clipRect(sharedResources.finalRect);
+            boolean result = super.drawChild(canvas, child, drawingTime);
             canvas.restore();
-            return r;
+            return result;
         } else if (child == reactionsContainerLayout && chatActivityEnterView != null) {
             child.setTranslationY(-reactionsContainerLayout.getMeasuredHeight() + (chatActivityEnterView.getY() + chatActivityEnterView.getAnimatedTop()) - AndroidUtilities.dp(18));
         } else if (child == likesReactionLayout) {
@@ -7612,16 +7542,6 @@ public class PeerStoriesView extends SizeNotifierFrameLayout implements Notifica
 //                sharedResources.dimPaint.setAlpha((int) (125 * progressToKeyboard));
 //                canvas.drawRect(0, 0, getMeasuredWidth(), chatActivityEnterView.getY() + chatActivityEnterView.getAnimatedTop(), sharedResources.dimPaint);
 //            }
-        } else if (child == storyContainer) {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && canvas.isHardwareAccelerated() && blurredBackgroundSourceRenderNodeWithSaturation != null) {
-                if (!blurredBackgroundSourceRenderNodeWithSaturation.inRecording()) {
-                    final Canvas c = blurredBackgroundSourceRenderNodeWithSaturation.beginRecording(getMeasuredWidth(), getMeasuredHeight());
-                    c.drawColor(ColorUtils.blendARGB(Color.BLACK, Color.WHITE, 0.2f));
-                    c.translate(storyContainer.getX(), storyContainer.getY());
-                    child.draw(c);
-                    blurredBackgroundSourceRenderNodeWithSaturation.endRecording();
-                }
-            }
         }
         return super.drawChild(canvas, child, drawingTime);
     }

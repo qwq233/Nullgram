@@ -44,11 +44,15 @@ val verName = if (Version.isStable) {
 
 val androidTargetSdkVersion by extra(36)
 val androidMinSdkVersion by extra(27)
-val androidCompileSdkVersion by extra(36)
-val androidBuildToolsVersion by extra("36.0.0")
-val androidCompileNdkVersion = "28.2.13676358"
+val androidCompileSdkVersion by extra(37)
+val androidBuildToolsVersion by extra("37.0.0")
+val androidCompileNdkVersion = "29.0.14206865"
 
 subprojects {
+    tasks.withType<org.gradle.api.tasks.compile.JavaCompile>().configureEach {
+        options.forkOptions.memoryMaximumSize = "2g"
+    }
+
     plugins.withId("com.android.application") {
         extensions.configure(com.android.build.api.dsl.ApplicationExtension::class.java) {
             compileSdk = androidCompileSdkVersion

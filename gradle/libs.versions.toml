@@ -1,36 +1,36 @@
 [versions]
-agp = "9.1.0"
-aboutlibraries = "14.0.0-b03"
+agp = "9.3.0"
+aboutlibraries = "15.0.4"
 biometric = "1.1.0"
 checkerCompatQual = "2.5.6"
-checkerQual = "3.54.0"
-crashlytics = "3.0.6"
-credentials = "1.5.0"
-recaptcha = "18.7.1"
+checkerQual = "4.2.1"
+crashlytics = "3.0.7"
+credentials = "1.6.0"
+recaptcha = "18.9.2"
 dynamicanimation = "1.1.0"
 exifinterface = "1.4.2"
-coreKtx = "1.18.0"
+coreKtx = "1.19.0"
 fragment = "1.8.9"
-firebase = "34.11.0"
-gms = "4.4.4"
-gson = "2.13.2"
-guava = "33.5.0-jre"
+firebase = "34.16.0"
+gms = "4.5.0"
+gson = "2.14.0"
+guava = "33.6.0-jre"
 hiddenapibypass = "6.1"
 interpolator = "1.0.0"
 isoparser = "1.0.6" # DO NOT UPDATE THIS DEPENDENCY
 imageLabeling= "16.0.8"
-kotlin = "2.3.20"
-ksp = "2.3.6"
-kotlinxCoroutinesAndroid = "1.10.2"
-kotlinxSerializationJson = "1.10.0"
-ktor = "3.4.1"
+kotlin = "2.4.10"
+ksp = "2.3.10"
+kotlinxCoroutinesAndroid = "1.11.0"
+kotlinxSerializationJson = "1.11.0"
+ktor = "3.5.1"
 languageId = "17.0.6"
 osmdroidAndroid = "6.1.20"
-playServicesLocation = "21.3.0"
+playServicesLocation = "21.4.0"
 playServicesVision = "20.1.3"
-playServicesWallet = "19.5.0"
-playServicesCastFramework = "22.3.0"
-poet = "2.2.0"
+playServicesWallet = "20.0.0"
+playServicesCastFramework = "22.3.1"
+poet = "2.3.0"
 mlkitVision = "16.0.0-beta1"
 processPhoenix = "3.0.0"
 sharetarget = "1.2.0"
@@ -38,6 +38,7 @@ paletteKtx = "1.0.0"
 rust = "0.9.6"
 nanohttpd = "2.3.1"
 mediarouter = "1.8.1"
+securityCrypto = "1.1.0"
 
 [libraries]
 androidx-core-ktx = { module = "androidx.core:core-ktx", version.ref = "coreKtx" }
@@ -50,6 +51,7 @@ androidx-biometric = { module = "androidx.biometric:biometric", version.ref = "b
 androidx-palette-ktx = { module = "androidx.palette:palette-ktx", version.ref = "paletteKtx" }
 androidx-mediarouter = { module = "androidx.mediarouter:mediarouter", version.ref = "mediarouter" }
 androidx-credentials = { module = "androidx.credentials:credentials", version.ref = "credentials" }
+androidx-security-crypto = { module = "androidx.security:security-crypto", version.ref = "securityCrypto" }
 
 checker-compat-qual = { module = "org.checkerframework:checker-compat-qual", version.ref = "checkerCompatQual" }
 checker-qual = { module = "org.checkerframework:checker-qual", version.ref = "checkerQual" }
@@ -90,7 +92,6 @@ recaptcha = { module = "com.google.android.recaptcha:recaptcha", version.ref = "
 aboutlibraries = { id = "com.mikepenz.aboutlibraries.plugin.android" , version.ref = "aboutlibraries" }
 android-application = { id = "com.android.application", version.ref = "agp" }
 android-library = { id = "com.android.library", version.ref = "agp" }
-kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
 serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
 firebase-crashlytics = { id = "com.google.firebase.crashlytics", version.ref = "crashlytics" }

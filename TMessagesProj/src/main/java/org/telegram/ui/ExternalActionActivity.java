@@ -8,7 +8,6 @@
 
 package org.telegram.ui;
 
-import android.app.Activity;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.os.Build;
@@ -23,6 +22,8 @@ import android.view.Window;
 import android.view.WindowManager;
 import android.widget.FrameLayout;
 import android.widget.RelativeLayout;
+
+import androidx.fragment.app.FragmentActivity;
 
 import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.ApplicationLoader;
@@ -50,7 +51,7 @@ import java.util.ArrayList;
 
 import top.qwq2333.gen.Config;
 
-public class ExternalActionActivity extends Activity implements INavigationLayout.INavigationLayoutDelegate {
+public class ExternalActionActivity extends FragmentActivity implements INavigationLayout.INavigationLayoutDelegate {
 
     private boolean finished;
     private static ArrayList<BaseFragment> mainFragmentsStack = new ArrayList<>();

@@ -3391,6 +3391,7 @@ public class DialogsActivity extends BaseFragment implements NotificationCenter.
                 actionBar.setSupportsHolidayImage(true);
             }
         }
+        actionBarDefaultTitle = actionBar.getTitle();
         if (!onlySelect || (initialDialogsType == DIALOGS_TYPE_FORWARD && Config.showTabsOnForward)) {
             actionBar.setAddToContainer(false);
             actionBar.setCastShadows(false);

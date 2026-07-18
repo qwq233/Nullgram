@@ -32,7 +32,6 @@ import org.telegram.ui.Components.CubicBezierInterpolator;
 import org.telegram.ui.Components.FragmentContextView;
 import org.telegram.ui.Components.LayoutHelper;
 import org.telegram.ui.Components.ScaleStateListAnimator;
-import org.telegram.ui.Components.chat.ChatInputViewsContainer;
 import org.telegram.ui.Components.inset.InAppKeyboardInsetView;
 
 import java.util.ArrayList;
@@ -193,14 +192,10 @@ public class BotKeyboardView extends LinearLayout implements InAppKeyboardInsetV
         }
 
         public void setBackground(boolean isLeft, boolean isTop, boolean isRight, boolean isBottom) {
-            final int br = dp(ChatInputViewsContainer.INPUT_KEYBOARD_RADIUS - BORDER_MARGIN);
-            final int dr = dp(4);
+            final int br = dp(4);
 
             setBackground(Theme.createSimpleSelectorRoundRectDrawable(
-                isLeft && isTop ? br : dr,
-                isRight && isTop ? br : dr,
-                isRight && isBottom ? br : dr,
-                isLeft && isBottom ? br : dr,
+                br, br, br, br,
                 getThemedColor(Theme.key_chat_botKeyboardButtonBackground),
                 getThemedColor(Theme.key_chat_botKeyboardButtonBackgroundPressed),
                 getThemedColor(Theme.key_chat_botKeyboardButtonBackgroundPressed)
