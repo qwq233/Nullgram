@@ -45912,13 +45912,13 @@ public class ChatActivity extends BaseFragment implements
 
     private void checkUi_botMenuPosition() {
         final float margin = windowInsetsStateHolder.getAnimatedMaxBottomInset() +
-            getInputPanelTotalHeight(false) + dp(6);
+            Math.max(0, chatInputViewsContainer.getInputBubbleHeight());
 
         if (chatActivityEnterView != null && chatActivityEnterView.botCommandsMenuContainer != null) {
             chatActivityEnterView.botCommandsMenuContainer.setTranslationY(-margin);
         }
         if (mentionContainer != null) {
-            mentionContainer.setTranslationY(mentionContainer.isReversed() ? dp(5) : -margin);
+            mentionContainer.setTranslationY(mentionContainer.isReversed() ? dp(5) : -(margin - dp(2)));
         }
     }
 
