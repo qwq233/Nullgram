@@ -8435,7 +8435,6 @@ public class ChatActivity extends BaseFragment implements
         };
         bottomChannelButtonsLayout.setVisibility(View.INVISIBLE);
         bottomChannelButtonsLayout.setClipChildren(false);
-        bottomChannelButtonsLayout.setAccentColor(getThemedColor(Theme.key_featuredStickers_addButton));
         bottomChannelButtonsLayout.setButtonOnClickListener(ChatActivityChannelButtonsLayout.BUTTON_SEARCH, v -> {
             openSearchWithText(isSupportedTags() ? "" : null);
         });
@@ -8511,8 +8510,17 @@ public class ChatActivity extends BaseFragment implements
                 }
                 cellFlickerDrawable.setParentWidth(getMeasuredWidth());
                 AndroidUtilities.rectTmp.set(0, 0, getMeasuredWidth(), getMeasuredHeight());
-                cellFlickerDrawable.draw(canvas, AndroidUtilities.rectTmp, AndroidUtilities.dp(22), null);
+                cellFlickerDrawable.draw(canvas, AndroidUtilities.rectTmp, AndroidUtilities.dp(4), null);
                 invalidate();
+            }
+
+            @Override
+            public void setVisibility(int visibility) {
+                final boolean changed = getVisibility() != visibility;
+                super.setVisibility(visibility);
+                if (changed) {
+                    checkUi_inputIslandHeight();
+                }
             }
         };
         bottomOverlayStartButton.setBackground(Theme.AdaptiveRipple.filledRect(getThemedColor(Theme.key_featuredStickers_addButton), 8));
@@ -19402,11 +19410,11 @@ public class ChatActivity extends BaseFragment implements
         } else {
             int size = selectedMessagesIds[0].size() + selectedMessagesIds[1].size();
             if (size == 0) {
-                bottomOverlayChatText.setText(LocaleController.getString(R.string.ReportMessagesNoCaps));
+                bottomOverlayChatText.setText(LocaleController.getString(R.string.ReportMessages));
                 bottomOverlayChatText.setAlpha(0.5f);
                 bottomOverlayChatText.setEnabled(false);
             } else {
-                bottomOverlayChatText.setText(LocaleController.formatString(R.string.ReportMessagesCountNoCaps, LocaleController.formatPluralString("messages", size)).toUpperCase());
+                bottomOverlayChatText.setText(LocaleController.formatString(R.string.ReportMessagesCount, LocaleController.formatPluralString("messages", size)).toUpperCase());
                 bottomOverlayChatText.setAlpha(1.0f);
                 bottomOverlayChatText.setEnabled(true);
             }
@@ -27026,7 +27034,6 @@ public class ChatActivity extends BaseFragment implements
         bottomOverlayChatWaitsReply = false;
         bottomOverlayLinks = false;
 
-        boolean accentTextButton = false;
         boolean forceVisible = false;
         boolean forceNoBottom = false;
         boolean showGiftButton = false;
@@ -27081,7 +27088,7 @@ public class ChatActivity extends BaseFragment implements
                 forceNoBottom = true;
             } else {
                 bottomOverlayChatText.setTag(null);
-                bottomOverlayChatText.setText(LocaleController.getString(currentUser != null ? R.string.SavedOpenChatNoCaps : (ChatObject.isChannelAndNotMegaGroup(currentChat) ? R.string.SavedOpenChannelNoCaps : R.string.SavedOpenGroupNoCaps)));
+                bottomOverlayChatText.setText(LocaleController.getString(currentUser != null ? R.string.SavedOpenChat : (ChatObject.isChannelAndNotMegaGroup(currentChat) ? R.string.SavedOpenChannel : R.string.SavedOpenGroup)));
                 showBottomOverlayProgress(false, false);
             }
         } else if (isReport()) {
@@ -27099,18 +27106,18 @@ public class ChatActivity extends BaseFragment implements
             }
             if (allowPin) {
                 bottomOverlayChatText.setTag(1);
-                bottomOverlayChatText.setText(LocaleController.getString(R.string.UnpinAllMessagesNoCaps));
+                bottomOverlayChatText.setText(LocaleController.getString(R.string.UnpinAllMessages));
             } else {
                 bottomOverlayChatText.setTag(null);
-                bottomOverlayChatText.setText(LocaleController.getString(R.string.HidePinnedMessagesNoCaps));
+                bottomOverlayChatText.setText(LocaleController.getString(R.string.HidePinnedMessages));
             }
             showBottomOverlayProgress(false, false);
         } else if (currentUser != null && currentUser.id == UserObject.VERIFY) {
             if (!getMessagesController().isDialogMuted(dialog_id, getTopicId())) {
-                bottomOverlayChatText.setText(LocaleController.getString(R.string.ChannelMuteNoCaps), false);
+                bottomOverlayChatText.setText(LocaleController.getString(R.string.ChannelMute), false);
                 bottomOverlayChatText.setEnabled(true);
             } else {
-                bottomOverlayChatText.setText(LocaleController.getString(R.string.ChannelUnmuteNoCaps), true);
+                bottomOverlayChatText.setText(LocaleController.getString(R.string.ChannelUnmute), true);
                 bottomOverlayChatText.setEnabled(true);
             }
             showBottomOverlayProgress(false, bottomOverlayProgress.getTag() != null);
@@ -27125,19 +27132,17 @@ public class ChatActivity extends BaseFragment implements
                         if (currentChat.join_request) {
                             shouldApply = true;
                             if (requestedTime > 0 && System.currentTimeMillis() - requestedTime < 1000 * 60 * 2) {
-                                bottomOverlayChatText.setText(LocaleController.getString(ChatObject.isChannelAndNotMegaGroup(currentChat) ? R.string.ChannelJoinRequestSentNoCaps : R.string.GroupJoinRequestSentNoCaps), true);
+                                bottomOverlayChatText.setText(LocaleController.getString(ChatObject.isChannelAndNotMegaGroup(currentChat) ? R.string.ChannelJoinRequestSent : R.string.GroupJoinRequestSent), true);
                                 bottomOverlayChatText.setEnabled(false);
                             } else {
-                                bottomOverlayChatText.setText(LocaleController.getString(ChatObject.isChannelAndNotMegaGroup(currentChat) ? R.string.ChannelJoinRequestNoCaps : R.string.GroupJoinRequestNoCaps));
+                                bottomOverlayChatText.setText(LocaleController.getString(ChatObject.isChannelAndNotMegaGroup(currentChat) ? R.string.ChannelJoinRequest : R.string.GroupJoinRequest));
                                 bottomOverlayChatText.setEnabled(true);
-                                accentTextButton = true;
                             }
                         } else {
-                            bottomOverlayChatText.setText(LocaleController.getString(ChatObject.isChannelAndNotMegaGroup(currentChat) ? R.string.ChannelJoinNoCaps : R.string.GroupJoinNoCaps));
+                            bottomOverlayChatText.setText(LocaleController.getString(ChatObject.isChannelAndNotMegaGroup(currentChat) ? R.string.ChannelJoin : R.string.GroupJoin));
                             bottomOverlayChatText.setEnabled(true);
                             showGiftButton = false; // disable for obvious reason
                             showSuggestButton = currentChat.broadcast_messages_allowed && currentChat.linked_monoforum_id != 0;
-                            accentTextButton = true;
                         }
                         showBottomOverlayProgress(false, false);
                     }
@@ -27148,10 +27153,10 @@ public class ChatActivity extends BaseFragment implements
                     bottomOverlayChatText.setEnabled(false);
                 } else if (!isThreadChat()) {
                     if (!getMessagesController().isDialogMuted(dialog_id, getTopicId())) {
-                        bottomOverlayChatText.setText(LocaleController.getString(R.string.ChannelMuteNoCaps), false);
+                        bottomOverlayChatText.setText(LocaleController.getString(R.string.ChannelMute), false);
                         bottomOverlayChatText.setEnabled(true);
                     } else {
-                        bottomOverlayChatText.setText(LocaleController.getString(R.string.ChannelUnmuteNoCaps), true);
+                        bottomOverlayChatText.setText(LocaleController.getString(R.string.ChannelUnmute), true);
                         bottomOverlayChatText.setEnabled(true);
                     }
                     showBottomOverlayProgress(false, bottomOverlayProgress.getTag() != null);
@@ -27188,7 +27193,7 @@ public class ChatActivity extends BaseFragment implements
                     bottomOverlayStartButton.setVisibility(View.GONE);
                 }
                 if (currentUser.bot) {
-                    bottomOverlayChatText.setText(LocaleController.getString(R.string.BotUnblockNoCaps));
+                    bottomOverlayChatText.setText(LocaleController.getString(R.string.BotUnblock));
                 } else {
                     bottomOverlayChatText.setText(LocaleController.getString(R.string.Unblock));
                 }
@@ -27205,9 +27210,9 @@ public class ChatActivity extends BaseFragment implements
                 }
             } else if (UserObject.isReplyUser(currentUser)) {
                 if (!getMessagesController().isDialogMuted(dialog_id, getTopicId())) {
-                    bottomOverlayChatText.setText(LocaleController.getString(R.string.ChannelMuteNoCaps), false);
+                    bottomOverlayChatText.setText(LocaleController.getString(R.string.ChannelMute), false);
                 } else {
-                    bottomOverlayChatText.setText(LocaleController.getString(R.string.ChannelUnmuteNoCaps), true);
+                    bottomOverlayChatText.setText(LocaleController.getString(R.string.ChannelUnmute), true);
                 }
                 showBottomOverlayProgress(false, true);
             } else if (botUser != null && currentUser.bot && !UserObject.isDeleted(currentUser) && !UserObject.isBotForum(currentUser)) {
@@ -27386,12 +27391,7 @@ public class ChatActivity extends BaseFragment implements
             chatActivityEnterView.setVisibility(View.VISIBLE);
             chatActivityEnterView.setBotInfo(botInfo);
         }
-
-
-
-        bottomOverlayChatText.setTextColorKey(accentTextButton ? Theme.key_featuredStickers_buttonText : Theme.key_chat_fieldOverlayText);
-
-        bottomChannelButtonsLayout.setCenterAccentBackground(accentTextButton, animated);
+        bottomOverlayChatText.setTextColorKey(Theme.key_chat_fieldOverlayText);
         bottomChannelButtonsLayout.showButton(ChatActivityChannelButtonsLayout.BUTTON_SEARCH, showSearchButton && bottomChannelButtonsLayout.getVisibility() == View.VISIBLE, animated);
         bottomChannelButtonsLayout.showButton(ChatActivityChannelButtonsLayout.BUTTON_DIRECT, showSuggestButton && bottomChannelButtonsLayout.getVisibility() == View.VISIBLE, animated);
         bottomChannelButtonsLayout.showButton(ChatActivityChannelButtonsLayout.BUTTON_GIGA_GROUP_INFO, showGigaGroupButton && bottomChannelButtonsLayout.getVisibility() == View.VISIBLE, animated);
@@ -42184,7 +42184,6 @@ public class ChatActivity extends BaseFragment implements
                 sideControlsButtonsLayout.updateColors();
             }
             if (bottomChannelButtonsLayout != null) {
-                bottomChannelButtonsLayout.setAccentColor(getThemedColor(Theme.key_featuredStickers_addButton));
                 bottomChannelButtonsLayout.updateColors();
             }
             if (bottomOverlayStartButton != null) {
@@ -45930,6 +45929,15 @@ public class ChatActivity extends BaseFragment implements
 
     /* */
 
+    private float getBottomOverlayStartButtonFactor(boolean target) {
+        if (bottomOverlayStartButton == null || bottomOverlayStartButton.getVisibility() != View.VISIBLE || bottomOverlayLinks) {
+            return 0;
+        }
+        return target
+            ? (bottomViewsVisibilityController.getCurrentPriorityContainerId() == BOTTOM_OVERLAY_CHAT_CONTAINER ? 1 : 0)
+            : bottomViewsVisibilityController.getVisibility(BOTTOM_OVERLAY_CHAT_CONTAINER);
+    }
+
     private float calculateInputIslandHeight(boolean target) {
         final float enterViewIslandHeight = Math.max(
             chatActivityEnterView != null ? chatActivityEnterView.getIslandTotalHeight(target): 0, dp(48));
@@ -45949,10 +45957,13 @@ public class ChatActivity extends BaseFragment implements
             pollAddVisibility = animatorPollAddAnswerVisibility.getFloatValue();
         }
 
+        final float startButtonExtraHeight = (
+            dp(67) - Theme.chat_composeShadowDrawable.getIntrinsicHeight() - defaultIslandHeight
+        ) * getBottomOverlayStartButtonFactor(target);
         if (!isInsideContainer && !isInPreviewMode()) {
-            return lerp(Math.max(lerp(defaultIslandHeight, enterViewIslandHeight, enterViewFactor) * visibility, dp(48)), -dp(7), pollAddVisibility);
+            return lerp(Math.max(lerp(defaultIslandHeight, enterViewIslandHeight, enterViewFactor) * visibility, dp(48)) + startButtonExtraHeight, -dp(7), pollAddVisibility);
         } else {
-            return lerp(defaultIslandHeight, enterViewIslandHeight, enterViewFactor) * visibility;
+            return lerp(defaultIslandHeight, enterViewIslandHeight, enterViewFactor) * visibility + startButtonExtraHeight;
         }
     }
 
@@ -45972,6 +45983,14 @@ public class ChatActivity extends BaseFragment implements
         inputIslandHeightCurrent = calculateInputIslandHeight(false);
         inputIslandHeightTarget = calculateInputIslandHeight(true);
 
+        if (bottomChannelButtonsLayout != null) {
+            final ViewGroup.LayoutParams params = bottomChannelButtonsLayout.getLayoutParams();
+            final int height = Math.round(lerp((float) dp(48), dp(67) - dp(1.5f), getBottomOverlayStartButtonFactor(false)));
+            if (params.height != height) {
+                params.height = height;
+                bottomChannelButtonsLayout.requestLayout();
+            }
+        }
         chatInputViewsContainer.setInputBubbleHeight(inputIslandHeightCurrent);
         updatePagedownButtonsPosition();
         updateBotforumTabsBottomMargin();

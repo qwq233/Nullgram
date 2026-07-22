@@ -5,11 +5,8 @@ import static org.telegram.messenger.AndroidUtilities.lerp;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
-import android.graphics.Canvas;
-import android.graphics.Paint;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffColorFilter;
-import android.graphics.RectF;
 import android.view.Gravity;
 import android.view.View;
 import android.widget.FrameLayout;
@@ -63,7 +60,7 @@ public class ChatActivityChannelButtonsLayout extends FrameLayout implements Fac
         this.resourcesProvider = resourcesProvider;
 
         container = new FrameLayout(context);
-        addView(container, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, 48, Gravity.CENTER_VERTICAL));
+        addView(container, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, LayoutHelper.MATCH_PARENT, Gravity.CENTER_VERTICAL));
     }
 
     public void updateColors() {
@@ -140,16 +137,6 @@ public class ChatActivityChannelButtonsLayout extends FrameLayout implements Fac
         checkButtonsPositionsAndVisibility();
     }
 
-
-
-    private static final int CENTER_ACCENT_BACKGROUND_ANIMATOR_ID = 99;
-    private final BoolAnimator animatorCenterAccentBackground = new BoolAnimator(
-        CENTER_ACCENT_BACKGROUND_ANIMATOR_ID, this, CubicBezierInterpolator.EASE_OUT_QUINT, 320L);
-
-    public void setCenterAccentBackground(boolean accent, boolean animated) {
-        animatorCenterAccentBackground.setValue(accent, animated);
-    }
-
     private static final int VISIBILITY_ANIMATOR_ID = 1;
 
     private float totalVisibilityFactor;
@@ -163,11 +150,6 @@ public class ChatActivityChannelButtonsLayout extends FrameLayout implements Fac
 
     @Override
     public void onFactorChanged(int id, float factor, float fraction, FactorAnimator callee) {
-        if (id == CENTER_ACCENT_BACKGROUND_ANIMATOR_ID) {
-            invalidate();
-            return;
-        }
-
         final int buttonId = id >> 16;
         final int animatorId = id & 0xFFFF;
         if (buttonId < 0 || buttonId >= buttonHolders.length || buttonHolders[buttonId] == null) {
@@ -183,10 +165,6 @@ public class ChatActivityChannelButtonsLayout extends FrameLayout implements Fac
 
     @Override
     public void onFactorChangeFinished(int id, float finalFactor, FactorAnimator callee) {
-        if (id == CENTER_ACCENT_BACKGROUND_ANIMATOR_ID) {
-            invalidate();
-        }
-
         final int buttonId = id >> 16;
         final int animatorId = id & 0xFFFF;
         if (buttonId < 0 || buttonId >= buttonHolders.length || buttonHolders[buttonId] == null) {
@@ -297,36 +275,8 @@ public class ChatActivityChannelButtonsLayout extends FrameLayout implements Fac
         }
 
     }
-
-    private static final RectF tmpRect = new RectF();
-    private final Paint backgroundAccentPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
-
     public interface OnButtonFullyVisibleListener {
         void onButtonFullyVisible(View v, int buttonId, boolean firstTime);
-    }
-
-    @Override
-    protected void dispatchDraw(@NonNull Canvas canvas) {
-        final int accentAlpha = (int) (255 * totalVisibilityFactor * animatorCenterAccentBackground.getFloatValue());
-        if (accentAlpha > 0) {
-            tmpRect.set(
-                totalWidthLeft + dp(8),
-                dp(8),
-                getMeasuredWidth() - dp(8) - totalWidthRight,
-                getMeasuredHeight() - dp(8)
-            );
-            backgroundAccentPaint.setColor(accentColor);
-            backgroundAccentPaint.setAlpha(accentAlpha);
-            canvas.drawRoundRect(tmpRect, dp(8), dp(8), backgroundAccentPaint);
-        }
-
-        super.dispatchDraw(canvas);
-    }
-
-    private int accentColor = 0;
-
-    public void setAccentColor(int accentColor) {
-        this.accentColor = accentColor;
     }
 
     private static class ButtonHolder {
