@@ -43,7 +43,7 @@ jobs:
           key: ccache-stable
           restore-keys: ccache-stable
       - name: Setup Android SDK Tools
-        uses: android-actions/setup-android@v2
+        uses: android-actions/setup-android@v4
       - name: Prepare Environment
         run: |
             echo "Removing large packages"
