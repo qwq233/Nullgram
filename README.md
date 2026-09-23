@@ -38,10 +38,11 @@ You will require Android NDK rev. 21 and Android SDK 14
 1. Download the Telegram source code from https://github.com/qwq233/Nullgram
 2. Download the ccache from [here](https://ccache.dev/) and make sure it is in your `PATH`.
 3. Replace release.keystore in TMessagesProj/config with your own one.
-4. Fill out RELEASE_KEY_PASSWORD, RELEASE_KEY_ALIAS, RELEASE_STORE_PASSWORD in gradle.properties to access your release.keystore
+4. Fill out RELEASE_KEY_PASSWORD, RELEASE_KEY_ALIAS, RELEASE_STORE_PASSWORD in local.properties to access your release.keystore
 5.  Go to https://console.firebase.google.com/, create one android app with application ID `top.qwq2333.nullgram`, turn on firebase messaging and download google-services.json, 
     which should be copied to the same folder as TMessagesProj.
-6. Open your terminal and run `./gradlew assembleRelease` to build the APK
+6. Open your terminal and run `git -c submodule."libs/rust".update=none submodule update --init --recursive` to checkout the submodules
+7. Open your terminal and run `./gradlew assembleRelease` to build the APK
 
 [^1]: https://telegra.ph/%E6%9C%89%E5%85%B3-Nekogram-Lite-%E7%9A%84%E6%95%85%E4%BA%8B-04-09
 
