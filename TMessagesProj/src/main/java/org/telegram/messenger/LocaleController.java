@@ -2955,7 +2955,7 @@ public class LocaleController {
             if (rounded != null) {
                 rounded[0] = number;
             }
-            return String.format("%,d", number);
+            return formatNumber(number, ',');
         }
         StringBuilder K = new StringBuilder();
         int lastDec = 0;
