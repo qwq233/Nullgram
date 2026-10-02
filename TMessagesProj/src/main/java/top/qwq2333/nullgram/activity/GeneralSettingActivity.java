@@ -121,6 +121,11 @@ public class GeneralSettingActivity extends BaseActivity {
     }
 
     @Override
+    public int getDrawable() {
+        return R.drawable.msg_theme;
+    }
+
+    @Override
     protected String getActionBarTitle() {
         return LocaleController.getString("General", R.string.General);
     }

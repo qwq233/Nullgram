@@ -248,6 +248,22 @@ public abstract class BaseActivity extends BaseFragment {
         rowMap.clear();
     }
 
+    public int getBaseGuid() {
+        return 10000;
+    }
+
+    public int getDrawable() {
+        return 0;
+    }
+
+    public String getTitle() {
+        return getActionBarTitle();
+    }
+
+    public HashMap<Integer, String> getRowMapReverse() {
+        updateRows();
+        return rowMapReverse;
+    }
 
     protected abstract class BaseListAdapter extends RecyclerListView.SelectionAdapter {
 
