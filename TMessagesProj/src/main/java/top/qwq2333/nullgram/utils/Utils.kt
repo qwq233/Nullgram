@@ -44,7 +44,7 @@ import org.telegram.ui.Components.AlertsCreator
 import org.telegram.ui.Components.BulletinFactory
 import top.qwq2333.gen.Config
 import top.qwq2333.nullgram.activity.DatacenterActivity
-import top.qwq2333.nullgram.remote.NicegramController
+import top.qwq2333.nullgram.helpers.ProfileDateHelper
 import java.io.BufferedReader
 import java.io.File
 import java.io.FileReader
@@ -271,17 +271,7 @@ object Utils {
                 false,
                 fragment.resourceProvider
             )
-            subItem.setSubtext(LocaleController.getString("Loading", R.string.Loading))
-            NicegramController.getRegDate(id, {
-                subItem.setSubtext(LocaleController.getString("ErrorOccurred", R.string.ErrorOccurred))
-            }) { dateType, date ->
-                when (dateType) {
-                    NicegramController.RegDateResponse.RegDateType.Approximately -> LocaleController.formatString("RegistrationDateApproximately", R.string.RegistrationDateApproximately, date)
-                    NicegramController.RegDateResponse.RegDateType.NewerThan -> LocaleController.formatString("RegistrationDateNewer", R.string.RegistrationDateNewer, date)
-                    NicegramController.RegDateResponse.RegDateType.OlderThan -> LocaleController.formatString("RegistrationDateOlder", R.string.RegistrationDateOlder, date)
-                    else -> date
-                }.let { subItem.setSubtext(it) }
-            }
+            subItem.setSubtext(ProfileDateHelper.getUserTime(id))
         }
         popupLayout.setParentWindow(popupWindow)
     }
