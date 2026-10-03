@@ -23,7 +23,12 @@ import android.net.Uri;
 import android.text.TextUtils;
 
 import org.telegram.messenger.AndroidUtilities;
+import org.telegram.messenger.LocaleController;
+import org.telegram.messenger.R;
 import org.telegram.ui.ActionBar.BaseFragment;
+
+import java.util.ArrayList;
+import java.util.Map;
 
 import top.qwq2333.nullgram.activity.BaseActivity;
 import top.qwq2333.nullgram.activity.ChatSettingActivity;
@@ -83,5 +88,44 @@ public class SettingsHelper {
 
     public interface Callback {
         void presentFragment(BaseFragment fragment);
+    }
+
+    public static ArrayList<SettingsSearchResult> onCreateSearchArray(Callback callback) {
+        ArrayList<SettingsSearchResult> items = new ArrayList<>();
+        ArrayList<BaseActivity> fragments = new ArrayList<>();
+        fragments.add(new GeneralSettingActivity());
+        fragments.add(new ChatSettingActivity());
+        fragments.add(new ExperimentSettingActivity(false, false));
+        String n_title = LocaleController.getString(R.string.NullSettings);
+        for (BaseActivity fragment: fragments) {
+            int uid = fragment.getBaseGuid();
+            int drawable = fragment.getDrawable();
+            String f_title = fragment.getTitle();
+            for (Map.Entry<Integer, String> entry : fragment.getRowMapReverse().entrySet()) {
+                Integer i = entry.getKey();
+                String key = entry.getValue();
+                if (key.equals(String.valueOf(i))) {
+                    continue;
+                }
+                int guid = uid + i;
+                String key1 = key.substring(0, 1).toUpperCase() + key.substring(1);
+                String key2 = key.substring(0, 1).toLowerCase() + key.substring(1);
+                String title1 = LocaleController.getString(key1);
+                String title2 = LocaleController.getString(key2);
+                String title = (title1 != null && !title1.isEmpty()) ? title1 : (title2 != null && !title2.isEmpty()) ? title2 : null;
+                if (title == null) {
+                    continue;
+                }
+                Runnable open = () -> {
+                    callback.presentFragment(fragment);
+                    AndroidUtilities.runOnUIThread(() -> fragment.scrollToRow(key, null));
+                };
+                SettingsSearchResult result = new SettingsSearchResult(
+                    guid, title, n_title, f_title, drawable, open
+                );
+                items.add(result);
+            }
+        }
+        return items;
     }
 }

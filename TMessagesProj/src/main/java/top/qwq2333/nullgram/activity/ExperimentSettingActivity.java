@@ -291,6 +291,16 @@ public class ExperimentSettingActivity extends BaseActivity {
     }
 
     @Override
+    public int getBaseGuid() {
+        return 12000;
+    }
+
+    @Override
+    public int getDrawable() {
+        return R.drawable.msg_fave;
+    }
+
+    @Override
     protected String getActionBarTitle() {
         return LocaleController.getString("Experiment", R.string.Experiment);
     }
