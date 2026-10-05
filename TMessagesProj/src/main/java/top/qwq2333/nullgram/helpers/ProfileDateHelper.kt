@@ -22,11 +22,12 @@ package top.qwq2333.nullgram.helpers
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import org.telegram.messenger.ApplicationLoader
-import top.qwq2333.nullgram.utils.Log
 import org.telegram.messenger.LocaleController
 import org.telegram.messenger.R
-import java.util.Calendar
+import top.qwq2333.nullgram.utils.Log
+import java.text.SimpleDateFormat
 import java.util.Date
+import java.util.Locale
 import kotlin.math.roundToLong
 
 object ProfileDateHelper {
@@ -52,12 +53,8 @@ object ProfileDateHelper {
     }
 
     fun getUserTime(key: String, stringRes: Int, date: Long): String {
-        val calendar = Calendar.getInstance().apply { timeInMillis = date }
-        val year = calendar.get(Calendar.YEAR)
-        val month = (calendar.get(Calendar.MONTH) + 1).toString().padStart(2, '0')
-        val day = calendar.get(Calendar.DAY_OF_MONTH).toString().padStart(2, '0')
-        val timeStr = LocaleController.getInstance().formatterDay.format(Date(date))
-        val st = LocaleController.formatString("formatDateAtTime", R.string.formatDateAtTime, "$year-$month-$day", timeStr)
+        val dateFormat = SimpleDateFormat("yyyy-MM", LocaleController.getInstance().currentLocale ?: Locale.getDefault())
+        val st = dateFormat.format(Date(date))
         return LocaleController.formatString(key, stringRes, st)
     }
 
@@ -65,7 +62,7 @@ object ProfileDateHelper {
     fun getUserTime(userId: Long): String {
         val dataList = profileDateDataList
         if (dataList.isEmpty()) {
-            return "unknown"
+            return LocaleController.getString(R.string.ErrorOccurred)
         }
         for (i in 1 until dataList.size) {
             val data1 = dataList[i - 1]
@@ -81,9 +78,9 @@ object ProfileDateHelper {
                 return getUserTime("RegistrationDateApproximately", R.string.RegistrationDateApproximately, dateLong)
             }
         }
-        if (userId <= 1000000L) {
-            return getUserTime("RegistrationDateOlder", R.string.RegistrationDateOlder, 1380326400000L)
+        if (userId < dataList.first().id) {
+            return getUserTime("RegistrationDateOlder", R.string.RegistrationDateOlder, dataList.first().date * 1000)
         }
-        return getUserTime("RegistrationDateNewer", R.string.RegistrationDateNewer, 1711889200000L)
+        return getUserTime("RegistrationDateNewer", R.string.RegistrationDateNewer, dataList.last().date * 1000)
     }
 }
