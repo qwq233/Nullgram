@@ -81,8 +81,6 @@ import org.telegram.ui.Stories.StoriesUtilities;
 
 import java.util.Locale;
 
-import top.qwq2333.gen.Config;
-
 public class ProfileSearchCell extends BaseCell implements NotificationCenter.NotificationCenterDelegate, Theme.Colorable {
 
     public boolean dontDrawAvatar;
@@ -986,7 +984,7 @@ public class ProfileSearchCell extends BaseCell implements NotificationCenter.No
             statusDrawable.draw(canvas);
         }
 
-        if (Config.blockSponsorAds && ad != null && adText != null && adBackgroundPaint != null) {
+        if (ad != null && adText != null && adBackgroundPaint != null) {
             final int color = Theme.getColor(Theme.key_featuredStickers_addButton, resourcesProvider);
             adBackgroundPaint.setColor(Theme.multAlpha(color, .10f));
             final int w = (int) adText.getWidth() + dp(12.66f);
