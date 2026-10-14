@@ -36039,8 +36039,8 @@ public class ChatActivity extends BaseFragment implements
         if (messageObject == null || messageObject.messageOwner == null || richMessage == null) return;
         messageObject.messageOwner.rich_message = richMessage;
         messageObject.richLayout = null;
-        if (chatMessageCellDelegate != null && cell != null) {
-            chatMessageCellDelegate.forceUpdate(cell, true, true);
+        if (cell != null) {
+            getChatMessageCellDelegate().forceUpdate(cell, true, true);
         }
     }
 

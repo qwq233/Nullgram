@@ -6776,7 +6776,10 @@ public class ChatMessageCell extends BaseCell implements SeekBar.SeekBarDelegate
             if (messageChanged) {
                 firstVisibleBlockNum = 0;
                 lastVisibleBlockNum = 0;
-                if (currentMessageObject != null && currentMessageObject.textLayoutBlocks != null && currentMessageObject.textLayoutBlocks.size() > 1) {
+                if (currentMessageObject != null && (
+                    currentMessageObject.textLayoutBlocks != null && currentMessageObject.textLayoutBlocks.size() > 1 ||
+                    currentMessageObject.richLayout != null
+                )) {
                     needNewVisiblePart = true;
                 }
             }
@@ -13798,7 +13801,10 @@ public class ChatMessageCell extends BaseCell implements SeekBar.SeekBarDelegate
         if (preview != (currentMessageObject != null && currentMessageObject.preview)) {
             return;
         }
-        boolean newPart = needNewVisiblePart && currentMessageObject.type == MessageObject.TYPE_TEXT, hasSpoilers = hasSpoilers();
+        boolean newPart = needNewVisiblePart && (
+            currentMessageObject.type == MessageObject.TYPE_TEXT ||
+            currentMessageObject.type == MessageObject.TYPE_ARTICLE
+        ), hasSpoilers = hasSpoilers();
         if (newPart || hasSpoilers) {
             getLocalVisibleRect(scrollRect);
             if (hasSpoilers) {
