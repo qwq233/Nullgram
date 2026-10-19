@@ -105,6 +105,7 @@ object Defines {
     @BooleanConfig const val showHideTitle = "showHideTitle"
     @StringConfig("") const val messageFilter = "messageFilter1"
     @BooleanConfig const val sendLargePhoto = "sendLargePhoto"
+    @BooleanConfig const val takeGifAsVideo = "takeGifAsVideo"
 
     /**
      * 0 default 1 online 2 offline

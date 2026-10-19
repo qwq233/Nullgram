@@ -119,6 +119,7 @@ public class ChatSettingActivity extends BaseActivity {
     private int hideTitleRow;
     private int messageFiltersRow;
     private int sendLargePhotoRow;
+    private int takeGifAsVideoRow;
     private int chat2Row;
 
     private int markdownRow;
@@ -379,6 +380,11 @@ public class ChatSettingActivity extends BaseActivity {
             if (view instanceof TextCheckCell) {
                 ((TextCheckCell) view).setChecked(Config.sendLargePhoto);
             }
+        } else if (position == takeGifAsVideoRow) {
+            Config.toggleTakeGifAsVideo();
+            if (view instanceof TextCheckCell) {
+                ((TextCheckCell) view).setChecked(Config.takeGifAsVideo);
+            }
         }
     }
 
@@ -432,6 +438,7 @@ public class ChatSettingActivity extends BaseActivity {
         hideTitleRow = addRow("showHideTitle");
         messageFiltersRow = addRow("messageFilters");
         sendLargePhotoRow = addRow("sendLargePhoto");
+        takeGifAsVideoRow = addRow("takeGifAsVideo");
         chat2Row = addRow();
 
         markdownRow = addRow();
@@ -570,6 +577,8 @@ public class ChatSettingActivity extends BaseActivity {
                         textCell.setTextAndCheck(LocaleController.getString("showHideTitle", R.string.showHideTitle), Config.showHideTitle, true);
                     } else if (position == sendLargePhotoRow) {
                         textCell.setTextAndCheck(LocaleController.getString("sendLargePhoto", R.string.sendLargePhoto), Config.sendLargePhoto, true);
+                    } else if (position == takeGifAsVideoRow) {
+                        textCell.setTextAndCheck(LocaleController.getString("takeGifAsVideo", R.string.takeGifAsVideo), Config.takeGifAsVideo, true);
                     }
                     break;
                 }
