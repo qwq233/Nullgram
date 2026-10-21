@@ -106,6 +106,7 @@ public class GeneralSettingActivity extends BaseActivity {
     private int ignoreMutedCountRow;
     private int disableSharePhoneWithContactByDefaultRow;
     private int ignoreUserSpecifiedReplyColorRow;
+    private int alwaysShowDownloadIconRow;
 
 
     private int devicesRow;
@@ -224,6 +225,11 @@ public class GeneralSettingActivity extends BaseActivity {
             Config.toggleDisableVibration();
             if (view instanceof TextCheckCell) {
                 ((TextCheckCell) view).setChecked(Config.disableVibration);
+            }
+        } else if (position == alwaysShowDownloadIconRow) {
+            Config.toggleAlwaysShowDownloadIcon();
+            if (view instanceof TextCheckCell) {
+                ((TextCheckCell) view).setChecked(Config.alwaysShowDownloadIcon);
             }
         } else if (position == tabsTitleTypeRow) {
             ArrayList<String> arrayList = new ArrayList<>();
@@ -443,6 +449,7 @@ public class GeneralSettingActivity extends BaseActivity {
         ignoreMutedCountRow = addRow("ignoreMutedCount");
         disableSharePhoneWithContactByDefaultRow = addRow("disableSharePhoneWithContactByDefault");
         ignoreUserSpecifiedReplyColorRow = addRow("ignoreUserSpecifiedReplyColor");
+        alwaysShowDownloadIconRow = addRow("alwaysShowDownloadIcon");
         tabsTitleTypeRow = addRow("tabsTitleType");
         customSavePathRow = addRow("customSavePath");
         general2Row = addRow();
@@ -627,6 +634,9 @@ public class GeneralSettingActivity extends BaseActivity {
                     } else if (position == ignoreUserSpecifiedReplyColorRow) {
                         textCell.setTextAndCheck(LocaleController.getString("ignoreUserSpecifiedReplyColor", R.string.ignoreUserSpecifiedReplyColor),
                             Config.ignoreUserSpecifiedReplyColor, true);
+                    } else if (position == alwaysShowDownloadIconRow) {
+                        textCell.setTextAndCheck(LocaleController.getString("AlwaysShowDownloadIcon", R.string.AlwaysShowDownloadIcon),
+                            Config.alwaysShowDownloadIcon, true);
                     } else if (position == autoDisableBuiltInProxyRow) {
                         textCell.setTextAndValueAndCheck(LocaleController.getString("autoDisableBuiltInProxy", R.string.autoDisableBuiltInProxy),
                             LocaleController.getString("autoDisableBuiltInProxyDesc", R.string.autoDisableBuiltInProxyDesc),

@@ -10326,6 +10326,9 @@ public class DialogsActivity extends BaseFragment implements NotificationCenter.
                 break;
             }
         }
+        if (Config.alwaysShowDownloadIcon) {
+            showDownloads = true;
+        }
         if (!searching && (getDownloadController().hasUnviewedDownloads() || showDownloads || (downloadsItem.getVisibility() == View.VISIBLE && downloadsItem.getAlpha() == 1 && !force))) {
             downloadsItemVisible = true;
             downloadsItem.setVisibility(View.VISIBLE);
