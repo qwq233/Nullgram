@@ -240,54 +240,7 @@ public class GeneralSettingActivity extends BaseActivity {
                 getNotificationCenter().postNotificationName(NotificationCenter.dialogFiltersUpdated);
             });
         } else if (position == customSavePathRow) {
-            AlertDialog.Builder builder = new AlertDialog.Builder(getParentActivity());
-            builder.setTitle(LocaleController.getString("customSavePath", R.string.customSavePath));
-
-            final EditTextBoldCursor editText = new EditTextBoldCursor(getParentActivity()) {
-                @Override
-                protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-                    super.onMeasure(widthMeasureSpec, MeasureSpec.makeMeasureSpec(AndroidUtilities.dp(64), MeasureSpec.EXACTLY));
-                }
-            };
-            editText.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 18);
-            editText.setTextColor(getThemedColor(Theme.key_dialogTextBlack));
-            editText.setHintText(LocaleController.getString("customSavePathHint", R.string.customSavePathHint));
-            editText.setText(Config.getCustomSavePath());
-            editText.setHeaderHintColor(getThemedColor(Theme.key_windowBackgroundWhiteBlueHeader));
-            editText.setSingleLine(true);
-            editText.setFocusable(true);
-            editText.setTransformHintToHeader(true);
-            editText.setLineColors(getThemedColor(Theme.key_windowBackgroundWhiteInputField), getThemedColor(Theme.key_windowBackgroundWhiteInputFieldActivated), getThemedColor(Theme.key_text_RedRegular));
-            editText.setImeOptions(EditorInfo.IME_ACTION_DONE);
-            editText.setBackgroundDrawable(null);
-            editText.requestFocus();
-            editText.setPadding(0, 0, 0, 0);
-            builder.setView(editText);
-
-            builder.setPositiveButton(LocaleController.getString("OK", R.string.OK), (dialogInterface, i) -> {
-                String input = editText.getText().toString().trim();
-                if (input.matches("^[A-Za-z0-9.]{1,255}$") || input.isEmpty()) {
-                    Config.setCustomSavePath(input);
-                } else {
-                    Config.setCustomSavePath("Nullgram");
-                }
-                listAdapter.notifyItemChanged(customSavePathRow, PARTIAL);
-            });
-            builder.setNegativeButton(LocaleController.getString("Cancel", R.string.Cancel), null);
-            builder.show().setOnShowListener(dialog -> {
-                editText.requestFocus();
-                AndroidUtilities.showKeyboard(editText);
-            });
-            ViewGroup.MarginLayoutParams layoutParams = (ViewGroup.MarginLayoutParams) editText.getLayoutParams();
-            if (layoutParams != null) {
-                if (layoutParams instanceof FrameLayout.LayoutParams) {
-                    ((FrameLayout.LayoutParams) layoutParams).gravity = Gravity.CENTER_HORIZONTAL;
-                }
-                layoutParams.rightMargin = layoutParams.leftMargin = AndroidUtilities.dp(24);
-                layoutParams.height = AndroidUtilities.dp(36);
-                editText.setLayoutParams(layoutParams);
-            }
-            editText.setSelection(0, editText.getText().length());
+            setCustomSavePath(customSavePathRow);
         } else if (position == overrideDevicePerformanceRow) {
             ArrayList<String> arrayList = new ArrayList<>();
             ArrayList<Integer> types = new ArrayList<>();
@@ -802,5 +755,55 @@ public class GeneralSettingActivity extends BaseActivity {
             langCodes.add(currentLang);
         }
         return langCodes;
+    }
+
+    private void setCustomSavePath(int pos) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(getParentActivity());
+        builder.setTitle(LocaleController.getString("customSavePath", R.string.customSavePath));
+
+        final EditTextBoldCursor editText = new EditTextBoldCursor(getParentActivity()) {
+            @Override
+            protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+                super.onMeasure(widthMeasureSpec, MeasureSpec.makeMeasureSpec(AndroidUtilities.dp(64), MeasureSpec.EXACTLY));
+            }
+        };
+        editText.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 18);
+        editText.setTextColor(getThemedColor(Theme.key_dialogTextBlack));
+        editText.setText(Config.getCustomSavePath());
+        editText.setHeaderHintColor(getThemedColor(Theme.key_windowBackgroundWhiteBlueHeader));
+        editText.setSingleLine(true);
+        editText.setFocusable(true);
+        editText.setTransformHintToHeader(true);
+        editText.setLineColors(getThemedColor(Theme.key_windowBackgroundWhiteInputField), getThemedColor(Theme.key_windowBackgroundWhiteInputFieldActivated), getThemedColor(Theme.key_text_RedRegular));
+        editText.setImeOptions(EditorInfo.IME_ACTION_DONE);
+        editText.setBackgroundDrawable(null);
+        editText.requestFocus();
+        editText.setPadding(0, 0, 0, 0);
+        builder.setView(editText);
+
+        builder.setPositiveButton(LocaleController.getString("OK", R.string.OK), (dialogInterface, i) -> {
+            String input = editText.getText().toString().trim();
+            if (!input.isEmpty() && input.matches("^[A-Za-z0-9_-]{1,255}$")) {
+                Config.setCustomSavePath(input);
+            } else {
+                Config.setCustomSavePath("Nullgram");
+            }
+            listAdapter.notifyItemChanged(pos, PARTIAL);
+        });
+        builder.setNegativeButton(LocaleController.getString("Cancel", R.string.Cancel), null);
+        builder.show().setOnShowListener(dialog -> {
+            editText.requestFocus();
+            AndroidUtilities.showKeyboard(editText);
+        });
+        ViewGroup.MarginLayoutParams layoutParams = (ViewGroup.MarginLayoutParams) editText.getLayoutParams();
+        if (layoutParams != null) {
+            if (layoutParams instanceof FrameLayout.LayoutParams) {
+                ((FrameLayout.LayoutParams) layoutParams).gravity = Gravity.CENTER_HORIZONTAL;
+            }
+            layoutParams.rightMargin = layoutParams.leftMargin = AndroidUtilities.dp(24);
+            layoutParams.height = AndroidUtilities.dp(36);
+            editText.setLayoutParams(layoutParams);
+        }
+        editText.setSelection(0, editText.getText().length());
     }
 }
