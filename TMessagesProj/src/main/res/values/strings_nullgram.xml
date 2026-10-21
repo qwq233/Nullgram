@@ -361,4 +361,5 @@
     <string name="NoFilesFoundInfo">No results for **%1$s** in the current folder.</string>
     <string name="ResetSettings">Reset Settings</string>
     <string name="ResetSettingsAlert">Are you sure you want to reset all Nullgram settings?</string>
+    <string name="customSavePath">Custom Storage Path</string>
 </resources>

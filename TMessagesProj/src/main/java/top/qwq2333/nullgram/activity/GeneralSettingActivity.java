@@ -23,18 +23,24 @@ import android.annotation.SuppressLint;
 import android.content.Context;
 import android.text.TextUtils;
 import android.transition.TransitionManager;
+import android.util.TypedValue;
+import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.inputmethod.EditorInfo;
+import android.widget.FrameLayout;
 
 import androidx.annotation.NonNull;
 import androidx.core.text.HtmlCompat;
 import androidx.core.util.Pair;
 import androidx.recyclerview.widget.RecyclerView;
 
+import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.LanguageDetector;
 import org.telegram.messenger.LocaleController;
 import org.telegram.messenger.NotificationCenter;
 import org.telegram.messenger.R;
+import org.telegram.ui.ActionBar.AlertDialog;
 import org.telegram.ui.ActionBar.DrawerLayoutContainer;
 import org.telegram.ui.ActionBar.Theme;
 import org.telegram.ui.Cells.HeaderCell;
@@ -45,6 +51,7 @@ import org.telegram.ui.Cells.TextDetailSettingsCell;
 import org.telegram.ui.Cells.TextInfoPrivacyCell;
 import org.telegram.ui.Cells.TextSettingsCell;
 import org.telegram.ui.Components.BulletinFactory;
+import org.telegram.ui.Components.EditTextBoldCursor;
 import org.telegram.ui.Components.RecyclerListView;
 
 import java.util.ArrayList;
@@ -93,6 +100,7 @@ public class GeneralSettingActivity extends BaseActivity {
     private int disableUndoRow;
     private int skipOpenLinkConfirmRow;
     private int tabsTitleTypeRow;
+    private int customSavePathRow;
     private int openArchiveOnPullRow;
     private int hideAllTabRow;
     private int ignoreMutedCountRow;
@@ -231,6 +239,8 @@ public class GeneralSettingActivity extends BaseActivity {
                 listAdapter.notifyItemChanged(tabsTitleTypeRow, PARTIAL);
                 getNotificationCenter().postNotificationName(NotificationCenter.dialogFiltersUpdated);
             });
+        } else if (position == customSavePathRow) {
+            setCustomSavePath(customSavePathRow);
         } else if (position == overrideDevicePerformanceRow) {
             ArrayList<String> arrayList = new ArrayList<>();
             ArrayList<Integer> types = new ArrayList<>();
@@ -434,6 +444,7 @@ public class GeneralSettingActivity extends BaseActivity {
         disableSharePhoneWithContactByDefaultRow = addRow("disableSharePhoneWithContactByDefault");
         ignoreUserSpecifiedReplyColorRow = addRow("ignoreUserSpecifiedReplyColor");
         tabsTitleTypeRow = addRow("tabsTitleType");
+        customSavePathRow = addRow("customSavePath");
         general2Row = addRow();
 
         devicesRow = addRow();
@@ -489,6 +500,8 @@ public class GeneralSettingActivity extends BaseActivity {
                             default -> LocaleController.getString("TabTitleTypeMix", R.string.TabTitleTypeMix);
                         };
                         textCell.setTextAndValue(LocaleController.getString("TabTitleType", R.string.TabTitleType), value, payload, false);
+                    } else if (position == customSavePathRow) {
+                        textCell.setTextAndValue(LocaleController.getString("customSavePath", R.string.customSavePath), Config.getCustomSavePath(), payload, false);
                     } else if (position == overrideDevicePerformanceRow) {
                         String value = switch (Config.getDevicePerformance()) {
                             case Defines.devicePerformanceLow -> LocaleController.getString("DevicePerformanceLow", R.string.DevicePerformanceLow);
@@ -715,7 +728,7 @@ public class GeneralSettingActivity extends BaseActivity {
         public int getItemViewType(int position) {
             if (position == general2Row || position == drawer2Row || position == translator2Row || position == devices2Row || position == stories2Row) {
                 return 1;
-            } else if (position == tabsTitleTypeRow || position == translationProviderRow || position == deepLFormalityRow || position == translationTargetRow ||
+            } else if (position == tabsTitleTypeRow || position == customSavePathRow || position == translationProviderRow || position == deepLFormalityRow || position == translationTargetRow ||
                 position == translatorTypeRow || position == doNotTranslateRow || position == overrideDevicePerformanceRow) {
                 return 2;
             } else if (position == generalRow || position == translatorRow || position == devicesRow || position == storiesRow) {
@@ -742,5 +755,55 @@ public class GeneralSettingActivity extends BaseActivity {
             langCodes.add(currentLang);
         }
         return langCodes;
+    }
+
+    private void setCustomSavePath(int pos) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(getParentActivity());
+        builder.setTitle(LocaleController.getString("customSavePath", R.string.customSavePath));
+
+        final EditTextBoldCursor editText = new EditTextBoldCursor(getParentActivity()) {
+            @Override
+            protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+                super.onMeasure(widthMeasureSpec, MeasureSpec.makeMeasureSpec(AndroidUtilities.dp(64), MeasureSpec.EXACTLY));
+            }
+        };
+        editText.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 18);
+        editText.setTextColor(getThemedColor(Theme.key_dialogTextBlack));
+        editText.setText(Config.getCustomSavePath());
+        editText.setHeaderHintColor(getThemedColor(Theme.key_windowBackgroundWhiteBlueHeader));
+        editText.setSingleLine(true);
+        editText.setFocusable(true);
+        editText.setTransformHintToHeader(true);
+        editText.setLineColors(getThemedColor(Theme.key_windowBackgroundWhiteInputField), getThemedColor(Theme.key_windowBackgroundWhiteInputFieldActivated), getThemedColor(Theme.key_text_RedRegular));
+        editText.setImeOptions(EditorInfo.IME_ACTION_DONE);
+        editText.setBackgroundDrawable(null);
+        editText.requestFocus();
+        editText.setPadding(0, 0, 0, 0);
+        builder.setView(editText);
+
+        builder.setPositiveButton(LocaleController.getString("OK", R.string.OK), (dialogInterface, i) -> {
+            String input = editText.getText().toString().trim();
+            if (!input.isEmpty() && input.matches("^[A-Za-z0-9_-]{1,255}$")) {
+                Config.setCustomSavePath(input);
+            } else {
+                Config.setCustomSavePath("Nullgram");
+            }
+            listAdapter.notifyItemChanged(pos, PARTIAL);
+        });
+        builder.setNegativeButton(LocaleController.getString("Cancel", R.string.Cancel), null);
+        builder.show().setOnShowListener(dialog -> {
+            editText.requestFocus();
+            AndroidUtilities.showKeyboard(editText);
+        });
+        ViewGroup.MarginLayoutParams layoutParams = (ViewGroup.MarginLayoutParams) editText.getLayoutParams();
+        if (layoutParams != null) {
+            if (layoutParams instanceof FrameLayout.LayoutParams) {
+                ((FrameLayout.LayoutParams) layoutParams).gravity = Gravity.CENTER_HORIZONTAL;
+            }
+            layoutParams.rightMargin = layoutParams.leftMargin = AndroidUtilities.dp(24);
+            layoutParams.height = AndroidUtilities.dp(36);
+            editText.setLayoutParams(layoutParams);
+        }
+        editText.setSelection(0, editText.getText().length());
     }
 }
