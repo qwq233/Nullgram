@@ -106,6 +106,7 @@ public class GeneralSettingActivity extends BaseActivity {
     private int ignoreMutedCountRow;
     private int disableSharePhoneWithContactByDefaultRow;
     private int ignoreUserSpecifiedReplyColorRow;
+    private int forceChatBlurRow;
     private int alwaysShowDownloadIconRow;
 
 
@@ -225,6 +226,11 @@ public class GeneralSettingActivity extends BaseActivity {
             Config.toggleDisableVibration();
             if (view instanceof TextCheckCell) {
                 ((TextCheckCell) view).setChecked(Config.disableVibration);
+            }
+        } else if (position == forceChatBlurRow) {
+            Config.toggleForceChatBlur();
+            if (view instanceof TextCheckCell) {
+                ((TextCheckCell) view).setChecked(Config.forceChatBlur);
             }
         } else if (position == alwaysShowDownloadIconRow) {
             Config.toggleAlwaysShowDownloadIcon();
@@ -449,6 +455,7 @@ public class GeneralSettingActivity extends BaseActivity {
         ignoreMutedCountRow = addRow("ignoreMutedCount");
         disableSharePhoneWithContactByDefaultRow = addRow("disableSharePhoneWithContactByDefault");
         ignoreUserSpecifiedReplyColorRow = addRow("ignoreUserSpecifiedReplyColor");
+        forceChatBlurRow = addRow("forceChatBlur");
         alwaysShowDownloadIconRow = addRow("alwaysShowDownloadIcon");
         tabsTitleTypeRow = addRow("tabsTitleType");
         customSavePathRow = addRow("customSavePath");
@@ -634,6 +641,9 @@ public class GeneralSettingActivity extends BaseActivity {
                     } else if (position == ignoreUserSpecifiedReplyColorRow) {
                         textCell.setTextAndCheck(LocaleController.getString("ignoreUserSpecifiedReplyColor", R.string.ignoreUserSpecifiedReplyColor),
                             Config.ignoreUserSpecifiedReplyColor, true);
+                    } else if (position == forceChatBlurRow) {
+                        textCell.setTextAndCheck(LocaleController.getString("forceChatBlur", R.string.forceChatBlur),
+                            Config.forceChatBlur, true);
                     } else if (position == alwaysShowDownloadIconRow) {
                         textCell.setTextAndCheck(LocaleController.getString("AlwaysShowDownloadIcon", R.string.AlwaysShowDownloadIcon),
                             Config.alwaysShowDownloadIcon, true);
