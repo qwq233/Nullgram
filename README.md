@@ -6,6 +6,8 @@
 
 Nullgram is an **free and open source** third-party Telegram client, based on the official source code for [Telegram App for Android](https://play.google.com/store/apps/details?id=org.telegram.messenger).
 
+Made with Love ❤️ in Hong Kong 🇭🇰
+
 ## Why Nullgram
 Null used in computer programming for an uninitialized, undefined, empty, or meaningless value.
 In the name of Nullgram, the purpose is to express that there is no such bad things. Nullgram won't push FCM-Notification "nmsl"[^2] or somethings like that to your phone, won't send ads[^4] to channels, won't compete maliciously[^5] or publish malicious rumors about competitors
