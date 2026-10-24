@@ -10235,12 +10235,12 @@ public class ChatMessageCell extends BaseCell implements SeekBar.SeekBarDelegate
                                 captionWidth = width2;
                                 captionHeight = captionLayout.textHeight();
                             }
-                            totalHeight += captionHeight + dp(9);
+                            totalHeight += captionHeight + (currentMessageObject.type != MessageObject.TYPE_POLL ? dp(9) : 0);
                             if (captionLayout != null && (captionLayout.hasCodeAtBottom || captionLayout.hasQuoteAtBottom)) {
                                 captionHeight += dp(10);
                                 totalHeight += dp(10);
                             }
-                            if ((reactionsLayoutInBubble.isEmpty || reactionsLayoutInBubble.isSmall) && (currentPosition == null || (currentPosition.flags & captionFlag()) != 0)) {
+                            if (currentMessageObject.type != MessageObject.TYPE_POLL && (reactionsLayoutInBubble.isEmpty || reactionsLayoutInBubble.isSmall) && (currentPosition == null || (currentPosition.flags & captionFlag()) != 0)) {
                                 int timeWidthTotal = timeWidth + (messageObject.isOutOwner() ? dp(20) : 0) + getExtraTimeX();
                                 if (width2 - dp(8) - lastCaptionLineWidth < timeWidthTotal || hasFactCheck) {
                                     totalHeight += dp(14);
@@ -10253,6 +10253,14 @@ public class ChatMessageCell extends BaseCell implements SeekBar.SeekBarDelegate
                         }
                     } catch (Exception e) {
                         FileLog.e(e);
+                    }
+                }
+                if (captionLayout != null && currentMessageObject.type == MessageObject.TYPE_POLL) {
+                    TLRPC.MessageMedia m = MessageObject.getMedia(messageObject.messageOwner);
+                    if (pollButtons != null && m instanceof TLRPC.TL_messageMediaPoll) {
+                        for (PollButton button : pollButtons) {
+                            button.y += captionHeight;
+                        }
                     }
                 }
             }
