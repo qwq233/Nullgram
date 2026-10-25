@@ -363,4 +363,5 @@
     <string name="ResetSettingsAlert">Are you sure you want to reset all Nullgram settings?</string>
     <string name="customSavePath">Custom Storage Path</string>
     <string name="AlwaysShowDownloadIcon">Always Show Download Icon</string>
+    <string name="hideSideShareButton">Hide side share button</string>
 </resources>

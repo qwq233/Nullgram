@@ -117,6 +117,7 @@ public class ChatSettingActivity extends BaseActivity {
     private int showTabsOnForwardRow;
     private int disableStickersAutoReorderRow;
     private int hideTitleRow;
+    private int hideSideShareButtonRow;
     private int messageFiltersRow;
     private int sendLargePhotoRow;
     private int takeGifAsVideoRow;
@@ -290,6 +291,11 @@ public class ChatSettingActivity extends BaseActivity {
             if (view instanceof TextCheckCell) {
                 ((TextCheckCell) view).setChecked(Config.dateOfForwardedMsg);
             }
+        } else if (position == hideSideShareButtonRow) {
+            Config.toggleHideSideShareButton();
+            if (view instanceof TextCheckCell) {
+                ((TextCheckCell) view).setChecked(Config.hideSideShareButton);
+            }
         } else if (position == hideTimeForStickerRow) {
             Config.toggleHideTimeForSticker();
             if (view instanceof TextCheckCell) {
@@ -427,6 +433,7 @@ public class ChatSettingActivity extends BaseActivity {
         unreadBadgeOnBackButtonRow = addRow("unreadBadgeOnBackButton");
         ignoreReactionMentionRow = addRow("ignoreReactionMention");
         showForwardDateRow = addRow("showForwardDate");
+        hideSideShareButtonRow = addRow("hideSideShareButton");
         hideTimeForStickerRow = addRow("hideTimeForSticker");
         showMessageIDRow = addRow("showMessageID");
         quickToggleAnonymous = addRow("quickToggleAnonymous");
@@ -551,6 +558,8 @@ public class ChatSettingActivity extends BaseActivity {
                         textCell.setTextAndValueAndCheck(LocaleController.getString("ignoreReactionMention", R.string.ignoreReactionMention), LocaleController.getString("ignoreReactionMentionInfo", R.string.ignoreReactionMentionInfo), Config.ignoreReactionMention, true, true);
                     } else if (position == showForwardDateRow) {
                         textCell.setTextAndCheck(LocaleController.getString("showForwardDate", R.string.showForwardDate), Config.dateOfForwardedMsg, true);
+                    } else if (position == hideSideShareButtonRow) {
+                        textCell.setTextAndCheck(LocaleController.getString("hideSideShareButton", R.string.hideSideShareButton), Config.hideSideShareButton, true);
                     } else if (position == hideTimeForStickerRow) {
                         textCell.setTextAndCheck(LocaleController.getString("showForwardName", R.string.hideTimeForSticker), Config.hideTimeForSticker, true);
                     } else if (position == showMessageIDRow) {

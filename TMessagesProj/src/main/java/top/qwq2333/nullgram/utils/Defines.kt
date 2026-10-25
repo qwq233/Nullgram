@@ -67,6 +67,7 @@ object Defines {
     @BooleanConfig const val avatarAsDrawerBackground = "avatarAsDrawerBackground"
     @BooleanConfig const val avatarBackgroundBlur = "avatarBackgroundBlur"
     @BooleanConfig const val avatarBackgroundDarken = "avatarBackgroundDarken"
+    @BooleanConfig const val hideSideShareButton = "hideSideShareButton"
     @BooleanConfig const val hideTimeForSticker = "hideTimeForSticker"
     @BooleanConfig const val showMessageID = "showMessageID"
     @BooleanConfig const val hideQuickSendMediaBottom = "hideQuickSendMediaButtom"
