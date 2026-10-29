@@ -29,6 +29,7 @@ import org.telegram.ui.Components.BackupImageView;
 import org.telegram.ui.Components.CubicBezierInterpolator;
 import org.telegram.ui.Components.LayoutHelper;
 import org.telegram.ui.Components.RLottieDrawable;
+import org.telegram.ui.Components.RecyclerListView;
 import org.telegram.ui.Components.ScaleStateListAnimator;
 import org.telegram.ui.Components.TextHelper;
 import org.telegram.ui.Components.UItem;
@@ -174,7 +175,7 @@ public class EnableTopicsActivity extends BaseFragment {
             ScaleStateListAnimator.apply(leftLayout, .05f, 1.25f);
             addView(leftLayout, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, 226, 1, Gravity.FILL));
             leftImageView = new BackupImageView(context);
-            leftImageView.setImageDrawable(new RLottieDrawable(R.raw.topics_tabs, "topics_tabs", dp(160), dp(160)));
+            leftImageView.setImageDrawable(new RLottieDrawable(R.raw.topics_tabs, dp(160), dp(160)));
             leftLayout.addView(leftImageView, LayoutHelper.createFrame(160, 160, Gravity.CENTER_HORIZONTAL | Gravity.TOP, 0, 12.33f, 0, 0));
 
             leftTitleLayout = new FrameLayout(context);
@@ -195,7 +196,7 @@ public class EnableTopicsActivity extends BaseFragment {
             ScaleStateListAnimator.apply(rightLayout, .05f, 1.25f);
             addView(rightLayout, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, 226, 1, Gravity.FILL));
             rightImageView = new BackupImageView(context);
-            rightImageView.setImageDrawable(new RLottieDrawable(R.raw.topics_list, "topics_list", dp(160), dp(160)));
+            rightImageView.setImageDrawable(new RLottieDrawable(R.raw.topics_list, dp(160), dp(160)));
             rightLayout.addView(rightImageView, LayoutHelper.createFrame(160, 160, Gravity.CENTER_HORIZONTAL | Gravity.TOP, 0, 12.33f, 0, 0));
 
             rightTitleLayout = new FrameLayout(context);
@@ -317,7 +318,7 @@ public class EnableTopicsActivity extends BaseFragment {
             static { setup(new Factory()); }
 
             @Override
-            public TopicsLayoutSwitcher createView(Context context, int currentAccount, int classGuid, Theme.ResourcesProvider resourcesProvider) {
+            public TopicsLayoutSwitcher createView(Context context, RecyclerListView listView, int currentAccount, int classGuid, Theme.ResourcesProvider resourcesProvider) {
                 return new TopicsLayoutSwitcher(context, resourcesProvider);
             }
 

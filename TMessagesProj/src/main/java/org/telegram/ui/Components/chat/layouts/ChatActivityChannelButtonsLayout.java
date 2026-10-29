@@ -2,6 +2,7 @@ package org.telegram.ui.Components.chat.layouts;
 
 import static org.telegram.messenger.AndroidUtilities.dp;
 import static org.telegram.messenger.AndroidUtilities.lerp;
+import static org.telegram.messenger.LocaleController.getString;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
@@ -30,7 +31,8 @@ public class ChatActivityChannelButtonsLayout extends FrameLayout implements Fac
     public static final int BUTTON_GIFT = 1;
     public static final int BUTTON_DIRECT = 2;
     public static final int BUTTON_GIGA_GROUP_INFO = 3;
-    private static final int BUTTONS_COUNT = 4;
+    public static final int BUTTON_RECENT_ACTIONS_INFO = 4;
+    private static final int BUTTONS_COUNT = 5;
 
     private final ButtonHolder[] buttonHolders = new ButtonHolder[BUTTONS_COUNT];
     private final OnClickListener[] onClickListeners = new OnClickListener[BUTTONS_COUNT];
@@ -41,6 +43,7 @@ public class ChatActivityChannelButtonsLayout extends FrameLayout implements Fac
         R.drawable.msg_search,
         R.drawable.input_gift_s,
         R.drawable.input_message,
+        R.drawable.msg_help,
         R.drawable.msg_help
     };
     private static final int[] buttonsOrderLeft = new int[] {
@@ -49,7 +52,8 @@ public class ChatActivityChannelButtonsLayout extends FrameLayout implements Fac
     private static final int[] buttonsOrderRight = new int[] {
         BUTTON_GIFT,
         BUTTON_DIRECT,
-        BUTTON_GIGA_GROUP_INFO
+        BUTTON_GIGA_GROUP_INFO,
+        BUTTON_RECENT_ACTIONS_INFO
     };
 
     private final Theme.ResourcesProvider resourcesProvider;
@@ -95,6 +99,18 @@ public class ChatActivityChannelButtonsLayout extends FrameLayout implements Fac
             final ImageView button = new ImageView(getContext());
             button.setImageResource(buttonIcons[buttonId]);
             button.setScaleType(ImageView.ScaleType.CENTER);
+            if (buttonId == BUTTON_GIFT) {
+                button.setContentDescription(getString(R.string.ProfileActionsGift));
+            } else if (buttonId == BUTTON_DIRECT) {
+                button.setContentDescription(getString(R.string.ChannelOpenDirect));
+            } else if (buttonId == BUTTON_SEARCH) {
+                button.setContentDescription(getString(R.string.Search));
+            } else if (buttonId == BUTTON_GIGA_GROUP_INFO) {
+                button.setContentDescription(getString(R.string.BroadcastGroupInfo));
+            } else if (buttonId == BUTTON_RECENT_ACTIONS_INFO) {
+                button.setContentDescription(getString(R.string.EventLogInfoTitle));
+            }
+
 
             ScaleStateListAnimator.apply(button, .13f, 2f);
             button.setVisibility(GONE);

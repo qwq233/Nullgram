@@ -1,22 +1,44 @@
 package org.telegram.messenger;
 
 import androidx.annotation.DrawableRes;
+import androidx.annotation.NonNull;
 import androidx.annotation.StringRes;
 
 import org.telegram.tgnet.TLRPC;
+import org.telegram.tgnet.tl.TL_keyboard;
 
 import java.util.ArrayList;
 
 public class BotInlineKeyboard {
+    public enum BackgroundColor {
+        NONE,
+        PRIMARY,
+        SUCCESS,
+        DANGER
+    }
+
     public static abstract class Button {
         public abstract String getText();
-        public abstract int getIcon();
+
+        @NonNull
+        public BackgroundColor getColor() {
+            return BackgroundColor.NONE;
+        }
+
+        @DrawableRes
+        public int getIconRes() {
+            return 0;
+        }
+
+        public long getIconEmoji() {
+            return 0;
+        }
     }
 
     public static class ButtonBot extends Button {
-        public final TLRPC.KeyboardButton button;
+        public final TL_keyboard.KeyboardInlineButton button;
 
-        public ButtonBot(TLRPC.KeyboardButton button) {
+        public ButtonBot(TL_keyboard.KeyboardInlineButton button) {
             this.button = button;
         }
 
@@ -25,9 +47,24 @@ public class BotInlineKeyboard {
             return button.text;
         }
 
+        @NonNull
         @Override
-        public int getIcon() {
-            return 0;
+        public BackgroundColor getColor() {
+            if (button.style != null) {
+                if (button.style.bg_success) {
+                    return BackgroundColor.SUCCESS;
+                } else if (button.style.bg_danger) {
+                    return BackgroundColor.DANGER;
+                } else if (button.style.bg_primary) {
+                    return BackgroundColor.PRIMARY;
+                }
+            }
+            return BackgroundColor.NONE;
+        }
+
+        @Override
+        public long getIconEmoji() {
+            return button.style != null ? button.style.icon : 0;
         }
     }
 
@@ -38,6 +75,8 @@ public class BotInlineKeyboard {
         public static final int OPEN_MESSAGE_THREAD = 4;
         public static final int GIFT_OFFER_DECLINE = 5;
         public static final int GIFT_OFFER_ACCEPT = 6;
+        public static final int SHARING_OFFER_DECLINE = 7;
+        public static final int SHARING_OFFER_ACCEPT = 8;
 
         public final int id;
         public final @DrawableRes int icon;
@@ -55,7 +94,7 @@ public class BotInlineKeyboard {
         }
 
         @Override
-        public int getIcon() {
+        public int getIconRes() {
             return icon;
         }
     }
@@ -106,7 +145,7 @@ public class BotInlineKeyboard {
 
         public void addBotKeyboard(TLRPC.TL_replyInlineMarkup replyInlineMarkup) {
             for (int a = 0; a < replyInlineMarkup.rows.size(); a++) {
-                ArrayList<TLRPC.KeyboardButton> row = replyInlineMarkup.rows.get(a).buttons;
+                ArrayList<TL_keyboard.KeyboardInlineButton> row = replyInlineMarkup.rows.get(a).buttons;
                 ButtonBot[] arr = new ButtonBot[row.size()];
                 for (int b = 0; b < row.size(); b++) {
                     arr[b] = new ButtonBot(row.get(b));
@@ -129,6 +168,13 @@ public class BotInlineKeyboard {
             buttons.add(new Button[]{
                 new ButtonCustom(ButtonCustom.GIFT_OFFER_DECLINE, R.string.GiftOfferDecline, R.drawable.filled_bot_decline_24),
                 new ButtonCustom(ButtonCustom.GIFT_OFFER_ACCEPT, R.string.GiftOfferAccept, R.drawable.filled_bot_approve_24),
+            });
+        }
+
+        public void addSharingOfferKeyboard() {
+            buttons.add(new Button[]{
+                new ButtonCustom(ButtonCustom.SHARING_OFFER_DECLINE, R.string.DisableSharingOfferDecline, R.drawable.filled_bot_decline_24),
+                new ButtonCustom(ButtonCustom.SHARING_OFFER_ACCEPT, R.string.DisableSharingOfferAccept, R.drawable.filled_bot_approve_24),
             });
         }
 

@@ -19,14 +19,17 @@
 
 package org.telegram.ui.Components;
 
+import static org.telegram.messenger.AndroidUtilities.dp;
+
 import android.Manifest;
 import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
-import android.animation.StateListAnimator;
 import android.animation.ValueAnimator;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
+import android.animation.StateListAnimator;
+import android.view.ViewOutlineProvider;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
@@ -52,7 +55,6 @@ import android.view.Gravity;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.ViewOutlineProvider;
 import android.view.animation.OvershootInterpolator;
 import android.widget.EditText;
 import android.widget.FrameLayout;
@@ -78,6 +80,7 @@ import org.telegram.messenger.OSMDroidMapsProvider;
 import org.telegram.messenger.R;
 import org.telegram.messenger.UserConfig;
 import org.telegram.messenger.UserObject;
+import org.telegram.messenger.utils.ViewOutlineProviderImpl;
 import org.telegram.tgnet.TLRPC;
 import org.telegram.ui.ActionBar.ActionBar;
 import org.telegram.ui.ActionBar.ActionBarMenu;
@@ -97,6 +100,7 @@ import org.telegram.ui.Cells.SendLocationCell;
 import org.telegram.ui.Cells.ShadowSectionCell;
 import org.telegram.ui.Cells.SharingLiveLocationCell;
 import org.telegram.ui.ChatActivity;
+import org.telegram.ui.Components.blur3.ViewGroupPartRenderer;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -122,8 +126,6 @@ public class ChatAttachAlertLocationLayout extends ChatAttachAlert.AttachAlertLa
     private IMapsProvider.IMapView mapView;
     private IMapsProvider.ICameraUpdate forceUpdate;
     private float yOffset;
-
-    private boolean ignoreLayout;
 
     private boolean scrolling;
 
@@ -396,16 +398,16 @@ public class ChatAttachAlertLocationLayout extends ChatAttachAlert.AttachAlertLa
         void didSelectLocation(TLRPC.MessageMedia location, int live, boolean notify, int scheduleDate, long payStars);
     }
 
-    public ChatAttachAlertLocationLayout(ChatAttachAlert alert, Context context, Theme.ResourcesProvider resourcesProvider) {
+    public ChatAttachAlertLocationLayout(ChatAttachAlert alert, Context context, Theme.ResourcesProvider resourcesProvider, boolean allowLiveLocation) {
         super(alert, context, resourcesProvider);
         AndroidUtilities.fixGoogleMapsBug();
-        ChatActivity chatActivity = (ChatActivity) parentAlert.baseFragment;
-        dialogId = chatActivity.getDialogId();
+        ChatActivity chatActivity = parentAlert.baseFragment instanceof ChatActivity ? (ChatActivity) parentAlert.baseFragment : null;
+        dialogId = parentAlert.getDialogId();
         if (parentAlert.isStoryLocationPicker) {
             locationType = LOCATION_TYPE_STORY;
         } else if (parentAlert.isBizLocationPicker) {
             locationType = LOCATION_TYPE_BIZ;
-        } else if (chatActivity.getCurrentEncryptedChat() == null && !chatActivity.isInScheduleMode() && !UserObject.isUserSelf(chatActivity.getCurrentUser())) {
+        } else if (allowLiveLocation && chatActivity != null && chatActivity.getCurrentEncryptedChat() == null && !chatActivity.isInScheduleMode() && !UserObject.isUserSelf(chatActivity.getCurrentUser())) {
             locationType = LOCATION_TYPE_SEND_WITH_LIVE;
         } else {
             locationType = LOCATION_TYPE_SEND;
@@ -429,7 +431,7 @@ public class ChatAttachAlertLocationLayout extends ChatAttachAlert.AttachAlertLa
 
         overlayView = new MapOverlayView(context);
 
-        searchItem = menu.addItem(0, R.drawable.ic_ab_search).setIsSearchField(true).setActionBarMenuItemSearchListener(new ActionBarMenuItem.ActionBarMenuItemSearchListener() {
+        searchItem = menu.addItem(0, R.drawable.outline_header_search).setIsSearchField(true).setActionBarMenuItemSearchListener(new ActionBarMenuItem.ActionBarMenuItemSearchListener() {
             @Override
             public void onSearchExpand() {
                 searching = true;
@@ -572,7 +574,7 @@ public class ChatAttachAlertLocationLayout extends ChatAttachAlert.AttachAlertLa
         searchAreaButton.setText(LocaleController.getString(R.string.PlacesInThisArea));
         searchAreaButton.setGravity(Gravity.CENTER);
         searchAreaButton.setPadding(AndroidUtilities.dp(20), 0, AndroidUtilities.dp(20), 0);
-        mapViewClip.addView(searchAreaButton, LayoutHelper.createFrame(LayoutHelper.WRAP_CONTENT, Build.VERSION.SDK_INT >= 21 ? 40 : 44, Gravity.CENTER_HORIZONTAL | Gravity.TOP, 80, 12, 80, 0));
+        mapViewClip.addView(searchAreaButton, LayoutHelper.createFrame(LayoutHelper.WRAP_CONTENT, 40, Gravity.CENTER_HORIZONTAL | Gravity.TOP, 80, 12, 80, 0));
         searchAreaButton.setOnClickListener(v -> {
             showSearchPlacesButton(false);
             adapter.searchPlacesWithQuery(null, userLocation, true, true);
@@ -617,7 +619,7 @@ public class ChatAttachAlertLocationLayout extends ChatAttachAlert.AttachAlertLa
         }
         mapTypeButton.setBackgroundDrawable(drawable);
         mapTypeButton.setIcon(R.drawable.msg_map_type);
-        mapViewClip.addView(mapTypeButton, LayoutHelper.createFrame(Build.VERSION.SDK_INT >= 21 ? 40 : 44, Build.VERSION.SDK_INT >= 21 ? 40 : 44, Gravity.RIGHT | Gravity.TOP, 0, 12, 12, 0));
+        mapViewClip.addView(mapTypeButton, LayoutHelper.createFrame(40, 40, Gravity.RIGHT | Gravity.TOP, 0, 12, 12, 0));
         mapTypeButton.setOnClickListener(v -> mapTypeButton.toggleSubMenu());
         mapTypeButton.setDelegate(id -> {
             if (map == null) {
@@ -695,7 +697,7 @@ public class ChatAttachAlertLocationLayout extends ChatAttachAlert.AttachAlertLa
         locationButton.setColorFilter(new PorterDuffColorFilter(getThemedColor(Theme.key_location_actionActiveIcon), PorterDuff.Mode.SRC_IN));
         locationButton.setTag(Theme.key_location_actionActiveIcon);
         locationButton.setContentDescription(LocaleController.getString(R.string.AccDescrMyLocation));
-        LayoutParams layoutParams1 = LayoutHelper.createFrame(Build.VERSION.SDK_INT >= 21 ? 40 : 44, Build.VERSION.SDK_INT >= 21 ? 40 : 44, Gravity.RIGHT | Gravity.BOTTOM, 0, 0, 12, 12);
+        LayoutParams layoutParams1 = LayoutHelper.createFrame(40, 40, Gravity.RIGHT | Gravity.BOTTOM, 0, 0, 12, 12);
         mapViewClip.addView(locationButton, layoutParams1);
         locationButton.setOnClickListener(v -> {
             if (Build.VERSION.SDK_INT >= 23) {
@@ -760,8 +762,10 @@ public class ChatAttachAlertLocationLayout extends ChatAttachAlert.AttachAlertLa
                 updateClipView();
             }
         };
+        occupyNavigationBar = true;
         listView.setClipToPadding(false);
         listView.setAdapter(adapter = new LocationActivityAdapter(context, locationType, dialogId, true, resourcesProvider, parentAlert.isStoryLocationPicker, false, parentAlert.isBizLocationPicker));
+        adapter.isPollAttach = parentAlert != null && (parentAlert.isPollAttach || parentAlert.isLocationPicker);
         DefaultItemAnimator itemAnimator = new DefaultItemAnimator();
         itemAnimator.setDurations(350);
         itemAnimator.setInterpolator(CubicBezierInterpolator.EASE_OUT_QUINT);
@@ -843,7 +847,7 @@ public class ChatAttachAlertLocationLayout extends ChatAttachAlert.AttachAlertLa
                         location.geo.lat = AndroidUtilities.fixLocationCoord(userLocation.getLatitude());
                         location.geo._long = AndroidUtilities.fixLocationCoord(userLocation.getLongitude());
                         AlertsCreator.ensurePaidMessageConfirmation(parentAlert.currentAccount, parentAlert.getDialogId(), 1 + parentAlert.getAdditionalMessagesCount(), payStars -> {
-                            if (chatActivity.isInScheduleMode()) {
+                            if (chatActivity != null && chatActivity.isInScheduleMode()) {
                                 AlertsCreator.createScheduleDatePickerDialog(getParentActivity(), chatActivity.getDialogId(), (notify, scheduleDate, scheduleRepeatPeriod) -> {
                                     delegate.didSelectLocation(location, locationType, notify, scheduleDate, payStars);
                                     parentAlert.dismiss(true);
@@ -875,7 +879,7 @@ public class ChatAttachAlertLocationLayout extends ChatAttachAlert.AttachAlertLa
             Object object = adapter.getItem(position);
             if (object instanceof TLRPC.TL_messageMediaVenue) {
                 AlertsCreator.ensurePaidMessageConfirmation(parentAlert.currentAccount, parentAlert.getDialogId(), 1 + parentAlert.getAdditionalMessagesCount(), payStars -> {
-                    if (chatActivity.isInScheduleMode()) {
+                    if (chatActivity != null && chatActivity.isInScheduleMode()) {
                         AlertsCreator.createScheduleDatePickerDialog(getParentActivity(), chatActivity.getDialogId(), (notify, scheduleDate, scheduleRepeatPeriod) -> {
                             delegate.didSelectLocation((TLRPC.TL_messageMediaVenue) object, locationType, notify, scheduleDate, 0);
                             parentAlert.dismiss(true);
@@ -891,7 +895,7 @@ public class ChatAttachAlertLocationLayout extends ChatAttachAlert.AttachAlertLa
             }
         });
         adapter.setDelegate(dialogId, this::updatePlacesMarkers);
-        adapter.setOverScrollHeight(overScrollHeight);
+        adapter.setOverScrollHeight(overScrollHeight + dp(16));
 
         addView(mapViewClip, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, LayoutHelper.MATCH_PARENT, Gravity.LEFT | Gravity.TOP));
 
@@ -985,6 +989,7 @@ public class ChatAttachAlertLocationLayout extends ChatAttachAlert.AttachAlertLa
         mapViewClip.addView(markerImageView, LayoutHelper.createFrame(28, 48, Gravity.TOP | Gravity.CENTER_HORIZONTAL));
 
         searchListView = new RecyclerListView(context, resourcesProvider);
+        searchListView.setClipToPadding(false);
         searchListView.setVisibility(GONE);
         searchListView.setLayoutManager(new LinearLayoutManager(context, LinearLayoutManager.VERTICAL, false));
         searchAdapter = new LocationActivitySearchAdapter(context, resourcesProvider, parentAlert.isStoryLocationPicker, parentAlert.isBizLocationPicker) {
@@ -1017,7 +1022,7 @@ public class ChatAttachAlertLocationLayout extends ChatAttachAlert.AttachAlertLa
         searchListView.setOnItemClickListener((view, position) -> {
             TLRPC.TL_messageMediaVenue object = searchAdapter.getItem(position);
             if (object != null && delegate != null) {
-                if (chatActivity.isInScheduleMode()) {
+                if (chatActivity != null && chatActivity.isInScheduleMode()) {
                     AlertsCreator.createScheduleDatePickerDialog(getParentActivity(), chatActivity.getDialogId(), (notify, scheduleDate, scheduleRepeatPeriod) -> {
                         delegate.didSelectLocation(object, locationType, notify, scheduleDate, 0);
                         parentAlert.dismiss(true);
@@ -1158,11 +1163,8 @@ public class ChatAttachAlertLocationLayout extends ChatAttachAlert.AttachAlertLa
             }
             parentAlert.setAllowNestedScroll(true);
         }
-        if (listView.getPaddingTop() != padding) {
-            ignoreLayout = true;
-            listView.setPadding(0, padding, 0, 0);
-            ignoreLayout = false;
-        }
+        listView.setPaddingWithoutRequestLayout(0, padding, 0, listPaddingBottom);
+        searchListView.setPaddingWithoutRequestLayout(0, 0, 0, listPaddingBottom);
     }
 
     private boolean first = true;
@@ -1179,14 +1181,6 @@ public class ChatAttachAlertLocationLayout extends ChatAttachAlert.AttachAlertLa
     @Override
     public int getButtonsHideOffset() {
         return AndroidUtilities.dp(56);
-    }
-
-    @Override
-    public void requestLayout() {
-        if (ignoreLayout) {
-            return;
-        }
-        super.requestLayout();
     }
 
     @Override
@@ -1658,7 +1652,7 @@ public class ChatAttachAlertLocationLayout extends ChatAttachAlert.AttachAlertLa
         layoutParams.topMargin = height;
         searchListView.setLayoutParams(layoutParams);
 
-        adapter.setOverScrollHeight(locationDenied && isTypeSend() ? overScrollHeight - listView.getPaddingTop() : overScrollHeight);
+        adapter.setOverScrollHeight((locationDenied && isTypeSend() ? overScrollHeight - listView.getPaddingTop() : overScrollHeight) + dp(16));
         layoutParams = (FrameLayout.LayoutParams) mapView.getView().getLayoutParams();
         if (layoutParams != null) {
             layoutParams.height = mapHeight + AndroidUtilities.dp(10);

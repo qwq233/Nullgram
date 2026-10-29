@@ -41,11 +41,10 @@ import android.view.ViewConfiguration;
 
 import androidx.annotation.NonNull;
 import androidx.core.graphics.ColorUtils;
-import androidx.recyclerview.widget.ChatListItemAnimator;
+import org.telegram.ui.recyclerview.ChatListItemAnimator;
 
 import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.ApplicationLoader;
-import org.telegram.messenger.BotForumHelper;
 import org.telegram.messenger.DocumentObject;
 import org.telegram.messenger.Emoji;
 import org.telegram.messenger.ImageLocation;
@@ -63,9 +62,11 @@ import org.telegram.messenger.UserObject;
 import org.telegram.messenger.Utilities;
 import org.telegram.tgnet.TLObject;
 import org.telegram.tgnet.TLRPC;
+import org.telegram.ui.ActionBar.MessageDrawable;
 import org.telegram.ui.ActionBar.Theme;
 import org.telegram.ui.Cells.ChatActionCell;
 import org.telegram.ui.Cells.ChatMessageCell;
+import org.telegram.ui.Cells.IMessageCell;
 import org.telegram.ui.Components.AnimatedEmojiDrawable;
 import org.telegram.ui.Components.AnimatedEmojiSpan;
 import org.telegram.ui.Components.AnimatedFileDrawable;
@@ -75,7 +76,6 @@ import org.telegram.ui.Components.ButtonBounce;
 import org.telegram.ui.Components.CounterView;
 import org.telegram.ui.Components.CubicBezierInterpolator;
 import org.telegram.ui.Components.RLottieDrawable;
-import org.telegram.ui.Components.RLottieImageView;
 import org.telegram.ui.Stars.StarsReactionsSheet;
 
 import java.util.ArrayList;
@@ -591,16 +591,8 @@ public class ReactionsLayoutInBubble {
     }
 
     private void didPressReaction(TLRPC.ReactionCount reaction, boolean longpress, float x, float y) {
-        if (parentView instanceof ChatMessageCell) {
-            final ChatMessageCell cell = (ChatMessageCell) parentView;
-            final ChatMessageCell.ChatMessageCellDelegate delegate = cell.getDelegate();
-            if (delegate == null) return;
-            delegate.didPressReaction(cell, reaction, longpress, x, y);
-        } else if (parentView instanceof ChatActionCell) {
-            final ChatActionCell cell = (ChatActionCell) parentView;
-            final ChatActionCell.ChatActionCellDelegate delegate = cell.getDelegate();
-            if (delegate == null) return;
-            delegate.didPressReaction(cell, reaction, longpress, x, y);
+        if (parentView instanceof IMessageCell) {
+            ((IMessageCell) parentView).didPressReactionFromLayout(reaction, longpress, x, y);
         }
     }
 
@@ -824,6 +816,7 @@ public class ReactionsLayoutInBubble {
         public boolean wasDrawn;
         public String key;
         public boolean choosen;
+        public boolean drawBgOnlyIfChosen;
 
         public String countText;
         public TLRPC.Reaction reaction;
@@ -894,6 +887,7 @@ public class ReactionsLayoutInBubble {
             }
             if (textDrawable == null) {
                 textDrawable = new AnimatedTextView.AnimatedTextDrawable(true, true, true);
+                textDrawable.ignoreRTL = true;
                 textDrawable.setAnimationProperties(.4f, 0, 320, CubicBezierInterpolator.EASE_OUT_QUINT);
                 textDrawable.setTextSize(dp(13));
                 textDrawable.setCallback(supercallback);
@@ -937,7 +931,7 @@ public class ReactionsLayoutInBubble {
                         if (reuseFrom != null && reuseFrom.starDrawable != null) {
                             starDrawable = reuseFrom.starDrawable;
                         } else {
-                            starDrawable = new RLottieDrawable(R.raw.star_reaction_click, "star_reaction_click", dp(40), dp(40));
+                            starDrawable = new RLottieDrawable(R.raw.star_reaction_click, dp(40), dp(40));
                         }
                         imageReceiver.setImageBitmap(starDrawable);
                     } else {
@@ -1024,9 +1018,6 @@ public class ReactionsLayoutInBubble {
             particles.bounds.inset(-dp(4), -dp(4));
             particles.setBounds(particles.bounds);
             final boolean needsPostInvalidate = particles.process();
-            if (parentView != null) {
-                parentView.invalidate();
-            }
             particles.draw(canvas, ColorUtils.blendARGB(ColorUtils.setAlphaComponent(backgroundColor, 0xFF), ColorUtils.blendARGB(serviceTextColor, ColorUtils.setAlphaComponent(backgroundColor, 0xFF), .4f), getDrawServiceShaderBackground()));
 
             if (isSelected) {
@@ -1085,6 +1076,12 @@ public class ReactionsLayoutInBubble {
                     serviceBackgroundColor = Color.TRANSPARENT;
                 }
             }
+
+            if (drawBgOnlyIfChosen) {
+                backgroundColor = 0;
+                serviceBackgroundColor = 0;
+            }
+
             updateColors(progress);
             textPaint.setColor(lastDrawnTextColor);
             if (textDrawable != null) {
@@ -1129,7 +1126,7 @@ public class ReactionsLayoutInBubble {
                 canvas.scale(bounceScale, bounceScale, x + w / 2f, y + height / 2f);
             }
             float rad = height / 2f;
-            if (getDrawServiceShaderBackground() > 0) {
+            if (getDrawServiceShaderBackground() > 0 && !drawBgOnlyIfChosen) {
                 Paint paint1 = Theme.getThemePaint(Theme.key_paint_chatActionBackground, resourcesProvider);
                 Paint paint2 = Theme.getThemePaint(Theme.key_paint_chatActionBackgroundDarken, resourcesProvider);
                 int oldAlpha = paint1.getAlpha();
@@ -1144,7 +1141,7 @@ public class ReactionsLayoutInBubble {
                 paint2.setAlpha(oldAlpha2);
             }
             if (drawOverlayScrim && getDrawServiceShaderBackground() < 1 && parentView instanceof ChatMessageCell) {
-                Theme.MessageDrawable messageBackground = ((ChatMessageCell) parentView).getCurrentBackgroundDrawable(false);
+                MessageDrawable messageBackground = ((ChatMessageCell) parentView).getCurrentBackgroundDrawable(false);
                 if (messageBackground != null && !isTag) {
                     canvas.drawRoundRect(AndroidUtilities.rectTmp, rad, rad, messageBackground.getPaint());
                 }
@@ -1503,12 +1500,11 @@ public class ReactionsLayoutInBubble {
         }
         float eventX = event.getX();
         float eventY = event.getY();
-        if (parentView instanceof ChatMessageCell) {
+        if (parentView instanceof org.telegram.ui.Cells.IMessageCell) {
             eventY -= parentView.getPaddingTop();
-        } else if (parentView instanceof ChatActionCell) {
-            ChatActionCell actionCell = (ChatActionCell) parentView;
-            eventX -= actionCell.sideMenuWidth / 2f;
-            eventY -= parentView.getPaddingTop();
+            if (parentView instanceof ChatActionCell) {
+                eventX -= ((ChatActionCell) parentView).sideMenuWidth / 2f;
+            }
         }
         float x = eventX - this.x;
         float y = eventY - this.y;

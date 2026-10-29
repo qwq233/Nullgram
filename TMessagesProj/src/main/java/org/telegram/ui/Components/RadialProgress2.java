@@ -22,6 +22,7 @@ import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.ImageLocation;
 import org.telegram.messenger.ImageReceiver;
 import org.telegram.tgnet.TLRPC;
+import org.telegram.ui.ActionBar.MessageDrawable;
 import org.telegram.ui.ActionBar.Theme;
 
 import java.util.Locale;
@@ -137,7 +138,7 @@ public class RadialProgress2 {
         return circleRadius;
     }
 
-    public void setBackgroundDrawable(Theme.MessageDrawable drawable) {
+    public void setBackgroundDrawable(MessageDrawable drawable) {
         mediaActionDrawable.setBackgroundDrawable(drawable);
         miniMediaActionDrawable.setBackgroundDrawable(drawable);
     }
@@ -160,6 +161,10 @@ public class RadialProgress2 {
 
     public void setImageOverlay(String url) {
         overlayImageView.setImage(url, url != null ? String.format(Locale.US, "%d_%d", circleRadius * 2, circleRadius * 2) : null, null, null, -1);
+    }
+
+    public void setImageOverlay(Bitmap bitmap) {
+        overlayImageView.setImageBitmap(bitmap);
     }
 
     public void onAttachedToWindow() {

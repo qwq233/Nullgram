@@ -41,6 +41,7 @@ import android.widget.TextView;
 
 import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.Emoji;
+import org.telegram.messenger.FileLog;
 import org.telegram.ui.ActionBar.Theme;
 import org.telegram.ui.Cells.TextSelectionHelper;
 import org.telegram.ui.Components.AnimatedEmojiDrawable;
@@ -49,6 +50,8 @@ import org.telegram.ui.Components.LinkPath;
 import org.telegram.ui.Components.LinkSpanDrawable;
 import org.telegram.ui.Components.LoadingDrawable;
 
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Stack;
@@ -62,8 +65,10 @@ public class SpoilersTextView extends TextView implements TextSelectionHelper.Si
     protected List<SpoilerEffect> spoilers = new ArrayList<>();
     private Stack<SpoilerEffect> spoilersPool = new Stack<>();
     private boolean isSpoilersRevealed;
-    private final Path path = new Path();
-    private Paint xRefPaint;
+    private boolean revealPending;
+    private boolean revealInProgress;
+    private int revealGeneration;
+    private Path path = new Path();
     public boolean allowClickSpoilers = true;
 
     public int cacheType = AnimatedEmojiDrawable.CACHE_TYPE_MESSAGES;
@@ -100,17 +105,42 @@ public class SpoilersTextView extends TextView implements TextSelectionHelper.Si
         this.resourcesProvider = resourcesProvider;
 
         clickDetector = new SpoilersClickDetector(this, spoilers, (eff, x, y) -> {
-            if (isSpoilersRevealed || !revealOnClick) return;
-
-            eff.setOnRippleEndCallback(()->post(()->{
-                isSpoilersRevealed = true;
-                invalidateSpoilers();
-            }));
-
-            float rad = (float) Math.sqrt(Math.pow(getWidth(), 2) + Math.pow(getHeight(), 2));
-            for (SpoilerEffect ef : spoilers)
-                ef.startRipple(x, y, rad);
+            if (isSpoilersRevealed || revealPending || revealInProgress || !revealOnClick) return;
+            startReveal(x, y);
         });
+    }
+
+    public void reveal() {
+        if (isSpoilersRevealed || revealInProgress) return;
+        // setText() can leave the old layout in place until the next traversal.
+        revealPending = true;
+        if (getLayout() == null || isLayoutRequested()) return;
+
+        startReveal(getWidth() / 2f - getPaddingLeft(),
+            getHeight() / 2f - getPaddingTop() + getScrollY());
+    }
+
+    private void startReveal(float x, float y) {
+        revealPending = false;
+        if (spoilers.isEmpty()) {
+            isSpoilersRevealed = true;
+            invalidateSpoilers();
+            return;
+        }
+
+        revealInProgress = true;
+        final int generation = ++revealGeneration;
+        spoilers.get(0).setOnRippleEndCallback(() -> post(() -> {
+            if (generation != revealGeneration) return;
+            revealInProgress = false;
+            isSpoilersRevealed = true;
+            invalidateSpoilers();
+        }));
+
+        final float radius = (float) Math.hypot(getWidth(), getHeight());
+        for (SpoilerEffect spoiler : spoilers) {
+            spoiler.startRipple(x, y, radius);
+        }
     }
 
     private CharacterStyle currentLinkLoading;
@@ -205,6 +235,9 @@ public class SpoilersTextView extends TextView implements TextSelectionHelper.Si
 
     @Override
     public void setText(CharSequence text, BufferType type) {
+        revealGeneration++;
+        revealPending = false;
+        revealInProgress = false;
         isSpoilersRevealed = Config.displaySpoilerMsgDirectly;
         super.setText(text, type);
     }
@@ -262,27 +295,31 @@ public class SpoilersTextView extends TextView implements TextSelectionHelper.Si
         }
         canvas.restore();
 
-        canvas.save();
-        path.rewind();
-        for (SpoilerEffect eff : spoilers) {
-            Rect bounds = eff.getBounds();
-            path.addRect(bounds.left + pl, bounds.top + pt, bounds.right + pl, bounds.bottom + pt, Path.Direction.CW);
-        }
-        canvas.clipPath(path, Region.Op.DIFFERENCE);
-        Emoji.emojiDrawingUseAlpha = useAlphaForEmoji;
-        super.onDraw(canvas);
-        Emoji.emojiDrawingUseAlpha = true;
-        canvas.restore();
+        if (spoilers.isEmpty()) {
+            super.onDraw(canvas);
+        } else {
+            canvas.save();
+            path.rewind();
+            for (SpoilerEffect eff : spoilers) {
+                Rect bounds = eff.getBounds();
+                path.addRect(bounds.left + pl, bounds.top + pt, bounds.right + pl, bounds.bottom + pt, Path.Direction.CW);
+            }
+            canvas.clipPath(path, Region.Op.DIFFERENCE);
+            Emoji.emojiDrawingUseAlpha = useAlphaForEmoji;
+            super.onDraw(canvas);
+            Emoji.emojiDrawingUseAlpha = true;
+            canvas.restore();
 
-        canvas.save();
-        canvas.clipPath(path);
-        path.rewind();
-        if (!spoilers.isEmpty()) {
-            spoilers.get(0).getRipplePath(path);
+            if (spoilers.get(0).hasRipplePath()) {
+                canvas.save();
+                canvas.clipPath(path);
+                path.rewind();
+                spoilers.get(0).getRipplePath(path);
+                canvas.clipPath(path);
+                super.onDraw(canvas);
+                canvas.restore();
+            }
         }
-        canvas.clipPath(path);
-        super.onDraw(canvas);
-        canvas.restore();
 
         updateAnimatedEmoji(false);
         if (animatedEmoji != null) {
@@ -295,8 +332,7 @@ public class SpoilersTextView extends TextView implements TextSelectionHelper.Si
         if (!spoilers.isEmpty()) {
             boolean useAlphaLayer = spoilers.get(0).getRippleProgress() != -1;
             if (useAlphaLayer) {
-                canvas.saveLayer(0, 0, getMeasuredWidth(), getMeasuredHeight(), null,
-                    Canvas.ALL_SAVE_FLAG);
+                canvas.saveLayer(0, 0, getMeasuredWidth(), getMeasuredHeight(), null, Canvas.ALL_SAVE_FLAG);
             } else {
                 canvas.save();
             }
@@ -309,12 +345,7 @@ public class SpoilersTextView extends TextView implements TextSelectionHelper.Si
             if (useAlphaLayer) {
                 path.rewind();
                 spoilers.get(0).getRipplePath(path);
-                if (xRefPaint == null) {
-                    xRefPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
-                    xRefPaint.setColor(0xff000000);
-                    xRefPaint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.CLEAR));
-                }
-                canvas.drawPath(path, xRefPaint);
+                canvas.drawPath(path, Theme.PAINT_CLEAR);
             }
             canvas.restore();
         }
@@ -330,6 +361,11 @@ public class SpoilersTextView extends TextView implements TextSelectionHelper.Si
     protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
         super.onLayout(changed, left, top, right, bottom);
         invalidateSpoilers();
+        if (revealPending) {
+            // onLayout may still report isLayoutRequested(), so start directly.
+            startReveal(getWidth() / 2f - getPaddingLeft(),
+                getHeight() / 2f - getPaddingTop() + getScrollY());
+        }
     }
 
     private Layout lastLayout = null;
@@ -384,5 +420,46 @@ public class SpoilersTextView extends TextView implements TextSelectionHelper.Si
     @Override
     public Layout getStaticTextLayout() {
         return getLayout();
+    }
+
+    private boolean triedGetInvalidate;
+    private static Field mEditor;
+    private static Class editorClass;
+    private static Method mEditorInvalidateDisplayList;
+    private Object editor;
+
+    @Override
+    public void invalidate() {
+        if (!triedGetInvalidate) {
+            triedGetInvalidate = true;
+            try {
+                if (editorClass == null) {
+                    mEditor = TextView.class.getDeclaredField("mEditor");
+                    mEditor.setAccessible(true);
+                    editorClass = Class.forName("android.widget.Editor");
+                    try {
+                        mEditorInvalidateDisplayList = editorClass.getDeclaredMethod("invalidateTextDisplayList");
+                        mEditorInvalidateDisplayList.setAccessible(true);
+                    } catch (Exception ignore) {}
+                }
+            } catch (Throwable e) {
+                FileLog.e(e);
+            }
+        }
+        super.invalidate();
+        if (!isHardwareAccelerated()) {
+            return;
+        }
+        try {
+            // on hardware accelerated edittext to invalidate imagespan display list must be invalidated
+            if (mEditorInvalidateDisplayList != null) {
+                if (editor == null) {
+                    editor = mEditor.get(this);
+                }
+                if (editor != null) {
+                    mEditorInvalidateDisplayList.invoke(editor);
+                }
+            }
+        } catch (Exception ignore) {};
     }
 }

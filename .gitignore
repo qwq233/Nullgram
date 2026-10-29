@@ -8,3 +8,11 @@ local.properties
 service_account_credentials.json
 Tools/Utils.java
 test.py
+
+/temp
+
+TMessagesProj/.cxx/
+TMessagesProj/jniLibs/
+TMessagesProj/jniRes/
+TMessagesProj/afat/
+TMessagesProj/jni/ffmpeg/build_android

@@ -211,7 +211,7 @@ public class TL_smsjobs {
             stream.writeInt32(constructor);
             stream.writeInt32(flags);
             stream.writeString(job_id);
-            if ((flags & 1) != 0) {
+            if (hasFlag(flags, 1)) {
                 stream.writeString(error);
             }
         }
@@ -231,7 +231,7 @@ public class TL_smsjobs {
         @Override
         public void serializeToStream(OutputSerializedData stream) {
             stream.writeInt32(constructor);
-            flags = allow_international ? flags | 1 : flags &~ 1;
+            flags = setFlag(flags, 1, allow_international);
             stream.writeInt32(flags);
         }
     }

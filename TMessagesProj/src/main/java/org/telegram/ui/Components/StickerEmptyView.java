@@ -118,7 +118,7 @@ public class StickerEmptyView extends FrameLayout implements NotificationCenter.
         subtitle.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 14);
         subtitle.setGravity(Gravity.CENTER);
 
-        button = new ButtonWithCounterView(context, resourcesProvider);
+        button = new ButtonWithCounterView(context, resourcesProvider).setRound();
         button.setVisibility(View.GONE);
 
         linearLayout.addView(stickerView, LayoutHelper.createLinear(117, 117, Gravity.CENTER_HORIZONTAL));
@@ -276,7 +276,7 @@ public class StickerEmptyView extends FrameLayout implements NotificationCenter.
 
     private void setSticker() {
         if (stickerType == STICKER_TYPE_NO_CONTACTS || stickerType == STICKER_TYPE_SEARCH) {
-            stickerView.setImageDrawable(new RLottieDrawable(R.raw.utyan_empty, "utyan_empty", dp(130), dp(130)));
+            stickerView.setImageDrawable(new RLottieDrawable(R.raw.utyan_empty, dp(130), dp(130)));
             return;
         }
 

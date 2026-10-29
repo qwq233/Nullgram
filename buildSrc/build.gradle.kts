@@ -31,7 +31,8 @@ repositories {
 
     dependencies {
         //noinspection UseTomlInstead
-        implementation("org.eclipse.jgit:org.eclipse.jgit:7.7.0.202606012155-r")
+        implementation("org.eclipse.jgit:org.eclipse.jgit:7.8.0.202609011348-r")
+        implementation("com.google.code.gson:gson:2.15.0")
     }
 }
 

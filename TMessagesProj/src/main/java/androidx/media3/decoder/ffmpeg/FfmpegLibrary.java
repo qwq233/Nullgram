@@ -1,0 +1,210 @@
+/*
+ * Copyright (C) 2016 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package androidx.media3.decoder.ffmpeg;
+
+import androidx.annotation.Nullable;
+import androidx.media3.common.C;
+import androidx.media3.common.MediaLibraryInfo;
+import androidx.media3.common.MimeTypes;
+import androidx.media3.common.util.LibraryLoader;
+import androidx.media3.common.util.Log;
+import androidx.media3.common.util.UnstableApi;
+
+import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
+
+/** Configures and queries the underlying native library. */
+@UnstableApi
+public final class FfmpegLibrary {
+
+  static {
+    MediaLibraryInfo.registerModule("media3.decoder.ffmpeg");
+  }
+
+  private static final String TAG = "FfmpegLibrary";
+
+  private static @MonotonicNonNull String version;
+  private static int inputBufferPaddingSize = C.LENGTH_UNSET;
+
+  private FfmpegLibrary() {}
+
+  /**
+   * Override the names of the FFmpeg native libraries. If an application wishes to call this
+   * method, it must do so before calling any other method defined by this class, and before
+   * instantiating a {@link FfmpegAudioRenderer} or {@link ExperimentalFfmpegVideoRenderer}
+   * instance.
+   *
+   * @param libraries The names of the FFmpeg native libraries.
+   */
+  public static void setLibraries(String... libraries) {
+
+  }
+
+  /** Returns whether the underlying library is available, loading it if necessary. */
+  public static boolean isAvailable() {
+    return true;
+  }
+
+  /** Returns the version of the underlying library if available, or null otherwise. */
+  @Nullable
+  public static String getVersion() {
+    if (!isAvailable()) {
+      return null;
+    }
+    if (version == null) {
+      version = ffmpegGetVersion();
+    }
+    return version;
+  }
+
+  /**
+   * Returns the required amount of padding for input buffers in bytes, or {@link C#LENGTH_UNSET} if
+   * the underlying library is not available.
+   */
+  public static int getInputBufferPaddingSize() {
+    if (!isAvailable()) {
+      return C.LENGTH_UNSET;
+    }
+    if (inputBufferPaddingSize == C.LENGTH_UNSET) {
+      inputBufferPaddingSize = ffmpegGetInputBufferPaddingSize();
+    }
+    return inputBufferPaddingSize;
+  }
+
+  /**
+   * Returns whether the underlying library supports the specified MIME type.
+   *
+   * @param mimeType The MIME type to check.
+   */
+  public static boolean supportsFormat(@Nullable String mimeType) {
+    if (!isAvailable()) {
+      return false;
+    }
+    if (mimeType == null) {
+      return false;
+    }
+    @Nullable String codecName = getCodecName(mimeType);
+    if (codecName == null) {
+      return false;
+    }
+    if (!ffmpegHasDecoder(codecName)) {
+      Log.w(TAG, "No " + codecName + " decoder available. Check the FFmpeg build configuration.");
+      return false;
+    }
+    return true;
+  }
+
+  /**
+   * Returns the name of the FFmpeg decoder that could be used to decode the format, or {@code null}
+   * if it's unsupported.
+   */
+  @Nullable
+  /* package */ static String getCodecName(String mimeType) {
+    switch (mimeType) {
+      case MimeTypes.AUDIO_AAC:
+        return "aac";
+      case MimeTypes.AUDIO_MPEG:
+      case MimeTypes.AUDIO_MPEG_L1:
+      case MimeTypes.AUDIO_MPEG_L2:
+        return "mp3";
+      case MimeTypes.AUDIO_AC3:
+        return "ac3";
+      case MimeTypes.AUDIO_E_AC3:
+      case MimeTypes.AUDIO_E_AC3_JOC:
+        return "eac3";
+      case MimeTypes.AUDIO_TRUEHD:
+        return "truehd";
+      case MimeTypes.AUDIO_DTS:
+      case MimeTypes.AUDIO_DTS_EXPRESS:
+      case MimeTypes.AUDIO_DTS_HD:
+        return "dca";
+      case MimeTypes.AUDIO_VORBIS:
+        return "vorbis";
+      case MimeTypes.AUDIO_OPUS:
+        return "opus";
+      case MimeTypes.AUDIO_AMR_NB:
+        return "amrnb";
+      case MimeTypes.AUDIO_AMR_WB:
+        return "amrwb";
+      case MimeTypes.AUDIO_FLAC:
+        return "flac";
+      case MimeTypes.AUDIO_ALAC:
+        return "alac";
+      case MimeTypes.AUDIO_MLAW:
+        return "pcm_mulaw";
+      case MimeTypes.AUDIO_ALAW:
+        return "pcm_alaw";
+      case MimeTypes.VIDEO_H264:
+        return "h264";
+      case MimeTypes.VIDEO_H265:
+      case MimeTypes.VIDEO_DOLBY_VISION:
+        return "hevc";
+      case MimeTypes.VIDEO_VP8:
+        return "vp8";
+      case MimeTypes.VIDEO_VP9:
+        return "vp9";
+      // MimeTypes.VIDEO_WEBM ("video/webm") is a container type, not a codec; the actual codec
+      // (VP8/VP9) is exposed via its own MIME type, so no mapping is possible here.
+      case MimeTypes.VIDEO_MPEG:
+        // "video/mpeg" (from PS demuxing) can carry MPEG-1 or MPEG-2 video; the
+        // mpeg2video decoder in FFmpeg handles both, so use it instead of mpeg1video.
+        return "mpeg2video";
+      case MimeTypes.VIDEO_MPEG2:
+        return "mpeg2video";
+      case "video/prores":
+        return "prores";
+      case MimeTypes.VIDEO_MP4V:
+      case MimeTypes.VIDEO_DIVX:
+        return "mpeg4";
+      case MimeTypes.VIDEO_MP42:
+        return "msmpeg4v2";
+      case MimeTypes.VIDEO_MP43:
+        return "msmpeg4";
+      case MimeTypes.VIDEO_AV1:
+        // Probe the built-in AV1 decoder once and cache the result: libdav1d is
+        // preferred, libaom-av1 as a fallback.
+        if (av1DecoderName == null) {
+          av1DecoderName = ffmpegGetAv1DecoderName();
+        }
+        return av1DecoderName;
+      case MimeTypes.VIDEO_MJPEG:
+        return "mjpeg";
+      case MimeTypes.VIDEO_H263:
+        return "h263";
+      case MimeTypes.VIDEO_FLV:
+        return "flv1";
+      case MimeTypes.VIDEO_VC1:
+        return "vc1";
+      case MimeTypes.VIDEO_OGG:
+        return "theora";
+      case MimeTypes.VIDEO_AVI:
+        return "mpeg4";
+      default:
+        return null;
+    }
+  }
+
+  private static native String ffmpegGetVersion();
+
+  private static native int ffmpegGetInputBufferPaddingSize();
+
+  private static native boolean ffmpegHasDecoder(String codecName);
+
+  /** Lazily probed AV1 decoder name, see {@link #getCodecName(String)}. */
+  @Nullable private static String av1DecoderName;
+
+  @Nullable
+  private static native String ffmpegGetAv1DecoderName();
+}

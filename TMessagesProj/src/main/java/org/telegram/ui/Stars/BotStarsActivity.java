@@ -330,14 +330,14 @@ public class BotStarsActivity extends BaseFragment implements NotificationCenter
             protected boolean subTextSplitToWords() {
                 return false;
             }
-        };
+        }.setRound();
         balanceButton.setEnabled(MessagesController.getInstance(currentAccount).channelRevenueWithdrawalEnabled);
         balanceButton.setText(getString(R.string.BotStarsButtonWithdrawShortAll), false);
         balanceButton.setOnClickListener(v -> {
             withdraw();
         });
 
-        adsButton = new ButtonWithCounterView(context, getResourceProvider());
+        adsButton = new ButtonWithCounterView(context, getResourceProvider()).setRound();
         adsButton.setEnabled(true);
         adsButton.setText(getString(R.string.MonetizationStarsAds), false);
         adsButton.setOnClickListener(v -> {
@@ -390,7 +390,7 @@ public class BotStarsActivity extends BaseFragment implements NotificationCenter
         tonBalanceSubtitle.setTextSize(dp(14));
         tonBalanceLayout.addView(tonBalanceSubtitle, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, 17, Gravity.CENTER_HORIZONTAL | Gravity.TOP, 22, 4, 22, 0));
 
-        tonBalanceButton = new ButtonWithCounterView(context, resourceProvider);
+        tonBalanceButton = new ButtonWithCounterView(context, resourceProvider).setRound();
         tonBalanceButton.setEnabled(MessagesController.getInstance(currentAccount).channelRevenueWithdrawalEnabled);
         tonBalanceButton.setText(getString(self ? R.string.MonetizationSelfWithdraw : R.string.MonetizationWithdraw), false);
         tonBalanceButton.setVisibility(View.GONE);

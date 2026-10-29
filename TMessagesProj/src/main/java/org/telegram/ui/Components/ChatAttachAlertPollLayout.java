@@ -314,8 +314,6 @@ public class ChatAttachAlertPollLayout extends ChatAttachAlert.AttachAlertLayout
                 return super.requestChildRectangleOnScreen(child, rectangle, immediate);
             }
         };
-        iBlur3Capture = listView;
-        iBlur3CaptureView = listView;
         occupyStatusBar = true;
         occupyNavigationBar = true;
         listView.setItemAnimator(itemAnimator = new DefaultItemAnimator() {
@@ -335,7 +333,6 @@ public class ChatAttachAlertPollLayout extends ChatAttachAlert.AttachAlertLayout
         itemAnimator.setDurations(350);
         listView.setClipToPadding(false);
         listView.setVerticalScrollBarEnabled(false);
-        listView.setSections(true);
         listView.setLayoutManager(layoutManager = new FillLastLinearLayoutManager(context, LinearLayoutManager.VERTICAL, false, AndroidUtilities.dp(53 + 12) + AndroidUtilities.statusBarHeight, listView) {
 
             @Override
@@ -1076,7 +1073,7 @@ public class ChatAttachAlertPollLayout extends ChatAttachAlert.AttachAlertLayout
 
     private void showMediaHint(int index) {
         final RecyclerView.ViewHolder holder = listView.findViewHolderForAdapterPosition(answerStartRow + index);
-        if (holder != null && holder.getItemViewType() == ListAdapter.VIEW_TYPE_ANSWER) {
+        if (holder != null && holder.itemView instanceof PollEditTextCell) {
             PollEditTextCell pollEditTextCell = (PollEditTextCell) holder.itemView;
             if (pollEditTextCell.getTop() > AndroidUtilities.dp(40)) {
                 if (suggestEmojiPanel != null) {
@@ -2392,7 +2389,6 @@ public class ChatAttachAlertPollLayout extends ChatAttachAlert.AttachAlertLayout
                 case 8: {
                     view = new EmptyView(mContext);
                     // view.setBackgroundColor(getThemedColor(Theme.key_windowBackgroundGray));
-                    view.setTag(RecyclerListView.TAG_NOT_SECTION);
                     break;
                 }
                 case 9: {
@@ -2402,7 +2398,6 @@ public class ChatAttachAlertPollLayout extends ChatAttachAlert.AttachAlertLayout
                             setMeasuredDimension(MeasureSpec.getSize(widthMeasureSpec), topPadding);
                         }
                     };
-                    view.setTag(RecyclerListView.TAG_NOT_SECTION);
                     break;
                 }
                 case VIEW_TYPE_CHECK_V2: {
@@ -2974,7 +2969,7 @@ public class ChatAttachAlertPollLayout extends ChatAttachAlert.AttachAlertLayout
         }
 
         chatAttachAlert.setMaxSelectedPhotos(1, true);
-        chatAttachAlert.enablePollAttachMode(layoutToShow, allowedLayouts);
+        chatAttachAlert.enablePollAttachMode(allowedLayouts);
         chatAttachAlert.setLocationActivityDelegate((location, live, notify, scheduleDate, payStars) -> {
             callback.run(new PollAttachedMediaLocation(location));
         });

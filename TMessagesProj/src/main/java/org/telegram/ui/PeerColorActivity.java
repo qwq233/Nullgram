@@ -49,6 +49,9 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.core.graphics.Insets;
+import androidx.core.view.ViewCompat;
+import androidx.core.view.WindowInsetsCompat;
 import androidx.annotation.Nullable;
 import androidx.core.graphics.ColorUtils;
 import androidx.recyclerview.widget.DefaultItemAnimator;
@@ -81,8 +84,10 @@ import org.telegram.tgnet.tl.TL_stars;
 import org.telegram.ui.ActionBar.ActionBar;
 import org.telegram.ui.ActionBar.AlertDialog;
 import org.telegram.ui.ActionBar.BaseFragment;
+import org.telegram.ui.ActionBar.EdgeToEdgeSupportMode;
 import org.telegram.ui.ActionBar.SimpleTextView;
 import org.telegram.ui.ActionBar.Theme;
+import org.telegram.ui.ActionBar.MessageDrawable;
 import org.telegram.ui.ActionBar.ThemeDescription;
 import org.telegram.ui.Cells.ChatMessageCell;
 import org.telegram.ui.Cells.HeaderCell;
@@ -488,7 +493,7 @@ public class PeerColorActivity extends BaseFragment implements NotificationCente
                             if (resaleGifts == null) return;
                             if (index2 < 0 || index2 >= uniqueGifts.size()) return;
                             final TL_stars.TL_starGiftUnique gift2 = uniqueGifts.get(index2);
-                            giftCell2.setStarsGift(gift2, false, false, false, true);
+                            giftCell2.setStarsGift(gift2, false, false, false, true, false);
                             giftCell2.setSelected(
                                 selectedEmojiCollectible != null && selectedEmojiCollectible.collectible_id == gift2.id ||
                                     selectedPeerCollectible != null && selectedPeerCollectible.collectible_id == gift2.id,
@@ -570,7 +575,7 @@ public class PeerColorActivity extends BaseFragment implements NotificationCente
                         if (resaleGifts == null) return;
                         if (index2 < 0 || index2 >= uniqueGifts.size()) return;
                         final TL_stars.TL_starGiftUnique gift2 = uniqueGifts.get(index2);
-                        giftCell2.setStarsGift(gift2, false, false, false, true);
+                        giftCell2.setStarsGift(gift2, false, false, false, true, false);
                         giftCell2.setSelected(
                             selectedEmojiCollectible != null && selectedEmojiCollectible.collectible_id == gift2.id ||
                                 selectedPeerCollectible != null && selectedPeerCollectible.collectible_id == gift2.id,
@@ -784,7 +789,7 @@ public class PeerColorActivity extends BaseFragment implements NotificationCente
                 setBackgroundColor(getThemedColor(Theme.key_windowBackgroundWhite));
 
                 imageView = new BackupImageView(getContext());
-                imageView.setImageDrawable(new RLottieDrawable(R.raw.utyan_draw, "utyan_draw", dp(120), dp(120)));
+                imageView.setImageDrawable(new RLottieDrawable(R.raw.utyan_draw, dp(120), dp(120)));
                 addView(imageView, LayoutHelper.createLinear(120, 120, Gravity.CENTER_HORIZONTAL, 0, 6, 0, 0));
 
                 title = TextHelper.makeLinkTextView(getContext(), 14, Theme.key_windowBackgroundWhiteGrayText, false, resourceProvider);
@@ -847,7 +852,7 @@ public class PeerColorActivity extends BaseFragment implements NotificationCente
                 actionBarHeight = messagesCellPreview.getMeasuredHeight() + ActionBar.getCurrentActionBarHeight() + AndroidUtilities.statusBarHeight;
                 ((MarginLayoutParams) messagesCellPreview.getLayoutParams()).topMargin = ActionBar.getCurrentActionBarHeight() + AndroidUtilities.statusBarHeight;
                 ((MarginLayoutParams) listView.getLayoutParams()).topMargin = ActionBar.getCurrentActionBarHeight() + AndroidUtilities.statusBarHeight;
-                listView.setPadding(0, messagesCellPreview.getMeasuredHeight(), 0, 0);
+                listView.setPadding(listView.getPaddingLeft(), messagesCellPreview.getMeasuredHeight(), listView.getPaddingRight(), listView.getPaddingBottom());
             } else {
                 actionBarHeight = dp(230) + AndroidUtilities.statusBarHeight;
                 ((MarginLayoutParams) listView.getLayoutParams()).topMargin = actionBarHeight;
@@ -1332,7 +1337,7 @@ public class PeerColorActivity extends BaseFragment implements NotificationCente
 
     private Theme.ResourcesProvider parentResourcesProvider;
     private final SparseIntArray currentColors = new SparseIntArray();
-    private final Theme.MessageDrawable msgInDrawable, msgInDrawableSelected;
+    private final MessageDrawable msgInDrawable, msgInDrawableSelected;
 
     public void updateThemeColors() {
         SharedPreferences preferences = ApplicationLoader.applicationContext.getSharedPreferences("themeconfig", Activity.MODE_PRIVATE);
@@ -1445,8 +1450,8 @@ public class PeerColorActivity extends BaseFragment implements NotificationCente
                 return isDark;
             }
         };
-        msgInDrawable = new Theme.MessageDrawable(Theme.MessageDrawable.TYPE_TEXT, false, false, resourceProvider);
-        msgInDrawableSelected = new Theme.MessageDrawable(Theme.MessageDrawable.TYPE_TEXT, false, true, resourceProvider);
+        msgInDrawable = new MessageDrawable(MessageDrawable.TYPE_TEXT, false, false, resourceProvider);
+        msgInDrawableSelected = new MessageDrawable(MessageDrawable.TYPE_TEXT, false, true, resourceProvider);
     }
 
     @Override
@@ -1622,13 +1627,13 @@ public class PeerColorActivity extends BaseFragment implements NotificationCente
         backButton.setImageResource(R.drawable.ic_ab_back);
         backButton.setColorFilter(new PorterDuffColorFilter(Color.WHITE, PorterDuff.Mode.SRC_IN));
         backButton.setOnClickListener(v -> {
-            if (onBackPressed()) {
+            if (onBackPressed(true)) {
                 finishFragment();
             }
         });
         actionBarContainer.addView(backButton, LayoutHelper.createFrame(54, 54, Gravity.LEFT | Gravity.CENTER_VERTICAL));
 
-        sunDrawable = new RLottieDrawable(R.raw.sun, "" + R.raw.sun, dp(28), dp(28), true, null);
+        sunDrawable = new RLottieDrawable(R.raw.sun, dp(28), dp(28), true, null);
         sunDrawable.setPlayInDirectionOfCustomEndFrame(true);
         if (!isDark) {
             sunDrawable.setCustomEndFrame(0);
@@ -1658,6 +1663,7 @@ public class PeerColorActivity extends BaseFragment implements NotificationCente
         colorBar.updateColors();
 
         fragmentView = contentView = frameLayout;
+        ViewCompat.setOnApplyWindowInsetsListener(fragmentView, this::onApplyWindowInsets);
 
         return contentView;
     }
@@ -1679,12 +1685,12 @@ public class PeerColorActivity extends BaseFragment implements NotificationCente
     }
 
     @Override
-    public boolean onBackPressed() {
+    public boolean onBackPressed(boolean invoked) {
         if (!isChannel && hasUnsavedChanged() && getUserConfig().isPremium()) {
-            showUnsavedAlert();
+            if (invoked) showUnsavedAlert();
             return false;
         }
-        return super.onBackPressed();
+        return super.onBackPressed(invoked);
     }
 
     @Override
@@ -1764,7 +1770,7 @@ public class PeerColorActivity extends BaseFragment implements NotificationCente
             final StarGiftSheet.PaymentFormState initial = new StarGiftSheet.PaymentFormState(currency, form);
             final String giftName = gift.title + " #" + LocaleController.formatNumber(gift.num, ',');
             final boolean[] buying = new boolean[1];
-            final StarGiftSheet.ResaleBuyTransferAlert sheet = new StarGiftSheet.ResaleBuyTransferAlert(getContext(), resourceProvider, gift, initial, currentAccount, to, giftName, (state, progress) -> {
+            final StarGiftSheet.ResaleBuyTransferAlert sheet = new StarGiftSheet.ResaleBuyTransferAlert(getContext(), resourceProvider, gift, initial, currentAccount, to, giftName, false, (state, progress) -> {
                 buying[0] = true;
                 progress.init();
                 StarsController.getInstance(currentAccount, state.currency).buyResellingGift(state.form, gift, to, (status, err) -> {
@@ -3502,7 +3508,7 @@ public class PeerColorActivity extends BaseFragment implements NotificationCente
 
     public void updateLightStatusBar() {
         if (getParentActivity() == null) return;
-        AndroidUtilities.setLightStatusBar(getParentActivity().getWindow(), isLightStatusBar());
+        AndroidUtilities.setLightStatusBar(getParentActivity(), isLightStatusBar());
     }
 
     private boolean forceDark = isDark;
@@ -3636,7 +3642,7 @@ public class PeerColorActivity extends BaseFragment implements NotificationCente
             static { setup(new Factory()); }
 
             @Override
-            public GiftCell createView(Context context, int currentAccount, int classGuid, Theme.ResourcesProvider resourcesProvider) {
+            public GiftCell createView(Context context, RecyclerListView listView, int currentAccount, int classGuid, Theme.ResourcesProvider resourcesProvider) {
                 return new GiftCell(context, true, resourcesProvider);
             }
 
@@ -3655,6 +3661,7 @@ public class PeerColorActivity extends BaseFragment implements NotificationCente
     }
 
     public static boolean eq(TLRPC.EmojiStatus emoji_status, TLRPC.TL_emojiStatusCollectible b) {
+        if (b == emoji_status) return true;
         if ((b != null) != (emoji_status instanceof TLRPC.TL_emojiStatusCollectible)) return false;
         if (b == null || !(emoji_status instanceof TLRPC.TL_emojiStatusCollectible)) return false;
         final TLRPC.TL_emojiStatusCollectible a = (TLRPC.TL_emojiStatusCollectible) emoji_status;
@@ -3667,4 +3674,31 @@ public class PeerColorActivity extends BaseFragment implements NotificationCente
         if (a == null || b == null) return false;
         return a.collectible_id == b.collectible_id;
     }
+    @Override
+    public boolean isSupportEdgeToEdge() {
+        return true;
+    }
+
+    @Override
+    public EdgeToEdgeSupportMode getEdgeToEdgeSupportMode() {
+        return EdgeToEdgeSupportMode.FULL;
+    }
+
+    @Override
+    public boolean drawEdgeNavigationBar() {
+        return false;
+    }
+
+    @NonNull
+    private WindowInsetsCompat onApplyWindowInsets(@NonNull View v, @NonNull WindowInsetsCompat insetsCompat) {
+        final Insets insets = AndroidUtilities.getDefaultWindowInsets(insetsCompat, false);
+        namePage.listView.setPadding(insets.left, namePage.listView.getPaddingTop(), insets.right, insets.bottom);
+        profilePage.listView.setPadding(insets.left, profilePage.listView.getPaddingTop(), insets.right, insets.bottom);
+        namePage.buttonContainer.setPadding(insets.left, 0, insets.right, insets.bottom);
+        profilePage.buttonContainer.setPadding(insets.left, 0, insets.right, insets.bottom);
+
+        return WindowInsetsCompat.CONSUMED;
+    }
+
+
 }

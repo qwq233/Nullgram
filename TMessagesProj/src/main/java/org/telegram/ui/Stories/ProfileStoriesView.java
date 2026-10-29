@@ -28,6 +28,7 @@ import android.animation.AnimatorSet;
 import android.animation.ValueAnimator;
 import android.content.Context;
 import android.graphics.Canvas;
+import android.graphics.Color;
 import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.Path;
@@ -191,7 +192,7 @@ public class ProfileStoriesView extends View implements NotificationCenter.Notif
         titleDrawable.setTextSize(dp(18));
         titleDrawable.setAnimationProperties(.4f, 0, 320, CubicBezierInterpolator.EASE_OUT_QUINT);
         titleDrawable.setTypeface(AndroidUtilities.bold());
-        titleDrawable.setTextColor(Theme.getColor(Theme.key_actionBarDefaultTitle, resourcesProvider));
+        titleDrawable.setTextColor(Color.WHITE/*Theme.getColor(Theme.key_actionBarDefaultTitle, resourcesProvider)*/);
         titleDrawable.setEllipsizeByGradient(true);
         titleDrawable.setCallback(this);
 
@@ -515,7 +516,7 @@ public class ProfileStoriesView extends View implements NotificationCenter.Notif
     protected void dispatchDraw(Canvas canvas) {
         float rright = rightAnimated.set(this.right);
         float avatarPullProgress = Utilities.clamp((avatarContainer.getScaleX() - 1f) / 0.4f, 1f, 0f);
-        float insetMain = AndroidUtilities.lerp(AndroidUtilities.dpf2(4f), AndroidUtilities.dpf2(3.5f), avatarPullProgress);
+        float insetMain = lerp(dpf2(4f), dpf2(3.5f), avatarPullProgress);
         insetMain *= progressToInsets;
         float ax = avatarContainer.getX() + insetMain * avatarContainer.getScaleX();
         float ay = avatarContainer.getY() + insetMain * avatarContainer.getScaleY();
@@ -591,7 +592,8 @@ public class ProfileStoriesView extends View implements NotificationCenter.Notif
                 }
             }
             radialProgress.setDiff(0);
-            unreadPaint.setAlpha((int) (255 * segmentsAlpha * progressToUploading));
+            int wasAlpha = unreadPaint.getAlpha();
+            unreadPaint.setAlpha((int) (wasAlpha * segmentsAlpha * progressToUploading));
             unreadPaint.setStrokeWidth(dpf2(2.33f));
             radialProgress.setPaint(unreadPaint);
             radialProgress.setProgressRect((int) rect2.left, (int) rect2.top, (int) rect2.right, (int) rect2.bottom);
@@ -599,6 +601,7 @@ public class ProfileStoriesView extends View implements NotificationCenter.Notif
             if (avatarImage.drawAvatar) {
                 radialProgress.draw(canvas);
             }
+            unreadPaint.setAlpha(wasAlpha);
             progressWasDrawn = true;
             boolean oldIsDone = progressIsDone;
             progressIsDone = radialProgress.getAnimatedProgress() >= 0.98f;
@@ -766,25 +769,6 @@ public class ProfileStoriesView extends View implements NotificationCenter.Notif
             unreadPaint.setStrokeWidth(lerp(dpf2(2.33f), dpf2(1.5f), expandProgress));
             readPaint.setStrokeWidth(lerp(dpf2(1.125f), dpf2(1.5f), expandProgress));
             livePaint.setStrokeWidth(lerp(dpf2(1.125f), dpf2(1.5f), expandProgress));
-//            if (expandProgress > 0) {
-//                for (int i = 0; i < circles.size(); ++i) {
-//                    StoryCircle circle = circles.get(i);
-//                    int wasAlpha = whitePaint.getAlpha();
-//                    whitePaint.setAlpha((int) (wasAlpha * expandProgress));
-//                    canvas.drawCircle(
-//                            circle.cachedRect.centerX(),
-//                            circle.cachedRect.centerY(),
-//                            Math.min(circle.cachedRect.width(), circle.cachedRect.height()) / 2f +
-//                                    lerp(
-//                                            dpf2(2.66f) + unreadPaint.getStrokeWidth() / 2f,
-//                                            dpf2(2.33f) - readPaint.getStrokeWidth() / 2f,
-//                                            circle.cachedRead
-//                                    ) * expandProgress,
-//                            whitePaint
-//                    );
-//                    whitePaint.setAlpha(wasAlpha);
-//                }
-//            }
             for (int i = 0; i < circles.size(); ++i) {
                 StoryCircle B = circles.get(i);
                 StoryCircle A = nearest(i - 2 >= 0 ? circles.get(i - 2) : null, i - 1 >= 0 ? circles.get(i - 1) : null, B);
@@ -804,8 +788,10 @@ public class ProfileStoriesView extends View implements NotificationCenter.Notif
                 }
 
                 if (B.cachedRead < 1) {
-                    unreadPaint.setAlpha((int) (0xFF * B.cachedScale * (1f - B.cachedRead) * (1f - segmentsAlpha)));
+                    int wasAlpha = unreadPaint.getAlpha();
+                    unreadPaint.setAlpha((int) (wasAlpha * B.cachedScale * (1f - B.cachedRead) * (1f - segmentsAlpha)));
                     drawArcs(canvas, A, B, C, unreadPaint);
+                    unreadPaint.setAlpha(wasAlpha);
                 }
                 if (B.cachedRead > 0) {
                     Paint paint = B.live ? livePaint : readPaint;

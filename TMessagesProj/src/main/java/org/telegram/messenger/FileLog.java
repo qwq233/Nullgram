@@ -65,11 +65,11 @@ public class FileLog {
     }
 
 
-    public static void dumpResponseAndRequest(TLObject request, TLObject response, TLRPC.TL_error error, long requestMsgId, long startRequestTimeInMillis, int requestToken) {
+    public static void dumpResponseAndRequest(int account, TLObject request, TLObject response, TLRPC.TL_error error, long requestMsgId, long startRequestTimeInMillis, int requestToken) {
         return;
     }
 
-    public static void dumpUnparsedMessage(TLObject message, long messageId) {
+    public static void dumpUnparsedMessage(TLObject message, long messageId, int account) {
         return;
     }
 
@@ -147,7 +147,7 @@ public class FileLog {
         }
     }
 
-    private void dumpANR() {
+    public static void dumpANR() {
         StringBuilder sb = new StringBuilder();
         Map<Thread, StackTraceElement[]> allThreads = Thread.getAllStackTraces();
 
@@ -163,7 +163,7 @@ public class FileLog {
         }
 
         FileLog.e("ANR thread dump\n" + sb.toString());
-        dumpMemory(false);
+        getInstance().dumpMemory(false);
     }
 
     public static void fatal(final Throwable e, boolean logToAppCenter) {

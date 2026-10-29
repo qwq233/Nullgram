@@ -1,7 +1,6 @@
 package org.telegram.messenger;
 
 import android.text.TextUtils;
-import android.util.Log;
 import android.util.LongSparseArray;
 
 import androidx.annotation.Nullable;

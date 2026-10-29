@@ -34,6 +34,7 @@ import android.graphics.Color;
 import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.Path;
+import android.graphics.PointF;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffColorFilter;
 import android.graphics.PorterDuffXfermode;
@@ -62,6 +63,7 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import androidx.annotation.NonNull;
 import androidx.core.graphics.ColorUtils;
 import androidx.dynamicanimation.animation.FloatValueHolder;
 import androidx.dynamicanimation.animation.SpringAnimation;
@@ -114,7 +116,6 @@ import org.telegram.ui.Components.Paint.PhotoFace;
 import org.telegram.ui.Components.Paint.RenderView;
 import org.telegram.ui.Components.Paint.Swatch;
 import org.telegram.ui.Components.Paint.UndoStore;
-import org.telegram.ui.Components.Point;
 import org.telegram.ui.Components.RLottieDrawable;
 import org.telegram.ui.Components.Size;
 import org.telegram.ui.Components.SizeNotifierFrameLayout;
@@ -237,6 +238,8 @@ public class LPhotoPaintView extends SizeNotifierFrameLayoutPhoto implements IPh
 
     private Runnable onDoneButtonClickedListener;
 
+    private final PersistColorPalette palette;
+
     @SuppressLint("NotifyDataSetChanged")
     public LPhotoPaintView(Context context, Activity activity, int currentAccount, Bitmap bitmap, Bitmap originalBitmap, int originalRotation, ArrayList<VideoEditedInfo.MediaEntity> entities, MediaController.CropState cropState, Runnable onInit, Theme.ResourcesProvider resourcesProvider) {
         super(context, activity, true);
@@ -306,7 +309,7 @@ public class LPhotoPaintView extends SizeNotifierFrameLayoutPhoto implements IPh
 
         inBubbleMode = context instanceof BubbleActivity;
 
-        PersistColorPalette palette = PersistColorPalette.getInstance(currentAccount);
+        palette = PersistColorPalette.getInstance(currentAccount);
         palette.resetCurrentColor();
         colorSwatch.color = palette.getCurrentColor();
         colorSwatch.brushWeight = palette.getCurrentWeight();
@@ -530,7 +533,9 @@ public class LPhotoPaintView extends SizeNotifierFrameLayoutPhoto implements IPh
                 }
                 view.setX(entity.x * paintingSize.width - entity.viewWidth * (1 - entity.scale) / 2);
                 view.setY(entity.y * paintingSize.height - entity.viewHeight * (1 - entity.scale) / 2);
-                view.setPosition(new Point(view.getX() + entity.viewWidth / 2f, view.getY() + entity.viewHeight / 2f));
+                float x = view.getX() + entity.viewWidth / 2f;
+                float y = view.getY() + entity.viewHeight / 2f;
+                view.setPosition(new PointF(x, y));
                 view.setScale(entity.scale);
                 view.setRotation((float) (-entity.rotation / Math.PI * 180));
             }
@@ -648,122 +653,7 @@ public class LPhotoPaintView extends SizeNotifierFrameLayoutPhoto implements IPh
         doneTextButton.setVisibility(View.GONE);
         topLayout.addView(doneTextButton, LayoutHelper.createFrame(LayoutHelper.WRAP_CONTENT, 32, Gravity.RIGHT, 0, 0, 4, 0));
 
-        bottomLayout = new FrameLayout(context) {
-            private float lastRainbowX, lastRainbowY;
-            private Path path = new Path();
-
-            {
-                setWillNotDraw(false);
-                colorPickerRainbowPaint.setStyle(Paint.Style.STROKE);
-                colorPickerRainbowPaint.setStrokeWidth(dp(2));
-            }
-
-            private void checkRainbow(float cx, float cy) {
-                if (cx != lastRainbowX || cy != lastRainbowY) {
-                    lastRainbowX = cx;
-                    lastRainbowY = cy;
-
-                    int[] colors = {
-                            0xffeb4b4b,
-                            0xffee82ee,
-                            0xff6080e4,
-                            Color.CYAN,
-                            0xff8fce00,
-                            Color.YELLOW,
-                            0xffffa500,
-                            0xffeb4b4b
-                    };
-                    colorPickerRainbowPaint.setShader(new SweepGradient(cx, cy, colors, null));
-                }
-            }
-
-            @Override
-            public void setTranslationY(float translationY) {
-                super.setTranslationY(translationY);
-                if (overlayLayout != null) {
-                    overlayLayout.invalidate();
-                }
-            }
-
-            @Override
-            protected void onDraw(Canvas canvas) {
-                super.onDraw(canvas);
-
-                ViewGroup barView = getBarView();
-                AndroidUtilities.rectTmp.set(
-                        AndroidUtilities.lerp(barView.getLeft(), colorsListView.getLeft(), toolsTransformProgress),
-                        AndroidUtilities.lerp(barView.getTop(), colorsListView.getTop(), toolsTransformProgress),
-                        AndroidUtilities.lerp(barView.getRight(), colorsListView.getRight(), toolsTransformProgress),
-                        AndroidUtilities.lerp(barView.getBottom(), colorsListView.getBottom(), toolsTransformProgress)
-                );
-                final float radius = AndroidUtilities.lerp(dp(32), dp(24), toolsTransformProgress);
-                canvas.drawRoundRect(AndroidUtilities.rectTmp, radius, radius, toolsPaint);
-
-                if (barView != null && barView.getChildCount() >= 1 && toolsTransformProgress != 1f) {
-                    canvas.save();
-                    canvas.translate(barView.getLeft(), barView.getTop());
-
-                    View child = barView.getChildAt(0);
-                    if (barView instanceof PaintTextOptionsView) {
-                        child = ((PaintTextOptionsView) barView).getColorClickableView();
-                    }
-
-                    if (child.getAlpha() != 0f) {
-                        canvas.scale(child.getScaleX(), child.getScaleY(), child.getPivotX(), child.getPivotY());
-
-                        colorPickerRainbowPaint.setAlpha((int) ((1f - toolsTransformProgress) * child.getAlpha() * 0xFF));
-
-                        int childWidth = child.getWidth() - child.getPaddingLeft() - child.getPaddingRight();
-                        int childHeight = child.getHeight() - child.getPaddingTop() - child.getPaddingBottom();
-                        float cx = child.getX() + child.getPaddingLeft() + childWidth / 2f, cy = child.getY() + child.getPaddingTop() + childHeight / 2f;
-                        int colorCircle = colorSwatch.color;
-                        if (tabsNewSelectedIndex != -1) {
-                            ViewGroup barView2 = (ViewGroup) getBarView(tabsNewSelectedIndex);
-                            View newView = (barView2 == null ? barView : barView2).getChildAt(0);
-                            if (barView2 instanceof PaintTextOptionsView) {
-                                newView = ((PaintTextOptionsView) barView2).getColorClickableView();
-                            }
-                            cx = AndroidUtilities.lerp(cx, newView.getX() + newView.getPaddingLeft() + (newView.getWidth() - newView.getPaddingLeft() - newView.getPaddingRight()) / 2f, tabsSelectionProgress);
-                            cy = AndroidUtilities.lerp(cy, newView.getY() + newView.getPaddingTop() + (newView.getHeight() - newView.getPaddingTop() - newView.getPaddingBottom()) / 2f, tabsSelectionProgress);
-                        }
-                        if (colorsListView != null && colorsListView.getChildCount() > 0) {
-                            View animateToView = colorsListView.getChildAt(0);
-                            cx = AndroidUtilities.lerp(cx, colorsListView.getX() - barView.getLeft() + animateToView.getX() + animateToView.getWidth() / 2f, toolsTransformProgress);
-                            cy = AndroidUtilities.lerp(cy, colorsListView.getY() - barView.getTop() + animateToView.getY() + animateToView.getHeight() / 2f, toolsTransformProgress);
-                            int paletteFirstColor = palette.getColor(0);
-                            colorCircle = ColorUtils.blendARGB(colorSwatch.color, paletteFirstColor, toolsTransformProgress);
-                        }
-                        checkRainbow(cx, cy);
-
-                        float rad = Math.min(childWidth, childHeight) / 2f - dp(0.5f);
-                        if (colorsListView != null && colorsListView.getChildCount() > 0) {
-                            View animateToView = colorsListView.getChildAt(0);
-                            rad = AndroidUtilities.lerp(rad, Math.min(animateToView.getWidth() - animateToView.getPaddingLeft() - animateToView.getPaddingRight(), animateToView.getHeight() - animateToView.getPaddingTop() - animateToView.getPaddingBottom()) / 2f - dp(2f), toolsTransformProgress);
-                        }
-                        AndroidUtilities.rectTmp.set(cx - rad, cy - rad, cx + rad, cy + rad);
-                        canvas.drawArc(AndroidUtilities.rectTmp, 0, 360, false, colorPickerRainbowPaint);
-
-                        colorSwatchPaint.setColor(colorCircle);
-                        colorSwatchPaint.setAlpha((int) (colorSwatchPaint.getAlpha() * child.getAlpha()));
-                        colorSwatchOutlinePaint.setColor(colorCircle);
-                        colorSwatchOutlinePaint.setAlpha((int) (0xFF * child.getAlpha()));
-
-                        float rad2 = rad - dp(3f);
-                        if (colorsListView != null && colorsListView.getSelectedColorIndex() != 0) {
-                            rad2 = AndroidUtilities.lerp(rad - dp(3f), rad + dp(2), toolsTransformProgress);
-                        }
-                        PaintColorsListView.drawColorCircle(canvas, cx, cy, rad2, colorSwatchPaint.getColor());
-
-                        if (colorsListView != null && colorsListView.getSelectedColorIndex() == 0) {
-                            colorSwatchOutlinePaint.setAlpha((int) (colorSwatchOutlinePaint.getAlpha() * toolsTransformProgress * child.getAlpha()));
-                            canvas.drawCircle(cx, cy, rad - (dp(3f) + colorSwatchOutlinePaint.getStrokeWidth()) * (1f - toolsTransformProgress), colorSwatchOutlinePaint);
-                        }
-                    }
-
-                    canvas.restore();
-                }
-            }
-        };
+        bottomLayout = new BottomLayout(context);
         bottomLayout.setPadding(dp(8), dp(8), dp(8), 0);
         bottomLayout.setBackground(new GradientDrawable(GradientDrawable.Orientation.TOP_BOTTOM, new int[]{0x00000000, 0x80000000}));
         addView(bottomLayout, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, 44 + 60, Gravity.BOTTOM));
@@ -1024,7 +914,7 @@ public class LPhotoPaintView extends SizeNotifierFrameLayoutPhoto implements IPh
         onTextAdd();
 
         Size paintingSize = getPaintingSize();
-        Point position = startPositionRelativeToEntity(null);
+        PointF position = startPositionRelativeToEntity(null);
         TextPaintView view = new TextPaintView(getContext(), position, (int) (paintingSize.width / 9), "", colorSwatch, selectedTextType);
         view.setMinMaxFontSize((int) (0.5f * (paintingSize.width / 9f)), (int) (2f * (paintingSize.width / 9f)), () -> {
             if (weightChooserView != null) {
@@ -1891,7 +1781,7 @@ public class LPhotoPaintView extends SizeNotifierFrameLayoutPhoto implements IPh
                     continue;
                 }
                 EntityView entity = (EntityView) v;
-                Point position = entity.getPosition();
+                PointF position = entity.getPosition();
                 if (entities != null) {
                     VideoEditedInfo.MediaEntity mediaEntity = new VideoEditedInfo.MediaEntity();
                     if (entity instanceof TextPaintView) {
@@ -2850,7 +2740,7 @@ public class LPhotoPaintView extends SizeNotifierFrameLayoutPhoto implements IPh
         }
 
         EntityView entityView = null;
-        Point position = startPositionRelativeToEntity(currentEntityView);
+        PointF position = startPositionRelativeToEntity(currentEntityView);
 
         if (currentEntityView instanceof StickerView) {
             StickerView newStickerView = new StickerView(getContext(), (StickerView) currentEntityView, position);
@@ -2869,21 +2759,23 @@ public class LPhotoPaintView extends SizeNotifierFrameLayoutPhoto implements IPh
         selectEntity(entityView);
     }
 
-    private Point startPositionRelativeToEntity(EntityView entityView) {
+    private PointF startPositionRelativeToEntity(EntityView entityView) {
         float offset = 200.0f;
         if (currentCropState != null) {
             offset /= currentCropState.cropScale;
         }
 
         if (entityView != null) {
-            Point position = entityView.getPosition();
-            return new Point(position.x + offset, position.y + offset);
+            PointF position = entityView.getPosition();
+            float x = position.x + offset;
+            float y = position.y + offset;
+            return new PointF(x, y);
         } else {
             float minimalDistance = 100.0f;
             if (currentCropState != null) {
                 minimalDistance /= currentCropState.cropScale;
             }
-            Point position = centerPositionForEntity();
+            PointF position = centerPositionForEntity();
             while (true) {
                 boolean occupied = false;
                 for (int index = 0; index < entitiesView.getChildCount(); index++) {
@@ -2891,7 +2783,7 @@ public class LPhotoPaintView extends SizeNotifierFrameLayoutPhoto implements IPh
                     if (!(view instanceof EntityView))
                         continue;
 
-                    Point location = ((EntityView) view).getPosition();
+                    PointF location = ((EntityView) view).getPosition();
                     float distance = (float) Math.sqrt(Math.pow(location.x - position.x, 2) + Math.pow(location.y - position.y, 2));
                     if (distance < minimalDistance) {
                         occupied = true;
@@ -2901,7 +2793,9 @@ public class LPhotoPaintView extends SizeNotifierFrameLayoutPhoto implements IPh
                 if (!occupied) {
                     break;
                 } else {
-                    position = new Point(position.x + offset, position.y + offset);
+                    float x = position.x + offset;
+                    float y = position.y + offset;
+                    position = new PointF(x, y);
                 }
             }
             return position;
@@ -2979,7 +2873,7 @@ public class LPhotoPaintView extends SizeNotifierFrameLayoutPhoto implements IPh
         return new Size(side, side);
     }
 
-    private Point centerPositionForEntity() {
+    private PointF centerPositionForEntity() {
         Size paintingSize = getPaintingSize();
         float x = paintingSize.width / 2.0f;
         float y = paintingSize.height / 2.0f;
@@ -2990,7 +2884,9 @@ public class LPhotoPaintView extends SizeNotifierFrameLayoutPhoto implements IPh
             x -= px * paintingSize.width;
             y -= py * paintingSize.height;
         }
-        return new Point(x, y);
+        float x1 = x;
+        float y1 = y;
+        return new PointF(x1, y1);
     }
 
     private StickerPosition calculateStickerPosition(TLRPC.Document document) {
@@ -3024,7 +2920,7 @@ public class LPhotoPaintView extends SizeNotifierFrameLayoutPhoto implements IPh
                 return defaultPosition;
             }
 
-            Point referencePoint = face.getPointForAnchor(anchor);
+            PointF referencePoint = face.getPointForAnchor(anchor);
             float referenceWidth = face.getWidthForAnchor(anchor);
             float angle = face.getAngle();
             Size baseSize = baseStickerSize();
@@ -3041,7 +2937,9 @@ public class LPhotoPaintView extends SizeNotifierFrameLayoutPhoto implements IPh
             float x = referencePoint.x + xCompX + yCompX;
             float y = referencePoint.y + xCompY + yCompY;
 
-            return new StickerPosition(new Point(x, y), scale, angle);
+            float x1 = x;
+            float y1 = y;
+            return new StickerPosition(new PointF(x1, y1), scale, angle);
         }
     }
 
@@ -3066,7 +2964,7 @@ public class LPhotoPaintView extends SizeNotifierFrameLayoutPhoto implements IPh
     }
 
     private boolean isFaceAnchorOccupied(PhotoFace face, int anchor, long documentId, TLRPC.TL_maskCoords maskCoords) {
-        Point anchorPoint = face.getPointForAnchor(anchor);
+        PointF anchorPoint = face.getPointForAnchor(anchor);
         if (anchorPoint == null) {
             return true;
         }
@@ -3084,7 +2982,7 @@ public class LPhotoPaintView extends SizeNotifierFrameLayoutPhoto implements IPh
                 continue;
             }
 
-            Point location = stickerView.getPosition();
+            PointF location = stickerView.getPosition();
             float distance = (float)Math.hypot(location.x - anchorPoint.x, location.y - anchorPoint.y);
             if ((documentId == stickerView.getSticker().id || faces.size() > 1) && distance < minDistance) {
                 return true;
@@ -3237,11 +3135,11 @@ public class LPhotoPaintView extends SizeNotifierFrameLayoutPhoto implements IPh
     }
 
     private static class StickerPosition {
-        private Point position;
+        private PointF position;
         private float scale;
         private float angle;
 
-        StickerPosition(Point position, float scale, float angle) {
+        StickerPosition(PointF position, float scale, float angle) {
             this.position = position;
             this.scale = scale;
             this.angle = angle;
@@ -3806,5 +3704,130 @@ public class LPhotoPaintView extends SizeNotifierFrameLayoutPhoto implements IPh
         thanosEffect.animate(matrix, bitmap, () -> {
             photoView.onSwitchSegmentedAnimationStarted(true);
         }, () -> {});
+    }
+
+
+    private class BottomLayout extends FrameLayout {
+
+        public BottomLayout(@NonNull Context context) {
+            super(context);
+        }
+
+        private float lastRainbowX, lastRainbowY;
+        private Path path = new Path();
+
+        {
+            setWillNotDraw(false);
+            colorPickerRainbowPaint.setStyle(Paint.Style.STROKE);
+            colorPickerRainbowPaint.setStrokeWidth(dp(2));
+        }
+
+        private void checkRainbow(float cx, float cy) {
+            if (cx != lastRainbowX || cy != lastRainbowY) {
+                lastRainbowX = cx;
+                lastRainbowY = cy;
+
+                int[] colors = {
+                        0xffeb4b4b,
+                        0xffee82ee,
+                        0xff6080e4,
+                        Color.CYAN,
+                        0xff8fce00,
+                        Color.YELLOW,
+                        0xffffa500,
+                        0xffeb4b4b
+                };
+                colorPickerRainbowPaint.setShader(new SweepGradient(cx, cy, colors, null));
+            }
+        }
+
+        @Override
+        public void setTranslationY(float translationY) {
+            super.setTranslationY(translationY);
+            if (overlayLayout != null) {
+                overlayLayout.invalidate();
+            }
+        }
+
+        @Override
+        protected void onDraw(Canvas canvas) {
+            super.onDraw(canvas);
+
+            ViewGroup barView = getBarView();
+            AndroidUtilities.rectTmp2.set(
+                    AndroidUtilities.lerp(barView.getLeft(), colorsListView.getLeft(), toolsTransformProgress),
+                    AndroidUtilities.lerp(barView.getTop(), colorsListView.getTop(), toolsTransformProgress),
+                    AndroidUtilities.lerp(barView.getRight(), colorsListView.getRight(), toolsTransformProgress),
+                    AndroidUtilities.lerp(barView.getBottom(), colorsListView.getBottom(), toolsTransformProgress)
+            );
+            AndroidUtilities.rectTmp.set(AndroidUtilities.rectTmp2);
+
+            final float radius = AndroidUtilities.lerp(dp(32), dp(24), toolsTransformProgress);
+            canvas.drawRoundRect(AndroidUtilities.rectTmp, radius, radius, toolsPaint);
+
+            if (barView != null && barView.getChildCount() >= 1 && toolsTransformProgress != 1f) {
+                canvas.save();
+                canvas.translate(barView.getLeft(), barView.getTop());
+
+                View child = barView.getChildAt(0);
+                if (barView instanceof PaintTextOptionsView) {
+                    child = ((PaintTextOptionsView) barView).getColorClickableView();
+                }
+
+                if (child.getAlpha() != 0f) {
+                    canvas.scale(child.getScaleX(), child.getScaleY(), child.getPivotX(), child.getPivotY());
+
+                    colorPickerRainbowPaint.setAlpha((int) ((1f - toolsTransformProgress) * child.getAlpha() * 0xFF));
+
+                    int childWidth = child.getWidth() - child.getPaddingLeft() - child.getPaddingRight();
+                    int childHeight = child.getHeight() - child.getPaddingTop() - child.getPaddingBottom();
+                    float cx = child.getX() + child.getPaddingLeft() + childWidth / 2f, cy = child.getY() + child.getPaddingTop() + childHeight / 2f;
+                    int colorCircle = colorSwatch.color;
+                    if (tabsNewSelectedIndex != -1) {
+                        ViewGroup barView2 = (ViewGroup) getBarView(tabsNewSelectedIndex);
+                        View newView = (barView2 == null ? barView : barView2).getChildAt(0);
+                        if (barView2 instanceof PaintTextOptionsView) {
+                            newView = ((PaintTextOptionsView) barView2).getColorClickableView();
+                        }
+                        cx = AndroidUtilities.lerp(cx, newView.getX() + newView.getPaddingLeft() + (newView.getWidth() - newView.getPaddingLeft() - newView.getPaddingRight()) / 2f, tabsSelectionProgress);
+                        cy = AndroidUtilities.lerp(cy, newView.getY() + newView.getPaddingTop() + (newView.getHeight() - newView.getPaddingTop() - newView.getPaddingBottom()) / 2f, tabsSelectionProgress);
+                    }
+                    if (colorsListView != null && colorsListView.getChildCount() > 0) {
+                        View animateToView = colorsListView.getChildAt(0);
+                        cx = AndroidUtilities.lerp(cx, colorsListView.getX() - barView.getLeft() + animateToView.getX() + animateToView.getWidth() / 2f, toolsTransformProgress);
+                        cy = AndroidUtilities.lerp(cy, colorsListView.getY() - barView.getTop() + animateToView.getY() + animateToView.getHeight() / 2f, toolsTransformProgress);
+                        int paletteFirstColor = palette.getColor(0);
+                        colorCircle = ColorUtils.blendARGB(colorSwatch.color, paletteFirstColor, toolsTransformProgress);
+                    }
+                    checkRainbow(cx, cy);
+
+                    float rad = Math.min(childWidth, childHeight) / 2f - dp(0.5f);
+                    if (colorsListView != null && colorsListView.getChildCount() > 0) {
+                        View animateToView = colorsListView.getChildAt(0);
+                        rad = AndroidUtilities.lerp(rad, Math.min(animateToView.getWidth() - animateToView.getPaddingLeft() - animateToView.getPaddingRight(), animateToView.getHeight() - animateToView.getPaddingTop() - animateToView.getPaddingBottom()) / 2f - dp(2f), toolsTransformProgress);
+                    }
+                    AndroidUtilities.rectTmp.set(cx - rad, cy - rad, cx + rad, cy + rad);
+                    canvas.drawArc(AndroidUtilities.rectTmp, 0, 360, false, colorPickerRainbowPaint);
+
+                    colorSwatchPaint.setColor(colorCircle);
+                    colorSwatchPaint.setAlpha((int) (colorSwatchPaint.getAlpha() * child.getAlpha()));
+                    colorSwatchOutlinePaint.setColor(colorCircle);
+                    colorSwatchOutlinePaint.setAlpha((int) (0xFF * child.getAlpha()));
+
+                    float rad2 = rad - dp(3f);
+                    if (colorsListView != null && colorsListView.getSelectedColorIndex() != 0) {
+                        rad2 = AndroidUtilities.lerp(rad - dp(3f), rad + dp(2), toolsTransformProgress);
+                    }
+                    PaintColorsListView.drawColorCircle(canvas, cx, cy, rad2, colorSwatchPaint.getColor());
+
+                    if (colorsListView != null && colorsListView.getSelectedColorIndex() == 0) {
+                        colorSwatchOutlinePaint.setAlpha((int) (colorSwatchOutlinePaint.getAlpha() * toolsTransformProgress * child.getAlpha()));
+                        canvas.drawCircle(cx, cy, rad - (dp(3f) + colorSwatchOutlinePaint.getStrokeWidth()) * (1f - toolsTransformProgress), colorSwatchOutlinePaint);
+                    }
+                }
+
+                canvas.restore();
+            }
+        }
     }
 }

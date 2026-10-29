@@ -37,7 +37,6 @@ import android.graphics.Rect;
 import android.graphics.RectF;
 import android.graphics.Region;
 import android.graphics.drawable.Drawable;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.SystemClock;
 import android.text.SpannableString;
@@ -70,6 +69,7 @@ import org.telegram.messenger.R;
 import org.telegram.tgnet.TLRPC;
 import org.telegram.ui.ActionBar.Theme;
 import org.telegram.ui.Components.BackupImageView;
+import org.telegram.ui.Components.ChatAttachAlertPhotoLayout;
 import org.telegram.ui.Components.CheckBox2;
 import org.telegram.ui.Components.ColoredImageSpan;
 import org.telegram.ui.Components.CubicBezierInterpolator;
@@ -77,11 +77,10 @@ import org.telegram.ui.Components.LayoutHelper;
 import org.telegram.ui.Components.spoilers.SpoilerEffect;
 import org.telegram.ui.Components.spoilers.SpoilerEffect2;
 import org.telegram.ui.PhotoViewer;
-import org.telegram.ui.Stars.StarsIntroActivity;
 
 public class PhotoAttachPhotoCell extends FrameLayout {
 
-    private BackupImageView imageView;
+    public BackupImageView imageView;
     private FrameLayout container;
     private FrameLayout checkFrame;
     private CheckBox2 checkBox;
@@ -488,7 +487,7 @@ public class PhotoAttachPhotoCell extends FrameLayout {
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         if (itemSizeChanged) {
-            super.onMeasure(MeasureSpec.makeMeasureSpec(itemSize, MeasureSpec.EXACTLY), MeasureSpec.makeMeasureSpec(itemSize + dp(5), MeasureSpec.EXACTLY));
+            super.onMeasure(MeasureSpec.makeMeasureSpec(itemSize, MeasureSpec.EXACTLY), MeasureSpec.makeMeasureSpec(itemSize + dp(ChatAttachAlertPhotoLayout.GAP), MeasureSpec.EXACTLY));
         } else {
             if (isVertical) {
                 super.onMeasure(MeasureSpec.makeMeasureSpec(dp(80), MeasureSpec.EXACTLY), MeasureSpec.makeMeasureSpec(dp(80 + (isLast ? 0 : 6)), MeasureSpec.EXACTLY));
@@ -772,9 +771,7 @@ public class PhotoAttachPhotoCell extends FrameLayout {
         if (checkBox.isChecked()) {
             info.setSelected(true);
         }
-        if (Build.VERSION.SDK_INT >= 21) {
-            info.addAction(new AccessibilityNodeInfo.AccessibilityAction(R.id.acc_action_open_photo, getString(R.string.Open)));
-        }
+        info.addAction(new AccessibilityNodeInfo.AccessibilityAction(R.id.acc_action_open_photo, getString(R.string.Open)));
     }
 
     @Override

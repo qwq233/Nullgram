@@ -41,6 +41,7 @@ public interface ForwardContext {
         forwardParams.noCaption = nocaption;
         forwardParams.notify = true;
         forwardParams.scheduleDate = 0;
+        forwardParams.scheduleRepeatPeriod = 0;
     }
 
     default void setForwardParams(boolean noquote) {
@@ -48,6 +49,7 @@ public interface ForwardContext {
         forwardParams.noCaption = false;
         forwardParams.notify = true;
         forwardParams.scheduleDate = 0;
+        forwardParams.scheduleRepeatPeriod = 0;
     }
 
     class ForwardParams {
@@ -55,5 +57,6 @@ public interface ForwardContext {
         public boolean noCaption = false;
         public boolean notify = true;
         public int scheduleDate = 0;
+        public int scheduleRepeatPeriod = 0;
     }
 }

@@ -210,7 +210,7 @@ public class DrawerLayoutContainer extends FrameLayout {
     }
 
     public void openDrawer(boolean fast) {
-        if (!allowOpenDrawer || drawerLayout == null) {
+        if (!isAllowOpenDrawer() || drawerLayout == null) {
             return;
         }
         if (AndroidUtilities.isTablet() && parentActionBarLayout != null && parentActionBarLayout.getParentActivity() != null) {
@@ -257,6 +257,7 @@ public class DrawerLayoutContainer extends FrameLayout {
             }
         });
         animatorSet.start();
+        currentAnimation = animatorSet;
     }
 
     private void onDrawerAnimationEnd(boolean opened) {
@@ -297,7 +298,8 @@ public class DrawerLayoutContainer extends FrameLayout {
     }
 
     public void closeDrawer() {
-        if (drawerPosition != 0) {
+        if (drawerPosition != 0 || currentAnimation != null) {
+            cancelCurrentAnimation();
             setDrawerPosition(0);
             onDrawerAnimationEnd(false);
         }
@@ -305,8 +307,9 @@ public class DrawerLayoutContainer extends FrameLayout {
 
     public void setAllowOpenDrawer(boolean value, boolean animated) {
         allowOpenDrawer = value;
-        if (!allowOpenDrawer && drawerPosition != 0) {
+        if (!allowOpenDrawer && (drawerPosition != 0 || currentAnimation != null)) {
             if (!animated) {
+                cancelCurrentAnimation();
                 setDrawerPosition(0);
                 onDrawerAnimationEnd(false);
             } else {
@@ -406,7 +409,7 @@ public class DrawerLayoutContainer extends FrameLayout {
                 return true;
             }
 
-            if ((allowOpenDrawerBySwipe || drawerOpened) && allowOpenDrawer && parentActionBarLayout.getFragmentStack().size() == 1 && parentActionBarLayout.allowSwipe() && (parentActionBarLayout.getLastFragment().getLastSheet() == null || !parentActionBarLayout.getLastFragment().getLastSheet().attachedToParent())) {
+            if ((allowOpenDrawerBySwipe || drawerOpened) && isAllowOpenDrawer() && parentActionBarLayout.getFragmentStack().size() == 1 && parentActionBarLayout.allowSwipe() && (parentActionBarLayout.getLastFragment().getLastSheet() == null || !parentActionBarLayout.getLastFragment().getLastSheet().attachedToParent())) {
                 if (ev != null && (ev.getAction() == MotionEvent.ACTION_DOWN || ev.getAction() == MotionEvent.ACTION_MOVE) && !startedTracking && !maybeStartTracking) {
                    View scrollingChild = findScrollingChild(this, ev.getX(),ev.getY());
                    if (scrollingChild != null) {

@@ -87,10 +87,10 @@ import org.telegram.ui.ActionBar.Theme;
 import org.telegram.ui.ActionBar.ThemeColors;
 import org.telegram.ui.ActionBar.ThemeDescription;
 import org.telegram.ui.ActionBar.theme.ThemeKey;
-import org.telegram.ui.Cells.DrawerProfileCell;
 import org.telegram.ui.Cells.ThemesHorizontalListCell;
 import org.telegram.ui.ChatActivity;
 import org.telegram.ui.Components.Premium.LimitReachedBottomSheet;
+import org.telegram.ui.DialogsActivity;
 import org.telegram.ui.PhotoViewer;
 import org.telegram.ui.StatisticActivity;
 import org.telegram.ui.ThemePreviewActivity;
@@ -197,7 +197,7 @@ public class ChatThemeBottomSheet extends BottomSheet implements NotificationCen
 
         int drawableColor = getThemedColor(Theme.key_featuredStickers_addButton);
         int drawableSize = dp(28);
-        darkThemeDrawable = new RLottieDrawable(R.raw.sun_outline, "" + R.raw.sun_outline, drawableSize, drawableSize, false, null);
+        darkThemeDrawable = new RLottieDrawable(R.raw.sun_outline, drawableSize, drawableSize, false, null);
         forceDark = !Theme.getActiveTheme().isDark();
         setForceDark(Theme.getActiveTheme().isDark(), false);
         darkThemeDrawable.setAllowDecodeSingleFrame(true);
@@ -452,7 +452,7 @@ public class ChatThemeBottomSheet extends BottomSheet implements NotificationCen
                 AndroidUtilities.updateViewVisibilityAnimated(cancelOrResetTextView, false, 0.9f, false, animated);
                 AndroidUtilities.updateViewVisibilityAnimated(applyButton, true, 1f, false, animated);
                 AndroidUtilities.updateViewVisibilityAnimated(applyTextView, true, 0.9f, false, animated);
-                AndroidUtilities.updateViewVisibilityAnimated(applySubTextView, showSubText, 0.9f, false, 0.7f, animated);
+                AndroidUtilities.updateViewVisibilityAnimated(applySubTextView, showSubText, 0.9f, false, 0.7f, animated, null);
                 AndroidUtilities.updateViewVisibilityAnimated(themeHintTextView, true, 0.9f, false, animated);
             } else {
                 backButtonDrawable.setRotation(1f, animated);
@@ -982,10 +982,10 @@ public class ChatThemeBottomSheet extends BottomSheet implements NotificationCen
     }
 
     private void setDarkButtonColor(int color) {
-        darkThemeDrawable.setLayerColor("Sunny.**", color);
-        darkThemeDrawable.setLayerColor("Path.**", color);
-        darkThemeDrawable.setLayerColor("Path 10.**", color);
-        darkThemeDrawable.setLayerColor("Path 11.**", color);
+        darkThemeDrawable.setLayerColor("Sunny", color);
+        darkThemeDrawable.setLayerColor("Path", color);
+        darkThemeDrawable.setLayerColor("Path 10", color);
+        darkThemeDrawable.setLayerColor("Path 11", color);
     }
 
     private void setForceDark(boolean isDark, boolean playAnimation) {
@@ -1144,7 +1144,7 @@ public class ChatThemeBottomSheet extends BottomSheet implements NotificationCen
             }
             boolean animated = true;
             ChatThemeItem newItem = items.get(position);
-            if (view.chatThemeItem == null || !ThemeKey.equals(view.chatThemeItem.chatTheme.getThemeKey(), newItem.chatTheme.getThemeKey()) || DrawerProfileCell.switchingTheme || view.lastThemeIndex != newItem.themeIndex) {
+            if (view.chatThemeItem == null || !ThemeKey.equals(view.chatThemeItem.chatTheme.getThemeKey(), newItem.chatTheme.getThemeKey()) || DialogsActivity.switchingTheme || view.lastThemeIndex != newItem.themeIndex) {
                 animated = false;
             }
 

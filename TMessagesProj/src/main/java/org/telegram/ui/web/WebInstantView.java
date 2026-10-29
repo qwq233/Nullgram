@@ -12,7 +12,6 @@ import android.graphics.Canvas;
 import android.os.Build;
 import android.text.TextUtils;
 import android.util.JsonReader;
-import android.util.Log;
 import android.util.Pair;
 import android.view.MotionEvent;
 import android.view.View;
@@ -26,8 +25,6 @@ import android.webkit.WebViewClient;
 import android.widget.FrameLayout;
 
 import androidx.annotation.Keep;
-
-import com.google.common.collect.Lists;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -43,7 +40,6 @@ import org.telegram.messenger.SharedConfig;
 import org.telegram.messenger.SvgHelper;
 import org.telegram.messenger.Timer;
 import org.telegram.messenger.Utilities;
-import org.telegram.messenger.browser.Browser;
 import org.telegram.tgnet.ConnectionsManager;
 import org.telegram.tgnet.TLRPC;
 import org.telegram.tgnet.tl.TL_iv;
@@ -519,12 +515,6 @@ public class WebInstantView {
         page.url = url;
         page.blocks.addAll(parsePageBlocks(url, content, page));
         if (page.blocks.isEmpty() || !(page.blocks.get(0) instanceof TL_iv.pageBlockHeader)) {
-//            if (byline != null || publishedTime != null) {
-//                final TL_iv.pageBlockAuthorDate authorDate = new TL_iv.pageBlockAuthorDate();
-//                authorDate.author = trim(parseRichText(byline));
-//                page.blocks.add(0, authorDate);
-//            }
-
             final TL_iv.pageBlockTitle blockTitle = new TL_iv.pageBlockTitle();
             blockTitle.text = trim(parseRichText(title));
             page.blocks.add(0, blockTitle);
@@ -552,18 +542,34 @@ public class WebInstantView {
                         blocks.add(p);
                         break;
                     case "h1":
-                    case "h2":
-                        TL_iv.pageBlockHeader h1 = new TL_iv.pageBlockHeader();
+                        TL_iv.pageBlockHeading1 h1 = new TL_iv.pageBlockHeading1();
                         h1.text = trim(parseRichText(o, page));
                         blocks.add(h1);
                         break;
+                    case "h2":
+                        TL_iv.pageBlockHeading2 h2 = new TL_iv.pageBlockHeading2();
+                        h2.text = trim(parseRichText(o, page));
+                        blocks.add(h2);
+                        break;
                     case "h3":
+                        TL_iv.pageBlockHeading3 h3 = new TL_iv.pageBlockHeading3();
+                        h3.text = trim(parseRichText(o, page));
+                        blocks.add(h3);
+                        break;
                     case "h4":
+                        TL_iv.pageBlockHeading4 h4 = new TL_iv.pageBlockHeading4();
+                        h4.text = trim(parseRichText(o, page));
+                        blocks.add(h4);
+                        break;
                     case "h5":
+                        TL_iv.pageBlockHeading5 h5 = new TL_iv.pageBlockHeading5();
+                        h5.text = trim(parseRichText(o, page));
+                        blocks.add(h5);
+                        break;
                     case "h6":
-                        TL_iv.pageBlockSubheader h = new TL_iv.pageBlockSubheader();
-                        h.text = trim(parseRichText(o, page));
-                        blocks.add(h);
+                        TL_iv.pageBlockHeading6 h6 = new TL_iv.pageBlockHeading6();
+                        h6.text = trim(parseRichText(o, page));
+                        blocks.add(h6);
                         break;
                     case "pre":
                         TL_iv.pageBlockPreformatted pre = new TL_iv.pageBlockPreformatted();

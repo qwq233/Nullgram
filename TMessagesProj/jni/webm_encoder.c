@@ -3,6 +3,7 @@
 #include "libavcodec/codec.h"
 #include "libavcodec/avcodec.h"
 #include "libavformat/avformat.h"
+#include "libavcodec/avcodec.h"
 #include "c_utils.h"
 #include "libavutil/opt.h"
 #include "libswscale/swscale.h"

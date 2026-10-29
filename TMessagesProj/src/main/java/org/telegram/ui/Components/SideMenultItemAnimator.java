@@ -33,6 +33,7 @@ public class SideMenultItemAnimator extends SimpleItemAnimator {
 
     private RecyclerListView parentRecyclerView;
     private boolean shouldClipChildren;
+    private Runnable animationUpdatesListener;
 
     private static class MoveInfo {
         public RecyclerView.ViewHolder holder;
@@ -459,6 +460,11 @@ public class SideMenultItemAnimator extends SimpleItemAnimator {
         }
         holder.itemView.animate().setInterpolator(sDefaultInterpolator);
         endAnimation(holder);
+        holder.itemView.animate().setUpdateListener(animation -> {
+            if (animationUpdatesListener != null) {
+                animationUpdatesListener.run();
+            }
+        });
     }
 
     @Override
@@ -520,6 +526,9 @@ public class SideMenultItemAnimator extends SimpleItemAnimator {
 
     void dispatchFinishedWhenDone() {
         if (!isRunning()) {
+            if (animationUpdatesListener != null) {
+                animationUpdatesListener.run();
+            }
             dispatchAnimationsFinished();
             onAllAnimationsDone();
         }
@@ -559,6 +568,7 @@ public class SideMenultItemAnimator extends SimpleItemAnimator {
         }
         mPendingChanges.clear();
         if (!isRunning()) {
+            dispatchFinishedWhenDone();
             return;
         }
 
@@ -623,5 +633,10 @@ public class SideMenultItemAnimator extends SimpleItemAnimator {
     @Override
     public boolean canReuseUpdatedViewHolder(RecyclerView.ViewHolder viewHolder, List<Object> payloads) {
         return !payloads.isEmpty() || super.canReuseUpdatedViewHolder(viewHolder, payloads);
+    }
+
+    @Override
+    public void listenToAnimationUpdates(Runnable listener) {
+        animationUpdatesListener = listener;
     }
 }

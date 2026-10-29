@@ -108,6 +108,7 @@ import org.telegram.ui.Components.UItem;
 import org.telegram.ui.Components.UniversalAdapter;
 import org.telegram.ui.Components.UniversalRecyclerView;
 import org.telegram.ui.Components.ViewPagerFixed;
+import org.telegram.ui.Components.blur3.capture.IBlur3Capture;
 import org.telegram.ui.Stars.BotStarsActivity;
 import org.telegram.ui.Stars.BotStarsController;
 import org.telegram.ui.Stars.StarsIntroActivity;
@@ -165,7 +166,8 @@ public class ChannelMonetizationLayout extends SizeNotifierFrameLayout implement
 
     private boolean transfering;
 
-    private final UniversalRecyclerView listView;
+    public final UniversalRecyclerView listView;
+    public IBlur3Capture iBlur3Capture;
     private final FrameLayout progress;
 
     private DecimalFormat formatter;
@@ -257,7 +259,7 @@ public class ChannelMonetizationLayout extends SizeNotifierFrameLayout implement
         balanceSubtitle.setTextSize(dp(14));
         balanceLayout.addView(balanceSubtitle, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, 17, Gravity.CENTER_HORIZONTAL | Gravity.TOP, 22, 4, 22, 0));
 
-        balanceButton = new ButtonWithCounterView(context, resourcesProvider);
+        balanceButton = new ButtonWithCounterView(context, resourcesProvider).setRound();
         balanceButton.setEnabled(MessagesController.getInstance(currentAccount).channelRevenueWithdrawalEnabled);
         balanceButton.setText(getString(R.string.MonetizationWithdraw), false);
         balanceButton.setVisibility(View.GONE);
@@ -385,7 +387,7 @@ public class ChannelMonetizationLayout extends SizeNotifierFrameLayout implement
             protected boolean subTextSplitToWords() {
                 return false;
             }
-        };
+        }.setRound();
         starsBalanceButton.setEnabled(false);
         starsBalanceButton.setText(formatPluralString("MonetizationStarsWithdraw", 0), false);
         starsBalanceButton.setVisibility(View.VISIBLE);
@@ -431,7 +433,7 @@ public class ChannelMonetizationLayout extends SizeNotifierFrameLayout implement
             });
         });
 
-        starsAdsButton = new ButtonWithCounterView(context, resourcesProvider);
+        starsAdsButton = new ButtonWithCounterView(context, resourcesProvider).setRound();
         starsAdsButton.setEnabled(false);
         starsAdsButton.setText(getString(R.string.MonetizationStarsAds), false);
         starsAdsButton.setOnClickListener(v -> {
@@ -464,7 +466,7 @@ public class ChannelMonetizationLayout extends SizeNotifierFrameLayout implement
                 starsBalanceButton.setLoading(true);
                 passwordFragment.preload(() -> {
                     starsBalanceButton.setLoading(false);
-                    fragment.presentFragment(passwordFragment);;
+                    fragment.presentFragment(passwordFragment);
                 });
                 return true;
             }
@@ -499,6 +501,7 @@ public class ChannelMonetizationLayout extends SizeNotifierFrameLayout implement
         };
 
         listView = new UniversalRecyclerView(fragment, this::fillItems, this::onClick, this::onLongClick);
+        listView.setClipToPadding(false);
         addView(listView);
 
         LinearLayout progressLayout = new LinearLayout(context);
@@ -974,7 +977,7 @@ public class ChannelMonetizationLayout extends SizeNotifierFrameLayout implement
             items.add(UItem.asShadow(-7, null));
         }
         if (transactionsLayout.hasTransactions()) {
-            items.add(UItem.asFullscreenCustom(transactionsLayout, 0));
+            items.add(UItem.asFullscreenCustom(transactionsLayout, dp(24), true));
         } else {
             items.add(UItem.asShadow(-10, null));
         }
@@ -1052,14 +1055,16 @@ public class ChannelMonetizationLayout extends SizeNotifierFrameLayout implement
         if (tonString == null) {
             tonString = new SpannableString("T");
             if (large) {
-                ColoredImageSpan span = new ColoredImageSpan(R.drawable.ton);
+                ColoredImageSpan span = new ColoredImageSpan(R.drawable.mini_gram_72);
+                span.recolorDrawable = false;
                 span.setScale(scale, scale);
                 span.setColorKey(Theme.key_windowBackgroundWhiteBlueText2);
                 span.setRelativeSize(textPaint.getFontMetricsInt());
                 span.spaceScaleX = .9f;
                 tonString.setSpan(span, 0, tonString.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
             } else {
-                ColoredImageSpan span = new ColoredImageSpan(R.drawable.mini_ton);
+                ColoredImageSpan span = new ColoredImageSpan(R.drawable.mini_gram_16);
+                span.recolorDrawable = false;
                 span.setScale(scale, scale);
                 span.setTranslateY(translateY);
                 span.spaceScaleX = .95f;
@@ -1533,7 +1538,7 @@ public class ChannelMonetizationLayout extends SizeNotifierFrameLayout implement
             layout.addView(chipLayout, LayoutHelper.createLinear(LayoutHelper.WRAP_CONTENT, 28, Gravity.CENTER_HORIZONTAL, 42, 10, 42, 0));
         }
 
-        ButtonWithCounterView button = new ButtonWithCounterView(context, resourcesProvider);
+        ButtonWithCounterView button = new ButtonWithCounterView(context, resourcesProvider).setRound();
         if (transaction instanceof TL_stats.TL_broadcastRevenueTransactionWithdrawal && (((TL_stats.TL_broadcastRevenueTransactionWithdrawal) transaction).flags & 2) != 0) {
             TL_stats.TL_broadcastRevenueTransactionWithdrawal t = (TL_stats.TL_broadcastRevenueTransactionWithdrawal) transaction;
             button.setText(getString(R.string.MonetizationTransactionDetailWithdrawButton), false);
@@ -1600,9 +1605,9 @@ public class ChannelMonetizationLayout extends SizeNotifierFrameLayout implement
         textView.setTypeface(AndroidUtilities.bold());
         textView.setTextColor(Theme.getColor(Theme.key_windowBackgroundWhiteBlackText, resourcesProvider));
         SpannableString animatedDiamond = new SpannableString("💎");
-        ColoredImageSpan span = new ColoredImageSpan(R.drawable.ton);
+        ColoredImageSpan span = new ColoredImageSpan(R.drawable.mini_gram_72);
+        span.recolorDrawable = false;
         span.setScale(.9f, .9f);
-        span.setColorKey(Theme.key_windowBackgroundWhiteBlueText2);
         span.setRelativeSize(textView.getPaint().getFontMetricsInt());
         span.spaceScaleX = .9f;
         animatedDiamond.setSpan(span, 0, animatedDiamond.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
@@ -1617,7 +1622,7 @@ public class ChannelMonetizationLayout extends SizeNotifierFrameLayout implement
         textView.setText(AndroidUtilities.withLearnMore(AndroidUtilities.replaceTags(getString(bots ? R.string.BotMonetizationInfoTONText : R.string.MonetizationInfoTONText)), () -> Browser.openUrl(context, getString(bots ? R.string.BotMonetizationInfoTONLink : R.string.MonetizationInfoTONLink))));
         layout.addView(textView, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT, 28, 9, 28, 0));
 
-        ButtonWithCounterView button = new ButtonWithCounterView(context, resourcesProvider);
+        ButtonWithCounterView button = new ButtonWithCounterView(context, resourcesProvider).setRound();
         button.setText(getString(R.string.GotIt), false);
         button.setOnClickListener(v -> {
             sheet.dismiss();
@@ -1629,7 +1634,7 @@ public class ChannelMonetizationLayout extends SizeNotifierFrameLayout implement
         return sheet;
     }
 
-    private static class FeatureCell extends FrameLayout {
+    public static class FeatureCell extends FrameLayout {
         public FeatureCell(Context context, int icon, CharSequence header, CharSequence text, Theme.ResourcesProvider resourcesProvider) {
             super(context);
 
@@ -1643,16 +1648,18 @@ public class ChannelMonetizationLayout extends SizeNotifierFrameLayout implement
             layout.setOrientation(LinearLayout.VERTICAL);
             addView(layout, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT, Gravity.TOP | Gravity.FILL_HORIZONTAL, 42, 0, 0, 0));
 
-            TextView textView = new TextView(context);
+            LinkSpanDrawable.LinksTextView textView = new LinkSpanDrawable.LinksTextView(context);
             textView.setTypeface(AndroidUtilities.bold());
             textView.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 14);
             textView.setTextColor(Theme.getColor(Theme.key_windowBackgroundWhiteBlackText, resourcesProvider));
+            textView.setLinkTextColor(Theme.getColor(Theme.key_chat_messageLinkIn, resourcesProvider));
             textView.setText(header);
             layout.addView(textView, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT, Gravity.TOP | Gravity.FILL_HORIZONTAL, 0, 0, 0, 2));
 
-            textView = new TextView(context);
+            textView = new LinkSpanDrawable.LinksTextView(context);
             textView.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 14);
             textView.setTextColor(Theme.getColor(Theme.key_windowBackgroundWhiteGrayText, resourcesProvider));
+            textView.setLinkTextColor(Theme.getColor(Theme.key_chat_messageLinkIn, resourcesProvider));
             textView.setText(text);
             layout.addView(textView, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT, Gravity.TOP | Gravity.FILL_HORIZONTAL, 0, 0, 0, 0));
         }
@@ -1983,7 +1990,7 @@ public class ChannelMonetizationLayout extends SizeNotifierFrameLayout implement
                 if (actionBar != null) {
                     actionBar.setCastShadows(!isAttachedToWindow() || listView.getHeight() - bottom < 0);
                 }
-                if (listView.getHeight() - bottom >= 0) {
+                if (listView.getHeight() - bottom >= (listView.getPaddingBottom() + dp(8))) {
                     consumed[1] = dyUnconsumed;
                     innerListView.scrollBy(0, dyUnconsumed);
                 }
@@ -2024,7 +2031,7 @@ public class ChannelMonetizationLayout extends SizeNotifierFrameLayout implement
                 if (actionBar != null) {
                     actionBar.setCastShadows(!isAttachedToWindow() || listView.getHeight() - bottom < 0);
                 }
-                if (listView.getHeight() - bottom >= 0) {
+                if (listView.getHeight() - bottom >= (listView.getPaddingBottom() + dp(8))) {
                     RecyclerListView innerListView = transactionsLayout.getCurrentListView();
                     LinearLayoutManager linearLayoutManager = (LinearLayoutManager) innerListView.getLayoutManager();
                     int pos = linearLayoutManager.findFirstVisibleItemPosition();
@@ -2058,7 +2065,7 @@ public class ChannelMonetizationLayout extends SizeNotifierFrameLayout implement
                     }
                 } else if (dy > 0) {
                     RecyclerListView innerListView = transactionsLayout.getCurrentListView();
-                    if (listView.getHeight() - bottom >= 0 && innerListView != null && !innerListView.canScrollVertically(1)) {
+                    if (listView.getHeight() - bottom >= (listView.getPaddingBottom() + dp(8)) && innerListView != null && !innerListView.canScrollVertically(1)) {
                         consumed[1] = dy;
                         listView.stopScroll();
                     }
@@ -2068,22 +2075,22 @@ public class ChannelMonetizationLayout extends SizeNotifierFrameLayout implement
     }
 
     @Override
-    public boolean onStartNestedScroll(View child, View target, int axes, int type) {
+    public boolean onStartNestedScroll(@NonNull View child, @NonNull View target, int axes, int type) {
         return axes == ViewCompat.SCROLL_AXIS_VERTICAL;
     }
 
     @Override
-    public void onNestedScrollAccepted(View child, View target, int axes, int type) {
+    public void onNestedScrollAccepted(@NonNull View child, @NonNull View target, int axes, int type) {
         nestedScrollingParentHelper.onNestedScrollAccepted(child, target, axes);
     }
 
     @Override
-    public void onStopNestedScroll(View target, int type) {
+    public void onStopNestedScroll(@NonNull View target, int type) {
         nestedScrollingParentHelper.onStopNestedScroll(target);
     }
 
     @Override
-    public void onStopNestedScroll(View child) {
+    public void onStopNestedScroll(@NonNull View child) {
 
     }
 

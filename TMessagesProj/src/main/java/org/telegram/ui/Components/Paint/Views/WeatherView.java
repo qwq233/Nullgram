@@ -23,6 +23,7 @@ import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.Path;
+import android.graphics.PointF;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffXfermode;
 import android.view.Gravity;
@@ -30,8 +31,7 @@ import android.view.ViewGroup;
 
 import org.telegram.messenger.AndroidUtilities;
 import org.telegram.ui.Components.LayoutHelper;
-import org.telegram.ui.Components.Point;
-import org.telegram.ui.Components.Rect;
+import org.telegram.ui.Components.RectOld;
 import org.telegram.ui.Stories.recorder.Weather;
 
 public class WeatherView extends EntityView {
@@ -64,7 +64,7 @@ public class WeatherView extends EntityView {
         return marker.pady;
     }
 
-    public WeatherView(Context context, Point position, int currentAccount, Weather.State weather, float density, int maxWidth) {
+    public WeatherView(Context context, PointF position, int currentAccount, Weather.State weather, float density, int maxWidth) {
         super(context, position);
 
         marker = new LocationMarker(context, LocationMarker.VARIANT_WEATHER, density, 0);
@@ -142,17 +142,17 @@ public class WeatherView extends EntityView {
     }
 
     @Override
-    public Rect getSelectionBounds() {
+    public RectOld getSelectionBounds() {
         ViewGroup parentView = (ViewGroup) getParent();
         if (parentView == null) {
-            return new Rect();
+            return new RectOld();
         }
         float scale = parentView.getScaleX();
         float width = getMeasuredWidth() * getScale() + AndroidUtilities.dp(64) / scale;
         float height = getMeasuredHeight() * getScale() + AndroidUtilities.dp(64) / scale;
         float left = (getPositionX() - width / 2.0f) * scale;
         float right = left + width * scale;
-        return new Rect(left, (getPositionY() - height / 2f) * scale, right - left, height * scale);
+        return new RectOld(left, (getPositionY() - height / 2f) * scale, right - left, height * scale);
     }
 
     protected TextViewSelectionView createSelectionView() {

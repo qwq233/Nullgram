@@ -106,9 +106,10 @@ jint getTimeDifference(JNIEnv *env, jclass c, jint instanceNum) {
     return ConnectionsManager::getInstance(instanceNum).getTimeDifference();
 }
 
-void sendRequest(JNIEnv *env, jclass c, jint instanceNum, jlong object, jint flags, jint datacenterId, jint connectionType, jboolean immediate, jint token) {
+void sendRequest(JNIEnv *env, jclass c, jint instanceNum, jlong object, jint flags, jint datacenterId, jint connectionType, jboolean immediate, jint token, jint downloadSize) {
     TL_api_request *request = new TL_api_request();
     request->request = (NativeByteBuffer *) (intptr_t) object;
+    request->downloadSize = downloadSize > 0 ? (uint32_t) downloadSize : 0;
     ConnectionsManager::getInstance(instanceNum).sendRequest(request, ([instanceNum, token](TLObject *response, TL_error *error, int32_t networkType, int64_t responseTime, int64_t msgId, int32_t dcId) {
         TL_api_response *resp = (TL_api_response *) response;
         jlong ptr = 0;
@@ -556,7 +557,7 @@ static JNINativeMethod ConnectionsManagerMethods[] = {
         {"native_getCurrentAuthKeyId", "(I)J", (void *) getCurrentAuthKeyId},
         {"native_isTestBackend", "(I)I", (void *) isTestBackend},
         {"native_getTimeDifference", "(I)I", (void *) getTimeDifference},
-        {"native_sendRequest", "(IJIIIZI)V", (void *) sendRequest},
+        {"native_sendRequest", "(IJIIIZII)V", (void *) sendRequest},
         {"native_cancelRequest", "(IIZ)V", (void *) cancelRequest},
         {"native_cleanUp", "(IZ)V", (void *) cleanUp},
         {"native_cancelRequestsForGuid", "(II)V",
@@ -593,6 +594,18 @@ static JNINativeMethod ConnectionsManagerMethods[] = {
         {"native_receivedCaptchaResult", "(I[ILjava/lang/String;)V", (void *) receivedCaptchaResult},
         {"native_isGoodPrime", "([BI)Z", (void *) isGoodPrime},
 };
+
+
+extern "C"
+JNIEXPORT jboolean JNICALL
+Java_org_telegram_tgnet_ConnectionsManager_native_1test_1AuthAuthorization(JNIEnv *env, jclass clazz, jlong address) {
+    auto *buffer = (NativeByteBuffer *) (intptr_t) address;
+    bool error = false;
+
+    int constructorId = buffer->readInt32(&error);
+    auth_Authorization::TLdeserialize(buffer, constructorId, 0, error);
+    return !error;
+}
 
 inline int registerNativeMethods(JNIEnv *env, const char *className, JNINativeMethod *methods, int methodsCount) {
     jclass clazz;

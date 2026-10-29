@@ -44,9 +44,8 @@ public interface INavigationLayout {
     int FORCE_NOT_ATTACH_VIEW = -2;
     int FORCE_ATTACH_VIEW_AS_FIRST = -3;
 
-    default boolean isLayersLayout() {
-        return false;
-    }
+    boolean isLayersLayout();
+    boolean isRightLayout();
 
     boolean presentFragment(NavigationParams params);
     boolean checkTransitionAnimation();
@@ -96,8 +95,8 @@ public interface INavigationLayout {
     void startActivityForResult(Intent intent, int requestCode);
 
     // TODO: Migrate them to be out of navigation layout
-    Theme.MessageDrawable getMessageDrawableOutStart();
-    Theme.MessageDrawable getMessageDrawableOutMediaStart();
+    MessageDrawable getMessageDrawableOutStart();
+    MessageDrawable getMessageDrawableOutMediaStart();
 
     // TODO: Make something like FieldsContainer and put them there?
     List<BackButtonMenu.PulledDialog> getPulledDialogs();
@@ -180,7 +179,7 @@ public interface INavigationLayout {
         if (getFragmentStack().isEmpty()) return null;
         for (int i = getFragmentStack().size() - 1; i >= 0; --i) {
             BaseFragment fragment = getFragmentStack().get(i);
-            if (fragment == null || fragment.isFinishing() || fragment.isRemovingFromStack())
+            if (fragment == null || fragment.getContext() == null || fragment.isFinishing() || fragment.isRemovingFromStack())
                 continue;
             return fragment;
         }
@@ -205,14 +204,6 @@ public interface INavigationLayout {
 
     default void animateThemedValues(Theme.ThemeInfo theme, int accentId, boolean nightTheme, boolean instant, Runnable onDone) {
         animateThemedValues(new ThemeAnimationSettings(theme, accentId, nightTheme, instant), onDone);
-    }
-
-    /**
-     * @deprecated Deprecated in favor of {@link INavigationLayout#bringToFront(int)}
-     */
-    @Deprecated
-    default void showFragment(int i) {
-        bringToFront(i);
     }
 
     default void bringToFront(int i) {
@@ -371,12 +362,18 @@ public interface INavigationLayout {
         public boolean preview;
         public ActionBarPopupWindow.ActionBarPopupWindowLayout menuView;
         public boolean needDelayWithoutAnimation;
+        public boolean forceRightLayout;
 
         public boolean isFromDelay;
         public boolean delayDone;
 
         public NavigationParams(BaseFragment fragment) {
             this.fragment = fragment;
+        }
+
+        public NavigationParams forceRightLayout() {
+            forceRightLayout = true;
+            return this;
         }
 
         public NavigationParams setRemoveLast(boolean removeLast) {

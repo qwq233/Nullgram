@@ -22,6 +22,8 @@ package org.telegram.messenger;
 import android.content.Context;
 import android.content.SharedPreferences;
 
+
+
 import org.telegram.tgnet.SerializedData;
 import org.telegram.tgnet.TLRPC;
 
@@ -125,7 +127,7 @@ public class AuthTokensHelper {
                 editor.putString("log_in_token_" + i, Utilities.bytesToHex(data.toByteArray()));
             }
             editor.apply();
-            BackupAgent.requestBackup(ApplicationLoader.applicationContext);
+            BackupAgent.requestBackup();
         }
     }
 
@@ -135,7 +137,7 @@ public class AuthTokensHelper {
         SerializedData data = new SerializedData(response.getObjectSize());
         response.serializeToStream(data);
         preferences.edit().putString("log_out_token_" + count, Utilities.bytesToHex(data.toByteArray())).putInt("count", count + 1).apply();
-        BackupAgent.requestBackup(ApplicationLoader.applicationContext);
+        BackupAgent.requestBackup();
     }
 
     public static void clearLogInTokens() {

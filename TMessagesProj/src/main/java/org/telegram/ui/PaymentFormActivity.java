@@ -98,13 +98,14 @@ import com.google.android.gms.wallet.Wallet;
 import com.google.android.gms.wallet.WalletConstants;
 import com.google.android.gms.wallet.contract.TaskResultContracts;
 import com.stripe.android.Stripe;
-import com.stripe.android.TokenCallback;
-import com.stripe.android.exception.APIConnectionException;
-import com.stripe.android.exception.APIException;
+import com.stripe.android.ApiResultCallback;
+import com.stripe.android.GooglePayConfig;
+import com.stripe.android.core.exception.APIConnectionException;
+import com.stripe.android.core.exception.APIException;
+import com.stripe.android.model.Address;
 import com.stripe.android.model.Card;
+import com.stripe.android.model.CardParams;
 import com.stripe.android.model.Token;
-import com.stripe.android.net.StripeApiHandler;
-import com.stripe.android.net.TokenParser;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -133,6 +134,7 @@ import org.telegram.tgnet.TLObject;
 import org.telegram.tgnet.TLRPC;
 import org.telegram.tgnet.tl.TL_update;
 import org.telegram.tgnet.tl.TL_account;
+import org.telegram.tgnet.tl.TL_update;
 import org.telegram.ui.ActionBar.ActionBar;
 import org.telegram.ui.ActionBar.ActionBarMenu;
 import org.telegram.ui.ActionBar.ActionBarMenuItem;
@@ -2284,6 +2286,8 @@ public class PaymentFormActivity extends BaseFragment implements NotificationCen
                         detailSettingsCell[2].setBackgroundDrawable(Theme.getSelectorDrawable(true));
                         detailSettingsCell[2].setOnClickListener(v -> {
                             PaymentFormActivity activity = new PaymentFormActivity(invoiceInput, paymentForm, messageObject, invoiceSlug, STEP_SHIPPING_INFORMATION, requestedInfo, shippingOption, tipAmount, null, cardName, validateRequest, saveCardInfo, null, parentFragment, allowUnregistered);
+                            activity.setCustomResultReceiver(customResultReceiver);
+                            activity.setCustomAnyResultReceiver(customAnyResultReceiver);
                             activity.setDelegate(new PaymentFormActivityDelegate() {
                                 @Override
                                 public void didSelectNewAddress(TLRPC.TL_payments_validateRequestedInfo validateRequested) {
@@ -2307,6 +2311,8 @@ public class PaymentFormActivity extends BaseFragment implements NotificationCen
                         detailSettingsCell[3].setBackgroundDrawable(Theme.getSelectorDrawable(true));
                         detailSettingsCell[3].setOnClickListener(v -> {
                             PaymentFormActivity activity = new PaymentFormActivity(invoiceInput, paymentForm, messageObject, invoiceSlug, STEP_SHIPPING_INFORMATION, requestedInfo, shippingOption, tipAmount, null, cardName, validateRequest, saveCardInfo, null, parentFragment, allowUnregistered);
+                            activity.setCustomResultReceiver(customResultReceiver);
+                            activity.setCustomAnyResultReceiver(customAnyResultReceiver);
                             activity.setDelegate(new PaymentFormActivityDelegate() {
                                 @Override
                                 public void didSelectNewAddress(TLRPC.TL_payments_validateRequestedInfo validateRequested) {
@@ -2330,6 +2336,8 @@ public class PaymentFormActivity extends BaseFragment implements NotificationCen
                         detailSettingsCell[4].setBackgroundDrawable(Theme.getSelectorDrawable(true));
                         detailSettingsCell[4].setOnClickListener(v -> {
                             PaymentFormActivity activity = new PaymentFormActivity(invoiceInput, paymentForm, messageObject, invoiceSlug, STEP_SHIPPING_INFORMATION, requestedInfo, shippingOption, tipAmount, null, cardName, validateRequest, saveCardInfo, null, parentFragment, allowUnregistered);
+                            activity.setCustomResultReceiver(customResultReceiver);
+                            activity.setCustomAnyResultReceiver(customAnyResultReceiver);
                             activity.setDelegate(new PaymentFormActivityDelegate() {
                                 @Override
                                 public void didSelectNewAddress(TLRPC.TL_payments_validateRequestedInfo validateRequested) {
@@ -2353,6 +2361,8 @@ public class PaymentFormActivity extends BaseFragment implements NotificationCen
                         detailSettingsCell[5].setBackgroundDrawable(Theme.getSelectorDrawable(true));
                         detailSettingsCell[5].setOnClickListener(v -> {
                             PaymentFormActivity activity = new PaymentFormActivity(invoiceInput, paymentForm, messageObject, invoiceSlug, STEP_SHIPPING_INFORMATION, requestedInfo, shippingOption, tipAmount, null, cardName, validateRequest, saveCardInfo, null, parentFragment, allowUnregistered);
+                            activity.setCustomResultReceiver(customResultReceiver);
+                            activity.setCustomAnyResultReceiver(customAnyResultReceiver);
                             activity.setDelegate(new PaymentFormActivityDelegate() {
                                 @Override
                                 public void didSelectNewAddress(TLRPC.TL_payments_validateRequestedInfo validateRequested) {
@@ -2421,7 +2431,11 @@ public class PaymentFormActivity extends BaseFragment implements NotificationCen
                         if (step == STEP_PAYMENT_INFO && !paymentForm.additional_methods.isEmpty()) {
                             showChoosePaymentMethod(v::callOnClick);
                         } else {
-                            presentFragment(new PaymentFormActivity(invoiceInput, paymentForm, messageObject, invoiceSlug, step, requestedInfo, shippingOption, tipAmount, paymentJson, cardName, validateRequest, saveCardInfo, null, parentFragment, allowUnregistered));
+                            presentFragment(
+                                new PaymentFormActivity(invoiceInput, paymentForm, messageObject, invoiceSlug, step, requestedInfo, shippingOption, tipAmount, paymentJson, cardName, validateRequest, saveCardInfo, null, parentFragment, allowUnregistered)
+                                    .setCustomResultReceiver(customResultReceiver)
+                                    .setCustomAnyResultReceiver(customAnyResultReceiver)
+                            );
                         }
                         return;
                     }
@@ -2436,7 +2450,11 @@ public class PaymentFormActivity extends BaseFragment implements NotificationCen
 
                         if (UserConfig.getInstance(currentAccount).tmpPassword == null) {
                             needPayAfterTransition = true;
-                            presentFragment(new PaymentFormActivity(invoiceInput, paymentForm, messageObject, invoiceSlug, STEP_CONFIRM_PASSWORD, requestedInfo, shippingOption, tipAmount, null, cardName, validateRequest, saveCardInfo, null, parentFragment, allowUnregistered));
+                            presentFragment(
+                                new PaymentFormActivity(invoiceInput, paymentForm, messageObject, invoiceSlug, STEP_CONFIRM_PASSWORD, requestedInfo, shippingOption, tipAmount, null, cardName, validateRequest, saveCardInfo, null, parentFragment, allowUnregistered)
+                                    .setCustomResultReceiver(customResultReceiver)
+                                    .setCustomAnyResultReceiver(customAnyResultReceiver)
+                            );
                             needPayAfterTransition = false;
                             return;
                         } else if (isCheckoutPreview) {
@@ -2880,11 +2898,15 @@ public class PaymentFormActivity extends BaseFragment implements NotificationCen
                 TLRPC.TL_paymentFormMethod method = paymentForm.additional_methods.get(which - savedCredentialsCards.size() - offset);
 
                 PaymentFormActivity activity = new PaymentFormActivity(invoiceInput, paymentForm, messageObject, invoiceSlug, STEP_PAYMENT_INFO, requestedInfo, shippingOption, tipAmount, null, cardName, validateRequest, saveCardInfo, null, parentFragment, allowUnregistered);
+                activity.setCustomResultReceiver(customResultReceiver);
+                activity.setCustomAnyResultReceiver(customAnyResultReceiver);
                 activity.setPaymentMethod(method);
                 activity.setDelegate(delegate);
                 presentFragment(activity);
             } else if (which == titles.size() - 1) {
                 PaymentFormActivity activity = new PaymentFormActivity(invoiceInput, paymentForm, messageObject, invoiceSlug, STEP_PAYMENT_INFO, requestedInfo, shippingOption, tipAmount, null, cardName, validateRequest, saveCardInfo, null, parentFragment, allowUnregistered);
+                activity.setCustomResultReceiver(customResultReceiver);
+                activity.setCustomAnyResultReceiver(customAnyResultReceiver);
                 activity.setDelegate(delegate);
                 presentFragment(activity);
             }
@@ -2970,19 +2992,13 @@ public class PaymentFormActivity extends BaseFragment implements NotificationCen
                             put("publicKey", googlePayPublicKey);
                         }});
                     }});
-                } else {
+                } else if (googlePayParameters != null) {
                     cardPaymentMethod.put("tokenizationSpecification", new JSONObject() {{
                         put("type", "PAYMENT_GATEWAY");
-                        if (googlePayParameters != null) {
-                            put("parameters", googlePayParameters);
-                        } else {
-                            put("parameters", new JSONObject() {{
-                                put("gateway", "stripe");
-                                put("stripe:publishableKey", providerApiKey);
-                                put("stripe:version", StripeApiHandler.VERSION);
-                            }});
-                        }
+                        put("parameters", googlePayParameters);
                     }});
+                } else {
+                    cardPaymentMethod.put("tokenizationSpecification", new GooglePayConfig(providerApiKey).getTokenizationSpecification());
                 }
 
                 paymentDataRequest.put("allowedPaymentMethods", new JSONArray().put(cardPaymentMethod));
@@ -3442,10 +3458,13 @@ public class PaymentFormActivity extends BaseFragment implements NotificationCen
                                 cardName = "Android Pay";
                             }
                         } else {
-                            Token t = TokenParser.parseToken(token);
-                            paymentJson = String.format(Locale.US, "{\"type\":\"%1$s\", \"id\":\"%2$s\"}", t.getType(), t.getId());
+                            Token t = Token.fromJson(new JSONObject(token));
+                            if (t == null || t.getType() != Token.Type.Card || t.getCard() == null) {
+                                throw new JSONException("Invalid Stripe card token");
+                            }
+                            paymentJson = String.format(Locale.US, "{\"type\":\"card\", \"id\":\"%1$s\"}", t.getId());
                             Card card = t.getCard();
-                            cardName = card.getBrand() + " *" + card.getLast4();
+                            cardName = card.getBrand().getDisplayName() + " *" + card.getLast4();
                         }
                         goToNextStep();
                     } catch (JSONException e) {
@@ -3494,7 +3513,12 @@ public class PaymentFormActivity extends BaseFragment implements NotificationCen
                     if (nextStep == STEP_PAYMENT_INFO && savedCredentialsCard == null && paymentJson == null && !paymentForm.additional_methods.isEmpty()) {
                         showChoosePaymentMethod(this::goToNextStep);
                     } else {
-                        presentFragment(new PaymentFormActivity(invoiceInput, paymentForm, messageObject, invoiceSlug, nextStep, requestedInfo, null, null, paymentJson, cardName, validateRequest, saveCardInfo, googlePayCredentials, parentFragment, allowUnregistered), isWebView);
+                        presentFragment(
+                            new PaymentFormActivity(invoiceInput, paymentForm, messageObject, invoiceSlug, nextStep, requestedInfo, null, null, paymentJson, cardName, validateRequest, saveCardInfo, googlePayCredentials, parentFragment, allowUnregistered)
+                                .setCustomResultReceiver(customResultReceiver)
+                                .setCustomAnyResultReceiver(customAnyResultReceiver),
+                            isWebView
+                        );
                     }
                 }
                 break;
@@ -3520,13 +3544,20 @@ public class PaymentFormActivity extends BaseFragment implements NotificationCen
                 if (nextStep == STEP_PAYMENT_INFO && cardName == null && savedCredentialsCard == null && paymentJson == null && !paymentForm.additional_methods.isEmpty()) {
                     showChoosePaymentMethod(this::goToNextStep);
                 } else {
-                    presentFragment(new PaymentFormActivity(invoiceInput, paymentForm, messageObject, invoiceSlug, nextStep, requestedInfo, shippingOption, tipAmount, paymentJson, cardName, validateRequest, saveCardInfo, googlePayCredentials, parentFragment, allowUnregistered), isWebView);
+                    presentFragment(
+                        new PaymentFormActivity(invoiceInput, paymentForm, messageObject, invoiceSlug, nextStep, requestedInfo, shippingOption, tipAmount, paymentJson, cardName, validateRequest, saveCardInfo, googlePayCredentials, parentFragment, allowUnregistered)
+                            .setCustomResultReceiver(customResultReceiver)
+                            .setCustomAnyResultReceiver(customAnyResultReceiver),
+                        isWebView
+                    );
                 }
                 break;
             }
             case STEP_PAYMENT_INFO:
                 if (paymentForm.password_missing && saveCardInfo) {
                     passwordFragment = new PaymentFormActivity(invoiceInput, paymentForm, messageObject, invoiceSlug, STEP_SET_PASSWORD_EMAIL, requestedInfo, shippingOption, tipAmount, paymentJson, cardName, validateRequest, saveCardInfo, googlePayCredentials, parentFragment, allowUnregistered);
+                    passwordFragment.setCustomResultReceiver(customResultReceiver);
+                    passwordFragment.setCustomAnyResultReceiver(customAnyResultReceiver);
                     passwordFragment.setCurrentPassword(currentPassword);
                     passwordFragment.setDelegate(new PaymentFormActivityDelegate() {
                         @Override
@@ -3556,7 +3587,12 @@ public class PaymentFormActivity extends BaseFragment implements NotificationCen
                         delegate.didSelectNewCard(paymentJson, cardName, saveCardInfo, googlePayCredentials, null);
                         finishFragment();
                     } else {
-                        presentFragment(new PaymentFormActivity(invoiceInput, paymentForm, messageObject, invoiceSlug, STEP_CHECKOUT, requestedInfo, shippingOption, tipAmount, paymentJson, cardName, validateRequest, saveCardInfo, googlePayCredentials, parentFragment, allowUnregistered), isWebView);
+                        presentFragment(
+                            new PaymentFormActivity(invoiceInput, paymentForm, messageObject, invoiceSlug, STEP_CHECKOUT, requestedInfo, shippingOption, tipAmount, paymentJson, cardName, validateRequest, saveCardInfo, googlePayCredentials, parentFragment, allowUnregistered)
+                                .setCustomResultReceiver(customResultReceiver)
+                                .setCustomAnyResultReceiver(customAnyResultReceiver),
+                            isWebView
+                        );
                     }
                 }
                 break;
@@ -3567,7 +3603,12 @@ public class PaymentFormActivity extends BaseFragment implements NotificationCen
                 } else {
                     nextStep = STEP_PAYMENT_INFO;
                 }
-                presentFragment(new PaymentFormActivity(invoiceInput, paymentForm, messageObject, invoiceSlug, nextStep, requestedInfo, shippingOption, tipAmount, paymentJson, cardName, validateRequest, saveCardInfo, googlePayCredentials, parentFragment, allowUnregistered), true);
+                presentFragment(
+                    new PaymentFormActivity(invoiceInput, paymentForm, messageObject, invoiceSlug, nextStep, requestedInfo, shippingOption, tipAmount, paymentJson, cardName, validateRequest, saveCardInfo, googlePayCredentials, parentFragment, allowUnregistered)
+                        .setCustomResultReceiver(customResultReceiver)
+                        .setCustomAnyResultReceiver(customAnyResultReceiver),
+                    true
+                );
                 break;
             }
             case STEP_CHECKOUT:
@@ -3597,7 +3638,12 @@ public class PaymentFormActivity extends BaseFragment implements NotificationCen
                 break;
             case STEP_SET_PASSWORD_EMAIL:
                 if (!delegate.didSelectNewCard(paymentJson, cardName, saveCardInfo, googlePayCredentials, savedCredentialsCard)) {
-                    presentFragment(new PaymentFormActivity(invoiceInput, paymentForm, messageObject, invoiceSlug, STEP_CHECKOUT, requestedInfo, shippingOption, tipAmount, paymentJson, cardName, validateRequest, saveCardInfo, googlePayCredentials, parentFragment, false), true);
+                    presentFragment(
+                        new PaymentFormActivity(invoiceInput, paymentForm, messageObject, invoiceSlug, STEP_CHECKOUT, requestedInfo, shippingOption, tipAmount, paymentJson, cardName, validateRequest, saveCardInfo, googlePayCredentials, parentFragment, false)
+                            .setCustomResultReceiver(customResultReceiver)
+                            .setCustomAnyResultReceiver(customAnyResultReceiver),
+                        true
+                    );
                 } else {
                     finishFragment();
                 }
@@ -3904,17 +3950,38 @@ public class PaymentFormActivity extends BaseFragment implements NotificationCen
             month = null;
             year = null;
         }
-        Card card = new Card(
-            inputFields[FIELD_CARD].getText().toString(),
-            month,
-            year,
-            inputFields[FIELD_CVV].getText().toString(),
-            inputFields[FIELD_CARDNAME].getText().toString(),
-            null, null, null, null,
-            inputFields[FIELD_CARD_POSTCODE].getText().toString(),
-            inputFields[FIELD_CARD_COUNTRY].getText().toString(),
-            null);
-        cardName = card.getBrand() + " *" + card.getLast4();
+        String number = inputFields[FIELD_CARD].getText().toString().trim().replaceAll("\\s+|-", "");
+        String cvc = inputFields[FIELD_CVV].getText().toString().trim();
+        boolean isAmex = number.startsWith("34") || number.startsWith("37");
+        boolean isDiners = number.matches("(30[0-5]|309|36|38|39).*");
+        boolean validNumber = number.length() == (isAmex ? 15 : isDiners ? 14 : 16);
+        int checksum = 0;
+        boolean doubleDigit = false;
+        for (int i = number.length() - 1; validNumber && i >= 0; i--) {
+            int digit = Character.digit(number.charAt(i), 10);
+            if (digit < 0) {
+                validNumber = false;
+                break;
+            }
+            if (doubleDigit) {
+                digit *= 2;
+                if (digit > 9) {
+                    digit -= 9;
+                }
+            }
+            checksum += digit;
+            doubleDigit = !doubleDigit;
+        }
+        validNumber &= checksum % 10 == 0;
+        boolean validCvc = cvc.length() == 3 || isAmex && cvc.length() == 4;
+        for (int i = 0; validCvc && i < cvc.length(); i++) {
+            validCvc = Character.isDigit(cvc.charAt(i));
+        }
+        Calendar now = Calendar.getInstance();
+        int currentYear = now.get(Calendar.YEAR);
+        int fullYear = year == null ? -1 : year >= 0 && year < 100 ? currentYear / 100 * 100 + year : year;
+        boolean validDate = month != null && month >= 1 && month <= 12 &&
+            (fullYear > currentYear || fullYear == currentYear && month >= now.get(Calendar.MONTH) + 1);
 
         boolean skipDateCheck = false;
         if (month != null && year != null) {
@@ -3927,16 +3994,16 @@ public class PaymentFormActivity extends BaseFragment implements NotificationCen
             }
         }
 
-        if (!card.validateNumber()) {
+        if (!validNumber) {
             shakeField(FIELD_CARD);
             return false;
-        } else if (!skipDateCheck && (!card.validateExpMonth() || !card.validateExpYear() || !card.validateExpiryDate())) {
+        } else if (!skipDateCheck && !validDate) {
             shakeField(FIELD_EXPIRE_DATE);
             return false;
         } else if (need_card_name && inputFields[FIELD_CARDNAME].length() == 0) {
             shakeField(FIELD_CARDNAME);
             return false;
-        } else if (!card.validateCVC()) {
+        } else if (!validCvc) {
             shakeField(FIELD_CVV);
             return false;
         } else if (need_card_country && inputFields[FIELD_CARD_COUNTRY].length() == 0) {
@@ -3948,14 +4015,25 @@ public class PaymentFormActivity extends BaseFragment implements NotificationCen
         }
         showEditDoneProgress(true, true);
         try {
+            CardParams cardParams = new CardParams(number, month, year, cvc,
+                inputFields[FIELD_CARDNAME].getText().toString(),
+                new Address.Builder()
+                    .setPostalCode(inputFields[FIELD_CARD_POSTCODE].getText().toString())
+                    .setCountry(inputFields[FIELD_CARD_COUNTRY].getText().toString())
+                    .build());
+            cardName = cardParams.getBrand().getDisplayName() + " *" + number.substring(number.length() - 4);
             if ("stripe".equals(paymentForm.native_provider)) {
-                Stripe stripe = new Stripe(providerApiKey);
-                stripe.createToken(card, new TokenCallback() {
+                Stripe stripe = new Stripe(ApplicationLoader.applicationContext, providerApiKey);
+                stripe.createCardToken(cardParams, new ApiResultCallback<Token>() {
                             public void onSuccess(Token token) {
                                 if (canceled) {
                                     return;
                                 }
-                                paymentJson = String.format(Locale.US, "{\"type\":\"%1$s\", \"id\":\"%2$s\"}", token.getType(), token.getId());
+                                if (token.getType() != Token.Type.Card) {
+                                    onError(new IllegalStateException("Invalid Stripe card token"));
+                                    return;
+                                }
+                                paymentJson = String.format(Locale.US, "{\"type\":\"card\", \"id\":\"%1$s\"}", token.getId());
                                 AndroidUtilities.runOnUIThread(() -> {
                                     goToNextStep();
                                     showEditDoneProgress(true, false);
@@ -3985,10 +4063,10 @@ public class PaymentFormActivity extends BaseFragment implements NotificationCen
                         try {
                             JSONObject jsonObject = new JSONObject();
                             JSONObject cardObject = new JSONObject();
-                            cardObject.put("number", card.getNumber());
-                            cardObject.put("expiration_month", String.format(Locale.US, "%02d", card.getExpMonth()));
-                            cardObject.put("expiration_year", "" + card.getExpYear());
-                            cardObject.put("security_code", "" + card.getCVC());
+                            cardObject.put("number", number);
+                            cardObject.put("expiration_month", String.format(Locale.US, "%02d", month));
+                            cardObject.put("expiration_year", "" + year);
+                            cardObject.put("security_code", cvc);
                             jsonObject.put("card", cardObject);
 
                             String overrideSmartGlocalConnectionUrl = null;
@@ -4067,6 +4145,9 @@ public class PaymentFormActivity extends BaseFragment implements NotificationCen
             }
         } catch (Exception e) {
             FileLog.e(e);
+            showEditDoneProgress(true, false);
+            setDonePressed(false);
+            AlertsCreator.showSimpleToast(PaymentFormActivity.this, e.getMessage());
         }
         return true;
     }
@@ -4223,8 +4304,14 @@ public class PaymentFormActivity extends BaseFragment implements NotificationCen
     }
 
     private Utilities.Callback<TLRPC.TL_payments_paymentResult> customResultReceiver;
-    public void setCustomResultReceiver(Utilities.Callback<TLRPC.TL_payments_paymentResult> receiver) {
+    public PaymentFormActivity setCustomResultReceiver(Utilities.Callback<TLRPC.TL_payments_paymentResult> receiver) {
         this.customResultReceiver = receiver;
+        return this;
+    }
+    private Utilities.Callback<TLRPC.payments_PaymentResult> customAnyResultReceiver;
+    public PaymentFormActivity setCustomAnyResultReceiver(Utilities.Callback<TLRPC.payments_PaymentResult> receiver) {
+        this.customAnyResultReceiver = receiver;
+        return this;
     }
     private Utilities.CallbackReturn<TLRPC.TL_error, Boolean> customErrorReceiver;
     public void setCustomErrorReceiver(Utilities.CallbackReturn<TLRPC.TL_error, Boolean> receiver) {
@@ -4370,7 +4457,12 @@ public class PaymentFormActivity extends BaseFragment implements NotificationCen
                                                 BaseFragment.BottomSheetParams params = new BaseFragment.BottomSheetParams();
                                                 params.transitionFromLeft = true;
                                                 params.allowNestedScroll = false;
-                                                lastFragment3.showAsSheet(new PaymentFormActivity((TLRPC.PaymentReceipt) response2), params);
+                                                lastFragment3.showAsSheet(
+                                                    new PaymentFormActivity((TLRPC.PaymentReceipt) response2)
+                                                        .setCustomResultReceiver(customResultReceiver)
+                                                        .setCustomAnyResultReceiver(customAnyResultReceiver),
+                                                    params
+                                                );
                                             }
                                         }
                                     }), ConnectionsManager.RequestFlagFailOnServerErrors);
@@ -4381,6 +4473,10 @@ public class PaymentFormActivity extends BaseFragment implements NotificationCen
                     });
                 } else if (response instanceof TLRPC.TL_payments_paymentVerificationNeeded) {
                     AndroidUtilities.runOnUIThread(() -> {
+                        if (this.customAnyResultReceiver != null) {
+                            this.customAnyResultReceiver.run((TLRPC.TL_payments_paymentVerificationNeeded) response);
+                        }
+
                         setDonePressed(false);
                         webviewLoading = true;
                         showEditDoneProgress(true, true);
@@ -4469,7 +4565,12 @@ public class PaymentFormActivity extends BaseFragment implements NotificationCen
                                                             BaseFragment.BottomSheetParams params = new BaseFragment.BottomSheetParams();
                                                             params.transitionFromLeft = true;
                                                             params.allowNestedScroll = false;
-                                                            lastFragment3.showAsSheet(new PaymentFormActivity((TLRPC.PaymentReceipt) response2), params);
+                                                            lastFragment3.showAsSheet(
+                                                                new PaymentFormActivity((TLRPC.PaymentReceipt) response2)
+                                                                    .setCustomResultReceiver(customResultReceiver)
+                                                                    .setCustomAnyResultReceiver(customAnyResultReceiver),
+                                                                params
+                                                            );
                                                         }
                                                     }
                                                 }), ConnectionsManager.RequestFlagFailOnServerErrors);
@@ -4793,10 +4894,12 @@ public class PaymentFormActivity extends BaseFragment implements NotificationCen
     }
 
     @Override
-    public boolean onBackPressed() {
+    public boolean onBackPressed(boolean invoked) {
         if (webView != null && shouldNavigateBack) {
-            webView.loadUrl(webViewUrl);
-            shouldNavigateBack = false;
+            if (invoked) {
+                webView.loadUrl(webViewUrl);
+                shouldNavigateBack = false;
+            }
             return false;
         }
         return !donePressed;

@@ -123,7 +123,7 @@ public class ChannelWallpaperActivity extends BaseFragment {
             }
         });
 
-        sunDrawable = new RLottieDrawable(R.raw.sun, "" + R.raw.sun, dp(28), dp(28), true, null);
+        sunDrawable = new RLottieDrawable(R.raw.sun, dp(28), dp(28), true, null);
         sunDrawable.setPlayInDirectionOfCustomEndFrame(true);
         if (!isDark()) {
             sunDrawable.setCustomEndFrame(0);
@@ -134,10 +134,10 @@ public class ChannelWallpaperActivity extends BaseFragment {
         }
         sunDrawable.beginApplyLayerColors();
         int color = Theme.getColor(Theme.key_chats_menuName, resourceProvider);
-        sunDrawable.setLayerColor("Sunny.**", color);
-        sunDrawable.setLayerColor("Path 6.**", color);
-        sunDrawable.setLayerColor("Path.**", color);
-        sunDrawable.setLayerColor("Path 5.**", color);
+        sunDrawable.setLayerColor("Sunny", color);
+        sunDrawable.setLayerColor("Path 6", color);
+        sunDrawable.setLayerColor("Path", color);
+        sunDrawable.setLayerColor("Path 5", color);
         if (resourceProvider instanceof ChannelColorActivity.ThemeDelegate) {
             dayNightItem = actionBar.createMenu().addItem(1, sunDrawable);
         }

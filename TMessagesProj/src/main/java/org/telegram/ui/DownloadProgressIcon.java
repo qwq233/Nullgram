@@ -7,8 +7,6 @@ import android.graphics.PorterDuff;
 import android.graphics.PorterDuffColorFilter;
 import android.view.View;
 
-import com.google.android.exoplayer2.util.Log;
-
 import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.DownloadController;
 import org.telegram.messenger.FileLoader;
@@ -47,10 +45,8 @@ public class DownloadProgressIcon extends View implements NotificationCenter.Not
         downloadImageReceiver.ignoreNotifications = true;
         downloadCompleteImageReceiver.ignoreNotifications = true;
 
-        downloadDrawable = new RLottieDrawable(R.raw.download_progress, "download_progress", AndroidUtilities.dp(28), AndroidUtilities.dp(28), true, null);
-        downloadDrawable.setColorFilter(new PorterDuffColorFilter(Theme.getColor(Theme.key_actionBarDefaultIcon), PorterDuff.Mode.MULTIPLY));
-        downloadCompleteDrawable = new RLottieDrawable(R.raw.download_finish, "download_finish", AndroidUtilities.dp(28), AndroidUtilities.dp(28), true, null);
-        downloadCompleteDrawable.setColorFilter(new PorterDuffColorFilter(Theme.getColor(Theme.key_actionBarDefaultIcon), PorterDuff.Mode.MULTIPLY));
+        downloadDrawable = new RLottieDrawable(R.raw.download_progress, AndroidUtilities.dp(28), AndroidUtilities.dp(28), true, null);
+        downloadCompleteDrawable = new RLottieDrawable(R.raw.download_finish, AndroidUtilities.dp(28), AndroidUtilities.dp(28), true, null);
 
         downloadImageReceiver.setImageBitmap(downloadDrawable);
         downloadCompleteImageReceiver.setImageBitmap(downloadCompleteDrawable);
@@ -58,6 +54,12 @@ public class DownloadProgressIcon extends View implements NotificationCenter.Not
         downloadImageReceiver.setAutoRepeat(1);
         downloadDrawable.setAutoRepeat(1);
         downloadDrawable.start();
+    }
+
+    public void updateColors() {
+        downloadDrawable.setColorFilter(new PorterDuffColorFilter(Theme.getColor(Theme.key_actionBarDefaultIcon), PorterDuff.Mode.SRC_IN));
+        downloadCompleteDrawable.setColorFilter(new PorterDuffColorFilter(Theme.getColor(Theme.key_actionBarDefaultIcon), PorterDuff.Mode.SRC));
+        invalidate();
     }
 
     @Override
@@ -79,8 +81,8 @@ public class DownloadProgressIcon extends View implements NotificationCenter.Not
             currentColor = Theme.getColor(Theme.key_actionBarDefaultIcon);
             paint.setColor(Theme.getColor(Theme.key_actionBarDefaultIcon));
             paint2.setColor(Theme.getColor(Theme.key_actionBarDefaultIcon));
-            downloadImageReceiver.setColorFilter(new PorterDuffColorFilter(Theme.getColor(Theme.key_actionBarDefaultIcon), PorterDuff.Mode.MULTIPLY));
-            downloadCompleteImageReceiver.setColorFilter(new PorterDuffColorFilter(Theme.getColor(Theme.key_actionBarDefaultIcon), PorterDuff.Mode.MULTIPLY));
+            downloadImageReceiver.setColorFilter(new PorterDuffColorFilter(Theme.getColor(Theme.key_actionBarDefaultIcon), PorterDuff.Mode.SRC_IN));
+            downloadCompleteImageReceiver.setColorFilter(new PorterDuffColorFilter(Theme.getColor(Theme.key_actionBarDefaultIcon), PorterDuff.Mode.SRC_IN));
             paint2.setAlpha(100);
         }
 

@@ -25,6 +25,7 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import androidx.annotation.NonNull;
 import androidx.core.graphics.ColorUtils;
 import androidx.viewpager.widget.ViewPager;
 import androidx.viewpager.widget.ViewPager.OnPageChangeListener;
@@ -186,6 +187,7 @@ public class PagerSlidingTabStrip extends HorizontalScrollView {
 //            tab.setBackground(rippleDrawable);
 //        }
         tab.setText(text);
+        ScaleStateListAnimator.apply(tab, .025f, 1.2f);
         tab.setOnClickListener(v -> {
             if (pager.getAdapter() instanceof IconTabProvider) {
                 if (!((IconTabProvider) pager.getAdapter()).canScrollToTab(position)) {
@@ -194,7 +196,7 @@ public class PagerSlidingTabStrip extends HorizontalScrollView {
             }
             pager.setCurrentItem(position, false);
         });
-        tab.setPadding(AndroidUtilities.dp(18), 0, AndroidUtilities.dp(18), 0);
+        tab.setPadding(AndroidUtilities.dp(16), 0, AndroidUtilities.dp(16), 0);
         tabsContainer.addView(tab, LayoutHelper.createLinear(LayoutHelper.WRAP_CONTENT, LayoutHelper.WRAP_CONTENT, 10, 0, 10, 0));
         tab.setSelected(position == currentPosition);
     }
@@ -248,7 +250,7 @@ public class PagerSlidingTabStrip extends HorizontalScrollView {
     private AnimatedFloat lineRightAnimated = new AnimatedFloat(this, 350, CubicBezierInterpolator.EASE_OUT_QUINT);
 
     @Override
-    protected void onDraw(Canvas canvas) {
+    protected void onDraw(@NonNull Canvas canvas) {
 
         if (isInEditMode() || tabCount == 0) {
             super.onDraw(canvas);

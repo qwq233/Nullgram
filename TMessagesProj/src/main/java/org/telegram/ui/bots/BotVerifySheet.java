@@ -1,16 +1,13 @@
 package org.telegram.ui.bots;
 
 import static org.telegram.messenger.AndroidUtilities.dp;
-import static org.telegram.messenger.LocaleController.formatPluralString;
 import static org.telegram.messenger.LocaleController.formatString;
 import static org.telegram.messenger.LocaleController.getString;
-import static org.telegram.ui.bots.AffiliateProgramFragment.percents;
 
 import android.content.Context;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffColorFilter;
 import android.graphics.Typeface;
-import android.graphics.drawable.ShapeDrawable;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.InputType;
@@ -20,22 +17,16 @@ import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.View;
 import android.widget.FrameLayout;
-import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
-import org.telegram.messenger.AccountInstance;
 import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.ChatObject;
-import org.telegram.messenger.DialogObject;
 import org.telegram.messenger.Emoji;
 import org.telegram.messenger.LocaleController;
-import org.telegram.messenger.MessageObject;
 import org.telegram.messenger.MessagesController;
-import org.telegram.messenger.MessagesStorage;
 import org.telegram.messenger.NotificationCenter;
 import org.telegram.messenger.R;
-import org.telegram.messenger.SendMessagesHelper;
 import org.telegram.messenger.UserObject;
 import org.telegram.messenger.Utilities;
 import org.telegram.tgnet.ConnectionsManager;
@@ -55,18 +46,13 @@ import org.telegram.ui.Components.EditTextBoldCursor;
 import org.telegram.ui.Components.EditTextSuggestionsFix;
 import org.telegram.ui.Components.LayoutHelper;
 import org.telegram.ui.Components.OutlineTextContainerView;
-import org.telegram.ui.Components.Premium.PremiumGradient;
 import org.telegram.ui.DialogsActivity;
 import org.telegram.ui.LaunchActivity;
 import org.telegram.ui.Stories.recorder.ButtonWithCounterView;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-
 public class BotVerifySheet {
 
-    public static void openVerify(int currentAccount, long botId, TL_bots.botVerifierSettings settings) {
+    public static void openVerify(int currentAccount, long botId, TL_bots.BotVerifierSettings settings) {
         BaseFragment lastFragment = LaunchActivity.getSafeLastFragment();
         if (lastFragment == null) return;
 
@@ -77,7 +63,7 @@ public class BotVerifySheet {
 
         final DialogsActivity fragment = new DialogsActivity(args);
         fragment.setCurrentAccount(currentAccount);
-        fragment.setDelegate((fragment1, dids, _message, param, notify, scheduleDate, topicsFragment) -> {
+        fragment.setDelegate((fragment1, dids, _message, param, notify, scheduleDate, scheduleRepeatPeriod, topicsFragment) -> {
             if (dids.isEmpty()) {
                 return false;
             }
@@ -112,7 +98,7 @@ public class BotVerifySheet {
         lastFragment.presentFragment(fragment);
     }
 
-    public static void openSheet(Context context, int currentAccount, long botId, long dialogId, TL_bots.botVerifierSettings settings, Utilities.Callback<Boolean> whenSent) {
+    public static void openSheet(Context context, int currentAccount, long botId, long dialogId, TL_bots.BotVerifierSettings settings, Utilities.Callback<Boolean> whenSent) {
         if (context == null) {
             return;
         }
@@ -284,8 +270,8 @@ public class BotVerifySheet {
                 editTextContainer.animateSelection(editText.isFocused(), !TextUtils.isEmpty(text));
             }
         });
-        if (!TextUtils.isEmpty(settings.custom_description)) {
-            editText.setText(settings.custom_description);
+        if (settings.custom_description != null && !TextUtils.isEmpty(settings.custom_description.text)) {
+            editText.setText(settings.custom_description.text);
             if (!settings.can_modify_custom_description) {
                 editText.setEnabled(false);
                 editText.setFocusable(false);
@@ -330,12 +316,13 @@ public class BotVerifySheet {
             req.bot = MessagesController.getInstance(currentAccount).getInputUser(botId);
             req.peer = MessagesController.getInstance(currentAccount).getInputPeer(dialogId);
             if (settings.can_modify_custom_description) {
-                req.custom_description = editText.getText().toString();
+                final String text = editText.getText().toString();
+                if (!TextUtils.isEmpty(text)) {
+                    req.custom_description = new TLRPC.TL_textWithEntities();
+                    req.custom_description.text = text;
+                }
             } else {
                 req.custom_description = settings.custom_description;
-            }
-            if (!TextUtils.isEmpty(req.custom_description)) {
-                req.flags |= 4;
             }
 
             ConnectionsManager.getInstance(currentAccount).sendRequest(req, (res, err) -> AndroidUtilities.runOnUIThread(() -> {
@@ -354,7 +341,7 @@ public class BotVerifySheet {
         sheet.show();
     }
 
-    public static void openRemoveVerify(Context context, int currentAccount, long botId, long dialogId, TL_bots.botVerifierSettings settings, Utilities.Callback<Boolean> whenSent) {
+    public static void openRemoveVerify(Context context, int currentAccount, long botId, long dialogId, TL_bots.BotVerifierSettings settings, Utilities.Callback<Boolean> whenSent) {
         if (context == null) {
             return;
         }

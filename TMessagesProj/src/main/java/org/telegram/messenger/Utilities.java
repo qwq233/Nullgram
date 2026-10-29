@@ -29,7 +29,6 @@ import android.net.Uri;
 import com.carrotsearch.randomizedtesting.Xoroshiro128PlusRandom;
 
 import org.telegram.tgnet.ConnectionsManager;
-import org.telegram.tgnet.TLRPC;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -75,12 +74,9 @@ public class Utilities {
         }
     }
 
-    public native static int pinBitmap(Bitmap bitmap);
-    public native static void unpinBitmap(Bitmap bitmap);
-    public native static void blurBitmap(Object bitmap, int radius, int unpin, int width, int height, int stride);
-    public native static int needInvert(Object bitmap, int unpin, int width, int height, int stride);
+    public native static void blurBitmap(Object bitmap, int radius);
+    public native static int needInvert(Object bitmap);
     public native static void calcCDT(ByteBuffer hsvBuffer, int width, int height, ByteBuffer buffer, ByteBuffer calcBuffer);
-    public native static int convertVideoFrame(ByteBuffer src, ByteBuffer dest, int destFormat, int width, int height, int padding, int swap);
     private native static void aesIgeEncryption(ByteBuffer buffer, byte[] key, byte[] iv, boolean encrypt, int offset, int length);
     private native static void aesIgeEncryptionByteArray(byte[] buffer, byte[] key, byte[] iv, boolean encrypt, int offset, int length);
     public native static void aesCtrDecryption(ByteBuffer buffer, byte[] key, byte[] iv, int offset, int length);
@@ -94,10 +90,16 @@ public class Utilities {
     public native static void clearDir(String path, int docType, long time, boolean subdirs);
     private native static int pbkdf2(byte[] password, byte[] salt, byte[] dst, int iterations);
     public static native void stackBlurBitmap(Bitmap bitmap, int radius);
-    public static native void drawDitheredGradient(Bitmap bitmap, int[] colors, int startX, int startY, int endX, int endY);
+    public static native boolean drawDitheredGradient(Bitmap bitmap, int[] colors, int startX, int startY, int endX, int endY);
 //    public static native int saveProgressiveJpeg(Bitmap bitmap, int width, int height, int stride, int quality, String path);
-    public static native void generateGradient(Bitmap bitmap, boolean unpin, int phase, float progress, int width, int height, int stride, int[] colors);
-    public static native void applyAlphaThreshold(Bitmap bitmap, int threshold);
+    public static native void generateGradient(Bitmap bitmap, int phase, float progress, int[] colors);
+    public static native boolean applySoftLight(Bitmap inputBitmap, Bitmap outputBitmap, int color);
+    public static native boolean applyAlphaInvert(Bitmap inputBitmap, Bitmap outputBitmap, int intensity);
+    public static native boolean expandAlphaToBlack(Bitmap inputBitmap, Bitmap outputBitmap);
+    public static native boolean extractAlpha(Bitmap inputBitmap, Bitmap outputBitmap);
+    public static native boolean copyBitmaps(Bitmap src, Bitmap dst);
+    public static native int averageBitmapColor(Bitmap bitmap, int left, int top, int right, int bottom);
+    public static native boolean drawReplyLinePattern(Bitmap bitmap, int color1, int color2, int color3, int barHeight, boolean hasColor3);
 
     public static Bitmap stackBlurBitmapMax(Bitmap bitmap) {
         return stackBlurBitmapMax(bitmap, false);
@@ -176,17 +178,15 @@ public class Utilities {
                 if (allowedChar && start < 0) {
                     start = end;
                 } else if (!allowedChar && start >= 0) {
-                    end++;
                     break;
                 }
             }
-            if (start >= 0) {
+            if (start >= 0 && (end - start > 1 || value.charAt(start) != '-')) {
                 String str = value.subSequence(start, end).toString();
 //                val = parseInt(str);
                 val = Integer.parseInt(str);
             }
-        } catch (Exception ignore) {
-        }
+        } catch (Exception ignore) {}
         return val;
     }
 
@@ -642,4 +642,18 @@ public class Utilities {
         }
     }
 
+    public static int divCeil(int a, int b) {
+        return (a + b - 1) / b;
+    }
+
+
+
+    public enum libyuv_ScaleFilter {
+        None, Linear, Bilinear, Box
+    }
+
+    private static native boolean nLibyuvARGBSaleBitmap(Bitmap src, Bitmap dst, int filterMode);
+    public static boolean libyuvARGBSaleBitmap(Bitmap src, Bitmap dst, libyuv_ScaleFilter mode) {
+        return nLibyuvARGBSaleBitmap(src, dst, mode.ordinal());
+    }
 }

@@ -9,6 +9,10 @@ import org.telegram.tgnet.Vector;
 import java.util.ArrayList;
 
 public class TL_update {
+    private TL_update() {
+
+    }
+
     public static class TL_updateStarsRevenueStatus extends TLRPC.Update {
         public static final int constructor = 0xa584b019;
 
@@ -2648,12 +2652,12 @@ public class TL_update {
 
         public TLRPC.Peer peer;
         public long bot_id;
-        public ArrayList<TLRPC.TL_botCommand> commands = new ArrayList<>();
+        public ArrayList<TLRPC.BotCommand> commands = new ArrayList<>();
 
         public void readParams(InputSerializedData stream, boolean exception) {
             peer = TLRPC.Peer.TLdeserialize(stream, stream.readInt32(exception), exception);
             bot_id = stream.readInt64(exception);
-            commands = Vector.deserialize(stream, TLRPC.TL_botCommand::TLdeserialize, exception);
+            commands = Vector.deserialize(stream, TLRPC.BotCommand::TLdeserialize, exception);
         }
 
         public void serializeToStream(OutputSerializedData stream) {
@@ -2879,6 +2883,209 @@ public class TL_update {
                 stream.writeBool(open_external_browser);
             }
             exception.serializeToStream(stream);
+        }
+    }
+
+    public static class TL_updateNewEphemeralMessage extends TLRPC.Update {
+        public static final int constructor = 0x20BCBBA1;
+
+        public TL_ephemeral.EphemeralMessage message;
+
+        public void readParams(InputSerializedData stream, boolean exception) {
+            message = TL_ephemeral.EphemeralMessage.TLdeserialize(stream, stream.readInt32(exception), exception);
+        }
+
+        public void serializeToStream(OutputSerializedData stream) {
+            stream.writeInt32(constructor);
+            message.serializeToStream(stream);
+        }
+    }
+
+    public static class TL_updateDeleteEphemeralMessages extends TLRPC.Update {
+        public static final int constructor = 0x56DBFCF8;
+
+        public TLRPC.Peer peer;
+        public ArrayList<Integer> ids = new ArrayList<>();
+
+        public void readParams(InputSerializedData stream, boolean exception) {
+            peer = TLRPC.Peer.TLdeserialize(stream, stream.readInt32(exception), exception);
+            ids = Vector.deserializeInt(stream, exception);
+        }
+
+        public void serializeToStream(OutputSerializedData stream) {
+            stream.writeInt32(constructor);
+            peer.serializeToStream(stream);
+            Vector.serializeInt(stream, ids);
+        }
+    }
+
+    public static class TL_updateEditEphemeralMessage extends TLRPC.Update {
+        public static final int constructor = 0x4BBB8F01;
+
+        public TL_ephemeral.EphemeralMessage message;
+
+        public void readParams(InputSerializedData stream, boolean exception) {
+            message = TL_ephemeral.EphemeralMessage.TLdeserialize(stream, stream.readInt32(exception), exception);
+        }
+
+        public void serializeToStream(OutputSerializedData stream) {
+            stream.writeInt32(constructor);
+            message.serializeToStream(stream);
+        }
+    }
+
+    public static class TL_updateEphemeralBotCallbackQuery extends TLRPC.Update {
+        public static final int constructor = 0x7C1079D6;
+
+        public int flags;
+        public long query_id;
+        public long user_id;
+        public TLRPC.Peer peer;
+        public int msg_id;
+        public byte[] data;
+        public long chat_instance;
+        public TL_ephemeral.EphemeralMessage message;
+
+        public void readParams(InputSerializedData stream, boolean exception) {
+            flags = stream.readInt32(exception);
+            query_id = stream.readInt64(exception);
+            user_id = stream.readInt64(exception);
+            if (hasFlag(flags, FLAG_0)) {
+                peer = TLRPC.Peer.TLdeserialize(stream, stream.readInt32(exception), exception);
+            }
+            msg_id = stream.readInt32(exception);
+            data = stream.readByteArray(exception);
+            if (hasFlag(flags, FLAG_1)) {
+                chat_instance = stream.readInt64(exception);
+            }
+            message = TL_ephemeral.EphemeralMessage.TLdeserialize(stream, stream.readInt32(exception), exception);
+        }
+
+        public void serializeToStream(OutputSerializedData stream) {
+            stream.writeInt32(constructor);
+            flags = setFlag(flags, FLAG_0, peer != null);
+            flags = setFlag(flags, FLAG_1, chat_instance != 0);
+            stream.writeInt32(flags);
+            stream.writeInt64(query_id);
+            stream.writeInt64(user_id);
+            if (hasFlag(flags, FLAG_0)) {
+                peer.serializeToStream(stream);
+            }
+            stream.writeInt32(msg_id);
+            stream.writeByteArray(data);
+            if (hasFlag(flags, FLAG_1)) {
+                stream.writeInt64(chat_instance);
+            }
+            message.serializeToStream(stream);
+        }
+    }
+
+    public static class TL_updateWalletState extends TLRPC.Update {
+        public static final int constructor = 0x6ac3f2aa;
+
+        public TL_wallet.WalletState state;
+
+        @Override
+        public void readParams(InputSerializedData stream, boolean exception) {
+            state = TL_wallet.WalletState.TLdeserialize(stream, stream.readInt32(exception), exception);
+        }
+
+        @Override
+        public void serializeToStream(OutputSerializedData stream) {
+            stream.writeInt32(constructor);
+            state.serializeToStream(stream);
+        }
+    }
+
+    public static class TL_updateWalletTonConnectSession extends TLRPC.Update {
+        public static final int constructor = 0x50a38e0e;
+
+        public TL_wallet.tonConnectSession session;
+
+        @Override
+        public void readParams(InputSerializedData stream, boolean exception) {
+            session = TL_wallet.tonConnectSession.TLdeserialize(stream, stream.readInt32(exception), exception);
+        }
+
+        @Override
+        public void serializeToStream(OutputSerializedData stream) {
+            stream.writeInt32(constructor);
+            session.serializeToStream(stream);
+        }
+    }
+
+    public static class TL_updateWalletTonConnectPendingDisconnect extends TLRPC.Update {
+        public static final int constructor = 0xd1ee8199;
+
+        public ArrayList<Long> session_ids = new ArrayList<>();
+
+        @Override
+        public void readParams(InputSerializedData stream, boolean exception) {
+            session_ids = Vector.deserializeLong(stream, exception);
+        }
+
+        @Override
+        public void serializeToStream(OutputSerializedData stream) {
+            stream.writeInt32(constructor);
+            Vector.serializeLong(stream, session_ids);
+        }
+    }
+
+    public static class TL_updateSentWalletTransaction extends TLRPC.Update {
+        public static final int constructor = 0xb1434d4a;
+
+        public boolean gasless;
+        public String msg_hash;
+        public TL_wallet.walletTransaction transaction;
+
+        @Override
+        public void readParams(InputSerializedData stream, boolean exception) {
+            int flags = stream.readInt32(exception);
+            gasless = (flags & 1) != 0;
+            msg_hash = stream.readString(exception);
+            if ((flags & 2) != 0) {
+                transaction = TL_wallet.walletTransaction.TLdeserialize(stream, stream.readInt32(exception), exception);
+            }
+        }
+
+        @Override
+        public void serializeToStream(OutputSerializedData stream) {
+            stream.writeInt32(constructor);
+            stream.writeInt32((gasless ? 1 : 0) | (transaction != null ? 2 : 0));
+            stream.writeString(msg_hash);
+            if (transaction != null) transaction.serializeToStream(stream);
+        }
+    }
+
+    public static class TL_updateWalletGaslessInfo extends TLRPC.Update {
+        public static final int constructor = 0xa8ae1cac;
+
+        public boolean available;
+        public int left;
+        public int reset_at;
+        public long min_amount;
+        public String relayer_address;
+
+        @Override
+        public void readParams(InputSerializedData stream, boolean exception) {
+            int flags = stream.readInt32(exception);
+            available = (flags & 1) != 0;
+            left = stream.readInt32(exception);
+            reset_at = stream.readInt32(exception);
+            min_amount = stream.readInt64(exception);
+            relayer_address = stream.readString(exception);
+        }
+
+        @Override
+        public void serializeToStream(OutputSerializedData stream) {
+            stream.writeInt32(constructor);
+            int flags = 0;
+            flags = available ? 1 : 0;
+            stream.writeInt32(flags);
+            stream.writeInt32(left);
+            stream.writeInt32(reset_at);
+            stream.writeInt64(min_amount);
+            stream.writeString(relayer_address);
         }
     }
 }

@@ -159,6 +159,10 @@ public class MemberRequestsDelegate implements MemberRequestCell.OnClickListener
         return rootLayout;
     }
 
+    public RecyclerListView getRecyclerView() {
+        return recyclerView;
+    }
+
     public void setShowLastItemDivider(boolean showLastItemDivider) {
         this.isShowLastItemDivider = showLastItemDivider;
     }
@@ -264,9 +268,9 @@ public class MemberRequestsDelegate implements MemberRequestCell.OnClickListener
         }
     }
 
-    public boolean onBackPressed() {
+    public boolean onBackPressed(boolean invoked) {
         if (previewDialog != null) {
-            previewDialog.dismiss();
+            if (invoked) previewDialog.dismiss();
             return false;
         } else {
             return true;
@@ -874,8 +878,8 @@ public class MemberRequestsDelegate implements MemberRequestCell.OnClickListener
             final ImageLocation imageLocation;
             final ImageLocation thumbLocation;
             TLRPC.User currentUser = MessagesController.getInstance(currentAccount).getUser(importer.user_id);
-            imageLocation = ImageLocation.getForUserOrChat(currentUser, ImageLocation.TYPE_BIG);
-            thumbLocation = ImageLocation.getForUserOrChat(currentUser, ImageLocation.TYPE_SMALL);
+            imageLocation = ImageLocation.getForUserOrChat(currentAccount, currentUser, ImageLocation.TYPE_BIG);
+            thumbLocation = ImageLocation.getForUserOrChat(currentAccount, currentUser, ImageLocation.TYPE_SMALL);
             final TLRPC.UserFull userFull = MessagesController.getInstance(currentAccount).getUserFull(importer.user_id);
             if (userFull == null) {
                 MessagesController.getInstance(currentAccount).loadUserInfo(currentUser, false, 0);

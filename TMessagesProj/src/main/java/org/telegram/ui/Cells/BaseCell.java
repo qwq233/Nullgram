@@ -21,12 +21,13 @@ package org.telegram.ui.Cells;
 
 import android.content.Context;
 import android.content.res.ColorStateList;
-import android.graphics.Canvas;
 import android.graphics.RecordingCanvas;
 import android.graphics.RenderNode;
+import android.os.Build;
+import org.telegram.messenger.SharedConfig;
+import android.graphics.Canvas;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.RippleDrawable;
-import android.os.Build;
 import android.view.HapticFeedbackConstants;
 import android.view.MotionEvent;
 import android.view.ViewConfiguration;
@@ -38,9 +39,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import org.telegram.messenger.FileLog;
-import org.telegram.messenger.SharedConfig;
 import org.telegram.ui.Components.SizeNotifierFrameLayout;
-import org.telegram.ui.Components.blur3.DownscaleScrollableNoiseSuppressor;
 
 public abstract class BaseCell extends ViewGroup implements SizeNotifierFrameLayout.IViewWithInvalidateCallback {
 
@@ -159,6 +158,7 @@ public abstract class BaseCell extends ViewGroup implements SizeNotifierFrameLay
     }
     @Override
     public void invalidate() {
+        updatedContent = true;
         if (invalidateCallback != null) {
             invalidateCallback.run();
         }

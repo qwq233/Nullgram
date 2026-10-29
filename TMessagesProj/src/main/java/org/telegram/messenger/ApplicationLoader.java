@@ -47,6 +47,7 @@ import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesUtil;
 
 import org.json.JSONObject;
+import org.telegram.messenger.utils.Choreographer60FpsContent;
 import org.telegram.messenger.voip.VideoCapturerDevice;
 import org.telegram.tgnet.ConnectionsManager;
 import org.telegram.tgnet.TLRPC;
@@ -59,6 +60,7 @@ import org.telegram.ui.Components.UpdateButton;
 import org.telegram.ui.Components.UpdateLayout;
 import org.telegram.ui.Components.Premium.boosts.BoostRepository;
 import org.telegram.ui.IUpdateButton;
+import org.telegram.ui.Components.ItemOptions;
 import org.telegram.ui.IUpdateLayout;
 import org.telegram.ui.LauncherIconController;
 
@@ -68,6 +70,7 @@ import java.util.concurrent.CountDownLatch;
 
 import top.qwq2333.nullgram.CrashListener;
 import top.qwq2333.nullgram.utils.AnalyticsUtils;
+import java.util.Locale;
 
 public class ApplicationLoader extends Application {
 
@@ -325,7 +328,11 @@ public class ApplicationLoader extends Application {
 
         super.onCreate();
 
+        // AndroidUtilities must be initialized before FileLog
+        final String helloWorld = AndroidUtilities.getHelloWorld();
+
         if (BuildVars.LOGS_ENABLED) {
+            FileLog.d(helloWorld);
             FileLog.d("app start time = " + (startTime = SystemClock.elapsedRealtime()));
             try {
                 FileLog.d("buildVersion = " + ApplicationLoader.applicationContext.getPackageManager().getPackageInfo(ApplicationLoader.applicationContext.getPackageName(), 0).versionCode);
@@ -341,6 +348,7 @@ public class ApplicationLoader extends Application {
         applicationContext.getSharedPreferences("globalConfig", Context.MODE_PRIVATE);
 
         NativeLoader.initNativeLibs(ApplicationLoader.applicationContext);
+
         try {
             ConnectionsManager.native_setJava(false);
         } catch (UnsatisfiedLinkError error) {
@@ -356,6 +364,10 @@ public class ApplicationLoader extends Application {
                 }
             }
         };
+        if (BuildConfig.DEBUG_VERSION) {
+            new ANRDetector(FileLog::dumpANR);
+        }
+
         if (BuildVars.LOGS_ENABLED) {
             FileLog.d("load libs time = " + (SystemClock.elapsedRealtime() - startTime));
         }
@@ -371,7 +383,15 @@ public class ApplicationLoader extends Application {
 
         LauncherIconController.tryFixLauncherIconIfNeeded();
         ProxyRotationController.init();
+
+        //if (BuildConfig.DEBUG_PRIVATE_VERSION) {
+        //    Choreographer60FpsContent.getInstance().addFrameCallback(debugEverySecondChecks, 1);
+        //}
     }
+
+    private final Runnable debugEverySecondChecks = () -> AndroidUtilities.runOnUIThread(() -> {
+        NotificationCenter.sanitize();
+    });
 
     public static void startPushService() {
         Utilities.globalQueue.postRunnable(() -> {
@@ -730,6 +750,10 @@ public class ApplicationLoader extends Application {
 
     public boolean extendDrawer(ArrayList<DrawerLayoutAdapter.Item> items) {
         return false;
+    }
+
+    public void addItemOptions(ItemOptions itemOptions) {
+
     }
 
     public boolean checkRequestPermissionResult(int requestCode, String[] permissions, int[] grantResults) {

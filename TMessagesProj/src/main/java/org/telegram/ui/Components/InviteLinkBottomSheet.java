@@ -166,7 +166,9 @@ public class InviteLinkBottomSheet extends BottomSheet {
         this.chatId = chatId;
         this.permanent = permanent;
         this.isChannel = isChannel;
-        fixNavigationBar(getThemedColor(Theme.key_graySection));
+        setBackgroundColor(getThemedColor(Theme.key_windowBackgroundGray));
+        fixNavigationBar(getThemedColor(Theme.key_windowBackgroundGray));
+        behindKeyboardColorKey = -1;
 
         if (this.users == null) {
             this.users = new HashMap<>();
@@ -196,11 +198,9 @@ public class InviteLinkBottomSheet extends BottomSheet {
             @Override
             protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
                 int height = MeasureSpec.getSize(heightMeasureSpec);
-                if (Build.VERSION.SDK_INT >= 21) {
-                    ignoreLayout = true;
-                    setPadding(backgroundPaddingLeft, AndroidUtilities.statusBarHeight, backgroundPaddingLeft, 0);
-                    ignoreLayout = false;
-                }
+                ignoreLayout = true;
+                setPadding(backgroundPaddingLeft, AndroidUtilities.statusBarHeight, backgroundPaddingLeft, 0);
+                ignoreLayout = false;
                 super.onMeasure(widthMeasureSpec, MeasureSpec.makeMeasureSpec(height, MeasureSpec.EXACTLY));
                 fullHeight = true;
             }
@@ -225,24 +225,22 @@ public class InviteLinkBottomSheet extends BottomSheet {
                 int height = getMeasuredHeight() + dp(36) + backgroundPaddingTop;
                 int statusBarHeight = 0;
                 float radProgress = 1.0f;
-                if (Build.VERSION.SDK_INT >= 21) {
-                    top += AndroidUtilities.statusBarHeight;
-                    height -= AndroidUtilities.statusBarHeight;
+                top += AndroidUtilities.statusBarHeight;
+                height -= AndroidUtilities.statusBarHeight;
 
-                    if (fullHeight) {
-                        if (top + backgroundPaddingTop < AndroidUtilities.statusBarHeight * 2) {
-                            int diff = Math.min(AndroidUtilities.statusBarHeight, AndroidUtilities.statusBarHeight * 2 - top - backgroundPaddingTop);
-                            top -= diff;
-                            height += diff;
-                            radProgress = 1.0f - Math.min(1.0f, (diff * 2) / (float) AndroidUtilities.statusBarHeight);
-                        }
-                        if (top + backgroundPaddingTop < AndroidUtilities.statusBarHeight) {
-                            statusBarHeight = Math.min(AndroidUtilities.statusBarHeight, AndroidUtilities.statusBarHeight - top - backgroundPaddingTop);
-                        }
+                if (fullHeight) {
+                    if (top + backgroundPaddingTop < AndroidUtilities.statusBarHeight * 2) {
+                        int diff = Math.min(AndroidUtilities.statusBarHeight, AndroidUtilities.statusBarHeight * 2 - top - backgroundPaddingTop);
+                        top -= diff;
+                        height += diff;
+                        radProgress = 1.0f - Math.min(1.0f, (diff * 2) / (float) AndroidUtilities.statusBarHeight);
+                    }
+                    if (top + backgroundPaddingTop < AndroidUtilities.statusBarHeight) {
+                        statusBarHeight = Math.min(AndroidUtilities.statusBarHeight, AndroidUtilities.statusBarHeight - top - backgroundPaddingTop);
                     }
                 }
 
-                shadowDrawable.setBounds(0, top, getMeasuredWidth(), height);
+                shadowDrawable.setBounds(0, top, getMeasuredWidth(), height + dp(10) + AndroidUtilities.navigationBarHeight);
                 shadowDrawable.draw(canvas);
 
                 if (radProgress != 1.0f) {
@@ -457,7 +455,7 @@ public class InviteLinkBottomSheet extends BottomSheet {
         }
         listView.setGlowColor(Theme.getColor(Theme.key_dialogScrollGlow));
         shadow.setBackgroundColor(Theme.getColor(Theme.key_dialogShadowLine));
-        setBackgroundColor(Theme.getColor(Theme.key_dialogBackground));
+        setBackgroundColor(Theme.getColor(Theme.key_windowBackgroundGray));
 
 
         int count = listView.getHiddenChildCount();
@@ -491,28 +489,9 @@ public class InviteLinkBottomSheet extends BottomSheet {
         } else if (view instanceof LinkActionView) {
             ((LinkActionView) view).updateColors();
         } else if (view instanceof TextInfoPrivacyCell) {
-            CombinedDrawable combinedDrawable = new CombinedDrawable(new ColorDrawable(Theme.getColor(Theme.key_windowBackgroundGray)), Theme.getThemedDrawableByKey(view.getContext(), R.drawable.greydivider, Theme.key_windowBackgroundGrayShadow));
-            combinedDrawable.setFullsize(true);
-            view.setBackground(combinedDrawable);
             ((TextInfoPrivacyCell) view).setTextColor(Theme.getColor(Theme.key_windowBackgroundWhiteGrayText4));
         } else if (view instanceof UserCell) {
             ((UserCell) view).update(0);
-        }
-        RecyclerView.ViewHolder holder = listView.getChildViewHolder(view);
-        if (holder != null) {
-            if (holder.getItemViewType() == 7) {
-                Drawable shadowDrawable = Theme.getThemedDrawableByKey(view.getContext(), R.drawable.greydivider_bottom, Theme.key_windowBackgroundGrayShadow);
-                Drawable background = new ColorDrawable(Theme.getColor(Theme.key_windowBackgroundGray));
-                CombinedDrawable combinedDrawable = new CombinedDrawable(background, shadowDrawable, 0, 0);
-                combinedDrawable.setFullsize(true);
-                view.setBackgroundDrawable(combinedDrawable);
-            } else if (holder.getItemViewType() == 2) {
-                Drawable shadowDrawable = Theme.getThemedDrawableByKey(view.getContext(), R.drawable.greydivider, Theme.key_windowBackgroundGrayShadow);
-                Drawable background = new ColorDrawable(Theme.getColor(Theme.key_windowBackgroundGray));
-                CombinedDrawable combinedDrawable = new CombinedDrawable(background, shadowDrawable, 0, 0);
-                combinedDrawable.setFullsize(true);
-                view.setBackgroundDrawable(combinedDrawable);
-            }
         }
     }
 
@@ -767,9 +746,6 @@ public class InviteLinkBottomSheet extends BottomSheet {
                     break;
                 case 4:
                     view = new TimerPrivacyCell(context);
-                    CombinedDrawable combinedDrawable = new CombinedDrawable(new ColorDrawable(Theme.getColor(Theme.key_windowBackgroundGray)), Theme.getThemedDrawableByKey(context, R.drawable.greydivider, Theme.key_windowBackgroundGrayShadow));
-                    combinedDrawable.setFullsize(true);
-                    view.setBackground(combinedDrawable);
                     break;
                 case 5:
                     FlickerLoadingView flickerLoadingView = new FlickerLoadingView(context);
@@ -789,11 +765,6 @@ public class InviteLinkBottomSheet extends BottomSheet {
                     break;
                 case 7:
                     view = new ShadowSectionCell(context, 12);
-                    Drawable shadowDrawable = Theme.getThemedDrawableByKey(context, R.drawable.greydivider_bottom, Theme.key_windowBackgroundGrayShadow);
-                    Drawable background = new ColorDrawable(Theme.getColor(Theme.key_windowBackgroundGray));
-                    combinedDrawable = new CombinedDrawable(background, shadowDrawable, 0, 0);
-                    combinedDrawable.setFullsize(true);
-                    view.setBackgroundDrawable(combinedDrawable);
                     break;
                 case 8:
                     view = new EmptyHintRow(context);
@@ -841,7 +812,7 @@ public class InviteLinkBottomSheet extends BottomSheet {
                     TLRPC.User user;
                     String role = null;
                     String status = null;
-                    boolean isAdmin, isOwner, canEditAdmin;
+                    final boolean isAdmin, isOwner, canEditAdmin;
                     TLRPC.ChatParticipant part = null;
                     TLRPC.TL_chatInviteImporter invitedUser = null;
                     long userId;

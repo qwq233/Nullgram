@@ -10,17 +10,16 @@ import org.telegram.messenger.BaseController;
 import org.telegram.messenger.DialogObject;
 import org.telegram.messenger.FileLog;
 import org.telegram.messenger.LocaleController;
-import org.telegram.messenger.MessagesController;
 import org.telegram.messenger.R;
 import org.telegram.messenger.UserConfig;
 import org.telegram.messenger.Utilities;
 import org.telegram.tgnet.TLObject;
 import org.telegram.tgnet.json.TLJsonBuilder;
-import org.telegram.tgnet.TLMethod;
 import org.telegram.tgnet.TLRPC;
 import org.telegram.tgnet.tl.TL_update;
 import org.telegram.tgnet.json.TLJsonParser;
 import org.telegram.tgnet.tl.TL_phone;
+import org.telegram.tgnet.tl.TL_update;
 
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -61,13 +60,13 @@ public class GroupCallMessagesController extends BaseController {
             TLRPC.TL_groupCallMessage result = null;
             try {
                 final byte[] decrypted = groupCallMessageDecrypt(callId, fromId, encrypted);
-                if (decrypted != null) {
+                if (decrypted != null && decrypted.length <= 8192) {
                     final String jsonString = new String(decrypted);
                     final JSONObject jsonObject = new JSONObject(jsonString);
 
                     result = TLRPC.TL_groupCallMessage.TLJsonDeserialize(new TLJsonParser(jsonObject));
                 }
-            } catch (Exception e) {
+            } catch (Exception | StackOverflowError e) {
                 FileLog.e(e);
             }
 

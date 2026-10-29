@@ -57,6 +57,7 @@ import org.telegram.messenger.R;
 import org.telegram.messenger.UserConfig;
 import org.telegram.messenger.UserObject;
 import org.telegram.messenger.Utilities;
+import org.telegram.messenger.utils.DrawableUtils;
 import org.telegram.tgnet.ConnectionsManager;
 import org.telegram.tgnet.TLRPC;
 import org.telegram.tgnet.tl.TL_account;
@@ -78,6 +79,7 @@ import org.telegram.ui.Components.Text;
 import org.telegram.ui.FilterCreateActivity;
 import org.telegram.ui.NotificationsSettingsActivity;
 import org.telegram.ui.Stories.StoriesUtilities;
+import org.telegram.ui.community.CommunityUtils;
 
 import java.util.Locale;
 
@@ -254,6 +256,11 @@ public class ProfileSearchCell extends BaseCell implements NotificationCenter.No
         subLabel = s;
         drawCount = needCount;
         savedMessages = saved;
+        update(0);
+    }
+
+    public void setSubLabel(CharSequence subLabel) {
+        this.subLabel = subLabel;
         update(0);
     }
 
@@ -620,7 +627,7 @@ public class ProfileSearchCell extends BaseCell implements NotificationCenter.No
         }
         if (!statusDrawable.isEmpty()) {
             if (LocaleController.isRTL) {
-                nameLeft += statusDrawable.getIntrinsicWidth();
+                // nameLeft += statusDrawable.getIntrinsicWidth();
             } else {
                 nameWidth -= statusDrawable.getIntrinsicWidth();
             }
@@ -671,7 +678,9 @@ public class ProfileSearchCell extends BaseCell implements NotificationCenter.No
                 nameTop = dp(20);
             }
         } else {
-            if (ChatObject.isChannel(chat) && !chat.megagroup) {
+            if (ChatObject.isCommunity(chat)) {
+                statusString = getString(R.string.Community).toLowerCase();
+            } else if (ChatObject.isChannelAndNotMegaGroup(chat)) {
                 if (chat.participants_count != 0) {
                     statusString = LocaleController.formatPluralStringComma("Subscribers", chat.participants_count);
                 } else {
@@ -774,6 +783,7 @@ public class ProfileSearchCell extends BaseCell implements NotificationCenter.No
         nameLeft += getPaddingLeft();
         statusLeft += getPaddingLeft();
         nameLockLeft += getPaddingLeft();
+
     }
 
     public void updateStatus(boolean verified, TLRPC.User user, TLRPC.Chat chat, boolean animated) {
@@ -831,7 +841,7 @@ public class ProfileSearchCell extends BaseCell implements NotificationCenter.No
                         thumb = user.photo.strippedBitmap;
                     }
                 }
-                avatarImage.setImage(ImageLocation.getForUserOrChat(user, ImageLocation.TYPE_SMALL), "50_50", ImageLocation.getForUserOrChat(user, ImageLocation.TYPE_STRIPPED), "50_50", thumb, user, 0);
+                avatarImage.setImage(ImageLocation.getForUserOrChat(currentAccount, user, ImageLocation.TYPE_SMALL), "50_50", ImageLocation.getForUserOrChat(user, ImageLocation.TYPE_STRIPPED), "50_50", thumb, user, 0);
             }
         } else if (chat != null) {
             Drawable thumb = avatarDrawable;
@@ -845,7 +855,7 @@ public class ProfileSearchCell extends BaseCell implements NotificationCenter.No
                 ForumUtilities.setMonoForumAvatar(currentAccount, chat, avatarDrawable, avatarImage);
             } else {
                 avatarDrawable.setInfo(currentAccount, chat);
-                avatarImage.setImage(ImageLocation.getForUserOrChat(chat, ImageLocation.TYPE_SMALL), "50_50", ImageLocation.getForUserOrChat(chat, ImageLocation.TYPE_STRIPPED), "50_50", thumb, chat, 0);
+                avatarImage.setImage(ImageLocation.getForUserOrChat(currentAccount, chat, ImageLocation.TYPE_SMALL), "50_50", ImageLocation.getForUserOrChat(chat, ImageLocation.TYPE_STRIPPED), "50_50", thumb, chat, 0);
             }
         } else if (contact != null) {
             avatarDrawable.setInfo(0, contact.first_name, contact.last_name);
@@ -855,7 +865,7 @@ public class ProfileSearchCell extends BaseCell implements NotificationCenter.No
             avatarImage.setImage(null, null, avatarDrawable, null, null, 0);
         }
 
-        avatarImage.setRoundRadius(chat != null && chat.monoforum ? 0 : rectangularAvatar ? dp(10) : chat != null && chat.forum ? dp(16) : dp(23));
+        avatarImage.setRoundRadius(ChatObject.isCommunity(chat) ? DrawableUtils.getCommunityCardDrawableRadius(dp(46)) : chat != null && chat.monoforum ? 0 : rectangularAvatar ? dp(10) : chat != null && chat.forum ? dp(16) : dp(23));
         if (mask != 0) {
             boolean continueUpdate = false;
             if ((mask & MessagesController.UPDATE_MASK_AVATAR) != 0 && user != null || (mask & MessagesController.UPDATE_MASK_CHAT_AVATAR) != 0 && chat != null) {
@@ -1057,6 +1067,12 @@ public class ProfileSearchCell extends BaseCell implements NotificationCenter.No
         } else if (user != null) {
             StoriesUtilities.drawAvatarWithStory(user.id, canvas, avatarImage, avatarStoryParams);
         } else if (chat != null) {
+            if (ChatObject.isCommunity(chat)) {
+                DrawableUtils.drawCommunityCardDrawable(canvas, Theme.dialogs_communityCardsDrawable,
+                    avatarStoryParams.originalAvatarRect.centerX(),
+                    avatarStoryParams.originalAvatarRect.centerY(),
+                    avatarStoryParams.originalAvatarRect.width());
+            }
             StoriesUtilities.drawAvatarWithStory(-chat.id, canvas, avatarImage, avatarStoryParams);
         } else {
             avatarImage.setImageCoords(avatarStoryParams.originalAvatarRect);

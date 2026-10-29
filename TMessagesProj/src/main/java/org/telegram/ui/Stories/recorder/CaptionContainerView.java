@@ -186,6 +186,7 @@ public class CaptionContainerView extends FrameLayout {
                         emojiView.setPadding(0, 0, 0, AndroidUtilities.navigationBarHeight);
                         emojiView.emojiCacheType = AnimatedEmojiDrawable.CACHE_TYPE_ALERT_PREVIEW;
                     }
+                    emojiView.updateColors();
                 }
             }
 
@@ -235,6 +236,11 @@ public class CaptionContainerView extends FrameLayout {
                     }
                 }
                 return true;
+            }
+
+            @Override
+            protected void onLineCountChanged(int oldLineCount, int newLineCount) {
+                CaptionContainerView.this.onLineCountChanged(oldLineCount, newLineCount);
             }
         };
         editText.getEditText().addTextChangedListener(new EditTextSuggestionsFix());
@@ -324,13 +330,10 @@ public class CaptionContainerView extends FrameLayout {
         applyButtonDrawable.setCustomSize(AndroidUtilities.dp(32), AndroidUtilities.dp(32));
         applyButton.setImageDrawable(applyButtonDrawable);
         applyButton.setScaleType(ImageView.ScaleType.CENTER);
+        applyButton.setContentDescription(LocaleController.getString(R.string.Done));
         applyButton.setAlpha(0f);
         applyButton.setVisibility(View.GONE);
-        applyButton.setOnClickListener(e -> {
-            closeKeyboard();
-            AndroidUtilities.cancelRunOnUIThread(textChangeRunnable);
-            textChangeRunnable.run();
-        });
+        applyButton.setOnClickListener(e -> done());
         applyButton.setTranslationY(-AndroidUtilities.dp(1));
         addView(applyButton, LayoutHelper.createFrame(44, 44, Gravity.RIGHT | (isAtTop() ? Gravity.TOP : Gravity.BOTTOM)));
 
@@ -349,8 +352,15 @@ public class CaptionContainerView extends FrameLayout {
         fadePaint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.DST_OUT));
     }
 
+    protected void onLineCountChanged(int oldLineCount, int newLineCount) {
+
+    }
+
     public void setDialogId(long dialogId) {
         this.dialogId = dialogId;
+        if (mentionContainer != null) {
+            mentionContainer.setDialogId(dialogId);
+        }
     }
 
     public int additionalRightMargin() {
@@ -359,6 +369,12 @@ public class CaptionContainerView extends FrameLayout {
 
     private final Runnable textChangeRunnable = () -> onTextChange();
     protected void onTextChange() {}
+
+    protected void done() {
+        closeKeyboard();
+        AndroidUtilities.cancelRunOnUIThread(textChangeRunnable);
+        textChangeRunnable.run();
+    }
 
     public void invalidateBlur() {
         invalidate();
@@ -450,7 +466,7 @@ public class CaptionContainerView extends FrameLayout {
     }
 
     private void createMentionsContainer() {
-        mentionContainer = new MentionsContainerView(getContext(), UserConfig.getInstance(currentAccount).getClientUserId(), 0, LaunchActivity.getLastFragment(), new DarkThemeResourceProvider()) {
+        mentionContainer = new MentionsContainerView(getContext(), dialogId, 0, LaunchActivity.getLastFragment(), new DarkThemeResourceProvider()) {
             @Override
             public void drawRoundRect(Canvas canvas, Rect rectTmp, float radius) {
                 rectF.set(rectTmp);
@@ -492,7 +508,7 @@ public class CaptionContainerView extends FrameLayout {
         mentionContainer.getAdapter().setAllowStickers(false);
         mentionContainer.getAdapter().setAllowBots(false);
         mentionContainer.getAdapter().setAllowChats(false);
-        mentionContainer.getAdapter().setSearchInDailogs(true);
+        mentionContainer.getAdapter().setSearchInDialogs(this instanceof CaptionStory);
     }
 
     private void replaceWithText(int start, int len, CharSequence text, boolean parseEmoji) {
@@ -1042,6 +1058,7 @@ public class CaptionContainerView extends FrameLayout {
         canvas.restore();
     }
 
+
     public void drawOver(Canvas canvas, RectF bounds) {
 
     }
@@ -1341,8 +1358,10 @@ public class CaptionContainerView extends FrameLayout {
         }
 
         public float textOffsetX, textOffsetY;
+        public int strokeColor;
 
         public void updateColors(int strokeColor, int fillColor, int activeTextColor) {
+            this.strokeColor = strokeColor;
             strokePaint.setColor(strokeColor);
             textDrawable.setTextColor(strokeColor);
             activeTextDrawable.setTextColor(activeTextColor);
@@ -1391,7 +1410,7 @@ public class CaptionContainerView extends FrameLayout {
                 canvas.drawCircle(cx, cy, dpf2(11.33f) * fillT, fillPaint);
             }
 
-            strokePaint.setAlpha((int) (0xFF * alpha * (1f - fillT)));
+            strokePaint.setAlpha((int) (Color.alpha(strokeColor) * alpha * (1f - fillT)));
             AndroidUtilities.rectTmp.set(cx - r, cy - r, cx + r, cy + r);
             canvas.drawArc(AndroidUtilities.rectTmp, 90, 180, false, strokePaint);
 
@@ -1414,7 +1433,7 @@ public class CaptionContainerView extends FrameLayout {
                 (int) (cy + dp(20))
             );
             textDrawable.setBounds(AndroidUtilities.rectTmp2);
-            textDrawable.setAlpha((int) (0xFF * alpha));
+            textDrawable.setAlpha((int) (Color.alpha(strokeColor) * alpha));
             textDrawable.draw(canvas);
             if (fillT > 0) {
                 activePath.rewind();

@@ -79,6 +79,7 @@ public class LocationActivityAdapter extends BaseLocationAdapter implements Loca
 
     public boolean animated = true;
     public TLRPC.TL_messageMediaVenue city, street;
+    public boolean isPollAttach;
 
     public void setAddressNameOverride(String address) {
         overrideAddressName = address;
@@ -232,7 +233,9 @@ public class LocationActivityAdapter extends BaseLocationAdapter implements Loca
                 } else if (!myLocationDenied) {
                     address = LocaleController.getString(R.string.Loading);
                 }
-                if (locationType == LocationActivity.LOCATION_TYPE_GROUP) {
+                if (isPollAttach) {
+                    sendLocationCell.setText(LocaleController.getString(R.string.AttachSelectedLocation), address);
+                } else if (locationType == LocationActivity.LOCATION_TYPE_GROUP) {
                     sendLocationCell.setText(LocaleController.getString(R.string.ChatSetThisLocation), address);
                 } else {
                     sendLocationCell.setText(LocaleController.getString(R.string.SendSelectedLocation), address);
@@ -443,7 +446,7 @@ public class LocationActivityAdapter extends BaseLocationAdapter implements Loca
                 Drawable drawable = Theme.getThemedDrawableByKey(mContext, R.drawable.greydivider_bottom, Theme.key_windowBackgroundGrayShadow);
                 CombinedDrawable combinedDrawable = new CombinedDrawable(new ColorDrawable(getThemedColor(Theme.key_windowBackgroundGray)), drawable);
                 combinedDrawable.setFullsize(true);
-                view.setBackgroundDrawable(combinedDrawable);
+                // view.setBackgroundDrawable(combinedDrawable);
                 break;
             }
             case VIEW_TYPE_STORY_LOCATION: {

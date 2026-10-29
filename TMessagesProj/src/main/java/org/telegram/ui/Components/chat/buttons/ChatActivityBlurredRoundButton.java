@@ -156,11 +156,11 @@ public class ChatActivityBlurredRoundButton extends FrameLayout implements Facto
         }
     }
     public static ChatActivityBlurredRoundButton create(
-            Context context,
-            BlurredBackgroundDrawableViewFactory factory,
-            BlurredBackgroundColorProvider colorProvider,
-            Theme.ResourcesProvider resourcesProvider,
-            @DrawableRes int res
+        Context context,
+        BlurredBackgroundDrawableViewFactory factory,
+        BlurredBackgroundColorProvider colorProvider,
+        Theme.ResourcesProvider resourcesProvider,
+        @DrawableRes int res
     ) {
         ChatActivityBlurredRoundButton button;
 
@@ -170,7 +170,9 @@ public class ChatActivityBlurredRoundButton extends FrameLayout implements Facto
         button.setBlurredBackgroundDrawable(factory.create(button, colorProvider));
         button.setIcon(res);
         button.setIconColor(color);
-        button.setBackground(Theme.createSimpleSelectorRoundRectDrawableWithInset(dp(22), 0, Theme.multAlpha(color, .15f), dp(6)));
+        int rad = dp(22);
+        int pressedColor = Theme.multAlpha(color, .15f);
+        button.setBackground(Theme.createInsetRoundRectDrawable(pressedColor, rad, dp(6)));
 
         return button;
     }
@@ -183,7 +185,9 @@ public class ChatActivityBlurredRoundButton extends FrameLayout implements Facto
 
         final int color = Theme.getColor(Theme.key_glass_defaultIcon, resourcesProvider);
         setIconColor(Theme.getColor(Theme.key_glass_defaultIcon, resourcesProvider));
-        setBackground(Theme.createSimpleSelectorRoundRectDrawableWithInset(dp(22), 0, Theme.multAlpha(color, .15f), dp(6)));
+        int rad = dp(22);
+        int pressedColor = Theme.multAlpha(color, .15f);
+        setBackground(Theme.createInsetRoundRectDrawable(pressedColor, rad, dp(6)));
     }
 
     private void checkUi_IconViewVisibility() {

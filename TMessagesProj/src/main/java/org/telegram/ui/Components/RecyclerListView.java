@@ -19,6 +19,11 @@
 
 package org.telegram.ui.Components;
 
+import static org.telegram.messenger.AndroidUtilities.dp;
+import static org.telegram.messenger.AndroidUtilities.dpf2;
+import static org.telegram.messenger.AndroidUtilities.lerp;
+import static org.telegram.ui.ActionBar.Theme.multAlpha;
+
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.annotation.SuppressLint;
@@ -26,9 +31,11 @@ import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.ColorFilter;
+import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.Path;
-import android.graphics.PointF;
+import android.graphics.PixelFormat;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffColorFilter;
 import android.graphics.Rect;
@@ -41,6 +48,7 @@ import android.text.Layout;
 import android.text.SpannableStringBuilder;
 import android.text.StaticLayout;
 import android.text.TextPaint;
+import android.util.Pair;
 import android.util.SparseIntArray;
 import android.util.StateSet;
 import android.view.HapticFeedbackConstants;
@@ -56,51 +64,50 @@ import android.view.accessibility.AccessibilityNodeInfo;
 import android.widget.FrameLayout;
 
 import androidx.annotation.IntDef;
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.content.ContextCompat;
 import androidx.core.graphics.ColorUtils;
 import androidx.core.util.Consumer;
 import androidx.recyclerview.widget.DiffUtil;
 import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.LinearSmoothScroller;
 import androidx.recyclerview.widget.RecyclerView;
 
 import org.telegram.messenger.AndroidUtilities;
+import org.telegram.messenger.BuildConfig;
 import org.telegram.messenger.FileLog;
 import org.telegram.messenger.GenericProvider;
 import org.telegram.messenger.LocaleController;
 import org.telegram.messenger.NotificationCenter;
 import org.telegram.messenger.R;
 import org.telegram.messenger.SharedConfig;
+import org.telegram.messenger.Utilities;
 import org.telegram.ui.ActionBar.Theme;
 import org.telegram.ui.Cells.ChatActionCell;
 import org.telegram.ui.Cells.ChatMessageCell;
+import org.telegram.ui.Cells.CollapseTextCell;
+import org.telegram.ui.Cells.GraySectionCell;
+import org.telegram.ui.Cells.ShadowSectionCell;
+import org.telegram.ui.Cells.TextInfoPrivacyCell;
+import org.telegram.ui.Components.blur3.BlurredBackgroundDrawableViewFactory;
 import org.telegram.ui.Components.blur3.capture.IBlur3Capture;
+import org.telegram.ui.Components.blur3.capture.IBlur3Hash;
+import org.telegram.ui.Components.blur3.drawable.BlurredBackgroundDrawable;
+import org.telegram.ui.Components.blur3.drawable.color.BlurredBackgroundProvider;
+import org.telegram.ui.FiltersSetupActivity;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Objects;
 
 @SuppressWarnings("JavaReflectionMemberAccess")
 public class RecyclerListView extends RecyclerView implements IBlur3Capture {
-    public static final int TAG_NOT_SECTION = -33024;
-
-    public void setSections(boolean topPadding) {
-    }
-
-    public void setPaddingWithoutRequestLayout(int left, int top, int right, int bottom) {
-        super.setPadding(left, top, right, bottom);
-    }
-
-    @Override
-    public void capture(Canvas canvas, RectF position) {
-        draw(canvas);
-    }
-
     public final static int SECTIONS_TYPE_SIMPLE = 0,
             SECTIONS_TYPE_STICKY_HEADERS = 1,
             SECTIONS_TYPE_DATE = 2,
@@ -157,6 +164,7 @@ public class RecyclerListView extends RecyclerView implements IBlur3Capture {
 
     @SectionsType
     private int sectionsType;
+    private boolean skipDrawSection = false;
 
     private boolean hideIfEmpty = true;
 
@@ -563,6 +571,10 @@ public class RecyclerListView extends RecyclerView implements IBlur3Capture {
         float touchSlop;
         Drawable fastScrollShadowDrawable;
         Drawable fastScrollBackgroundDrawable;
+
+        BlurredBackgroundDrawable blurredCircleDrawable;
+        BlurredBackgroundDrawable blurredTagDrawable;
+
         boolean isRtl;
         public int topOffset;
 
@@ -597,7 +609,7 @@ public class RecyclerListView extends RecyclerView implements IBlur3Capture {
                 radii[a] = AndroidUtilities.dp(44);
             }
 
-            scrollX = isRtl ? AndroidUtilities.dp(10) : AndroidUtilities.dp((type == LETTER_TYPE ? 132 : 240) - 15);
+            scrollX = isRtl ? dp(10) : dp((type == LETTER_TYPE ? 132 : 240) - 15);
             updateColors();
             setFocusableInTouchMode(true);
             ViewConfiguration vc = ViewConfiguration.get(context);
@@ -791,7 +803,7 @@ public class RecyclerListView extends RecyclerView implements IBlur3Capture {
 
         @Override
         protected void onDraw(Canvas canvas) {
-            int topPadding = usePadding ? getPaddingTop() : topOffset;
+            int topPadding = usePadding ? getPaddingTop() : 0;
             int y = topPadding + (int) Math.ceil((getMeasuredHeight() - topPadding - AndroidUtilities.dp(24 + 30)) * progress);
             rect.set(scrollX, AndroidUtilities.dp(12) + y, scrollX + AndroidUtilities.dp(5), AndroidUtilities.dp(12 + 30) + y);
             if (type == LETTER_TYPE) {
@@ -801,9 +813,18 @@ public class RecyclerListView extends RecyclerView implements IBlur3Capture {
                 paint.setColor(ColorUtils.blendARGB(Theme.getColor(Theme.key_windowBackgroundWhite, resourcesProvider), Color.WHITE, 0.1f));
 
                 float cy = y + AndroidUtilities.dp(12 + 15);
-                fastScrollShadowDrawable.setBounds(getMeasuredWidth() - fastScrollShadowDrawable.getIntrinsicWidth(), (int) (cy - fastScrollShadowDrawable.getIntrinsicHeight() / 2), getMeasuredWidth(), (int) (cy + fastScrollShadowDrawable.getIntrinsicHeight() / 2));
-                fastScrollShadowDrawable.draw(canvas);
-                canvas.drawCircle(scrollX + AndroidUtilities.dp(8), y + AndroidUtilities.dp(12 + 15), AndroidUtilities.dp(24), paint);
+                if (blurredCircleDrawable != null) {
+                    blurredCircleDrawable.setBounds(
+                            scrollX + AndroidUtilities.dp(8 - 28),
+                            y + AndroidUtilities.dp(12 + 15 - 28),
+                            scrollX + AndroidUtilities.dp(8 + 28),
+                            y + AndroidUtilities.dp(12 + 15 + 28));
+                    blurredCircleDrawable.draw(canvas);
+                } else {
+                    fastScrollShadowDrawable.setBounds(getMeasuredWidth() - fastScrollShadowDrawable.getIntrinsicWidth(), (int) (cy - fastScrollShadowDrawable.getIntrinsicHeight() / 2), getMeasuredWidth(), (int) (cy + fastScrollShadowDrawable.getIntrinsicHeight() / 2));
+                    fastScrollShadowDrawable.draw(canvas);
+                    canvas.drawCircle(scrollX + AndroidUtilities.dp(8), y + AndroidUtilities.dp(12 + 15), AndroidUtilities.dp(24), paint);
+                }
 
                 paint.setColor(Theme.getColor(Theme.key_windowBackgroundWhiteBlackText, resourcesProvider));
                 canvas.save();
@@ -877,9 +898,16 @@ public class RecyclerListView extends RecyclerView implements IBlur3Capture {
                     int oldAlpha2 = letterPaint.getAlpha();
                     paint2.setAlpha((int) (oldAlpha1 * floatingDateProgress));
 
-                    fastScrollBackgroundDrawable.setBounds((int) rect.left, (int) rect.top, (int) rect.right, (int) rect.bottom);
-                    fastScrollBackgroundDrawable.setAlpha((int) (255 * floatingDateProgress));
-                    fastScrollBackgroundDrawable.draw(canvas);
+                    if (blurredTagDrawable != null) {
+                        rect.round(AndroidUtilities.rectTmp2);
+                        AndroidUtilities.rectTmp2.inset(-dp(4), -dp(4));
+                        blurredTagDrawable.setBounds(AndroidUtilities.rectTmp2);
+                        blurredTagDrawable.draw(canvas);
+                    } else {
+                        fastScrollBackgroundDrawable.setBounds((int) rect.left, (int) rect.top, (int) rect.right, (int) rect.bottom);
+                        fastScrollBackgroundDrawable.setAlpha((int) (255 * floatingDateProgress));
+                        fastScrollBackgroundDrawable.draw(canvas);
+                    }
 
                     if (replaceLayoutProgress != 1f) {
                         replaceLayoutProgress += 16f / 150f;
@@ -1033,6 +1061,30 @@ public class RecyclerListView extends RecyclerView implements IBlur3Capture {
 
         public float getProgress() {
             return progress;
+        }
+
+
+        public void applyBlurDrawables(
+                BlurredBackgroundDrawableViewFactory factory,
+                BlurredBackgroundProvider backgroundProvider
+        ) {
+            blurredCircleDrawable = factory.create(fastScroll, backgroundProvider);
+            blurredCircleDrawable.setPadding(dp(4));
+            blurredCircleDrawable.setRadius(dp(24));
+
+            blurredTagDrawable = factory.create(fastScroll, backgroundProvider);
+            blurredTagDrawable.setPadding(dp(6));
+            blurredTagDrawable.setRadius(dp(14));
+        }
+
+        public boolean fillDrawablesRect(RectF rect) {
+            if (blurredCircleDrawable != null || blurredTagDrawable != null)  {
+                rect.set(blurredTagDrawable.getBounds());
+                AndroidUtilities.rectTmp.set(blurredCircleDrawable.getBounds());
+                rect.union(AndroidUtilities.rectTmp);
+                return true;
+            }
+            return false;
         }
 
     }
@@ -1246,9 +1298,7 @@ public class RecyclerListView extends RecyclerView implements IBlur3Capture {
                                     ((TransitionDrawable) d).resetTransition();
                                 }
                             }
-                            if (Build.VERSION.SDK_INT >= 21) {
-                                selectorDrawable.setHotspot(event.getX(), event.getY());
-                            }
+                            selectorDrawable.setHotspot(event.getX(), event.getY());
                         }
                         updateSelectorState();
                     } else {
@@ -1347,7 +1397,7 @@ public class RecyclerListView extends RecyclerView implements IBlur3Capture {
                 if (d instanceof TransitionDrawable) {
                     ((TransitionDrawable) d).resetTransition();
                 }
-                if (event != null && Build.VERSION.SDK_INT >= 21) {
+                if (event != null) {
                     selectorDrawable.setHotspot(event.getX(), event.getY());
                 }
             }
@@ -1431,7 +1481,9 @@ public class RecyclerListView extends RecyclerView implements IBlur3Capture {
     public RecyclerListView(Context context, Theme.ResourcesProvider resourcesProvider) {
         super(context);
         this.resourcesProvider = resourcesProvider;
+        this.edgeEffectTrackerFactory = new EdgeEffectTrackerFactory();
 
+        setEdgeEffectFactory(edgeEffectTrackerFactory);
         setGlowColor(getThemedColor(Theme.key_actionBarDefault));
         selectorDrawable = Theme.getSelectorDrawable(getThemedColor(Theme.key_listSelector), false);
         selectorDrawable.setCallback(this);
@@ -1713,7 +1765,7 @@ public class RecyclerListView extends RecyclerView implements IBlur3Capture {
                 LinearLayoutManager linearLayoutManager = (LinearLayoutManager) layoutManager;
                 if (linearLayoutManager.getOrientation() == LinearLayoutManager.VERTICAL) {
                     if (sectionsAdapter != null) {
-                        int paddingTop = getPaddingTop();
+                        int paddingTop = sectionsType == SECTIONS_TYPE_STICKY_HEADERS ? 0 : getPaddingTop();
                         if (sectionsType == SECTIONS_TYPE_STICKY_HEADERS || sectionsType == SECTIONS_TYPE_FAST_SCROLL_ONLY) {
                             int childCount = getChildCount();
                             int maxBottom = 0;
@@ -1870,7 +1922,7 @@ public class RecyclerListView extends RecyclerView implements IBlur3Capture {
                             int count = sectionsAdapter.getCountForSection(startSection);
 
                             int pos = sectionsAdapter.getPositionInSectionForPosition(firstVisibleItem);
-                            int sectionOffsetY = maxBottom != 0 && maxBottom < (getMeasuredHeight() - getPaddingBottom()) ? 0 : sectionOffset;
+                            int sectionOffsetY = maxBottom != 0 && maxBottom < (getMeasuredHeight() - getPaddingBottom()) ? -paddingTop : sectionOffset;
 
                             if (pos == count - 1) {
                                 int headerHeight = pinnedHeader.getHeight();
@@ -2104,9 +2156,7 @@ public class RecyclerListView extends RecyclerView implements IBlur3Capture {
                         ((TransitionDrawable) d).resetTransition();
                     }
                 }
-                if (Build.VERSION.SDK_INT >= 21) {
-                    selectorDrawable.setHotspot(holder.itemView.getMeasuredWidth() / 2, holder.itemView.getMeasuredHeight() / 2);
-                }
+                selectorDrawable.setHotspot(holder.itemView.getMeasuredWidth() / 2, holder.itemView.getMeasuredHeight() / 2);
             }
             if (selectorDrawable != null && selectorDrawable.isStateful()) {
                 if (selectorDrawable.setState(getDrawableStateForSelector())) {
@@ -2145,8 +2195,29 @@ public class RecyclerListView extends RecyclerView implements IBlur3Capture {
         return onInterceptTouchListener != null && onInterceptTouchListener.onInterceptTouchEvent(e) || super.onInterceptTouchEvent(e);
     }
 
+    private int activeTouches;
+    private boolean adaptiveOverScroll;
+
+    public void setAdaptiveOverScroll() {
+        adaptiveOverScroll = true;
+        setOverScrollMode(OVER_SCROLL_NEVER);
+    }
+
     @Override
     public boolean dispatchTouchEvent(MotionEvent ev) {
+        final int action = ev.getAction();
+        if (action == MotionEvent.ACTION_DOWN) {
+            if (activeTouches == 0 && adaptiveOverScroll) {
+                setOverScrollMode(OVER_SCROLL_ALWAYS);
+            }
+            activeTouches++;
+        } else if (action == MotionEvent.ACTION_UP || action == MotionEvent.ACTION_CANCEL) {
+            activeTouches--;
+            if (activeTouches == 0 && adaptiveOverScroll) {
+                setOverScrollMode(OVER_SCROLL_NEVER);
+            }
+        }
+
         FastScroll fastScroll = getFastScroll();
         if (fastScroll != null && fastScroll.isVisible && fastScroll.isMoving && (ev.getActionMasked() != MotionEvent.ACTION_UP && ev.getActionMasked() != MotionEvent.ACTION_CANCEL)) {
             return true;
@@ -2223,6 +2294,11 @@ public class RecyclerListView extends RecyclerView implements IBlur3Capture {
             }
             hiddenByEmptyView = true;
         }
+    }
+
+    @Override
+    public ViewPropertyAnimator animate() {
+        return super.animate();
     }
 
     protected void emptyViewUpdated(boolean shown, boolean animated) {
@@ -2373,7 +2449,7 @@ public class RecyclerListView extends RecyclerView implements IBlur3Capture {
                 selectorDrawable.setVisible(true, false);
             }
         }
-        if (Build.VERSION.SDK_INT >= 21 && manageHotspot) {
+        if (manageHotspot) {
             selectorDrawable.setHotspot(x, y);
         }
     }
@@ -2588,63 +2664,59 @@ public class RecyclerListView extends RecyclerView implements IBlur3Capture {
         translateSelector = position <= 0 ? -1 : position;
     }
 
+    private void drawSelectors2(Canvas canvas) {
+        if (selectorRect.isEmpty() || selectorDrawable == null) {
+            return;
+        }
+
+        if ((translateSelector == -2 || translateSelector == selectorPosition) && selectorView != null) {
+            int bottomPadding;
+            if (getAdapter() instanceof SelectionAdapter) {
+                bottomPadding = ((SelectionAdapter) getAdapter()).getSelectionBottomPadding(selectorView);
+            } else {
+                bottomPadding = 0;
+            }
+            selectorDrawable.setBounds(selectorView.getLeft(), selectorView.getTop(), selectorView.getRight(), selectorView.getBottom() - bottomPadding);
+        } else {
+            selectorDrawable.setBounds(selectorRect);
+        }
+        canvas.save();
+        if ((translateSelector == -2 || translateSelector == selectorPosition) && selectorTransformer != null) {
+            selectorTransformer.accept(canvas);
+        }
+        if ((translateSelector == -2 || translateSelector == selectorPosition) && selectorView != null) {
+            canvas.translate(selectorView.getX() - selectorRect.left, selectorView.getY() - selectorRect.top);
+            selectorDrawable.setAlpha((int) (0xFF * selectorView.getAlpha()));
+        }
+        drawSelector(canvas);
+        canvas.restore();
+    }
+
+    private void drawSelector(Canvas canvas) {
+        selectorDrawable.draw(canvas);
+    }
+
+
     @Override
-    protected void dispatchDraw(Canvas canvas) {
+    protected void dispatchDraw(@NonNull Canvas canvas) {
         if (itemsEnterAnimator != null) {
             itemsEnterAnimator.dispatchDraw();
         }
 
-        if (drawSelection && drawSelectorBehind && !selectorRect.isEmpty() && selectorDrawable != null) {
-            if ((translateSelector == -2 || translateSelector == selectorPosition) && selectorView != null) {
-                int bottomPadding;
-                if (getAdapter() instanceof SelectionAdapter) {
-                    bottomPadding = ((SelectionAdapter) getAdapter()).getSelectionBottomPadding(selectorView);
-                } else {
-                    bottomPadding = 0;
-                }
-                selectorDrawable.setBounds(selectorView.getLeft(), selectorView.getTop(), selectorView.getRight(), selectorView.getBottom() - bottomPadding);
-            } else {
-                selectorDrawable.setBounds(selectorRect);
-            }
-            canvas.save();
-            if ((translateSelector == -2 || translateSelector == selectorPosition) && selectorTransformer != null) {
-                selectorTransformer.accept(canvas);
-            }
-            if ((translateSelector == -2 || translateSelector == selectorPosition) && selectorView != null) {
-                canvas.translate(selectorView.getX() - selectorRect.left, selectorView.getY() - selectorRect.top);
-                selectorDrawable.setAlpha((int) (0xFF * selectorView.getAlpha()));
-            }
-            selectorDrawable.draw(canvas);
-            canvas.restore();
+        if (drawSelection && drawSelectorBehind) {
+            drawSelectors2(canvas);
         }
         super.dispatchDraw(canvas);
-        if (drawSelection && !drawSelectorBehind && !selectorRect.isEmpty() && selectorDrawable != null) {
-            if ((translateSelector == -2 || translateSelector == selectorPosition) && selectorView != null) {
-                int bottomPadding;
-                if (getAdapter() instanceof SelectionAdapter) {
-                    bottomPadding = ((SelectionAdapter) getAdapter()).getSelectionBottomPadding(selectorView);
-                } else {
-                    bottomPadding = 0;
-                }
-                selectorDrawable.setBounds(selectorView.getLeft(), selectorView.getTop(), selectorView.getRight(), selectorView.getBottom() - bottomPadding);
-            } else {
-                selectorDrawable.setBounds(selectorRect);
-            }
-            canvas.save();
-            if ((translateSelector == -2 || translateSelector == selectorPosition) && selectorTransformer != null) {
-                selectorTransformer.accept(canvas);
-            }
-            if ((translateSelector == -2 || translateSelector == selectorPosition) && selectorView != null) {
-                canvas.translate(selectorView.getX() - selectorRect.left, selectorView.getY() - selectorRect.top);
-                selectorDrawable.setAlpha((int) (0xFF * selectorView.getAlpha()));
-            }
-            selectorDrawable.draw(canvas);
-            canvas.restore();
+        if (drawSelection && !drawSelectorBehind) {
+            drawSelectors2(canvas);
         }
         if (overlayContainer != null) {
             overlayContainer.draw(canvas);
         }
-        if (sectionsType == SECTIONS_TYPE_STICKY_HEADERS) {
+
+        if (skipDrawSection) {
+
+        } else if (sectionsType == SECTIONS_TYPE_STICKY_HEADERS) {
             if (sectionsAdapter != null && !headers.isEmpty()) {
                 for (int a = 0; a < headers.size(); a++) {
                     View header = headers.get(a);
@@ -2688,6 +2760,10 @@ public class RecyclerListView extends RecyclerView implements IBlur3Capture {
                 canvas.restoreToCount(saveCount);
             }
         }
+    }
+
+    public void setSkipDrawSection(boolean skipDrawSection) {
+        this.skipDrawSection = skipDrawSection;
     }
 
     public void relayoutPinnedHeader() {
@@ -2757,10 +2833,28 @@ public class RecyclerListView extends RecyclerView implements IBlur3Capture {
 
     @Override
     public void requestLayout() {
-        if (fastScrollAnimationRunning) {
+        if (fastScrollAnimationRunning || ignoreLayout) {
             return;
         }
         super.requestLayout();
+    }
+
+    private boolean ignoreLayout;
+
+    public void setPadding(int left, int top, int right, int bottom, boolean doNotRequestLayout) {
+        if (doNotRequestLayout) {
+            setPaddingWithoutRequestLayout(left, top, right, bottom);
+        } else {
+            setPadding(left, top, right, bottom);
+        }
+    }
+
+    public void setPaddingWithoutRequestLayout(int left, int top, int right, int bottom) {
+        if (getPaddingLeft() != left || getPaddingTop() != top || getPaddingRight() != right || getPaddingBottom() != bottom) {
+            ignoreLayout = true;
+            setPadding(left, top, right, bottom);
+            ignoreLayout = false;
+        }
     }
 
     public ViewParent getTouchParent() {
@@ -2999,9 +3093,6 @@ public class RecyclerListView extends RecyclerView implements IBlur3Capture {
         return paint != null ? paint : Theme.getThemePaint(paintKey);
     }
 
-    public Drawable getClipBackground(View child) {
-        return null;
-    }
 
     public interface onMultiSelectionChanged {
         void onSelectionChanged(int position, boolean selected, float x, float y);
@@ -3027,4 +3118,141 @@ public class RecyclerListView extends RecyclerView implements IBlur3Capture {
     public void setDrawSelection(boolean drawSelection) {
         this.drawSelection = drawSelection;
     }
+
+
+    /* Overscroll */
+
+    private final @NonNull EdgeEffectTrackerFactory edgeEffectTrackerFactory;
+
+    public float getEdgeEffectDistance(@EdgeEffectFactory.EdgeDirection int direction) {
+        return edgeEffectTrackerFactory.getDistance(direction);
+    }
+
+    public boolean hasActiveEdgeEffects() {
+        return edgeEffectTrackerFactory.hasVisibleEdges();
+    }
+
+    public void addEdgeEffectListener(Runnable listener) {
+        addEdgeEffectListener((direction, isVisible) -> listener.run());
+    }
+
+    public void addEdgeEffectListener(EdgeEffectTrackerFactory.OnEdgeEffectListener listener) {
+        edgeEffectTrackerFactory.addEdgeEffectListener(listener);
+    }
+
+    public void removeEdgeEffectListener(EdgeEffectTrackerFactory.OnEdgeEffectListener listener) {
+        edgeEffectTrackerFactory.removeEdgeEffectListener(listener);
+    }
+
+
+    /* Blur3 */
+
+    private Matrix selfTransformationsMatrix;
+
+    @Override
+    public void capture(Canvas canvas, RectF position) {
+        final long drawingTime = SystemClock.uptimeMillis();
+
+        if (hasActiveEdgeEffects() && getOverScrollMode() != OVER_SCROLL_NEVER) {
+            if (selfTransformationsMatrix == null) {
+                selfTransformationsMatrix = new Matrix();
+            }
+
+            canvas.save();
+            final Matrix matrix = getMatrix();
+            if (matrix.invert(selfTransformationsMatrix)){
+                canvas.concat(selfTransformationsMatrix);
+            }
+            canvas.translate(-getX(), -getY());
+
+            // hack: call drawChild(this) for access to internal render node
+            try {
+                super.drawChild(canvas, this, drawingTime);
+            } catch (Throwable t) {
+                FileLog.e(t);
+            }
+            canvas.restore();
+
+            if (BuildConfig.DEBUG_PRIVATE_VERSION) {
+            //     canvas.drawColor(0x80FF00FF);
+            }
+        } else {
+            captureChildren(canvas, position, drawingTime);
+        }
+    }
+
+    protected void captureChildren(Canvas canvas, RectF position, long drawingTime) {
+        for (int a = 0, N = getItemDecorationCount(); a < N; a++) {
+            ItemDecoration itemDecoration = getItemDecorationAt(a);
+            if (itemDecoration instanceof IBlur3Capture) {
+                final IBlur3Capture capture = (IBlur3Capture) itemDecoration;
+                capture.capture(canvas, position);
+            }
+        }
+        for (int i = 0, N = getChildCount(); i < N; i++) {
+            final View child = getChildAt(i);
+
+            final float left = child.getX();
+            final float top = child.getY();
+            final float right = left + child.getWidth();
+            final float bottom = top + child.getHeight();
+
+            if (!position.intersects(left, top, right, bottom)) {
+                continue;
+            }
+
+            drawChild(canvas, child, drawingTime);
+        }
+    }
+
+
+
+    @Override
+    public void captureCalculateHash(IBlur3Hash builder, RectF position) {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) {
+            builder.unsupported();
+            return;
+        }
+
+        if (hasActiveEdgeEffects() && getOverScrollMode() != OVER_SCROLL_NEVER) {
+            builder.unsupported();
+            return;
+        }
+
+        for (int a = 0, N = getItemDecorationCount(); a < N; a++) {
+            ItemDecoration itemDecoration = getItemDecorationAt(a);
+            if (itemDecoration instanceof IBlur3Capture) {
+                final IBlur3Capture capture = (IBlur3Capture) itemDecoration;
+                capture.captureCalculateHash(builder, position);
+            }
+        }
+        for (int i = 0, N = getChildCount(); i < N; i++) {
+            final View child = getChildAt(i);
+
+            final float left = child.getX();
+            final float top = child.getY();
+            final float right = left + child.getWidth();
+            final float bottom = top + child.getHeight();
+
+            if (!position.intersects(left, top, right, bottom)) {
+                continue;
+            }
+
+            builder.add(child);
+        }
+    }
+
+
+    public View findViewByPosition(int position) {
+        if (position == NO_POSITION) return null;
+        for (int i = 0; i < getChildCount(); ++i) {
+            View child = getChildAt(i);
+            int childPosition = getChildAdapterPosition(child);
+            if (childPosition != NO_POSITION && childPosition == position) {
+                return child;
+            }
+        }
+        return null;
+    }
+
 }

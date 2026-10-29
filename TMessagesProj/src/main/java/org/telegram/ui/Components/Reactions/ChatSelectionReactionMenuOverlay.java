@@ -321,7 +321,10 @@ public class ChatSelectionReactionMenuOverlay extends FrameLayout {
         if (obj == null || obj.messageOwner == null || obj.needDrawBluredPreview()) {
             return false;
         }
-        return MessageObject.getMedia(obj.messageOwner) instanceof TLRPC.TL_messageMediaPhoto ||
+        if (obj.messageOwner.rich_message != null) {
+            return true;
+        }
+        return MessageObject.isPhoto(obj.messageOwner) && MessageObject.getMedia(obj.messageOwner) != null && MessageObject.getMedia(obj.messageOwner).webpage == null ||
             obj.getDocument() != null && (
                 MessageObject.isVideoDocument(obj.getDocument()) ||
                 MessageObject.isGifDocument(obj.getDocument())
@@ -405,9 +408,9 @@ public class ChatSelectionReactionMenuOverlay extends FrameLayout {
         }
     }
 
-    public boolean onBackPressed() {
+    public boolean onBackPressed(boolean invoked) {
         if (reactionsContainerLayout != null && reactionsContainerLayout.getReactionsWindow() != null) {
-            reactionsContainerLayout.dismissWindow();
+            if (invoked) reactionsContainerLayout.dismissWindow();
             return false;
         }
         return true;

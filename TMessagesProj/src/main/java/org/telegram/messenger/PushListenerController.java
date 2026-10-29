@@ -40,7 +40,6 @@ import org.json.JSONObject;
 import org.telegram.messenger.voip.VoIPGroupNotification;
 import org.telegram.tgnet.ConnectionsManager;
 import org.telegram.tgnet.NativeByteBuffer;
-import org.telegram.tgnet.SerializedData;
 import org.telegram.tgnet.TLRPC;
 import org.telegram.tgnet.tl.TL_update;
 
@@ -245,6 +244,17 @@ public class PushListenerController {
                         FileLog.d(tag + " " + loc_key);
                     }
                     switch (loc_key) {
+                        case "MESSAGE_WALLET_TONCONNECT_REQUEST":
+                        case "MESSAGE_WALLET_TONCONNECT_REQUEST_DAPP": {
+                            JSONArray args = json.optJSONArray("loc_args");
+                            String dapp = "MESSAGE_WALLET_TONCONNECT_REQUEST_DAPP".equals(loc_key) && args != null
+                                    ? args.optString(1, null) : null;
+                            NotificationsController.getInstance(currentAccount).showTonConnectNotification(dapp, time);
+                            ConnectionsManager.onInternalPushReceived(currentAccount);
+                            ConnectionsManager.getInstance(currentAccount).resumeNetworkMaybe();
+                            countDownLatch.countDown();
+                            return;
+                        }
                         case "DC_UPDATE": {
                             int dc = custom.getInt("dc");
                             String addr = custom.getString("addr");
@@ -288,6 +298,45 @@ public class PushListenerController {
                         case "GEO_LIVE_PENDING": {
                             Utilities.stageQueue.postRunnable(() -> LocationController.getInstance(accountFinal).setNewLocationEndWatchTime());
                             countDownLatch.countDown();
+                            return;
+                        }
+                        case "OAUTH_REQUEST": {
+                            String[] args;
+                            if (json.has("loc_args")) {
+                                JSONArray loc_args = json.getJSONArray("loc_args");
+                                args = new String[loc_args.length()];
+                                for (int a = 0; a < args.length; a++) {
+                                    args[a] = loc_args.getString(a);
+                                }
+                            } else {
+                                return;
+                            }
+                            if (args.length < 2) return;
+
+                            final String data_url = custom.optString("url");
+                            if (TextUtils.isEmpty(data_url)) return;
+
+                            final long dialogId = UserObject.OAUTH; // UserConfig.getInstance(currentAccount).getClientUserId();
+                            final String messageText = LocaleController.formatString(R.string.BotAuthNotification, args[0], args[1]);
+
+                            final TLRPC.TL_message messageOwner = new TLRPC.TL_message();
+                            messageOwner.id = Integer.MAX_VALUE - 10;
+                            messageOwner.random_id = Long.MAX_VALUE - 10L;
+                            messageOwner.message = messageText;
+                            messageOwner.date = (int) (time / 1000);
+                            messageOwner.dialog_id = dialogId;
+                            messageOwner.peer_id = new TLRPC.TL_peerUser();
+                            messageOwner.peer_id.user_id = dialogId;
+                            messageOwner.flags |= 256;
+                            messageOwner.from_id = messageOwner.peer_id;
+                            messageOwner.silent = custom.has("silent") && custom.getInt("silent") != 0;
+
+                            final MessageObject messageObject = new MessageObject(currentAccount, messageOwner, messageText, data_url, null, true, false, false, false);
+                            messageObject.isOauthPush = true;
+                            ArrayList<MessageObject> arrayList = new ArrayList<>();
+                            arrayList.add(messageObject);
+                            FileLog.d("PushListenerController push OAUTH notification to NotificationsController of " + messageOwner.dialog_id);
+                            NotificationsController.getInstance(currentAccount).processNewMessages(arrayList, true, true, countDownLatch);
                             return;
                         }
                     }
@@ -540,6 +589,22 @@ public class PushListenerController {
                                         case "MESSAGE_RECURRING_PAY": {
                                             messageText = LocaleController.formatString("NotificationMessageRecurringPay", R.string.NotificationMessageRecurringPay, args[0], args[1]);
                                             message1 = getString(R.string.PaymentInvoice);
+                                            break;
+                                        }
+                                        case "MESSAGE_GRAM_TRANSFER":
+                                        case "MESSAGE_GRAM_TRANSFER_COMMENT":
+                                        case "MESSAGE_GRAM_TRANSFER_UNKNOWN":
+                                        case "MESSAGE_GRAM_TRANSFER_UNKNOWN_COMMENT": {
+                                            boolean unknown = loc_key.startsWith("MESSAGE_GRAM_TRANSFER_UNKNOWN");
+                                            boolean comment = loc_key.endsWith("_COMMENT");
+                                            if (args == null || args.length < (comment ? 3 : 2)) {
+                                                break;
+                                            }
+                                            int stringId = unknown
+                                                    ? (comment ? R.string.NotificationGramTransferUnknownComment : R.string.NotificationGramTransferUnknown)
+                                                    : (comment ? R.string.NotificationGramTransferComment : R.string.NotificationGramTransfer);
+                                            messageText = LocaleController.formatString(stringId, (Object[]) args);
+                                            message1 = messageText;
                                             break;
                                         }
                                         case "MESSAGE_TEXT":
@@ -1398,8 +1463,9 @@ public class PushListenerController {
                                     FileLog.d(tag + " received message notification " + loc_key + " for dialogId = " + dialogId + " mid = " + msg_id);
                                 }
                                 if (messageText != null) {
+                                    boolean isStoryReaction = loc_key.equals("REACT_STORY") || loc_key.equals("REACT_STORY_HIDDEN");
                                     TLRPC.TL_message messageOwner = new TLRPC.TL_message();
-                                    if (loc_key.startsWith("REACT_STORY") && msg_id > 0) {
+                                    if (isStoryReaction && msg_id > 0) {
                                         msg_id = -msg_id;
                                     }
                                     messageOwner.id = msg_id;
@@ -1446,7 +1512,7 @@ public class PushListenerController {
                                         messageObject.messageOwner.reply_to.forum_topic = true;
                                         messageObject.messageOwner.reply_to.reply_to_top_id = topicId;
                                     }
-                                    messageObject.isStoryReactionPush = loc_key.startsWith("REACT_STORY");
+                                    messageObject.isStoryReactionPush = isStoryReaction;
                                     messageObject.isReactionPush = !messageObject.isStoryReactionPush && (loc_key.startsWith("REACT_") || loc_key.startsWith("CHAT_REACT_"));
                                     messageObject.isStoryPush = loc_key.equals("STORY_NOTEXT") || loc_key.equals("STORY_HIDDEN_AUTHOR");
                                     messageObject.isLiveStoryPush = loc_key.equals("STORY_LIVE");
@@ -1612,6 +1678,98 @@ public class PushListenerController {
             }
             case "CHAT_REACT_GIF": {
                 return LocaleController.formatString(R.string.PushChatReactGif, args);
+            }
+            case "REACT_PHOTO_SECRET": {
+                return LocaleController.formatString(R.string.PushReactPhotoSecret, args);
+            }
+            case "REACT_VIDEO_SECRET": {
+                return LocaleController.formatString(R.string.PushReactVideoSecret, args);
+            }
+            case "REACT_TODO_APPEND":
+            case "REACT_TODO_DONE": {
+                return LocaleController.formatString(R.string.PushReactTodoUpdate, args);
+            }
+            case "REACT_GAME_SCORE": {
+                return LocaleController.formatString(R.string.PushReactGameScore, args);
+            }
+            case "REACT_PAID_MEDIA": {
+                return LocaleController.formatString(R.string.PushReactPaidMedia, args);
+            }
+            case "REACT_STORY_MENTION": {
+                return LocaleController.formatString(R.string.PushReactStoryMention, args);
+            }
+            case "REACT_GIVEAWAY_STARS": {
+                return LocaleController.formatString(R.string.NotificationReactGiveaway, args);
+            }
+            case "REACT_GIFTCODE": {
+                return LocaleController.formatString(R.string.PushReactGiftCode, args);
+            }
+            case "REACT_THEME":
+            case "REACT_GIFT_THEME":
+            case "REACT_NOTHEME": {
+                return LocaleController.formatString(R.string.PushReactThemeChange, args);
+            }
+            case "REACT_WALLPAPER": {
+                return LocaleController.formatString(R.string.PushReactWallpaper, args);
+            }
+            case "REACT_SAME_WALLPAPER": {
+                return LocaleController.formatString(R.string.PushReactSameWallpaper, args);
+            }
+            case "REACT_SUGGEST_USERPIC": {
+                return LocaleController.formatString(R.string.PushReactSuggestUserpic, args);
+            }
+            case "REACT_SUGGEST_BIRTHDAY": {
+                return LocaleController.formatString(R.string.PushReactSuggestBirthday, args);
+            }
+            case "REACT_RECURRING_PAY": {
+                return LocaleController.formatString(R.string.PushReactRecurringPay, args);
+            }
+            case "REACT_STARGIFT": {
+                return LocaleController.formatString(R.string.PushReactStarGift, args);
+            }
+            case "REACT_UNIQUE_STARGIFT": {
+                return LocaleController.formatString(R.string.PushReactUniqueStarGift, args);
+            }
+            case "REACT_STARGIFT_UPGRADE": {
+                return LocaleController.formatString(R.string.PushReactStarGiftUpgrade, args);
+            }
+            case "REACT_STARGIFT_PREPAID_UPGRADE": {
+                return LocaleController.formatString(R.string.PushReactStarGiftPrepaidUpgrade, args);
+            }
+            case "REACT_STARGIFT_UNPACK_UPGRADE": {
+                return LocaleController.formatString(R.string.PushReactStarGiftUnpackUpgrade, args);
+            }
+            case "REACT_GRAM_TRANSFER": {
+                return LocaleController.formatString(R.string.PushReactGramTransfer, args);
+            }
+            case "REACT_GRAM_TRANSFER_COMMENT": {
+                return LocaleController.formatString(R.string.PushReactGramTransferComment, args);
+            }
+            case "REACT_WALLET_TONCONNECT_REQUEST": {
+                return LocaleController.formatString(R.string.PushReactWalletTonConnectRequest, args);
+            }
+            case "REACT_PROXIMITY": {
+                return LocaleController.formatString(R.string.PushReactProximity, args);
+            }
+            case "REACT_SCREENSHOT": {
+                return LocaleController.formatString(R.string.PushReactScreenshot, args);
+            }
+            case "CHAT_REACT_GAME_SCORE": {
+                return LocaleController.formatString(R.string.PushChatReactGameScore, args);
+            }
+            case "CHAT_REACT_STORY": {
+                return LocaleController.formatString(R.string.PushChatReactStory, args);
+            }
+            case "CHAT_REACT_THEME":
+            case "CHAT_REACT_NOTHEME": {
+                return LocaleController.formatString(R.string.PushChatReactThemeChange, args);
+            }
+            case "CHAT_REACT_POLL_APPEND": {
+                return LocaleController.formatString(R.string.PushChatReactPollUpdate, args);
+            }
+            case "CHAT_REACT_TODO_APPEND":
+            case "CHAT_REACT_TODO_DONE": {
+                return LocaleController.formatString(R.string.PushChatReactTodoUpdate, args);
             }
             /* stories */
             case "REACT_STORY": {

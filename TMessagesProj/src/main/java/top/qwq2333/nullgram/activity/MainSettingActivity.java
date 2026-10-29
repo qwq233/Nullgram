@@ -305,12 +305,6 @@ public class MainSettingActivity extends BaseActivity {
         }
 
         @Override
-        public boolean isEnabled(RecyclerView.ViewHolder holder) {
-            int type = holder.getItemViewType();
-            return type == 2 || type == 3 || type == 5;
-        }
-
-        @Override
         public int getItemViewType(int position) {
             if (position == categories2Row || position == about2Row) {
                 return TYPE_SHADOW;

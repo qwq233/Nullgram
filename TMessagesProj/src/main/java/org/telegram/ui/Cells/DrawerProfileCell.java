@@ -63,6 +63,7 @@ import org.telegram.ui.Components.AvatarDrawable;
 import org.telegram.ui.Components.BackupImageView;
 import org.telegram.ui.Components.CubicBezierInterpolator;
 import org.telegram.ui.Components.LayoutHelper;
+import org.telegram.ui.Components.BulletinFactory;
 import org.telegram.ui.Components.Premium.PremiumGradient;
 import org.telegram.ui.Components.Premium.StarParticlesView;
 import org.telegram.ui.Components.RLottieDrawable;
@@ -253,7 +254,7 @@ public class DrawerProfileCell extends FrameLayout implements NotificationCenter
 
         boolean playDrawable;
         if (playDrawable = sunDrawable == null) {
-            sunDrawable = new RLottieDrawable(R.raw.sun, "" + R.raw.sun, AndroidUtilities.dp(28), AndroidUtilities.dp(28), true, null);
+            sunDrawable = new RLottieDrawable(R.raw.sun, AndroidUtilities.dp(28), AndroidUtilities.dp(28), true, null);
             sunDrawable.setPlayInDirectionOfCustomEndFrame(true);
             if (Theme.isCurrentThemeDay()) {
                 sunDrawable.setCustomEndFrame(0);
@@ -328,7 +329,7 @@ public class DrawerProfileCell extends FrameLayout implements NotificationCenter
 
             if (drawerLayoutContainer != null ) {
                 FrameLayout layout = drawerLayoutContainer.getParent() instanceof FrameLayout ? (FrameLayout) drawerLayoutContainer.getParent() : null;
-                Theme.turnOffAutoNight(layout, () -> {
+                Theme.turnOffAutoNight(layout != null ? BulletinFactory.of(layout, null) : BulletinFactory.global(), () -> {
                     drawerLayoutContainer.closeDrawer(false);
                     drawerLayoutContainer.presentFragment(new ThemeActivity(ThemeActivity.THEME_TYPE_NIGHT));
                 });

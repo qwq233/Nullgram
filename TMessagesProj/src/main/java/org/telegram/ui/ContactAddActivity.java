@@ -346,7 +346,7 @@ public class ContactAddActivity extends BaseFragment implements NotificationCent
             suggestPhoto.setTextAndIcon(LocaleController.formatString(R.string.SuggestUserPhoto, user.first_name), R.drawable.msg_addphoto, true);
             suggestPhoto.setBackground(Theme.getSelectorDrawable(true, resourcesProvider));
             suggestPhoto.setColors(Theme.key_windowBackgroundWhiteBlueIcon, Theme.key_windowBackgroundWhiteBlueButton);
-            RLottieDrawable suggestDrawable = new RLottieDrawable(R.raw.photo_suggest_icon, "" + R.raw.photo_suggest_icon, AndroidUtilities.dp(50), AndroidUtilities.dp(50), false, null);
+            RLottieDrawable suggestDrawable = new RLottieDrawable(R.raw.photo_suggest_icon, AndroidUtilities.dp(50), AndroidUtilities.dp(50), false, null);
             suggestPhoto.imageView.setTranslationX(-AndroidUtilities.dp(8));
             suggestPhoto.imageView.setAnimation(suggestDrawable);
             suggestPhoto.setOnClickListener(v -> {
@@ -373,7 +373,7 @@ public class ContactAddActivity extends BaseFragment implements NotificationCent
             setAvatarCell.setTextAndIcon(LocaleController.formatString(R.string.UserSetPhoto, user.first_name), R.drawable.msg_addphoto, false);
             setAvatarCell.setBackground(Theme.getSelectorDrawable(true, resourcesProvider));
             setAvatarCell.setColors(Theme.key_windowBackgroundWhiteBlueIcon, Theme.key_windowBackgroundWhiteBlueButton);
-            RLottieDrawable cameraDrawable = new RLottieDrawable(R.raw.camera_outline, "" + R.raw.camera_outline, AndroidUtilities.dp(50), AndroidUtilities.dp(50), false, null);
+            RLottieDrawable cameraDrawable = new RLottieDrawable(R.raw.camera_outline, AndroidUtilities.dp(50), AndroidUtilities.dp(50), false, null);
             setAvatarCell.imageView.setTranslationX(-AndroidUtilities.dp(8));
             setAvatarCell.imageView.setAnimation(cameraDrawable);
             setAvatarCell.setOnClickListener(v -> {
@@ -484,7 +484,7 @@ public class ContactAddActivity extends BaseFragment implements NotificationCent
                         }));
                     },
                     null,
-                    false, resourcesProvider
+                    false, false, resourcesProvider
                 ).create());
             });
 
@@ -512,10 +512,15 @@ public class ContactAddActivity extends BaseFragment implements NotificationCent
         listView.setBackgroundColor(getThemedColor(Theme.key_windowBackgroundGray));
         frameLayout.addView(listView, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, LayoutHelper.MATCH_PARENT, Gravity.FILL));
 
+        if (addContact && needAddException) {
+            checkShare = true;
+        }
+        listView.adapter.update(false);
+
         return fragmentView = frameLayout;
     }
 
-    private boolean checkShare = true;
+    private boolean checkShare = false;
 
     private boolean firstSet = true;
     private void fillItems(ArrayList<UItem> items, UniversalAdapter adapter) {
@@ -925,7 +930,7 @@ public class ContactAddActivity extends BaseFragment implements NotificationCent
                         src.renameTo(destFile);
                         String oldKey = avatar.volume_id + "_" + avatar.local_id + "@50_50";
                         String newKey = smallSize2.location.volume_id + "_" + smallSize2.location.local_id + "@50_50";
-                        ImageLoader.getInstance().replaceImageInCache(oldKey, newKey, ImageLocation.getForUser(user, ImageLocation.TYPE_SMALL), false);
+                        ImageLoader.getInstance().replaceImageInCache(oldKey, newKey, ImageLocation.getForUser(currentAccount, user, ImageLocation.TYPE_SMALL), false);
                     }
 
                     if (bigSize2 != null && bigAvatar != null) {
@@ -993,7 +998,7 @@ public class ContactAddActivity extends BaseFragment implements NotificationCent
 
         themeDescriptions.add(new ThemeDescription(fragmentView, ThemeDescription.FLAG_BACKGROUND, null, null, null, null, Theme.key_windowBackgroundWhite));
 
-        themeDescriptions.add(new ThemeDescription(actionBar, ThemeDescription.FLAG_BACKGROUND, null, null, null, null, Theme.key_actionBarDefault));
+//        themeDescriptions.add(new ThemeDescription(actionBar, ThemeDescription.FLAG_BACKGROUND, null, null, null, null, Theme.key_actionBarDefault));
         themeDescriptions.add(new ThemeDescription(actionBar, ThemeDescription.FLAG_AB_ITEMSCOLOR, null, null, null, null, Theme.key_actionBarDefaultIcon));
         themeDescriptions.add(new ThemeDescription(actionBar, ThemeDescription.FLAG_AB_TITLECOLOR, null, null, null, null, Theme.key_actionBarDefaultTitle));
         themeDescriptions.add(new ThemeDescription(actionBar, ThemeDescription.FLAG_AB_SELECTORCOLOR, null, null, null, null, Theme.key_actionBarDefaultSelector));

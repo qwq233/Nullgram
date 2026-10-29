@@ -18,6 +18,8 @@ import android.media.MediaPlayer;
 import android.media.RingtoneManager;
 import android.net.Uri;
 import android.os.Build;
+import android.os.VibrationAttributes;
+import android.os.VibrationEffect;
 import android.os.Vibrator;
 import android.provider.Settings;
 import android.text.SpannableString;
@@ -142,7 +144,7 @@ public class VoIPPreNotificationService { // } extends Service implements AudioM
         final Intent intent = new Intent(context, LaunchActivity.class).setAction("voip");
         final Notification.Builder builder = new Notification.Builder(context)
             .setContentTitle(LocaleController.getString(video ? R.string.VoipInVideoCallBranding : R.string.VoipInCallBranding))
-            .setSmallIcon(R.drawable.ic_call)
+            .setSmallIcon(R.drawable.call)
             .setContentIntent(
                 PendingIntent.getActivity(
                     context, 0,
@@ -272,41 +274,6 @@ public class VoIPPreNotificationService { // } extends Service implements AudioM
         return builder.build();
     }
 
-//    @Override
-//    public int onStartCommand(Intent intent, int flags, int startId) {
-//        instance = this;
-//        startRinging();
-//        return START_NOT_STICKY;
-//    }
-
-//    @Override
-//    public void onCreate() {
-//        if (pendingVoIP != null) {
-//            account = pendingVoIP.getIntExtra("account", UserConfig.selectedAccount);
-//            user_id = pendingVoIP.getLongExtra("user_id", 0);
-//            call_id = pendingVoIP.getLongExtra("call_id", 0);
-//            video = pendingVoIP.getBooleanExtra("video", false);
-//        }
-//        if (Build.VERSION.SDK_INT >= 33) {
-//            startForeground(VoIPService.ID_INCOMING_CALL_PRENOTIFICATION, getNotification(), ServiceInfo.FOREGROUND_SERVICE_TYPE_DATA_SYNC);
-//        } else {
-//            startForeground(VoIPService.ID_INCOMING_CALL_PRENOTIFICATION, getNotification());
-//        }
-//    }
-//
-//    @Nullable
-//    @Override
-//    public IBinder onBind(Intent intent) {
-//        return null;
-//    }
-//
-//    @Override
-//    public void onDestroy() {
-//        stopForeground(true);
-//        stopRinging();
-//        super.onDestroy();
-//    }
-
     private static final Object sync = new Object();
     private static MediaPlayer ringtonePlayer;
     private static Vibrator vibrator;
@@ -383,7 +350,16 @@ public class VoIPPreNotificationService { // } extends Service implements AudioM
                     } else if (vibrate == 3) {
                         duration *= 2;
                     }
-                    vibrator.vibrate(new long[]{0, duration, 500}, 0);
+                    long[] pattern = new long[]{0, duration, 500};
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                        vibrator.vibrate(
+                                VibrationEffect.createWaveform(pattern, 0),
+                                new VibrationAttributes.Builder()
+                                    .setUsage(VibrationAttributes.USAGE_RINGTONE) // required for background apps
+                                    .build());
+                    } else {
+                        vibrator.vibrate(pattern, 0);
+                    }
                 }
             }
         }
@@ -623,11 +599,18 @@ public class VoIPPreNotificationService { // } extends Service implements AudioM
             for (int i = 0; i < UserConfig.MAX_ACCOUNT_COUNT; ++i) {
                 MessagesController.getInstance(i).ignoreSetOnline = false;
             }
+            AndroidUtilities.runOnUIThread(() -> {
+                final LaunchActivity activity = LaunchActivity.instance;
+                if (activity != null && activity.voipLaunchedInBackground && VoIPService.getSharedInstance() == null) {
+                    activity.voipLaunchedInBackground = false;
+                    final VoIPFragment fragment = VoIPFragment.getInstance();
+                    if (fragment != null) {
+                        fragment.finish();
+                    }
+                    activity.moveTaskToBack(true);
+                }
+            });
         }
-//        if (pendingNotificationService != null) {
-//            context.stopService(pendingNotificationService);
-//        }
-//        pendingNotificationService = null;
     }
 
 }

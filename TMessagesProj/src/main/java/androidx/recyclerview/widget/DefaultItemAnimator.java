@@ -51,16 +51,16 @@ public class DefaultItemAnimator extends SimpleItemAnimator {
     protected ArrayList<MoveInfo> mPendingMoves = new ArrayList<>();
     protected ArrayList<ChangeInfo> mPendingChanges = new ArrayList<>();
 
-    ArrayList<ArrayList<RecyclerView.ViewHolder>> mAdditionsList = new ArrayList<>();
-    ArrayList<ArrayList<MoveInfo>> mMovesList = new ArrayList<>();
-    ArrayList<ArrayList<ChangeInfo>> mChangesList = new ArrayList<>();
-    ArrayList<MoveInfo> currentMoves = new ArrayList<>();
-    ArrayList<ChangeInfo> currentChanges = new ArrayList<>();
+    protected ArrayList<ArrayList<RecyclerView.ViewHolder>> mAdditionsList = new ArrayList<>();
+    protected ArrayList<ArrayList<MoveInfo>> mMovesList = new ArrayList<>();
+    protected ArrayList<ArrayList<ChangeInfo>> mChangesList = new ArrayList<>();
+    protected ArrayList<MoveInfo> currentMoves = new ArrayList<>();
+    protected ArrayList<ChangeInfo> currentChanges = new ArrayList<>();
 
     protected ArrayList<RecyclerView.ViewHolder> mAddAnimations = new ArrayList<>();
     protected ArrayList<RecyclerView.ViewHolder> mMoveAnimations = new ArrayList<>();
     protected ArrayList<RecyclerView.ViewHolder> mRemoveAnimations = new ArrayList<>();
-    ArrayList<RecyclerView.ViewHolder> mChangeAnimations = new ArrayList<>();
+    protected ArrayList<RecyclerView.ViewHolder> mChangeAnimations = new ArrayList<>();
 
     protected boolean delayAnimations = true;
     private long delayIncrement = 0;
@@ -90,8 +90,8 @@ public class DefaultItemAnimator extends SimpleItemAnimator {
             this.newHolder = newHolder;
         }
 
-        ChangeInfo(RecyclerView.ViewHolder oldHolder, RecyclerView.ViewHolder newHolder,
-                int fromX, int fromY, int toX, int toY) {
+        public ChangeInfo(RecyclerView.ViewHolder oldHolder, RecyclerView.ViewHolder newHolder,
+                          int fromX, int fromY, int toX, int toY) {
             this(oldHolder, newHolder);
             this.fromX = fromX;
             this.fromY = fromY;
@@ -254,7 +254,12 @@ public class DefaultItemAnimator extends SimpleItemAnimator {
             .scaleX(1f - animateByScale(view))
             .scaleY(1f - animateByScale(view));
         if (Build.VERSION.SDK_INT >= 19) {
-            animation.setUpdateListener(animation1 -> onRemoveAnimationUpdate(holder));
+            animation.setUpdateListener(animation1 -> {
+                onRemoveAnimationUpdate(holder);
+                if (animationUpdatesListener != null) {
+                    animationUpdatesListener.run();
+                }
+            });
         }
         animation
             .setListener(
@@ -274,6 +279,10 @@ public class DefaultItemAnimator extends SimpleItemAnimator {
                         }
                         view.setTranslationX(0);
                         view.setTranslationY(0);
+                        onRemoveAnimationUpdate(holder);
+                        if (animationUpdatesListener != null) {
+                            animationUpdatesListener.run();
+                        }
                         dispatchRemoveFinished(holder);
                         mRemoveAnimations.remove(holder);
                         dispatchFinishedWhenDone();
@@ -310,7 +319,12 @@ public class DefaultItemAnimator extends SimpleItemAnimator {
             .setStartDelay(getAddDelay() + delay)
             .setInterpolator(getAddInterpolator());
         if (Build.VERSION.SDK_INT >= 19) {
-            animation.setUpdateListener(animation1 -> onAddAnimationUpdate(holder));
+            animation.setUpdateListener(animation1 -> {
+                onAddAnimationUpdate(holder);
+                if (animationUpdatesListener != null) {
+                    animationUpdatesListener.run();
+                }
+            });
         }
         animation
             .setListener(new AnimatorListenerAdapter() {
@@ -331,6 +345,10 @@ public class DefaultItemAnimator extends SimpleItemAnimator {
                 @Override
                 public void onAnimationEnd(Animator animator) {
                     animation.setListener(null);
+                    onAddAnimationUpdate(holder);
+                    if (animationUpdatesListener != null) {
+                        animationUpdatesListener.run();
+                    }
                     dispatchAddFinished(holder);
                     mAddAnimations.remove(holder);
                     dispatchFinishedWhenDone();
@@ -418,7 +436,12 @@ public class DefaultItemAnimator extends SimpleItemAnimator {
         final ViewPropertyAnimator animation = view.animate();
         mMoveAnimations.add(holder);
         if (Build.VERSION.SDK_INT >= 19) {
-            animation.setUpdateListener(animation1 -> onMoveAnimationUpdate(holder));
+            animation.setUpdateListener(animation1 -> {
+                onMoveAnimationUpdate(holder);
+                if (animationUpdatesListener != null) {
+                    animationUpdatesListener.run();
+                }
+            });
         }
         if (translationInterpolator != null) {
             animation.setInterpolator(translationInterpolator);
@@ -448,6 +471,10 @@ public class DefaultItemAnimator extends SimpleItemAnimator {
                 @Override
                 public void onAnimationEnd(Animator animator) {
                     animation.setListener(null);
+                    onMoveAnimationUpdate(holder);
+                    if (animationUpdatesListener != null) {
+                        animationUpdatesListener.run();
+                    }
                     dispatchMoveFinished(holder);
                     mMoveAnimations.remove(holder);
                     dispatchFinishedWhenDone();
@@ -515,7 +542,12 @@ public class DefaultItemAnimator extends SimpleItemAnimator {
                     .scaleY(1f - animateByScale(view));
             }
             if (Build.VERSION.SDK_INT >= 19) {
-                oldViewAnim.setUpdateListener(animation1 -> onChangeAnimationUpdate(changeInfo.oldHolder));
+                oldViewAnim.setUpdateListener(animation1 -> {
+                    onChangeAnimationUpdate(changeInfo.oldHolder);
+                    if (animationUpdatesListener != null) {
+                        animationUpdatesListener.run();
+                    }
+                });
             }
             oldViewAnim
                 .setStartDelay(delay)
@@ -536,6 +568,10 @@ public class DefaultItemAnimator extends SimpleItemAnimator {
                         }
                         view.setTranslationX(0);
                         view.setTranslationY(0);
+                        onChangeAnimationUpdate(changeInfo.oldHolder);
+                        if (animationUpdatesListener != null) {
+                            animationUpdatesListener.run();
+                        }
                         dispatchChangeFinished(changeInfo.oldHolder, true);
                         mChangeAnimations.remove(changeInfo.oldHolder);
                         dispatchFinishedWhenDone();
@@ -555,7 +591,12 @@ public class DefaultItemAnimator extends SimpleItemAnimator {
                 newViewAnimation.scaleX(1f).scaleY(1f);
             }
             if (Build.VERSION.SDK_INT >= 19) {
-                newViewAnimation.setUpdateListener(animation1 -> onChangeAnimationUpdate(changeInfo.newHolder));
+                newViewAnimation.setUpdateListener(animation1 -> {
+                    onChangeAnimationUpdate(changeInfo.newHolder);
+                    if (animationUpdatesListener != null) {
+                        animationUpdatesListener.run();
+                    }
+                });
             }
             newViewAnimation
                 .setListener(new AnimatorListenerAdapter() {
@@ -573,6 +614,10 @@ public class DefaultItemAnimator extends SimpleItemAnimator {
                         }
                         newView.setTranslationX(0);
                         newView.setTranslationY(0);
+                        onChangeAnimationUpdate(changeInfo.newHolder);
+                        if (animationUpdatesListener != null) {
+                            animationUpdatesListener.run();
+                        }
                         dispatchChangeFinished(changeInfo.newHolder, false);
                         mChangeAnimations.remove(changeInfo.newHolder);
                         dispatchFinishedWhenDone();
@@ -867,7 +912,7 @@ public class DefaultItemAnimator extends SimpleItemAnimator {
         dispatchAnimationsFinished();
     }
 
-    void cancelAll(List<RecyclerView.ViewHolder> viewHolders) {
+    protected void cancelAll(List<RecyclerView.ViewHolder> viewHolders) {
         for (int i = viewHolders.size() - 1; i >= 0; i--) {
             viewHolders.get(i).itemView.animate().cancel();
         }
@@ -909,5 +954,11 @@ public class DefaultItemAnimator extends SimpleItemAnimator {
 
     public void checkIsRunning() {
 
+    }
+
+    private Runnable animationUpdatesListener;
+    @Override
+    public void listenToAnimationUpdates(Runnable listener) {
+        this.animationUpdatesListener = listener;
     }
 }

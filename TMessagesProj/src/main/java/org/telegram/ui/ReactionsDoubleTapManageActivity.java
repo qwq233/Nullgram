@@ -200,8 +200,6 @@ public class ReactionsDoubleTapManageActivity extends BaseFragment implements No
         public SetDefaultReactionCell(Context context) {
             super(context);
 
-            setBackgroundColor(getThemedColor(Theme.key_windowBackgroundWhite));
-
             textView = new TextView(context);
             textView.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 16);
             textView.setTextColor(getThemedColor(Theme.key_windowBackgroundWhiteBlackText));
@@ -281,7 +279,7 @@ public class ReactionsDoubleTapManageActivity extends BaseFragment implements No
                 AndroidUtilities.rectTmp2.set(cell.imageDrawable.getBounds());
                 yoff = -(cell.getHeight() - AndroidUtilities.rectTmp2.centerY()) - AndroidUtilities.dp(16);
                 int popupWidth = (int) Math.min(AndroidUtilities.dp(340 - 16), AndroidUtilities.displaySize.x * .95f);
-                xoff = AndroidUtilities.rectTmp2.centerX() - (AndroidUtilities.displaySize.x - popupWidth);
+                xoff = AndroidUtilities.rectTmp2.centerX() - (AndroidUtilities.displaySize.x - AndroidUtilities.dp(12) - popupWidth);
             }
         }
         SelectAnimatedEmojiDialog popupLayout = new SelectAnimatedEmojiDialog(this, getContext(), false, xoff, SelectAnimatedEmojiDialog.TYPE_SET_DEFAULT_REACTION, null) {
@@ -399,5 +397,16 @@ public class ReactionsDoubleTapManageActivity extends BaseFragment implements No
             updateRows();
             listAdapter.notifyDataSetChanged();
         }
+    }
+
+    @Override
+    public boolean isSupportEdgeToEdge() {
+        return true;
+    }
+
+    @Override
+    public void onInsets(int left, int top, int right, int bottom) {
+        listView.setPadding(0, 0, 0, bottom);
+        listView.setClipToPadding(false);
     }
 }

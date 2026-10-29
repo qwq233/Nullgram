@@ -1,16 +1,17 @@
 package org.telegram.messenger.video;
 
 
-import static com.googlecode.mp4parser.authoring.tracks.h265.NalUnitTypes.NAL_TYPE_PPS_NUT;
-import static com.googlecode.mp4parser.authoring.tracks.h265.NalUnitTypes.NAL_TYPE_PREFIX_SEI_NUT;
-import static com.googlecode.mp4parser.authoring.tracks.h265.NalUnitTypes.NAL_TYPE_SPS_NUT;
-import static com.googlecode.mp4parser.authoring.tracks.h265.NalUnitTypes.NAL_TYPE_VPS_NUT;
+import static com.googlecode.mp4parser.authoring.tracks.h265.H265NalUnitTypes.NAL_TYPE_PPS_NUT;
+import static com.googlecode.mp4parser.authoring.tracks.h265.H265NalUnitTypes.NAL_TYPE_PREFIX_SEI_NUT;
+import static com.googlecode.mp4parser.authoring.tracks.h265.H265NalUnitTypes.NAL_TYPE_SPS_NUT;
+import static com.googlecode.mp4parser.authoring.tracks.h265.H265NalUnitTypes.NAL_TYPE_VPS_NUT;
 
 import androidx.annotation.NonNull;
 
 import com.coremedia.iso.IsoTypeReader;
 import com.coremedia.iso.IsoTypeWriter;
 import com.coremedia.iso.boxes.sampleentry.VisualSampleEntry;
+
 import com.googlecode.mp4parser.authoring.tracks.CleanInputStream;
 import com.googlecode.mp4parser.util.ByteBufferByteChannel;
 

@@ -157,7 +157,7 @@ public class WsSettingsActivity extends BaseActivity {
 
     @Override
     protected String getActionBarTitle() {
-        return currentProxyInfo.address;
+        return currentProxyInfo.settings.getAddress();
     }
 
     @Override

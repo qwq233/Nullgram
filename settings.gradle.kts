@@ -27,7 +27,7 @@ pluginManagement {
 }
 
 dependencyResolutionManagement {
-    repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
+    repositoriesMode.set(RepositoriesMode.PREFER_SETTINGS)
     repositories {
         google()
         mavenCentral()
@@ -38,7 +38,7 @@ dependencyResolutionManagement {
 }
 
 plugins {
-    id("com.gradle.develocity") version "4.5.0"
+    id("com.gradle.develocity") version "4.6.1"
     id("org.gradle.toolchains.foojay-resolver-convention") version "1.0.0"
 }
 
@@ -57,5 +57,8 @@ include(
     ":TMessagesProj",
     ":libs:tcp2ws",
     ":libs:pangu",
-    ":libs:ksp"
+    ":libs:ksp",
+    ":jlatexmath"
 )
+project(":jlatexmath").projectDir = file("TMessagesProj/lib/jlatexmath/jlatexmath")
+

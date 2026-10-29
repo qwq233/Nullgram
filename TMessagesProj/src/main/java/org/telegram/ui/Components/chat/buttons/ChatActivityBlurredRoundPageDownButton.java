@@ -87,16 +87,14 @@ public class ChatActivityBlurredRoundPageDownButton extends FrameLayout {
     }
 
     public static ChatActivityBlurredRoundPageDownButton create(
-            Context context,
-            Theme.ResourcesProvider resourcesProvider,
-            BlurredBackgroundDrawableViewFactory factory,
-            BlurredBackgroundColorProvider colorProvider,
-            @DrawableRes int res
+        Context context,
+        Theme.ResourcesProvider resourcesProvider,
+        BlurredBackgroundDrawableViewFactory factory,
+        BlurredBackgroundColorProvider colorProvider,
+        @DrawableRes int res
     ) {
         ChatActivityBlurredRoundPageDownButton button = new ChatActivityBlurredRoundPageDownButton(context, resourcesProvider);
-        button.addButtonView(ChatActivityBlurredRoundButton.create(
-            context, factory, colorProvider, resourcesProvider, res
-        ));
+        button.addButtonView(ChatActivityBlurredRoundButton.create(context, factory, colorProvider, resourcesProvider, res));
         ScaleStateListAnimator.apply(button, .13f, 2f);
 
         return button;

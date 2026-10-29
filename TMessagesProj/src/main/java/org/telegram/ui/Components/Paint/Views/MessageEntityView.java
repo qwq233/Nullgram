@@ -29,6 +29,7 @@ import android.graphics.Canvas;
 import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.Path;
+import android.graphics.PointF;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffXfermode;
 import android.graphics.RectF;
@@ -55,14 +56,14 @@ import org.telegram.messenger.MessagesController;
 import org.telegram.messenger.SharedConfig;
 import org.telegram.messenger.UserConfig;
 import org.telegram.tgnet.TLRPC;
+import org.telegram.ui.ActionBar.MessageDrawable;
 import org.telegram.ui.ActionBar.Theme;
 import org.telegram.ui.Cells.ChatActionCell;
 import org.telegram.ui.Cells.ChatMessageCell;
 import org.telegram.ui.Components.BlurringShader;
 import org.telegram.ui.Components.LayoutHelper;
 import org.telegram.ui.Components.MessageBackgroundDrawable;
-import org.telegram.ui.Components.Point;
-import org.telegram.ui.Components.Rect;
+import org.telegram.ui.Components.RectOld;
 import org.telegram.ui.Components.RecyclerListView;
 import org.telegram.ui.Stories.recorder.PreviewView;
 import org.telegram.ui.Stories.recorder.StoryEntry;
@@ -89,11 +90,11 @@ public class MessageEntityView extends EntityView {
         return false;
     }
 
-    public MessageEntityView(Context context, Point position, ArrayList<MessageObject> messageObjects, BlurringShader.BlurManager blurManager, boolean isRepostVideoPreview, PreviewView.TextureViewHolder videoTextureHolder) {
+    public MessageEntityView(Context context, PointF position, ArrayList<MessageObject> messageObjects, BlurringShader.BlurManager blurManager, boolean isRepostVideoPreview, PreviewView.TextureViewHolder videoTextureHolder) {
         this(context, position, 0.0f, 1.0f, messageObjects, blurManager, isRepostVideoPreview, videoTextureHolder);
     }
 
-    public MessageEntityView(Context context, Point position, float angle, float scale, ArrayList<MessageObject> thisMessageObjects, BlurringShader.BlurManager blurManager, boolean isRepostVideoPreview, PreviewView.TextureViewHolder videoTextureHolder) {
+    public MessageEntityView(Context context, PointF position, float angle, float scale, ArrayList<MessageObject> thisMessageObjects, BlurringShader.BlurManager blurManager, boolean isRepostVideoPreview, PreviewView.TextureViewHolder videoTextureHolder) {
         super(context, position);
         this.blurManager = blurManager;
         setRotation(angle);
@@ -1063,7 +1064,7 @@ public class MessageEntityView extends EntityView {
             } else if (child instanceof ChatActionCell) {
                 ChatActionCell cell = (ChatActionCell) child;
                 float cleft, ctop, cright, cbottom;
-                if (cell.starGiftLayout.has()) {
+                if (cell.hasStarGiftLayout()) {
                     cleft = container.getX() + cell.getX() + cell.getBoundsLeft();
                     cright = container.getX() + cell.getX() + cell.getBoundsRight();
                     ctop = container.getY() + cell.getY();
@@ -1138,7 +1139,7 @@ public class MessageEntityView extends EntityView {
             if (scale < 1) {
                 setScale(scale);
             }
-            final Point p = getPosition();
+            final PointF p = getPosition();
             if (!isAction) {
                 p.x -= dp(19) * Math.min(1, scale);
             }
@@ -1149,13 +1150,13 @@ public class MessageEntityView extends EntityView {
     }
 
     @Override
-    public Rect getSelectionBounds() {
+    public RectOld getSelectionBounds() {
         ViewGroup parentView = (ViewGroup) getParent();
         if (parentView == null) {
-            return new Rect();
+            return new RectOld();
         }
         float scale = parentView.getScaleX();
-        return new Rect(
+        return new RectOld(
             getPositionX() * scale - getMeasuredWidth() * getScale() / 2.0f * scale - dp(1.0f + 19.5f + 15),
             getPositionY() * scale - getMeasuredHeight() * getScale() / 2.0f * scale - dp(1.0f + 19.5f + 15),
             (getMeasuredWidth() * getScale()) * scale + dp((1.0f + 19.5f + 15) * 2),
@@ -1304,51 +1305,51 @@ public class MessageEntityView extends EntityView {
         public Drawable getDrawable(String drawableKey) {
             if (drawableKey.equals(Theme.key_drawable_msgIn)) {
                 if (msgInDrawable == null) {
-                    msgInDrawable = new Theme.MessageDrawable(Theme.MessageDrawable.TYPE_TEXT, false, false, resourcesProvider);
+                    msgInDrawable = new MessageDrawable(MessageDrawable.TYPE_TEXT, false, false, resourcesProvider);
                 }
                 return msgInDrawable;
             }
             if (drawableKey.equals(Theme.key_drawable_msgInSelected)) {
                 if (msgInDrawableSelected == null) {
-                    msgInDrawableSelected = new Theme.MessageDrawable(Theme.MessageDrawable.TYPE_TEXT, false, true, resourcesProvider);
+                    msgInDrawableSelected = new MessageDrawable(MessageDrawable.TYPE_TEXT, false, true, resourcesProvider);
                 }
                 return msgInDrawableSelected;
             }
             if (drawableKey.equals(Theme.key_drawable_msgOut)) {
                 if (msgOutDrawable == null) {
-                    msgOutDrawable = new Theme.MessageDrawable(Theme.MessageDrawable.TYPE_TEXT, true, false, resourcesProvider);
+                    msgOutDrawable = new MessageDrawable(MessageDrawable.TYPE_TEXT, true, false, resourcesProvider);
                 }
                 return msgOutDrawable;
             }
             if (drawableKey.equals(Theme.key_drawable_msgOutSelected)) {
                 if (msgOutDrawableSelected == null) {
-                    msgOutDrawableSelected = new Theme.MessageDrawable(Theme.MessageDrawable.TYPE_TEXT, true, true, resourcesProvider);
+                    msgOutDrawableSelected = new MessageDrawable(MessageDrawable.TYPE_TEXT, true, true, resourcesProvider);
                 }
                 return msgOutDrawableSelected;
             }
 
             if (drawableKey.equals(Theme.key_drawable_msgInMedia)) {
                 if (msgMediaInDrawable == null) {
-                    msgMediaInDrawable = new Theme.MessageDrawable(Theme.MessageDrawable.TYPE_MEDIA, false, false, resourcesProvider);
+                    msgMediaInDrawable = new MessageDrawable(MessageDrawable.TYPE_MEDIA, false, false, resourcesProvider);
                 }
                 msgMediaInDrawable.invalidateSelf();
                 return msgMediaInDrawable;
             }
             if (drawableKey.equals(Theme.key_drawable_msgInMediaSelected)) {
                 if (msgMediaInDrawableSelected == null) {
-                    msgMediaInDrawableSelected = new Theme.MessageDrawable(Theme.MessageDrawable.TYPE_MEDIA, false, true, resourcesProvider);
+                    msgMediaInDrawableSelected = new MessageDrawable(MessageDrawable.TYPE_MEDIA, false, true, resourcesProvider);
                 }
                 return msgMediaInDrawableSelected;
             }
             if (drawableKey.equals(Theme.key_drawable_msgOutMedia)) {
                 if (msgMediaOutDrawable == null) {
-                    msgMediaOutDrawable = new Theme.MessageDrawable(Theme.MessageDrawable.TYPE_MEDIA, true, false, resourcesProvider);
+                    msgMediaOutDrawable = new MessageDrawable(MessageDrawable.TYPE_MEDIA, true, false, resourcesProvider);
                 }
                 return msgMediaOutDrawable;
             }
             if (drawableKey.equals(Theme.key_drawable_msgOutMediaSelected)) {
                 if (msgMediaOutDrawableSelected == null) {
-                    msgMediaOutDrawableSelected = new Theme.MessageDrawable(Theme.MessageDrawable.TYPE_MEDIA, true, true, resourcesProvider);
+                    msgMediaOutDrawableSelected = new MessageDrawable(MessageDrawable.TYPE_MEDIA, true, true, resourcesProvider);
                 }
                 return msgMediaOutDrawableSelected;
             }
@@ -1361,10 +1362,10 @@ public class MessageEntityView extends EntityView {
             return isDark;
         }
     };
-    private Theme.MessageDrawable msgInDrawable, msgInDrawableSelected;
-    private Theme.MessageDrawable msgOutDrawable, msgOutDrawableSelected;
-    private Theme.MessageDrawable msgMediaInDrawable, msgMediaInDrawableSelected;
-    private Theme.MessageDrawable msgMediaOutDrawable, msgMediaOutDrawableSelected;
+    private MessageDrawable msgInDrawable, msgInDrawableSelected;
+    private MessageDrawable msgOutDrawable, msgOutDrawableSelected;
+    private MessageDrawable msgMediaInDrawable, msgMediaInDrawableSelected;
+    private MessageDrawable msgMediaOutDrawable, msgMediaOutDrawableSelected;
 
     public void setupTheme(StoryEntry entry) {
         if (entry == null) {

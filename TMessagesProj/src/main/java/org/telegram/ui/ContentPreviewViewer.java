@@ -20,6 +20,7 @@
 package org.telegram.ui;
 
 import static org.telegram.messenger.AndroidUtilities.dp;
+import static org.telegram.messenger.LocaleController.getString;
 
 import android.animation.ValueAnimator;
 import android.annotation.SuppressLint;
@@ -27,12 +28,15 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
+import android.graphics.BitmapShader;
 import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.PixelFormat;
 import android.graphics.Rect;
+import android.graphics.Shader;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
@@ -49,13 +53,14 @@ import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.WindowInsets;
 import android.view.WindowManager;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.core.graphics.Insets;
+import androidx.core.view.ViewCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -107,15 +112,19 @@ import org.telegram.ui.Components.blur3.BlurredBackgroundDrawableViewFactory;
 import org.telegram.ui.Components.blur3.drawable.color.impl.BlurredBackgroundProviderImpl;
 import org.telegram.ui.Components.blur3.source.BlurredBackgroundSourceBitmap;
 import org.telegram.ui.Components.poll.RecentVotersCell;
+import org.telegram.ui.Components.ScrimOptions;
 import org.telegram.ui.Components.StickersAlert;
 import org.telegram.ui.Components.StickersDialogs;
 import org.telegram.ui.Components.SuggestEmojiView;
+import org.telegram.ui.Components.blur3.utils.Blur3Utils;
+import org.telegram.ui.Components.chat.ViewPositionWatcher;
 import org.telegram.ui.Stories.DarkThemeResourceProvider;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import top.qwq2333.gen.Config;
+import me.vkryl.core.reference.ReferenceList;
 
 public class ContentPreviewViewer {
 
@@ -170,7 +179,7 @@ public class ContentPreviewViewer {
 
         }
 
-        default void sendSticker() {
+        default void sendSticker(String emoji) {
         }
 
         default void sendSticker(TLRPC.Document sticker, String query, Object parent, boolean notify, int scheduleDate, int scheduleRepeatPeriod) {
@@ -208,6 +217,14 @@ public class ContentPreviewViewer {
 
         }
 
+        default boolean canAddCaption(TLRPC.Document document) {
+            return false;
+        }
+
+        default void addCaptionToGif(Object gif, Object parent, boolean notify, int scheduleDate, int scheduleRepeatPeriod) {
+
+        }
+
         default boolean canEditSticker() {
             return false;
         }
@@ -220,6 +237,9 @@ public class ContentPreviewViewer {
             return false;
         }
 
+        default boolean canSendSticker() {
+            return true;
+        }
         default boolean isSettingIntroSticker() {
             return false;
         }
@@ -326,7 +346,7 @@ public class ContentPreviewViewer {
 
     private boolean isRecentSticker;
 
-    private WindowInsets lastInsets;
+    private Insets lastInsets = Insets.NONE;
 
     private int currentAccount;
 
@@ -352,7 +372,7 @@ public class ContentPreviewViewer {
     private boolean menuVisible;
     private View popupLayout;
     private float blurProgress;
-    private Paint paint = new Paint(Paint.ANTI_ALIAS_FLAG);
+    private final Paint paint = new Paint(Paint.ANTI_ALIAS_FLAG);
     private UnlockPremiumView unlockPremiumView;
     private ReactionsContainerLayout reactionsLayout;
     private FrameLayout reactionsLayoutContainer;
@@ -399,7 +419,7 @@ public class ContentPreviewViewer {
 
             swb.setGapBackgroundColor(Theme.multAlpha(Theme.getColor(Theme.key_actionBarDefaultSubmenuItem, resourcesProvider), 0.06f));
             swb.setBlurBackgroundForSwipeback(scrimBlur3Factory, BlurredBackgroundProviderImpl.scrimMenuBackground(resourcesProvider), true);
-            swb.add(R.drawable.ic_ab_back, LocaleController.getString(R.string.Back), () -> previewMenu.getSwipeBack().closeForeground());
+            swb.add(R.drawable.ic_ab_back, getString(R.string.Back), () -> previewMenu.getSwipeBack().closeForeground());
             swb.addGap();
 
             final MessageObject messageObject = delegate.getPollMessageObject();
@@ -471,9 +491,11 @@ public class ContentPreviewViewer {
             }
             closeOnDismiss = true;
 
+
             if (delegate != null) {
                 ItemOptions io = delegate.getCustomItemOptions(containerView, containerView);
                 if (io != null) {
+                    io.setBlurBackground(scrimBlur3Factory, BlurredBackgroundProviderImpl.scrimMenuBackground(resourcesProvider), true);
                     io.setDrawScrim(false);
                     io.setupSelectors();
                     io.setOnDismiss(() -> dismissPopupWindow());
@@ -501,15 +523,10 @@ public class ContentPreviewViewer {
                     popupWindow.setInputMethodMode(ActionBarPopupWindow.INPUT_METHOD_NOT_NEEDED);
                     popupWindow.getContentView().setFocusableInTouchMode(true);
 
-                    int insets = 0;
-                    int top;
-                    if (lastInsets != null) {
-                        insets = lastInsets.getStableInsetBottom() + lastInsets.getStableInsetTop();
-                        top = lastInsets.getStableInsetTop();
-                    } else {
-                        top = AndroidUtilities.statusBarHeight;
-                    }
+                    int insets = lastInsets.bottom + lastInsets.top;
+                    int top = lastInsets.top;
                     int size = Math.min(containerView.getWidth(), containerView.getHeight() - insets) - AndroidUtilities.dp(40f);
+
 
                     int y = (int) (moveY + Math.max(size / 2 + top + (stickerEmojiLayout != null ? AndroidUtilities.dp(40) : 0), (containerView.getHeight() - insets - keyboardHeight) / 2) + size / 2);
                     y += AndroidUtilities.dp(24) - moveY;
@@ -534,17 +551,23 @@ public class ContentPreviewViewer {
                         valueAnimator.setInterpolator(CubicBezierInterpolator.DEFAULT);
                         valueAnimator.start();
                     }
-
                     menuVisible = true;
                     return;
                 }
             }
 
+
             int flags = 0;
             if (currentContentType == CONTENT_TYPE_CUSTOM_STIKER || canShowFullVotersList()) {
                 flags |= ActionBarPopupWindow.ActionBarPopupWindowLayout.FLAG_USE_SWIPEBACK;
             }
-            ActionBarPopupWindow.ActionBarPopupWindowLayout previewMenu = new ActionBarPopupWindow.ActionBarPopupWindowLayout(containerView.getContext(), R.drawable.popup_fixed_alert3, resourcesProvider, flags);
+            ActionBarPopupWindow.ActionBarPopupWindowLayout previewMenu = new ActionBarPopupWindow.ActionBarPopupWindowLayout(containerView.getContext(), R.drawable.popup_fixed_alert4, resourcesProvider, flags);
+            previewMenu.setBackground(scrimBlur3Factory.create(previewMenu, true)
+                .setColorProvider(BlurredBackgroundProviderImpl.scrimMenuBackground(resourcesProvider))
+                .setRadius(dp(12))
+                .setPadding(dp(8))
+                .setHasPadding(true));
+
             if (currentContentType == CONTENT_TYPE_CUSTOM_STIKER) {
                 ArrayList<CharSequence> items = new ArrayList<>();
                 final ArrayList<Integer> actions = new ArrayList<>();
@@ -556,9 +579,11 @@ public class ContentPreviewViewer {
                         icons.add(R.drawable.menu_sticker_add);
                         actions.add(0);
                     } else {
-                        items.add(LocaleController.getString(R.string.SendStickerPreview));
-                        icons.add(R.drawable.msg_send);
-                        actions.add(0);
+                        if (delegate.canSendSticker()) {
+                            items.add(LocaleController.getString(R.string.SendStickerPreview));
+                            icons.add(R.drawable.msg_send);
+                            actions.add(0);
+                        }
 
                         items.add(LocaleController.getString(R.string.AddToFavorites));
                         icons.add(R.drawable.msg_fave);
@@ -639,7 +664,7 @@ public class ContentPreviewViewer {
                                 if (delegate.isSettingIntroSticker()) {
                                     delegate.setIntroSticker(TextUtils.join("", selectedEmojis));
                                 } else {
-                                    delegate.sendSticker();
+                                    delegate.sendSticker(TextUtils.join("", selectedEmojis));
                                 }
                             }
                         }
@@ -679,14 +704,8 @@ public class ContentPreviewViewer {
 //                popupWindow.setInputMethodMode(ActionBarPopupWindow.INPUT_METHOD_NOT_NEEDED);
 //                popupWindow.getContentView().setFocusableInTouchMode(true);
 
-                int insets = 0;
-                int top;
-                if (lastInsets != null) {
-                    insets = lastInsets.getStableInsetBottom() + lastInsets.getStableInsetTop();
-                    top = lastInsets.getStableInsetTop();
-                } else {
-                    top = AndroidUtilities.statusBarHeight;
-                }
+                int insets = lastInsets.bottom + lastInsets.top;
+                int top = lastInsets.top;
                 int size = (int) (Math.min(containerView.getWidth(), containerView.getHeight() - insets) / 1.8f);
                 int y = (int) (moveY + Math.max(size / 2 + top, (containerView.getHeight() - insets - keyboardHeight) / 2) + size / 2);
                 y += AndroidUtilities.dp(24 + 60);
@@ -733,11 +752,6 @@ public class ContentPreviewViewer {
                         icons.add(R.drawable.msg_autodelete);
                         actions.add(3);
                     }
-                    if (currentStickerSet != null && !(currentStickerSet instanceof TLRPC.TL_inputStickerSetEmpty) && delegate.needOpen()) {
-                        items.add(LocaleController.formatString("ViewPackPreview", R.string.ViewPackPreview));
-                        icons.add(R.drawable.msg_media);
-                        actions.add(1);
-                    }
                     if (delegate.needRemove()) {
                         items.add(LocaleController.getString(R.string.ImportStickersRemoveMenu));
                         icons.add(R.drawable.msg_delete);
@@ -749,6 +763,13 @@ public class ContentPreviewViewer {
                     icons.add(inFavs ? R.drawable.msg_unfave : R.drawable.msg_fave);
                     actions.add(2);
                 }
+                if (delegate != null) {
+                    if (currentStickerSet != null && !(currentStickerSet instanceof TLRPC.TL_inputStickerSetEmpty) && delegate.needOpen()) {
+                        items.add(LocaleController.formatString(R.string.ViewPackPreview));
+                        icons.add(R.drawable.msg_media);
+                        actions.add(1);
+                    }
+                }
                 if (isRecentSticker) {
                     items.add(LocaleController.getString(R.string.DeleteFromRecent));
                     icons.add(R.drawable.msg_delete);
@@ -758,12 +779,14 @@ public class ContentPreviewViewer {
                 if (currentStickerSet != null && currentDocument != null) {
                     final MediaDataController mediaDataController = MediaDataController.getInstance(currentAccount);
                     TLRPC.TL_messages_stickerSet stickerSet = mediaDataController.getStickerSet(currentStickerSet, true);
-                    if (stickerSet != null && stickerSet.set.creator && !StickersAlert.DISABLE_STICKER_EDITOR) {
+                    if (stickerSet != null && /*stickerSet.set.creator && */!StickersAlert.DISABLE_STICKER_EDITOR) {
                         if (delegate != null && delegate.canEditSticker() && !stickerSet.set.emojis && !stickerSet.set.masks) {
                             items.add(LocaleController.getString(R.string.EditSticker));
                             icons.add(R.drawable.msg_edit);
                             actions.add(7);
                         }
+                    }
+                    if (stickerSet != null && stickerSet.set.creator && !StickersAlert.DISABLE_STICKER_EDITOR) {
                         if (delegate != null && delegate.canDeleteSticker(currentDocument)) {
                             items.add(LocaleController.getString(R.string.DeleteSticker));
                             icons.add(R.drawable.msg_delete);
@@ -860,14 +883,8 @@ public class ContentPreviewViewer {
                 popupWindow.setInputMethodMode(ActionBarPopupWindow.INPUT_METHOD_NOT_NEEDED);
                 popupWindow.getContentView().setFocusableInTouchMode(true);
 
-                int insets = 0;
-                int top;
-                if (lastInsets != null) {
-                    insets = lastInsets.getStableInsetBottom() + lastInsets.getStableInsetTop();
-                    top = lastInsets.getStableInsetTop();
-                } else {
-                    top = AndroidUtilities.statusBarHeight;
-                }
+                int insets = lastInsets.bottom + lastInsets.top;
+                int top = lastInsets.top;
                 int size;
                 if (currentContentType == CONTENT_TYPE_GIF) {
                     size = Math.min(containerView.getWidth(), containerView.getHeight() - insets) - AndroidUtilities.dp(40f);
@@ -992,14 +1009,8 @@ public class ContentPreviewViewer {
                 popupWindow.setInputMethodMode(ActionBarPopupWindow.INPUT_METHOD_NOT_NEEDED);
                 popupWindow.getContentView().setFocusableInTouchMode(true);
 
-                int insets = 0;
-                int top;
-                if (lastInsets != null) {
-                    insets = lastInsets.getStableInsetBottom() + lastInsets.getStableInsetTop();
-                    top = lastInsets.getStableInsetTop();
-                } else {
-                    top = AndroidUtilities.statusBarHeight;
-                }
+                int insets = lastInsets.bottom + lastInsets.top;
+                int top = lastInsets.top;
                 int size = Math.min(containerView.getWidth(), containerView.getHeight() - insets) - AndroidUtilities.dp(40f);
 
                 int y = (int) (moveY + Math.max(size / 2 + top + (stickerEmojiLayout != null ? AndroidUtilities.dp(40) : 0), (containerView.getHeight() - insets - keyboardHeight) / 2) + size / 2);
@@ -1045,6 +1056,11 @@ public class ContentPreviewViewer {
                     items.add(LocaleController.getString(R.string.Schedule));
                     icons.add(R.drawable.msg_autodelete);
                     actions.add(3);
+                }
+                if (currentDocument != null && delegate.canAddCaption(currentDocument)) {
+                    items.add(LocaleController.getString(R.string.AddACaption));
+                    icons.add(R.drawable.outline_caption_24);
+                    actions.add(11);
                 }
 
                 boolean canDelete;
@@ -1094,6 +1110,8 @@ public class ContentPreviewViewer {
                         Object parent = parentObject;
                         ContentPreviewViewerDelegate stickerPreviewViewerDelegate = delegate;
                         AlertsCreator.createScheduleDatePickerDialog(parentActivity, stickerPreviewViewerDelegate.getDialogId(), (notify, scheduleDate, scheduleRepeatPeriod) -> stickerPreviewViewerDelegate.sendGif(document != null ? document : result, parent, notify, scheduleDate, scheduleRepeatPeriod), resourcesProvider);
+                    } else if (actions.get(which) == 11) {
+                        delegate.addCaptionToGif(currentDocument != null ? currentDocument : inlineResult, parentObject, true, 0, 0);
                     }
                     dismissPopupWindow();
                 };
@@ -1129,14 +1147,8 @@ public class ContentPreviewViewer {
                 popupWindow.setInputMethodMode(ActionBarPopupWindow.INPUT_METHOD_NOT_NEEDED);
                 popupWindow.getContentView().setFocusableInTouchMode(true);
 
-                int insets = 0;
-                int top;
-                if (lastInsets != null) {
-                    insets = lastInsets.getStableInsetBottom() + lastInsets.getStableInsetTop();
-                    top = lastInsets.getStableInsetTop();
-                } else {
-                    top = AndroidUtilities.statusBarHeight;
-                }
+                int insets = lastInsets.bottom + lastInsets.top;
+                int top = lastInsets.top;
                 int size = Math.min(containerView.getWidth(), containerView.getHeight() - insets) - AndroidUtilities.dp(40f);
 
 
@@ -1167,7 +1179,7 @@ public class ContentPreviewViewer {
             for (int i = 0; i < previewMenu.getItemsCount(); ++i) {
                 View child = previewMenu.getItemAt(i);
                 if (child instanceof ActionBarMenuSubItem) {
-                    ((ActionBarMenuSubItem) child).updateSelectorBackground(i == 0, i == previewMenu.getItemsCount() - 1, 8);
+                    ((ActionBarMenuSubItem) child).updateSelectorBackground(i == 0, i == previewMenu.getItemsCount() - 1, 12);
                 }
             }
         }
@@ -1691,12 +1703,21 @@ public class ContentPreviewViewer {
                 }
                 return super.dispatchKeyEvent(event);
             }
+
+            @Override
+            protected void onSizeChanged(int w, int h, int oldw, int oldh) {
+                super.onSizeChanged(w, h, oldw, oldh);
+                Blur3Utils.checkBitmapSourceMatrixScale(scrimBlur3SourceBitmap, windowView);
+                scrimBlur3Factory.invalidateAllLinkedViews();
+            }
         };
+        scrimBlur3Factory.setSourceRootView(new ViewPositionWatcher(windowView), windowView);
+        scrimBlur3Factory.setLinkedViewsRef(new ReferenceList<>());
         windowView.setFocusable(true);
         windowView.setFocusableInTouchMode(true);
         windowView.setSystemUiVisibility(View.SYSTEM_UI_FLAG_LAYOUT_STABLE | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION);
-        windowView.setOnApplyWindowInsetsListener((v, insets) -> {
-            lastInsets = insets;
+        ViewCompat.setOnApplyWindowInsetsListener(windowView, (v, insets) -> {
+            lastInsets = AndroidUtilities.getDefaultWindowInsets(insets, false);
             return insets;
         });
 
@@ -1742,11 +1763,7 @@ public class ContentPreviewViewer {
             | WindowManager.LayoutParams.FLAG_LAYOUT_INSET_DECOR
             | WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN;
 
-        if (Build.VERSION.SDK_INT >= 28) {
-            windowLayoutParams.layoutInDisplayCutoutMode = Build.VERSION.SDK_INT >= 30
-                    ? WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS
-                    : WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES;
-        }
+        AndroidUtilities.applyEdgeToEdgeLayoutParams(windowLayoutParams);
 
         centerImage.setAspectFit(true);
         centerImage.setInvalidateAll(true);
@@ -1777,7 +1794,7 @@ public class ContentPreviewViewer {
     }
 
     public void open(TLRPC.Document document, SendMessagesHelper.ImportingSticker sticker, String emojiPath, String query, TLRPC.BotInlineResult botInlineResult, int contentType, boolean isRecent, Object parent, Theme.ResourcesProvider resourcesProvider) {
-        open(document, sticker, emojiPath, query, botInlineResult, contentType, isRecent, parent, resourcesProvider, 0);
+        open(document, sticker, emojiPath, query,botInlineResult, contentType, isRecent, parent, resourcesProvider, 0);
     }
 
     public void open(TLRPC.Document document, SendMessagesHelper.ImportingSticker sticker, String emojiPath, String query, TLRPC.BotInlineResult botInlineResult, int contentType, boolean isRecent, Object parent, Theme.ResourcesProvider resourcesProvider, int menuOpenDelay) {
@@ -2053,11 +2070,10 @@ public class ContentPreviewViewer {
 
             if (blurProgress != 0 && blurrBitmap != null) {
                 paint.setAlpha((int) (blurProgress * 255));
-                canvas.save();
-                canvas.scale(12f, 12f);
-                canvas.drawColor(Theme.multAlpha(Theme.getColor(Theme.key_windowBackgroundGray, resourcesProvider), blurProgress));
-                canvas.drawBitmap(blurrBitmap, 0, 0, paint);
-                canvas.restore();
+                if (paint.getAlpha() != 255) {
+                    canvas.drawColor(Theme.multAlpha(Theme.getColor(Theme.key_windowBackgroundGray, resourcesProvider), blurProgress));
+                }
+                canvas.drawPaint(paint);
             }
         }
 
@@ -2067,14 +2083,8 @@ public class ContentPreviewViewer {
 
         canvas.save();
         int size;
-        int insets = 0;
-        int top;
-        if (lastInsets != null) {
-            insets = lastInsets.getStableInsetBottom() + lastInsets.getStableInsetTop();
-            top = lastInsets.getStableInsetTop();
-        } else {
-            top = AndroidUtilities.statusBarHeight;
-        }
+        int insets = lastInsets.bottom + lastInsets.top;
+        int top = lastInsets.top;
 
         if (currentContentType == CONTENT_TYPE_GIF) {
             size = Math.min(containerView.getWidth(), containerView.getHeight() - insets) - AndroidUtilities.dp(40f);
@@ -2208,14 +2218,28 @@ public class ContentPreviewViewer {
         }
         preparingBitmap = true;
         centerImage.setVisible(false, false);
-        AndroidUtilities.makeGlobalBlurBitmap(bitmap -> {
+        ScrimOptions.makeGlobalBlurBitmaps((bitmapBg, bitmapOptions) -> {
             centerImage.setVisible(true, false);
-            blurrBitmap = bitmap;
+            blurrBitmap = bitmapBg;
+            BitmapShader bitmapShader = new BitmapShader(bitmapBg, Shader.TileMode.CLAMP, Shader.TileMode.CLAMP);
+
+            Matrix m = new Matrix();
+            m.setScale(15, 15);
+            bitmapShader.setLocalMatrix(m);
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                bitmapShader.setFilterMode(BitmapShader.FILTER_MODE_LINEAR);
+            }
+            paint.setFilterBitmap(true);
+            paint.setShader(bitmapShader);
+
+            scrimBlur3SourceBitmap.setBitmap(bitmapOptions);
+            Blur3Utils.checkBitmapSourceMatrixScale(scrimBlur3SourceBitmap, windowView);
+            scrimBlur3Factory.invalidateAllLinkedViews();
             preparingBitmap = false;
             if (containerView != null) {
                 containerView.invalidate();
             }
-        }, 12);
+        });
     }
 
     public boolean showMenuFor(View view) {

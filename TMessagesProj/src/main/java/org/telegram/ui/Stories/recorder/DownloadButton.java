@@ -570,7 +570,7 @@ public class DownloadButton extends ImageView {
                 lottieDrawable.recycle(true);
             }
 
-            lottieDrawable = new RLottieDrawable(resId, "" + resId, dp(36), dp(36));
+            lottieDrawable = new RLottieDrawable(resId, dp(36), dp(36));
             lottieDrawable.setCallback(this);
             lottieDrawable.start();
 

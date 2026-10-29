@@ -2,7 +2,6 @@ package org.telegram.messenger.voip;
 
 import android.text.TextUtils;
 import android.util.LongSparseArray;
-import android.util.SparseIntArray;
 
 import androidx.annotation.Keep;
 import androidx.annotation.NonNull;
@@ -12,13 +11,13 @@ import org.telegram.messenger.DialogObject;
 import org.telegram.messenger.FileLog;
 import org.telegram.messenger.MessagesController;
 import org.telegram.messenger.NotificationCenter;
-import org.telegram.messenger.UserConfig;
 import org.telegram.messenger.Utilities;
 import org.telegram.tgnet.ConnectionsManager;
 import org.telegram.tgnet.TLObject;
 import org.telegram.tgnet.TLRPC;
 import org.telegram.tgnet.tl.TL_update;
 import org.telegram.tgnet.tl.TL_phone;
+import org.telegram.tgnet.tl.TL_update;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -115,6 +114,11 @@ public class ConferenceCall {
     public static native long key_generate_temporary_private_key();
     public static native byte[] key_to_public_key(long private_key);
     public static native long key_from_public_key(byte[] public_key);
+
+    public static native long key_from_ecdh(long private_key_id, long other_public_key_id);
+    public static native byte[] encrypt_message_for_one(long symmetric_key_id, byte[] message);
+    public static native byte[] decrypt_message_for_one(long symmetric_key_id, byte[] encrypted);
+    public static native void key_destroy(long key_id);
 
     public static native byte[] call_create_zero_block(long private_key_id, CallState initial_state);
     public static native byte[] call_create_self_add_block(long private_key_id, byte[] previous_block, CallParticipant self);

@@ -51,10 +51,11 @@ import org.telegram.messenger.Emoji;
 import org.telegram.messenger.FileLog;
 import org.telegram.messenger.NotificationCenter;
 import org.telegram.ui.ActionBar.Theme;
+import org.telegram.ui.Stories.recorder.HintView2;
 
 import java.util.ArrayList;
 
-public class ScrollSlidingTextTabStrip extends HorizontalScrollView {
+public class ScrollSlidingTextTabStrip extends HorizontalScrollView implements Theme.Colorable {
 
     public interface ScrollSlidingTabStripDelegate {
         void onPageSelected(int page, boolean forward);
@@ -521,7 +522,7 @@ public class ScrollSlidingTextTabStrip extends HorizontalScrollView {
         }
         text = Emoji.replaceEmoji(text, tab.getPaint().getFontMetricsInt(), false);
         tab.setText(text);
-        int tabWidth = (int) Math.ceil(tab.getPaint().measureText(text, 0, text.length())) + tab.getPaddingLeft() + tab.getPaddingRight();
+        int tabWidth = (int) Math.ceil(HintView2.measureCorrectly(text, tab.getPaint())) + tab.getPaddingLeft() + tab.getPaddingRight();
         tabsContainer.addView(tab, LayoutHelper.createLinear(0, LayoutHelper.MATCH_PARENT));
         allTextWidth += tabWidth;
         positionToWidth.put(position, tabWidth);
@@ -594,6 +595,7 @@ public class ScrollSlidingTextTabStrip extends HorizontalScrollView {
         selectorDrawable.setColor(processColor(Theme.getColor(tabLineColorKey, resourcesProvider)));
     }
 
+    @Override
     public void updateColors() {
         int count = tabsContainer.getChildCount();
         for (int a = 0; a < count; a++) {

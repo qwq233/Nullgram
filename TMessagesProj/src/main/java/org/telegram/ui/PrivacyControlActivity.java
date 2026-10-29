@@ -17,6 +17,7 @@
 
 package org.telegram.ui;
 
+import org.telegram.ui.Components.CombinedDrawable;
 import static org.telegram.messenger.AndroidUtilities.dp;
 import static org.telegram.messenger.ContactsController.findRule;
 import static org.telegram.messenger.LocaleController.formatString;
@@ -46,6 +47,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
 
+import androidx.annotation.Keep;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.DefaultItemAnimator;
 import androidx.recyclerview.widget.DiffUtil;
@@ -93,7 +95,6 @@ import org.telegram.ui.Components.Bulletin;
 import org.telegram.ui.Components.BulletinFactory;
 import org.telegram.ui.Components.CircularProgressDrawable;
 import org.telegram.ui.Components.ColoredImageSpan;
-import org.telegram.ui.Components.CombinedDrawable;
 import org.telegram.ui.Components.CrossfadeDrawable;
 import org.telegram.ui.Components.CubicBezierInterpolator;
 import org.telegram.ui.Components.HintView;
@@ -142,11 +143,14 @@ public class PrivacyControlActivity extends BaseFragment implements Notification
 
     private boolean prevSubtypeContacts;
 
+    @Keep
     private int setBirthdayRow;
     private int messageRow;
     private int sectionRow;
+    @Keep
     private int everybodyRow;
     private int myContactsRow;
+    @Keep
     private int nobodyRow;
     private int detailRow;
     private int detailRow2;
@@ -158,23 +162,29 @@ public class PrivacyControlActivity extends BaseFragment implements Notification
     private int phoneEverybodyRow;
     private int phoneContactsRow;
     private int phoneDetailRow;
+    @Keep
     private int photoForRestRow;
+    @Keep
     private int currentPhotoForRestRow;
     private int photoForRestDescriptionRow;
     private int p2pSectionRow;
     private int p2pRow;
     private int p2pDetailRow;
+    @Keep
     private int readRow;
     private int readDetailRow;
     private int readPremiumRow;
     private int readPremiumDetailRow;
     private int payRow;
     private int priceHeaderRow;
+    @Keep
     private int priceRow;
     private int priceButtonRow;
     private int priceInfoRow;
+    @Keep
     private int showGiftIconRow;
     private int showGiftIconInfoRow;
+    @Keep
     private int giftTypesHeaderRow;
     private int giftTypeUnlimitedRow;
     private int giftTypeLimitedRow;
@@ -479,7 +489,7 @@ public class PrivacyControlActivity extends BaseFragment implements Notification
             ContactsController.getInstance(currentAccount).loadPrivacySettings();
         }
         if (rulesType == PRIVACY_RULES_TYPE_PHOTO) {
-            imageUpdater = new ImageUpdater(false, ImageUpdater.FOR_TYPE_USER, true);
+            imageUpdater = new ImageUpdater(true, ImageUpdater.FOR_TYPE_USER, true);
             imageUpdater.parentFragment = this;
             imageUpdater.setDelegate(this);
             TLRPC.UserFull userFull = getMessagesController().getUserFull(getUserConfig().clientUserId);
@@ -554,7 +564,7 @@ public class PrivacyControlActivity extends BaseFragment implements Notification
             @Override
             public void onItemClick(int id) {
                 if (id == -1) {
-                    if (checkDiscard()) {
+                    if (checkDiscard(true)) {
                         finishFragment();
                     }
                 } else if (id == done_button) {
@@ -1675,8 +1685,8 @@ public class PrivacyControlActivity extends BaseFragment implements Notification
     }
 
     @Override
-    public boolean onBackPressed() {
-        return checkDiscard();
+    public boolean onBackPressed(boolean invoked) {
+        return checkDiscard(invoked);
     }
 
     private void processDone() {
@@ -1711,14 +1721,16 @@ public class PrivacyControlActivity extends BaseFragment implements Notification
         applyCurrentPrivacySettings();
     }
 
-    private boolean checkDiscard() {
+    private boolean checkDiscard(boolean invoked) {
         if (doneButton.getAlpha() == 1.0f) {
-            AlertDialog.Builder builder = new AlertDialog.Builder(getParentActivity());
-            builder.setTitle(LocaleController.getString(R.string.UserRestrictionsApplyChanges));
-            builder.setMessage(LocaleController.getString(R.string.PrivacySettingsChangedAlert));
-            builder.setPositiveButton(LocaleController.getString(R.string.ApplyTheme), (dialogInterface, i) -> processDone());
-            builder.setNegativeButton(LocaleController.getString(R.string.PassportDiscard), (dialog, which) -> finishFragment());
-            showDialog(builder.create());
+            if (invoked) {
+                final AlertDialog.Builder builder = new AlertDialog.Builder(getParentActivity());
+                builder.setTitle(LocaleController.getString(R.string.UserRestrictionsApplyChanges));
+                builder.setMessage(LocaleController.getString(R.string.PrivacySettingsChangedAlert));
+                builder.setPositiveButton(LocaleController.getString(R.string.ApplyTheme), (dialogInterface, i) -> processDone());
+                builder.setNegativeButton(LocaleController.getString(R.string.PassportDiscard), (dialog, which) -> finishFragment());
+                showDialog(builder.create());
+            }
             return false;
         }
         return true;
@@ -1726,7 +1738,7 @@ public class PrivacyControlActivity extends BaseFragment implements Notification
 
     @Override
     public boolean canBeginSlide() {
-        return checkDiscard();
+        return checkDiscard(true);
     }
 
     private class ListAdapter extends RecyclerListView.SelectionAdapter {
@@ -1790,7 +1802,7 @@ public class PrivacyControlActivity extends BaseFragment implements Notification
                     }
                     setAvatarCell.setBackgroundDrawable(Theme.getSelectorDrawable(false));
                     setAvatarCell.setColors(Theme.key_windowBackgroundWhiteBlueIcon, Theme.key_windowBackgroundWhiteBlueButton);
-                    cameraDrawable = new RLottieDrawable(R.raw.camera_outline, "" + R.raw.camera_outline, dp(50), dp(50), false, null);
+                    cameraDrawable = new RLottieDrawable(R.raw.camera_outline, dp(50), dp(50), false, null);
                     setAvatarCell.imageView.setTranslationX(-dp(8));
                     setAvatarCell.imageView.setAnimation(cameraDrawable);
                     setAvatarCell.setBackgroundColor(Theme.getColor(Theme.key_windowBackgroundWhite));
@@ -1842,7 +1854,7 @@ public class PrivacyControlActivity extends BaseFragment implements Notification
                     break;
                 case 10:
                     final FrameLayout frameLayout = new FrameLayout(mContext);
-                    final ButtonWithCounterView button = new ButtonWithCounterView(mContext, resourceProvider);
+                    final ButtonWithCounterView button = new ButtonWithCounterView(mContext, resourceProvider).setRound();
                     final ColoredImageSpan lockSpan = new ColoredImageSpan(R.drawable.msg_mini_lock3);
                     SpannableStringBuilder ssb = new SpannableStringBuilder(getString(R.string.PrivateMessagesChargePremiumLocked));
                     ssb.append(" l");
@@ -2019,7 +2031,7 @@ public class PrivacyControlActivity extends BaseFragment implements Notification
 
                                 NotificationCenter.getInstance(currentAccount).postNotificationName(NotificationCenter.premiumPromoUpdated);
                                 updateRows(true);
-                            }, null, false, getResourceProvider()).create());
+                            }, null, false, false, getResourceProvider()).create());
                         }), true));
                         backgroundResId = R.drawable.greydivider;
                     } else if (position == detailRow) {
@@ -2140,6 +2152,8 @@ public class PrivacyControlActivity extends BaseFragment implements Notification
                         CombinedDrawable combinedDrawable = new CombinedDrawable(new ColorDrawable(Theme.getColor(Theme.key_windowBackgroundGray)), drawable);
                         combinedDrawable.setFullsize(true);
                         privacyCell.setBackgroundDrawable(combinedDrawable);
+                    } else {
+                        privacyCell.setBackgroundColor(Theme.getColor(Theme.key_windowBackgroundGray));
                     }
                     break;
                 case 2:
@@ -2408,7 +2422,7 @@ public class PrivacyControlActivity extends BaseFragment implements Notification
         themeDescriptions.add(new ThemeDescription(listView, ThemeDescription.FLAG_CELLBACKGROUNDCOLOR, new Class[]{TextSettingsCell.class, HeaderCell.class, RadioCell.class}, null, null, null, Theme.key_windowBackgroundWhite));
         themeDescriptions.add(new ThemeDescription(fragmentView, ThemeDescription.FLAG_BACKGROUND, null, null, null, null, Theme.key_windowBackgroundWhite));
 
-        themeDescriptions.add(new ThemeDescription(actionBar, ThemeDescription.FLAG_BACKGROUND, null, null, null, null, Theme.key_actionBarDefault));
+//        themeDescriptions.add(new ThemeDescription(actionBar, ThemeDescription.FLAG_BACKGROUND, null, null, null, null, Theme.key_actionBarDefault));
         themeDescriptions.add(new ThemeDescription(listView, ThemeDescription.FLAG_LISTGLOWCOLOR, null, null, null, null, Theme.key_actionBarDefault));
         themeDescriptions.add(new ThemeDescription(actionBar, ThemeDescription.FLAG_AB_ITEMSCOLOR, null, null, null, null, Theme.key_actionBarDefaultIcon));
         themeDescriptions.add(new ThemeDescription(actionBar, ThemeDescription.FLAG_AB_TITLECOLOR, null, null, null, null, Theme.key_actionBarDefaultTitle));
@@ -2422,10 +2436,8 @@ public class PrivacyControlActivity extends BaseFragment implements Notification
         themeDescriptions.add(new ThemeDescription(listView, 0, new Class[]{TextSettingsCell.class}, new String[]{"valueTextView"}, null, null, null, Theme.key_windowBackgroundWhiteValueText));
 
         themeDescriptions.add(new ThemeDescription(listView, 0, new Class[]{TextInfoPrivacyCell.class}, new String[]{"textView"}, null, null, null, Theme.key_windowBackgroundWhiteGrayText4));
-        themeDescriptions.add(new ThemeDescription(listView, ThemeDescription.FLAG_BACKGROUNDFILTER, new Class[]{TextInfoPrivacyCell.class}, null, null, null, Theme.key_windowBackgroundGrayShadow));
         themeDescriptions.add(new ThemeDescription(listView, ThemeDescription.FLAG_BACKGROUNDFILTER | ThemeDescription.FLAG_CELLBACKGROUNDCOLOR, new Class[]{TextInfoPrivacyCell.class}, null, null, null, Theme.key_windowBackgroundGray));
 
-        themeDescriptions.add(new ThemeDescription(listView, ThemeDescription.FLAG_BACKGROUNDFILTER, new Class[]{ShadowSectionCell.class}, null, null, null, Theme.key_windowBackgroundGrayShadow));
         themeDescriptions.add(new ThemeDescription(listView, ThemeDescription.FLAG_BACKGROUNDFILTER | ThemeDescription.FLAG_CELLBACKGROUNDCOLOR, new Class[]{ShadowSectionCell.class}, null, null, null, Theme.key_windowBackgroundGray));
 
         themeDescriptions.add(new ThemeDescription(listView, 0, new Class[]{HeaderCell.class}, new String[]{"textView"}, null, null, null, Theme.key_windowBackgroundWhiteBlueHeader));
@@ -2466,5 +2478,15 @@ public class PrivacyControlActivity extends BaseFragment implements Notification
         themeDescriptions.add(new ThemeDescription(listView, 0, null, null, null, null, Theme.key_chat_outTimeSelectedText));
 
         return themeDescriptions;
+    }
+
+    @Override
+    public boolean isSupportEdgeToEdge() {
+        return true;
+    }
+    @Override
+    public void onInsets(int left, int top, int right, int bottom) {
+        listView.setPadding(0, 0, 0, bottom);
+        listView.setClipToPadding(false);
     }
 }

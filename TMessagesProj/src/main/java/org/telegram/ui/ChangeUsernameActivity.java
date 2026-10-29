@@ -19,6 +19,8 @@
 
 package org.telegram.ui;
 
+import static org.telegram.messenger.AndroidUtilities.dp;
+
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.ValueAnimator;
@@ -213,7 +215,7 @@ public class ChangeUsernameActivity extends BaseFragment {
         });
 
         ActionBarMenu menu = actionBar.createMenu();
-        doneButton = menu.addItemWithWidth(done_button, R.drawable.ic_ab_done, AndroidUtilities.dp(56), LocaleController.getString(R.string.Done));
+        doneButton = menu.addItemWithWidth(done_button, R.drawable.ic_ab_done, dp(56), LocaleController.getString(R.string.Done));
 
         TLRPC.User user = MessagesController.getInstance(currentAccount).getUser(getUserId());
         if (user == null) {
@@ -259,7 +261,6 @@ public class ChangeUsernameActivity extends BaseFragment {
 
         fragmentView = new FrameLayout(context);
         listView = new RecyclerListView(context) {
-
             private Paint backgroundPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
             @Override
             protected void dispatchDraw(Canvas canvas) {
@@ -505,7 +506,8 @@ public class ChangeUsernameActivity extends BaseFragment {
                     headerCell.setBackgroundColor(getThemedColor(Theme.key_windowBackgroundWhite));
                     return new RecyclerListView.Holder(headerCell);
                 case VIEW_TYPE_HELP1:
-                    return new RecyclerListView.Holder(new UsernameHelpCell(getContext()));
+                    final View view = new UsernameHelpCell(getContext());
+                    return new RecyclerListView.Holder(view);
                 case VIEW_TYPE_HELP2:
                     return new RecyclerListView.Holder(new TextInfoPrivacyCell(getContext()));
                 case VIEW_TYPE_INPUT:
@@ -553,6 +555,7 @@ public class ChangeUsernameActivity extends BaseFragment {
                     break;
             }
         }
+
 
         @Override
         public int getItemCount() {
@@ -681,7 +684,7 @@ public class ChangeUsernameActivity extends BaseFragment {
 
             helpCell = this;
 
-            setPadding(AndroidUtilities.dp(18), AndroidUtilities.dp(10), AndroidUtilities.dp(18), AndroidUtilities.dp(17));
+            setPadding(dp(18), dp(10), dp(18), dp(17));
             setBackgroundDrawable(Theme.getThemedDrawableByKey(context, R.drawable.greydivider_bottom, Theme.key_windowBackgroundGrayShadow));
             setClipChildren(false);
 
@@ -691,7 +694,7 @@ public class ChangeUsernameActivity extends BaseFragment {
             text1View.setGravity(LocaleController.isRTL ? Gravity.RIGHT : Gravity.LEFT);
             text1View.setLinkTextColor(Theme.getColor(Theme.key_windowBackgroundWhiteLinkText));
             text1View.setHighlightColor(Theme.getColor(Theme.key_windowBackgroundWhiteLinkSelection));
-            text1View.setPadding(AndroidUtilities.dp(3), 0, AndroidUtilities.dp(3), 0);
+            text1View.setPadding(dp(3), 0, dp(3), 0);
 
             text2View = statusTextView = new LinkSpanDrawable.LinksTextView(context) {
                 @Override
@@ -734,7 +737,7 @@ public class ChangeUsernameActivity extends BaseFragment {
             text2View.setGravity(LocaleController.isRTL ? Gravity.RIGHT : Gravity.LEFT);
             text2View.setLinkTextColor(Theme.getColor(Theme.key_windowBackgroundWhiteLinkText));
             text2View.setHighlightColor(Theme.getColor(Theme.key_windowBackgroundWhiteLinkSelection));
-            text2View.setPadding(AndroidUtilities.dp(3), 0, AndroidUtilities.dp(3), 0);
+            text2View.setPadding(dp(3), 0, dp(3), 0);
 
             addView(text1View, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT, Gravity.TOP));
             addView(text2View, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT, Gravity.TOP));
@@ -774,9 +777,9 @@ public class ChangeUsernameActivity extends BaseFragment {
                 heightUpdateAnimator.cancel();
             }
             int fromHeight = height == null ? getMeasuredHeight() : height;
-            int newHeight = AndroidUtilities.dp(10 + 17) + text1View.getHeight() + (text2View.getVisibility() == View.VISIBLE && !TextUtils.isEmpty(text2View.getText()) ? text2View.getMeasuredHeight() + AndroidUtilities.dp(8) : 0);
+            int newHeight = dp(10 + 17) + text1View.getHeight() + (text2View.getVisibility() == View.VISIBLE && !TextUtils.isEmpty(text2View.getText()) ? text2View.getMeasuredHeight() + dp(8) : 0);
             float fromTranslationY = text1View.getTranslationY();
-            float newTranslationY = text2View.getVisibility() == View.VISIBLE && !TextUtils.isEmpty(text2View.getText()) ? text2View.getMeasuredHeight() + AndroidUtilities.dp(8) : 0;
+            float newTranslationY = text2View.getVisibility() == View.VISIBLE && !TextUtils.isEmpty(text2View.getText()) ? text2View.getMeasuredHeight() + dp(8) : 0;
             heightUpdateAnimator = ValueAnimator.ofFloat(0, 1);
             heightUpdateAnimator.addUpdateListener(anm -> {
                 final float t = (float) anm.getAnimatedValue();
@@ -814,7 +817,7 @@ public class ChangeUsernameActivity extends BaseFragment {
             field.setImeOptions(EditorInfo.IME_ACTION_DONE);
             field.setHint(LocaleController.getString(R.string.UsernameLinkPlaceholder));
             field.setCursorColor(Theme.getColor(Theme.key_windowBackgroundWhiteBlackText));
-            field.setCursorSize(AndroidUtilities.dp(19));
+            field.setCursorSize(dp(19));
             field.setCursorWidth(1.5f);
             field.setOnEditorActionListener((textView, i, keyEvent) -> {
                 if (i == EditorInfo.IME_ACTION_DONE && doneButton != null) {
@@ -880,11 +883,10 @@ public class ChangeUsernameActivity extends BaseFragment {
             tme.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 17);
             tme.setTextColor(Theme.getColor(Theme.key_windowBackgroundWhiteBlackText));
             tme.setGravity((LocaleController.isRTL ? Gravity.RIGHT : Gravity.LEFT) | Gravity.TOP);
-            tme.setTranslationY(-AndroidUtilities.dp(3));
+            tme.setTranslationY(-dp(3));
             content.addView(tme, LayoutHelper.createLinear(LayoutHelper.WRAP_CONTENT, LayoutHelper.WRAP_CONTENT, 0, Gravity.CENTER_VERTICAL, 21, 15, 0, 15));
             content.addView(field, LayoutHelper.createLinear(LayoutHelper.WRAP_CONTENT, LayoutHelper.WRAP_CONTENT, 1, Gravity.CENTER_VERTICAL, 0, 15, 21, 15));
             addView(content, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, LayoutHelper.MATCH_PARENT, Gravity.TOP));
-            setBackgroundColor(getThemedColor(Theme.key_windowBackgroundWhite));
 
             if (botId != 0) {
                 field.setAlpha(0.6f);
@@ -896,7 +898,7 @@ public class ChangeUsernameActivity extends BaseFragment {
         protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
             super.onMeasure(
                 MeasureSpec.makeMeasureSpec(MeasureSpec.getSize(widthMeasureSpec), MeasureSpec.EXACTLY),
-                MeasureSpec.makeMeasureSpec(AndroidUtilities.dp(50), MeasureSpec.EXACTLY)
+                MeasureSpec.makeMeasureSpec(dp(50), MeasureSpec.EXACTLY)
             );
         }
     }
@@ -931,18 +933,18 @@ public class ChangeUsernameActivity extends BaseFragment {
             addView(usernameView, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT, Gravity.TOP, 70, 9, 0, 50));
 
             loadingView = new ImageView(getContext());
-            loadingDrawable = new CircularProgressDrawable(AndroidUtilities.dp(7), AndroidUtilities.dp(1.35f), Theme.getColor(Theme.key_windowBackgroundWhiteBlueText, resourcesProvider));
+            loadingDrawable = new CircularProgressDrawable(dp(7), dp(1.35f), Theme.getColor(Theme.key_windowBackgroundWhiteBlueText, resourcesProvider));
             loadingView.setScaleType(ImageView.ScaleType.CENTER);
             loadingView.setImageDrawable(loadingDrawable);
             loadingView.setAlpha(0f);
             loadingView.setVisibility(View.VISIBLE);
-            loadingDrawable.setBounds(0, 0, AndroidUtilities.dp(14), AndroidUtilities.dp(14));
+            loadingDrawable.setBounds(0, 0, dp(14), dp(14));
             addView(loadingView, LayoutHelper.createFrame(14, 14, Gravity.TOP, 70, 23 + 12, 0, 0));
 
             activeView = new AnimatedTextView(getContext(), false, true, true);
             activeView.setTextColor(Theme.getColor(Theme.key_windowBackgroundWhiteGrayText2, resourcesProvider));
             activeView.setAnimationProperties(0.4f, 0, 120, CubicBezierInterpolator.EASE_OUT);
-            activeView.setTextSize(AndroidUtilities.dp(13));
+            activeView.setTextSize(dp(13));
             addView(activeView, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT, Gravity.TOP, 70, 23, 0, 0));
 
             linkDrawables = new Drawable[] {
@@ -969,7 +971,7 @@ public class ChangeUsernameActivity extends BaseFragment {
                 loadingAnimator = ValueAnimator.ofFloat(loadingFloat, loading ? 1 : 0);
                 loadingAnimator.addUpdateListener(anm -> {
                     loadingFloat = (float) anm.getAnimatedValue();
-                    activeView.setTranslationX(loadingFloat * AndroidUtilities.dp(12 + 4));
+                    activeView.setTranslationX(loadingFloat * dp(12 + 4));
                     loadingView.setAlpha(loadingFloat);
                 });
                 loadingAnimator.addListener(new AnimatorListenerAdapter() {
@@ -1085,7 +1087,7 @@ public class ChangeUsernameActivity extends BaseFragment {
         protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
             super.onMeasure(
                 MeasureSpec.makeMeasureSpec(MeasureSpec.getSize(widthMeasureSpec), MeasureSpec.EXACTLY),
-                MeasureSpec.makeMeasureSpec(AndroidUtilities.dp(58), MeasureSpec.EXACTLY)
+                MeasureSpec.makeMeasureSpec(dp(58), MeasureSpec.EXACTLY)
             );
         }
 
@@ -1095,27 +1097,27 @@ public class ChangeUsernameActivity extends BaseFragment {
 
             float activeValue = activeFloat.set(active ? 1f : 0f);
             if (activeValue < 1) {
-                canvas.drawCircle(AndroidUtilities.dp(35), AndroidUtilities.dp(29), AndroidUtilities.dp(16), linkBackgroundInactive);
+                canvas.drawCircle(dp(35), dp(29), dp(16), linkBackgroundInactive);
 
                 linkDrawables[1].setAlpha((int) (255 * (1f - activeValue)));
                 linkDrawables[1].setBounds(
-                    AndroidUtilities.dp(35) -    linkDrawables[1].getIntrinsicWidth() / 2,
-                    AndroidUtilities.dp(29) -    linkDrawables[1].getIntrinsicHeight() / 2,
-                    AndroidUtilities.dp(35) +   linkDrawables[1].getIntrinsicWidth() / 2,
-                    AndroidUtilities.dp(29) + linkDrawables[1].getIntrinsicHeight() / 2
+                    dp(35) -    linkDrawables[1].getIntrinsicWidth() / 2,
+                    dp(29) -    linkDrawables[1].getIntrinsicHeight() / 2,
+                    dp(35) +   linkDrawables[1].getIntrinsicWidth() / 2,
+                    dp(29) + linkDrawables[1].getIntrinsicHeight() / 2
                 );
                 linkDrawables[1].draw(canvas);
             }
             if (activeValue > 0) {
                 linkBackgroundActive.setAlpha((int) (255 * activeValue));
-                canvas.drawCircle(AndroidUtilities.dp(35), AndroidUtilities.dp(29), activeValue * AndroidUtilities.dp(16), linkBackgroundActive);
+                canvas.drawCircle(dp(35), dp(29), activeValue * dp(16), linkBackgroundActive);
 
                 linkDrawables[0].setAlpha((int) (255 * activeValue));
                 linkDrawables[0].setBounds(
-                    AndroidUtilities.dp(35) -    linkDrawables[0].getIntrinsicWidth() / 2,
-                    AndroidUtilities.dp(29) -    linkDrawables[0].getIntrinsicHeight() / 2,
-                    AndroidUtilities.dp(35) +   linkDrawables[0].getIntrinsicWidth() / 2,
-                    AndroidUtilities.dp(29) + linkDrawables[0].getIntrinsicHeight() / 2
+                    dp(35) -    linkDrawables[0].getIntrinsicWidth() / 2,
+                    dp(29) -    linkDrawables[0].getIntrinsicHeight() / 2,
+                    dp(35) +   linkDrawables[0].getIntrinsicWidth() / 2,
+                    dp(29) + linkDrawables[0].getIntrinsicHeight() / 2
                 );
                 linkDrawables[0].draw(canvas);
             }
@@ -1124,17 +1126,17 @@ public class ChangeUsernameActivity extends BaseFragment {
             if (dividerAlpha > 0) {
                 int wasAlpha = Theme.dividerPaint.getAlpha();
                 Theme.dividerPaint.setAlpha((int) (wasAlpha * dividerAlpha));
-                canvas.drawRect(AndroidUtilities.dp(70), getHeight() - 1, getWidth(), getHeight(), Theme.dividerPaint);
+                canvas.drawRect(dp(70), getHeight() - 1, getWidth(), getHeight(), Theme.dividerPaint);
                 Theme.dividerPaint.setAlpha(wasAlpha);
             }
 
             dragPaint.setColor(Theme.getColor(Theme.key_stickers_menu));
             dragPaint.setAlpha((int) (dragPaint.getAlpha() * activeValue));
-            AndroidUtilities.rectTmp.set(getWidth() - AndroidUtilities.dp(37), AndroidUtilities.dp(25), getWidth() - AndroidUtilities.dp(21), AndroidUtilities.dp(25 + 2));
-            canvas.drawRoundRect(AndroidUtilities.rectTmp, AndroidUtilities.dp(.3f), AndroidUtilities.dp(.3f), dragPaint);
+            AndroidUtilities.rectTmp.set(getWidth() - dp(37), dp(25), getWidth() - dp(21), dp(25 + 2));
+            canvas.drawRoundRect(AndroidUtilities.rectTmp, dp(.3f), dp(.3f), dragPaint);
 
-            AndroidUtilities.rectTmp.set(getWidth() - AndroidUtilities.dp(37), AndroidUtilities.dp(25 + 6), getWidth() - AndroidUtilities.dp(21), AndroidUtilities.dp(25 + 2 + 6));
-            canvas.drawRoundRect(AndroidUtilities.rectTmp, AndroidUtilities.dp(.3f), AndroidUtilities.dp(.3f), dragPaint);
+            AndroidUtilities.rectTmp.set(getWidth() - dp(37), dp(25 + 6), getWidth() - dp(21), dp(25 + 2 + 6));
+            canvas.drawRoundRect(AndroidUtilities.rectTmp, dp(.3f), dp(.3f), dragPaint);
         }
     }
 
@@ -1178,6 +1180,9 @@ public class ChangeUsernameActivity extends BaseFragment {
                 viewHolder.itemView.setPressed(true);
             }
             super.onSelectedChanged(viewHolder, actionState);
+            if (viewHolder != null) {
+                viewHolder.itemView.setTag(R.id.dragging, actionState == ItemTouchHelper.ACTION_STATE_DRAG ? true : null);
+            }
         }
 
         @Override
@@ -1188,6 +1193,7 @@ public class ChangeUsernameActivity extends BaseFragment {
         public void clearView(@NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder) {
             super.clearView(recyclerView, viewHolder);
             viewHolder.itemView.setPressed(false);
+            viewHolder.itemView.setTag(R.id.dragging, null);
         }
     }
 
@@ -1490,38 +1496,11 @@ public class ChangeUsernameActivity extends BaseFragment {
 
         themeDescriptions.add(new ThemeDescription(fragmentView, ThemeDescription.FLAG_BACKGROUND, null, null, null, null, Theme.key_windowBackgroundWhite));
 
-        themeDescriptions.add(new ThemeDescription(actionBar, ThemeDescription.FLAG_BACKGROUND, null, null, null, null, Theme.key_actionBarDefault));
+//        themeDescriptions.add(new ThemeDescription(actionBar, ThemeDescription.FLAG_BACKGROUND, null, null, null, null, Theme.key_actionBarDefault));
         themeDescriptions.add(new ThemeDescription(actionBar, ThemeDescription.FLAG_AB_ITEMSCOLOR, null, null, null, null, Theme.key_actionBarDefaultIcon));
         themeDescriptions.add(new ThemeDescription(actionBar, ThemeDescription.FLAG_AB_TITLECOLOR, null, null, null, null, Theme.key_actionBarDefaultTitle));
         themeDescriptions.add(new ThemeDescription(actionBar, ThemeDescription.FLAG_AB_SELECTORCOLOR, null, null, null, null, Theme.key_actionBarDefaultSelector));
 
-//        themeDescriptions.add(new ThemeDescription(firstNameField, ThemeDescription.FLAG_TEXTCOLOR, null, null, null, null, Theme.key_windowBackgroundWhiteBlackText));
-//        themeDescriptions.add(new ThemeDescription(firstNameField, ThemeDescription.FLAG_HINTTEXTCOLOR, null, null, null, null, Theme.key_windowBackgroundWhiteHintText));
-//        themeDescriptions.add(new ThemeDescription(firstNameField, ThemeDescription.FLAG_BACKGROUNDFILTER, null, null, null, null, Theme.key_windowBackgroundWhiteInputField));
-//        themeDescriptions.add(new ThemeDescription(firstNameField, ThemeDescription.FLAG_BACKGROUNDFILTER | ThemeDescription.FLAG_DRAWABLESELECTEDSTATE, null, null, null, null, Theme.key_windowBackgroundWhiteInputFieldActivated));
-
-//        themeDescriptions.add(new ThemeDescription(helpTextView, ThemeDescription.FLAG_TEXTCOLOR, null, null, null, null, Theme.key_windowBackgroundWhiteGrayText8));
-//
-//        themeDescriptions.add(new ThemeDescription(checkTextView, ThemeDescription.FLAG_TEXTCOLOR | ThemeDescription.FLAG_CHECKTAG, null, null, null, null, Theme.key_text_RedRegular));
-//        themeDescriptions.add(new ThemeDescription(checkTextView, ThemeDescription.FLAG_TEXTCOLOR | ThemeDescription.FLAG_CHECKTAG, null, null, null, null, Theme.key_windowBackgroundWhiteGreenText));
-//        themeDescriptions.add(new ThemeDescription(checkTextView, ThemeDescription.FLAG_TEXTCOLOR | ThemeDescription.FLAG_CHECKTAG, null, null, null, null, Theme.key_windowBackgroundWhiteGrayText8));
-
         return themeDescriptions;
-    }
-
-    @Override
-    public void onBecomeFullyVisible() {
-        super.onBecomeFullyVisible();
-        if (parentLayout != null && parentLayout.getDrawerLayoutContainer() != null) {
-            parentLayout.getDrawerLayoutContainer().setBehindKeyboardColor(getThemedColor(Theme.key_windowBackgroundGray));
-        }
-    }
-
-    @Override
-    public void onBecomeFullyHidden() {
-        super.onBecomeFullyHidden();
-        if (parentLayout != null && parentLayout.getDrawerLayoutContainer() != null) {
-            parentLayout.getDrawerLayoutContainer().setBehindKeyboardColor(Theme.getColor(Theme.key_windowBackgroundWhite));
-        }
     }
 }

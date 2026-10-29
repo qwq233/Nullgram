@@ -47,7 +47,6 @@ import org.telegram.tgnet.TLRPC;
 import org.telegram.ui.ActionBar.BaseFragment;
 import org.telegram.ui.ActionBar.EmojiThemes;
 import org.telegram.ui.ActionBar.Theme;
-import org.telegram.ui.Cells.DrawerProfileCell;
 import org.telegram.ui.Cells.TextCell;
 import org.telegram.ui.Components.ChatThemeBottomSheet;
 import org.telegram.ui.Components.FlickerLoadingView;
@@ -174,7 +173,7 @@ public class DefaultThemesPreviewCell extends LinearLayout {
         recyclerView.setAnimateEmptyView(true, RecyclerListView.EMPTY_VIEW_ANIMATION_TYPE_ALPHA);
 
         if (currentType == ThemeActivity.THEME_TYPE_BASIC) {
-            darkThemeDrawable = new RLottieDrawable(R.raw.sun_outline, "" + R.raw.sun_outline, AndroidUtilities.dp(28), AndroidUtilities.dp(28), true, null);
+            darkThemeDrawable = new RLottieDrawable(R.raw.sun_outline, AndroidUtilities.dp(28), AndroidUtilities.dp(28), true, null);
             darkThemeDrawable.setPlayInDirectionOfCustomEndFrame(true);
             darkThemeDrawable.beginApplyLayerColors();
             darkThemeDrawable.commitApplyLayerColors();
@@ -193,12 +192,12 @@ public class DefaultThemesPreviewCell extends LinearLayout {
                 @SuppressLint("NotifyDataSetChanged")
                 @Override
                 public void onClick(View view) {
-                    if (DrawerProfileCell.switchingTheme) {
+                    if (DialogsActivity.switchingTheme) {
                         return;
                     }
                     int iconOldColor = Theme.getColor(Theme.key_windowBackgroundWhiteBlueText4);
                     int navBarOldColor = Theme.getColor(Theme.key_windowBackgroundGray);
-                    DrawerProfileCell.switchingTheme = true;
+                    DialogsActivity.switchingTheme = true;
                     SharedPreferences preferences = ApplicationLoader.applicationContext.getSharedPreferences("themeconfig", Activity.MODE_PRIVATE);
                     String dayThemeName = preferences.getString("lastDayTheme", "Blue");
                     if (Theme.getTheme(dayThemeName) == null || Theme.getTheme(dayThemeName).isDark()) {

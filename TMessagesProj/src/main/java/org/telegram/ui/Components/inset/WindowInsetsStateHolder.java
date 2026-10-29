@@ -4,9 +4,11 @@ import android.view.View;
 
 import androidx.annotation.Nullable;
 import androidx.core.graphics.Insets;
+import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
 import org.telegram.messenger.AndroidUtilities;
+import org.telegram.messenger.AnimationNotificationsLocker;
 import org.telegram.ui.ActionBar.AdjustPanLayoutHelper;
 
 import me.vkryl.android.animator.FactorAnimator;
@@ -18,6 +20,7 @@ public class WindowInsetsStateHolder implements WindowInsetsProvider, WindowInse
     private final VariableFloat keyboardVisibility = new VariableFloat(0);
     private final VariableRect insetsMaxRect = new VariableRect();
     private final VariableRect insetsImeRect = new VariableRect();
+    private final AnimationNotificationsLocker locker = new AnimationNotificationsLocker();
 
     private final KeyboardState keyboardState = new KeyboardState(this::onKeyboardStateChanged);
     private final Runnable onUpdateListener;
@@ -49,8 +52,23 @@ public class WindowInsetsStateHolder implements WindowInsetsProvider, WindowInse
                 if (changed) {
                     onUpdateListener.run();
                 }
+                checkAnimationsLocker();
             }
         }, AdjustPanLayoutHelper.keyboardInterpolator, AdjustPanLayoutHelper.keyboardDuration);
+    }
+
+    private boolean locked;
+
+    private void checkAnimationsLocker() {
+        final boolean animating = insetsAnimator.isAnimating();
+        if (!locked && animating) {
+            locked = true;
+            locker.lock();
+        }
+        if (locked && !animating) {
+            locked = false;
+            locker.unlock();
+        }
     }
 
     private void onKeyboardStateChanged(KeyboardState.State state) {
@@ -67,10 +85,20 @@ public class WindowInsetsStateHolder implements WindowInsetsProvider, WindowInse
         setInsets(insets, lastInsets != null);
     }
 
+    @Nullable
+    protected WindowInsetsCompat filterInsets(@Nullable WindowInsetsCompat insets) {
+        return insets;
+    }
+
     private void setInsets(@Nullable WindowInsetsCompat insets, boolean animated) {
+        insets = filterInsets(insets);
         this.lastInsets = insets;
 
-        final Insets systemInsets = insets != null ? insets.getInsets(WindowInsetsCompat.Type.systemBars()) : Insets.NONE;
+        final int insetsType = WindowInsetsCompat.Type.systemBars() | WindowInsetsCompat.Type.displayCutout();
+        final Insets systemInsets = insets != null ? Insets.max(
+            insets.getInsets(insetsType),
+            insets.getInsetsIgnoringVisibility(insetsType)
+        ) : Insets.NONE;
         final Insets imeInsets = insets != null ? insets.getInsets(WindowInsetsCompat.Type.ime()) : Insets.NONE;
 
         final KeyboardState.State oldKeyboardState = keyboardState.getState();
@@ -117,6 +145,8 @@ public class WindowInsetsStateHolder implements WindowInsetsProvider, WindowInse
             insetsImeRect.set(inputInsets.left, inputInsets.top, inputInsets.right, inputInsets.bottom);
             onUpdateListener.run();
         }
+
+        checkAnimationsLocker();
     }
 
 
@@ -206,6 +236,10 @@ public class WindowInsetsStateHolder implements WindowInsetsProvider, WindowInse
         }
     };
 
+    public int getInAppKeyboardHeight() {
+        return inAppKeyboardHeight;
+    }
+
     @Override
     public void resetInAppKeyboardHeight(boolean waitKeyboardOpen) {
         if (inAppKeyboardHeight == 0) {
@@ -243,7 +277,8 @@ public class WindowInsetsStateHolder implements WindowInsetsProvider, WindowInse
 
     @Override
     public void onAnimatedInsetsChanged(View view, WindowInsetsCompat insets) {
-        animatedImeInset = insets.getInsets(WindowInsetsCompat.Type.ime()).bottom;
+        insets = filterInsets(insets);
+        animatedImeInset = insets != null ? insets.getInsets(WindowInsetsCompat.Type.ime()).bottom : 0;
         onUpdateListener.run();
     }
 

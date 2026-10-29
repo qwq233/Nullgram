@@ -44,6 +44,8 @@ import androidx.annotation.Nullable;
 import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.ImageReceiver;
 import org.telegram.messenger.LocaleController;
+import org.telegram.messenger.UserConfig;
+import org.telegram.tgnet.ConnectionsManager;
 import org.telegram.tgnet.TLRPC;
 import org.telegram.ui.ActionBar.SimpleTextView;
 import org.telegram.ui.ActionBar.Theme;
@@ -225,9 +227,24 @@ public class TextCell extends FrameLayout {
 
     @Override
     public void setEnabled(boolean enabled) {
+        setEnabled(enabled, true);
+    }
+
+    public void setEnabled(boolean enabled, boolean animated) {
         super.setEnabled(enabled);
         if (checkBox != null) {
             checkBox.setEnabled(enabled);
+        }
+        if (animated) {
+            textView.animate().alpha(enabled ? 1.0f : 0.5f).start();
+            subtitleView.animate().alpha(enabled ? 1.0f : 0.5f).start();
+            valueTextView.animate().alpha(enabled ? 1.0f : 0.5f).start();
+            valueSpoilersTextView.animate().alpha(enabled ? 1.0f : 0.5f).start();
+        } else {
+            textView.setAlpha(enabled ? 1.0f : 0.5f);
+            subtitleView.setAlpha(enabled ? 1.0f : 0.5f);
+            valueTextView.setAlpha(enabled ? 1.0f : 0.5f);
+            valueSpoilersTextView.setAlpha(enabled ? 1.0f : 0.5f);
         }
     }
 
@@ -596,6 +613,11 @@ public class TextCell extends FrameLayout {
     public static CharSequence applyNewSpan(CharSequence str) {
         return applyNewSpan(str, false);
     }
+    public static CharSequence applyNewSpanTimed(CharSequence str, int since) {
+        if (ConnectionsManager.getInstance(UserConfig.selectedAccount).getCurrentTime() - since > 4 * 7 * 24 * 60 * 60)
+            return str;
+        return applyNewSpan(str);
+    }
     public static CharSequence applyNewSpan(CharSequence str, boolean usePaintAlpha) {
         SpannableStringBuilder spannableStringBuilder = new SpannableStringBuilder(str);
         spannableStringBuilder.append("  d");
@@ -863,43 +885,6 @@ public class TextCell extends FrameLayout {
         checkBox.setChecked(checked, true);
     }
 
-    public void showEnabledAlpha(boolean show) {
-        float alpha = show ? 0.5f : 1f;
-        if (attached) {
-            if (imageView != null) {
-                imageView.animate().alpha(alpha).start();
-            }
-            if (textView != null) {
-                textView.animate().alpha(alpha).start();
-            }
-            if (valueTextView != null) {
-                valueTextView.animate().alpha(alpha).start();
-            }
-            if (valueSpoilersTextView != null) {
-                valueSpoilersTextView.animate().alpha(alpha).start();
-            }
-            if (valueImageView != null) {
-                valueImageView.animate().alpha(alpha).start();
-            }
-        } else {
-            if (imageView != null) {
-                imageView.setAlpha(alpha);
-            }
-            if (textView != null) {
-                textView.setAlpha(alpha);
-            }
-            if (valueTextView != null) {
-                valueTextView.setAlpha(alpha);
-            }
-            if (valueSpoilersTextView != null) {
-                valueSpoilersTextView.setAlpha(alpha);
-            }
-            if (valueImageView != null) {
-                valueImageView.setAlpha(alpha);
-            }
-        }
-    }
-
     @Override
     protected void onAttachedToWindow() {
         super.onAttachedToWindow();
@@ -986,8 +971,8 @@ public class TextCell extends FrameLayout {
             canvas.drawRoundRect(AndroidUtilities.rectTmp, dp(3), dp(3), paint);
             invalidate();
         }
-        valueTextView.setAlpha((1f - drawLoadingProgress) * (emojiDrawable == null ? 1f : 1f - emojiDrawable.isNotEmpty()));
-        valueSpoilersTextView.setAlpha((1f - drawLoadingProgress) * (emojiDrawable == null ? 1f : 1f - emojiDrawable.isNotEmpty()));
+        valueTextView.setAlpha((1f - drawLoadingProgress) * (emojiDrawable == null ? 1f : 1f - emojiDrawable.isNotEmpty()) * (isEnabled() ? 1.0f : 0.5f));
+        valueSpoilersTextView.setAlpha((1f - drawLoadingProgress) * (emojiDrawable == null ? 1f : 1f - emojiDrawable.isNotEmpty()) * (isEnabled() ? 1.0f : 0.5f));
         super.dispatchDraw(canvas);
         if (emojiDrawable != null) {
             updateEmojiBounds();

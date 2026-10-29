@@ -20,7 +20,6 @@
 package top.qwq2333.nullgram.translate
 
 import android.text.TextUtils
-import android.util.Pair
 import androidx.collection.LruCache
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.okhttp.OkHttp
@@ -34,6 +33,7 @@ import io.ktor.utils.io.charsets.Charsets
 import kotlinx.serialization.json.Json
 import org.telegram.messenger.LocaleController
 import org.telegram.messenger.R
+import org.telegram.tgnet.TLObject
 import org.telegram.tgnet.TLRPC
 import top.qwq2333.nullgram.helpers.TranslateHelper
 import top.qwq2333.nullgram.utils.Log
@@ -42,7 +42,7 @@ abstract class BaseTranslator {
     /**
      * cache pool
      */
-    private val cache: LruCache<Pair<Any, String>, TranslateResult> = LruCache<Pair<Any, String>, TranslateResult>(200)
+    private val cache: LruCache<Triple<String, String, String>, RequestResult> = LruCache<Triple<String, String, String>, RequestResult>(200)
 
     data class RequestResult(
         val from: String, val result: String?, val error: HttpStatusCode? = null
@@ -126,11 +126,17 @@ abstract class BaseTranslator {
     }
 
     private suspend fun doTranslateText(text: String, from: String, to: String): RequestResult {
+        val key = Triple(text, from, to)
+        cache.get(key)?.let { return it }
         return runCatching {
             translateText(text, from, to)
         }.getOrElse {
             Log.w("Translate Error Occur: ", it)
             RequestResult(from, null, HttpStatusCode(500, it.message ?: ""))
+        }.also {
+            if (it.error == null) {
+                cache.put(key, it)
+            }
         }
     }
 
@@ -147,35 +153,18 @@ abstract class BaseTranslator {
         val source = if (source is CharSequence) source.toString() else source
         val from = convertLanguageCode(if (TextUtils.isEmpty(from) || "und" == from) "auto" else from, false)
         val to = convertLanguageCode(to, false)
-        val cachedResult: TranslateResult? = cache.get(Pair(source, to))
-        if (cachedResult != null) {
-            return cachedResult
-        }
-
         when (source) {
             is String -> {
                 val result = doTranslateText(source, from, to)
                 return if (result.error == null) {
-                    val translateResult = TranslateResult(from, result.result)
-                    cache.put(Pair(source, to), translateResult)
-                    translateResult
+                    TranslateResult(from, result.result)
                 } else {
                     TranslateResult(from, null, result.error)
                 }
             }
 
             is TLRPC.Poll -> {
-                val translatedPoll: TLRPC.TL_poll = TLRPC.TL_poll().apply {
-                    // Keep original information
-                    close_date = source.close_date
-                    close_period = source.close_period
-                    closed = source.closed
-                    flags = source.flags
-                    id = source.id
-                    multiple_choice = source.multiple_choice
-                    public_voters = source.public_voters
-                    quiz = source.quiz
-                }
+                val translatedPoll = TLObject.deepCopy(source, TLRPC.Poll::TLdeserialize)
 
                 // Translate question
                 val translatedQuestion = doTranslateText(source.question.text, from, to)
@@ -198,9 +187,8 @@ abstract class BaseTranslator {
                     text = question
                 }
                 // Translate options
-                source.answers.forEach {
+                translatedPoll.answers.forEach {
                     val translatedAnswer = doTranslateText(it.text.text, from, to)
-                    val translatedPollAnswer = TLRPC.TL_pollAnswer()
                     val text = if (translatedAnswer.error == null) {
                         if (TranslateHelper.showOriginal) {
                             "${it.text.text} | ${translatedAnswer.result!!}"
@@ -210,15 +198,11 @@ abstract class BaseTranslator {
                     } else {
                         return TranslateResult(from, null, translatedAnswer.error)
                     }
-                    translatedPollAnswer.text = TLRPC.TL_textWithEntities().apply {
+                    it.text = TLRPC.TL_textWithEntities().apply {
                         this.text = text
                     }
-                    translatedPollAnswer.option = it.option
-                    translatedPoll.answers.add(translatedPollAnswer)
                 }
-                val result = TranslateResult(from, translatedPoll)
-                cache.put(Pair(source, to), result)
-                return result
+                return TranslateResult(from, translatedPoll)
             }
 
             else -> {

@@ -82,13 +82,19 @@ public class GraySectionCell extends FrameLayout implements Theme.Colorable {
         rightTextView.setTextSize(dp(14));
         rightTextView.setTextColor(getThemedColor(Theme.key_graySectionText));
         rightTextView.setGravity(LocaleController.isRTL ? Gravity.LEFT : Gravity.RIGHT);
-        addView(rightTextView, rightTextViewLayoutParams = LayoutHelper.createFrame(LayoutHelper.WRAP_CONTENT, LayoutHelper.MATCH_PARENT, (LocaleController.isRTL ? Gravity.LEFT : Gravity.RIGHT) | Gravity.TOP, 16, 0, 16, 0));
+        addView(rightTextView, rightTextViewLayoutParams = LayoutHelper.createFrame(LayoutHelper.WRAP_CONTENT, LayoutHelper.MATCH_PARENT, (LocaleController.isRTL ? Gravity.LEFT : Gravity.RIGHT) | Gravity.TOP, padding, 0, padding, 0));
 
         ViewCompat.setAccessibilityHeading(this, true);
     }
 
+    private boolean noBackground;
+    public void setNoBackground(boolean no) {
+        this.noBackground = no;
+        updateColors();
+    }
+
     public void updateColors() {
-        setBackgroundColor(getThemedColor(Theme.key_graySection));
+        setBackgroundColor(noBackground ? 0 : getThemedColor(Theme.key_graySection));
         textView.setTextColor(getThemedColor(Theme.key_graySectionText));
         rightTextView.setTextColor(getThemedColor(Theme.key_graySectionText));
     }

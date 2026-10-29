@@ -317,7 +317,7 @@ public class FilterTabsView extends FrameLayout {
         @SuppressLint("DrawAllocation")
         @Override
         protected void onDraw(Canvas canvas) {
-            boolean reorderEnabled = (!currentTab.isDefault || UserConfig.getInstance(UserConfig.selectedAccount).isPremium());
+            boolean reorderEnabled = !MessagesController.getInstance(UserConfig.selectedAccount).premiumFeaturesBlocked() || !currentTab.isDefault || UserConfig.getInstance(UserConfig.selectedAccount).isPremium();
             boolean showRemove = !currentTab.isDefault && reorderEnabled;
             if (reorderEnabled && editingAnimationProgress != 0) {
                 canvas.save();
@@ -362,16 +362,16 @@ public class FilterTabsView extends FrameLayout {
             }
             if (animateToKey < 0) {
                 if ((animatingIndicator || manualScrollingToId != -1) && (currentTab.id == id1 || currentTab.id == id2)) {
-                    textPaint.setColor(ColorUtils.blendARGB(Theme.getColor(otherKey), Theme.getColor(key), animatingIndicatorProgress));
+                    textPaint.setColor(ColorUtils.blendARGB(Theme.getColor(otherKey, resourcesProvider), Theme.getColor(key, resourcesProvider), animatingIndicatorProgress));
                 } else {
-                    textPaint.setColor(Theme.getColor(key));
+                    textPaint.setColor(Theme.getColor(key, resourcesProvider));
                 }
             } else {
-                int color1 = Theme.getColor(key);
-                int color2 = Theme.getColor(animateToKey);
+                int color1 = Theme.getColor(key, resourcesProvider);
+                int color2 = Theme.getColor(animateToKey, resourcesProvider);
                 if ((animatingIndicator || manualScrollingToPosition != -1) && (currentTab.id == id1 || currentTab.id == id2)) {
-                    int color3 = Theme.getColor(otherKey);
-                    int color4 = Theme.getColor(animateToOtherKey);
+                    int color3 = Theme.getColor(otherKey, resourcesProvider);
+                    int color4 = Theme.getColor(animateToOtherKey, resourcesProvider);
                     textPaint.setColor(ColorUtils.blendARGB(ColorUtils.blendARGB(color3, color4, animationValue), ColorUtils.blendARGB(color1, color2, animationValue), animatingIndicatorProgress));
                 } else {
                     textPaint.setColor(ColorUtils.blendARGB(color1, color2, animationValue));
@@ -519,9 +519,9 @@ public class FilterTabsView extends FrameLayout {
                     textCounterPaint.setColor(ColorUtils.blendARGB(color1, color2, animationValue));
                 }
                 if (Theme.hasThemeKey(unreadKey) && Theme.hasThemeKey(unreadOtherKey)) {
-                    int color1 = Theme.getColor(unreadKey);
+                    int color1 = Theme.getColor(unreadKey, resourcesProvider);
                     if ((animatingIndicator || manualScrollingToPosition != -1) && (currentTab.id == id1 || currentTab.id == id2)) {
-                        int color3 = Theme.getColor(unreadOtherKey);
+                        int color3 = Theme.getColor(unreadOtherKey, resourcesProvider);
                         counterPaint.setColor(ColorUtils.blendARGB(color3, color1, animatingIndicatorProgress));
                     } else {
                         counterPaint.setColor(color1);
@@ -644,9 +644,9 @@ public class FilterTabsView extends FrameLayout {
                     progressToLocked -= 16 / 150f;
                 }
                 progressToLocked = Utilities.clamp(progressToLocked, 1f, 0);
-                int unactiveColor = Theme.getColor(unactiveTextColorKey);
+                int unactiveColor = Theme.getColor(unactiveTextColorKey, resourcesProvider);
                 if (aUnactiveTextColorKey >= 0) {
-                    unactiveColor = ColorUtils.blendARGB(unactiveColor, Theme.getColor(aUnactiveTextColorKey), animationValue);
+                    unactiveColor = ColorUtils.blendARGB(unactiveColor, Theme.getColor(aUnactiveTextColorKey, resourcesProvider), animationValue);
                 }
                 if (lockDrawableColor != unactiveColor) {
                     lockDrawableColor = unactiveColor;
@@ -1151,7 +1151,7 @@ public class FilterTabsView extends FrameLayout {
         listView.setItemAnimator(itemAnimator);
         listView.setSelectorType(8);
         listView.setSelectorRadius(6);
-        listView.setSelectorDrawableColor(Theme.getColor(selectorColorKey));
+        listView.setSelectorDrawableColor(Theme.getColor(selectorColorKey, resourcesProvider));
         listView.setLayoutManager(layoutManager = new LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false) {
 
             @Override
@@ -1233,6 +1233,7 @@ public class FilterTabsView extends FrameLayout {
                 invalidate();
             }
         });
+        listView.setAdaptiveOverScroll();
         addView(listView, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, LayoutHelper.MATCH_PARENT));
     }
 
@@ -1395,7 +1396,7 @@ public class FilterTabsView extends FrameLayout {
         aUnactiveTextColorKey = unactive;
         aBackgroundColorKey = background;
         selectorColorKey = selector;
-        listView.setSelectorDrawableColor(Theme.getColor(selectorColorKey));
+        listView.setSelectorDrawableColor(Theme.getColor(selectorColorKey, resourcesProvider));
 
         colorChangeAnimator = new AnimatorSet();
         colorChangeAnimator.playTogether(ObjectAnimator.ofFloat(this, COLORS, 0.0f, 1.0f));
@@ -1422,6 +1423,17 @@ public class FilterTabsView extends FrameLayout {
 
     public int getFirstTabId() {
         return positionToId.get(0, 0);
+    }
+
+    public int getLastTabId() {
+        return positionToId.get(getTabsCount() - 1, 0);
+    }
+
+    public void updateColors() {
+        listView.setSelectorDrawableColor(Theme.getColor(selectorColorKey, resourcesProvider));
+        selectorDrawable.setColor(Theme.getColor(tabLineColorKey, resourcesProvider));
+        listView.invalidateViews();
+        invalidate();
     }
 
     public int getSelectorColorKey() {
@@ -1696,6 +1708,7 @@ public class FilterTabsView extends FrameLayout {
         isEditing = value;
         editingForwardAnimation = true;
         listView.invalidateViews();
+        adapter.notifyDataSetChanged();
         invalidate();
         if (!isEditing && orderChanged) {
             MessagesStorage.getInstance(UserConfig.selectedAccount).saveDialogFiltersOrder();
@@ -1730,7 +1743,7 @@ public class FilterTabsView extends FrameLayout {
                 invalidated = true;
                 requestLayout();
                 allTabsWidth = 0;
-                if (!Config.hideAllTab) findDefaultTab().setTitle(LocaleController.getString(R.string.FilterAllChats), null, false);
+                if (!Config.hideAllTab && findDefaultTab() != null) findDefaultTab().setTitle(LocaleController.getString(R.string.FilterAllChats), null, false);
                 for (int b = 0; b < N; b++) {
                     allTabsWidth += tabs.get(b).getWidth(true) + FolderIconHelper.getPaddingTab();
                 }
@@ -1761,7 +1774,7 @@ public class FilterTabsView extends FrameLayout {
             listView.setItemAnimator(itemAnimator);
             adapter.notifyDataSetChanged();
             allTabsWidth = 0;
-            if (!Config.hideAllTab) findDefaultTab().setTitle(LocaleController.getString(R.string.FilterAllChats), null, false);
+            if (!Config.hideAllTab && findDefaultTab() != null) findDefaultTab().setTitle(LocaleController.getString(R.string.FilterAllChats), null, false);
             for (int b = 0, N = tabs.size(); b < N; b++) {
                 allTabsWidth += tabs.get(b).getWidth(true) + FolderIconHelper.getPaddingTab();
             }
@@ -1932,7 +1945,7 @@ public class FilterTabsView extends FrameLayout {
 
         @Override
         public int getMovementFlags(RecyclerView recyclerView, RecyclerView.ViewHolder viewHolder) {
-            if (!Config.hideAllTab && (!isEditing || (viewHolder.getAdapterPosition() == 0 && tabs.get(0).isDefault && !UserConfig.getInstance(UserConfig.selectedAccount).isPremium()))) {
+            if (!Config.hideAllTab && MessagesController.getInstance(UserConfig.selectedAccount).premiumFeaturesBlocked() && (!isEditing || (viewHolder.getAdapterPosition() == 0 && tabs.get(0).isDefault && !UserConfig.getInstance(UserConfig.selectedAccount).isPremium()))) {
                 return makeMovementFlags(0, 0);
             }
             return makeMovementFlags(ItemTouchHelper.LEFT | ItemTouchHelper.RIGHT, 0);
@@ -1940,7 +1953,7 @@ public class FilterTabsView extends FrameLayout {
 
         @Override
         public boolean onMove(RecyclerView recyclerView, RecyclerView.ViewHolder source, RecyclerView.ViewHolder target) {
-            if (!Config.hideAllTab && ((source.getAdapterPosition() == 0 || target.getAdapterPosition() == 0) && !UserConfig.getInstance(UserConfig.selectedAccount).isPremium())) {
+            if (!Config.hideAllTab && MessagesController.getInstance(UserConfig.selectedAccount).premiumFeaturesBlocked() && ((source.getAdapterPosition() == 0 || target.getAdapterPosition() == 0) && !UserConfig.getInstance(UserConfig.selectedAccount).isPremium())) {
                 return false;
             }
             adapter.swapElements(source.getAdapterPosition(), target.getAdapterPosition());
@@ -1972,6 +1985,9 @@ public class FilterTabsView extends FrameLayout {
                 AndroidUtilities.runOnUIThread(resetDefaultPosition, 320);
             }
             super.onSelectedChanged(viewHolder, actionState);
+            if (viewHolder != null) {
+                viewHolder.itemView.setTag(R.id.dragging, actionState == ItemTouchHelper.ACTION_STATE_DRAG ? true : null);
+            }
         }
 
         @Override
@@ -1984,6 +2000,7 @@ public class FilterTabsView extends FrameLayout {
             super.clearView(recyclerView, viewHolder);
             viewHolder.itemView.setPressed(false);
             viewHolder.itemView.setBackground(null);
+            viewHolder.itemView.setTag(R.id.dragging, null);
         }
     }
 

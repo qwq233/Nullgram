@@ -21,13 +21,23 @@
 
 import com.android.build.api.variant.BuildConfigField
 import com.android.build.api.variant.FilterConfiguration
+import com.android.build.api.artifact.SingleArtifact
 import com.android.build.gradle.internal.cxx.configure.gradleLocalProperties
 import com.google.firebase.crashlytics.buildtools.gradle.CrashlyticsExtension
+import org.gradle.api.artifacts.type.ArtifactTypeDefinition
+import org.gradle.api.artifacts.component.ModuleComponentSelector
+import org.gradle.api.attributes.Usage
 import java.text.SimpleDateFormat
 import java.util.Date
+import org.telegram.tasks.GenerateLottieMetadataAssetFileTask
+import org.telegram.tasks.GenerateStringResourceIdsAssetTask
+import org.telegram.tasks.TelegramStringsTask
+import org.telegram.tasks.localization.GenerateLocalizationUtilsJavaTask
+import org.telegram.transforms.CoreFingerprintTransform
 
 plugins {
     alias(libs.plugins.android.application)
+    id("org.jetbrains.kotlin.android")
     alias(libs.plugins.firebase.crashlytics)
     alias(libs.plugins.google.services)
     alias(libs.plugins.triplet.play)
@@ -72,7 +82,60 @@ fun setupPlay(stable: Boolean) {
 //    profile = "release"
 //}
 
+// Core 1.18+ dropped the backend used by stable Biometric on older Android versions.
+check(libs.versions.coreKtx.get() == "1.19.1") {
+    "Re-audit CoreFingerprintTransform before updating Core"
+}
+val coreStockAarType = "nullgram-core-stock-aar"
+val coreFingerprintDonor = configurations.create("coreFingerprintDonor") {
+    isCanBeResolved = true
+    isCanBeConsumed = false
+    isTransitive = false
+    attributes.attribute(ArtifactTypeDefinition.ARTIFACT_TYPE_ATTRIBUTE, "aar")
+    attributes.attribute(Usage.USAGE_ATTRIBUTE, objects.named(Usage.JAVA_RUNTIME))
+}
+
+configurations.matching {
+    it.name.endsWith("CompileClasspath") || it.name.endsWith("RuntimeClasspath")
+}.configureEach {
+    resolutionStrategy.dependencySubstitution.all {
+        val request = requested as? ModuleComponentSelector
+        if (request?.group == "androidx.core" && request.module == "core") {
+            // Explicit AAR requests from older POMs would bypass the variant transform.
+            artifactSelection {
+                check(requestedSelectors.all {
+                    it.type == "aar" && it.extension == "aar" && it.classifier.isNullOrEmpty()
+                }) { "Unexpected Core artifact selector; re-audit fingerprint compatibility" }
+                withoutArtifactSelectors()
+            }
+        }
+    }
+}
+
 dependencies {
+    components.withModule("androidx.core:core") {
+        if (id.version == "1.19.1") {
+            for (variant in listOf("releaseVariantReleaseApiPublication", "releaseVariantReleaseRuntimePublication")) {
+                withVariant(variant) {
+                    attributes.attribute(ArtifactTypeDefinition.ARTIFACT_TYPE_ATTRIBUTE, coreStockAarType)
+                }
+            }
+        }
+    }
+    add(coreFingerprintDonor.name, "androidx.core:core:1.17.0@aar")
+    registerTransform(CoreFingerprintTransform::class) {
+        from.attribute(ArtifactTypeDefinition.ARTIFACT_TYPE_ATTRIBUTE, coreStockAarType)
+        to.attribute(ArtifactTypeDefinition.ARTIFACT_TYPE_ATTRIBUTE, "aar")
+        parameters.legacyCoreAar.set(
+            layout.file(coreFingerprintDonor.elements.map { it.single().asFile })
+        )
+    }
+    constraints {
+        implementation("androidx.core:core") {
+            version { strictly(libs.versions.coreKtx.get()) }
+            because("The native fingerprint compatibility transform is audited for this Core version")
+        }
+    }
     implementation(platform(libs.firebase.bom))
     implementation(libs.firebase.crashlytics.ndk)
 
@@ -82,16 +145,25 @@ dependencies {
     implementation(libs.androidx.dynamicanimation)
     implementation(libs.androidx.interpolator)
     implementation(libs.androidx.fragment)
+    implementation(libs.androidx.activity)
     implementation(libs.androidx.sharetarget)
     implementation(libs.androidx.biometric)
     implementation(libs.androidx.mediarouter)
     implementation(libs.androidx.credentials)
+    implementation(libs.androidx.credentials.play.services)
     implementation(libs.androidx.security.crypto)
+    implementation(libs.androidx.webkit)
+    implementation(libs.androidx.car.app)
+    implementation(libs.androidx.car.projected)
+    implementation(libs.zxing.core)
+    implementation(libs.nv.websocket)
+    implementation(libs.play.services.wearable)
 
     compileOnly(libs.checker.compat.qual)
     compileOnly(libs.checker.qual)
     implementation(libs.firebase.messaging)
     implementation(libs.firebase.config)
+    implementation(libs.firebase.appindexing)
     implementation(libs.play.services.vision)
     implementation(libs.play.services.location)
     implementation(libs.play.services.wallet)
@@ -99,7 +171,7 @@ dependencies {
     implementation(libs.play.services.mlkit.imageLabeling)
     implementation(libs.play.services.cast.framework)
     implementation(libs.isoparser)
-    implementation(files("libs/stripe.aar"))
+    implementation(libs.stripe.payments.core)
     implementation(libs.language.id)
     implementation(files("libs/libgsaverification-client.aar"))
     implementation(libs.kotlinx.coroutines.android)
@@ -113,7 +185,15 @@ dependencies {
     implementation("io.noties.markwon:ext-tables:4.6.2")
     implementation("io.noties.markwon:html:4.6.2")
     implementation("io.noties.markwon:inline-parser:4.6.2")
-    implementation("io.noties.markwon:ext-latex:4.6.2")
+    implementation("io.noties.markwon:ext-latex:4.6.2") {
+        exclude(group = "ru.noties", module = "jlatexmath-android")
+    }
+
+    implementation(libs.media3.exoplayer)
+    implementation(libs.media3.dash)
+    implementation(libs.media3.hls)
+    implementation(libs.media3.session)
+    implementation(project(":jlatexmath"))
 
     implementation(libs.kotlin.stdlib.common)
     implementation(libs.kotlin.stdlib)
@@ -194,6 +274,7 @@ android {
 
         create("play") {
             initWith(getByName("release"))
+            matchingFallbacks += listOf("release")
         }
     }
 
@@ -223,6 +304,12 @@ android {
             }
         }
         buildConfigField("String", "BUILD_TIME", "\"${SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(Date())}\"")
+        buildConfigField("String", "BUILD_VERSION_STRING", "\"${Version.officialVersionName}\"")
+        buildConfigField("String", "BETA_URL", "\"\"")
+        buildConfigField("boolean", "DEBUG_VERSION", "true")
+        buildConfigField("boolean", "DEBUG_PRIVATE_VERSION", "false")
+        buildConfigField("boolean", "BUNDLE", isBuildingBundle.toString())
+        buildConfigField("int", "VERSION_NUM", "7")
     }
 
     splits {
@@ -240,6 +327,39 @@ base {
 
 androidComponents {
     onVariants { variant ->
+        val suffix = variant.name.replaceFirstChar { it.uppercase() }
+        val localizations = tasks.register<GenerateLocalizationUtilsJavaTask>("generate${suffix}LocalizationUtilsJava") {
+            localizationFiles.from(fileTree("src/main/res") { include("values-*/strings*.xml") })
+            javaOutputDir.set(layout.buildDirectory.dir("generated/generateLocalizationUtilsJava/${variant.name}"))
+        }
+        variant.sources.java?.addGeneratedSourceDirectory(localizations, GenerateLocalizationUtilsJavaTask::javaOutputDir)
+
+        val strings = tasks.register<TelegramStringsTask>("generate${suffix}TelegramStrings") {
+            stringsXml.from(fileTree("src/main/res/values") { include("strings*.xml") })
+            localizationFiles.from(fileTree("src/main/res") { include("values-*/strings*.xml") })
+            stringsOutputDir.set(layout.buildDirectory.dir("generated/telegramStrings/${variant.name}/res"))
+            assetsOutputDir.set(layout.buildDirectory.dir("generated/telegramStrings/${variant.name}/assets"))
+            stableIdsFile.set(layout.buildDirectory.file("generated/telegramStrings/${variant.name}/stable-ids.txt"))
+            resourcePackageName.set(variant.applicationId)
+        }
+        variant.sources.res?.addGeneratedSourceDirectory(strings, TelegramStringsTask::stringsOutputDir)
+        variant.sources.assets?.addGeneratedSourceDirectory(strings, TelegramStringsTask::assetsOutputDir)
+        variant.androidResources.aaptAdditionalParameters.addAll(strings.flatMap { task ->
+            task.stableIdsFile.map { listOf("--stable-ids", it.asFile.absolutePath) }
+        })
+
+        val stringIds = tasks.register<GenerateStringResourceIdsAssetTask>("generate${suffix}StringResourceIdsAsset") {
+            runtimeSymbolList.set(variant.artifacts.get(SingleArtifact.RUNTIME_SYMBOL_LIST))
+            outputDir.set(layout.buildDirectory.dir("generated/stringResourceIds/${variant.name}/assets"))
+        }
+        variant.sources.assets?.addGeneratedSourceDirectory(stringIds, GenerateStringResourceIdsAssetTask::outputDir)
+        val lottie = tasks.register<GenerateLottieMetadataAssetFileTask>("generate${suffix}LottieMeta") {
+            runtimeSymbolList.set(variant.artifacts.get(SingleArtifact.RUNTIME_SYMBOL_LIST))
+            rawResourceDirs.from(fileTree("src/main/res") { include("raw*/*.json") })
+            outputDir.set(layout.buildDirectory.dir("generated/lottieMeta/${variant.name}/assets"))
+        }
+        variant.sources.assets?.addGeneratedSourceDirectory(lottie, GenerateLottieMetadataAssetFileTask::outputDir)
+
         variant.buildConfigFields!!.put("isPlay", BuildConfigField("boolean", variant.name.lowercase() == "play", null))
 
         variant.outputs.forEach { output ->

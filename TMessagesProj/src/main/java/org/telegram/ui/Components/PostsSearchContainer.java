@@ -31,7 +31,6 @@ import android.text.Spanned;
 import android.text.TextPaint;
 import android.text.TextUtils;
 import android.text.style.CharacterStyle;
-import android.text.style.ForegroundColorSpan;
 import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.View;
@@ -43,8 +42,6 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import org.telegram.messenger.AndroidUtilities;
-import org.telegram.messenger.DialogObject;
-import org.telegram.messenger.LocaleController;
 import org.telegram.messenger.MessageObject;
 import org.telegram.messenger.MessagesController;
 import org.telegram.messenger.R;
@@ -52,12 +49,9 @@ import org.telegram.messenger.UserConfig;
 import org.telegram.tgnet.ConnectionsManager;
 import org.telegram.tgnet.TLRPC;
 import org.telegram.ui.ActionBar.AdjustPanLayoutHelper;
-import org.telegram.ui.ActionBar.AlertDialog;
 import org.telegram.ui.ActionBar.BaseFragment;
 import org.telegram.ui.ActionBar.Theme;
-import org.telegram.ui.Cells.DialogCell;
 import org.telegram.ui.ChatActivity;
-import org.telegram.ui.Components.Premium.PremiumPreviewBottomSheet;
 import org.telegram.ui.LaunchActivity;
 import org.telegram.ui.PhotoViewer;
 import org.telegram.ui.PremiumPreviewFragment;
@@ -67,7 +61,6 @@ import org.telegram.ui.Stories.DarkThemeResourceProvider;
 import org.telegram.ui.Stories.recorder.ButtonWithCounterView;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -75,7 +68,7 @@ public class PostsSearchContainer extends FrameLayout {
 
     private final BaseFragment fragment;
     private final int currentAccount;
-    private final UniversalRecyclerView listView;
+    public final UniversalRecyclerView listView;
 
     private TLRPC.SearchPostsFlood flood;
 
@@ -157,7 +150,7 @@ public class PostsSearchContainer extends FrameLayout {
         emptyTextView.setEllipsize(TextUtils.TruncateAt.END);
         emptyView.addView(emptyTextView, LayoutHelper.createLinear(LayoutHelper.WRAP_CONTENT, LayoutHelper.WRAP_CONTENT, Gravity.CENTER_HORIZONTAL, 0, 9, 0, 0));
 
-        emptyButton = new ButtonWithCounterView(context, null);
+        emptyButton = new ButtonWithCounterView(context, null).setRound();
         emptyView.addView(emptyButton, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, 44, Gravity.FILL_HORIZONTAL, 0, 19, 0, 0));
 
         emptyUnderButtonTextView = new TextView(context);
@@ -172,6 +165,35 @@ public class PostsSearchContainer extends FrameLayout {
 
         updateColors();
         updateEmptyView();
+    }
+
+    public void setPagesPaddings(int top, int bottom) {
+        setPagesPaddings(top, bottom, false);
+    }
+
+    public void setPagesPaddings(int top, int bottom, boolean doNotRequestLayout) {
+        setClipToPadding(false);
+        ignoreRequestLayout = doNotRequestLayout;
+
+        setPadding(0, top, 0, bottom);
+        listView.setPadding(0, top, 0, bottom, doNotRequestLayout);
+
+        MarginLayoutParams lp = null;
+        lp = (MarginLayoutParams) listView.getLayoutParams();
+        lp.topMargin = -top;
+        lp.bottomMargin = -bottom;
+
+        ignoreRequestLayout = false;
+    }
+
+    private boolean ignoreRequestLayout;
+
+    @Override
+    public void requestLayout() {
+        if (ignoreRequestLayout) {
+            return;
+        }
+        super.requestLayout();
     }
 
     public void updateColors() {
@@ -511,7 +533,7 @@ public class PostsSearchContainer extends FrameLayout {
             emptyUnderButtonTextView.setText(getString(R.string.SearchPostsPremium));
         } else if (!TextUtils.isEmpty(lastQuery) && messages.isEmpty() && endReached) {
             if (emptyImageView.getImageReceiver().getImageDrawable() == null) {
-                emptyImageView.setImageDrawable(new RLottieDrawable(R.raw.utyan_empty, "utyan_empty", dp(130), dp(130)));
+                emptyImageView.setImageDrawable(new RLottieDrawable(R.raw.utyan_empty, dp(130), dp(130)));
             }
             emptyImageView.setVisibility(View.VISIBLE);
             emptyTitleView.setText(getString(R.string.SearchPostsNotFound));

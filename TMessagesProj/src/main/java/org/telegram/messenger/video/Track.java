@@ -309,9 +309,7 @@ public class Track {
 
             descriptor.setDecoderConfigDescriptor(decoderConfigDescriptor);
 
-            ByteBuffer data = descriptor.serialize();
-            //esds.setEsDescriptor(descriptor);
-            esds.setData(data);
+            esds.setEsDescriptor(descriptor);
             audioSampleEntry.addBox(esds);
             sampleDescriptionBox.addBox(audioSampleEntry);
         }

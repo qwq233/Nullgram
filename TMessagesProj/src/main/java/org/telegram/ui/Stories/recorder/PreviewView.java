@@ -57,7 +57,7 @@ import android.widget.FrameLayout;
 
 import androidx.annotation.NonNull;
 
-import com.google.android.exoplayer2.C;
+import androidx.media3.common.C;
 import com.google.zxing.common.detector.MathUtils;
 
 import org.telegram.messenger.AndroidUtilities;
@@ -263,11 +263,6 @@ public class PreviewView extends FrameLayout {
                 @Override
                 public void onSurfaceTextureUpdated(SurfaceTexture surfaceTexture) {
                     invalidateTextureViewHolder();
-                }
-
-                @Override
-                public boolean onSurfaceDestroyed(SurfaceTexture surfaceTexture) {
-                    return false;
                 }
             });
             audioPlayer.preparePlayer(Uri.fromFile(new File(entry.audioPath)), "other");
@@ -718,7 +713,7 @@ public class PreviewView extends FrameLayout {
                         } else {
                             return BitmapFactory.decodeFile(path, opts);
                         }
-                    }, rw, rh, false, false);
+                    }, rw, rh, !entry.isVideo ? entry.orientation : 0, false, !entry.isVideo);
                     setupMatrix[0] = false;
                 }
             }
@@ -911,11 +906,6 @@ public class PreviewView extends FrameLayout {
                 public void onSurfaceTextureUpdated(SurfaceTexture surfaceTexture) {
                     invalidateTextureViewHolder();
                 }
-
-                @Override
-                public boolean onSurfaceDestroyed(SurfaceTexture surfaceTexture) {
-                    return false;
-                }
             });
 
             if (textureView != null) {
@@ -1097,14 +1087,6 @@ public class PreviewView extends FrameLayout {
                 @Override
                 public void onRenderedFirstFrame() {
 
-                }
-
-                @Override
-                public void onSurfaceTextureUpdated(SurfaceTexture surfaceTexture) {}
-
-                @Override
-                public boolean onSurfaceDestroyed(SurfaceTexture surfaceTexture) {
-                    return false;
                 }
             });
 

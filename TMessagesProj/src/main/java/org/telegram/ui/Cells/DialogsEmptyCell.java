@@ -12,7 +12,6 @@ import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.ValueAnimator;
 import android.content.Context;
-import android.os.Build;
 import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.View;
@@ -67,9 +66,9 @@ public class DialogsEmptyCell extends LinearLayout {
     private boolean utyanAnimationTriggered;
     private ValueAnimator utyanAnimator;
 
-    private RLottieImageView imageView;
-    private TextView titleView;
-    private TextViewSwitcher subtitleView;
+    private final RLottieImageView imageView;
+    private final TextView titleView;
+    private final TextViewSwitcher subtitleView;
 
     @EmptyType
     private int currentType = TYPE_UNSPECIFIED;
@@ -77,104 +76,7 @@ public class DialogsEmptyCell extends LinearLayout {
     @RawRes
     private int prevIcon;
 
-    private int currentAccount = UserConfig.selectedAccount;
-    private DialogsEmptyCellContent currentContent = null;
-    private DialogsEmptyCellContent lastContent = null;
-
-    private static class DialogsEmptyCellContent extends LinearLayout {
-        private RLottieImageView imageView;
-        private TextView emptyTextView1;
-        private TextView emptyTextView2;
-        private int currentType = 0;
-
-        public DialogsEmptyCellContent(Context context) {
-            super(context);
-
-            setGravity(Gravity.CENTER);
-            setOrientation(VERTICAL);
-            setOnTouchListener((v, event) -> true);
-
-            imageView = new RLottieImageView(context);
-            imageView.setScaleType(ImageView.ScaleType.CENTER);
-            addView(imageView, LayoutHelper.createLinear(100, 100, Gravity.CENTER, 52, 4, 52, 0));
-            imageView.setOnClickListener(v -> {
-                if (!imageView.isPlaying()) {
-                    imageView.setProgress(0.0f);
-                    imageView.playAnimation();
-                }
-            });
-
-            emptyTextView1 = new TextView(context);
-            emptyTextView1.setTextColor(Theme.getColor(Theme.key_chats_nameMessage_threeLines));
-            emptyTextView1.setText(LocaleController.getString("NoChats", R.string.NoChats));
-            emptyTextView1.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 20);
-            emptyTextView1.setTypeface(AndroidUtilities.getTypeface("fonts/rmedium.ttf"));
-            emptyTextView1.setGravity(Gravity.CENTER);
-            addView(emptyTextView1, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT, Gravity.TOP | Gravity.LEFT, 52, 10, 52, 0));
-
-            emptyTextView2 = new TextView(context);
-            String help = LocaleController.getString("NoChatsHelp", R.string.NoChatsHelp);
-            if (AndroidUtilities.isTablet() && !AndroidUtilities.isSmallTablet()) {
-                help = help.replace('\n', ' ');
-            }
-            emptyTextView2.setText(help);
-            emptyTextView2.setTextColor(Theme.getColor(Theme.key_chats_message));
-            emptyTextView2.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 14);
-            emptyTextView2.setGravity(Gravity.CENTER);
-            emptyTextView2.setLineSpacing(AndroidUtilities.dp(2), 1);
-            addView(emptyTextView2, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT, Gravity.TOP | Gravity.LEFT, 52, 7, 52, 0));
-        }
-
-        public void setType(int value) {
-            if (currentType == value) {
-                return;
-            }
-            currentType = value;
-            String help;
-            int icon;
-            int translationY = 0;
-            if (currentType == 0) {
-                icon = 0;
-                help = LocaleController.getString("NoChatsHelp", R.string.NoChatsHelp);
-                emptyTextView1.setText(LocaleController.getString("NoChats", R.string.NoChats));
-            } else if (currentType == 1) {
-                icon = 0;
-                help = LocaleController.getString("NoChatsContactsHelp", R.string.NoChatsContactsHelp);
-                emptyTextView1.setText(LocaleController.getString("NoChats", R.string.NoChats));
-            } else if (currentType == 2) {
-                imageView.setAutoRepeat(false);
-                icon = R.raw.filter_no_chats;
-                help = LocaleController.getString("FilterNoChatsToDisplayInfo", R.string.FilterNoChatsToDisplayInfo);
-                emptyTextView1.setText(LocaleController.getString("FilterNoChatsToDisplay", R.string.FilterNoChatsToDisplay));
-            } else {
-                imageView.setAutoRepeat(true);
-                icon = R.raw.filter_new;
-                help = LocaleController.getString("FilterAddingChatsInfo", R.string.FilterAddingChatsInfo);
-                emptyTextView1.setText(LocaleController.getString("FilterAddingChats", R.string.FilterAddingChats));
-                translationY = AndroidUtilities.dp(8);
-            }
-            setTranslationY(translationY);
-            if (icon != 0) {
-                imageView.setVisibility(VISIBLE);
-                imageView.setAnimation(icon, 100, 100);
-                imageView.playAnimation();
-            } else {
-                imageView.setVisibility(GONE);
-            }
-            if (AndroidUtilities.isTablet() && !AndroidUtilities.isSmallTablet()) {
-                help = help.replace('\n', ' ');
-            }
-            emptyTextView2.setText(help);
-        }
-
-        public void setOffset(int offset) {
-            if (currentType == 2 || currentType == 3) {
-                imageView.setTranslationY(offset);
-                emptyTextView1.setTranslationY(offset);
-                emptyTextView2.setTranslationY(offset);
-            }
-        }
-    }
+    private final int currentAccount = UserConfig.selectedAccount;
 
     public DialogsEmptyCell(Context context) {
         super(context);
@@ -376,7 +278,7 @@ public class DialogsEmptyCell extends LinearLayout {
             }
         }
         if (currentType == TYPE_WELCOME_NO_CONTACTS || currentType == TYPE_WELCOME_WITH_CONTACTS) {
-            offset -= (int) (ActionBar.getCurrentActionBarHeight() / 2f) * (1f - utyanCollapseProgress);
+            offset -= (int) ((ActionBar.getCurrentActionBarHeight() / 2f) * (1f - utyanCollapseProgress));
         }
         imageView.setTranslationY(offset);
         titleView.setTranslationY(offset);
@@ -387,18 +289,12 @@ public class DialogsEmptyCell extends LinearLayout {
         int totalHeight;
         if (getParent() instanceof View) {
             View view = (View) getParent();
-            totalHeight = view.getMeasuredHeight();
-            if (view.getPaddingTop() != 0 && Build.VERSION.SDK_INT >= 21) {
-                totalHeight -= AndroidUtilities.statusBarHeight;
-            }
+            totalHeight = view.getMeasuredHeight() - view.getPaddingTop() - view.getPaddingBottom();
         } else {
             totalHeight = MeasureSpec.getSize(heightMeasureSpec);
         }
         if (totalHeight == 0) {
-            totalHeight = AndroidUtilities.displaySize.y - ActionBar.getCurrentActionBarHeight() - (Build.VERSION.SDK_INT >= 21 ? AndroidUtilities.statusBarHeight : 0);
-        }
-        if (getParent() instanceof BlurredRecyclerView) {
-            totalHeight -= ((BlurredRecyclerView) getParent()).blurTopPadding;
+            totalHeight = AndroidUtilities.displaySize.y - ActionBar.getCurrentActionBarHeight() - AndroidUtilities.statusBarHeight;
         }
 
         return (int) (totalHeight + (AndroidUtilities.dp(320) - totalHeight) * utyanCollapseProgress);
@@ -413,14 +309,14 @@ public class DialogsEmptyCell extends LinearLayout {
             if (getParent() instanceof View) {
                 View view = (View) getParent();
                 totalHeight = view.getMeasuredHeight();
-                if (view.getPaddingTop() != 0 && Build.VERSION.SDK_INT >= 21) {
+                if (view.getPaddingTop() != 0) {
                     totalHeight -= AndroidUtilities.statusBarHeight;
                 }
             } else {
                 totalHeight = MeasureSpec.getSize(heightMeasureSpec);
             }
             if (totalHeight == 0) {
-                totalHeight = AndroidUtilities.displaySize.y - ActionBar.getCurrentActionBarHeight() - (Build.VERSION.SDK_INT >= 21 ? AndroidUtilities.statusBarHeight : 0);
+                totalHeight = AndroidUtilities.displaySize.y - ActionBar.getCurrentActionBarHeight() - AndroidUtilities.statusBarHeight;
             }
 
             if (getParent() instanceof BlurredRecyclerView) {
@@ -431,7 +327,9 @@ public class DialogsEmptyCell extends LinearLayout {
             if (!arrayList.isEmpty()) {
                 totalHeight -= AndroidUtilities.dp(72) * arrayList.size() + arrayList.size() - 1 + AndroidUtilities.dp(12 + 38);
             }
-            super.onMeasure(MeasureSpec.makeMeasureSpec(MeasureSpec.getSize(widthMeasureSpec), MeasureSpec.EXACTLY), MeasureSpec.makeMeasureSpec(totalHeight, MeasureSpec.EXACTLY));
+            super.onMeasure(
+                MeasureSpec.makeMeasureSpec(MeasureSpec.getSize(widthMeasureSpec), MeasureSpec.EXACTLY),
+                MeasureSpec.makeMeasureSpec(totalHeight, MeasureSpec.EXACTLY));
         } else {
             super.onMeasure(widthMeasureSpec, MeasureSpec.makeMeasureSpec(AndroidUtilities.dp(166), MeasureSpec.EXACTLY));
         }

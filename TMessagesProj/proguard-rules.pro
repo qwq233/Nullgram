@@ -3,6 +3,11 @@
 -keepclassmembernames class * {
     @com.google.android.gms.common.annotation.KeepName *;
 }
+
+-keep @interface androidx.annotation.Keep
+-keep @androidx.annotation.Keep class * { *; }
+-keepclasseswithmembers class * { @androidx.annotation.Keep *; }
+
 -keep class org.webrtc.* { *; }
 -keep class org.webrtc.audio.* { *; }
 -keep class org.webrtc.voiceengine.* { *; }
@@ -19,6 +24,19 @@
 -keep class com.google.android.exoplayer2.extractor.FlacStreamMetadata { *; }
 -keep class com.google.android.exoplayer2.metadata.flac.PictureFrame { *; }
 -keep class com.google.android.exoplayer2.decoder.SimpleDecoderOutputBuffer { *; }
+
+# These classes and members are resolved by the app's FFmpeg JNI bridge.
+-keep,includedescriptorclasses class androidx.media3.decoder.ffmpeg.** {
+    native <methods>;
+}
+-keep,includedescriptorclasses class androidx.media3.decoder.ffmpeg.FfmpegAudioDecoder {
+    private java.nio.ByteBuffer growOutputBuffer(androidx.media3.decoder.SimpleDecoderOutputBuffer, int);
+}
+-keep class androidx.media3.decoder.VideoDecoderOutputBuffer { *; }
+-keep class org.telegram.tgnet.ConnectionsManager { *; }
+-keep class org.telegram.tgnet.NativeByteBuffer { *; }
+-keep class org.telegram.tgnet.RequestTimeDelegate { *; }
+-keep class org.telegram.tgnet.RequestDelegate { *; }
 -keep class org.telegram.ui.Stories.recorder.FfmpegAudioWaveformLoader { *; }
 -keep class androidx.mediarouter.app.MediaRouteButton { *; }
 -keepclassmembers class ** {
@@ -36,6 +54,10 @@
 -dontwarn org.slf4j.impl.StaticLoggerBinder
 
 -keep class org.telegram.tgnet.TLRPC$TL_* { <init>(); }
+-keep class org.telegram.utils.code.highlight.PrismaHighlighter {
+    private static native <methods>;
+}
+
 # https://developers.google.com/ml-kit/known-issues#android_issues
 -keep class com.google.mlkit.nl.languageid.internal.ThickLanguageIdentifier { *; }
 -keep class com.google.mlkit.nl.languageid.internal.LanguageIdentificationJni { *; }
@@ -126,6 +148,10 @@
 -keepclassmembernames class top.qwq2333.nullgram.activity.MessageDetailActivity$TextDetailSimpleCell { <fields>; }
 -keepclassmembernames class top.qwq2333.nullgram.activity.PasscodeSettingActivity$AccountCell { <fields>; }
 -keepclassmembernames class top.qwq2333.nullgram.activity.ChatSettingActivity$StickerSizeCell { <fields>; }
+# Huawei Services
+-keep class com.huawei.hianalytics.**{ *; }
+-keep class com.huawei.updatesdk.**{ *; }
+-keep class com.huawei.hms.**{ *; }
 
 -keepclassmembernames class androidx.core.widget.NestedScrollView {
     private android.widget.OverScroller mScroller;
@@ -187,6 +213,12 @@
 -dontwarn org.jetbrains.annotations.NotNull
 -dontwarn org.jetbrains.annotations.Nullable
 
+# SDK 37 omits legacy APIs used only by the real API 27-29 fingerprint backend.
+-dontwarn android.hardware.fingerprint.**
+-keepclassmembers class androidx.core.hardware.fingerprint.FingerprintManagerCompat$* {
+    public void onAuthentication*(...);
+}
+
 -allowaccessmodification
 -overloadaggressively
 -keepattributes SourceFile,LineNumberTable,LocalVariableTable
@@ -194,3 +226,15 @@
 -obfuscationdictionary          proguard-dic.txt
 -classobfuscationdictionary     proguard-dic.txt
 -packageobfuscationdictionary   proguard-dic.txt
+-keep class io.nano.tex.** {*;}
+
+-keep class org.telegram.tgnet.** { *; }
+
+# JLatexMath: macro/atom classes are loaded reflectively by Class.forName
+-keep class org.scilab.forge.jlatexmath.** { *; }
+-keep class ru.noties.jlatexmath.** { *; }
+-dontwarn org.scilab.forge.jlatexmath.**
+
+# Use -keep to explicitly keep any other classes shrinking would remove
+#-dontoptimize
+#-dontobfuscate

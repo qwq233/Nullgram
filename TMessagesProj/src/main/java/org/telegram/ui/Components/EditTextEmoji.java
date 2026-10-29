@@ -30,6 +30,8 @@ import android.view.inputmethod.EditorInfo;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 
+import androidx.annotation.NonNull;
+
 import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.Emoji;
 import org.telegram.messenger.FileLog;
@@ -145,7 +147,6 @@ public class EditTextEmoji extends FrameLayout implements NotificationCenter.Not
         this.resourcesProvider = resourcesProvider;
         currentStyle = style;
 
-        NotificationCenter.getGlobalInstance().addObserver(this, NotificationCenter.emojiLoaded);
         parentFragment = fragment;
         sizeNotifierLayout = parent;
         sizeNotifierLayout.addDelegate(this);
@@ -336,7 +337,7 @@ public class EditTextEmoji extends FrameLayout implements NotificationCenter.Not
             if (shownFormatButton) {
                 if (formatOptions == null) {
                     editText.hideActionMode();
-                    ItemOptions itemOptions = ItemOptions.makeOptions(parent, resourcesProvider, emojiButton);
+                    ItemOptions itemOptions = ItemOptions.makeOptions(parent, resourcesProvider, emojiButton, false, false, true);
                     itemOptions.setMaxHeight(dp(280));
                     editText.extendActionMode(null, new MenuToItemOptions(itemOptions, editText::performMenuAction, editText.getOnPremiumMenuLockClickListener()));
                     itemOptions.forceTop(true);
@@ -488,9 +489,20 @@ public class EditTextEmoji extends FrameLayout implements NotificationCenter.Not
         }
     }
 
+    @Override
+    protected void onAttachedToWindow() {
+        super.onAttachedToWindow();
+        NotificationCenter.getGlobalInstance().addObserver(this, NotificationCenter.emojiLoaded);
+    }
+
+    @Override
+    protected void onDetachedFromWindow() {
+        super.onDetachedFromWindow();
+        NotificationCenter.getGlobalInstance().removeObserver(this, NotificationCenter.emojiLoaded);
+    }
+
     public void onDestroy() {
         destroyed = true;
-        NotificationCenter.getGlobalInstance().removeObserver(this, NotificationCenter.emojiLoaded);
         if (emojiView != null) {
             emojiView.onDestroy();
         }
@@ -768,6 +780,7 @@ public class EditTextEmoji extends FrameLayout implements NotificationCenter.Not
         return false;
     }
 
+
     protected void createEmojiView() {
         if (emojiView != null && emojiView.currentAccount != UserConfig.selectedAccount) {
             sizeNotifierLayout.removeView(emojiView);
@@ -778,7 +791,7 @@ public class EditTextEmoji extends FrameLayout implements NotificationCenter.Not
         }
         emojiView = new EmojiView(parentFragment, allowAnimatedEmoji, false, false, getContext(), allowSearch(), null, null, currentStyle != STYLE_STORY && currentStyle != STYLE_PHOTOVIEWER && currentStyle != STYLE_CALL, resourcesProvider, false) {
             @Override
-            protected void dispatchDraw(Canvas canvas) {
+            protected void dispatchDraw(@NonNull Canvas canvas) {
                 if (currentStyle == STYLE_STORY || currentStyle == STYLE_PHOTOVIEWER) {
                     drawEmojiBackground(canvas, this);
                 }

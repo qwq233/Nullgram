@@ -282,9 +282,7 @@ public class CameraScanActivity extends BaseFragment {
     public void onFragmentDestroy() {
         super.onFragmentDestroy();
         destroy(false, null);
-        if (getParentActivity() != null) {
-            getParentActivity().setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED);
-        }
+        AndroidUtilities.unlockOrientation(getParentActivity());
         if (visionQrReader != null) {
             visionQrReader.release();
         }
@@ -776,9 +774,7 @@ public class CameraScanActivity extends BaseFragment {
             });
         }
 
-        if (getParentActivity() != null) {
-            getParentActivity().setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
-        }
+        AndroidUtilities.lockOrientation(getParentActivity(), ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
         fragmentView.setKeepScreenOn(true);
 
         return fragmentView;
@@ -954,8 +950,8 @@ public class CameraScanActivity extends BaseFragment {
         if (normalBounds == null) {
             normalBounds = new RectF();
         }
-        int width = Math.max(AndroidUtilities.displaySize.x, fragmentView.getWidth()),
-            height = Math.max(AndroidUtilities.displaySize.y, fragmentView.getHeight()),
+        int width = fragmentView.getWidth(),
+            height = fragmentView.getHeight(),
             side = (int) (Math.min(width, height) / 1.5f);
         normalBounds.set(
             (width - side) / 2f / (float) width,

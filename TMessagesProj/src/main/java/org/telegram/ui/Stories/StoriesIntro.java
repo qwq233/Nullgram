@@ -47,6 +47,7 @@ public class StoriesIntro extends FrameLayout {
     public StoriesIntro(Context context, View parentView) {
         super(context);
         ImageView backgroundImageView = new ImageView(context);
+        backgroundImageView.setScaleType(ImageView.ScaleType.CENTER_CROP);
         addView(backgroundImageView, LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT);
         View scrim = new View(context);
         scrim.setBackgroundColor(0x64000000); // 40%
@@ -192,7 +193,7 @@ public class StoriesIntro extends FrameLayout {
             super(context);
             this.header = header;
             this.subHeader = subHeader;
-            lottieDrawable = new RLottieDrawable(rawRes, "" + rawRes, AndroidUtilities.dp(36), AndroidUtilities.dp(36), true, null);
+            lottieDrawable = new RLottieDrawable(rawRes, AndroidUtilities.dp(36), AndroidUtilities.dp(36), true, null);
             lottieDrawable.setAutoRepeat(1);
             lottieDrawable.setMasterParent(this);
 

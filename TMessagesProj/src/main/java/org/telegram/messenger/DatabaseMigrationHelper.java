@@ -17,6 +17,9 @@
 
 package org.telegram.messenger;
 
+import android.content.Context;
+import android.content.SharedPreferences;
+
 import org.telegram.SQLite.SQLiteCursor;
 import org.telegram.SQLite.SQLiteDatabase;
 import org.telegram.SQLite.SQLitePreparedStatement;
@@ -31,9 +34,11 @@ import java.util.HashSet;
 import java.util.Locale;
 
 public class DatabaseMigrationHelper {
-
     public static int migrate(MessagesStorage messagesStorage, int version) throws Exception {
-        SQLiteDatabase database = messagesStorage.getDatabase();
+        return migrate(messagesStorage, messagesStorage.getDatabase(), version);
+    }
+
+    public static int migrate(MessagesStorage messagesStorage, SQLiteDatabase database, int version) throws Exception {
         if (version < 4) {
             database.executeFast("CREATE TABLE IF NOT EXISTS user_photos(uid INTEGER, id INTEGER, data BLOB, PRIMARY KEY (uid, id))").stepThis().dispose();
 
@@ -462,13 +467,13 @@ public class DatabaseMigrationHelper {
             version = 68;
         }
         if (version == 68) {
-            messagesStorage.executeNoException("ALTER TABLE messages ADD COLUMN forwards INTEGER default 0");
+            executeNoException(database, "ALTER TABLE messages ADD COLUMN forwards INTEGER default 0");
             database.executeFast("PRAGMA user_version = 69").stepThis().dispose();
             version = 69;
         }
         if (version == 69) {
-            messagesStorage.executeNoException("ALTER TABLE messages ADD COLUMN replies_data BLOB default NULL");
-            messagesStorage.executeNoException("ALTER TABLE messages ADD COLUMN thread_reply_id INTEGER default 0");
+            executeNoException(database, "ALTER TABLE messages ADD COLUMN replies_data BLOB default NULL");
+            executeNoException(database, "ALTER TABLE messages ADD COLUMN thread_reply_id INTEGER default 0");
             database.executeFast("PRAGMA user_version = 70").stepThis().dispose();
             version = 70;
         }
@@ -478,7 +483,7 @@ public class DatabaseMigrationHelper {
             version = 71;
         }
         if (version == 71) {
-            messagesStorage.executeNoException("ALTER TABLE sharing_locations ADD COLUMN proximity INTEGER default 0");
+            executeNoException(database, "ALTER TABLE sharing_locations ADD COLUMN proximity INTEGER default 0");
             database.executeFast("PRAGMA user_version = 72").stepThis().dispose();
             version = 72;
         }
@@ -488,7 +493,7 @@ public class DatabaseMigrationHelper {
             version = 73;
         }
         if (version == 73) {
-            messagesStorage.executeNoException("ALTER TABLE chat_settings_v2 ADD COLUMN inviter INTEGER default 0");
+            executeNoException(database, "ALTER TABLE chat_settings_v2 ADD COLUMN inviter INTEGER default 0");
             database.executeFast("PRAGMA user_version = 74").stepThis().dispose();
             version = 74;
         }
@@ -499,12 +504,12 @@ public class DatabaseMigrationHelper {
             version = 75;
         }
         if (version == 75) {
-            messagesStorage.executeNoException("ALTER TABLE chat_settings_v2 ADD COLUMN links INTEGER default 0");
+            executeNoException(database, "ALTER TABLE chat_settings_v2 ADD COLUMN links INTEGER default 0");
             database.executeFast("PRAGMA user_version = 76").stepThis().dispose();
             version = 76;
         }
         if (version == 76) {
-            messagesStorage.executeNoException("ALTER TABLE enc_tasks_v2 ADD COLUMN media INTEGER default -1");
+            executeNoException(database, "ALTER TABLE enc_tasks_v2 ADD COLUMN media INTEGER default -1");
             database.executeFast("PRAGMA user_version = 77").stepThis().dispose();
             version = 77;
         }
@@ -1048,14 +1053,14 @@ public class DatabaseMigrationHelper {
             version = 85;
         }
         if (version == 85) {
-            messagesStorage.executeNoException("ALTER TABLE messages_v2 ADD COLUMN reply_to_message_id INTEGER default 0");
-            messagesStorage.executeNoException("ALTER TABLE scheduled_messages_v2 ADD COLUMN reply_to_message_id INTEGER default 0");
+            executeNoException(database, "ALTER TABLE messages_v2 ADD COLUMN reply_to_message_id INTEGER default 0");
+            executeNoException(database, "ALTER TABLE scheduled_messages_v2 ADD COLUMN reply_to_message_id INTEGER default 0");
 
             database.executeFast("CREATE INDEX IF NOT EXISTS reply_to_idx_messages_v2 ON messages_v2(mid, reply_to_message_id);").stepThis().dispose();
             database.executeFast("CREATE INDEX IF NOT EXISTS reply_to_idx_scheduled_messages_v2 ON scheduled_messages_v2(mid, reply_to_message_id);").stepThis().dispose();
 
-            messagesStorage.executeNoException("UPDATE messages_v2 SET replydata = NULL");
-            messagesStorage.executeNoException("UPDATE scheduled_messages_v2 SET replydata = NULL");
+            executeNoException(database, "UPDATE messages_v2 SET replydata = NULL");
+            executeNoException(database, "UPDATE scheduled_messages_v2 SET replydata = NULL");
             database.executeFast("PRAGMA user_version = 86").stepThis().dispose();
             version = 86;
         }
@@ -1100,7 +1105,7 @@ public class DatabaseMigrationHelper {
         }
 
         if (version == 95 || version == 93) {
-            messagesStorage.executeNoException("ALTER TABLE messages_v2 ADD COLUMN custom_params BLOB default NULL");
+            executeNoException(database, "ALTER TABLE messages_v2 ADD COLUMN custom_params BLOB default NULL");
             database.executeFast("PRAGMA user_version = 96").stepThis().dispose();
             version = 96;
         }
@@ -1403,6 +1408,9 @@ public class DatabaseMigrationHelper {
 
         if (version == 135) {
 //            database.executeFast("DROP TABLE stickersets").stepThis().dispose();
+            if (ApplicationLoader.isAndroidTestEnvironment()) {
+                database.executeFast("DROP TABLE stickersets").stepThis().dispose();
+            }
             database.executeFast("CREATE TABLE stickersets2(id INTEGER PRIMATE KEY, data BLOB, hash INTEGER, date INTEGER);").stepThis().dispose();
             database.executeFast("CREATE INDEX IF NOT EXISTS stickersets2_id_index ON stickersets2(id);").stepThis().dispose();
             database.executeFast("PRAGMA user_version = 136").stepThis().dispose();
@@ -1430,9 +1438,9 @@ public class DatabaseMigrationHelper {
             database.executeFast("DROP TABLE IF EXISTS tag_message_id;").stepThis().dispose();
             database.executeFast("CREATE TABLE tag_message_id(mid INTEGER, topic_id INTEGER, tag INTEGER, text TEXT);").stepThis().dispose();
             database.executeFast("CREATE INDEX IF NOT EXISTS tag_idx_tag_message_id ON tag_message_id(tag);").stepThis().dispose();
-            database.executeFast("CREATE INDEX IF NOT EXISTS tag_text_idx_tag_message_id ON tag_message_id(tag, text);").stepThis().dispose();
+            database.executeFast("CREATE INDEX IF NOT EXISTS tag_text_idx_tag_message_id ON tag_message_id(tag, text COLLATE NOCASE);").stepThis().dispose();
             database.executeFast("CREATE INDEX IF NOT EXISTS tag_topic_idx_tag_message_id ON tag_message_id(topic_id, tag);").stepThis().dispose();
-            database.executeFast("CREATE INDEX IF NOT EXISTS tag_topic_text_idx_tag_message_id ON tag_message_id(topic_id, tag, text);").stepThis().dispose();
+            database.executeFast("CREATE INDEX IF NOT EXISTS tag_topic_text_idx_tag_message_id ON tag_message_id(topic_id, tag, text COLLATE NOCASE);").stepThis().dispose();
             database.executeFast("PRAGMA user_version = 142").stepThis().dispose();
             version = 142;
         }
@@ -1621,8 +1629,118 @@ public class DatabaseMigrationHelper {
             version = 168;
         }
 
+        if (version == 168) {
+            database.executeFast("ALTER TABLE dialogs ADD COLUMN unread_poll_votes INTEGER default 0").stepThis().dispose();
+            database.executeFast("PRAGMA user_version = 169").stepThis().dispose();
+            version = 169;
+        }
+
+        if (version == 169) {
+            database.executeFast("ALTER TABLE topics ADD COLUMN unread_poll_votes INTEGER default 0").stepThis().dispose();
+            database.executeFast("PRAGMA user_version = 170").stepThis().dispose();
+            version = 170;
+        }
+
+        if (version == 170) {
+            database.executeFast("CREATE TABLE IF NOT EXISTS poll_votes_mentions(message_id INTEGER, state INTEGER, dialog_id INTEGER, PRIMARY KEY(message_id, dialog_id))").stepThis().dispose();
+            database.executeFast("CREATE INDEX IF NOT EXISTS poll_votes_mentions_did ON poll_votes_mentions(dialog_id);").stepThis().dispose();
+            database.executeFast("CREATE TABLE IF NOT EXISTS poll_votes_mentions_topics(message_id INTEGER, state INTEGER, dialog_id INTEGER, topic_id INTEGER, PRIMARY KEY(message_id, dialog_id, topic_id))").stepThis().dispose();
+            database.executeFast("CREATE INDEX IF NOT EXISTS poll_votes_mentions_topics_did ON poll_votes_mentions_topics(dialog_id, topic_id);").stepThis().dispose();
+
+            database.executeFast("PRAGMA user_version = 171").stepThis().dispose();
+            version = 171;
+        }
+
+        if (version == 171) {
+            database.executeFast("DROP TABLE story_pushes").stepThis().dispose();
+            database.executeFast("CREATE TABLE story_pushes (uid INTEGER, sid INTEGER, date INTEGER, localName TEXT, flags INTEGER, expire_date INTEGER, live INTEGER, PRIMARY KEY(uid, sid));").stepThis().dispose();
+            database.executeFast("PRAGMA user_version = 172").stepThis().dispose();
+            version = 172;
+        }
+        if (version == 172) {
+            database.executeFast("CREATE INDEX IF NOT EXISTS uid_end_messages_holes_4_dialogs ON messages_holes(uid, end);").stepThis().dispose();
+            database.executeFast("CREATE INDEX IF NOT EXISTS uid_end_messages_holes_4_topics ON messages_holes_topics(uid, topic_id, end);").stepThis().dispose();
+
+            database.executeFast("CREATE INDEX IF NOT EXISTS date_idx_4_saved_dialogs ON saved_dialogs(date);").stepThis().dispose();
+            database.executeFast("CREATE INDEX IF NOT EXISTS date_idx_4_dialogs ON dialogs(date);").stepThis().dispose();
+
+            database.executeFast("CREATE INDEX IF NOT EXISTS last_mid_idx_4_saved_dialogs ON saved_dialogs(last_mid);").stepThis().dispose();
+            database.executeFast("CREATE INDEX IF NOT EXISTS last_mid_idx_4_dialogs ON dialogs(last_mid);").stepThis().dispose();
+
+            database.executeFast("CREATE INDEX IF NOT EXISTS folder_id_idx_4_saved_dialogs ON saved_dialogs(folder_id);").stepThis().dispose();
+            database.executeFast("CREATE INDEX IF NOT EXISTS folder_id_idx_4_dialogs ON dialogs(folder_id);").stepThis().dispose();
+
+            database.executeFast("CREATE INDEX IF NOT EXISTS flags_idx_4_saved_dialogs ON saved_dialogs(flags);").stepThis().dispose();
+            database.executeFast("CREATE INDEX IF NOT EXISTS flags_idx_4_dialogs ON dialogs(flags);").stepThis().dispose();
+
+
+            database.executeFast("DROP INDEX IF EXISTS uid_end_messages_holes;").stepThis().dispose();
+            database.executeFast("DROP INDEX IF EXISTS date_idx_dialogs;").stepThis().dispose();
+            database.executeFast("DROP INDEX IF EXISTS last_mid_idx_dialogs;").stepThis().dispose();
+            database.executeFast("DROP INDEX IF EXISTS folder_id_idx_dialogs;").stepThis().dispose();
+            database.executeFast("DROP INDEX IF EXISTS flags_idx_dialogs;").stepThis().dispose();
+            database.executeFast("PRAGMA user_version = 173").stepThis().dispose();
+
+            version = 173;
+        }
+        if (version == 173) {
+            SharedPreferences legacy = ApplicationLoader.applicationContext.getSharedPreferences("mainconfig", Context.MODE_PRIVATE);
+            int browserSettings = (legacy.getBoolean("inapp_browser", false) ? 0 : 1)
+                | (legacy.getBoolean("custom_tabs", true) ? 2 : 0);
+            database.executeFast("SAVEPOINT legacy_browser_migration").stepThis().dispose();
+            try {
+                database.executeFast("CREATE TABLE web_browser_settings(data BLOB)").stepThis().dispose();
+                database.executeFast("REPLACE INTO keyvalue VALUES('legacy_web_browser_settings', '" + browserSettings + "')").stepThis().dispose();
+                database.executeFast("PRAGMA user_version = 174").stepThis().dispose();
+                database.executeFast("RELEASE legacy_browser_migration").stepThis().dispose();
+            } catch (Exception e) {
+                database.executeFast("ROLLBACK TO legacy_browser_migration").stepThis().dispose();
+                database.executeFast("RELEASE legacy_browser_migration").stepThis().dispose();
+                throw e;
+            }
+            version = 174;
+        }
+        if (version == 174) {
+            database.executeFast("CREATE INDEX IF NOT EXISTS uid_type_date_mid_idx_media_v4 ON media_v4(uid, type, date DESC, mid DESC);").stepThis().dispose();
+            database.executeFast("PRAGMA user_version = 175").stepThis().dispose();
+            version = 175;
+        }
+        if (version == 175) {
+            database.executeFast("CREATE TABLE ephemeral_messages (id INTEGER, dialog_id INTEGER, topic_id INTEGER, date INTEGER, data BLOB, PRIMARY KEY(dialog_id, id));").stepThis().dispose();
+            database.executeFast("CREATE INDEX IF NOT EXISTS ephemeral_messages_date_idx ON ephemeral_messages(date);").stepThis().dispose();
+            database.executeFast("PRAGMA user_version = 176").stepThis().dispose();
+            version = 176;
+        }
+        if (version == 176) {
+            database.executeFast("CREATE TABLE welcome_messages(mid INTEGER, dialog_id INTEGER, send_state INTEGER, date INTEGER, data BLOB, ttl INTEGER, replydata BLOB, reply_to_message_id INTEGER, PRIMARY KEY(mid, dialog_id))").stepThis().dispose();
+            database.executeFast("CREATE INDEX IF NOT EXISTS send_state_idx_welcome_messages ON welcome_messages(mid, send_state, date);").stepThis().dispose();
+            database.executeFast("CREATE INDEX IF NOT EXISTS dialog_date_idx_welcome_messages ON welcome_messages(dialog_id, date);").stepThis().dispose();
+            database.executeFast("CREATE INDEX IF NOT EXISTS reply_to_idx_welcome_messages ON welcome_messages(mid, reply_to_message_id);").stepThis().dispose();
+            database.executeFast("CREATE INDEX IF NOT EXISTS idx_to_reply_welcome_messages ON welcome_messages(reply_to_message_id, mid);").stepThis().dispose();
+            database.executeFast("PRAGMA user_version = 177").stepThis().dispose();
+            version = 177;
+        }
+        if (version == 177) {
+            database.executeFast("CREATE INDEX IF NOT EXISTS media_v4_music_browse_idx ON media_v4(uid, date DESC, mid DESC) WHERE type = 4 AND mid > 0 AND uid != 0;").stepThis().dispose();
+            database.executeFast("PRAGMA user_version = 178").stepThis().dispose();
+            version = 178;
+        }
+        if (version == 178) {
+            database.executeFast("PRAGMA user_version = 179").stepThis().dispose();
+            version = 179;
+        }
+
         return version;
     }
+
+    private static void executeNoException(SQLiteDatabase database, String query) {
+        try {
+            database.executeFast(query).stepThis().dispose();
+        } catch (Exception e) {
+            FileLog.e(e);
+        }
+    }
+
 
     public static boolean recoverDatabase(File oldDatabaseFile, File oldDatabaseWall, File oldDatabaseShm, int currentAccount) {
         File filesDir = ApplicationLoader.getFilesDirFixed();
@@ -1648,7 +1766,7 @@ public class DatabaseMigrationHelper {
         FileLog.d("start recover database");
 
         try {
-           time = System.currentTimeMillis();
+            time = System.currentTimeMillis();
 
             newDatabase = new SQLiteDatabase(cacheFile.getPath());
             newDatabase.executeFast("PRAGMA secure_delete = ON").stepThis().dispose();

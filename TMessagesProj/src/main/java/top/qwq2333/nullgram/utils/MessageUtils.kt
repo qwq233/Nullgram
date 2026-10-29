@@ -43,7 +43,6 @@ import android.widget.TextView
 import android.widget.TimePicker
 import androidx.core.content.FileProvider
 import com.google.zxing.EncodeHintType
-import com.google.zxing.qrcode.QRCodeWriter
 import com.google.zxing.qrcode.decoder.ErrorCorrectionLevel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -66,14 +65,17 @@ import org.telegram.messenger.MessageObject
 import org.telegram.messenger.MessagesController
 import org.telegram.messenger.NotificationCenter
 import org.telegram.messenger.R
+import org.telegram.messenger.TelegramQRCodeWriter
 import org.telegram.messenger.UserConfig
 import org.telegram.messenger.Utilities
+import org.telegram.messenger.utils.tlutils.TlUtils
 import org.telegram.tgnet.ConnectionsManager
 import org.telegram.tgnet.RequestDelegate
 import org.telegram.tgnet.SerializedData
 import org.telegram.tgnet.TLObject
 import org.telegram.tgnet.TLRPC
 import org.telegram.tgnet.tl.TL_iv
+import org.telegram.tgnet.tl.TL_keyboard
 import org.telegram.ui.ActionBar.AlertDialog
 import org.telegram.ui.ActionBar.BaseFragment
 import org.telegram.ui.ActionBar.Theme
@@ -506,8 +508,10 @@ class MessageUtils(num: Int) : BaseController(num) {
         editText.setPadding(0, 0, 0, 0)
         builder.setView(editText)
         builder.setPositiveButton(LocaleController.getString("OK", R.string.OK)) { dialogInterface: DialogInterface?, i: Int ->
-            val button = TLRPC.TL_keyboardButtonCallback()
-            button.data = editText.getText().toString().toByteArray(StandardCharsets.UTF_8)
+            val button = TL_keyboard.TL_keyboardInlineButton()
+            val callback = TL_keyboard.TL_inlineButtonTypeCallback()
+            callback.data = editText.getText().toString().toByteArray(StandardCharsets.UTF_8)
+            button.type = callback
             sendMessagesHelper.sendCallback(true, messageObject, button, fragment)
         }
         builder.setNegativeButton(LocaleController.getString("Cancel", R.string.Cancel), null)
@@ -539,7 +543,7 @@ class MessageUtils(num: Int) : BaseController(num) {
             val hints = HashMap<EncodeHintType, Any?>()
             hints[EncodeHintType.ERROR_CORRECTION] = ErrorCorrectionLevel.M
             hints[EncodeHintType.MARGIN] = 0
-            val writer = QRCodeWriter()
+            val writer = TelegramQRCodeWriter()
             return writer.encode(key, 768, 768, hints, null)
         }
         return null
@@ -1043,6 +1047,28 @@ class MessageUtils(num: Int) : BaseController(num) {
     }
 
     companion object {
+        @JvmStatic
+        fun mergePollTranslation(current: TLRPC.Poll, original: TLRPC.Poll, translated: TLRPC.Poll): TLRPC.Poll? {
+            if (current.id != original.id || current.id != translated.id) {
+                return null
+            }
+            val merged = TLObject.deepCopy(current, TLRPC.Poll::TLdeserialize)
+            var hasTranslation = false
+            if (TlUtils.tlEquals(current.question, original.question) && !TlUtils.tlEquals(original.question, translated.question)) {
+                merged.question = TLObject.deepCopy(translated.question, TLRPC.TL_textWithEntities::TLdeserialize)
+                hasTranslation = true
+            }
+            merged.answers.forEach { answer ->
+                val previous = original.answers.firstOrNull { it.option.contentEquals(answer.option) } ?: return@forEach
+                val translatedAnswer = translated.answers.firstOrNull { it.option.contentEquals(answer.option) } ?: return@forEach
+                if (TlUtils.tlEquals(previous.text, answer.text) && !TlUtils.tlEquals(previous.text, translatedAnswer.text)) {
+                    answer.text = TLObject.deepCopy(translatedAnswer.text, TLRPC.TL_textWithEntities::TLdeserialize)
+                    hasTranslation = true
+                }
+            }
+            return merged.takeIf { hasTranslation }
+        }
+
         @JvmField
         val datacenterInfos = ArrayList<DatacenterInfo>(5)
 

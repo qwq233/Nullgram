@@ -149,6 +149,7 @@ import org.telegram.tgnet.tl.TL_update;
 import org.telegram.tgnet.Vector;
 import org.telegram.tgnet.tl.TL_account;
 import org.telegram.tgnet.tl.TL_phone;
+import org.telegram.tgnet.tl.TL_update;
 import org.telegram.ui.ActionBar.ActionBar;
 import org.telegram.ui.ActionBar.ActionBarMenuItem;
 import org.telegram.ui.ActionBar.ActionBarMenuSubItem;
@@ -813,7 +814,7 @@ public class GroupCallActivity extends BottomSheet implements NotificationCenter
 
             setPadding(dp(12), 0, dp(12), 0);
 
-            speakerDrawable = new RLottieDrawable(R.raw.speaker, "" + R.raw.speaker, dp(24), dp(24), true, null);
+            speakerDrawable = new RLottieDrawable(R.raw.speaker, dp(24), dp(24), true, null);
 
             imageView = new RLottieImageView(context);
             imageView.setScaleType(ImageView.ScaleType.CENTER);
@@ -1948,7 +1949,7 @@ public class GroupCallActivity extends BottomSheet implements NotificationCenter
             }
         };
         setOnDismissListener(dialog -> {
-            BaseFragment fragment = parentActivity.getActionBarLayout().getFragmentStack().get(parentActivity.getActionBarLayout().getFragmentStack().size() - 1);
+            final BaseFragment fragment = LaunchActivity.getSafeLastFragment();
             if (anyEnterEventSent) {
                 if (fragment instanceof ChatActivity) {
                     ((ChatActivity) fragment).onEditTextDialogClose(true, true);
@@ -2471,8 +2472,8 @@ public class GroupCallActivity extends BottomSheet implements NotificationCenter
 
         shadowDrawable = context.getResources().getDrawable(R.drawable.sheet_shadow_round).mutate();
 
-        bigMicDrawable = new RLottieDrawable(R.raw.voip_filled, "" + R.raw.voip_filled, dp(46), dp(46), true, null);
-        handDrawables = new RLottieDrawable(R.raw.hand_2, "" + R.raw.hand_2, dp(46), dp(46), true, null);
+        bigMicDrawable = new RLottieDrawable(R.raw.voip_filled, dp(46), dp(46), true, null);
+        handDrawables = new RLottieDrawable(R.raw.hand_2, dp(46), dp(46), true, null);
 
         containerView = sizeNotifierFrameLayout = new SizeNotifierFrameLayout(context) {
             private boolean ignoreLayout = false;
@@ -4381,7 +4382,7 @@ public class GroupCallActivity extends BottomSheet implements NotificationCenter
         flipButton.showText(false, false);
         RLottieImageView flipIconView = new RLottieImageView(context);
         flipButton.addView(flipIconView, LayoutHelper.createFrame(32, 32, Gravity.CENTER_HORIZONTAL, 0, 10, 0, 0));
-        flipIcon = new RLottieDrawable(R.raw.camera_flip, "" + R.raw.camera_flip, dp(24), dp(24), true, null);
+        flipIcon = new RLottieDrawable(R.raw.camera_flip, dp(24), dp(24), true, null);
         flipIconView.setAnimation(flipIcon);
         flipButton.setOnClickListener(view -> {
             renderersContainer.delayHideUi();
@@ -5142,8 +5143,8 @@ public class GroupCallActivity extends BottomSheet implements NotificationCenter
                 final long dialogId = avatarsViewPager.getDialogId();
                 if (dialogId > 0) {
                     TLRPC.User user = accountInstance.getMessagesController().getUser(dialogId);
-                    final ImageLocation imageLocation = ImageLocation.getForUserOrChat(user, ImageLocation.TYPE_BIG);
-                    final ImageLocation thumbLocation = ImageLocation.getForUserOrChat(user, ImageLocation.TYPE_SMALL);
+                    final ImageLocation imageLocation = ImageLocation.getForUserOrChat(accountInstance.getCurrentAccount(), user, ImageLocation.TYPE_BIG);
+                    final ImageLocation thumbLocation = ImageLocation.getForUserOrChat(accountInstance.getCurrentAccount(), user, ImageLocation.TYPE_SMALL);
                     avatarsViewPager.initIfEmpty(null, imageLocation, thumbLocation, false);
                 }
             }
@@ -8212,16 +8213,16 @@ public class GroupCallActivity extends BottomSheet implements NotificationCenter
         final ImageLocation thumbLocation;
         if (peerId > 0) {
             TLRPC.User currentUser = accountInstance.getMessagesController().getUser(peerId);
-            imageLocation = ImageLocation.getForUserOrChat(currentUser, ImageLocation.TYPE_BIG);
-            thumbLocation = ImageLocation.getForUserOrChat(currentUser, ImageLocation.TYPE_SMALL);
+            imageLocation = ImageLocation.getForUserOrChat(accountInstance.getCurrentAccount(), currentUser, ImageLocation.TYPE_BIG);
+            thumbLocation = ImageLocation.getForUserOrChat(accountInstance.getCurrentAccount(), currentUser, ImageLocation.TYPE_SMALL);
             final TLRPC.UserFull userFull = MessagesController.getInstance(currentAccount).getUserFull(peerId);
             if (userFull == null) {
                 MessagesController.getInstance(currentAccount).loadUserInfo(currentUser, false, 0);
             }
         } else {
             TLRPC.Chat currentChat = accountInstance.getMessagesController().getChat(-peerId);
-            imageLocation = ImageLocation.getForUserOrChat(currentChat, ImageLocation.TYPE_BIG);
-            thumbLocation = ImageLocation.getForUserOrChat(currentChat, ImageLocation.TYPE_SMALL);
+            imageLocation = ImageLocation.getForUserOrChat(accountInstance.getCurrentAccount(), currentChat, ImageLocation.TYPE_BIG);
+            thumbLocation = ImageLocation.getForUserOrChat(accountInstance.getCurrentAccount(), currentChat, ImageLocation.TYPE_SMALL);
         }
 
         boolean hasAttachedRenderer = scrimRenderer != null && scrimRenderer.isAttached();
@@ -9343,7 +9344,7 @@ public class GroupCallActivity extends BottomSheet implements NotificationCenter
                                     src.renameTo(destFile);
                                     String oldKey = avatar.volume_id + "_" + avatar.local_id + "@50_50";
                                     String newKey = small.location.volume_id + "_" + small.location.local_id + "@50_50";
-                                    ImageLoader.getInstance().replaceImageInCache(oldKey, newKey, ImageLocation.getForUser(user, ImageLocation.TYPE_SMALL), false);
+                                    ImageLoader.getInstance().replaceImageInCache(oldKey, newKey, ImageLocation.getForUser(currentAccount, user, ImageLocation.TYPE_SMALL), false);
                                 }
 
                                 if (big != null && avatarBig != null) {
@@ -9365,8 +9366,8 @@ public class GroupCallActivity extends BottomSheet implements NotificationCenter
                                 final ImageLocation imageLocation;
                                 final ImageLocation thumbLocation;
                                 TLRPC.User currentUser = accountInstance.getMessagesController().getUser(peerId);
-                                imageLocation = ImageLocation.getForUser(currentUser, ImageLocation.TYPE_BIG);
-                                thumbLocation = ImageLocation.getForUser(currentUser, ImageLocation.TYPE_SMALL);
+                                imageLocation = ImageLocation.getForUser(accountInstance.getCurrentAccount(), currentUser, ImageLocation.TYPE_BIG);
+                                thumbLocation = ImageLocation.getForUser(accountInstance.getCurrentAccount(), currentUser, ImageLocation.TYPE_SMALL);
                                 ImageLocation thumb = ImageLocation.getForLocal(avatarBig);
                                 if (thumb == null) {
                                     thumb = ImageLocation.getForLocal(avatar);

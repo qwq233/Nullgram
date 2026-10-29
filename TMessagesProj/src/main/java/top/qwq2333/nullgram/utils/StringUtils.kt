@@ -138,22 +138,36 @@ object StringUtils {
 
         val panguText = pangu.spacingText(text)
 
-        if (panguText.length == text.length) return Pair(panguText, entities) // processed or unnecessary
+        if (panguText == text) return Pair(panguText, entities) // processed or unnecessary
 
         var skip = 0
         for (i in text.indices) {
-            if (i + skip >= panguText.length) break
-            if (text[i] == panguText[i + skip]) continue
+            if (i + skip < panguText.length && text[i] == panguText[i + skip]) continue
 
-            entities.forEach {
-                if (it.offset >= i + skip) { // text is after this entity
-                    it.offset += 1
-                } else if (it.offset + it.length >= i + skip) { // text is in this entity
-                    it.length += 1
-                } // text is before this entity
+            if (text[i].isWhitespace() || text[i] == '\u0085') {
+                // Android regex whitespace also includes NEL.
+                entities.forEach {
+                    if (it.offset > i + skip) {
+                        it.offset -= 1
+                    } else if (it.offset + it.length > i + skip) {
+                        it.length -= 1
+                    }
+                }
+                skip -= 1
+            } else {
+                if (i + skip >= panguText.length) break
+                entities.forEach {
+                    if (it.offset >= i + skip) { // text is after this entity
+                        it.offset += 1
+                    } else if (it.offset + it.length >= i + skip) { // text is in this entity
+                        it.length += 1
+                    } // text is before this entity
+                }
+                skip += 1
             }
-            skip += 1
         }
+
+        entities.removeAll { it.length <= 0 }
 
         // prevent out of bound
         entities.forEach {

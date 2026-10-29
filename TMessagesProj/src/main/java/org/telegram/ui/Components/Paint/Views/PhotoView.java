@@ -29,17 +29,14 @@ import android.graphics.LinearGradient;
 import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.Path;
+import android.graphics.PointF;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffXfermode;
 import android.graphics.Shader;
-import android.graphics.drawable.BitmapDrawable;
-import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.text.TextUtils;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
-
-import androidx.annotation.NonNull;
 
 import com.google.mlkit.common.MlKitException;
 import com.google.mlkit.vision.common.InputImage;
@@ -50,19 +47,13 @@ import com.google.mlkit.vision.segmentation.subject.SubjectSegmenterOptions;
 import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.FileLoader;
 import org.telegram.messenger.FileLog;
-import org.telegram.messenger.ImageLocation;
-import org.telegram.messenger.ImageReceiver;
 import org.telegram.messenger.MediaController;
 import org.telegram.tgnet.TLObject;
 import org.telegram.tgnet.TLRPC;
-import org.telegram.ui.ActionBar.Theme;
-import org.telegram.ui.Components.AnimatedFileDrawable;
 import org.telegram.ui.Components.AnimatedFloat;
 import org.telegram.ui.Components.CubicBezierInterpolator;
 import org.telegram.ui.Components.LayoutHelper;
-import org.telegram.ui.Components.Point;
-import org.telegram.ui.Components.RLottieDrawable;
-import org.telegram.ui.Components.Rect;
+import org.telegram.ui.Components.RectOld;
 import org.telegram.ui.Components.Size;
 import org.telegram.ui.Stories.recorder.StoryEntry;
 
@@ -128,7 +119,7 @@ public class PhotoView extends EntityView {
         segmentingLoading = false;
     }
 
-    public PhotoView(Context context, Point position, float angle, float scale, Size baseSize, String path, int orientation, int invert) {
+    public PhotoView(Context context, PointF position, float angle, float scale, Size baseSize, String path, int orientation, int invert) {
         super(context, position);
         setRotation(angle);
         setScale(scale);
@@ -158,7 +149,7 @@ public class PhotoView extends EntityView {
         updatePosition();
     }
 
-    public PhotoView(Context context, Point position, float angle, float scale, Size baseSize, TLObject obj) {
+    public PhotoView(Context context, PointF position, float angle, float scale, Size baseSize, TLObject obj) {
         super(context, position);
         setRotation(angle);
         setScale(scale);
@@ -546,10 +537,10 @@ public class PhotoView extends EntityView {
     }
 
     @Override
-    public Rect getSelectionBounds() {
+    public RectOld getSelectionBounds() {
         ViewGroup parentView = (ViewGroup) getParent();
         if (parentView == null) {
-            return new Rect();
+            return new RectOld();
         }
         float scale = parentView.getScaleX();
         float width = getMeasuredWidth() * getScale() + dp(64) / scale;
@@ -558,7 +549,7 @@ public class PhotoView extends EntityView {
         float pheight = getMeasuredHeight() * getScale() + dp(64) / scale;
         float left = (getPositionX() - width / 2.0f) * scale;
         float right = left + pwidth * scale;
-        return new Rect(left, (getPositionY() - height / 2.0f) * scale, right - left, height * scale);
+        return new RectOld(left, (getPositionY() - height / 2.0f) * scale, right - left, height * scale);
     }
 
     @Override

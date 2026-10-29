@@ -4,12 +4,14 @@ import static org.telegram.messenger.AndroidUtilities.dp;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.text.Layout;
 import android.text.SpannableStringBuilder;
 import android.text.StaticLayout;
 import android.text.TextPaint;
+import android.os.Bundle;
 import android.text.TextUtils;
 import android.view.Gravity;
 import android.view.MotionEvent;
@@ -32,6 +34,7 @@ import org.telegram.messenger.R;
 import org.telegram.messenger.SharedConfig;
 import org.telegram.messenger.UserConfig;
 import org.telegram.messenger.Utilities;
+import org.telegram.messenger.audioinfo.AudioInfo;
 import org.telegram.tgnet.TLRPC;
 import org.telegram.ui.ActionBar.Theme;
 import org.telegram.ui.Components.AnimatedEmojiDrawable;
@@ -42,11 +45,13 @@ import org.telegram.ui.Components.FlickerLoadingView;
 import org.telegram.ui.Components.LayoutHelper;
 import org.telegram.ui.Components.MediaActionDrawable;
 import org.telegram.ui.Components.RadialProgress2;
+import org.telegram.ui.Components.RecyclerListView;
 import org.telegram.ui.Components.UItem;
 import org.telegram.ui.Components.UniversalAdapter;
 import org.telegram.ui.Components.UniversalRecyclerView;
-import org.telegram.ui.EnableTopicsActivity;
 import org.telegram.ui.FilteredSearchView;
+
+import java.io.File;
 
 public class SharedAudioCell extends FrameLayout implements DownloadController.FileDownloadProgressListener, NotificationCenter.NotificationCenterDelegate {
 
@@ -253,17 +258,24 @@ public class SharedAudioCell extends FrameLayout implements DownloadController.F
     public void setMessageObject(MessageObject messageObject, boolean divider) {
         needDivider = divider;
         currentMessageObject = messageObject;
-        TLRPC.Document document = messageObject.getDocument();
-
-        TLRPC.PhotoSize thumb = document != null ? FileLoader.getClosestPhotoSizeWithSize(document.thumbs, 360) : null;
+        final TLRPC.Document document = messageObject.getDocument();
+        final TLRPC.PhotoSize thumb = document != null ? FileLoader.getClosestPhotoSizeWithSize(document.thumbs, 360) : null;
         if (thumb instanceof TLRPC.TL_photoSize || thumb instanceof TLRPC.TL_photoSizeProgressive) {
             radialProgress.setImageOverlay(thumb, document, messageObject);
         } else {
-            String artworkUrl = messageObject.getArtworkUrl(true);
-            if (!TextUtils.isEmpty(artworkUrl)) {
-                radialProgress.setImageOverlay(artworkUrl);
+            Bitmap cover = null;
+            if (messageObject.audioCover != null) {
+                cover = messageObject.audioCover;
+            }
+            if (cover != null) {
+                radialProgress.setImageOverlay(cover);
             } else {
-                radialProgress.setImageOverlay(null, null, null);
+                final String artworkUrl = messageObject.getArtworkUrl(true);
+                if (!TextUtils.isEmpty(artworkUrl)) {
+                    radialProgress.setImageOverlay(artworkUrl);
+                } else {
+                    radialProgress.setImageOverlay(null, null, null);
+                }
             }
         }
         updateButtonState(false, false);
@@ -582,7 +594,14 @@ public class SharedAudioCell extends FrameLayout implements DownloadController.F
         return TAG;
     }
 
+    private Utilities.CallbackReturn<MessageObject, Boolean> needPlayMessageListener;
+    public void setNeedPlayMessageListener(Utilities.CallbackReturn<MessageObject, Boolean> listener) {
+        this.needPlayMessageListener = listener;
+    }
     protected boolean needPlayMessage(MessageObject messageObject) {
+        if (needPlayMessageListener != null && needPlayMessageListener.run(messageObject)) {
+            return true;
+        }
         return false;
     }
 
@@ -599,6 +618,31 @@ public class SharedAudioCell extends FrameLayout implements DownloadController.F
             info.setCheckable(true);
             info.setChecked(true);
         }
+        CharSequence actionLabel;
+        switch (getIconForCurrentState()) {
+            case MediaActionDrawable.ICON_PAUSE:
+                actionLabel = LocaleController.getString("AccActionPause", R.string.AccActionPause);
+                break;
+            case MediaActionDrawable.ICON_DOWNLOAD:
+                actionLabel = LocaleController.getString("AccActionDownload", R.string.AccActionDownload);
+                break;
+            case MediaActionDrawable.ICON_CANCEL:
+                actionLabel = LocaleController.getString("AccActionCancelDownload", R.string.AccActionCancelDownload);
+                break;
+            default:
+                actionLabel = LocaleController.getString("AccActionPlay", R.string.AccActionPlay);
+                break;
+        }
+        info.addAction(new AccessibilityNodeInfo.AccessibilityAction(AccessibilityNodeInfo.ACTION_CLICK, actionLabel));
+    }
+
+    @Override
+    public boolean performAccessibilityAction(int action, Bundle arguments) {
+        if (action == AccessibilityNodeInfo.ACTION_CLICK) {
+            didPressedButton();
+            return true;
+        }
+        return super.performAccessibilityAction(action, arguments);
     }
 
     @Override
@@ -764,24 +808,51 @@ public class SharedAudioCell extends FrameLayout implements DownloadController.F
         static { setup(new Factory()); }
 
         @Override
-        public SharedAudioCell createView(Context context, int currentAccount, int classGuid, Theme.ResourcesProvider resourcesProvider) {
+        public SharedAudioCell createView(Context context, RecyclerListView listView, int currentAccount, int classGuid, Theme.ResourcesProvider resourcesProvider) {
             final SharedAudioCell cell = new SharedAudioCell(context, resourcesProvider);
-            cell.setPadding(dp(12), 0, dp(12), 0);
+            cell.setCheckForButtonPress(true);
             return cell;
         }
 
         @Override
         public void bindView(View view, UItem item, boolean divider, UniversalAdapter adapter, UniversalRecyclerView listView) {
             final SharedAudioCell cell = (SharedAudioCell) view;
-            final MessageObject messageObject = (MessageObject) item.object;
-            cell.setMessageObject(messageObject, divider);
+            if (item.object instanceof MessageObject) {
+                final MessageObject messageObject = (MessageObject) item.object;
+                cell.setMessageObject(messageObject, divider);
+            } else if (item.object instanceof MediaController.AudioEntry) {
+                final MediaController.AudioEntry audioEntry = (MediaController.AudioEntry) item.object;
+                cell.setTag(audioEntry);
+                cell.setMessageObject(audioEntry.messageObject, divider);
+            }
+            if (item.object2 instanceof Utilities.CallbackReturn) {
+                cell.setNeedPlayMessageListener((Utilities.CallbackReturn<MessageObject, Boolean>) item.object2);
+            }
             cell.setChecked(item.checked, false);
         }
 
-        public static UItem as(MessageObject messageObject) {
+        public static UItem as(MessageObject messageObject, Utilities.CallbackReturn<MessageObject, Boolean> playAudio) {
             final UItem item = UItem.ofFactory(Factory.class);
             item.object = messageObject;
+            item.object2 = playAudio;
             return item;
+        }
+
+        public static UItem as(MediaController.AudioEntry audioEntry, Utilities.CallbackReturn<MessageObject, Boolean> playAudio) {
+            final UItem item = UItem.ofFactory(Factory.class);
+            item.object = audioEntry;
+            item.object2 = playAudio;
+            return item;
+        }
+
+        @Override
+        public boolean equals(UItem a, UItem b) {
+            return a.id == b.id && a.object == b.object;
+        }
+
+        @Override
+        public boolean contentsEquals(UItem a, UItem b) {
+            return a.id == b.id && a.object == b.object;
         }
     }
 }

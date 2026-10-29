@@ -199,7 +199,7 @@ public class MessageSuggestionOfferSheet extends BottomSheet {
         /* Tabs */
 
         if (allowTON) {
-            currencyTabsView = new HorizontalRoundTabsLayout(context);
+            currencyTabsView = new HorizontalRoundTabsLayout(context, resourcesProvider);
             ArrayList<CharSequence> tabs = new ArrayList<>();
             tabs.add(getString(R.string.SuggestedOfferStars));
             tabs.add(getString(R.string.SuggestedOfferTON));
@@ -252,8 +252,7 @@ public class MessageSuggestionOfferSheet extends BottomSheet {
             starsCountEditOutline.addView(iconStars, LayoutHelper.createFrame(22, 22, Gravity.LEFT | Gravity.CENTER_VERTICAL, 14, 0, 0, 0));
 
             iconTon = new ImageView(context);
-            iconTon.setImageResource(R.drawable.ton);
-            iconTon.setColorFilter(0xFF3391d4);
+            iconTon.setImageResource(R.drawable.mini_gram_72);
             starsCountEditOutline.addView(iconTon, LayoutHelper.createFrame(22, 22, Gravity.LEFT | Gravity.CENTER_VERTICAL, 14, 0, 0, 0));
 
             dollarsEqView = new AnimatedTextView(context);

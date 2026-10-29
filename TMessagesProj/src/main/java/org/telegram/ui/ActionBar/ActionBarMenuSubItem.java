@@ -60,6 +60,7 @@ public class ActionBarMenuSubItem extends FrameLayout {
 
     private int textColor;
     private int iconColor;
+    private PorterDuff.Mode iconColorMode;
     private int selectorColor;
 
     int selectorRad = 6;
@@ -95,6 +96,7 @@ public class ActionBarMenuSubItem extends FrameLayout {
 
         textColor = getThemedColor(Theme.key_actionBarDefaultSubmenuItem);
         iconColor = getThemedColor(Theme.key_actionBarDefaultSubmenuItemIcon);
+        iconColorMode = PorterDuff.Mode.MULTIPLY;
         selectorColor = getThemedColor(Theme.key_dialogButtonSelector);
 
         updateBackground();
@@ -102,7 +104,7 @@ public class ActionBarMenuSubItem extends FrameLayout {
 
         imageView = new RLottieImageView(context);
         imageView.setScaleType(ImageView.ScaleType.CENTER);
-        imageView.setColorFilter(new PorterDuffColorFilter(iconColor, PorterDuff.Mode.MULTIPLY));
+        imageView.setColorFilter(new PorterDuffColorFilter(iconColor, PorterDuff.Mode.SRC_IN));
         addView(imageView, LayoutHelper.createFrame(LayoutHelper.WRAP_CONTENT, 40, Gravity.CENTER_VERTICAL | (LocaleController.isRTL ? Gravity.RIGHT : Gravity.LEFT)));
 
         textView = new AnimatedEmojiSpan.TextViewEmojis(context);
@@ -122,7 +124,7 @@ public class ActionBarMenuSubItem extends FrameLayout {
         if (needCheck > 0) {
             checkView = new CheckBox2(getContext(), 26, resourcesProvider);
             checkView.setDrawUnchecked(false);
-            checkView.setColor(-1, -1, Theme.key_radioBackgroundChecked);
+            checkView.setColor(-1, -1, Theme.key_actionBarDefaultSubmenuItem);
             checkView.setDrawBackgroundAsArc(-1);
             if (needCheck == 1) {
                 checkViewLeft = !LocaleController.isRTL;
@@ -251,6 +253,20 @@ public class ActionBarMenuSubItem extends FrameLayout {
         backupImageView.setImage(imageLocation, imageFilter, thumb, parentObject);
     }
 
+
+    public void setIconColorImage(int iconColor) {
+        if (backupImageView != null) {
+            backupImageView.setColorFilter(new PorterDuffColorFilter(iconColor, PorterDuff.Mode.SRC_IN));
+        }
+    }
+
+    public void setImageSize(int widthDp, int heightDp) {
+        if (backupImageView != null) {
+            backupImageView.setLayoutParams(LayoutHelper.createFrame(widthDp, heightDp, Gravity.CENTER_VERTICAL | (LocaleController.isRTL ? Gravity.RIGHT : Gravity.LEFT)));
+        }
+    }
+
+
     public ActionBarMenuSubItem setColors(int textColor, int iconColor) {
         setTextColor(textColor);
         setIconColor(iconColor);
@@ -264,8 +280,12 @@ public class ActionBarMenuSubItem extends FrameLayout {
     }
 
     public void setIconColor(int iconColor) {
-        if (this.iconColor != iconColor) {
-            imageView.setColorFilter(new PorterDuffColorFilter(this.iconColor = iconColor, PorterDuff.Mode.MULTIPLY));
+        setIconColor(iconColor, PorterDuff.Mode.SRC_IN);
+    }
+
+    public void setIconColor(int iconColor, PorterDuff.Mode mode) {
+        if (this.iconColor != iconColor || this.iconColorMode != mode) {
+            imageView.setColorFilter(new PorterDuffColorFilter(this.iconColor = iconColor, this.iconColorMode = mode));
         }
     }
 

@@ -165,7 +165,7 @@ public class QuickRepliesActivity extends BaseFragment implements NotificationCe
     private int repliesOrderId;
 
     private void fillItems(ArrayList<UItem> items, UniversalAdapter adapter) {
-        items.add(UItem.asTopView(getString(R.string.BusinessRepliesInfo), "RestrictedEmoji", "📝"));
+        items.add(UItem.asTopView(getString(R.string.BusinessReplies), getString(R.string.BusinessRepliesInfo), "RestrictedEmoji", "📝"));
         adapter.whiteSectionStart();
         if (QuickRepliesController.getInstance(currentAccount).canAddNew()) {
             items.add(UItem.asButton(BUTTON_ADD, R.drawable.msg_viewintopic, getString(R.string.BusinessRepliesAdd)).accent());
@@ -849,5 +849,15 @@ public class QuickRepliesActivity extends BaseFragment implements NotificationCe
             arrowPath.lineTo(cx + (LocaleController.isRTL ? -1 : 1) * dpf2(5.33f), cy);
             arrowPath.lineTo(cx, cy + dpf2(5.66f));
         }
+    }
+
+    @Override
+    public boolean isSupportEdgeToEdge() {
+        return true;
+    }
+    @Override
+    public void onInsets(int left, int top, int right, int bottom) {
+        listView.setPadding(0, 0, 0, bottom);
+        listView.setClipToPadding(false);
     }
 }

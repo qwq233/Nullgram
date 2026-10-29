@@ -39,7 +39,6 @@ public class PollStatisticsBottomSheet extends BottomSheetWithRecyclerListView {
 
         recyclerListView.setPadding(backgroundPaddingLeft, 0, backgroundPaddingLeft, AndroidUtilities.navigationBarHeight);
         recyclerListView.setClipToPadding(false);
-        recyclerListView.setSections(true);
 
         ActionBarMenu m = actionBar.createMenu();
         m.addItem(-1, R.drawable.ic_close_white);

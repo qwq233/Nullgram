@@ -8,6 +8,9 @@
 
 package org.telegram.ui.ActionBar;
 
+import static org.telegram.messenger.AndroidUtilities.dp;
+import static org.telegram.messenger.AndroidUtilities.find;
+
 import android.content.Context;
 import android.graphics.drawable.Drawable;
 import android.util.Log;
@@ -19,10 +22,15 @@ import android.widget.LinearLayout;
 import androidx.annotation.Nullable;
 
 import org.telegram.messenger.AndroidUtilities;
+import org.telegram.messenger.Utilities;
 import org.telegram.ui.Adapters.FiltersView;
+import org.telegram.ui.Components.CubicBezierInterpolator;
 import org.telegram.ui.Components.RLottieDrawable;
 
 import java.util.ArrayList;
+import java.util.Map;
+
+import me.vkryl.android.animator.FactorAnimator;
 
 public class ActionBarMenu extends LinearLayout {
 
@@ -63,7 +71,7 @@ public class ActionBarMenu extends LinearLayout {
     }
 
     public ActionBarMenuItem addItem(int id, Drawable drawable) {
-        return addItem(id, 0, null, isActionMode ? parentActionBar.itemsActionModeBackgroundColor : parentActionBar.itemsBackgroundColor, drawable, AndroidUtilities.dp(48), null);
+        return addItem(id, 0, null, isActionMode ? parentActionBar.itemsActionModeBackgroundColor : parentActionBar.itemsBackgroundColor, drawable, dp(48), null);
     }
 
     public ActionBarMenuItem addItem(int id, int icon) {
@@ -83,7 +91,7 @@ public class ActionBarMenu extends LinearLayout {
     }
 
     public ActionBarMenuItem addItem(int id, int icon, int backgroundColor, Theme.ResourcesProvider resourcesProvider) {
-        return addItem(id, icon, null, backgroundColor, null, AndroidUtilities.dp(48), null, resourcesProvider);
+        return addItem(id, icon, null, backgroundColor, null, dp(48), null, resourcesProvider);
     }
 
     public ActionBarMenuItem addItemWithWidth(int id, int icon, int width) {
@@ -110,13 +118,13 @@ public class ActionBarMenu extends LinearLayout {
         return addItemAt(-1, id, icon, text, backgroundColor, drawable, width, title, resourcesProvider);
     }
 
-    protected ActionBarMenuItem addItemAt(int index, int id, int icon, CharSequence text, int backgroundColor, Drawable drawable, int width, CharSequence title, Theme.ResourcesProvider resourcesProvider) {
+    public ActionBarMenuItem addItemAt(int index, int id, int icon, CharSequence text, int backgroundColor, Drawable drawable, int width, CharSequence title, Theme.ResourcesProvider resourcesProvider) {
         ActionBarMenuItem menuItem = new ActionBarMenuItem(getContext(), this, backgroundColor, isActionMode ? parentActionBar.itemsActionModeColor : parentActionBar.itemsColor, text != null, resourcesProvider);
         menuItem.setTag(id);
         if (text != null) {
             menuItem.textView.setText(text);
             LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(width != 0 ? width : ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.MATCH_PARENT);
-            layoutParams.leftMargin = layoutParams.rightMargin = AndroidUtilities.dp(14);
+            layoutParams.leftMargin = layoutParams.rightMargin = dp(14);
             addView(menuItem, index, layoutParams);
         } else {
             if (drawable != null) {
@@ -149,7 +157,11 @@ public class ActionBarMenu extends LinearLayout {
     }
 
     public LazyItem lazilyAddItem(int id, int icon, Theme.ResourcesProvider resourcesProvider) {
-        return lazilyAddItem(id, icon, null, isActionMode ? parentActionBar.itemsActionModeBackgroundColor : parentActionBar.itemsBackgroundColor, null, AndroidUtilities.dp(48), null, resourcesProvider);
+        return lazilyAddItem(id, icon, null, isActionMode ? parentActionBar.itemsActionModeBackgroundColor : parentActionBar.itemsBackgroundColor, null, dp(48), null, resourcesProvider);
+    }
+
+    public LazyItem lazilyAddItem(int id, Drawable drawable, Theme.ResourcesProvider resourcesProvider) {
+        return lazilyAddItem(id, 0, null, isActionMode ? parentActionBar.itemsActionModeBackgroundColor : parentActionBar.itemsBackgroundColor, drawable, dp(48), null, resourcesProvider);
     }
 
     public LazyItem lazilyAddItem(int id, int icon, CharSequence text, int backgroundColor, Drawable drawable, int width, CharSequence title, Theme.ResourcesProvider resourcesProvider) {
@@ -194,6 +206,7 @@ public class ActionBarMenu extends LinearLayout {
 
         int visibility = GONE;
         ActionBarMenuItem cell;
+        ArrayList<Utilities.Callback<ActionBarMenuItem>> onViews;
 
         public void setVisibility(int visibility) {
             if (this.visibility != visibility) {
@@ -320,6 +333,21 @@ public class ActionBarMenu extends LinearLayout {
                 cell.setSearchFieldHint(searchFieldHint);
             }
             cell.setAlpha(alpha);
+
+            if (onViews != null) {
+                for (Utilities.Callback<ActionBarMenuItem> onView : onViews)
+                    onView.run(cell);
+                onViews = null;
+            }
+        }
+
+        public void onView(Utilities.Callback<ActionBarMenuItem> onView) {
+            if (cell != null) {
+                onView.run(cell);
+                return;
+            }
+            if (onViews == null) onViews = new ArrayList<>();
+            onViews.add(onView);
         }
     }
 
@@ -550,6 +578,17 @@ public class ActionBarMenu extends LinearLayout {
             }
         }
         return w;
+    }
+
+    public int getVisibleItemsMeasuredWidthWithAlpha() {
+        float w = 0;
+        for (int i = 0, count = getChildCount(); i < count; i++) {
+            View view = getChildAt(i);
+            if (view instanceof ActionBarMenuItem && view.getVisibility() == View.VISIBLE) {
+                w += view.getMeasuredWidth() * view.getAlpha();
+            }
+        }
+        return (int) w;
     }
 
     public boolean searchFieldVisible() {

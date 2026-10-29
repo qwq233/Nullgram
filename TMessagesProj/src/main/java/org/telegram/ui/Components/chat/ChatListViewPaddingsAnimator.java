@@ -1,6 +1,9 @@
 package org.telegram.ui.Components.chat;
 
+import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+
+
 
 import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.FileLog;
@@ -15,9 +18,8 @@ public class ChatListViewPaddingsAnimator {
     private int currentAdditionalHeight;
     public void setPaddings(
         int paddingTopTarget,
-        float paddingBottomAnimated, int paddingBottomTarget, boolean allowScrollCompensation
+        float paddingBottomAnimated, boolean allowScrollCompensation
     ) {
-        final float translationY = paddingBottomTarget - paddingBottomAnimated;
         final int additionalHeight = 0; //(int) Math.ceil(Math.abs(translationY));
 
         if (additionalHeight == 0 && currentAdditionalHeight != 0) {
@@ -37,14 +39,22 @@ public class ChatListViewPaddingsAnimator {
         //recyclerView.setTranslationY(translationY);
         if (paddingTopOld != paddingTop || paddingBottomOld != paddingBottom) {
             final int dy = paddingTopOld - paddingTop;
+
+
             if (allowScrollCompensation && dy != 0) {
-                AndroidUtilities.doOnLayout(recyclerView, () -> {
-                    try {
-                        recyclerView.scrollBy(0, dy);
-                    } catch (Throwable t) {
-                        FileLog.e(t);
-                    }
-                });
+                final boolean canScrollDown = recyclerView.canScrollVertically(1);
+                final boolean canScrollUp = recyclerView.canScrollVertically(-1);
+                if (dy < 0 && !canScrollDown || dy > 0 && !canScrollUp) {
+
+                } else {
+                    AndroidUtilities.doOnLayout(recyclerView, () -> {
+                        try {
+                            recyclerView.scrollBy(0, dy);
+                        } catch (Throwable t) {
+                            FileLog.e(t);
+                        }
+                    });
+                }
             }
 
             recyclerView.setPadding(

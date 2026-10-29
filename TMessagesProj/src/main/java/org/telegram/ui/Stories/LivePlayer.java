@@ -3,7 +3,6 @@ package org.telegram.ui.Stories;
 import static org.telegram.messenger.MessagesController.findUpdates;
 import static org.telegram.messenger.MessagesController.findUpdatesAndRemove;
 import static org.telegram.messenger.voip.VoIPService.QUALITY_FULL;
-import static org.telegram.messenger.voip.VoIPService.QUALITY_MEDIUM;
 
 import android.Manifest;
 import android.content.Context;
@@ -11,11 +10,8 @@ import android.media.AudioAttributes;
 import android.media.AudioManager;
 import android.os.Build;
 
-import androidx.core.math.MathUtils;
-
 import org.telegram.messenger.AccountInstance;
 import org.telegram.messenger.AndroidUtilities;
-import org.telegram.messenger.BuildVars;
 import org.telegram.messenger.ChatObject;
 import org.telegram.messenger.DialogObject;
 import org.telegram.messenger.FileLog;
@@ -26,7 +22,6 @@ import org.telegram.messenger.SharedConfig;
 import org.telegram.messenger.UserConfig;
 import org.telegram.messenger.Utilities;
 import org.telegram.messenger.utils.tlutils.TlUtils;
-import org.telegram.messenger.voip.GroupCallMessagesController;
 import org.telegram.messenger.voip.Instance;
 import org.telegram.messenger.voip.NativeInstance;
 import org.telegram.messenger.voip.VoIPService;
@@ -38,14 +33,13 @@ import org.telegram.tgnet.tl.TL_update;
 import org.telegram.tgnet.Vector;
 import org.telegram.tgnet.tl.TL_phone;
 import org.telegram.tgnet.tl.TL_stories;
+import org.telegram.tgnet.tl.TL_update;
 import org.telegram.ui.Components.PermissionRequest;
 import org.telegram.ui.Components.voip.VoIPHelper;
 import org.webrtc.VideoFrame;
 import org.webrtc.VideoSink;
 import org.webrtc.voiceengine.WebRtcAudioTrack;
 
-import java.io.File;
-import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;

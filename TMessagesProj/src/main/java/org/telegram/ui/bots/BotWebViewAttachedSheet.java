@@ -108,6 +108,7 @@ import org.telegram.ui.Components.VerticalPositionAutoAnimator;
 import org.telegram.ui.DialogsActivity;
 import org.telegram.ui.LaunchActivity;
 import org.telegram.ui.PaymentFormActivity;
+import org.telegram.ui.ReportBottomSheet;
 import org.telegram.ui.Stars.StarsController;
 import org.telegram.ui.Stories.DarkThemeResourceProvider;
 import org.telegram.ui.web.BotWebViewContainer;
@@ -119,7 +120,13 @@ import java.util.List;
 import java.util.Locale;
 
 public class BotWebViewAttachedSheet implements NotificationCenter.NotificationCenterDelegate, BaseFragment.AttachedSheet, BottomSheetTabsOverlay.Sheet {
-    public final static int TYPE_WEB_VIEW_BUTTON = 0, TYPE_SIMPLE_WEB_VIEW_BUTTON = 1, TYPE_BOT_MENU_BUTTON = 2, TYPE_WEB_VIEW_BOT_APP = 3, TYPE_WEB_VIEW_BOT_MAIN = 4, TYPE_WEB_VIEW_GUARD = 5;
+    public final static int
+            TYPE_WEB_VIEW_BUTTON = 0,
+            TYPE_SIMPLE_WEB_VIEW_BUTTON = 1,
+            TYPE_BOT_MENU_BUTTON = 2,
+            TYPE_WEB_VIEW_BOT_APP = 3,
+            TYPE_WEB_VIEW_BOT_MAIN = 4,
+            TYPE_WEB_VIEW_GUARD = 5;
 
     public final static int FLAG_FROM_INLINE_SWITCH = 1;
     public final static int FLAG_FROM_SIDE_MENU = 2;
@@ -139,11 +146,11 @@ public class BotWebViewAttachedSheet implements NotificationCenter.NotificationC
         }
         String str;
         if (currentBot.show_in_side_menu && currentBot.show_in_attach_menu) {
-            str = LocaleController.formatString("BotAttachMenuShortcatAddedAttachAndSide", R.string.BotAttachMenuShortcatAddedAttachAndSide, user.first_name);
+            str = LocaleController.formatString(R.string.BotAttachMenuShortcatAddedAttachAndSide, user.first_name);
         } else if (currentBot.show_in_side_menu) {
-            str = LocaleController.formatString("BotAttachMenuShortcatAddedSide", R.string.BotAttachMenuShortcatAddedSide, user.first_name);
+            str = LocaleController.formatString(R.string.BotAttachMenuShortcatAddedSide, user.first_name);
         } else {
-            str = LocaleController.formatString("BotAttachMenuShortcatAddedAttach", R.string.BotAttachMenuShortcatAddedAttach, user.first_name);
+            str = LocaleController.formatString( R.string.BotAttachMenuShortcatAddedAttach, user.first_name);
         }
         AndroidUtilities.runOnUIThread(() -> {
             BulletinFactory.of(windowView, resourcesProvider)
@@ -252,6 +259,8 @@ public class BotWebViewAttachedSheet implements NotificationCenter.NotificationC
         tab.ready = webViewContainer != null && webViewContainer.isPageLoaded();
         tab.themeIsDark = Theme.isCurrentThemeDark();
         tab.lastUrl = webViewContainer != null ? webViewContainer.getUrlLoaded() : null;
+        tab.sameOrigin = webViewContainer != null && webViewContainer.isBridgeRestrictedToOrigin();
+        tab.trustedOrigin = webViewContainer != null ? webViewContainer.getTrustedOrigin() : null;
         tab.expanded = swipeContainer != null && ((1f - Math.min(swipeContainer.getTopActionBarOffsetY(), swipeContainer.getTranslationY() - swipeContainer.getTopActionBarOffsetY()) / swipeContainer.getTopActionBarOffsetY()) > .5f) || forceExpnaded || isFullSize();
         tab.fullsize = isFullSize();
         tab.expandedOffset = swipeContainer != null ? swipeContainer.getOffsetY() : Float.MAX_VALUE;
@@ -302,7 +311,7 @@ public class BotWebViewAttachedSheet implements NotificationCenter.NotificationC
         if (tab.webView != null) {
 //            tab.webView.resumeTimers();
             tab.webView.onResume();
-            webViewContainer.replaceWebView(currentAccount, tab.webView, tab.proxy);
+            webViewContainer.replaceWebView(currentAccount, tab.webView, tab.proxy, tab.trustedOrigin, tab.sameOrigin);
             webViewContainer.setState(tab.ready || tab.webView.isPageLoaded(), tab.lastUrl);
             if (Theme.isCurrentThemeDark() != tab.themeIsDark) {
 //                webViewContainer.notifyThemeChanged();
@@ -602,7 +611,7 @@ public class BotWebViewAttachedSheet implements NotificationCenter.NotificationC
                     DialogsActivity dialogsActivity = new DialogsActivity(args);
                     AndroidUtilities.hideKeyboard(windowView);
                     OverlayActionBarLayoutDialog overlayActionBarLayoutDialog = new OverlayActionBarLayoutDialog(getContext(), resourcesProvider);
-                    dialogsActivity.setDelegate((fragment, dids, message1, param, notify, scheduleDate, topicsFragment) -> {
+                    dialogsActivity.setDelegate((fragment, dids, message1, param, notify, scheduleDate, scheduleRepeatPeriod, topicsFragment) -> {
                         long did = dids.get(0).dialogId;
 
                         Bundle args1 = new Bundle();
@@ -640,13 +649,13 @@ public class BotWebViewAttachedSheet implements NotificationCenter.NotificationC
             }
 
             @Override
-            public void onSetupMainButton(boolean isVisible, boolean isActive, String text, int color, int textColor, boolean isProgressVisible, boolean hasShineEffect) {
-                botButtons.setMainState(BotButtons.ButtonState.of(isVisible, isActive, isProgressVisible, hasShineEffect, text, color, textColor), true);
+            public void onSetupMainButton(boolean isVisible, boolean isActive, String text, long emojiId, int color, int textColor, boolean isProgressVisible, boolean hasShineEffect) {
+                botButtons.setMainState(BotButtons.ButtonState.of(isVisible, isActive, isProgressVisible, hasShineEffect, text, emojiId, color, textColor), true);
             }
 
             @Override
-            public void onSetupSecondaryButton(boolean isVisible, boolean isActive, String text, int color, int textColor, boolean isProgressVisible, boolean hasShineEffect, String position) {
-                botButtons.setSecondaryState(BotButtons.ButtonState.of(isVisible, isActive, isProgressVisible, hasShineEffect, text, color, textColor, position), true);
+            public void onSetupSecondaryButton(boolean isVisible, boolean isActive, String text, long emojiId, int color, int textColor, boolean isProgressVisible, boolean hasShineEffect, String position) {
+                botButtons.setSecondaryState(BotButtons.ButtonState.of(isVisible, isActive, isProgressVisible, hasShineEffect, text, emojiId, color, textColor, position), true);
             }
 
             @Override
@@ -1038,6 +1047,7 @@ public class BotWebViewAttachedSheet implements NotificationCenter.NotificationC
         otherItem.addSubItem(R.id.menu_tos_bot, R.drawable.menu_intro, LocaleController.getString(R.string.BotWebViewToS));
         otherItem.addSubItem(R.id.menu_privacy, R.drawable.menu_privacy_policy, LocaleController.getString(R.string.BotPrivacyPolicy));
         otherItem.hideSubItem(R.id.menu_privacy);
+        otherItem.addSubItem(R.id.menu_report_bot, R.drawable.msg_report, LocaleController.getString(R.string.BotWebViewReportBot));
         if (currentBot != null && (currentBot.show_in_side_menu || currentBot.show_in_attach_menu)) {
             otherItem.addSubItem(R.id.menu_delete_bot, R.drawable.msg_delete, LocaleController.getString(R.string.BotWebViewDeleteBot));
         }
@@ -1097,6 +1107,8 @@ public class BotWebViewAttachedSheet implements NotificationCenter.NotificationC
                     final String username = UserObject.getPublicUsername(bot);
                     final String link = "https://"+MessagesController.getInstance(currentAccount).linkPrefix+"/"+username+"?profile";
                     new ShareAlert(getContext(), null, link, false, link, false, AndroidUtilities.computePerceivedBrightness(actionBarColor) > .721f ? null : new DarkThemeResourceProvider()).show();
+                } else if (id == R.id.menu_report_bot) {
+                    ReportBottomSheet.openChat(currentAccount, getContext(), BulletinFactory.of(Bulletin.BulletinWindow.make(getContext()), resourcesProvider), botId);
                 }
             }
         });
@@ -1254,7 +1266,7 @@ public class BotWebViewAttachedSheet implements NotificationCenter.NotificationC
                     req.platform = "android";
                     req.bot = MessagesController.getInstance(currentAccount).getInputUser(props.botId);
                     req.peer = fragment instanceof ChatActivity ? ((ChatActivity) fragment).getCurrentUser() != null ? MessagesController.getInputPeer(((ChatActivity) fragment).getCurrentUser()) : MessagesController.getInputPeer(((ChatActivity) fragment).getCurrentChat())
-                            : MessagesController.getInputPeer(props.botUser);
+                            : MessagesController.getInstance(currentAccount).getInputPeer(props.peerId);
                     req.compact = props.compact;
                     req.fullscreen = props.fullscreen;
 
@@ -1286,12 +1298,14 @@ public class BotWebViewAttachedSheet implements NotificationCenter.NotificationC
     private void loadFromResponse(boolean fromTab) {
         if (requestProps == null) return;
         final long pollTimeout = Math.max(0, POLL_PERIOD - (System.currentTimeMillis() - requestProps.responseTime));
+        boolean sameOrigin = false;
         String url = null;
         fullsize = null;
         if (requestProps.response instanceof TLRPC.TL_webViewResultUrl) {
             TLRPC.TL_webViewResultUrl resultUrl = (TLRPC.TL_webViewResultUrl) requestProps.response;
             queryId = resultUrl.query_id;
             url = resultUrl.url;
+            sameOrigin = resultUrl.same_origin;
             fullsize = resultUrl.fullsize;
         } else if (requestProps.response instanceof TLRPC.TL_appWebViewResultUrl) { // deprecated
             TLRPC.TL_appWebViewResultUrl result = (TLRPC.TL_appWebViewResultUrl) requestProps.response;
@@ -1304,7 +1318,7 @@ public class BotWebViewAttachedSheet implements NotificationCenter.NotificationC
         }
         if (url != null && !fromTab) {
             MediaDataController.getInstance(currentAccount).increaseWebappRating(requestProps.botId);
-            webViewContainer.loadUrl(currentAccount, url);
+            webViewContainer.loadUrl(currentAccount, url, sameOrigin);
         }
         AndroidUtilities.runOnUIThread(pollRunnable, pollTimeout);
         if (swipeContainer != null) {
@@ -1321,7 +1335,7 @@ public class BotWebViewAttachedSheet implements NotificationCenter.NotificationC
             if (user != null && user.photo != null) {
                 File f = FileLoader.getInstance(currentAccount).getPathToAttach(user.photo.photo_small, true);
                 if (!f.exists()) {
-                    MediaDataController.getInstance(currentAccount).preloadImage(ImageLocation.getForUser(user, ImageLocation.TYPE_SMALL), FileLoader.PRIORITY_LOW);
+                    MediaDataController.getInstance(currentAccount).preloadImage(ImageLocation.getForUser(currentAccount, user, ImageLocation.TYPE_SMALL), FileLoader.PRIORITY_LOW);
                 }
             }
         }
@@ -1720,7 +1734,7 @@ public class BotWebViewAttachedSheet implements NotificationCenter.NotificationC
 
             clipPath.rewind();
             float radius = dp(16) * (AndroidUtilities.isTablet() ? 1f : 1f - actionBarTransitionProgress);
-            final float r = lerp(radius, dp(10), progress);
+            final float r = lerp(radius, dp(18), progress);
             rect.set(clipRect);
             if (opening) {
                 rect.top -= dp(16) * (1f - actionBarTransitionProgress);
@@ -1914,7 +1928,7 @@ public class BotWebViewAttachedSheet implements NotificationCenter.NotificationC
         if (userFull == null) return false;
         if (userFull.bot_info == null) return false;
         if (userFull.bot_info.privacy_policy_url != null) return true;
-        for (TLRPC.TL_botCommand command : userFull.bot_info.commands) {
+        for (TLRPC.BotCommand command : userFull.bot_info.commands) {
             if ("privacy".equals(command.command)) {
                 return true;
             }
@@ -1945,4 +1959,8 @@ public class BotWebViewAttachedSheet implements NotificationCenter.NotificationC
         return true;
     }
 
+    @Override
+    public BulletinFactory getBulletinFactory() {
+        return BulletinFactory.of(windowView, resourcesProvider);
+    }
 }

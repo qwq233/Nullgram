@@ -2,7 +2,6 @@ package org.telegram.messenger;
 
 import android.os.Bundle;
 import android.text.TextUtils;
-import android.util.Log;
 
 import androidx.collection.LongSparseArray;
 
@@ -19,10 +18,8 @@ import org.telegram.ui.Components.AnimatedEmojiDrawable;
 import org.telegram.ui.LaunchActivity;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Objects;
 
 public class SavedMessagesController {
@@ -1123,6 +1120,17 @@ public class SavedMessagesController {
         }
         Bundle args = new Bundle();
         args.putLong("user_id", UserConfig.getInstance(lastFragment.getCurrentAccount()).getClientUserId());
+        lastFragment.presentFragment(new ChatActivity(args));
+    }
+
+    public static void openSavedMessagesReminders() {
+        BaseFragment lastFragment = LaunchActivity.getLastFragment();
+        if (lastFragment == null) {
+            return;
+        }
+        Bundle args = new Bundle();
+        args.putLong("user_id", UserConfig.getInstance(lastFragment.getCurrentAccount()).getClientUserId());
+        args.putInt("chatMode", ChatActivity.MODE_SCHEDULED);
         lastFragment.presentFragment(new ChatActivity(args));
     }
 

@@ -10,7 +10,6 @@ package org.telegram.ui;
 
 import android.content.Intent;
 import android.content.res.Configuration;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.SystemClock;
 import android.text.TextUtils;
@@ -24,6 +23,7 @@ import android.widget.FrameLayout;
 import android.widget.RelativeLayout;
 
 import androidx.fragment.app.FragmentActivity;
+import androidx.annotation.NonNull;
 
 import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.ApplicationLoader;
@@ -42,6 +42,7 @@ import org.telegram.ui.ActionBar.BaseFragment;
 import org.telegram.ui.ActionBar.DrawerLayoutContainer;
 import org.telegram.ui.ActionBar.INavigationLayout;
 import org.telegram.ui.ActionBar.Theme;
+import org.telegram.ui.Components.ActivityWindowEmptyBackgroundDrawable;
 import org.telegram.ui.Components.AlertsCreator;
 import org.telegram.ui.Components.LayoutHelper;
 import org.telegram.ui.Components.PasscodeView;
@@ -54,8 +55,8 @@ import top.qwq2333.gen.Config;
 public class ExternalActionActivity extends FragmentActivity implements INavigationLayout.INavigationLayoutDelegate {
 
     private boolean finished;
-    private static ArrayList<BaseFragment> mainFragmentsStack = new ArrayList<>();
-    private static ArrayList<BaseFragment> layerFragmentsStack = new ArrayList<>();
+    private static final ArrayList<BaseFragment> mainFragmentsStack = new ArrayList<>();
+    private static final ArrayList<BaseFragment> layerFragmentsStack = new ArrayList<>();
 
     private PasscodeView passcodeView;
     protected INavigationLayout actionBarLayout;
@@ -77,8 +78,8 @@ public class ExternalActionActivity extends FragmentActivity implements INavigat
 
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         setTheme(R.style.Theme_TMessages);
-        getWindow().setBackgroundDrawableResource(R.drawable.transparent);
-        if (SharedConfig.passcodeHash.length() > 0 && !SharedConfig.allowScreenCapture) {
+        getWindow().setBackgroundDrawable(new ActivityWindowEmptyBackgroundDrawable());
+        if (!SharedConfig.passcodeHash.isEmpty() && !SharedConfig.allowScreenCapture) {
             try {
                 if(!Config.allowScreenshotOnNoForwardChat)
                     getWindow().setFlags(WindowManager.LayoutParams.FLAG_SECURE, WindowManager.LayoutParams.FLAG_SECURE);
@@ -89,7 +90,7 @@ public class ExternalActionActivity extends FragmentActivity implements INavigat
 
         super.onCreate(savedInstanceState);
 
-        if (SharedConfig.passcodeHash.length() != 0 && SharedConfig.appLocked) {
+        if (!SharedConfig.passcodeHash.isEmpty() && SharedConfig.appLocked) {
             SharedConfig.lastPauseTime = (int) (SystemClock.elapsedRealtime() / 1000);
         }
 
@@ -100,7 +101,6 @@ public class ExternalActionActivity extends FragmentActivity implements INavigat
         actionBarLayout = INavigationLayout.newLayout(this, false);
 
         drawerLayoutContainer = new DrawerLayoutContainer(this);
-        drawerLayoutContainer.setAllowOpenDrawer(false, false);
         setContentView(drawerLayoutContainer, new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
 
         if (AndroidUtilities.isTablet()) {
@@ -218,14 +218,12 @@ public class ExternalActionActivity extends FragmentActivity implements INavigat
         }
         passcodeView.onShow(true, false);
         SharedConfig.isWaitingForPasscodeEnter = true;
-        drawerLayoutContainer.setAllowOpenDrawer(false, false);
         passcodeView.setDelegate(view -> {
             SharedConfig.isWaitingForPasscodeEnter = false;
             if (passcodeSaveIntent != null) {
                 handleIntent(passcodeSaveIntent, passcodeSaveIntentIsNew, passcodeSaveIntentIsRestore, true, passcodeSaveIntentAccount, passcodeSaveIntentState);
                 passcodeSaveIntent = null;
             }
-            drawerLayoutContainer.setAllowOpenDrawer(true, false);
             actionBarLayout.showLastFragment();
             if (AndroidUtilities.isTablet()) {
                 layersActionBarLayout.showLastFragment();
@@ -460,7 +458,7 @@ public class ExternalActionActivity extends FragmentActivity implements INavigat
         if (AndroidUtilities.isTablet()) {
             RelativeLayout.LayoutParams relativeLayoutParams = (RelativeLayout.LayoutParams) layersActionBarLayout.getView().getLayoutParams();
             relativeLayoutParams.leftMargin = (AndroidUtilities.displaySize.x - relativeLayoutParams.width) / 2;
-            int y = (Build.VERSION.SDK_INT >= 21 ? AndroidUtilities.statusBarHeight : 0);
+            int y = AndroidUtilities.statusBarHeight;
             relativeLayoutParams.topMargin = y + (AndroidUtilities.displaySize.y - relativeLayoutParams.height - y) / 2;
             layersActionBarLayout.getView().setLayoutParams(relativeLayoutParams);
 
@@ -557,7 +555,7 @@ public class ExternalActionActivity extends FragmentActivity implements INavigat
             AndroidUtilities.cancelRunOnUIThread(lockRunnable);
             lockRunnable = null;
         }
-        if (SharedConfig.passcodeHash.length() != 0) {
+        if (!SharedConfig.passcodeHash.isEmpty()) {
             SharedConfig.lastPauseTime = (int) (SystemClock.elapsedRealtime() / 1000);
             lockRunnable = new Runnable() {
                 @Override
@@ -603,7 +601,7 @@ public class ExternalActionActivity extends FragmentActivity implements INavigat
     }
 
     @Override
-    public void onConfigurationChanged(android.content.res.Configuration newConfig) {
+    public void onConfigurationChanged(@NonNull android.content.res.Configuration newConfig) {
         AndroidUtilities.checkDisplaySize(this, newConfig);
         AndroidUtilities.setPreferredMaxRefreshRate(getWindow());
         super.onConfigurationChanged(newConfig);
@@ -618,8 +616,6 @@ public class ExternalActionActivity extends FragmentActivity implements INavigat
         }
         if (PhotoViewer.getInstance().isVisible()) {
             PhotoViewer.getInstance().closePhoto(true, false);
-        } else if (drawerLayoutContainer.isDrawerOpened()) {
-            drawerLayoutContainer.closeDrawer(false);
         } else if (AndroidUtilities.isTablet()) {
             if (layersActionBarLayout.getView().getVisibility() == View.VISIBLE) {
                 layersActionBarLayout.onBackPressed();

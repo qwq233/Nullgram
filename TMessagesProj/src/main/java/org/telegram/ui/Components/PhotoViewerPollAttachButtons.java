@@ -62,7 +62,7 @@ public class PhotoViewerPollAttachButtons extends LinearLayout {
         final View child2 = replaceButton;
 
         ViewGroup.LayoutParams lp1 = child1.getLayoutParams();
-        ViewGroup.LayoutParams lp2 = child1.getLayoutParams();
+        ViewGroup.LayoutParams lp2 = child2.getLayoutParams();
 
         final int widthSize = MeasureSpec.getSize(widthMeasureSpec);
         final int heightSize = MeasureSpec.getSize(heightMeasureSpec);

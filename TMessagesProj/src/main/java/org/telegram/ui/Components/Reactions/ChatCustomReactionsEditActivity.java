@@ -53,6 +53,7 @@ import android.widget.LinearLayout;
 import android.widget.ScrollView;
 
 import androidx.annotation.NonNull;
+import androidx.core.math.MathUtils;
 
 import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.FileLog;
@@ -174,15 +175,17 @@ public class ChatCustomReactionsEditActivity extends BaseFragment implements Not
             @Override
             public void onItemClick(int id) {
                 if (id == -1) {
-                    if (!checkChangesBeforeExit()) {
+                    if (!checkChangesBeforeExit(true)) {
                         finishFragment();
                     }
                 }
             }
         });
 
+        contentLayout = new LinearLayout(context);
         scrollView = new ScrollView(context);
         scrollView.setFillViewport(true);
+
         FrameLayout rootLayout = new FrameLayout(context) {
             final AdjustPanLayoutHelper adjustPanLayoutHelper = new AdjustPanLayoutHelper(this) {
 
@@ -236,7 +239,6 @@ public class ChatCustomReactionsEditActivity extends BaseFragment implements Not
             }
         };
 
-        contentLayout = new LinearLayout(context);
         contentLayout.setOrientation(LinearLayout.VERTICAL);
 
         scrollView.addView(contentLayout);
@@ -254,7 +256,7 @@ public class ChatCustomReactionsEditActivity extends BaseFragment implements Not
         });
         contentLayout.addView(enableReactionsCell, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT));
 
-        TextInfoPrivacyCell infoCell = new TextInfoPrivacyCell(context);
+        TextInfoPrivacyCell infoCell = new TextInfoPrivacyCell(context, resourceProvider);
         infoCell.setTextColor(Theme.getColor(Theme.key_windowBackgroundWhiteGrayText4));
         infoCell.setTopPadding(12);
         infoCell.setBottomPadding(16);
@@ -300,7 +302,7 @@ public class ChatCustomReactionsEditActivity extends BaseFragment implements Not
         layoutTransition.enableTransitionType(LayoutTransition.CHANGING);
         switchLayout.setLayoutTransition(layoutTransition);
 
-        TextInfoPrivacyCell infoCell2 = new TextInfoPrivacyCell(context);
+        TextInfoPrivacyCell infoCell2 = new TextInfoPrivacyCell(context, resourceProvider);
         infoCell2.setTextColor(Theme.getColor(Theme.key_windowBackgroundWhiteGrayText4));
         infoCell2.setText(AndroidUtilities.replaceSingleTag(
                 getString(R.string.ReactionCreateOwnPack),
@@ -326,7 +328,7 @@ public class ChatCustomReactionsEditActivity extends BaseFragment implements Not
             reactionsCount = value;
         });
         switchLayout.addView(slideView, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT));
-        TextInfoPrivacyCell infoCell3 = new TextInfoPrivacyCell(context);
+        TextInfoPrivacyCell infoCell3 = new TextInfoPrivacyCell(context, resourceProvider);
         infoCell3.setTopPadding(12);
         infoCell3.setBottomPadding(16);
         infoCell3.setText(LocaleController.getString(R.string.MaximumReactionsInfo));
@@ -341,7 +343,7 @@ public class ChatCustomReactionsEditActivity extends BaseFragment implements Not
                 toggleStarsEnabled();
             });
 
-            infoCell = new TextInfoPrivacyCell(context);
+            infoCell = new TextInfoPrivacyCell(context, resourceProvider);
             infoCell.setTextColor(Theme.getColor(Theme.key_windowBackgroundWhiteGrayText4));
             infoCell.setTopPadding(12);
             infoCell.setBottomPadding(70);
@@ -362,6 +364,7 @@ public class ChatCustomReactionsEditActivity extends BaseFragment implements Not
         actionButtonContainer.addView(actionButtonContainerGradient, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, LayoutHelper.MATCH_PARENT, Gravity.FILL));
 
         actionButton = new UpdateReactionsButton(context, getResourceProvider());
+        actionButton.setRound();
         actionButton.setDefaultState();
         actionButton.setOnClickListener(v -> {
             if (actionButton.isLoading()) {
@@ -539,7 +542,7 @@ public class ChatCustomReactionsEditActivity extends BaseFragment implements Not
                         AnimatedEmojiSpan span = createAnimatedEmojiSpan(document, documentId, editText.getFontMetricsInt());
                         span.cacheType = AnimatedEmojiDrawable.getCacheTypeForEnterView();
                         span.setAdded();
-                        selectedEmojisIds.add(selectionEnd, documentId);
+                        selectedEmojisIds.add(MathUtils.clamp(selectionEnd, 0, selectedEmojisIds.size()), documentId);
                         selectedEmojisMap.put(documentId, span);
                         spannable.setSpan(span, 0, spannable.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
                         editText.getText().insert(selectionEnd, spannable);
@@ -640,7 +643,7 @@ public class ChatCustomReactionsEditActivity extends BaseFragment implements Not
 
     @Override
     public boolean canBeginSlide() {
-        if (checkChangesBeforeExit()) {
+        if (checkChangesBeforeExit(true)) {
             return false;
         }
         return super.canBeginSlide();
@@ -767,17 +770,18 @@ public class ChatCustomReactionsEditActivity extends BaseFragment implements Not
     }
 
     @Override
-    public boolean onBackPressed() {
-        if (closeKeyboard()) {
+    public boolean onBackPressed(boolean invoked) {
+        if (emojiKeyboardVisible) {
+            if (invoked) closeKeyboard();
             return false;
         }
-        if (checkChangesBeforeExit()) {
+        if (checkChangesBeforeExit(invoked)) {
             return false;
         }
-        return super.onBackPressed();
+        return super.onBackPressed(invoked);
     }
 
-    private boolean checkChangesBeforeExit() {
+    private boolean checkChangesBeforeExit(boolean invoked) {
         boolean hasChanges = !selectedEmojisMap.keySet().equals(initialSelectedEmojis.keySet());
         if (boostsStatus != null && boostsStatus.level < selectedCustomReactions) {
             hasChanges = false;
@@ -785,7 +789,7 @@ public class ChatCustomReactionsEditActivity extends BaseFragment implements Not
         if (initialPaid != paid) {
             hasChanges = true;
         }
-        if (hasChanges) {
+        if (invoked && hasChanges) {
             AlertDialog.Builder builder = new AlertDialog.Builder(getContext(), getResourceProvider());
             builder.setTitle(getString("UnsavedChanges", R.string.UnsavedChanges));
             String text = getString("ReactionApplyChangesDialog", R.string.ReactionApplyChangesDialog);

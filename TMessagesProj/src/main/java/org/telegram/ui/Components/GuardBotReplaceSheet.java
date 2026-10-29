@@ -48,7 +48,7 @@ public class GuardBotReplaceSheet extends BottomSheetWithRecyclerListView {
         contentLayout.setClipChildren(false);
         contentLayout.setClipToPadding(false);
 
-        final int avatarSize = 60;
+        final int avatarSize   = 60;
         final int arrowPadding = 7;
 
         FrameLayout avatarsRow = new FrameLayout(context);
@@ -79,7 +79,7 @@ public class GuardBotReplaceSheet extends BottomSheetWithRecyclerListView {
         contentLayout.addView(titleView, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT, Gravity.CENTER, 20, 0, 20, 6));
 
         final String currentName = DialogObject.getShortName(currentBot);
-        final String newName = DialogObject.getShortName(newBot);
+        final String newName     = DialogObject.getShortName(newBot);
 
         TextView subtitleView = new TextView(context);
         subtitleView.setGravity(Gravity.CENTER);

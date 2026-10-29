@@ -273,11 +273,6 @@ public class StarsIntroActivity extends GradientHeaderActivity implements Notifi
     }
 
     @Override
-    public int getNavigationBarColor() {
-        return Theme.getColor(Theme.key_dialogBackgroundGray);
-    }
-
-    @Override
     public View createView(Context context) {
         useFillLastLayoutManager = false;
         particlesViewHeight = dp(32 + 190 + 16);
@@ -287,11 +282,11 @@ public class StarsIntroActivity extends GradientHeaderActivity implements Notifi
             protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
                 int firstViewHeight;
                 if (StarsIntroActivity.this.isLandscapeMode) {
-                    firstViewHeight = StarsIntroActivity.this.statusBarHeight + actionBar.getMeasuredHeight() - AndroidUtilities.dp(16);
+                    firstViewHeight = StarsIntroActivity.this.statusBarHeight + actionBar.getMeasuredHeight() - dp(16);
                 } else {
-                    int h = AndroidUtilities.dp(140) + statusBarHeight;
-                    if (backgroundView.getMeasuredHeight() + AndroidUtilities.dp(24) > h) {
-                        h = backgroundView.getMeasuredHeight() + AndroidUtilities.dp(24);
+                    int h = dp(140) + statusBarHeight;
+                    if (backgroundView.getMeasuredHeight() + dp(24) > h) {
+                        h = backgroundView.getMeasuredHeight() + dp(24);
                     }
                     firstViewHeight = h;
                 }
@@ -299,14 +294,12 @@ public class StarsIntroActivity extends GradientHeaderActivity implements Notifi
                 super.onMeasure(widthMeasureSpec, MeasureSpec.makeMeasureSpec(firstViewHeight, MeasureSpec.EXACTLY));
             }
         };
-        emptyLayout.setBackgroundColor(Theme.getColor(Theme.key_dialogBackgroundGray));
 
         super.createView(context);
+        if (parentLayout != null && parentLayout.isRightLayout()) {
+            actionBar.setBackButtonImage(R.drawable.ic_ab_close);
+        }
 
-//        balanceView = new StarsBalanceView(context, currentAccount);
-//        actionBar.addView(balanceView, LayoutHelper.createFrame(LayoutHelper.WRAP_CONTENT, LayoutHelper.WRAP_CONTENT, Gravity.RIGHT | Gravity.BOTTOM));
-
-//        yOffset = dp(16);
         aboveTitleView = new FrameLayout(context);
         aboveTitleView.setClickable(true);
         iconTextureView = new GLIconTextureView(context, GLIconRenderer.DIALOG_STYLE, Icon3D.TYPE_GOLDEN_STAR);
@@ -314,7 +307,7 @@ public class StarsIntroActivity extends GradientHeaderActivity implements Notifi
         iconTextureView.mRenderer.colorKey2 = Theme.key_starsGradient2;
         iconTextureView.mRenderer.updateColors();
         iconTextureView.setStarParticlesView(particlesView);
-        aboveTitleView.addView(iconTextureView, LayoutHelper.createFrame(190, 190, Gravity.CENTER, 0, 32, 0, 24));
+        aboveTitleView.addView(iconTextureView, LayoutHelper.createFrame(190, 190, Gravity.CENTER, 0, 12, 0, 24));
         configureHeader(getString(R.string.TelegramStars), AndroidUtilities.replaceArrows(AndroidUtilities.replaceSingleTag(getString(R.string.TelegramStarsInfo2), () -> {
             new ExplainStarsSheet(context).show();
         }), true), aboveTitleView, null);
@@ -340,7 +333,7 @@ public class StarsIntroActivity extends GradientHeaderActivity implements Notifi
 
         balanceLayout = new LinearLayout(getContext());
         balanceLayout.setOrientation(LinearLayout.VERTICAL);
-        balanceLayout.setPadding(0, 0, 0, dp(10));
+        balanceLayout.setPadding(0, dp(24), 0, dp(10));
 
         starBalanceTextView = new AnimatedTextView(getContext(), false, true, false);
         starBalanceTextView.setTypeface(AndroidUtilities.bold());
@@ -350,7 +343,7 @@ public class StarsIntroActivity extends GradientHeaderActivity implements Notifi
 
         starBalanceIcon = new SpannableStringBuilder("S");
         final ImageReceiverSpan starBalanceIconSpan = new ImageReceiverSpan(starBalanceTextView, currentAccount, 42);
-        starBalanceIconSpan.imageReceiver.setImageBitmap(new RLottieDrawable(R.raw.star_reaction, "s" + R.raw.star_reaction, dp(42), dp(42)));
+        starBalanceIconSpan.imageReceiver.setImageBitmap(new RLottieDrawable(R.raw.star_reaction, dp(42), dp(42)));
         starBalanceIconSpan.imageReceiver.setAutoRepeat(2);
         starBalanceIconSpan.enableShadow(false);
         starBalanceIconSpan.translate(-dp(3), 0);
@@ -376,6 +369,7 @@ public class StarsIntroActivity extends GradientHeaderActivity implements Notifi
         buttonsLayout.addView(oneButtonsLayout);
 
         buyButton = new ButtonWithCounterView(getContext(), resourceProvider);
+        buyButton.setRound();
         buyButton.setText("", false);
         buyButton.setOnClickListener(v -> {
             if (MessagesController.getInstance(currentAccount).isFrozen()) {
@@ -396,6 +390,7 @@ public class StarsIntroActivity extends GradientHeaderActivity implements Notifi
         buttonsLayout.addView(twoButtonsLayout);
 
         topupButton = new ButtonWithCounterView(getContext(), resourceProvider);
+        topupButton.setRound();
         SpannableStringBuilder ssb = new SpannableStringBuilder("x  ");
         ssb.setSpan(new ColoredImageSpan(R.drawable.mini_topup, ColoredImageSpan.ALIGN_CENTER), 0, 1, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
         ssb.append(getString(R.string.StarsTopUp));
@@ -406,6 +401,7 @@ public class StarsIntroActivity extends GradientHeaderActivity implements Notifi
         twoButtonsLayout.addView(topupButton, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, 48, Gravity.CENTER, 1, 0, 0, 8, 0));
 
         withdrawButton = new ButtonWithCounterView(getContext(), resourceProvider);
+        withdrawButton.setRound();
         ssb = new SpannableStringBuilder("x  ");
         ssb.setSpan(new ColoredImageSpan(R.drawable.mini_stats, ColoredImageSpan.ALIGN_CENTER), 0, 1, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
         ssb.append(getString(R.string.StarsStats));
@@ -418,6 +414,7 @@ public class StarsIntroActivity extends GradientHeaderActivity implements Notifi
         balanceLayout.addView(buttonsLayout, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, 48, Gravity.CENTER, 20, 17, 20, 0));
 
         giftButton = new ButtonWithCounterView(getContext(), false, resourceProvider);
+        giftButton.setRound();
         SpannableStringBuilder sb2 = new SpannableStringBuilder();
         sb2.append("G  ");
         sb2.setSpan(new ColoredImageSpan(R.drawable.menu_stars_gift), 0, 1, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
@@ -508,7 +505,7 @@ public class StarsIntroActivity extends GradientHeaderActivity implements Notifi
                 if (target == listView && transactionsLayout.isAttachedToWindow()) {
                     RecyclerListView innerListView = transactionsLayout.getCurrentListView();
                     int bottom = ((View) transactionsLayout.getParent()).getBottom();
-                    if (listView.getHeight() - bottom >= 0) {
+                    if (listView.getHeight() - listView.getPaddingBottom() - bottom >= 0) {
                         consumed[1] = dyUnconsumed;
                         innerListView.scrollBy(0, dyUnconsumed);
                     }
@@ -546,7 +543,7 @@ public class StarsIntroActivity extends GradientHeaderActivity implements Notifi
                 int bottom = ((View) transactionsLayout.getParent()).getBottom();
                 if (dy < 0) {
                     boolean scrolledInner = false;
-                    if (listView.getHeight() - bottom >= 0) {
+                    if (listView.getHeight() - listView.getPaddingBottom() - bottom >= 0) {
                         RecyclerListView innerListView = transactionsLayout.getCurrentListView();
                         LinearLayoutManager linearLayoutManager = (LinearLayoutManager) innerListView.getLayoutManager();
                         int pos = linearLayoutManager.findFirstVisibleItemPosition();
@@ -580,7 +577,7 @@ public class StarsIntroActivity extends GradientHeaderActivity implements Notifi
                         }
                     } else if (dy > 0) {
                         RecyclerListView innerListView = transactionsLayout.getCurrentListView();
-                        if (listView.getHeight() - bottom >= 0 && innerListView != null && !innerListView.canScrollVertically(1)) {
+                        if (listView.getHeight() - listView.getPaddingBottom() - bottom >= 0 && innerListView != null && !innerListView.canScrollVertically(1)) {
                             consumed[1] = dy;
                             listView.stopScroll();
                         }
@@ -614,7 +611,7 @@ public class StarsIntroActivity extends GradientHeaderActivity implements Notifi
         if (transactionsLayout == null || !(transactionsLayout.getParent() instanceof View))
             return false;
         int bottom = ((View) transactionsLayout.getParent()).getBottom();
-        return listView.getHeight() - bottom >= 0;
+        return listView.getHeight() - listView.getPaddingBottom() - bottom >= 0;
     }
 
     @Override
@@ -693,7 +690,7 @@ public class StarsIntroActivity extends GradientHeaderActivity implements Notifi
     private UniversalAdapter adapter;
     @Override
     protected RecyclerView.Adapter<?> createAdapter() {
-        return adapter = new UniversalAdapter(listView, getContext(), currentAccount, classGuid, true, this::fillItems, getResourceProvider()) {
+        adapter = new UniversalAdapter(listView, getContext(), currentAccount, classGuid, true, this::fillItems, getResourceProvider()) {
             @NonNull
             @Override
             public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
@@ -705,6 +702,7 @@ public class StarsIntroActivity extends GradientHeaderActivity implements Notifi
                 return super.onCreateViewHolder(parent, viewType);
             }
         };
+        return adapter;
     }
 
     private boolean expanded = false;
@@ -748,9 +746,9 @@ public class StarsIntroActivity extends GradientHeaderActivity implements Notifi
         }
 
         if (hadTransactions = c.hasTransactions()) {
-            items.add(UItem.asFullscreenCustom(transactionsLayout, ActionBar.getCurrentActionBarHeight() + AndroidUtilities.statusBarHeight));
+            items.add(UItem.asFullscreenCustom(transactionsLayout, ActionBar.getCurrentActionBarHeight() + AndroidUtilities.statusBarHeight + dp(24) + AndroidUtilities.navigationBarHeight));
         } else {
-            items.add(UItem.asCustom(emptyLayout));
+            items.add(UItem.asCustomShadow(emptyLayout));
         }
     }
 
@@ -798,6 +796,7 @@ public class StarsIntroActivity extends GradientHeaderActivity implements Notifi
         private final int currentAccount;
         private final TextView headerTextView;
         private final AnimatedTextView amountTextView;
+        private boolean withTon;
 
         public StarsBalanceView(Context context, int currentAccount, Theme.ResourcesProvider resourcesProvider) {
             super(context);
@@ -821,9 +820,11 @@ public class StarsIntroActivity extends GradientHeaderActivity implements Notifi
             amountTextView = new AnimatedTextView(context) {
                 @Override
                 protected void dispatchDraw(Canvas canvas) {
-                    int x = (int) (getMeasuredWidth() - getDrawable().getCurrentWidth() - dp(20));
-                    starDrawable.setBounds(x, (getMeasuredHeight() - dp(17)) / 2, x + dp(17), (getMeasuredHeight() + dp(17)) / 2);
-                    starDrawable.draw(canvas);
+                    if (!withTon) {
+                        int x = (int) (getMeasuredWidth() - getDrawable().getCurrentWidth() - dp(20));
+                        starDrawable.setBounds(x, (getMeasuredHeight() - dp(17)) / 2, x + dp(17), (getMeasuredHeight() + dp(17)) / 2);
+                        starDrawable.draw(canvas);
+                    }
                     super.dispatchDraw(canvas);
                 }
             };
@@ -839,6 +840,10 @@ public class StarsIntroActivity extends GradientHeaderActivity implements Notifi
             updateBalance(false);
 
             setPadding(dp(15), dp(4), dp(15), dp(4));
+        }
+
+        public void withTon() {
+            this.withTon = true;
         }
 
         public void setDialogId(long dialogId) {
@@ -877,15 +882,25 @@ public class StarsIntroActivity extends GradientHeaderActivity implements Notifi
         private SpannableString loadingString;
         public long lastBalance = -1;
 
+        private final ColoredImageSpan[] ref = new ColoredImageSpan[1];
+        private final ColoredImageSpan[] refTon = new ColoredImageSpan[1];
+
         public void updateBalance(boolean animated) {
             StarsController c = StarsController.getInstance(currentAccount);
+            StarsController tc = withTon ? StarsController.getTonInstance(currentAccount) : null;
 
+            AmountUtils.Amount tonAmount = AmountUtils.Amount.fromNano(0, AmountUtils.Currency.TON);
             amountTextView.cancelAnimation();
             boolean loading;
             long balance;
             if (dialogId == UserConfig.getInstance(currentAccount).getClientUserId()) {
                 loading = !c.balanceAvailable();
                 balance = c.getBalance().amount;
+
+                if (tc != null) {
+                    loading |= !tc.balanceAvailable();
+                    tonAmount = tc.getBalanceAmount();
+                }
             } else {
                 TLRPC.TL_payments_starsRevenueStats stats = BotStarsController.getInstance(currentAccount).getStarsRevenueStats(dialogId);
                 loading = stats == null || stats.status == null;
@@ -902,7 +917,21 @@ public class StarsIntroActivity extends GradientHeaderActivity implements Notifi
                 amountTextView.setText(loadingString, animated);
                 lastBalance = -1;
             } else {
-                amountTextView.setText(LocaleController.formatNumber(balance, ' '));
+                if (withTon) {
+                    SpannableStringBuilder ssb = new SpannableStringBuilder();
+                    if (!tonAmount.isZero()) {
+                        ssb.append(replaceStarsWithPlain(true, "⭐️" + tonAmount.asFormatString(), 0.62f, refTon));
+                        if (refTon[0] != null) {
+                            refTon[0].setColorKey(Theme.key_telegram_color_text);
+                        }
+                        ssb.append("  ");
+                    }
+                    ssb.append(replaceStarsWithPlain("⭐️" + LocaleController.formatNumber(balance, ' '), 0.62f, ref));
+                    amountTextView.setText(ssb);
+                } else {
+                    amountTextView.setText(LocaleController.formatNumber(balance, ' '));
+                }
+
                 lastBalance = balance;
             }
         }
@@ -1039,7 +1068,7 @@ public class StarsIntroActivity extends GradientHeaderActivity implements Notifi
             static { setup(new Factory()); }
 
             @Override
-            public StarTierView createView(Context context, int currentAccount, int classGuid, Theme.ResourcesProvider resourcesProvider) {
+            public StarTierView createView(Context context, RecyclerListView listView, int currentAccount, int classGuid, Theme.ResourcesProvider resourcesProvider) {
                 return new StarTierView(context, resourcesProvider);
             }
 
@@ -1159,7 +1188,7 @@ public class StarsIntroActivity extends GradientHeaderActivity implements Notifi
             static { setup(new Factory()); }
 
             @Override
-            public ExpandView createView(Context context, int currentAccount, int classGuid, Theme.ResourcesProvider resourcesProvider) {
+            public ExpandView createView(Context context, RecyclerListView listView, int currentAccount, int classGuid, Theme.ResourcesProvider resourcesProvider) {
                 return new ExpandView(context, resourcesProvider);
             }
 
@@ -1543,8 +1572,9 @@ public class StarsIntroActivity extends GradientHeaderActivity implements Notifi
             star.setSpan(new ImageSpan(drawable), 0, star.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
 
             ton = new SpannableString("TON");
-            drawable = context.getResources().getDrawable(R.drawable.ton).mutate();
+            drawable = context.getResources().getDrawable(R.drawable.mini_gram_72).mutate();
             ColoredImageSpan span = new ColoredImageSpan(drawable);
+            span.recolorDrawable = false;
             span.setSize(dp(18));
             span.setTranslateY(dp(.5f));
             ton.setSpan(span, 0, ton.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
@@ -1636,7 +1666,16 @@ public class StarsIntroActivity extends GradientHeaderActivity implements Notifi
                     spanString.setSpan(span, 0, 1, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
                     setGiftImage(span.imageReceiver, transaction.stargift, 16);
                     titleTextView.setText(username);
-                    if (transaction.stargift_resale) {
+                    if (transaction.offer) {
+                        final SpannableStringBuilder sb = new SpannableStringBuilder("x ");
+                        sb.setSpan(new AnimatedEmojiSpan(transaction.stargift.getDocument(), subtitleTextView.getPaint().getFontMetricsInt()), 0, 1, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+                        if (!transaction.amount.negative()) {
+                            sb.append(getString(transaction.refund ? R.string.StarGiftTransactionGiftOfferRefund : R.string.StarGiftTransactionGiftSale));
+                        } else {
+                            sb.append(getString(transaction.refund ? R.string.StarGiftTransactionGiftSaleRefund : R.string.StarGiftTransactionGiftOffer));
+                        }
+                        subtitleTextView.setText(sb);
+                    } else if (transaction.stargift_resale) {
                         final SpannableStringBuilder sb = new SpannableStringBuilder("x ");
                         sb.setSpan(new AnimatedEmojiSpan(transaction.stargift.getDocument(), subtitleTextView.getPaint().getFontMetricsInt()), 0, 1, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
                         if (!transaction.amount.negative()) {
@@ -1810,7 +1849,7 @@ public class StarsIntroActivity extends GradientHeaderActivity implements Notifi
             static { setup(new Factory()); }
 
             @Override
-            public StarsTransactionView createView(Context context, int currentAccount, int classGuid, Theme.ResourcesProvider resourcesProvider) {
+            public StarsTransactionView createView(Context context, RecyclerListView listView, int currentAccount, int classGuid, Theme.ResourcesProvider resourcesProvider) {
                 StarsTransactionView cached = getCached();
                 if (cached != null) {
                     return cached;
@@ -1999,7 +2038,7 @@ public class StarsIntroActivity extends GradientHeaderActivity implements Notifi
             static { setup(new Factory()); }
 
             @Override
-            public StarsSubscriptionView createView(Context context, int currentAccount, int classGuid, Theme.ResourcesProvider resourcesProvider) {
+            public StarsSubscriptionView createView(Context context, RecyclerListView listView, int currentAccount, int classGuid, Theme.ResourcesProvider resourcesProvider) {
                 StarsSubscriptionView cached = getCached();
                 if (cached != null) {
                     return cached;
@@ -2614,6 +2653,7 @@ public class StarsIntroActivity extends GradientHeaderActivity implements Notifi
         private final FireworksOverlay fireworksOverlay;
         private Runnable whenPurchased;
         private final TLRPC.InputPeer purposePeer;
+        private final boolean canBuy;
 
         @Override
         public void didReceivedNotification(int id, int account, Object... args) {
@@ -2638,6 +2678,15 @@ public class StarsIntroActivity extends GradientHeaderActivity implements Notifi
 
         @Override
         public void show() {
+            if (!canBuy) {
+                BulletinFactory.of(Bulletin.BulletinWindow.make(getContext()), resourcesProvider)
+                    .createSimpleBulletin(R.raw.stars_topup,
+                        getString(R.string.PaymentInvoiceDisabledStarsText)
+                    ).show();
+                return;
+            }
+
+
             long balance = StarsController.getInstance(currentAccount).getBalance().amount;
             if (balance >= starsNeeded) {
                 if (whenPurchased != null) {
@@ -2698,6 +2747,7 @@ public class StarsIntroActivity extends GradientHeaderActivity implements Notifi
 
             this.whenPurchased = whenPurchased;
             this.purposePeer = purposePeerDialogId == 0 ? null : MessagesController.getInstance(currentAccount).getInputPeer(purposePeerDialogId);
+            this.canBuy = StarsController.getInstance(currentAccount).canBuy(purposePeer);
 
             fixNavigationBar();
             recyclerListView.setPadding(backgroundPaddingLeft, 0, backgroundPaddingLeft, 0);
@@ -2764,7 +2814,7 @@ public class StarsIntroActivity extends GradientHeaderActivity implements Notifi
             if (TextUtils.isEmpty(stringRes)) {
                 headerView.subtitleView.setText("");
             } else {
-                String str = LocaleController.nullable(formatString(stringRes, LocaleController.getStringResId(stringRes), botName));
+                String str = LocaleController.nullable(formatString(stringRes, 0, botName));
                 if (str == null) {
                     str = getString(stringRes);
                 }
@@ -2779,9 +2829,13 @@ public class StarsIntroActivity extends GradientHeaderActivity implements Notifi
             footerTextView.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 12);
             footerTextView.setTextColor(Theme.getColor(Theme.key_windowBackgroundWhiteGrayText4, resourcesProvider));
             footerTextView.setLinkTextColor(Theme.getColor(Theme.key_chat_messageLinkIn, resourcesProvider));
-            footerTextView.setText(AndroidUtilities.replaceSingleTag(getString(R.string.StarsTOS), () -> {
-                Browser.openUrl(getContext(), getString(R.string.StarsTOSLink));
-            }));
+            if (canBuy) {
+                footerTextView.setText(AndroidUtilities.replaceSingleTag(getString(R.string.StarsTOS), () -> {
+                    Browser.openUrl(getContext(), getString(R.string.StarsTOSLink));
+                }));
+            } else {
+                footerTextView.setText(AndroidUtilities.replaceTags(getString(R.string.StarsPurchaseUnavailable)));
+            }
             footerTextView.setGravity(Gravity.CENTER);
             footerTextView.setMaxWidth(HintView2.cutInFancyHalf(footerTextView.getText(), footerTextView.getPaint()));
             footerView.addView(footerTextView, LayoutHelper.createFrame(LayoutHelper.WRAP_CONTENT, LayoutHelper.MATCH_PARENT, Gravity.CENTER));
@@ -2811,11 +2865,16 @@ public class StarsIntroActivity extends GradientHeaderActivity implements Notifi
         private final int BUTTON_EXPAND = -1;
 
         public void fillItems(ArrayList<UItem> items, UniversalAdapter adapter) {
-            items.add(UItem.asCustom(headerView));
-            items.add(UItem.asHeader(getString(R.string.TelegramStarsChoose)));
+            items.add(UItem.asCustomShadow(headerView));
+            if (canBuy) {
+                items.add(UItem.asHeader(getString(R.string.TelegramStarsChoose)));
+            }
             int stars = 1;
             ArrayList<TL_stars.TL_starsTopupOption> options = StarsController.getInstance(currentAccount).getOptions();
-            if (options != null && !options.isEmpty()) {
+
+            if (!canBuy) {
+
+            } else if (options != null && !options.isEmpty()) {
                 int count = 0;
                 int hidden = 0;
                 boolean shownNearest = false;
@@ -3280,7 +3339,7 @@ public class StarsIntroActivity extends GradientHeaderActivity implements Notifi
         if (cache != null && cache[0] != null) {
             span = cache[0];
         } else {
-            span = new ColoredImageSpan(ton ? R.drawable.ton : R.drawable.msg_premium_liststar);
+            span = new ColoredImageSpan(ton ? R.drawable.mini_gram_72 : R.drawable.msg_premium_liststar);
             if (cache != null) {
                 cache[0] = span;
             }
@@ -3288,6 +3347,7 @@ public class StarsIntroActivity extends GradientHeaderActivity implements Notifi
         span.translate(tx, ty);
         span.spaceScaleX = sx;
         if (ton) {
+            span.recolorDrawable = false;
             span.setScale(scale * 0.2f, scale * 0.2f);
         } else {
             span.setScale(scale, scale);
@@ -3296,6 +3356,45 @@ public class StarsIntroActivity extends GradientHeaderActivity implements Notifi
         AndroidUtilities.replaceMultipleCharSequence("⭐️", ssb, "⭐");
         AndroidUtilities.replaceMultipleCharSequence("⭐ ", ssb, "⭐");
         AndroidUtilities.replaceMultipleCharSequence("⭐", ssb, spacedStar);
+        AndroidUtilities.replaceMultipleCharSequence(StarsController.currency + " ", ssb, StarsController.currency);
+        AndroidUtilities.replaceMultipleCharSequence(StarsController.currency, ssb, spacedStar);
+        return ssb;
+    }
+
+    public static SpannableStringBuilder replaceDiamond(CharSequence cs) {
+        return replaceDiamond(cs, 0.9f, null, 0, 0, 1.0f);
+    }
+
+    public static SpannableStringBuilder replaceDiamond(CharSequence cs, final float scale) {
+        return replaceDiamond(cs, scale, null, 0, 0, 1.0f);
+    }
+
+    public static SpannableStringBuilder replaceDiamond(CharSequence cs, final float scale, ColoredImageSpan[] cache, final float tx, final float ty, float sx) {
+        if (cs == null) return null;
+        SpannableStringBuilder ssb;
+        if (!(cs instanceof SpannableStringBuilder)) {
+            ssb = new SpannableStringBuilder(cs);
+        } else {
+            ssb = (SpannableStringBuilder) cs;
+        }
+        SpannableString spacedStar = new SpannableString("💎 ");
+        ColoredImageSpan span;
+        if (cache != null && cache[0] != null) {
+            span = cache[0];
+        } else {
+            span = new ColoredImageSpan(R.drawable.diamond);
+            if (cache != null) {
+                cache[0] = span;
+            }
+        }
+        span.recolorDrawable = false;
+        span.translate(tx, ty);
+        span.spaceScaleX = sx;
+        span.setScale(scale, scale);
+        spacedStar.setSpan(span, 0, spacedStar.length() - 1, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+        AndroidUtilities.replaceMultipleCharSequence("💎️", ssb, "💎");
+        AndroidUtilities.replaceMultipleCharSequence("💎 ", ssb, "💎");
+        AndroidUtilities.replaceMultipleCharSequence("💎", ssb, spacedStar);
         AndroidUtilities.replaceMultipleCharSequence(StarsController.currency + " ", ssb, StarsController.currency);
         AndroidUtilities.replaceMultipleCharSequence(StarsController.currency, ssb, spacedStar);
         return ssb;
@@ -3317,8 +3416,11 @@ public class StarsIntroActivity extends GradientHeaderActivity implements Notifi
         if (spanRef != null && spanRef[0] != null) {
             span = spanRef[0];
         } else {
-            span = new ColoredImageSpan(ton ? R.drawable.ton : R.drawable.msg_premium_liststar);
+            span = new ColoredImageSpan(ton ? R.drawable.mini_gram_72 : R.drawable.msg_premium_liststar);
             span.setScale(ton ? 0.222f : 1.13f, ton ? 0.222f : 1.13f);
+        }
+        if (ton) {
+            span.recolorDrawable = false;
         }
         if (spanRef != null) {
             spanRef[0] = span;
@@ -3356,7 +3458,7 @@ public class StarsIntroActivity extends GradientHeaderActivity implements Notifi
             ssb = (SpannableStringBuilder) cs;
         }
         final String symbol = ton ? "TON" : "⭐";
-        final int resId = ton ? R.drawable.ton : R.drawable.star_small_inner;
+        final int resId = ton ? R.drawable.mini_gram_72 : R.drawable.star_small_inner;
         SpannableString spacedStar = new SpannableString(symbol + " ");
         ColoredImageSpan span;
         if (spanArr != null && spanArr[0] != null) {
@@ -3366,10 +3468,9 @@ public class StarsIntroActivity extends GradientHeaderActivity implements Notifi
         } else {
             span = new ColoredImageSpan(resId);
         }
+        span.recolorDrawable = false;
         if (ton) {
             scale *= .33f;
-        } else {
-            span.recolorDrawable = false;
         }
         span.setScale(scale, scale);
         spacedStar.setSpan(span, 0, spacedStar.length() - 1, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
@@ -4054,7 +4155,17 @@ public class StarsIntroActivity extends GradientHeaderActivity implements Notifi
                 final TL_stars.TL_starsTransactionPeer peer = (TL_stars.TL_starsTransactionPeer) transaction.peer;
                 final long peerId = DialogObject.getPeerDialogId(peer.peer);
                 long from_id, to_id;
-                if (transaction.stargift_resale) {
+                if (transaction.offer) {
+                    if (!negative) {
+                        tableView.addRow(getString(R.string.StarGiftReason), getString(transaction.refund ? R.string.StarGiftReasonOfferRefund : R.string.StarGiftReasonSale));
+                        to_id = selfId;
+                        from_id = peerId;
+                    } else {
+                        tableView.addRow(getString(R.string.StarGiftReason), getString(transaction.refund ? R.string.StarGiftReasonSale : R.string.StarGiftReasonOffer));
+                        to_id = peerId;
+                        from_id = selfId;
+                    }
+                } else if (transaction.stargift_resale) {
                     if (!negative) {
                         tableView.addRow(getString(R.string.StarGiftReason), getString(transaction.refund ? R.string.StarGiftReasonPurchase : R.string.StarGiftReasonSale));
                         to_id = selfId;
@@ -4460,7 +4571,7 @@ public class StarsIntroActivity extends GradientHeaderActivity implements Notifi
             linearLayout.addView(textView, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT, 16, 15, 16, 0));
         }
 
-        ButtonWithCounterView button = new ButtonWithCounterView(context, resourcesProvider);
+        ButtonWithCounterView button = new ButtonWithCounterView(context, resourcesProvider).setRound();
         if ((transaction.flags & 32) != 0) {
             button.setText(getString(R.string.StarsTransactionViewInBlockchainExplorer), false);
         } else {
@@ -4811,7 +4922,7 @@ public class StarsIntroActivity extends GradientHeaderActivity implements Notifi
             linearLayout.addView(textView, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT, 26, 7, 26, 15));
 
             if (subscription.chat_invite_hash != null || subscription.invoice_slug != null) {
-                ButtonWithCounterView button = new ButtonWithCounterView(context, true, resourcesProvider);
+                ButtonWithCounterView button = new ButtonWithCounterView(context, true, resourcesProvider).setRound();
                 button.setText(getString(R.string.StarsSubscriptionAgain), false);
                 linearLayout.addView(button, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, 48));
                 button.setOnClickListener(v -> {
@@ -5074,13 +5185,13 @@ public class StarsIntroActivity extends GradientHeaderActivity implements Notifi
         infoView.setLinkTextColor(Theme.getColor(Theme.key_chat_messageLinkIn, resourcesProvider));
         linearLayout.addView(infoView, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT, 14, 3, 14, 24));
 
-        ButtonWithCounterView button = new ButtonWithCounterView(context, resourcesProvider);
+        ButtonWithCounterView button = new ButtonWithCounterView(context, resourcesProvider).setRound();
         button.setText(getString(stars > 0 ? R.string.PaidContentUpdateButton : R.string.PaidContentButton), false);
         linearLayout.addView(button, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, 48));
 
         final ButtonWithCounterView clearButton;
         if (stars > 0 && allowClear) {
-            clearButton = new ButtonWithCounterView(context, false, resourcesProvider);
+            clearButton = new ButtonWithCounterView(context, false, resourcesProvider).setRound();
             clearButton.setText(getString(R.string.PaidContentClearButton), false, false);
             linearLayout.addView(clearButton, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, 48, 0, 4, 0, 0));
         } else {
@@ -5596,15 +5707,24 @@ public class StarsIntroActivity extends GradientHeaderActivity implements Notifi
         });
     }
 
-    private static DecimalFormat floatFormat;
+    public static DecimalFormat floatFormat2;
+    public static String formatTON(long ton) {
+        if (floatFormat2 == null)
+            floatFormat2 = new DecimalFormat("0.####", new DecimalFormatSymbols(Locale.US));
+        if (ton % 1_000_000_000 != 0) {
+            return floatFormat2.format(ton / 1_000_000_000.0);
+        } else {
+            return (ton < 0 ? "-" : "") + LocaleController.formatNumber(Math.abs(ton / 1_000_000_000L), ',');
+        }
+    }
 
     public static CharSequence formatStarsAmount(TL_stars.StarsAmount starsAmount) {
         return formatStarsAmount(starsAmount, 0.777f, ',');
     }
-
+    private static DecimalFormat floatFormat;
     public static CharSequence formatStarsAmount(TL_stars.StarsAmount starsAmount, float relativeSize, char symbol) {
         if (floatFormat == null)
-            floatFormat = new DecimalFormat("0.################", new DecimalFormatSymbols(Locale.US));
+            floatFormat = new DecimalFormat("0.###", new DecimalFormatSymbols(Locale.US));
         SpannableStringBuilder ssb = new SpannableStringBuilder();
         if (starsAmount instanceof TL_stars.TL_starsTonAmount) {
             if (starsAmount.amount % 1_000_000_000 != 0) {

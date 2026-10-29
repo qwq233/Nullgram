@@ -286,6 +286,7 @@ public class MediaActivity extends BaseFragment implements SharedMediaLayout.Sha
         };
         fragmentView.needBlur = true;
         this.fragmentView = fragmentView;
+        fragmentView.setBackgroundColor(getThemedColor(Theme.key_windowBackgroundGray));
 
         ActionBarMenu menu2 = actionBar.createMenu();
         if (type == TYPE_STORIES || type == TYPE_ARCHIVED_CHANNEL_STORIES) {
@@ -740,7 +741,7 @@ public class MediaActivity extends BaseFragment implements SharedMediaLayout.Sha
             }
         };
         if (sharedMediaLayout.getSearchOptionsItem() != null) {
-            sharedMediaLayout.getSearchOptionsItem().setColorFilter(new PorterDuffColorFilter(getThemedColor(Theme.key_windowBackgroundWhiteBlackText), PorterDuff.Mode.MULTIPLY));
+            sharedMediaLayout.getSearchOptionsItem().setColorFilter(new PorterDuffColorFilter(getThemedColor(Theme.key_windowBackgroundWhiteBlackText), PorterDuff.Mode.SRC_IN));
         }
         sharedMediaLayout.setPinnedToTop(true);
         sharedMediaLayout.getSearchItem().setTranslationY(0);
@@ -824,7 +825,7 @@ public class MediaActivity extends BaseFragment implements SharedMediaLayout.Sha
             }
         }
 
-        final ImageLocation thumbLocation = ImageLocation.getForUserOrChat(avatarObject, ImageLocation.TYPE_SMALL);
+        final ImageLocation thumbLocation = ImageLocation.getForUserOrChat(currentAccount, avatarObject, ImageLocation.TYPE_SMALL);
         avatarImageView.setImage(thumbLocation, "50_50", avatarDrawable, avatarObject);
 
         if (nameTextView[0] != null && TextUtils.isEmpty(nameTextView[0].getText())) {
@@ -859,15 +860,16 @@ public class MediaActivity extends BaseFragment implements SharedMediaLayout.Sha
     }
 
     @Override
-    public boolean onBackPressed() {
-        if (closeSheet()) {
+    public boolean onBackPressed(boolean invoked) {
+        if (hasShownSheet()) {
+            if (invoked) closeSheet();
             return false;
         }
         if (sharedMediaLayout.isActionModeShown()) {
-            sharedMediaLayout.closeActionMode(false);
+            if (invoked) sharedMediaLayout.closeActionMode(false);
             return false;
         }
-        return super.onBackPressed();
+        return super.onBackPressed(invoked);
     }
 
     @Override
@@ -1003,7 +1005,7 @@ public class MediaActivity extends BaseFragment implements SharedMediaLayout.Sha
             subtitleTextView[i].setText(LocaleController.formatPluralString("GIFs", mediaCount[MediaDataController.MEDIA_GIF]), animated);
         } else if (id == SharedMediaLayout.TAB_RECOMMENDED_CHANNELS) {
             showSubtitle(i, true, true);
-            MessagesController.ChannelRecommendations rec = MessagesController.getInstance(currentAccount).getChannelRecommendations(-dialogId);
+            MessagesController.ChannelRecommendations rec = MessagesController.getInstance(currentAccount).getChannelRecommendations(dialogId);
             subtitleTextView[i].setText(LocaleController.formatPluralString("Channels", rec == null ? 0 : rec.more + rec.chats.size()), animated);
         }
     }
@@ -1083,9 +1085,9 @@ public class MediaActivity extends BaseFragment implements SharedMediaLayout.Sha
 
     private void updateColors() {
         if (sharedMediaLayout.getSearchOptionsItem() != null) {
-            sharedMediaLayout.getSearchOptionsItem().setColorFilter(new PorterDuffColorFilter(getThemedColor(Theme.key_windowBackgroundWhiteBlackText), PorterDuff.Mode.MULTIPLY));
+            sharedMediaLayout.getSearchOptionsItem().setColorFilter(new PorterDuffColorFilter(getThemedColor(Theme.key_windowBackgroundWhiteBlackText), PorterDuff.Mode.SRC_IN));
         }
-        actionBar.setBackgroundColor(Theme.getColor(Theme.key_windowBackgroundWhite));
+        actionBar.setBackgroundColor(Theme.getColor(Theme.key_windowBackgroundGray));
         actionBar.setItemsColor(Theme.getColor(Theme.key_windowBackgroundWhiteBlackText), false);
         actionBar.setItemsColor(Theme.getColor(Theme.key_windowBackgroundWhiteBlackText), true);
         actionBar.setItemsBackgroundColor(Theme.getColor(Theme.key_actionBarActionModeDefaultSelector), false);
@@ -1154,5 +1156,17 @@ public class MediaActivity extends BaseFragment implements SharedMediaLayout.Sha
             return getLastStoryViewer().getNavigationBarColor(color);
         }
         return color;
+    }
+
+    @Override
+    public boolean isSupportEdgeToEdge() {
+        return true;
+    }
+
+    @Override
+    public void onInsets(int left, int top, int right, int bottom) {
+        if (sharedMediaLayout != null) {
+            sharedMediaLayout.setPagesPaddingBottom(bottom);
+        }
     }
 }

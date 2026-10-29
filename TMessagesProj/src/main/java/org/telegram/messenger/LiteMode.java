@@ -41,8 +41,9 @@ public class LiteMode {
     public static final int FLAG_CHAT_BLUR = 256;
     public static final int FLAG_CHAT_SCALE = 32768;
     public static final int FLAG_CHAT_THANOS = 65536;
-    public static final int FLAG_LIQUID_GLASS = 1 << 18;
-    public static final int FLAGS_CHAT = FLAG_CHAT_BACKGROUND | FLAG_CHAT_FORUM_TWOCOLUMN | FLAG_CHAT_SPOILER | FLAG_CHAT_BLUR | FLAG_CHAT_SCALE | FLAG_CHAT_THANOS | FLAG_LIQUID_GLASS;
+    // Bit 18 remains reserved for settings written by previous versions.
+    private static final int RESERVED_LEGACY_UI_FLAG = 1 << 18;
+    public static final int FLAGS_CHAT = FLAG_CHAT_BACKGROUND | FLAG_CHAT_FORUM_TWOCOLUMN | FLAG_CHAT_SPOILER | FLAG_CHAT_BLUR | FLAG_CHAT_SCALE | FLAG_CHAT_THANOS;
 
     public static final int FLAG_CALLS_ANIMATIONS = 512;
     public static final int FLAG_AUTOPLAY_VIDEOS = 1024;
@@ -56,7 +57,7 @@ public class LiteMode {
         FLAG_AUTOPLAY_GIFS |
         FLAG_CHAT_THANOS |
         FLAG_PARTICLES
-    ); // 67612
+    ); // 198684
     public static int PRESET_MEDIUM = (
         FLAGS_ANIMATED_STICKERS |
         FLAG_ANIMATED_EMOJI_KEYBOARD_PREMIUM |
@@ -68,7 +69,7 @@ public class LiteMode {
         FLAG_AUTOPLAY_GIFS |
         FLAG_CHAT_THANOS |
         FLAG_PARTICLES
-    ); // 73311
+    ); // 204383
     public static int PRESET_HIGH = (
         FLAGS_ANIMATED_STICKERS |
         FLAGS_ANIMATED_EMOJI |
@@ -81,9 +82,8 @@ public class LiteMode {
         FLAG_CALLS_ANIMATIONS |
         FLAG_AUTOPLAY_VIDEOS |
         FLAG_AUTOPLAY_GIFS |
-        FLAG_CHAT_THANOS |
         FLAG_PARTICLES
-    ); // 131071
+    ); // 262143
     public static int PRESET_POWER_SAVER = 0;
 
     private static int BATTERY_LOW = 10;
@@ -170,7 +170,7 @@ public class LiteMode {
     public static void setAllFlags(int flags) {
         // in settings it is already handled. would you handle it? 🫵
         // onFlagsUpdate(value, flags);
-        value = flags;
+        value = flags & ~RESERVED_LEGACY_UI_FLAG;
         savePreference();
     }
 
@@ -214,7 +214,7 @@ public class LiteMode {
         if (!preferences.contains("lite_mode6")) {
             if (preferences.contains("lite_mode5")) {
                 defaultValue = preferences.getInt("lite_mode5", defaultValue);
-                defaultValue &=~ FLAG_LIQUID_GLASS;
+                defaultValue &= ~RESERVED_LEGACY_UI_FLAG;
                 preferences.edit().putInt("lite_mode6", defaultValue).apply();
             } else if (preferences.contains("lite_mode4")) {
                 defaultValue = preferences.getInt("lite_mode4", defaultValue);
@@ -278,7 +278,7 @@ public class LiteMode {
         }
 
         int prevValue = value;
-        value = preferences.getInt("lite_mode6", defaultValue);
+        value = preferences.getInt("lite_mode6", defaultValue) & ~RESERVED_LEGACY_UI_FLAG;
         if (loaded) {
             onFlagsUpdate(prevValue, value);
         }

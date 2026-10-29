@@ -12,6 +12,7 @@ import androidx.core.view.WindowInsetsAnimationCompat;
 import androidx.core.view.WindowInsetsCompat;
 
 import org.jspecify.annotations.Nullable;
+import org.telegram.messenger.AndroidUtilities;
 import org.telegram.ui.Components.chat.ViewPositionWatcher;
 
 import java.util.List;
@@ -82,6 +83,7 @@ public class WindowAnimatedInsetsProvider extends WindowInsetsAnimationCompat.Ca
     private static final PointF tmpPointF = new PointF();
     private static final RectF tmpRectF = new RectF();
     private static final Rect tmpRect = new Rect();
+
 
     private void dispatchWindowInsetsAnimationStart() {
         for (Listener listener: listeners) {

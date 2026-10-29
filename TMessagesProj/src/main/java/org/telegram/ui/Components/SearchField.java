@@ -201,7 +201,7 @@ public class SearchField extends FrameLayout {
         descriptions.add(new ThemeDescription(searchEditText, ThemeDescription.FLAG_CURSORCOLOR, null, null, null, null, Theme.key_featuredStickers_addedIcon));
     }
 
-    private int getThemedColor(int key) {
+    protected int getThemedColor(int key) {
         return Theme.getColor(key, resourcesProvider);
     }
 }

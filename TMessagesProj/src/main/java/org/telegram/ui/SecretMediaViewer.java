@@ -29,7 +29,6 @@ import android.graphics.PorterDuff;
 import android.graphics.PorterDuffColorFilter;
 import android.graphics.Rect;
 import android.graphics.RectF;
-import android.graphics.SurfaceTexture;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.ColorDrawable;
 import android.net.Uri;
@@ -71,9 +70,9 @@ import androidx.dynamicanimation.animation.FloatValueHolder;
 import androidx.dynamicanimation.animation.SpringAnimation;
 import androidx.dynamicanimation.animation.SpringForce;
 
-import com.google.android.exoplayer2.C;
-import com.google.android.exoplayer2.ExoPlayer;
-import com.google.android.exoplayer2.ui.AspectRatioFrameLayout;
+import androidx.media3.common.C;
+import androidx.media3.exoplayer.ExoPlayer;
+import org.telegram.ui.AspectRatioFrameLayout;
 
 import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.Emoji;
@@ -88,6 +87,7 @@ import org.telegram.messenger.NotificationCenter;
 import org.telegram.messenger.R;
 import org.telegram.messenger.SharedConfig;
 import org.telegram.messenger.UserConfig;
+import org.telegram.messenger.utils.WindowVisibilityManager;
 import org.telegram.tgnet.ConnectionsManager;
 import org.telegram.tgnet.TLRPC;
 import org.telegram.ui.ActionBar.ActionBar;
@@ -189,7 +189,7 @@ public class SecretMediaViewer implements NotificationCenter.NotificationCenterD
             circlePaint = new Paint(Paint.ANTI_ALIAS_FLAG);
             circlePaint.setColor(0x7f000000);
 
-            drawable = new RLottieDrawable(R.raw.fire_on, "" + R.raw.fire_on, dp(16), dp(16));
+            drawable = new RLottieDrawable(R.raw.fire_on, dp(16), dp(16));
             drawable.setColorFilter(new PorterDuffColorFilter(Color.WHITE, PorterDuff.Mode.SRC_IN));
             drawable.setMasterParent(this);
             drawable.start();
@@ -301,8 +301,8 @@ public class SecretMediaViewer implements NotificationCenter.NotificationCenterD
         @Keep
         @Override
         public void setAlpha(int alpha) {
-            if (parentActivity instanceof LaunchActivity) {
-                ((LaunchActivity) parentActivity).drawerLayoutContainer.setAllowDrawContent(!isPhotoVisible || alpha != 255);
+            if (activityVisibilityController != null) {
+                activityVisibilityController.setHidden(!(!isPhotoVisible || alpha != 255));
             }
             super.setAlpha(alpha);
         }
@@ -638,16 +638,6 @@ public class SecretMediaViewer implements NotificationCenter.NotificationCenterD
                         containerView.invalidate();
                     }
                 }
-
-                @Override
-                public boolean onSurfaceDestroyed(SurfaceTexture surfaceTexture) {
-                    return false;
-                }
-
-                @Override
-                public void onSurfaceTextureUpdated(SurfaceTexture surfaceTexture) {
-
-                }
             });
         }
         videoPlayer.preparePlayer(Uri.fromFile(file), "other");
@@ -728,6 +718,8 @@ public class SecretMediaViewer implements NotificationCenter.NotificationCenterD
         }
         isPlaying = false;
     }
+
+    private WindowVisibilityManager.Controller activityVisibilityController;
 
     public void setParentActivity(Activity activity) {
         currentAccount = UserConfig.selectedAccount;
@@ -1480,6 +1472,12 @@ public class SecretMediaViewer implements NotificationCenter.NotificationCenterD
         animateToRadius = true;
         zoomAnimation = true;
 
+        if (activityVisibilityController != null) {
+            activityVisibilityController.destroy();
+            activityVisibilityController = null;
+        }
+        activityVisibilityController = LaunchActivity.obtainActivityVisibilityController();
+
         NotificationCenter.getInstance(currentAccount).addObserver(this, NotificationCenter.messagesDeleted);
         NotificationCenter.getInstance(currentAccount).addObserver(this, NotificationCenter.updateMessageMedia);
         NotificationCenter.getInstance(currentAccount).addObserver(this, NotificationCenter.didCreatedNewDeleteTask);
@@ -1709,6 +1707,10 @@ public class SecretMediaViewer implements NotificationCenter.NotificationCenterD
         if (onClose != null) {
             onClose.run();
             onClose = null;
+        }
+        if (activityVisibilityController != null) {
+            activityVisibilityController.destroy();
+            activityVisibilityController = null;
         }
         NotificationCenter.getInstance(currentAccount).removeObserver(this, NotificationCenter.messagesDeleted);
         NotificationCenter.getInstance(currentAccount).removeObserver(this, NotificationCenter.updateMessageMedia);
@@ -1992,6 +1994,10 @@ public class SecretMediaViewer implements NotificationCenter.NotificationCenterD
             }
         }
 
+        if (activityVisibilityController != null) {
+            activityVisibilityController.destroy();
+            activityVisibilityController = null;
+        }
         NotificationCenter.getInstance(currentAccount).removeObserver(this, NotificationCenter.messagesDeleted);
         NotificationCenter.getInstance(currentAccount).removeObserver(this, NotificationCenter.updateMessageMedia);
         NotificationCenter.getInstance(currentAccount).removeObserver(this, NotificationCenter.didCreatedNewDeleteTask);

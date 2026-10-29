@@ -17,6 +17,8 @@
 
 package org.telegram.ui.Components;
 
+import static org.telegram.messenger.AndroidUtilities.dp;
+
 import android.graphics.Canvas;
 import android.graphics.ColorFilter;
 import android.graphics.Paint;
@@ -56,7 +58,7 @@ import org.telegram.messenger.NotificationCenter;
 import org.telegram.messenger.SharedConfig;
 import org.telegram.messenger.SvgHelper;
 import org.telegram.messenger.UserConfig;
-import org.telegram.messenger.utils.FrameTickScheduler;
+import org.telegram.messenger.utils.Choreographer60FpsContent;
 import org.telegram.tgnet.ConnectionsManager;
 import org.telegram.tgnet.NativeByteBuffer;
 import org.telegram.tgnet.TLRPC;
@@ -99,12 +101,18 @@ public class AnimatedEmojiDrawable extends Drawable {
     public static final int CACHE_TYPE_FORUM_TOPIC_PULL_DOWN = 22;
     public static final int CACHE_TYPE_MESSAGE_EFFECT_MINI = 23;
     public static final int CACHE_TYPE_ALERT_PREVIEW_LARGE_140 = 24;
+    public static final int CACHE_TYPE_ALERT_PREVIEW_LARGE_50 = 27;
     public static final int CACHE_TYPE_TOGGLEABLE_EDIT = 25;
     public static final int CACHE_TYPE_NOANIMATE_FOLDER = 26;
 
-    public int rawDrawIndex;
-
     private static SparseArray<LongSparseArray<AnimatedEmojiDrawable>> globalEmojiCache;
+
+    public static void dropGlobalEmojiCache() {
+        if (globalEmojiCache != null) {
+            globalEmojiCache.clear();
+        }
+    }
+
     private static boolean LOG_MEMORY_LEAK = false;
 
     @NonNull
@@ -536,6 +544,8 @@ public class AnimatedEmojiDrawable extends Drawable {
             sizedp = 100;
         } else if (cacheType == CACHE_TYPE_FORUM_TOPIC_LARGE || cacheType == CACHE_TYPE_FORUM_TOPIC_PULL_DOWN) {
             sizedp = 56;
+        } else if (cacheType == CACHE_TYPE_ALERT_PREVIEW_LARGE_50) {
+            sizedp = 50;
         } else if (cacheType == CACHE_TYPE_ALERT_PREVIEW_LARGE_140) {
             sizedp = 140;
         } else if (this.cacheType == CACHE_TYPE_MESSAGE_EFFECT_MINI) {
@@ -616,7 +626,7 @@ public class AnimatedEmojiDrawable extends Drawable {
         if (cacheType == CACHE_TYPE_ALERT_PREVIEW_STATIC || cacheType == CACHE_TYPE_ALERT_PREVIEW_STATIC_WITH_THUMB) {
             onlyStaticPreview = true;
         }
-        if (cacheType == CACHE_TYPE_ALERT_PREVIEW_LARGE_140) {
+        if (cacheType == CACHE_TYPE_ALERT_PREVIEW_LARGE_140 || cacheType == CACHE_TYPE_ALERT_PREVIEW_LARGE_50) {
             onlyStaticPreview = false;
         }
         String filter = sizedp + "_" + sizedp;
@@ -701,7 +711,7 @@ public class AnimatedEmojiDrawable extends Drawable {
         if (cacheType == CACHE_TYPE_ALERT_PREVIEW_STATIC || cacheType == CACHE_TYPE_ALERT_PREVIEW_STATIC_WITH_THUMB || cacheType == CACHE_TYPE_ALERT_PREVIEW || cacheType == CACHE_TYPE_ALERT_PREVIEW_TAB_STRIP || cacheType == CACHE_TYPE_ALERT_PREVIEW_LARGE || cacheType == CACHE_TYPE_ALERT_PREVIEW_LARGE_140) {
             imageReceiver.setLayerNum(7);
         }
-        if (cacheType == CACHE_TYPE_ALERT_EMOJI_STATUS || cacheType == CACHE_TYPE_ALERT_STANDARD_EMOJI) {
+        if (cacheType == CACHE_TYPE_ALERT_EMOJI_STATUS || cacheType == CACHE_TYPE_ALERT_STANDARD_EMOJI || cacheType == AnimatedEmojiDrawable.CACHE_TYPE_ALERT_PREVIEW_LARGE_50) {
             imageReceiver.setLayerNum(6656);
         }
         imageReceiver.setAspectFit(true);
@@ -716,10 +726,10 @@ public class AnimatedEmojiDrawable extends Drawable {
         }
         imageReceiver.setAllowDecodeSingleFrame(true);
         int roundRadius = 0;
-        if (cacheType == CACHE_TYPE_ALERT_PREVIEW_TAB_STRIP || cacheType == CACHE_TYPE_TAB_STRIP) {
-            roundRadius = AndroidUtilities.dp(6);
+        if (cacheType == CACHE_TYPE_ALERT_PREVIEW_TAB_STRIP || cacheType == CACHE_TYPE_TAB_STRIP || cacheType == CACHE_TYPE_ALERT_PREVIEW_LARGE_50) {
+            roundRadius = dp(6);
         } else if (cacheType == CACHE_TYPE_ALERT_PREVIEW_LARGE_140) {
-            roundRadius = AndroidUtilities.dp(14);
+            roundRadius = dp(14);
         }
         imageReceiver.setRoundRadius(roundRadius);
         updateAttachState();
@@ -732,7 +742,7 @@ public class AnimatedEmojiDrawable extends Drawable {
         disabledToggleableAnimations = !enabled;
         if (globalEmojiCache == null) return;
         final int key = Objects.hash(currentAccount, CACHE_TYPE_TOGGLEABLE_EDIT);
-        LongSparseArray<AnimatedEmojiDrawable> emojis = globalEmojiCache.get(key);
+        final LongSparseArray<AnimatedEmojiDrawable> emojis = globalEmojiCache.get(key);
         if (emojis != null) {
             for (int i = 0; i < emojis.size(); ++i) {
                 AnimatedEmojiDrawable drawable = emojis.valueAt(i);
@@ -809,6 +819,16 @@ public class AnimatedEmojiDrawable extends Drawable {
         if (placeholderPaint != null) {
             placeholderPaint.setColor(Theme.isCurrentThemeDark() ? 0x0fffffff : 0x0f000000);
         }
+    }
+
+    @Override
+    public int getIntrinsicWidth() {
+        return dp(sizedp);
+    }
+
+    @Override
+    public int getIntrinsicHeight() {
+        return dp(sizedp);
     }
 
     @Override
@@ -893,6 +913,17 @@ public class AnimatedEmojiDrawable extends Drawable {
         updateAttachState();
     }
 
+    public void clear() {
+        if (holders != null) {
+            holders.clear();
+        }
+        if (views != null) {
+            views.clear();
+        }
+        preloading = false;
+        updateAttachState();
+    }
+
     public static int attachedCount = 0;
     public static ArrayList<AnimatedEmojiDrawable> attachedDrawable;
 
@@ -921,15 +952,35 @@ public class AnimatedEmojiDrawable extends Drawable {
                 }
                 Log.d("animatedDrawable", "attached count " + attachedCount);
             }
-        }
 
-//        if (globalEmojiCache != null && (views == null || views.size() <= 0) && (holders == null || holders.size() <= 0) && globalEmojiCache.size() > 50) {
-//            HashMap<Long, AnimatedEmojiDrawable> cache = globalEmojiCache.get(currentAccount);
-//            if (cache != null) {
-//                cache.remove(documentId);
-//            }
-//        }
+            if (!attached) {
+                AndroidUtilities.cancelRunOnUIThread(cleanup);
+                AndroidUtilities.runOnUIThread(cleanup, 5000);
+            }
+        }
     }
+
+    private static final Runnable cleanup = () -> {
+        AndroidUtilities.cancelRunOnUIThread(AnimatedEmojiDrawable.cleanup);
+        try {
+            if (globalEmojiCache != null) {
+                for (int i = 0; i < globalEmojiCache.size(); ++i) {
+                    final LongSparseArray<AnimatedEmojiDrawable> array = globalEmojiCache.valueAt(i);
+                    for (int j = 0; j < array.size(); ++j) {
+                        final AnimatedEmojiDrawable drawable = array.valueAt(j);
+                        if (!drawable.attached) {
+                            array.removeAt(j);
+                            j--;
+                        }
+                    }
+                }
+            }
+        } catch (Exception e) {
+            if (BuildVars.DEBUG_PRIVATE_VERSION) {
+                FileLog.e(e);
+            }
+        }
+    };
 
     private Boolean canOverrideColorCached = null;
 
@@ -1126,6 +1177,11 @@ public class AnimatedEmojiDrawable extends Drawable {
             this.invalidateParent = invalidateParent;
         }
 
+        private Integer account;
+        public void setCurrentAccount(int account) {
+            this.account = account;
+        }
+
         public void setParentView(View parentView) {
             changeProgress.setParent(parentView);
             particlesAlpha.setParent(parentView);
@@ -1200,9 +1256,9 @@ public class AnimatedEmojiDrawable extends Drawable {
                 particles.setBounds(bounds);
                 particles.process();
                 particles.draw(canvas, Theme.multAlpha(lastColor == null ? 0xFFFFFFFF : lastColor, particlesAlpha));
-                FrameTickScheduler.subscribe(invalidateRunnable, 15);
+                Choreographer60FpsContent.getInstance().addFrameCallback(invalidateRunnable, 15);
             } else {
-                FrameTickScheduler.unsubscribe(invalidateRunnable);
+                Choreographer60FpsContent.getInstance().removeFrameCallback(invalidateRunnable);
             }
             if (drawables[1] != null && progress < 1) {
                 drawables[1].setAlpha((int) (alpha * (1f - progress)));
@@ -1235,7 +1291,7 @@ public class AnimatedEmojiDrawable extends Drawable {
                 int dh = drawables[0].getIntrinsicHeight() < 0 ? getIntrinsicHeight() : drawables[0].getIntrinsicHeight();
                 if (drawables[0] instanceof AnimatedEmojiDrawable) {
                     if (((AnimatedEmojiDrawable) drawables[0]).imageReceiver != null) {
-                        ((AnimatedEmojiDrawable) drawables[0]).imageReceiver.setRoundRadius(AndroidUtilities.dp(4));
+                        ((AnimatedEmojiDrawable) drawables[0]).imageReceiver.setRoundRadius(dp(4));
                     }
                     if (progress < 1) {
                         float scale = overshootInterpolator.getInterpolation(progress);
@@ -1313,7 +1369,7 @@ public class AnimatedEmojiDrawable extends Drawable {
                     drawables[1] = null;
                 }
                 drawables[1] = drawables[0];
-                drawables[0] = AnimatedEmojiDrawable.make(UserConfig.selectedAccount, cacheType, documentId);
+                drawables[0] = AnimatedEmojiDrawable.make(account != null ? account : UserConfig.selectedAccount, cacheType, documentId);
                 if (attached) {
                     ((AnimatedEmojiDrawable) drawables[0]).addView(this);
                 }
@@ -1323,7 +1379,7 @@ public class AnimatedEmojiDrawable extends Drawable {
                 if (attachedLocal) {
                     detach();
                 }
-                drawables[0] = AnimatedEmojiDrawable.make(UserConfig.selectedAccount, cacheType, documentId);
+                drawables[0] = AnimatedEmojiDrawable.make(account != null ? account : UserConfig.selectedAccount, cacheType, documentId);
                 if (attachedLocal) {
                     attach();
                 }
@@ -1363,7 +1419,7 @@ public class AnimatedEmojiDrawable extends Drawable {
                 }
                 drawables[1] = drawables[0];
                 if (document != null) {
-                    drawables[0] = AnimatedEmojiDrawable.make(UserConfig.selectedAccount, cacheType, document);
+                    drawables[0] = AnimatedEmojiDrawable.make(account != null ? account : UserConfig.selectedAccount, cacheType, document);
                     if (attached) {
                         ((AnimatedEmojiDrawable) drawables[0]).addView(this);
                     }
@@ -1377,7 +1433,7 @@ public class AnimatedEmojiDrawable extends Drawable {
                     detach();
                 }
                 if (document != null) {
-                    drawables[0] = AnimatedEmojiDrawable.make(UserConfig.selectedAccount, cacheType, document);
+                    drawables[0] = AnimatedEmojiDrawable.make(account != null ? account : UserConfig.selectedAccount, cacheType, document);
                 } else {
                     drawables[0] = null;
                 }

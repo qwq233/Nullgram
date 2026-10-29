@@ -830,7 +830,6 @@ public class PollVotesAlert extends BottomSheet {
                 gradientProtectionDrawable.draw(canvas);
             }
         };
-        listView.setSections(false);
 
         DefaultItemAnimator itemAnimator = new DefaultItemAnimator();
         itemAnimator.setAddDuration(150);
@@ -959,7 +958,6 @@ public class PollVotesAlert extends BottomSheet {
         titleTextView.setTypeface(AndroidUtilities.bold());
         titleTextView.setPadding(dp(21), dp(5), dp(14), dp(21));
         titleTextView.setTextColor(Theme.getColor(Theme.key_dialogTextBlack));
-        titleTextView.setTag(RecyclerListView.TAG_NOT_SECTION);
         titleTextView.setLayoutParams(new RecyclerView.LayoutParams(RecyclerView.LayoutParams.MATCH_PARENT, RecyclerView.LayoutParams.WRAP_CONTENT));
         if (poll.question != null) {
             TLRPC.TL_textWithEntities question = poll.question;
@@ -1269,7 +1267,6 @@ public class PollVotesAlert extends BottomSheet {
                 }
                 case 2: {
                     view = createSectionCell();
-                    view.setTag(RecyclerListView.TAG_NOT_SECTION);
                     break;
                 }
                 case 3:

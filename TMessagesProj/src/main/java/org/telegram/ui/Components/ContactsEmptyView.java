@@ -13,39 +13,28 @@ import static org.telegram.messenger.AndroidUtilities.dp;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
-import android.graphics.PorterDuff;
-import android.graphics.PorterDuffColorFilter;
 import android.util.TypedValue;
 import android.view.Gravity;
-import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.ContactsController;
-import org.telegram.messenger.ImageLocation;
 import org.telegram.messenger.LocaleController;
-import org.telegram.messenger.MediaDataController;
 import org.telegram.messenger.R;
 import org.telegram.messenger.UserConfig;
-import org.telegram.tgnet.TLRPC;
-import org.telegram.ui.ActionBar.ActionBar;
 import org.telegram.ui.ActionBar.Theme;
-
-import java.util.ArrayList;
 
 public class ContactsEmptyView extends LinearLayout {
 
-    private TextView titleTextView;
-    private TextView subtitleTextView;
-    private LinkSpanDrawable.LinksTextView buttonTextView;
+    private final TextView titleTextView;
+    private final TextView subtitleTextView;
 
-    private BackupImageView stickerView;
-    private ArrayList<TextView> textViews = new ArrayList<>();
-    private ArrayList<ImageView> imageViews = new ArrayList<>();
-    private LoadingStickerDrawable drawable;
+    private final BackupImageView stickerView;
+    private final LoadingStickerDrawable drawable;
+    private final LinkSpanDrawable.LinksTextView buttonTextView;
 
-    private int currentAccount = UserConfig.selectedAccount;
+    private final int currentAccount = UserConfig.selectedAccount;
 
     public static final String svg = "m418 282.6c13.4-21.1 20.2-44.9 20.2-70.8 0-88.3-79.8-175.3-178.9-175.3-100.1 0-178.9 88-178.9 175.3 0 46.6 16.9 73.1 29.1 86.1-19.3 23.4-30.9 52.3-34.6 86.1-2.5 22.7 3.2 41.4 17.4 57.3 14.3 16 51.7 35 148.1 35 41.2 0 119.9-5.3 156.7-18.3 49.5-17.4 59.2-41.1 59.2-76.2 0-41.5-12.9-74.8-38.3-99.2z";
     public ContactsEmptyView(Context context) {
@@ -103,17 +92,14 @@ public class ContactsEmptyView extends LinearLayout {
     }
 
     public void setColors() {
-        for (int a = 0; a < textViews.size(); a++) {
-            textViews.get(a).setTextColor(Theme.getColor(Theme.key_windowBackgroundWhiteGrayText));
-        }
-        for (int a = 0; a < imageViews.size(); a++) {
-            imageViews.get(a).setColorFilter(new PorterDuffColorFilter(Theme.getColor(Theme.key_windowBackgroundWhiteGrayText), PorterDuff.Mode.MULTIPLY));
-        }
         titleTextView.setTextColor(Theme.getColor(Theme.key_windowBackgroundWhiteBlackText));
+        subtitleTextView.setTextColor(Theme.getColor(Theme.key_windowBackgroundWhiteBlackText));
+        buttonTextView.setTextColor(Theme.getColor(Theme.key_windowBackgroundWhiteBlackText));
+        buttonTextView.setLinkTextColor(Theme.getColor(Theme.key_chat_messageLinkIn));
     }
 
     private void setSticker() {
-        stickerView.setImageDrawable(new RLottieDrawable(R.raw.utyan_empty, "utyan_empty", dp(130), dp(130)));
+        stickerView.setImageDrawable(new RLottieDrawable(R.raw.utyan_empty, dp(130), dp(130)));
     }
 
     @Override

@@ -1,5 +1,7 @@
 package org.telegram.ui;
 
+import static org.telegram.messenger.AndroidUtilities.dp;
+
 import android.content.Context;
 import android.text.TextUtils;
 import android.view.View;
@@ -98,7 +100,7 @@ public class ArchiveSettingsActivity extends BaseFragment implements Notificatio
                         presentFragment(new PremiumPreviewFragment("settings"));
                     }));
                     layout.textView.setSingleLine(false);
-                    layout.textView.setPadding(0, AndroidUtilities.dp(4), 0, AndroidUtilities.dp(4));
+                    layout.textView.setPadding(0, dp(4), 0, dp(4));
                     layout.imageView.setImageResource(R.drawable.msg_settings_premium);
                     Bulletin.make(this, layout, 3500).show();
 
@@ -301,5 +303,16 @@ public class ArchiveSettingsActivity extends BaseFragment implements Notificatio
         } else if (id == NotificationCenter.dialogFiltersUpdated) {
             updateItems(true);
         }
+    }
+
+    @Override
+    public boolean isSupportEdgeToEdge() {
+        return true;
+    }
+
+    @Override
+    public void onInsets(int left, int top, int right, int bottom) {
+        listView.setPadding(0, 0, 0, bottom);
+        listView.setClipToPadding(false);
     }
 }

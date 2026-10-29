@@ -46,6 +46,7 @@ import org.telegram.messenger.NotificationCenter;
 import org.telegram.messenger.R;
 import org.telegram.messenger.SvgHelper;
 import org.telegram.tgnet.ConnectionsManager;
+import org.telegram.utils.proxy.ProxySettings;
 import org.telegram.tgnet.TLRPC;
 import org.telegram.ui.ActionBar.ActionBar;
 import org.telegram.ui.ActionBar.Theme;
@@ -176,7 +177,7 @@ public class DatacenterActivity extends BaseActivity implements NotificationCent
         if (force) {
             listAdapter.notifyItemChanged(position);
         }
-        datacenterInfo.pingId = ConnectionsManager.getInstance(currentAccount).checkProxy("ping-test", datacenterInfo.id, null, null, null, time -> AndroidUtilities.runOnUIThread(() -> {
+        datacenterInfo.pingId = ConnectionsManager.getInstance(currentAccount).checkProxy(ProxySettings.builder().setAddress("ping-test").setPort(datacenterInfo.id).build(), time -> AndroidUtilities.runOnUIThread(() -> {
             datacenterInfo.availableCheckTime = SystemClock.elapsedRealtime();
             datacenterInfo.checking = false;
             if (time == -1) {

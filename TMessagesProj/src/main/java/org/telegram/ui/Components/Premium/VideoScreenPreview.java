@@ -7,12 +7,10 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Path;
-import android.graphics.SurfaceTexture;
 import android.graphics.drawable.Drawable;
 import android.media.MediaMetadataRetriever;
 import android.net.Uri;
 import android.os.Build;
-import android.util.Log;
 import android.view.TextureView;
 import android.widget.FrameLayout;
 
@@ -20,8 +18,8 @@ import androidx.core.graphics.ColorUtils;
 import androidx.core.graphics.drawable.RoundedBitmapDrawable;
 import androidx.core.graphics.drawable.RoundedBitmapDrawableFactory;
 
-import com.google.android.exoplayer2.ExoPlayer;
-import com.google.android.exoplayer2.ui.AspectRatioFrameLayout;
+import androidx.media3.exoplayer.ExoPlayer;
+import org.telegram.ui.AspectRatioFrameLayout;
 
 import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.ApplicationLoader;
@@ -37,10 +35,8 @@ import org.telegram.messenger.video.VideoPlayerHolderBase;
 import org.telegram.tgnet.TLRPC;
 import org.telegram.ui.ActionBar.Theme;
 import org.telegram.ui.Components.CombinedDrawable;
-import org.telegram.ui.Components.VideoPlayer;
 import org.telegram.ui.Components.voip.CellFlickerDrawable;
 import org.telegram.ui.PremiumPreviewFragment;
-import org.telegram.ui.Stories.StoryViewer;
 
 import java.io.File;
 import java.net.URLEncoder;
@@ -136,13 +132,14 @@ public class VideoScreenPreview extends FrameLayout implements PagerHeaderView, 
                 type == PremiumPreviewFragment.PREMIUM_FEATURE_ANIMATED_AVATARS ||
                 type == PremiumPreviewFragment.PREMIUM_FEATURE_ANIMATED_EMOJI ||
                 type == PremiumPreviewFragment.PREMIUM_FEATURE_REACTIONS ||
-                type == PremiumPreviewFragment.PREMIUM_FEATURE_SAVED_TAGS
+                type == PremiumPreviewFragment.PREMIUM_FEATURE_SAVED_TAGS ||
+                type == PremiumPreviewFragment.PREMIUM_FEATURE_RICH_EDITOR
         ) {
             starDrawable = new StarParticlesView.Drawable(40);
             starDrawable.speedScale = 3;
             starDrawable.type = type;
 
-            if (type == PremiumPreviewFragment.PREMIUM_FEATURE_ADS || type == PremiumPreviewFragment.PREMIUM_FEATURE_SAVED_TAGS) {
+            if (type == PremiumPreviewFragment.PREMIUM_FEATURE_ADS || type == PremiumPreviewFragment.PREMIUM_FEATURE_SAVED_TAGS || type == PremiumPreviewFragment.PREMIUM_FEATURE_RICH_EDITOR) {
                 starDrawable.size1 = 14;
                 starDrawable.size2 = 18;
                 starDrawable.size3 = 18;
@@ -150,6 +147,9 @@ public class VideoScreenPreview extends FrameLayout implements PagerHeaderView, 
                 starDrawable.size1 = 14;
                 starDrawable.size2 = 16;
                 starDrawable.size3 = 15;
+            }
+            if (type == PremiumPreviewFragment.PREMIUM_FEATURE_RICH_EDITOR) {
+                starDrawable.useRotate = true;
             }
             starDrawable.k1 = starDrawable.k2 = starDrawable.k3 = 0.98f;
             starDrawable.speedScale = 4;
@@ -192,7 +192,7 @@ public class VideoScreenPreview extends FrameLayout implements PagerHeaderView, 
 
         aspectRatioFrameLayout = new AspectRatioFrameLayout(context) {
 
-            Path clipPath = new Path();
+            private final Path clipPath = new Path();
 
             @Override
             protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
@@ -281,7 +281,7 @@ public class VideoScreenPreview extends FrameLayout implements PagerHeaderView, 
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         int measuredWidth = MeasureSpec.getSize(widthMeasureSpec);
         int measuredHeight = MeasureSpec.getSize(heightMeasureSpec);
-        int size = (int) (MeasureSpec.getSize(heightMeasureSpec) * 0.9f);
+        int size = (int) (Math.min(measuredHeight, measuredWidth) * 0.9f);
         float h = size;
         float w = size * 0.671f;
 
@@ -301,6 +301,10 @@ public class VideoScreenPreview extends FrameLayout implements PagerHeaderView, 
         ((MarginLayoutParams) aspectRatioFrameLayout.getLayoutParams()).topMargin = (int) AndroidUtilities.rectTmp.top;
 
         super.onMeasure(widthMeasureSpec, heightMeasureSpec);
+//        super.onMeasure(
+//            MeasureSpec.makeMeasureSpec(measuredWidth, MeasureSpec.EXACTLY),
+//            MeasureSpec.makeMeasureSpec(measuredHeight, MeasureSpec.EXACTLY)
+//        );
     }
 
     @Override
@@ -308,7 +312,7 @@ public class VideoScreenPreview extends FrameLayout implements PagerHeaderView, 
         super.onLayout(changed, left, top, right, bottom);
         int sizeInternal = getMeasuredWidth() << 16 + getMeasuredHeight();
 
-        int size = (int) (getMeasuredHeight() * 0.9f);
+        int size = (int) (Math.min(getMeasuredWidth(), getMeasuredHeight()) * 0.9f);
         float h = size;
         float w = size * 0.671f;
         float horizontalPadding = (getMeasuredWidth() - w) / 2f;
@@ -332,6 +336,7 @@ public class VideoScreenPreview extends FrameLayout implements PagerHeaderView, 
                         type == PremiumPreviewFragment.PREMIUM_FEATURE_ADS ||
                         type == PremiumPreviewFragment.PREMIUM_FEATURE_ANIMATED_AVATARS ||
                         type == PremiumPreviewFragment.PREMIUM_FEATURE_SAVED_TAGS ||
+                        type == PremiumPreviewFragment.PREMIUM_FEATURE_RICH_EDITOR ||
                         type == PremiumPreviewFragment.PREMIUM_FEATURE_ANIMATED_EMOJI ||
                         type == PremiumPreviewFragment.PREMIUM_FEATURE_REACTIONS) {
                     starDrawable.rect.set(0, 0, getMeasuredWidth(), getMeasuredHeight());
@@ -397,7 +402,7 @@ public class VideoScreenPreview extends FrameLayout implements PagerHeaderView, 
             canvas.restore();
             invalidate();
         }
-        int size = (int) (getMeasuredHeight() * 0.9f);
+        int size = (int) (Math.min(getMeasuredWidth(), getMeasuredHeight()) * 0.9f);
         float h = size;
         float w = size * 0.671f;
         float horizontalPadding = (getMeasuredWidth() - w) / 2f;

@@ -18,7 +18,9 @@ import androidx.credentials.GetCredentialResponse;
 import androidx.credentials.GetPublicKeyCredentialOption;
 import androidx.credentials.PrepareGetCredentialResponse;
 import androidx.credentials.exceptions.CreateCredentialCancellationException;
+import androidx.credentials.exceptions.CreateCredentialCustomException;
 import androidx.credentials.exceptions.CreateCredentialInterruptedException;
+import androidx.credentials.exceptions.CreateCredentialNoCreateOptionException;
 import androidx.credentials.exceptions.GetCredentialCancellationException;
 import androidx.credentials.exceptions.GetCredentialException;
 import androidx.credentials.exceptions.GetCredentialInterruptedException;
@@ -51,9 +53,9 @@ import kotlinx.coroutines.GlobalScope;
 import kotlinx.coroutines.Job;
 import kotlinx.coroutines.JobCancellationException;
 
-@RequiresApi(api = 28)
 public class PasskeysController {
 
+    @RequiresApi(api = 28)
     public static void create(Context context, int currentAccount, Utilities.Callback2<TL_account.Passkey, String> done) {
         if (!BuildVars.SUPPORTS_PASSKEYS) return;
 
@@ -90,6 +92,11 @@ public class PasskeysController {
                         if (err2 instanceof CreateCredentialCancellationException || err2 instanceof CreateCredentialInterruptedException) {
                             AndroidUtilities.runOnUIThread(() -> {
                                 done.run(null, "CANCELLED");
+                            });
+                            return;
+                        } else if (err2 instanceof CreateCredentialNoCreateOptionException) {
+                            AndroidUtilities.runOnUIThread(() -> {
+                                done.run(null, "EMPTY");
                             });
                             return;
                         } else if (err2 != null) {
@@ -155,6 +162,7 @@ public class PasskeysController {
         );
     }
 
+    @RequiresApi(api = 28)
     public static Runnable login(Context context, int currentAccount, boolean clickedButton, Utilities.Callback3<Long, TLRPC.auth_Authorization, String> done) {
         if (!BuildVars.SUPPORTS_PASSKEYS) return null;
 

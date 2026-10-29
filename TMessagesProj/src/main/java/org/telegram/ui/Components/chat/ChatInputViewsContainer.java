@@ -24,7 +24,8 @@ public class ChatInputViewsContainer extends FrameLayout {
     private final FrameLayout inputIslandBubbleContainer;
     private final FrameLayout inAppKeyboardBubbleContainer;
 
-    private BlurredBackgroundDrawable inputBackgroundDrawable;
+    public boolean drawInputBackground = true;
+    public BlurredBackgroundDrawable blurredBackgroundDrawable;
     private BlurredBackgroundDrawable underKeyboardBackgroundDrawable;
 
     public ChatInputViewsContainer(@NonNull Context context) {
@@ -50,10 +51,10 @@ public class ChatInputViewsContainer extends FrameLayout {
     }
 
     public void setInputIslandBubbleDrawable(BlurredBackgroundDrawable drawable) {
-        inputBackgroundDrawable = drawable;
-        inputBackgroundDrawable.setPadding(0);
-        inputBackgroundDrawable.setRadius(0);
-        inputBackgroundDrawable.setStrokeWidth(0, 0);
+        blurredBackgroundDrawable = drawable;
+        blurredBackgroundDrawable.setPadding(0);
+        blurredBackgroundDrawable.setRadius(0);
+        blurredBackgroundDrawable.setStrokeWidth(0, 0);
         invalidate();
     }
 
@@ -66,8 +67,8 @@ public class ChatInputViewsContainer extends FrameLayout {
     }
 
     public void updateColors() {
-        if (inputBackgroundDrawable != null) {
-            inputBackgroundDrawable.updateColors();
+        if (blurredBackgroundDrawable != null) {
+            blurredBackgroundDrawable.updateColors();
         }
         if (underKeyboardBackgroundDrawable != null) {
             underKeyboardBackgroundDrawable.updateColors();
@@ -189,7 +190,7 @@ public class ChatInputViewsContainer extends FrameLayout {
         final int contentBottom = Math.round(getInputBubbleBottom() + bubbleInputTranslationY);
         final int contentTop = contentBottom - inputBubbleHeightRound;
 
-        if (inputBubbleAlpha > 0 && inputBackgroundDrawable != null) {
+        if (drawInputBackground && inputBubbleAlpha > 0 && blurredBackgroundDrawable != null) {
             final int shadowHeight = Theme.chat_composeShadowDrawable.getIntrinsicHeight();
             final int oldShadowAlpha = Theme.chat_composeShadowDrawable.getAlpha();
             Theme.chat_composeShadowDrawable.setAlpha(inputBubbleAlpha);
@@ -200,9 +201,9 @@ public class ChatInputViewsContainer extends FrameLayout {
             final int backgroundBottom = needDrawInAppKeyboard
                 ? getMeasuredHeight() - (int) imeBottomInset
                 : getMeasuredHeight();
-            inputBackgroundDrawable.setAlpha(inputBubbleAlpha);
-            inputBackgroundDrawable.setBounds(0, contentTop, getMeasuredWidth(), Math.max(contentTop, backgroundBottom));
-            inputBackgroundDrawable.draw(canvas);
+            blurredBackgroundDrawable.setAlpha(inputBubbleAlpha);
+            blurredBackgroundDrawable.setBounds(0, contentTop, getMeasuredWidth(), Math.max(contentTop, backgroundBottom));
+            blurredBackgroundDrawable.draw(canvas);
         }
 
         if (needDrawInAppKeyboard && underKeyboardBackgroundDrawable != null) {

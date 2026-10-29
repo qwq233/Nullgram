@@ -220,7 +220,7 @@ public class ReactedUserHolderView extends FrameLayout {
                 thumb = chat.photo.strippedBitmap;
             }
         }
-        avatarView.setImage(ImageLocation.getForUserOrChat(u, ImageLocation.TYPE_SMALL), "50_50", thumb, u);
+        avatarView.setImage(ImageLocation.getForUserOrChat(currentAccount, u, ImageLocation.TYPE_SMALL), "50_50", thumb, u);
 
         String contentDescription = "";
         boolean hasReactImage = false;

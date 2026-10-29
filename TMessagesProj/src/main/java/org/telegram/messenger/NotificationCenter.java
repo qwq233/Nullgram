@@ -17,14 +17,23 @@
 
 package org.telegram.messenger;
 
+import android.app.Activity;
+import android.content.Context;
+import android.content.ContextWrapper;
 import android.os.SystemClock;
+import android.util.Log;
 import android.util.SparseArray;
 import android.view.View;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.UiThread;
+import androidx.collection.MutableIntList;
 
+import org.telegram.ui.ActionBar.BaseFragment;
+import org.telegram.ui.ActionBar.BottomSheet;
+
+import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -173,7 +182,6 @@ public class NotificationCenter {
     public static final int httpFileDidLoad = totalEvents++;
     public static final int httpFileDidFailedLoad = totalEvents++;
     public static final int didUpdateConnectionState = totalEvents++;
-
     public static final int fileUploaded = totalEvents++;
     public static final int fileUploadFailed = totalEvents++;
     public static final int fileUploadProgressChanged = totalEvents++;
@@ -183,9 +191,7 @@ public class NotificationCenter {
     public static final int filePreparingStarted = totalEvents++;
     public static final int fileNewChunkAvailable = totalEvents++;
     public static final int filePreparingFailed = totalEvents++;
-
     public static final int dialogsUnreadCounterChanged = totalEvents++;
-
     public static final int messagePlayingProgressDidChanged = totalEvents++;
     public static final int messagePlayingDidReset = totalEvents++;
     public static final int messagePlayingPlayStateChanged = totalEvents++;
@@ -203,7 +209,6 @@ public class NotificationCenter {
     public static final int audioDidSent = totalEvents++;
     public static final int audioRecordTooShort = totalEvents++;
     public static final int audioRouteChanged = totalEvents++;
-
     public static final int didStartedCall = totalEvents++;
     public static final int groupCallUpdated = totalEvents++;
     public static final int storyGroupCallUpdated = totalEvents++;
@@ -217,24 +222,16 @@ public class NotificationCenter {
     public static final int groupCallVisibilityChanged = totalEvents++;
     public static final int liveStoryUpdated = totalEvents++;
     public static final int liveStoryMessageUpdate = totalEvents++;
-
     public static final int appDidLogout = totalEvents++;
-
     public static final int configLoaded = totalEvents++;
-
     public static final int needDeleteDialog = totalEvents++;
-
     public static final int newEmojiSuggestionsAvailable = totalEvents++;
-
     public static final int themeUploadedToServer = totalEvents++;
     public static final int themeUploadError = totalEvents++;
-
     public static final int dialogFiltersUpdated = totalEvents++;
     public static final int filterSettingsUpdated = totalEvents++;
     public static final int suggestedFiltersLoaded = totalEvents++;
-
     public static final int updateBotMenuButton = totalEvents++;
-
     public static final int giftsToUserSent = totalEvents++;
     public static final int didStartedMultiGiftsSelector = totalEvents++;
     public static final int boostedChannelByUser = totalEvents++;
@@ -275,7 +272,6 @@ public class NotificationCenter {
     public static final int botStarsUpdated = totalEvents++;
     public static final int botStarsTransactionsLoaded = totalEvents++;
     public static final int channelStarsUpdated = totalEvents++;
-    public static final int webViewResolved = totalEvents++;
     public static final int updateAllMessages = totalEvents++;
     public static final int starGiftsLoaded = totalEvents++;
     public static final int starUserGiftsLoaded = totalEvents++;
@@ -297,8 +293,13 @@ public class NotificationCenter {
     public static final int profileMusicUpdated = totalEvents++;
     public static final int updatedChatRanks = totalEvents++;
     public static final int joinedGroup = totalEvents++;
+    public static final int loadedAiComposeTones = totalEvents++;
+    public static final int updatedChatbot = totalEvents++;
+    public static final int walletUpdate = totalEvents++;
+    public static final int walletTransactionsUpdate = totalEvents++;
 
     //global
+    public static final int activeAccountChanged = totalEvents++;
     public static final int pushMessagesUpdated = totalEvents++;
     public static final int wallpapersDidLoad = totalEvents++;
     public static final int wallpapersNeedReload = totalEvents++;
@@ -347,6 +348,7 @@ public class NotificationCenter {
     public static final int attachMenuBotsDidLoad = totalEvents++;
     public static final int chatAvailableReactionsUpdated = totalEvents++;
     public static final int dialogsUnreadReactionsCounterChanged = totalEvents++;
+    public static final int dialogsUnreadPollVotesCounterChanged = totalEvents++;
     public static final int onDatabaseOpened = totalEvents++;
     public static final int onDownloadingFilesChanged = totalEvents++;
     public static final int onActivityResultReceived = totalEvents++;
@@ -385,8 +387,14 @@ public class NotificationCenter {
     public static final int botForumTopicDidCreate = totalEvents++;
     public static final int botForumDraftUpdate = totalEvents++;
     public static final int botForumDraftDelete = totalEvents++;
-    public static final int guardBotDecisionResult = totalEvents++;
     public static final int tlSchemeParseException = totalEvents++;
+    public static final int memoryLeakFoundException = totalEvents++;
+    public static final int callTabsVisibleToggled = totalEvents++;
+    public static final int contactsPermissionBadgeCheck = totalEvents++;
+    public static final int guardBotDecisionResult = totalEvents++;
+    public static final int webBrowserSettingsUpdate = totalEvents++;
+    public static final int communityPendingRequestsUpdate = totalEvents++;
+    public static final int communitySwitchedCollapsed = totalEvents++;
 
     public static boolean alreadyLogged;
 
@@ -694,7 +702,7 @@ public class NotificationCenter {
                     int key = addAfterBroadcast.keyAt(a);
                     ArrayList<NotificationCenterDelegate> arrayList = addAfterBroadcast.get(key);
                     for (int b = 0; b < arrayList.size(); b++) {
-                        addObserver(arrayList.get(b), key);
+                        addObserverInternal(arrayList.get(b), key);
                     }
                 }
                 addAfterBroadcast.clear();
@@ -702,7 +710,127 @@ public class NotificationCenter {
         }
     }
 
+    public void updateObserver(boolean add, NotificationCenterDelegate observer, int id) {
+        if (add) {
+            addObserver(observer, id);
+        } else {
+            removeObserver(observer, id);
+        }
+    }
+
+    public interface ObserversGroup {
+        ObserversGroup add(int id);
+        ObserversGroup addGlobal(int id);
+        void removeAllObservers();
+    }
+
+    private static final class ObserversGroupImpl implements ObserversGroup {
+        private NotificationCenter notificationCenter;
+        private NotificationCenterDelegate delegate;
+        private final MutableIntList ids = new MutableIntList();
+        private ObserversGroupImpl globalGroup;
+
+        private ObserversGroupImpl(NotificationCenter center, NotificationCenterDelegate delegate) {
+            this.notificationCenter = center;
+            this.delegate = delegate;
+        }
+
+        @Override
+        public ObserversGroup add(int id) {
+            if (delegate == null) {
+                return this;
+            }
+
+            ids.add(id);
+            notificationCenter.addObserverInternal(delegate, id);
+            return this;
+        }
+
+        @Override
+        public ObserversGroup addGlobal(int id) {
+            if (delegate == null) {
+                return this;
+            }
+
+            if (globalGroup == null) {
+                globalGroup = new ObserversGroupImpl(getGlobalInstance(), delegate);
+            }
+
+            globalGroup.add(id);
+            return this;
+        }
+
+        @Override
+        public void removeAllObservers() {
+            if (delegate == null) {
+                return;
+            }
+
+            if (globalGroup != null) {
+                globalGroup.removeAllObservers();
+                globalGroup = null;
+            }
+
+            for (int a = 0, N = ids.getSize(); a < N; a++) {
+                notificationCenter.removeObserver(delegate, ids.get(a));
+            }
+            ids.clear();
+            notificationCenter = null;
+            delegate = null;
+        }
+    }
+
+    private static final class WeakObserversGroupImpl implements ObserversGroup, NotificationCenterDelegate {
+        private final ObserversGroupImpl observersGroup;
+        private final WeakReference<NotificationCenterDelegate> reference;
+
+        private WeakObserversGroupImpl(NotificationCenter center, NotificationCenterDelegate delegate) {
+            observersGroup = new ObserversGroupImpl(center, this);
+            reference = new WeakReference<>(delegate);
+        }
+
+        @Override
+        public void didReceivedNotification(int id, int account, Object... args) {
+            final NotificationCenterDelegate delegate = reference.get();
+            if (delegate != null) {
+                delegate.didReceivedNotification(id, account, args);
+            } else {
+                FileLog.e("MEMORY_LEAK observer " + id + " with destroyed WeakReference");
+                removeAllObservers();
+            }
+        }
+
+        @Override
+        public ObserversGroup add(int id) {
+            return observersGroup.add(id);
+        }
+
+        @Override
+        public ObserversGroup addGlobal(int id) {
+            return observersGroup.addGlobal(id);
+        }
+
+        @Override
+        public void removeAllObservers() {
+            observersGroup.removeAllObservers();
+        }
+    }
+
+
+    public ObserversGroup createObserversGroup(NotificationCenterDelegate delegate) {
+        return new ObserversGroupImpl(this, delegate);
+    }
+
+    public ObserversGroup createWeakObserversGroup(NotificationCenterDelegate delegate) {
+        return new WeakObserversGroupImpl(this, delegate);
+    }
+
+    @Deprecated(since = "use createWeakObserversGroup or createObserversGroup")
     public void addObserver(NotificationCenterDelegate observer, int id) {
+        addObserverInternal(observer, id);
+    }
+
+    private void addObserverInternal(NotificationCenterDelegate observer, int id) {
         if (BuildVars.DEBUG_VERSION) {
             if (Thread.currentThread() != ApplicationLoader.applicationHandler.getLooper().getThread()) {
                 throw new RuntimeException("addObserver allowed only from MAIN thread");
@@ -815,33 +943,6 @@ public class NotificationCenter {
         }
     }
 
-    public Runnable listenGlobal(View view, final int id, final Utilities.Callback<Object[]> callback) {
-        if (view == null || callback == null) {
-            return () -> {};
-        }
-        final NotificationCenterDelegate delegate = (_id, account, args) -> {
-            if (_id == id) {
-                callback.run(args);
-            }
-        };
-        final View.OnAttachStateChangeListener viewListener = new View.OnAttachStateChangeListener() {
-            @Override
-            public void onViewAttachedToWindow(View view) {
-                NotificationCenter.getGlobalInstance().addObserver(delegate, id);
-            }
-            @Override
-            public void onViewDetachedFromWindow(View view) {
-                NotificationCenter.getGlobalInstance().removeObserver(delegate, id);
-            }
-        };
-        view.addOnAttachStateChangeListener(viewListener);
-
-        return () -> {
-            view.removeOnAttachStateChangeListener(viewListener);
-            NotificationCenter.getGlobalInstance().removeObserver(delegate, id);
-        };
-    }
-
     public Runnable listen(View view, final int id, final Utilities.Callback<Object[]> callback) {
         if (view == null || callback == null) {
             return () -> {};
@@ -854,7 +955,7 @@ public class NotificationCenter {
         final View.OnAttachStateChangeListener viewListener = new View.OnAttachStateChangeListener() {
             @Override
             public void onViewAttachedToWindow(View view) {
-                addObserver(delegate, id);
+                addObserverInternal(delegate, id);
             }
             @Override
             public void onViewDetachedFromWindow(View view) {
@@ -870,36 +971,7 @@ public class NotificationCenter {
     }
 
     public static void listenEmojiLoading(View view) {
-        getGlobalInstance().listenGlobal(view, NotificationCenter.emojiLoaded, args -> view.invalidate());
-    }
-
-    public void listenOnce(int id, Runnable callback) {
-        final NotificationCenterDelegate[] observer = new NotificationCenterDelegate[1];
-        observer[0] = (nid, account, args) -> {
-            if (nid == id && observer[0] != null) {
-                if (callback != null) {
-                    callback.run();
-                }
-                removeObserver(observer[0], id);
-                observer[0] = null;
-            }
-        };
-        addObserver(observer[0], id);
-    }
-
-    public void listenOnce(int id, Utilities.Callback3<Integer, Object[], Runnable> callback) {
-        final NotificationCenterDelegate[] observer = new NotificationCenterDelegate[1];
-        observer[0] = (nid, account, args) -> {
-            if (nid == id && observer[0] != null) {
-                if (callback != null) {
-                    callback.run(account, args, () -> {
-                        removeObserver(observer[0], id);
-                        observer[0] = null;
-                    });
-                }
-            }
-        };
-        addObserver(observer[0], id);
+        getGlobalInstance().listen(view, NotificationCenter.emojiLoaded, args -> view.invalidate());
     }
 
     private class UniqArrayList<T> extends ArrayList<T> {
@@ -967,6 +1039,119 @@ public class NotificationCenter {
         public void clear() {
             set.clear();
             super.clear();
+        }
+    }
+
+    public static void sanitize() {
+        sanitizeInternal(globalInstance);
+        for (NotificationCenter notificationCenter : Instance) {
+            sanitizeInternal(notificationCenter);
+        }
+    }
+
+    private static void sanitizeInternal(NotificationCenter notificationCenter) {
+        if (notificationCenter == null) {
+            return;
+        }
+
+        int unknownObservers = 0;
+        for (int i = 0; i < notificationCenter.observers.size(); i++) {
+            final int observerId = notificationCenter.observers.keyAt(i);
+            final ArrayList<NotificationCenterDelegate> list = notificationCenter.observers.valueAt(i);
+
+            for (int N = list.size(), a = N - 1; a >= 0; a--) {
+                final NotificationCenterDelegate delegate = list.get(a);
+                if (delegate instanceof WeakObserversGroupImpl) {
+                    continue;
+                }
+                if (delegate instanceof BaseController) {
+                    continue;
+                }
+
+                if (delegate instanceof Context) {
+                    if (isContextDestroyed((Context) delegate)) {
+                        FileLog.e("MEMORY_LEAK observer " + observerId + " with destroyed Context");
+                        list.remove(a);
+                    }
+                } else if (delegate instanceof View) {
+                    if (isContextDestroyed(((View) delegate).getContext())) {
+                        FileLog.e("MEMORY_LEAK observer " + observerId + " with View with destroyed Context");
+                        list.remove(a);
+                    }
+                } else if (delegate instanceof BaseFragment) {
+                    if (((BaseFragment) delegate).isFinished) {
+                        FileLog.e("MEMORY_LEAK observer " + observerId + " with destroyed BaseFragment");
+                        list.remove(a);
+                    }
+                } else if (delegate instanceof BottomSheet) {
+                    if (((BottomSheet) delegate).isDismissed()) {
+                        FileLog.e("MEMORY_LEAK observer " + observerId + " with destroyed BottomSheet");
+                        list.remove(a);
+                    }
+                } else {
+                    unknownObservers++;
+                }
+            }
+        }
+        if (unknownObservers > 0) {
+            // Log.i("MEMORY_LEAK", "unknown observers: " + unknownObservers);
+        }
+    }
+
+    private static boolean isContextDestroyed(Context context) {
+        if (context == null) return false;
+        if (context instanceof Activity) {
+            final Activity activity = (Activity) context;
+            return activity.isDestroyed();
+        }
+        if (context instanceof ContextWrapper) {
+            final Context baseContext = ((ContextWrapper) context).getBaseContext();
+            return isContextDestroyed(baseContext);
+        }
+        return false;
+    }
+
+    public int getObserversSize() {
+        int totalSize = 0;
+        for (int i = 0; i < observers.size(); i++) {
+            ArrayList<NotificationCenterDelegate> list = observers.valueAt(i);
+            if (list != null) {
+                totalSize += list.size();
+            }
+        }
+        return totalSize;
+    }
+
+    // 1. Dump
+    public SparseArray<Integer> dumpObservers() {
+        SparseArray<Integer> dump = new SparseArray<>();
+        for (int i = 0; i < observers.size(); i++) {
+            int key = observers.keyAt(i);
+            ArrayList<NotificationCenterDelegate> list = observers.valueAt(i);
+            dump.put(key, list != null ? list.size() : 0);
+        }
+        return dump;
+    }
+
+    // 2. Compare two dumps and log differences
+    public static void diffObserverDumps(SparseArray<Integer> before, SparseArray<Integer> after) {
+        // Check keys present in before
+        for (int i = 0; i < before.size(); i++) {
+            int key = before.keyAt(i);
+            int sizeBefore = before.valueAt(i);
+            int sizeAfter = after.get(key, -1);
+            if (sizeAfter == -1) {
+                Log.i("ObserverDiff", "key=" + key + " REMOVED (was " + sizeBefore + ")");
+            } else if (sizeBefore != sizeAfter) {
+                Log.i("ObserverDiff", "key=" + key + " CHANGED: " + sizeBefore + " -> " + sizeAfter);
+            }
+        }
+        // Check keys added in after
+        for (int i = 0; i < after.size(); i++) {
+            int key = after.keyAt(i);
+            if (before.get(key, -1) == -1) {
+                Log.i("ObserverDiff", "key=" + key + " ADDED (size=" + after.valueAt(i) + ")");
+            }
         }
     }
 }

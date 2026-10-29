@@ -32,8 +32,12 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.graphics.Canvas;
+import android.graphics.Paint;
+import android.graphics.Rect;
+import android.graphics.RectF;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
+import android.os.Build;
 import android.os.Bundle;
 import android.util.SparseIntArray;
 import android.util.TypedValue;
@@ -41,6 +45,7 @@ import android.view.Gravity;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.Window;
 import android.view.WindowManager;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
@@ -48,6 +53,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.collection.ArraySet;
 import androidx.core.graphics.ColorUtils;
 import androidx.interpolator.view.animation.FastOutSlowInInterpolator;
@@ -61,12 +67,14 @@ import org.json.JSONObject;
 import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.ApplicationLoader;
 import org.telegram.messenger.ChatObject;
+import org.telegram.messenger.LiteMode;
 import org.telegram.messenger.LocaleController;
 import org.telegram.messenger.LruCache;
 import org.telegram.messenger.MessageObject;
 import org.telegram.messenger.MessagesController;
 import org.telegram.messenger.NotificationCenter;
 import org.telegram.messenger.R;
+import org.telegram.messenger.SharedConfig;
 import org.telegram.messenger.UserConfig;
 import org.telegram.messenger.Utilities;
 import org.telegram.tgnet.ConnectionsManager;
@@ -80,10 +88,8 @@ import org.telegram.ui.ActionBar.BaseFragment;
 import org.telegram.ui.ActionBar.Theme;
 import org.telegram.ui.ActionBar.ThemeDescription;
 import org.telegram.ui.Cells.EmptyCell;
-import org.telegram.ui.Cells.HeaderCell;
 import org.telegram.ui.Cells.LoadingCell;
 import org.telegram.ui.Cells.ManageChatTextCell;
-import org.telegram.ui.Cells.ManageChatUserCell;
 import org.telegram.ui.Cells.ShadowSectionCell;
 import org.telegram.ui.Cells.StatisticPostInfoCell;
 import org.telegram.ui.Charts.BarChartView;
@@ -107,6 +113,7 @@ import org.telegram.ui.Components.BulletinFactory;
 import org.telegram.ui.Components.ChatAvatarContainer;
 import org.telegram.ui.Components.CombinedDrawable;
 import org.telegram.ui.Components.FlatCheckBox;
+import org.telegram.ui.Components.ItemOptions;
 import org.telegram.ui.Components.LayoutHelper;
 import org.telegram.ui.Components.Premium.boosts.BoostDialogs;
 import org.telegram.ui.Components.RLottieImageView;
@@ -126,6 +133,7 @@ import java.util.List;
 import java.util.Locale;
 
 public class StatisticActivity extends BaseFragment implements NotificationCenter.NotificationCenterDelegate {
+    private final int ADDITIONAL_LIST_HEIGHT_DP = Build.VERSION.SDK_INT >= 31 ? 48 : 0;
 
     public static BaseFragment create(TLRPC.Chat chat) {
         return create(chat, true);
@@ -145,6 +153,7 @@ public class StatisticActivity extends BaseFragment implements NotificationCente
 
     private TLRPC.ChatFull chat;
     private final long chatId;
+    private boolean showTabs;
 
     //mutual
     private ChartViewData growthData;
@@ -171,16 +180,16 @@ public class StatisticActivity extends BaseFragment implements NotificationCente
     private ChartViewData messagesData;
     private ChartViewData actionsData;
     private ChartViewData topDayOfWeeksData;
-    private ArrayList<MemberData> topMembersAll = new ArrayList<>();
-    private ArrayList<MemberData> topMembersVisible = new ArrayList<>();
-    private ArrayList<MemberData> topInviters = new ArrayList<>();
-    private ArrayList<MemberData> topAdmins = new ArrayList<>();
+    private final ArrayList<MemberData> topMembersAll = new ArrayList<>();
+    private final ArrayList<MemberData> topMembersVisible = new ArrayList<>();
+    private final ArrayList<MemberData> topInviters = new ArrayList<>();
+    private final ArrayList<MemberData> topAdmins = new ArrayList<>();
 
     ChatAvatarContainer avatarContainer;
 
     private RecyclerListView recyclerListView;
     private LinearLayoutManager layoutManager;
-    private LruCache<ChartData> childDataCache = new LruCache<>(50);
+    private final LruCache<ChartData> childDataCache = new LruCache<>(50);
     private RLottieImageView imageView;
 
     private Adapter adapter;
@@ -190,15 +199,18 @@ public class StatisticActivity extends BaseFragment implements NotificationCente
     private BaseChartView.SharedUiComponents sharedUi;
     private LinearLayout progressLayout;
     private final boolean isMegagroup;
-    private boolean startFromBoosts, startFromMonetization;
+    private final boolean startFromBoosts;
+    private final boolean startFromMonetization;
     private long maxDateOverview;
     private long minDateOverview;
 
-    private AlertDialog[] progressDialog = new AlertDialog[1];
+    private final AlertDialog[] progressDialog = new AlertDialog[1];
     private ViewPagerFixed viewPagerFixed;
     private ChannelBoostLayout boostLayout;
     private ChannelMonetizationLayout monetizationLayout;
-    private boolean onlyBoostsStat;
+    private final boolean onlyBoostsStat;
+
+    private BottomPagerTabs tabsView;
 
     public StatisticActivity(Bundle args) {
         super(args);
@@ -208,6 +220,7 @@ public class StatisticActivity extends BaseFragment implements NotificationCente
         startFromMonetization = args.getBoolean("start_from_monetization", false);
         onlyBoostsStat = args.getBoolean("only_boosts", false);
         this.chat = getMessagesController().getChatFull(chatId);
+
     }
 
 
@@ -594,7 +607,9 @@ public class StatisticActivity extends BaseFragment implements NotificationCente
         final boolean hasStats = chatFull != null && chatFull.can_view_stats;
         boolean isBoostSupported = ChatObject.isBoostSupported(currentChat);
         final boolean hasMonetization = chatFull != null && (chatFull.can_view_revenue || chatFull.can_view_stars_revenue);
-        BottomPagerTabs storiesTabsView = new BottomPagerTabs(context, getResourceProvider()) {
+        final int pageCount = onlyBoostsStat ? 1 : (hasStats ? 1 : 0) + (isBoostSupported ? 1 : 0) + (hasMonetization ? 1 : 0);
+
+        tabsView = new BottomPagerTabs(context, getResourceProvider()) {
             @Override
             public Tab[] createTabs() {
                 ArrayList<Tab> tabs = new ArrayList<>();
@@ -602,7 +617,9 @@ public class StatisticActivity extends BaseFragment implements NotificationCente
                 if (hasStats) {
                     tabs.add(new Tab(i++, R.raw.stats, 25, 49, getString(R.string.Statistics)).customFrameInvert());
                 }
-                tabs.add(new Tab(i++, R.raw.boosts, 25, 49, getString(R.string.Boosts)));
+                if (isBoostSupported) {
+                    tabs.add(new Tab(i++, R.raw.boosts, 25, 49, getString(R.string.Boosts)));
+                }
                 if (hasMonetization) {
                     tabs.add(new Tab(i++, R.raw.monetize, 19, 45, getString(R.string.Monetization)));
                 }
@@ -616,15 +633,22 @@ public class StatisticActivity extends BaseFragment implements NotificationCente
                 if (manual) {
                     return;
                 }
-                storiesTabsView.setScrolling(true);
-                storiesTabsView.setProgress(viewPagerFixed.getPositionAnimated());
+                tabsView.setScrolling(true);
+                tabsView.setProgress(viewPagerFixed.getPositionAnimated());
+            }
+
+            @Override
+            protected void onScrollEnd() {
+                super.onScrollEnd();
+                tabsView.setScrolling(false);
+                tabsView.setProgress(getCurrentPosition());
             }
         };
 
-        storiesTabsView.setOnTabClick(position -> {
+        tabsView.setOnTabClick(position -> {
             if (viewPagerFixed.scrollToPosition(position)) {
-                storiesTabsView.setScrolling(false);
-                storiesTabsView.setProgress(position);
+                tabsView.setScrolling(false);
+                tabsView.setProgress(position);
             }
         });
         FrameLayout statisticLayout = new FrameLayout(context);
@@ -638,12 +662,7 @@ public class StatisticActivity extends BaseFragment implements NotificationCente
         viewPagerFixed.setAdapter(new ViewPagerFixed.Adapter() {
             @Override
             public int getItemCount() {
-                if (onlyBoostsStat) return 1;
-                return (
-                    (hasStats ? 1 : 0) +
-                    (isBoostSupported ? 1 : 0) +
-                    (hasMonetization ? 1 : 0)
-                );
+                return pageCount;
             }
 
             @Override
@@ -676,32 +695,34 @@ public class StatisticActivity extends BaseFragment implements NotificationCente
 
             }
         });
-        boolean showTabs = isBoostSupported && !onlyBoostsStat;
-        if (showTabs && startFromBoosts) {
+        showTabs = pageCount > 1;
+        if (showTabs && startFromBoosts && isBoostSupported) {
             viewPagerFixed.setPosition(hasStats ? 1 : 0);
-        } else if (showTabs && startFromMonetization) {
-            storiesTabsView.setProgress((hasStats ? 1 : 0) + (!onlyBoostsStat && isBoostSupported ? 1 : 0));
+        } else if (showTabs && startFromMonetization && hasMonetization) {
             viewPagerFixed.setPosition((hasStats ? 1 : 0) + (!onlyBoostsStat && isBoostSupported ? 1 : 0));
         }
+        tabsView.setProgress(viewPagerFixed.getCurrentPosition());
 
 
-        FrameLayout contentLayout = new SizeNotifierFrameLayout(getContext());
-        contentLayout.addView(viewPagerFixed, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, LayoutHelper.MATCH_PARENT, 0, 0, 0, 0, showTabs ? 64 : 0));
+        SizeNotifierFrameLayout contentLayout = new SizeNotifierFrameLayout(getContext());
+        contentLayout.setBackgroundColor(getThemedColor(Theme.key_windowBackgroundGray));
+        contentLayout.addView(viewPagerFixed, LayoutHelper.createFrameMatchParent());
         if (showTabs) {
-            contentLayout.addView(storiesTabsView, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT, Gravity.BOTTOM | Gravity.FILL_HORIZONTAL));
+            contentLayout.addView(tabsView, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, 64, Gravity.BOTTOM | Gravity.FILL_HORIZONTAL));
             Bulletin.addDelegate(this, new Bulletin.Delegate() {
                 @Override
                 public int getBottomOffset(int tag) {
-                    return dp(64);
+                    return (tabsView.getVisibility() == View.VISIBLE ? dp(64) : 0) + getBottomInset();
                 }
             });
         }
+        fragmentView = contentLayout;
         new KeyboardNotifier(contentLayout, keyboardHeight -> {
-            if (storiesTabsView != null) {
-                storiesTabsView.setVisibility(keyboardHeight > dp(20) ? View.GONE : View.VISIBLE);
+            if (showTabs) {
+                tabsView.setVisibility(keyboardHeight > dp(20) ? View.GONE : View.VISIBLE);
+                checkUi_listPaddings();
             }
         });
-        fragmentView = contentLayout;
         recyclerListView = new RecyclerListView(context) {
             int lastH;
 
@@ -714,6 +735,8 @@ public class StatisticActivity extends BaseFragment implements NotificationCente
                 lastH = getMeasuredHeight();
             }
         };
+        recyclerListView.setClipToPadding(false);
+
 
         progressLayout = new LinearLayout(context);
         progressLayout.setOrientation(LinearLayout.VERTICAL);
@@ -728,14 +751,14 @@ public class StatisticActivity extends BaseFragment implements NotificationCente
         loadingTitle.setTypeface(AndroidUtilities.bold());
         loadingTitle.setTextColor(Theme.getColor(Theme.key_player_actionBarTitle));
         loadingTitle.setTag(Theme.key_player_actionBarTitle);
-        loadingTitle.setText(getString("LoadingStats", R.string.LoadingStats));
+        loadingTitle.setText(getString(R.string.LoadingStats));
         loadingTitle.setGravity(Gravity.CENTER_HORIZONTAL);
 
         TextView loadingSubtitle = new TextView(context);
         loadingSubtitle.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 15);
         loadingSubtitle.setTextColor(Theme.getColor(Theme.key_player_actionBarSubtitle));
         loadingSubtitle.setTag(Theme.key_player_actionBarSubtitle);
-        loadingSubtitle.setText(getString("LoadingStatsDescription", R.string.LoadingStatsDescription));
+        loadingSubtitle.setText(getString(R.string.LoadingStatsDescription));
         loadingSubtitle.setGravity(Gravity.CENTER_HORIZONTAL);
 
         progressLayout.addView(imageView, LayoutHelper.createLinear(120, 120, Gravity.CENTER_HORIZONTAL, 0, 0, 0, 20));
@@ -806,36 +829,21 @@ public class StatisticActivity extends BaseFragment implements NotificationCente
                     return false;
                 }
 
-                final ArrayList<String> items = new ArrayList<>();
-                final ArrayList<Integer> actions = new ArrayList<>();
-                final ArrayList<Integer> icons = new ArrayList<>();
-
-                items.add(getString("ViewMessageStatistic", R.string.ViewMessageStatistic));
-                actions.add(0);
-                icons.add(R.drawable.msg_stats);
-
-                items.add(getString("ViewMessage", R.string.ViewMessage));
-                actions.add(1);
-                icons.add(R.drawable.msg_msgbubble3);
-
-
-                AlertDialog.Builder builder = new AlertDialog.Builder(getParentActivity());
-                builder.setItems(items.toArray(new CharSequence[actions.size()]), AndroidUtilities.toIntArray(icons), (dialogInterface, i) -> {
-                    if (i == 0) {
-                        MessageStatisticActivity activity = new MessageStatisticActivity(messageObject);
-                        presentFragment(activity);
-                    } else if (i == 1) {
+                ItemOptions.makeOptions(this, view)
+                    .add(R.drawable.msg_stats, getString(R.string.ViewMessageStatistic), () -> {
+                        presentFragment(new MessageStatisticActivity(messageObject));
+                    })
+                    .add(R.drawable.msg_msgbubble3, getString(R.string.ViewMessage), () -> {
                         Bundle bundle = new Bundle();
                         bundle.putLong("chat_id", chatId);
                         bundle.putInt("message_id", messageObject.getId());
                         bundle.putBoolean("need_remove_previous_same_chat_activity", false);
                         ChatActivity chatActivity = new ChatActivity(bundle);
                         presentFragment(chatActivity, false);
-                    }
-                });
+                    })
+                    .show();
 
-                showDialog(builder.create());
-
+                return true;
             } else if (position >= adapter.topAdminsStartRow && position <= adapter.topAdminsEndRow) {
                 int i = position - adapter.topAdminsStartRow;
                 topAdmins.get(i).onLongClick(chat, this, progressDialog);
@@ -894,6 +902,7 @@ public class StatisticActivity extends BaseFragment implements NotificationCente
             recyclerListView.setVisibility(View.VISIBLE);
         }
 
+        checkUi_listPaddings();
 
         diffUtilsCallback = new DiffUtilsCallback(adapter, layoutManager);
         return fragmentView;
@@ -1131,7 +1140,7 @@ public class StatisticActivity extends BaseFragment implements NotificationCente
                 v.setBackgroundColor(Theme.getColor(Theme.key_windowBackgroundWhite));
                 ((ManageChatTextCell) v).setColors(Theme.key_windowBackgroundWhiteBlueIcon, Theme.key_windowBackgroundWhiteBlueButton);
             } else {
-                v = new ShadowSectionCell(parent.getContext(), 12, Theme.getColor(Theme.key_windowBackgroundGray));
+                v = new ShadowSectionCell(parent.getContext(), 12, 0);
             }
             v.setLayoutParams(new RecyclerView.LayoutParams(MATCH_PARENT, WRAP_CONTENT));
             return new RecyclerListView.Holder(v);
@@ -1622,6 +1631,7 @@ public class StatisticActivity extends BaseFragment implements NotificationCente
     }
 
     public static abstract class BaseChartCell extends FrameLayout {
+        final @Nullable Window window;
         BaseChartView chartView;
         BaseChartView zoomedChartView;
         ChartHeaderView chartHeaderView;
@@ -1635,7 +1645,6 @@ public class StatisticActivity extends BaseFragment implements NotificationCente
 
         int chartType;
 
-        @SuppressLint("ClickableViewAccessibility")
         public BaseChartCell(@NonNull Context context, int type, BaseChartView.SharedUiComponents sharedUi) {
             this(context, type, sharedUi, null);
         }
@@ -1644,6 +1653,13 @@ public class StatisticActivity extends BaseFragment implements NotificationCente
         public BaseChartCell(@NonNull Context context, int type, BaseChartView.SharedUiComponents sharedUi, Theme.ResourcesProvider resourcesProvider) {
             super(context);
             setWillNotDraw(false);
+
+            if (context instanceof Activity) {
+                window = ((Activity) context).getWindow();
+            } else {
+                window = null;
+            }
+
             chartType = type;
             LinearLayout linearLayout = new LinearLayout(context);
             linearLayout.setOrientation(LinearLayout.VERTICAL);
@@ -1756,7 +1772,7 @@ public class StatisticActivity extends BaseFragment implements NotificationCente
 
             linearLayout.addView(chartHeaderView, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, 52));
             linearLayout.addView(frameLayout, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT));
-            linearLayout.addView(checkboxContainer, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT, Gravity.FILL_HORIZONTAL, 16, 0, 16, 0));
+            linearLayout.addView(checkboxContainer, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT, Gravity.FILL_HORIZONTAL, 10, 0, 10, 0));
 
             if (chartType == 4) {
                 frameLayout.setClipChildren(false);
@@ -1854,7 +1870,9 @@ public class StatisticActivity extends BaseFragment implements NotificationCente
                         zoomedChartView.enabled = true;
                         chartView.transitionMode = BaseChartView.TRANSITION_MODE_NONE;
                         zoomedChartView.transitionMode = BaseChartView.TRANSITION_MODE_NONE;
-                        ((Activity) getContext()).getWindow().clearFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
+                        if (window != null) {
+                            window.clearFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
+                        }
                     }
                 });
                 animator.start();
@@ -1883,7 +1901,9 @@ public class StatisticActivity extends BaseFragment implements NotificationCente
                 chartView.enabled = true;
                 zoomedChartView.enabled = false;
                 chartView.invalidate();
-                ((Activity) getContext()).getWindow().clearFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
+                if (window != null) {
+                    window.clearFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
+                }
 
                 for (CheckBoxHolder checkbox : checkBoxes) {
                     checkbox.checkBox.setAlpha(1);
@@ -1911,7 +1931,9 @@ public class StatisticActivity extends BaseFragment implements NotificationCente
                             chartView.legendShowing = false;
                             chartView.clearSelection();
                         }
-                        ((Activity) getContext()).getWindow().clearFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
+                        if (window != null) {
+                            window.clearFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
+                        }
                     }
                 });
                 for (CheckBoxHolder checkbox : checkBoxes) {
@@ -1925,8 +1947,10 @@ public class StatisticActivity extends BaseFragment implements NotificationCente
         }
 
         private ValueAnimator createTransitionAnimator(long d, boolean in) {
-            ((Activity) getContext()).getWindow().setFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE,
+            if (window != null) {
+                window.setFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE,
                     WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
+            }
 
             chartView.enabled = false;
             zoomedChartView.enabled = false;
@@ -2613,7 +2637,7 @@ public class StatisticActivity extends BaseFragment implements NotificationCente
 
         ArrayList<ThemeDescription> arrayList = new ArrayList<>();
 
-        arrayList.add(new ThemeDescription(fragmentView, ThemeDescription.FLAG_BACKGROUND, null, null, null, null, Theme.key_windowBackgroundWhite));
+        arrayList.add(new ThemeDescription(fragmentView, ThemeDescription.FLAG_BACKGROUND, null, null, null, null, Theme.key_windowBackgroundGray));
 
         arrayList.add(new ThemeDescription(recyclerListView, 0, new Class[]{StatisticPostInfoCell.class}, new String[]{"message"}, null, null, null, Theme.key_dialogTextBlack));
         arrayList.add(new ThemeDescription(recyclerListView, 0, new Class[]{StatisticPostInfoCell.class}, new String[]{"views"}, null, null, null, Theme.key_dialogTextBlack));
@@ -2639,7 +2663,6 @@ public class StatisticActivity extends BaseFragment implements NotificationCente
         arrayList.add(new ThemeDescription(null, 0, null, null, null, themeDelegate, Theme.key_windowBackgroundWhiteGreenText2));
         arrayList.add(new ThemeDescription(null, 0, null, null, null, themeDelegate, Theme.key_text_RedRegular));
 
-        arrayList.add(new ThemeDescription(actionBar, ThemeDescription.FLAG_BACKGROUND, null, null, null, null, Theme.key_windowBackgroundWhite));
         arrayList.add(new ThemeDescription(avatarContainer != null ? avatarContainer.getTitleTextView() : null, ThemeDescription.FLAG_TEXTCOLOR, null, null, null, null, Theme.key_player_actionBarTitle));
         arrayList.add(new ThemeDescription(avatarContainer != null ? avatarContainer.getSubtitleTextView() : null, ThemeDescription.FLAG_TEXTCOLOR | ThemeDescription.FLAG_CHECKTAG, null, null, null, null, Theme.key_player_actionBarSubtitle, null));
         arrayList.add(new ThemeDescription(null, 0, null, null, null, themeDelegate, Theme.key_statisticChartLineEmpty));
@@ -3379,4 +3402,31 @@ public class StatisticActivity extends BaseFragment implements NotificationCente
         }
         return super.isSwipeBackEnabled(event);
     }
+
+    @Override
+    public boolean isSupportEdgeToEdge() {
+        return true;
+    }
+    @Override
+    public void onInsets(int left, int top, int right, int bottom) {
+        checkUi_listPaddings();
+    }
+
+    private void checkUi_listPaddings() {
+        final int navbar = getBottomInset();
+        if (tabsView != null) {
+            tabsView.setTranslationY(-navbar);
+        }
+        final int bottom = navbar + (showTabs && tabsView != null && tabsView.getVisibility() == View.VISIBLE ? dp(64) : 0);
+        if (recyclerListView != null) {
+            recyclerListView.setPadding(0, 0, 0, bottom);
+        }
+        if (boostLayout != null) {
+            boostLayout.listView.setPadding(0, 0, 0, bottom);
+        }
+        if (monetizationLayout != null) {
+            monetizationLayout.listView.setPadding(0, 0, 0, bottom);
+        }
+    }
+
 }

@@ -4,6 +4,8 @@ import static org.telegram.messenger.AndroidUtilities.dp;
 import static org.telegram.messenger.AndroidUtilities.dpf2;
 import static org.telegram.messenger.AndroidUtilities.lerp;
 
+import android.animation.ObjectAnimator;
+import android.animation.StateListAnimator;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.graphics.Canvas;
@@ -63,32 +65,37 @@ public class FragmentFloatingButton extends FrameLayout implements FactorAnimato
         addView(imageView, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, LayoutHelper.MATCH_PARENT));
 
         progressView = new RadialProgressView(context);
-        progressView.setSize(dp(18));
+        progressView.setSize(dp(isSubButton ? 18 : 22));
         progressView.setStrokeWidth(2);
         addView(progressView, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, LayoutHelper.MATCH_PARENT));
         setAnimatedVisibility(progressView, 0);
 
-        ScaleStateListAnimator.apply(this);
-        if (!isSubButton) {
+        if (isSubButton) {
+            ScaleStateListAnimator.apply(this);
+        } else {
             setOutlineProvider(ViewOutlineProviderImpl.BOUNDS_OVAL);
-            setTranslationZ(dpf2(0.5f));
+            setTranslationZ(dp(2));
+            StateListAnimator animator = new StateListAnimator();
+            animator.addState(new int[]{android.R.attr.state_pressed}, ObjectAnimator.ofFloat(this, View.TRANSLATION_Z, dp(4)).setDuration(200));
+            animator.addState(new int[]{}, ObjectAnimator.ofFloat(this, View.TRANSLATION_Z, dp(2)).setDuration(200));
+            setStateListAnimator(animator);
         }
 
         if (isSubButton) {
             iBlur3ColorProviderTabs = new BlurredBackgroundColorProviderThemed(null, Theme.key_dialogBackground) {
                 @Override
                 public int getStrokeColorTop() {
-                    return Theme.isCurrentThemeDark() ? 0x06FFFFFF : 0x11000000;
+                    return isDark() ? 0x06FFFFFF : 0x11000000;
                 }
 
                 @Override
                 public int getStrokeColorBottom() {
-                    return Theme.isCurrentThemeDark() ? 0x11FFFFFF : 0x20000000;
+                    return isDark() ? 0x11FFFFFF : 0x20000000;
                 }
 
                 @Override
                 public int getShadowColor() {
-                    return Theme.isCurrentThemeDark() ? 0x04FFFFFF : 0x20000000;
+                    return isDark() ? 0x04FFFFFF : 0x20000000;
                 }
             };
             iBlur3SourceColor = new BlurredBackgroundSourceColor();
@@ -163,14 +170,14 @@ public class FragmentFloatingButton extends FrameLayout implements FactorAnimato
         } else {
             imageView.setColorFilter(Theme.getColor(Theme.key_chats_actionIcon, resourcesProvider), PorterDuff.Mode.SRC_IN);
             progressView.setProgressColor(Theme.getColor(Theme.key_chats_actionIcon, resourcesProvider));
-            setBackground(Theme.createSimpleSelectorCircleDrawable(dp(48),
-                Theme.getColor(Theme.key_featuredStickers_addButton, resourcesProvider),
-                Theme.getColor(Theme.key_featuredStickers_addButtonPressed, resourcesProvider)
+            setBackground(Theme.createSimpleSelectorCircleDrawable(dp(56),
+                Theme.getColor(Theme.key_chats_actionBackground, resourcesProvider),
+                Theme.getColor(Theme.key_chats_actionPressedBackground, resourcesProvider)
             ));
         }
     }
 
-    public static final int SIZE = 48;
+    public static final int SIZE = 56;
 
     public static FrameLayout.LayoutParams createSubButtonLayoutParams() {
         return LayoutHelper.createFrame(48, 48,
@@ -179,16 +186,14 @@ public class FragmentFloatingButton extends FrameLayout implements FactorAnimato
     }
 
     public static FrameLayout.LayoutParams createDefaultLayoutParams() {
-        return LayoutHelper.createFrame(48, 48,
+        return LayoutHelper.createFrame(56, 56,
                 (LocaleController.isRTL ? Gravity.LEFT : Gravity.RIGHT) | Gravity.BOTTOM,
-                20, 0, 20, 14);
+                14, 0, 14, 14);
     }
 
 
     public static FrameLayout.LayoutParams createDefaultLayoutParamsBig() {
-        return LayoutHelper.createFrame(56, 56,
-                (LocaleController.isRTL ? Gravity.LEFT : Gravity.RIGHT) | Gravity.BOTTOM,
-                20 /*24*/, 0, 20 /*24*/, 14 /*16*/);
+        return LayoutHelper.createFrame(56, 56, Gravity.RIGHT | Gravity.BOTTOM, 0, 0, 24, 16);
     }
 
     private float additionalTranslationY;

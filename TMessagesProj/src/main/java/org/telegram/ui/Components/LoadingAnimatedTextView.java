@@ -21,7 +21,7 @@ public class LoadingAnimatedTextView extends View {
     private TextPaint paint;
     private State currentState;
     private State nextState;
-    private Rect loadingRect;
+    private RectOld loadingRect;
     private float stateTransition = 0;
     private ValueAnimator stateTransitionAnimator;
 

@@ -102,16 +102,39 @@ public class TableView extends TableLayout {
     }
 
     public TableRow addRowMonospaced(CharSequence title, CharSequence text, int textFontSizeDp, Runnable copyButton) {
+        return addRowMonospaced(title, text, textFontSizeDp, copyButton, null, null);
+    }
+
+    public TableRow addRowMonospaced(CharSequence title, CharSequence text, int textFontSizeDp, Runnable copyButton, CharSequence buttonText, Runnable buttonOnClick) {
         FrameLayout idLayout = new FrameLayout(getContext());
-        idLayout.setPadding(dp(12.66f), dp(9.33f), dp(10.66f), dp(9.33f));
-        TextView textView = new TextView(getContext());
+        LinkSpanDrawable.LinksTextView textView = new LinkSpanDrawable.LinksTextView(getContext());
         textView.setTypeface(AndroidUtilities.getTypeface(AndroidUtilities.TYPEFACE_ROBOTO_MONO));
         textView.setTextSize(TypedValue.COMPLEX_UNIT_DIP, textFontSizeDp);
         textView.setTextColor(Theme.getColor(Theme.key_dialogTextBlack, resourcesProvider));
         textView.setMaxLines(4);
         textView.setSingleLine(false);
         textView.setText(text);
+        textView.setDisablePaddingsOffsetY(true);
+        textView.setPadding(dp(12.66f), dp(9.33f), dp(10.66f), dp(9.33f));
         idLayout.addView(textView, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, LayoutHelper.MATCH_PARENT, Gravity.FILL, 0, 0, 34, 0));
+        if (buttonText != null) {
+            ButtonSpan buttonSpan = new ButtonSpan(buttonText, buttonOnClick, resourcesProvider);
+            ButtonSpan.TextViewButtons buttonView = new ButtonSpan.TextViewButtons(getContext(), resourcesProvider);
+            buttonView.setTextSize(TypedValue.COMPLEX_UNIT_DIP, textFontSizeDp);
+            buttonView.setPadding(0, dp(9.33f), 0, dp(9.33f));
+            SpannableString button = new SpannableString("btn");
+            button.setSpan(buttonSpan, 0, button.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+            buttonView.setText(button);
+            final float rightMargin = 12.66f + (copyButton != null ? 34 : 0);
+            ((FrameLayout.LayoutParams) textView.getLayoutParams()).rightMargin = buttonSpan.getSize() + dp(rightMargin);
+            idLayout.addView(buttonView, LayoutHelper.createFrame(LayoutHelper.WRAP_CONTENT, LayoutHelper.WRAP_CONTENT, Gravity.TOP | Gravity.RIGHT, 0, 0, rightMargin, 0));
+            idLayout.addOnLayoutChangeListener((v, left, top, right, bottom, oldLeft, oldTop, oldRight, oldBottom) -> {
+                if (textView.getLayout() != null && textView.getLayout().getLineCount() > 0) {
+                    final float buttonLeft = textView.getLeft() + textView.getPaddingLeft() + textView.getLayout().getLineRight(0) + dp(6);
+                    buttonView.setTranslationX(Math.min(0, buttonLeft - buttonView.getLeft()));
+                }
+            });
+        }
         if (copyButton != null) {
             ImageView copyView = new ImageView(getContext());
             copyView.setImageResource(R.drawable.msg_copy);
@@ -164,8 +187,8 @@ public class TableView extends TableLayout {
     public TableRow addRowUserWithEmojiStatus(CharSequence title, final int currentAccount, final long did, Runnable onClick) {
         final LinkSpanDrawable.LinksSimpleTextView textView = new LinkSpanDrawable.LinksSimpleTextView(getContext(), resourcesProvider);
         textView.setPadding(dp(12.66f), dp(9.33f), dp(12.66f), dp(9.33f));
-        textView.setTextColor(Theme.getColor(Theme.key_chat_messageLinkIn, resourcesProvider));
-        textView.setLinkTextColor(Theme.getColor(Theme.key_chat_messageLinkIn, resourcesProvider));
+        textView.setTextColor(Theme.getColor(Theme.key_featuredStickers_addButton, resourcesProvider));
+        textView.setLinkTextColor(Theme.getColor(Theme.key_featuredStickers_addButton, resourcesProvider));
         textView.setTextSize(14);
         AvatarSpan avatarSpan = new AvatarSpan(textView, currentAccount, 24);
         CharSequence username;
@@ -269,8 +292,8 @@ public class TableView extends TableLayout {
         final ButtonSpan.TextViewButtons textView = new ButtonSpan.TextViewButtons(getContext(), resourcesProvider);
         textView.setPadding(dp(12.66f), dp(9.33f), dp(12.66f), dp(9.33f));
         textView.setEllipsize(TextUtils.TruncateAt.END);
-        textView.setTextColor(Theme.getColor(Theme.key_chat_messageLinkIn, resourcesProvider));
-        textView.setLinkTextColor(Theme.getColor(Theme.key_chat_messageLinkIn, resourcesProvider));
+        textView.setTextColor(Theme.getColor(Theme.key_featuredStickers_addButton, resourcesProvider));
+        textView.setLinkTextColor(Theme.getColor(Theme.key_featuredStickers_addButton, resourcesProvider));
         textView.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 14);
         textView.setSingleLine(true);
         textView.setDisablePaddingsOffsetY(true);
@@ -338,14 +361,18 @@ public class TableView extends TableLayout {
     }
 
     public TableRow addRowLink(CharSequence title, CharSequence value, Runnable onClick) {
-        final LinkSpanDrawable.LinksTextView textView = new LinkSpanDrawable.LinksTextView(getContext(), resourcesProvider);
+        return addRowLink(title, value, onClick, null, null);
+    }
+
+    public TableRow addRowLink(CharSequence title, CharSequence value, Runnable onClick, CharSequence buttonText, Runnable buttonOnClick) {
+        final ButtonSpan.TextViewButtons textView = new ButtonSpan.TextViewButtons(getContext(), resourcesProvider);
         textView.setPadding(dp(12.66f), dp(9.33f), dp(12.66f), dp(9.33f));
         textView.setEllipsize(TextUtils.TruncateAt.END);
         textView.setTextColor(Theme.getColor(Theme.key_chat_messageLinkIn, resourcesProvider));
         textView.setLinkTextColor(Theme.getColor(Theme.key_chat_messageLinkIn, resourcesProvider));
         textView.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 14);
         textView.setSingleLine(true);
-        ((LinkSpanDrawable.LinksTextView) textView).setDisablePaddingsOffsetY(true);
+        textView.setDisablePaddingsOffsetY(true);
         SpannableStringBuilder ssb = new SpannableStringBuilder(value);
         ssb.setSpan(new ClickableSpan() {
             @Override
@@ -360,6 +387,9 @@ public class TableView extends TableLayout {
             }
         }, 0, ssb.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
         textView.setText(ssb);
+        if (buttonText != null) {
+            textView.addButton(new ButtonSpan(buttonText, buttonOnClick, resourcesProvider));
+        }
         return addRowUnpadded(title, textView);
     }
 
@@ -399,17 +429,21 @@ public class TableView extends TableLayout {
     }
 
     public TableRow addRow(CharSequence title, CharSequence text, CharSequence buttonText, Runnable buttonOnClick) {
-        ButtonSpan.TextViewButtons textView = new ButtonSpan.TextViewButtons(getContext());
+        return addRow(title, text, buttonText, buttonOnClick, null);
+    }
+
+    public TableRow addRow(CharSequence title, CharSequence text, CharSequence buttonText, Runnable buttonOnClick, Integer buttonColor) {
+        final ButtonSpan.TextViewButtons textView = new ButtonSpan.TextViewButtons(getContext());
         textView.setTextColor(Theme.getColor(Theme.key_windowBackgroundWhiteBlackText, resourcesProvider));
         textView.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 14);
-        SpannableStringBuilder ssb = new SpannableStringBuilder(Emoji.replaceEmoji(text, textView.getPaint().getFontMetricsInt(), false));
+        final SpannableStringBuilder ssb = new SpannableStringBuilder(Emoji.replaceEmoji(text, textView.getPaint().getFontMetricsInt(), false));
         if (buttonText != null) {
-            ssb.append(" ").append(ButtonSpan.make(buttonText, buttonOnClick, resourcesProvider));
+            ssb.append(" ").append(ButtonSpan.make(buttonText, buttonOnClick, resourcesProvider, buttonColor));
         }
         textView.setText(ssb);
         NotificationCenter.listenEmojiLoading(textView);
 
-        TableRow row = new TableRow(getContext());
+        final TableRow row = new TableRow(getContext());
         TableRow.LayoutParams lp;
         lp = new TableRow.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.MATCH_PARENT);
         row.addView(new TableRowTitle(this, title), lp);
@@ -489,13 +523,13 @@ public class TableView extends TableLayout {
         @Override
         protected void onDraw(Canvas canvas) {
             if (first || last) {
-                final float r = dp(4);
+                final float r = dp(10);
                 table.radii[0] = table.radii[1] = first ? r : 0; // top left
                 table.radii[2] = table.radii[3] = 0; // top right
                 table.radii[4] = table.radii[5] = 0; // bottom right
                 table.radii[6] = table.radii[7] = last ? r : 0; // bottom left
                 table.path.rewind();
-                AndroidUtilities.rectTmp.set(table.hw, table.hw, getWidth() + table.hw, getHeight() + table.hw * dp(last ? -1 : +1));
+                AndroidUtilities.rectTmp.set(table.hw, table.hw, getWidth() + table.hw, getHeight() + table.hw * (last ? -1 : +1));
                 table.path.addRoundRect(AndroidUtilities.rectTmp, table.radii, Path.Direction.CW);
                 canvas.drawPath(table.path, table.backgroundPaint);
                 canvas.drawPath(table.path, table.borderPaint);
@@ -546,13 +580,13 @@ public class TableView extends TableLayout {
         @Override
         protected void onDraw(Canvas canvas) {
             if (first || last) {
-                final float r = dp(4);
+                final float r = dp(10);
                 table.radii[0] = table.radii[1] = first ? r : 0; // top left
                 table.radii[2] = table.radii[3] = first ? r : 0; // top right
                 table.radii[4] = table.radii[5] = last ? r : 0; // bottom right
                 table.radii[6] = table.radii[7] = last ? r : 0; // bottom left
                 table.path.rewind();
-                AndroidUtilities.rectTmp.set(table.hw, table.hw, getWidth() - table.hw, getHeight() + table.hw * dp(last ? -1f : +1f));
+                AndroidUtilities.rectTmp.set(table.hw, table.hw, getWidth() - table.hw, getHeight() + table.hw * (last ? -1f : +1f));
                 table.path.addRoundRect(AndroidUtilities.rectTmp, table.radii, Path.Direction.CW);
                 if (filled) canvas.drawPath(table.path, table.backgroundPaint);
                 canvas.drawPath(table.path, table.borderPaint);
@@ -586,6 +620,7 @@ public class TableView extends TableLayout {
         }
 
         private boolean first, last;
+        private boolean left = false, right = true;
 
         public void setFirstLast(boolean first, boolean last) {
             if (this.first != first || this.last != last) {
@@ -595,16 +630,27 @@ public class TableView extends TableLayout {
             }
         }
 
+        public void setLeftRight(boolean left, boolean right) {
+            if (this.left != left || this.right != right) {
+                this.left = left;
+                this.right = right;
+                invalidate();
+            }
+        }
+
         @Override
         protected void onDraw(Canvas canvas) {
             if (first || last) {
-                final float r = dp(4);
-                table.radii[0] = table.radii[1] = 0; // top left
-                table.radii[2] = table.radii[3] = first ? r : 0; // top right
-                table.radii[4] = table.radii[5] = last ? r : 0; // bottom right
-                table.radii[6] = table.radii[7] = 0; // bottom left
+                final float r = dp(10);
+                table.radii[0] = table.radii[1] = first && left ? r : 0; // top left
+                table.radii[2] = table.radii[3] = first && right ? r : 0; // top right
+                table.radii[4] = table.radii[5] = last && right ? r : 0; // bottom right
+                table.radii[6] = table.radii[7] = last && left ? r : 0; // bottom left
                 table.path.rewind();
-                AndroidUtilities.rectTmp.set(table.hw, table.hw, getWidth() - table.hw, getHeight() + table.hw * dp(last ? -1f : +1f));
+                AndroidUtilities.rectTmp.set(table.hw, table.hw, getWidth() - table.hw, getHeight() + table.hw * (last ? -1f : +1f));
+                if (!right) {
+                    AndroidUtilities.rectTmp.right += table.w;
+                }
                 table.path.addRoundRect(AndroidUtilities.rectTmp, table.radii, Path.Direction.CW);
                 canvas.drawPath(table.path, table.borderPaint);
             } else {
@@ -636,6 +682,7 @@ public class TableView extends TableLayout {
                     ((TableRowTitle) child).setFirstLast(y == 0, y == height - 1);
                 } else if (child instanceof TableRowContent) {
                     ((TableRowContent) child).setFirstLast(y == 0, y == height - 1);
+                    ((TableRowContent) child).setLeftRight(x == 0, x == width - 1);
                 } else if (child instanceof TableRowFullContent) {
                     ((TableRowFullContent) child).setFirstLast(y == 0, y == height - 1);
                 }

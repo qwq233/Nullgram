@@ -85,12 +85,11 @@ public class AutoDeleteMessagesActivity extends BaseFragment implements Notifica
         FrameLayout frameLayout = (FrameLayout) fragmentView;
         frameLayout.setBackgroundColor(Theme.getColor(Theme.key_windowBackgroundGray));
 
-        ScrollView scrollView = new ScrollView(getContext());
         LinearLayout mainContainer = new LinearLayout(getContext());
+        ScrollView scrollView = new ScrollView(getContext());
         mainContainer.setOrientation(LinearLayout.VERTICAL);
         scrollView.addView(mainContainer);
         frameLayout.addView(scrollView);
-
 
         FrameLayout stickerHeaderCell = new FrameLayout(context);
         StickerImageView backupImageView = new StickerImageView(context, currentAccount);
@@ -141,7 +140,7 @@ public class AutoDeleteMessagesActivity extends BaseFragment implements Notifica
 
         updateItems();
 
-        TextInfoPrivacyCell textInfoPrivacyCell = new TextInfoPrivacyCell(context);
+        TextInfoPrivacyCell textInfoPrivacyCell = new TextInfoPrivacyCell(context, resourceProvider);
         CharSequence infoText = AndroidUtilities.replaceSingleTag(LocaleController.getString(R.string.GlobalAutoDeleteInfo), new Runnable() {
             @Override
             public void run() {

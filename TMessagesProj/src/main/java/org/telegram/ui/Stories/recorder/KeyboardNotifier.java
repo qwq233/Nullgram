@@ -24,10 +24,14 @@ import android.view.View;
 import android.view.ViewTreeObserver;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Size;
+import androidx.core.view.ViewCompat;
+import androidx.core.view.WindowInsetsCompat;
 
 import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.Utilities;
 
+@Deprecated(since = "use insets listener !!!")
 public class KeyboardNotifier {
 
     private final View rootView;
@@ -35,6 +39,8 @@ public class KeyboardNotifier {
     private final Utilities.Callback<Integer> listener;
     public boolean ignoring;
     private boolean awaitingKeyboard;
+    private boolean mUseInsets;
+    private boolean mMinusNavBar;
 
     private final Rect rect = new Rect();
 
@@ -69,6 +75,16 @@ public class KeyboardNotifier {
         });
     }
 
+    public KeyboardNotifier useInsets() {
+        mUseInsets = true;
+        return this;
+    }
+
+    public KeyboardNotifier useMinusNavbar() {
+        mMinusNavBar = true;
+        return this;
+    }
+
     private final View.OnLayoutChangeListener onLayoutChangeListener = (view, l, t, r, b, ol, ot, or, ob) -> update();
     private final ViewTreeObserver.OnGlobalLayoutListener onGlobalLayoutListener = this::update;
 
@@ -80,9 +96,18 @@ public class KeyboardNotifier {
             return;
         }
 
-        rootView.getWindowVisibleDisplayFrame(rect);
-        final int screenHeight = (realRootView == null ? rootView : realRootView).getHeight();
-        keyboardHeight = screenHeight - rect.bottom;
+        if (mUseInsets) {
+            final WindowInsetsCompat insets = ViewCompat.getRootWindowInsets(realRootView == null ? rootView : realRootView);
+            keyboardHeight = insets != null ? insets.getInsets(WindowInsetsCompat.Type.ime()).bottom : 0;
+        } else {
+            rootView.getWindowVisibleDisplayFrame(rect);
+            final int screenHeight = (realRootView == null ? rootView : realRootView).getHeight();
+            keyboardHeight = screenHeight - rect.bottom;
+        }
+        if (mMinusNavBar) {
+            keyboardHeight = Math.max(0, keyboardHeight - AndroidUtilities.navigationBarHeight);
+        }
+
         final boolean unique = lastKeyboardHeight != keyboardHeight;
         lastKeyboardHeight = keyboardHeight;
 

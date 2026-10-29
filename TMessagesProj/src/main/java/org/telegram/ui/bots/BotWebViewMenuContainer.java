@@ -48,7 +48,7 @@ import androidx.annotation.NonNull;
 import androidx.core.graphics.ColorUtils;
 import androidx.dynamicanimation.animation.SpringAnimation;
 import androidx.dynamicanimation.animation.SpringForce;
-import androidx.recyclerview.widget.ChatListItemAnimator;
+import org.telegram.ui.recyclerview.ChatListItemAnimator;
 
 import org.json.JSONObject;
 import org.telegram.messenger.AndroidUtilities;
@@ -77,6 +77,8 @@ import org.telegram.ui.ActionBar.BottomSheetTabsOverlay;
 import org.telegram.ui.ActionBar.INavigationLayout;
 import org.telegram.ui.ActionBar.Theme;
 import org.telegram.ui.ChatActivity;
+import org.telegram.ui.Components.Bulletin;
+import org.telegram.ui.Components.BulletinFactory;
 import org.telegram.ui.Components.ChatActivityEnterView;
 import org.telegram.ui.Components.ChatAvatarContainer;
 import org.telegram.ui.Components.CubicBezierInterpolator;
@@ -85,6 +87,7 @@ import org.telegram.ui.Components.SimpleFloatPropertyCompat;
 import org.telegram.ui.DialogsActivity;
 import org.telegram.ui.LaunchActivity;
 import org.telegram.ui.PaymentFormActivity;
+import org.telegram.ui.ReportBottomSheet;
 import org.telegram.ui.Stars.StarsController;
 import org.telegram.ui.web.BotWebViewContainer;
 
@@ -214,6 +217,8 @@ public class BotWebViewMenuContainer extends FrameLayout implements Notification
         tab.props.responseTime = loadedResponseTime;
         tab.ready = webViewContainer != null && webViewContainer.isPageLoaded();
         tab.lastUrl = webViewContainer != null ? webViewContainer.getUrlLoaded() : null;
+        tab.sameOrigin = webViewContainer != null && webViewContainer.isBridgeRestrictedToOrigin();
+        tab.trustedOrigin = webViewContainer != null ? webViewContainer.getTrustedOrigin() : null;
         tab.themeIsDark = Theme.isCurrentThemeDark();
         tab.settings = settingsItem != null && settingsItem.getVisibility() == View.VISIBLE;
         tab.main = mainButtonSettings;
@@ -242,19 +247,19 @@ public class BotWebViewMenuContainer extends FrameLayout implements Notification
         if (tab == null || tab.props == null) return false;
 //        setBackgroundColor(tab.backgroundColor, false);
 //        setActionBarColor(tab.actionBarColor, tab.overrideActionBarColor, false);
-        if (tab.webView != null) {
-//            tab.webView.resumeTimers();
-            tab.webView.onResume();
-            webViewContainer.replaceWebView(currentAccount, tab.webView, tab.proxy);
-        } else {
-            tab.props.response = null;
-            tab.props.responseTime = 0;
-        }
         currentAccount = tab.props.currentAccount;
         botId = tab.props.botId;
         botUrl = tab.props.buttonUrl;
         loadedResponse = tab.props.response;
         loadedResponseTime = tab.props.responseTime;
+        if (tab.webView != null) {
+//            tab.webView.resumeTimers();
+            tab.webView.onResume();
+            webViewContainer.replaceWebView(currentAccount, tab.webView, tab.proxy, tab.trustedOrigin, tab.sameOrigin);
+        } else {
+            tab.props.response = null;
+            tab.props.responseTime = 0;
+        }
         loadWebView();
         return true;
     }
@@ -286,6 +291,7 @@ public class BotWebViewMenuContainer extends FrameLayout implements Notification
                 addToHomeScreenItem.setVisibility(View.GONE);
             }
             botMenuItem.addSubItem(R.id.menu_tos_bot, R.drawable.menu_intro, LocaleController.getString(R.string.BotWebViewToS));
+            botMenuItem.addSubItem(R.id.menu_report_bot, R.drawable.msg_report, LocaleController.getString(R.string.BotWebViewReportBot));
         }
     }
 
@@ -393,7 +399,7 @@ public class BotWebViewMenuContainer extends FrameLayout implements Notification
                     args.putBoolean("allowBots", chatTypes.contains("bots"));
 
                     DialogsActivity dialogsActivity = new DialogsActivity(args);
-                    dialogsActivity.setDelegate((fragment, dids, message1, param, notify, scheduleDate, topicsFragment) -> {
+                    dialogsActivity.setDelegate((fragment, dids, message1, param, notify, scheduleDate, scheduleRepeatPeriod, topicsFragment) -> {
                         long did = dids.get(0).dialogId;
 
                         Bundle args1 = new Bundle();
@@ -444,12 +450,12 @@ public class BotWebViewMenuContainer extends FrameLayout implements Notification
             }
 
             @Override
-            public void onSetupMainButton(boolean isVisible, boolean isActive, String text, int color, int textColor, boolean isProgressVisible, boolean hasShineEffect) {
+            public void onSetupMainButton(boolean isVisible, boolean isActive, String text, long emojiId, int color, int textColor, boolean isProgressVisible, boolean hasShineEffect) {
                 setMainButton(BotWebViewAttachedSheet.MainButtonSettings.of(isVisible, isActive, text, color, textColor, isProgressVisible));
             }
 
             @Override
-            public void onSetupSecondaryButton(boolean isVisible, boolean isActive, String text, int color, int textColor, boolean isProgressVisible, boolean hasShineEffect, String position) {
+            public void onSetupSecondaryButton(boolean isVisible, boolean isActive, String text, long emojiId, int color, int textColor, boolean isProgressVisible, boolean hasShineEffect, String position) {
 
             }
 
@@ -730,6 +736,8 @@ public class BotWebViewMenuContainer extends FrameLayout implements Notification
                                 MediaDataController.getInstance(currentAccount).installShortcut(botId, MediaDataController.SHORTCUT_TYPE_ATTACHED_BOT);
                             } else if (id == R.id.menu_tos_bot) {
                                 Browser.openUrl(getContext(), LocaleController.getString(R.string.BotWebViewToSLink));
+                            } else if (id == R.id.menu_report_bot) {
+                                ReportBottomSheet.openChat(currentAccount, getContext(), BulletinFactory.of(Bulletin.BulletinWindow.make(getContext()), null), botId);
                             }
                         }
                     });
@@ -1004,7 +1012,7 @@ public class BotWebViewMenuContainer extends FrameLayout implements Notification
 
             TLRPC.TL_webViewResultUrl resultUrl = (TLRPC.TL_webViewResultUrl) response;
             queryId = resultUrl.query_id;
-            webViewContainer.loadUrl(currentAccount, resultUrl.url);
+            webViewContainer.loadUrl(currentAccount, resultUrl.url, resultUrl.same_origin);
             swipeContainer.setWebView(webViewContainer.getWebView());
 
             AndroidUtilities.runOnUIThread(pollRunnable, POLL_PERIOD);
@@ -1287,7 +1295,7 @@ public class BotWebViewMenuContainer extends FrameLayout implements Notification
 
         clipPath.rewind();
         float radius = dp(16) * (AndroidUtilities.isTablet() ? 1f : 1f - actionBarTransitionProgress);
-        final float r = AndroidUtilities.lerp(radius, dp(10), progress);
+        final float r = AndroidUtilities.lerp(radius, dp(18), progress);
         clipPath.addRoundRect(clipRect, r, r, Path.Direction.CW);
         canvas.clipPath(clipPath);
         canvas.drawPaint(backgroundPaint);

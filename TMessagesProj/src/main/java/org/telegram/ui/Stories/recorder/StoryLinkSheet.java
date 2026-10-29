@@ -365,7 +365,7 @@ public class StoryLinkSheet extends BottomSheetWithRecyclerListView implements N
     }
 
     private final Runnable requestPreview = () -> {
-        TL_account.getWebPagePreview req = new TL_account.getWebPagePreview();
+        final TL_account.getWebPagePreview req = new TL_account.getWebPagePreview();
         req.message = urlEditText.editText.getText().toString();
         reqId = ConnectionsManager.getInstance(currentAccount).sendRequest(req, (res, err) -> AndroidUtilities.runOnUIThread(() -> {
             TLRPC.TL_messageMediaWebPage media = null;
@@ -553,7 +553,7 @@ public class StoryLinkSheet extends BottomSheetWithRecyclerListView implements N
         public static class Factory extends UItem.UItemFactory<WebpagePreviewView> {
             static { setup(new Factory()); }
             @Override
-            public WebpagePreviewView createView(Context context, int currentAccount, int classGuid, Theme.ResourcesProvider resourcesProvider) {
+            public WebpagePreviewView createView(Context context, RecyclerListView listView, int currentAccount, int classGuid, Theme.ResourcesProvider resourcesProvider) {
                 return new WebpagePreviewView(context);
             }
 

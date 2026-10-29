@@ -38,8 +38,7 @@ import android.widget.FrameLayout;
 import android.widget.ImageView;
 
 import androidx.annotation.Keep;
-
-import com.google.android.exoplayer2.ui.AspectRatioFrameLayout;
+import org.telegram.ui.AspectRatioFrameLayout;
 
 import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.ApplicationLoader;

@@ -45,6 +45,7 @@ import androidx.core.graphics.ColorUtils;
 import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.GenericProvider;
 import org.telegram.messenger.LocaleController;
+import org.telegram.ui.ActionBar.MessageDrawable;
 import org.telegram.ui.ActionBar.Theme;
 
 public class CheckBoxBase {
@@ -54,7 +55,6 @@ public class CheckBoxBase {
     private RectF rect = new RectF();
 
     private static Paint paint;
-    private static Paint eraser;
     private Paint checkPaint;
     public float checkScale = 1.0f;
     private Paint backgroundPaint;
@@ -62,17 +62,24 @@ public class CheckBoxBase {
     private static Paint forbidPaint;
 
     private float alpha = 1;
+
     public void setAlpha(float alpha) {
+        if (this.alpha == alpha) {
+            return;
+        }
         this.alpha = alpha;
         invalidate();
     }
 
     private boolean cutCheck;
-    public void setCuttingCheck(boolean cutCheck) {
-        if (this.cutCheck == cutCheck) return;
-        this.cutCheck = cutCheck;
 
+    public void setCuttingCheck(boolean cutCheck) {
+        if (this.cutCheck == cutCheck) {
+            return;
+        }
+        this.cutCheck = cutCheck;
         checkPaint.setXfermode(cutCheck ? new PorterDuffXfermode(PorterDuff.Mode.CLEAR) : null);
+        invalidate();
     }
 
     private Path path = new Path();
@@ -110,7 +117,7 @@ public class CheckBoxBase {
 
     private ProgressDelegate progressDelegate;
 
-    private Theme.MessageDrawable messageDrawable;
+    private MessageDrawable messageDrawable;
     private Theme.ResourcesProvider resourcesProvider;
 
     private GenericProvider<Void, Paint> circlePaintProvider = obj -> paint;
@@ -125,10 +132,6 @@ public class CheckBoxBase {
         size = sz;
         if (paint == null) {
             paint = new Paint(Paint.ANTI_ALIAS_FLAG);
-
-            eraser = new Paint(Paint.ANTI_ALIAS_FLAG);
-            eraser.setColor(0);
-            eraser.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.CLEAR));
         }
         checkPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
         checkPaint.setStrokeCap(Paint.Cap.ROUND);
@@ -149,8 +152,20 @@ public class CheckBoxBase {
         invalidate();
     }
 
+    public void setParentView(View view) {
+        parentView = view;
+    }
+
+    public View getParentView() {
+        return parentView;
+    }
+
     public void setResourcesProvider(Theme.ResourcesProvider resourcesProvider) {
+        if (this.resourcesProvider == resourcesProvider) {
+            return;
+        }
         this.resourcesProvider = resourcesProvider;
+        invalidate();
     }
 
     public void onAttachedToWindow() {
@@ -162,10 +177,16 @@ public class CheckBoxBase {
     }
 
     public void setBounds(int x, int y, int width, int height) {
+        int right = x + width;
+        int bottom = y + height;
+        if (bounds.left == x && bounds.top == y && bounds.right == right && bounds.bottom == bottom) {
+            return;
+        }
         bounds.left = x;
         bounds.top = y;
-        bounds.right = x + width;
-        bounds.bottom = y + height;
+        bounds.right = right;
+        bounds.bottom = bottom;
+        invalidate();
     }
 
     public void setCustomRadius(float customRadius) {
@@ -293,6 +314,9 @@ public class CheckBoxBase {
     }
 
     public void setColor(int background, int background2, int check) {
+        if (backgroundColorKey == background && background2ColorKey == background2 && checkColorKey == check) {
+            return;
+        }
         backgroundColorKey = background;
         background2ColorKey = background2;
         checkColorKey = check;
@@ -300,38 +324,66 @@ public class CheckBoxBase {
     }
 
     public void setStrokeBackgroundColor(int key) {
+        if (strokeBackgroundKey == key) {
+            return;
+        }
         strokeBackgroundKey = key;
         invalidate();
     }
 
     public void setStrokeBackgroundWidth(int width) {
+        if (strokeBackgroundWidth == width) {
+            return;
+        }
         strokeBackgroundWidth = width;
         invalidate();
     }
 
     public void setBackgroundColor(int backgroundColor) {
+        if (this.backgroundColor == backgroundColor) {
+            return;
+        }
         this.backgroundColor = backgroundColor;
         invalidate();
     }
 
-    public void setBackgroundDrawable(Theme.MessageDrawable drawable) {
+    public void setBackgroundDrawable(MessageDrawable drawable) {
+        if (messageDrawable == drawable) {
+            return;
+        }
         messageDrawable = drawable;
+        invalidate();
     }
 
     public void setUseDefaultCheck(boolean value) {
+        if (useDefaultCheck == value) {
+            return;
+        }
         useDefaultCheck = value;
+        invalidate();
     }
 
     public void setBackgroundAlpha(float alpha) {
+        if (backgroundAlpha == alpha) {
+            return;
+        }
         backgroundAlpha = alpha;
+        invalidate();
     }
 
     public void setNum(int num) {
+        String newText = null;
         if (num >= 0) {
-            checkedText = "" + (num + 1);
-        } else if (checkAnimator == null) {
-            checkedText = null;
+            newText = "" + (num + 1);
+        } else if (checkAnimator != null) {
+            newText = checkedText;
         }
+
+        if (checkedText == null ? newText == null : checkedText.equals(newText)) {
+            return;
+        }
+
+        checkedText = newText;
         invalidate();
     }
 
@@ -341,8 +393,11 @@ public class CheckBoxBase {
 
     public void setChecked(int num, boolean checked, boolean animated) {
         if (num >= 0) {
-            checkedText = "" + (num + 1);
-            invalidate();
+            String newText = "" + (num + 1);
+            if (checkedText == null || !checkedText.equals(newText)) {
+                checkedText = newText;
+                invalidate();
+            }
         }
         if (checked == isChecked) {
             return;
@@ -374,6 +429,7 @@ public class CheckBoxBase {
         int cx = bounds.centerX();
         int cy = bounds.centerY();
 
+        final boolean cutCheck = this.cutCheck && roundProgress > 0 && progress >= 0.5f && !forbidden && checkedText == null;
         if (cutCheck) {
             canvas.saveLayerAlpha(cx - rad, cy - rad, cx + rad, cy + rad, 255, Canvas.ALL_SAVE_FLAG);
         }
@@ -490,7 +546,7 @@ public class CheckBoxBase {
                 paint.setColor(getThemedColor(backgroundColorKey));
             } else if (backgroundColor != 0) {
                 paint.setColor(backgroundColor);
-            } else  {
+            } else {
                 paint.setColor(getThemedColor(enabled ? Theme.key_checkbox : Theme.key_checkboxDisabled));
             }
             if (forbidden) {
@@ -619,7 +675,11 @@ public class CheckBoxBase {
     }
 
     public void setCirclePaintProvider(GenericProvider<Void, Paint> circlePaintProvider) {
+        if (this.circlePaintProvider == circlePaintProvider) {
+            return;
+        }
         this.circlePaintProvider = circlePaintProvider;
+        invalidate();
     }
 
     private int getThemedColor(int key) {

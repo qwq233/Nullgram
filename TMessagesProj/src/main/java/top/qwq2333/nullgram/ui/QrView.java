@@ -13,7 +13,7 @@ import android.text.TextUtils;
 import android.view.View;
 
 import com.google.zxing.EncodeHintType;
-import com.google.zxing.qrcode.QRCodeWriter;
+import org.telegram.messenger.TelegramQRCodeWriter;
 import com.google.zxing.qrcode.decoder.ErrorCorrectionLevel;
 
 import org.telegram.messenger.AndroidUtilities;
@@ -47,7 +47,7 @@ public class QrView extends View {
         crossfadeToPaint.setShader(new LinearGradient(0, 0, 0, AndroidUtilities.dp(crossfadeWidthDp), new int[]{0, 0xffffffff}, new float[]{0f, 1f}, Shader.TileMode.CLAMP));
         crossfadeToPaint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.DST_OUT));
 
-        loadingMatrix = new RLottieDrawable(R.raw.qr_matrix, "qr_matrix", AndroidUtilities.dp(200), AndroidUtilities.dp(200));
+        loadingMatrix = new RLottieDrawable(R.raw.qr_matrix, AndroidUtilities.dp(200), AndroidUtilities.dp(200));
         loadingMatrix.setMasterParent(this);
         loadingMatrix.setAutoRepeat(1);
         loadingMatrix.setColorFilter(Color.BLACK, PorterDuff.Mode.MULTIPLY);
@@ -77,7 +77,7 @@ public class QrView extends View {
             int imageSize = imageBloks * multiple - 24;
             int imageX = (size - imageSize) / 2;
             paint.setColor(Color.BLACK);
-            QRCodeWriter.drawSideQuads(canvas, 0, 0, paint, 7, multiple, 16, size, .75f, radii, true);
+            TelegramQRCodeWriter.drawSideQuads(canvas, 0, 0, paint, 7, multiple, 16, size, .75f, radii, true);
             String svg = AndroidUtilities.readRes(null, R.raw.qr_logo);
             Bitmap icon = SvgHelper.getBitmap(svg, imageSize, imageSize, false);
             canvas.drawBitmap(icon, imageX, imageX, null);
@@ -175,7 +175,7 @@ public class QrView extends View {
         HashMap<EncodeHintType, Object> hints = new HashMap<>();
         hints.put(EncodeHintType.ERROR_CORRECTION, ErrorCorrectionLevel.M);
         hints.put(EncodeHintType.MARGIN, 0);
-        QRCodeWriter writer = new QRCodeWriter();
+        TelegramQRCodeWriter writer = new TelegramQRCodeWriter();
         try {
             qrBitmap = writer.encode(link, w, h, hints, null, 0.75f, 0, Color.BLACK);
         } catch (Exception e) {

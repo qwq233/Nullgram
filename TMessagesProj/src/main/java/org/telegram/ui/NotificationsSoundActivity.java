@@ -1045,4 +1045,14 @@ public class NotificationsSoundActivity extends BaseFragment implements ChatAtta
             return null;
         }
     }
+
+    @Override
+    public boolean isSupportEdgeToEdge() {
+        return true;
+    }
+    @Override
+    public void onInsets(int left, int top, int right, int bottom) {
+        listView.setClipToPadding(false);
+        listView.setPadding(0, 0, 0, bottom);
+    }
 }
