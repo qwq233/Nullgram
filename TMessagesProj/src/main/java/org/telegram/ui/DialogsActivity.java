@@ -3540,7 +3540,7 @@ public class DialogsActivity extends BaseFragment implements NotificationCenter.
             }
         }
         actionBarDefaultTitle = actionBar.getTitle();
-        if (communityId == 0 && (!onlySelect || (initialDialogsType == DIALOGS_TYPE_FORWARD && Config.showTabsOnForward))) {
+        if (!onlySelect || (initialDialogsType == DIALOGS_TYPE_FORWARD && Config.showTabsOnForward)) {
             actionBar.setAddToContainer(false);
             actionBar.setCastShadows(false);
             actionBar.setClipContent(true);
