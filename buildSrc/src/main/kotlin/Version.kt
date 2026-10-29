@@ -20,7 +20,7 @@ import org.gradle.api.JavaVersion
 object Version {
 
     @JvmStatic
-    val java = JavaVersion.VERSION_17
+    val java = JavaVersion.VERSION_21
 
     @JvmStatic
     val officialVersionName = "13.0.3"

@@ -22,7 +22,7 @@ plugins {
     `kotlin-dsl`
 }
 
-val java = JavaVersion.VERSION_17
+val java = JavaVersion.VERSION_21
 
 repositories {
     google()

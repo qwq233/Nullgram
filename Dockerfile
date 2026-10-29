@@ -1,4 +1,4 @@
-FROM gradle:8.13-jdk17
+FROM gradle:9.8.2-jdk21
 
 ENV ANDROID_CMDLINE_TOOLS_VERSION=15859902
 ENV ANDROID_SDK_URL=https://dl.google.com/android/repository/commandlinetools-linux-${ANDROID_CMDLINE_TOOLS_VERSION}_latest.zip
