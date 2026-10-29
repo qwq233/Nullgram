@@ -803,7 +803,7 @@ public class GeneralSettingActivity extends BaseActivity {
 
         builder.setPositiveButton(LocaleController.getString("OK", R.string.OK), (dialogInterface, i) -> {
             String input = editText.getText().toString().trim();
-            if (!input.isEmpty() && input.matches("^[A-Za-z0-9_-]{1,255}$")) {
+            if (input.matches("^[A-Za-z0-9_-]{1,255}$")) {
                 Config.setCustomSavePath(input);
             } else {
                 Config.setCustomSavePath("Nullgram");
