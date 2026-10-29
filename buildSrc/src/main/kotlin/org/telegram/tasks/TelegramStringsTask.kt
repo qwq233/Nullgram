@@ -27,12 +27,18 @@ abstract class TelegramStringsTask : DefaultTask() {
     companion object {
         private val GENERATED_EXCLUSIONS = setOf(
             "AppName",
-            "AppNameBeta"
+            "AppNameBeta",
+            "NullgramName",
+            "NullgramPushService",
+            "UnsupportedMediaNullgram"
         )
 
         private val STABLE_IDS_EXCLUSIONS = setOf(
             "AppName",
-            "AppNameBeta"
+            "AppNameBeta",
+            "NullgramName",
+            "NullgramPushService",
+            "UnsupportedMediaNullgram"
         )
 
         private const val STRING_RESOURCE_ID_BASE = 0x7F0FFFFE
