@@ -219,6 +219,10 @@
     public void onAuthentication*(...);
 }
 
+# Suppress missing class warnings for legacy support annotations and OEM window extensions
+-dontwarn android.support.annotation.**
+-dontwarn androidx.window.extensions.**
+
 -allowaccessmodification
 -overloadaggressively
 -keepattributes SourceFile,LineNumberTable,LocalVariableTable
