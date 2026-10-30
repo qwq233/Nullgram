@@ -19,62 +19,39 @@ jobs:
     env:
       CCACHE_COMPILERCHECK: "%compiler% -dumpmachine; %compiler% -dumpversion"
       CCACHE_NOHASHDIR: "true"
-      CCACHE_MAXSIZE: "10G"
+      CCACHE_MAXSIZE: "5G"
       CCACHE_HARDLINK: "true"
     steps:
-      - uses: actions/checkout@v2
+      - name: Checkout
+        uses: actions/checkout@v7
         with:
           fetch-depth: 0
       - name: Check out submodules
         run: |
           git -c submodule."libs/rust".update=none submodule update --init --recursive
       - name: Setup Java
-        uses: actions/setup-java@v3
+        uses: actions/setup-java@v6
         with:
           distribution: 'temurin'
           java-version: '21'
-          cache: 'gradle'
       - name: Setup Gradle
-        uses: gradle/gradle-build-action@v2.4.2
+        uses: gradle/actions/setup-gradle@v6
       - name: Set up ccache
-        uses: hendrikmuhs/ccache-action@v1.2
+        uses: hendrikmuhs/ccache-action@v1
         with:
           key: ccache
-          restore-keys: ccache
+          restore-keys: |
+            ccache-stable
+            ccache
+          max-size: 5G
       - name: Setup Android SDK Tools
         uses: android-actions/setup-android@v4
         with:
           packages: platform-tools
-      - name: Prepare Environment
-        run: |
-            echo "Removing large packages"
-            sudo apt-get remove -y '^dotnet-.*' aspnetcore-targeting-pack-6.0
-            sudo apt-get remove -y '^llvm-.*'
-            sudo apt-get remove -y 'php.*'
-            sudo apt-get remove -y '^mongodb-.*'
-            sudo apt-get remove -y '^mysql-.*'
-            sudo apt-get remove -y azure-cli google-chrome-stable firefox powershell mono-devel libgl1-mesa-dri
-            sudo apt-get autoremove -y
-            sudo apt-get clean
-            echo "Removing large directories"
-            sudo rm -rf /usr/share/dotnet/
-            sudo rm -rf /usr/local/graalvm/
-            sudo rm -rf /usr/local/.ghcup/
-            sudo rm -rf /usr/local/share/powershell
-            sudo rm -rf /usr/local/share/chromium
-            sudo rm -rf /usr/local/lib/node_modules
-            df -h
-            
-            sudo apt-get install bison gcc make curl ninja-build ccache -y
-            echo "y" | sdkmanager --install "ndk;28.1.13356709" --sdk_root=${ANDROID_SDK_ROOT} &> /dev/null
-            echo "sdk.dir=${ANDROID_HOME}" >> local.properties
       - name: Debug Build
         run: |
           sed '/signingConfig =/d' TMessagesProj/build.gradle.kts > TMessagesProj/build.gradle.kts.tmp
           sed '/google.services/d' TMessagesProj/build.gradle.kts.tmp > TMessagesProj/build.gradle.kts
           sed '/google.services/d' build.gradle.kts > build.gradle.kts.tmp
           cp build.gradle.kts.tmp build.gradle.kts
-          ./gradlew TMessagesProj:assembleDebug
-        
-
-  
+          ./gradlew TMessagesProj:assembleDebug --build-cache --no-configuration-cache
