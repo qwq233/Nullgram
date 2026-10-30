@@ -34,6 +34,8 @@ import org.telegram.ui.Stories.DarkThemeResourceProvider;
 import org.telegram.ui.Stories.recorder.CaptionContainerView;
 import org.telegram.ui.Stories.recorder.HintView2;
 
+import top.qwq2333.gen.Config;
+
 public class CaptionPhotoViewer extends CaptionContainerView {
 
     private boolean addPhotoVisible;
@@ -532,7 +534,7 @@ public class CaptionPhotoViewer extends CaptionContainerView {
 
     private boolean shownAiButton;
     private void showAiButton(boolean show_) {
-        final boolean show = show_;
+        final boolean show = show_ && !Config.disableAiEditor;
 
         if (shownAiButton == show) return;
         if (show) {
