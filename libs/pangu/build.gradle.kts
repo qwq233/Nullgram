@@ -19,7 +19,7 @@
 
 plugins {
     java
-    kotlin("jvm")
+    alias(libs.plugins.kotlin.jvm)
 }
 
 java {

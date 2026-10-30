@@ -1,10 +1,10 @@
 plugins {
     java
-    kotlin("jvm")
+    alias(libs.plugins.kotlin.jvm)
 }
 
 dependencies {
-    implementation("com.neovisionaries:nv-websocket-client:2.14")
+    implementation(libs.nv.websocket)
 
 }
 

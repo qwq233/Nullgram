@@ -8796,7 +8796,7 @@ public class LaunchActivity extends BasePermissionsActivity implements INavigati
         }
     }
 
-    private void updateCurrentConnectionState(int account) {
+    void updateCurrentConnectionState(int account) {
         if (actionBarLayout == null) {
             return;
         }

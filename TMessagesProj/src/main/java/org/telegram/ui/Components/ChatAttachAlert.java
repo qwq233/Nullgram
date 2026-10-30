@@ -1538,7 +1538,7 @@ public class ChatAttachAlert extends BottomSheet implements NotificationCenter.N
 
         this.forceDarkTheme = forceDarkTheme;
         this.showingFromDialog = showingFromDialog;
-        // drawNavigationBar = true;
+        drawNavigationBar = true;
         inBubbleMode = parentFragment instanceof ChatActivity && parentFragment.isInBubbleMode();
         openInterpolator = new OvershootInterpolator(0.7f);
         baseFragment = parentFragment;

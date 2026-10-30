@@ -37,7 +37,6 @@ import org.telegram.transforms.CoreFingerprintTransform
 
 plugins {
     alias(libs.plugins.android.application)
-    id("org.jetbrains.kotlin.android")
     alias(libs.plugins.firebase.crashlytics)
     alias(libs.plugins.google.services)
     alias(libs.plugins.triplet.play)
@@ -114,7 +113,7 @@ configurations.matching {
 
 dependencies {
     components.withModule("androidx.core:core") {
-        if (id.version == "1.19.1") {
+        if (id.version == libs.versions.coreKtx.get()) {
             for (variant in listOf("releaseVariantReleaseApiPublication", "releaseVariantReleaseRuntimePublication")) {
                 withVariant(variant) {
                     attributes.attribute(ArtifactTypeDefinition.ARTIFACT_TYPE_ATTRIBUTE, coreStockAarType)
@@ -122,7 +121,7 @@ dependencies {
             }
         }
     }
-    add(coreFingerprintDonor.name, "androidx.core:core:1.17.0@aar")
+    add(coreFingerprintDonor.name, variantOf(libs.androidx.core.fingerprint.compat) { artifactType("aar") })
     registerTransform(CoreFingerprintTransform::class) {
         from.attribute(ArtifactTypeDefinition.ARTIFACT_TYPE_ATTRIBUTE, coreStockAarType)
         to.attribute(ArtifactTypeDefinition.ARTIFACT_TYPE_ATTRIBUTE, "aar")
@@ -180,12 +179,12 @@ dependencies {
     implementation(libs.hiddenapibypass)
     implementation(libs.nanohttpd)
     implementation(libs.recaptcha)
-    implementation("io.noties.markwon:core:4.6.2")
-    implementation("io.noties.markwon:ext-strikethrough:4.6.2")
-    implementation("io.noties.markwon:ext-tables:4.6.2")
-    implementation("io.noties.markwon:html:4.6.2")
-    implementation("io.noties.markwon:inline-parser:4.6.2")
-    implementation("io.noties.markwon:ext-latex:4.6.2") {
+    implementation(libs.markwon.core)
+    implementation(libs.markwon.strikethrough)
+    implementation(libs.markwon.tables)
+    implementation(libs.markwon.html)
+    implementation(libs.markwon.inline.parser)
+    implementation(libs.markwon.latex) {
         exclude(group = "ru.noties", module = "jlatexmath-android")
     }
 

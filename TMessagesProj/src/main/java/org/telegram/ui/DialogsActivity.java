@@ -3907,6 +3907,7 @@ public class DialogsActivity extends BaseFragment implements NotificationCenter.
             }
         }
 
+        actionBar.setAllowOverlayTitle(true);
         actionBar.setActionBarMenuOnItemClick(new ActionBar.ActionBarMenuOnItemClick() {
             @Override
             public void onItemClick(int id) {
@@ -3954,6 +3955,8 @@ public class DialogsActivity extends BaseFragment implements NotificationCenter.
                     passcodeItem.getLocationInWindow(position);
                     ((LaunchActivity) getParentActivity()).showPasscodeActivity(false, true, position[0] + passcodeItem.getMeasuredWidth() / 2, position[1] + passcodeItem.getMeasuredHeight() / 2, () -> passcodeItem.setAlpha(1.0f), () -> passcodeItem.setAlpha(0.0f));
                     getNotificationsController().showNotifications();
+                } else if (id == 2) {
+                    presentFragment(new ProxyListActivity());
                 } else if (id == 3) {
                     showSearch(true, true, true);
                     actionBar.openSearchField(true);
@@ -4583,7 +4586,7 @@ public class DialogsActivity extends BaseFragment implements NotificationCenter.
                             }
                         }
                     }
-                    if (!hasStories && recyclerView == viewPages[0].listView && !searching && actionBar != null && !actionBar.isActionModeShowed() && !disableActionBarScrolling && !rightSlidingDialogContainer.hasFragment()) {
+                    if (!hasStories && filterTabsView != null && filterTabsView.getVisibility() == View.VISIBLE && filterTabsViewIsVisible && recyclerView == viewPages[0].listView && !searching && actionBar != null && !actionBar.isActionModeShowed() && !disableActionBarScrolling && !rightSlidingDialogContainer.hasFragment()) {
                         if (dy > 0 && hasHiddenArchive() && viewPages[0].dialogsType == DIALOGS_TYPE_DEFAULT) {
                             View child = recyclerView.getChildAt(0);
                             if (child != null) {
@@ -4602,22 +4605,14 @@ public class DialogsActivity extends BaseFragment implements NotificationCenter.
                         }
                         float currentTranslation = scrollYOffset;
                         float newTranslation = currentTranslation - dy;
-                        boolean applyScrollY = true;
-                        applyScrollY = false;
-                        invalidateScrollY = true;
-                        if (fragmentView != null) {
-                            fragmentView.invalidate();
+                        int maxScrollYOffset = getMaxScrollYOffset();
+                        if (newTranslation < -maxScrollYOffset) {
+                            newTranslation = -maxScrollYOffset;
+                        } else if (newTranslation > 0) {
+                            newTranslation = 0;
                         }
-                        if (applyScrollY) {
-                            int maxScrollYOffset = getMaxScrollYOffset();
-                            if (newTranslation < -maxScrollYOffset) {
-                                newTranslation = -maxScrollYOffset;
-                            } else if (newTranslation > 0) {
-                                newTranslation = 0;
-                            }
-                            if (newTranslation != currentTranslation) {
-                                setScrollY(newTranslation);
-                            }
+                        if (newTranslation != currentTranslation) {
+                            setScrollY(newTranslation);
                         }
                     }
                     if (fragmentView != null) {
@@ -5503,7 +5498,7 @@ public class DialogsActivity extends BaseFragment implements NotificationCenter.
                     transitionPage.animationSupportListView.setAdapter(transitionPage.animationSupportDialogsAdapter);
                     transitionPage.addView(transitionPage.animationSupportListView);
                 }
-                if (!open) {
+                if (!open && hasStories) {
                     invalidateScrollY = false;
                     DialogsActivity.this.setScrollY(-getMaxScrollYOffset());
                 }
@@ -5518,9 +5513,10 @@ public class DialogsActivity extends BaseFragment implements NotificationCenter.
                 hideFloatingButton(anotherFragmentOpened);
                 transitionPage.dialogsAdapter.notifyDataSetChanged();
                 transitionPage.animationSupportDialogsAdapter.notifyDataSetChanged();
-                float scrollOffset = !open ? scrollYOffset : -scrollYOffset;
+                float scrollOffset = hasStories && !open ? scrollYOffset : -scrollYOffset;
                 transitionPage.listView.setAnimationSupportView(transitionPage.animationSupportListView, scrollOffset, open, false);
                 transitionPage.listView.setClipChildren(false);
+                actionBar.setAllowOverlayTitle(false);
                 transitionPage.listView.stopScroll();
                 updateDialogsHint();
             }
@@ -5538,7 +5534,11 @@ public class DialogsActivity extends BaseFragment implements NotificationCenter.
                 transitionPage.animationSupportDialogsAdapter.notifyDataSetChanged();
                 transitionPage.listView.setAnimationSupportView(null, 0, hasFragment(), backward);
                 rightFragmentTransitionInProgress = false;
+                actionBar.setAllowOverlayTitle(!hasFragment());
                 contentView.requestLayout();
+                if (!hasStories) {
+                    DialogsActivity.this.setScrollY(0);
+                }
                 if (!hasFragment()) {
                     invalidateScrollY = true;
                     fixScrollYAfterArchiveOpened = true;
@@ -5551,6 +5551,9 @@ public class DialogsActivity extends BaseFragment implements NotificationCenter.
                 }
                 updateFilterTabs(false, true);
                 updateDialogsHint();
+                if (!hasFragment() && getParentActivity() instanceof LaunchActivity) {
+                    ((LaunchActivity) getParentActivity()).updateCurrentConnectionState(currentAccount);
+                }
             }
 
             @Override

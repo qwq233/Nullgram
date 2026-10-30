@@ -5618,6 +5618,9 @@ public class SharedMediaLayout extends FrameLayout implements NotificationCenter
         }
         additionalFloatingTranslation = top;
         floatingDateView.setTranslationY((floatingDateView.getTag() == null ? -dp(48) : 0) + additionalFloatingTranslation);
+        if (giftsContainer != null) {
+            setVisibleHeight(lastVisibleHeight);
+        }
     }
 
     @Override
@@ -5943,7 +5946,7 @@ public class SharedMediaLayout extends FrameLayout implements NotificationCenter
             botPreviewsContainer.setVisibleHeight(height);
         }
         if (giftsContainer != null) {
-            giftsContainer.setVisibleHeight(height);
+            giftsContainer.setVisibleHeight(height - dp(mediaPageTopMargin()) - topPadding);
         }
     }
 
