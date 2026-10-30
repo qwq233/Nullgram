@@ -7278,7 +7278,7 @@ public class DialogsActivity extends BaseFragment implements NotificationCenter.
         } else if (commentView != null && commentView.isPopupShowing()) {
             if (invoked) commentView.hidePopup(true);
             return false;
-        } else if (dialogStoriesCell.isFullExpanded() && dialogStoriesCell.scrollToFirst()) {
+        } else if (dialogStoriesCell.isFullExpanded() && dialogStoriesCell.scrollToFirst(invoked)) {
             return false;
         }
         return super.onBackPressed(invoked);

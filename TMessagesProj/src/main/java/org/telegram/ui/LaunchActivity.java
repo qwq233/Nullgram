@@ -870,6 +870,7 @@ public class LaunchActivity extends BasePermissionsActivity implements INavigati
             if (getLastFragment() != null && getLastFragment().getLastStoryViewer() != null) {
                 getLastFragment().getLastStoryViewer().updatePlayingMode();
             }
+            updateBackCallback();
         });
         actionBarLayout.setDelegate(this);
         Theme.loadWallpaper(true);
@@ -1095,6 +1096,7 @@ public class LaunchActivity extends BasePermissionsActivity implements INavigati
 
                     @Override
                     public void onBackInvoked() {
+                        backGestureInProgress = false;
                         invoked = true;
                         if (locked) {
                             locker.unlock();
@@ -1105,8 +1107,10 @@ public class LaunchActivity extends BasePermissionsActivity implements INavigati
                             onBackPressed();
                             return;
                         }
-                        if (!onBackPressed(true))
+                        if (!onBackPressed(true)) {
+                            if (actionBarLayout != null) actionBarLayout.onBackCancelled();
                             return;
+                        }
                         if (actionBarLayout != null) {
                             actionBarLayout.onBackInvoked();
                         } else {
@@ -1116,6 +1120,7 @@ public class LaunchActivity extends BasePermissionsActivity implements INavigati
 
                     @Override
                     public void onBackStarted(@NonNull BackEvent backEvent) {
+                        backGestureInProgress = true;
                         started = true;
                         invoked = false;
                         predictiveBackStarted = false;
@@ -1157,6 +1162,7 @@ public class LaunchActivity extends BasePermissionsActivity implements INavigati
 
                     @Override
                     public void onBackCancelled() {
+                        backGestureInProgress = false;
                         started = false;
                         invoked = false;
                         if (locked) {
@@ -1171,10 +1177,6 @@ public class LaunchActivity extends BasePermissionsActivity implements INavigati
                     }
                 };
             }
-            getOnBackInvokedDispatcher().registerOnBackInvokedCallback(
-                OnBackInvokedDispatcher.PRIORITY_DEFAULT,
-                (OnBackAnimationCallback) onBackAnimationCallback
-            );
         } else if (Build.VERSION.SDK_INT >= 33) {
             if (onBackInvokedCallback == null) {
                 onBackInvokedCallback = new OnBackInvokedCallback() {
@@ -1194,10 +1196,14 @@ public class LaunchActivity extends BasePermissionsActivity implements INavigati
                     }
                 };
             }
-            getOnBackInvokedDispatcher().registerOnBackInvokedCallback(
-                OnBackInvokedDispatcher.PRIORITY_DEFAULT,
-                (OnBackInvokedCallback) onBackInvokedCallback
-            );
+        }
+        if (Build.VERSION.SDK_INT >= 33) {
+            // Root overlays can change without changing the fragment stack.
+            getWindow().getDecorView().getViewTreeObserver().addOnPreDrawListener(backStateListener = () -> {
+                updateBackCallback();
+                return true;
+            });
+            updateBackCallback();
         }
 
         //if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
@@ -1221,6 +1227,38 @@ public class LaunchActivity extends BasePermissionsActivity implements INavigati
 
     private Object onBackAnimationCallback;
     private Object onBackInvokedCallback;
+    private boolean backCallbackRegistered;
+    private boolean backGestureInProgress;
+    private ViewTreeObserver.OnPreDrawListener backStateListener;
+
+    private void updateBackCallback() {
+        if (Build.VERSION.SDK_INT < 33 || backGestureInProgress || isFinishing()) return;
+        final Object callback = Build.VERSION.SDK_INT >= 34 ? onBackAnimationCallback : onBackInvokedCallback;
+        if (!(callback instanceof OnBackInvokedCallback)) return;
+
+        final BaseFragment fragment = actionBarLayout == null ? null : actionBarLayout.getLastFragment();
+        final boolean handleBack = !(fragment instanceof DialogsActivity)
+            || fragment.getFragmentView() == null || fragment.getFragmentView().getParent() == null
+            || actionBarLayout.getFragmentStack().size() != 1
+            || actionBarLayout.isTransitionAnimationInProgress() || actionBarLayout.isSwipeInProgress() || actionBarLayout.isInPreviewMode()
+            || AndroidUtilities.isTablet() && (
+                layersActionBarLayout != null && layersActionBarLayout.getView().getVisibility() == View.VISIBLE
+                || rightActionBarLayout != null && rightActionBarLayout.getView().getVisibility() == View.VISIBLE && !rightActionBarLayout.getFragmentStack().isEmpty()
+            )
+            || BaseFragment.hasSheets(fragment)
+            || GroupCallPip.onBackPressed(false)
+            || fragment.getActionBar() != null && fragment.getActionBar().isSearchFieldVisible()
+            || ((DialogsActivity) fragment).rightSlidingDialogContainer == null || ((DialogsActivity) fragment).rightSlidingDialogContainer.hasFragment()
+            || !onBackPressed(false) || !fragment.onBackPressed(false);
+        if (handleBack == backCallbackRegistered) return;
+        // A root callback would prevent Android's back-to-home preview.
+        if (handleBack) {
+            getOnBackInvokedDispatcher().registerOnBackInvokedCallback(OnBackInvokedDispatcher.PRIORITY_DEFAULT, (OnBackInvokedCallback) callback);
+        } else {
+            getOnBackInvokedDispatcher().unregisterOnBackInvokedCallback((OnBackInvokedCallback) callback);
+        }
+        backCallbackRegistered = handleBack;
+    }
 
     public static void showAttachMenuBot(LaunchActivity launchActivity, int currentAccount, TLRPC.TL_attachMenuBot attachMenuBot, String startApp, boolean sidemenu) {
         BaseFragment lastFragment = getLastFragment();
@@ -7431,12 +7469,16 @@ public class LaunchActivity extends BasePermissionsActivity implements INavigati
         } catch (Exception e) {
             FileLog.e(e);
         }
-        if (Build.VERSION.SDK_INT >= 34) {
+        if (backStateListener != null) {
+            getWindow().getDecorView().getViewTreeObserver().removeOnPreDrawListener(backStateListener);
+            backStateListener = null;
+        }
+        if (backCallbackRegistered && Build.VERSION.SDK_INT >= 34) {
             if (onBackAnimationCallback instanceof OnBackAnimationCallback) {
                 getOnBackInvokedDispatcher().unregisterOnBackInvokedCallback((OnBackAnimationCallback) onBackAnimationCallback);
             }
-        } else if (Build.VERSION.SDK_INT >= 33) {
-            if (onBackAnimationCallback instanceof OnBackInvokedCallback) {
+        } else if (backCallbackRegistered && Build.VERSION.SDK_INT >= 33) {
+            if (onBackInvokedCallback instanceof OnBackInvokedCallback) {
                 getOnBackInvokedDispatcher().unregisterOnBackInvokedCallback((OnBackInvokedCallback) onBackInvokedCallback);
             }
         }
@@ -8941,6 +8983,10 @@ public class LaunchActivity extends BasePermissionsActivity implements INavigati
             return false;
         } else if (ArticleViewer.hasInstance() && ArticleViewer.getInstance().isVisible()) {
             if (invoked) ArticleViewer.getInstance().close(true, false);
+            return false;
+        }
+        if (drawerLayoutContainer != null && drawerLayoutContainer.getDrawerPosition() > 0) {
+            if (invoked) drawerLayoutContainer.closeDrawer(false);
             return false;
         }
         return true;

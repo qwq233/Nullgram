@@ -283,6 +283,7 @@
 
         <activity
             android:name="org.telegram.ui.LaunchActivity"
+            android:enableOnBackInvokedCallback="true"
             android:theme="@style/Theme.TMessages.Start"
             android:configChanges="keyboard|keyboardHidden|orientation|screenSize|uiMode|smallestScreenSize|screenLayout"
             android:supportsPictureInPicture="true"

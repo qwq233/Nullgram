@@ -583,6 +583,9 @@ public class ActionBarLayout extends FrameLayout implements INavigationLayout, F
     public EmptyBaseFragment getSheetFragment(boolean create) {
         if (parentActivity == null)
             return null;
+        if (sheetFragment == null && !create) {
+            return null;
+        }
         if (sheetFragment == null) {
             sheetFragment = new EmptyBaseFragment() {
                 @Override
@@ -1679,7 +1682,7 @@ public class ActionBarLayout extends FrameLayout implements INavigationLayout, F
         if (transitionAnimationPreviewMode || startedTracking || checkTransitionAnimation() || fragmentsStack.isEmpty()) {
             return;
         }
-        if (GroupCallPip.onBackPressed()) {
+        if (GroupCallPip.onBackPressed(true)) {
             return;
         }
         if (!storyViewerAttached() && currentActionBar != null && !currentActionBar.isActionModeShowed() && currentActionBar.isSearchFieldVisible) {

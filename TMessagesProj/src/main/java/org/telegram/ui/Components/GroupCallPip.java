@@ -464,9 +464,9 @@ public class GroupCallPip implements NotificationCenter.NotificationCenterDelega
         return groupCall && !forceRemoved && (ApplicationLoader.mainInterfaceStopped || !GroupCallActivity.groupCallUiVisible);
     }
 
-    public static boolean onBackPressed() {
+    public static boolean onBackPressed(boolean invoked) {
         if (instance != null && instance.showAlert) {
-            instance.showAlert(false);
+            if (invoked) instance.showAlert(false);
             return true;
         }
         return false;
