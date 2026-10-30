@@ -96,6 +96,7 @@ public class GeneralSettingActivity extends BaseActivity {
     private int showBotAPIRow;
     private int showExactNumberRow;
     private int showExactTimeRow;
+    private int disableAiEditorRow;
     private int disableInstantCameraRow;
     private int disableUndoRow;
     private int skipOpenLinkConfirmRow;
@@ -201,6 +202,11 @@ public class GeneralSettingActivity extends BaseActivity {
             Config.toggleShowExactTime();
             if (view instanceof TextCheckCell) {
                 ((TextCheckCell) view).setChecked(Config.showExactTime);
+            }
+        } else if (position == disableAiEditorRow) {
+            Config.toggleDisableAiEditor();
+            if (view instanceof TextCheckCell) {
+                ((TextCheckCell) view).setChecked(Config.disableAiEditor);
             }
         } else if (position == disableInstantCameraRow) {
             Config.toggleDisableInstantCamera();
@@ -447,6 +453,7 @@ public class GeneralSettingActivity extends BaseActivity {
         showBotAPIRow = addRow("showBotAPI");
         showExactNumberRow = addRow("showExactNumber");
         showExactTimeRow = addRow("showExactTime");
+        disableAiEditorRow = addRow("disableAiEditor");
         disableInstantCameraRow = addRow("disableInstantCamera");
         disableUndoRow = addRow("disableUndo");
         skipOpenLinkConfirmRow = addRow("skipOpenLinkConfirm");
@@ -610,6 +617,8 @@ public class GeneralSettingActivity extends BaseActivity {
                         textCell.setTextAndCheck(LocaleController.getString("showExactNumber", R.string.showExactNumber), Config.showExactNumber, true);
                     } else if (position == showExactTimeRow) {
                         textCell.setTextAndCheck(LocaleController.getString("showExactTime", R.string.showExactTime), Config.showExactTime, true);
+                    } else if (position == disableAiEditorRow) {
+                        textCell.setTextAndCheck(LocaleController.getString("disableAiEditor", R.string.disableAiEditor), Config.disableAiEditor, true);
                     } else if (position == disableInstantCameraRow) {
                         textCell.setTextAndCheck(LocaleController.getString("disableInstantCamera", R.string.disableInstantCamera), Config.disableInstantCamera, true);
                     } else if (position == disableUndoRow) {
