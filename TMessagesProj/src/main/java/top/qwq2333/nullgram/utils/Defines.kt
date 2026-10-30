@@ -44,6 +44,7 @@ object Defines {
     @BooleanConfig const val linkedUser = "linkedUser"
     const val linkedUserPrefix = "linkedUser_"
     @BooleanConfig const val overrideChannelAlias = "overrideChannelAlias"
+    @BooleanConfig const val disableProfileAvatarBlur = "disableProfileAvatarBlur"
     @BooleanConfig const val hidePhone = "hidePhone"
     @BooleanConfig const val openArchiveOnPull = "openArchiveOnPull"
     @BooleanConfig const val disableJumpToNextChannel = "disableJumpToNextChannel"

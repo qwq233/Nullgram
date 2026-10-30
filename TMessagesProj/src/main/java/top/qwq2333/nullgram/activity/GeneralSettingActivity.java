@@ -79,6 +79,7 @@ public class GeneralSettingActivity extends BaseActivity {
     private int avatarBackgroundBlurRow;
     private int avatarBackgroundDarkenRow;
     private int largeAvatarAsBackgroundRow;
+    private int disableProfileAvatarBlurRow;
     private int hidePhoneRow;
     private int drawer2Row;
 
@@ -147,6 +148,11 @@ public class GeneralSettingActivity extends BaseActivity {
             Config.toggleShowBotAPIID();
             if (view instanceof TextCheckCell) {
                 ((TextCheckCell) view).setChecked(Config.showBotAPIID);
+            }
+        } else if (position == disableProfileAvatarBlurRow) {
+            Config.toggleDisableProfileAvatarBlur();
+            if (view instanceof TextCheckCell) {
+                ((TextCheckCell) view).setChecked(Config.disableProfileAvatarBlur);
             }
         } else if (position == hidePhoneRow) {
             Config.toggleHidePhone();
@@ -426,6 +432,7 @@ public class GeneralSettingActivity extends BaseActivity {
             avatarBackgroundDarkenRow = -1;
             largeAvatarAsBackgroundRow = -1;
         }
+        disableProfileAvatarBlurRow = addRow("disableProfileAvatarBlur");
         hidePhoneRow = addRow("hidePhone");
         drawer2Row = addRow();
 
@@ -611,6 +618,8 @@ public class GeneralSettingActivity extends BaseActivity {
                     textCell.setEnabled(true, null);
                     if (position == showBotAPIRow) {
                         textCell.setTextAndCheck(LocaleController.getString("showBotAPIID", R.string.showBotAPIID), Config.showBotAPIID, true);
+                    } else if (position == disableProfileAvatarBlurRow) {
+                        textCell.setTextAndCheck(LocaleController.getString("disableProfileAvatarBlur", R.string.disableProfileAvatarBlur), Config.disableProfileAvatarBlur, true);
                     } else if (position == hidePhoneRow) {
                         textCell.setTextAndCheck(LocaleController.getString("hidePhone", R.string.hidePhone), Config.hidePhone, true);
                     } else if (position == showExactNumberRow) {
