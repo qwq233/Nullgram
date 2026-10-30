@@ -366,4 +366,5 @@
     <string name="AlwaysShowDownloadIcon">Always Show Download Icon</string>
     <string name="hideSideShareButton">Hide side share button</string>
     <string name="disableAiEditor">Disable Ai Editor</string>
+    <string name="disableProfileAvatarBlur">Disable Profile Avatar Blur</string>
 </resources>
