@@ -110,8 +110,8 @@ public class SettingsHelper {
                 int guid = uid + i;
                 String key1 = key.substring(0, 1).toUpperCase() + key.substring(1);
                 String key2 = key.substring(0, 1).toLowerCase() + key.substring(1);
-                String title1 = LocaleController.getString(key1);
-                String title2 = LocaleController.getString(key2);
+                String title1 = LocaleController.nullable(LocaleController.getString(key1));
+                String title2 = LocaleController.nullable(LocaleController.getString(key2));
                 String title = (title1 != null && !title1.isEmpty()) ? title1 : (title2 != null && !title2.isEmpty()) ? title2 : null;
                 if (title == null) {
                     continue;
