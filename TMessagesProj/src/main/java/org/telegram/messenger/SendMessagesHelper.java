@@ -9420,7 +9420,7 @@ public class SendMessagesHelper extends BaseController implements NotificationCe
         if (size != null) {
             sizes.add(size);
         }
-        if (highQuality || Config.sendLargePhoto) {
+        if (highQuality) {
             size = ImageLoader.scaleAndSaveImage(null, bitmap, Bitmap.CompressFormat.JPEG, true, AndroidUtilities.getPhotoSize(highQuality), AndroidUtilities.getPhotoSize(highQuality), 99, false, 101, 101, false);
         } else {
             size = ImageLoader.scaleAndSaveImage(bitmap, AndroidUtilities.getPhotoSize(highQuality), AndroidUtilities.getPhotoSize(highQuality), true, 80, false, 101, 101);
