@@ -3017,8 +3017,17 @@ public class AndroidUtilities {
     }
 
     public static int getPhotoSize(boolean highQuality) {
-        return photoSize = SharedConfig.deviceIsHigh() || highQuality || Config.sendLargePhoto ? 
-        highQualityPhotoSize == null ? 2560 : highQualityPhotoSize : photoSize == null ? 1280 : photoSize;
+        if (highQuality) {
+            if (highQualityPhotoSize == null) {
+                highQualityPhotoSize = 2560;
+            }
+            return highQualityPhotoSize;
+        } else {
+            if (photoSize == null) {
+                photoSize = 1280;
+            }
+            return photoSize;
+        }
     }
 
     /*public static void clearCursorDrawable(EditText editText) {

@@ -344,6 +344,5 @@
     <string name="SaveToDownloadCount_many">ذخیره %1$d فایل برای دانلود</string>
     <string name="SaveToDownloadCount_other">ذخیره %1$d فایل برای دانلود</string>
     <string name="InvalidPattern">الگوی نادرست</string>
-    <string name="sendLargePhoto">فرستادن عکس بزرگ</string>
     <string name="Details">جزئیات</string>
 </resources>

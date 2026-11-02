@@ -345,6 +345,5 @@
     <string name="SaveToDownloadCount_many">Збереження %1$d файлів у Завантаження</string>
     <string name="SaveToDownloadCount_other">Збереження %1$d файлів у Завантаження</string>
     <string name="InvalidPattern">Невірний вираз</string>
-    <string name="sendLargePhoto">Надсилати великі фото</string>
     <string name="Details">Деталі</string>
 </resources>
