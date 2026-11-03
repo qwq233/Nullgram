@@ -119,6 +119,7 @@ public class ChatSettingActivity extends BaseActivity {
     private int hideTitleRow;
     private int hideSideShareButtonRow;
     private int messageFiltersRow;
+    private int sendLargeVideoRow;
     private int takeGifAsVideoRow;
     private int chat2Row;
 
@@ -382,6 +383,11 @@ public class ChatSettingActivity extends BaseActivity {
             }
         } else if (position == messageFiltersRow) {
             createMessageFilterSetter(this, getContext(), resourcesProvider);
+        } else if (position == sendLargeVideoRow) {
+            Config.toggleSendLargeVideo();
+            if (view instanceof TextCheckCell) {
+                ((TextCheckCell) view).setChecked(Config.sendLargeVideo);
+            }
         } else if (position == takeGifAsVideoRow) {
             Config.toggleTakeGifAsVideo();
             if (view instanceof TextCheckCell) {
@@ -440,6 +446,7 @@ public class ChatSettingActivity extends BaseActivity {
         disableStickersAutoReorderRow = addRow("disableStickersAutoReorder");
         hideTitleRow = addRow("showHideTitle");
         messageFiltersRow = addRow("messageFilters");
+        sendLargeVideoRow = addRow("sendLargeVideo");
         takeGifAsVideoRow = addRow("takeGifAsVideo");
         chat2Row = addRow();
 
@@ -581,6 +588,8 @@ public class ChatSettingActivity extends BaseActivity {
                         textCell.setTextAndCheck(LocaleController.getString("MarkdownDisableByDefault", R.string.MarkdownDisableByDefault), Config.markdownDisabled, true);
                     } else if (position == hideTitleRow) {
                         textCell.setTextAndCheck(LocaleController.getString("showHideTitle", R.string.showHideTitle), Config.showHideTitle, true);
+                    } else if (position == sendLargeVideoRow) {
+                        textCell.setTextAndCheck(LocaleController.getString("sendLargeVideo", R.string.sendLargeVideo), Config.sendLargeVideo, true);
                     } else if (position == takeGifAsVideoRow) {
                         textCell.setTextAndCheck(LocaleController.getString("takeGifAsVideo", R.string.takeGifAsVideo), Config.takeGifAsVideo, true);
                     }

@@ -366,4 +366,5 @@
     <string name="hideSideShareButton">Hide side share button</string>
     <string name="disableAiEditor">Disable Ai Editor</string>
     <string name="disableProfileAvatarBlur">Disable Profile Avatar Blur</string>
+    <string name="sendLargeVideo">Send large video</string>
 </resources>
