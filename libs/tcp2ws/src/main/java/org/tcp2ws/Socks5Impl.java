@@ -242,28 +242,7 @@ public class Socks5Impl extends Socks4Impl {
     }
 
     public void udp() throws IOException, WebSocketException {
-        //	Connect to the Remote Host
-        try {
-            DGSocket = new DatagramSocket();
-            initUdpInOut();
-        } catch (IOException e) {
             refuseCommand((byte) 0x05); // Connection Refused
-            throw new IOException("Connection Refused - FAILED TO INITIALIZE UDP Association.");
-        }
-
-        InetAddress MyIP = m_Parent.m_ClientSocket.getLocalAddress();
-        int MyPort = DGSocket.getLocalPort();
-
-        //	Return response to the Client
-        // Code '00' - Connection Succeeded,
-        // IP/Port where Server will listen
-        udpReply((byte) 0, MyIP, MyPort);
-
-
-        while (m_Parent.checkClientData() >= 0) {
-            processUdp();
-            Thread.yield();
-        }
     }
 
     private void initUdpInOut() throws IOException {
