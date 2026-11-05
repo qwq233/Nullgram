@@ -195,6 +195,16 @@ Datacenter::Datacenter(int32_t instance, NativeByteBuffer *data) {
 }
 
 TcpAddress *Datacenter::getCurrentAddress(uint32_t flags) {
+    bool wsProxyEnabled = ConnectionsManager::getInstance(instanceNum).proxyAddress == "127.0.0.1" && ConnectionsManager::getInstance(instanceNum).proxyPort == 6356;
+    if (wsProxyEnabled) {
+        bool media = (flags & TcpAddressFlagDownload) != 0;
+        bool ipv6 = (flags & TcpAddressFlagIpv6) != 0;
+        if (media || ipv6) {
+            return nullptr;
+        }
+        TcpAddress *loopbackAddress = new TcpAddress("127.0.1." + std::to_string(datacenterId), 443, 0, "");
+        return loopbackAddress;
+    }
     uint32_t currentAddressNum;
     std::vector<TcpAddress> *addresses;
     if (flags == 0 && (authKeyPerm == nullptr || PFS_ENABLED && authKeyTemp == nullptr) && !addressesIpv4Temp.empty()) {

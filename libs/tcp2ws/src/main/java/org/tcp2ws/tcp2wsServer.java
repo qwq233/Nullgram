@@ -34,63 +34,16 @@ public class tcp2wsServer {
         mtpcdn.put(18, "test_venus." + domain);
         mtpcdn.put(19, "test_aurora." + domain);
 
-//media
-        cdn.put("149.154.175.50", "pluto." + domain);
-        cdn.put("149.154.167.51", "venus." + domain);
-        cdn.put("95.161.76.100", "venus." + domain);
-        cdn.put("149.154.175.100", "aurora." + domain);
-        cdn.put("149.154.167.91", "vesta." + domain);
-        cdn.put("149.154.171.5", "flora." + domain);
-
-        try {
-            cdn.put(InetAddress.getByName("2001:b28:f23d:f001:0000:0000:0000:000a").getHostAddress(), "pluto." + domain);
-            cdn.put(InetAddress.getByName("2001:67c:4e8:f002:0000:0000:0000:000a").getHostAddress(), "venus." + domain);
-            cdn.put(InetAddress.getByName("2001:b28:f23d:f003:0000:0000:0000:000a").getHostAddress(), "aurora." + domain);
-            cdn.put(InetAddress.getByName("2001:67c:4e8:f004:0000:0000:0000:000a").getHostAddress(), "vesta." + domain);
-            cdn.put(InetAddress.getByName("2001:b28:f23f:f005:0000:0000:0000:000a").getHostAddress(), "flora." + domain);
-        } catch (UnknownHostException e) {
-            e.printStackTrace();
-        }
-//proxy
-        cdn.put("149.154.175.5", "pluto." + domain);
-        cdn.put("149.154.161.144", "venus." + domain);
-        cdn.put("149.154.167.15", "venus." + domain);
-        cdn.put("149.154.167.5", "venus." + domain);
-        cdn.put("149.154.167.6", "venus." + domain);
-        cdn.put("149.154.167.7", "venus." + domain);
-        cdn.put("149.154.167.2", "venus." + domain);
-        cdn.put("91.108.4.", "vesta." + domain);
-        cdn.put("149.154.164.", "vesta." + domain);
-        cdn.put("149.154.165.", "vesta." + domain);
-        cdn.put("149.154.166.", "vesta." + domain);
-        cdn.put("149.154.167.8", "vesta." + domain);
-        cdn.put("149.154.167.9", "vesta." + domain);
-        cdn.put("91.108.56.", "flora." + domain);
-        cdn.put("111.62.91.", "venus." + domain);
-
-        try {
-            cdn.put(InetAddress.getByName("2001:b28:f23d:f001:0000:0000:0000:000d").getHostAddress(), "pluto." + domain);
-            cdn.put(InetAddress.getByName("2001:67c:4e8:f002:0000:0000:0000:000d").getHostAddress(), "venus." + domain);
-            cdn.put(InetAddress.getByName("2001:b28:f23d:f003:0000:0000:0000:000d").getHostAddress(), "aurora." + domain);
-            cdn.put(InetAddress.getByName("2001:67c:4e8:f004:0000:0000:0000:000d").getHostAddress(), "vesta." + domain);
-            cdn.put(InetAddress.getByName("2001:b28:f23f:f005:0000:0000:0000:000d").getHostAddress(), "flora." + domain);
-        } catch (UnknownHostException e) {
-            e.printStackTrace();
-        }
-
-//test
-        cdn.put("149.154.175.10", "test_pluto." + domain);
-        cdn.put("149.154.175.40", "test_pluto." + domain);
-        cdn.put("149.154.167.40", "test_venus." + domain);
-        cdn.put("149.154.175.117", "test_aurora." + domain);
-
-        try {
-            cdn.put(InetAddress.getByName("2001:b28:f23d:f001:0000:0000:0000:000e").getHostAddress(), "test_pluto." + domain);
-            cdn.put(InetAddress.getByName("2001:67c:4e8:f002:0000:0000:0000:000e").getHostAddress(), "test_venus." + domain);
-            cdn.put(InetAddress.getByName("2001:b28:f23d:f003:0000:0000:0000:000e").getHostAddress(), "test_aurora." + domain);
-        } catch (UnknownHostException e) {
-            e.printStackTrace();
-        }
+        cdn.put("127.0.1.1", "pluto." + domain);
+        cdn.put("127.0.1.2", "venus." + domain);
+        cdn.put("127.0.1.3", "aurora." + domain);
+        cdn.put("127.0.1.4", "vesta." + domain);
+        cdn.put("127.0.1.5", "flora." + domain);
+        cdn.put("127.0.2.1", "pluto-media." + domain);
+        cdn.put("127.0.2.2", "venus-media." + domain);
+        cdn.put("127.0.2.3", "aurora-media." + domain);
+        cdn.put("127.0.2.4", "vesta-media." + domain);
+        cdn.put("127.0.2.5", "flora-media." + domain);
 
         inactiveWs.put(tcp2wsServer.mtpcdn.get(1), new HashSet<>());
         inactiveWs.put(tcp2wsServer.mtpcdn.get(2), new HashSet<>());
