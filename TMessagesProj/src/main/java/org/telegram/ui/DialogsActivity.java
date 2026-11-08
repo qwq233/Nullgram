@@ -5536,6 +5536,8 @@ public class DialogsActivity extends BaseFragment implements NotificationCenter.
                 transitionPage.listView.setAnimationSupportView(null, 0, hasFragment(), backward);
                 rightFragmentTransitionInProgress = false;
                 actionBar.setAllowOverlayTitle(!hasFragment());
+                // The closing fragment is detached after the final progress update.
+                updateDrawerSwipeEnabled();
                 contentView.requestLayout();
                 if (!hasStories) {
                     DialogsActivity.this.setScrollY(0);
@@ -5563,6 +5565,7 @@ public class DialogsActivity extends BaseFragment implements NotificationCenter.
                 if (anotherFragmentOpened != opened) {
                     anotherFragmentOpened = opened;
                 }
+                updateDrawerSwipeEnabled();
                 if (fragmentView != null) {
                     fragmentView.invalidate();
                 }
@@ -5572,6 +5575,19 @@ public class DialogsActivity extends BaseFragment implements NotificationCenter.
                     if (actionBar.getTitleTextView().getAlpha() > 0) {
                         actionBar.getTitleTextView().setVisibility(View.VISIBLE);
                     }
+                }
+                if (proxyItem != null) {
+                    proxyItem.setAlpha(1f - progress);
+                }
+                if (downloadsItem != null) {
+                    downloadsItem.setAlpha(1f - progress);
+                }
+                if (passcodeItem != null) {
+                    passcodeItem.setAlpha(1f - progress);
+                }
+                if (searchItem != null) {
+                    searchItem.setAlpha(anotherFragmentOpened ? 0f : 1f);
+                    searchItem.setEnabled(!anotherFragmentOpened);
                 }
                 if (actionBar.getBackButton() != null) {
                     actionBar.getBackButton().setAlpha(progress == 1f ? 0f : 1f);
