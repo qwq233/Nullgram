@@ -1484,6 +1484,8 @@ public class SearchViewPager extends ViewPagerFixed implements FilteredSearchVie
                 return;
             }
         }
+        // Restricted search contexts may omit Downloads; All Chats is always first.
+        setPosition(0);
     }
 
     public int getPositionForType(int initialSearchType) {

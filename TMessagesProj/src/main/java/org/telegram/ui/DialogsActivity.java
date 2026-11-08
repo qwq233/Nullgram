@@ -7461,13 +7461,19 @@ public class DialogsActivity extends BaseFragment implements NotificationCenter.
         ((SizeNotifierFrameLayout) fragmentView).invalidateBlur();
         if (show) {
             boolean onlyDialogsAdapter;
-            if (searchFiltersWasShowed || forceNotOnlyDialogs) {
+            if (searchFiltersWasShowed || forceNotOnlyDialogs || startFromDownloads) {
                 onlyDialogsAdapter = false;
             } else {
                 onlyDialogsAdapter = onlyDialogsAdapter();
             }
             if (searchViewPager != null) {
+                if (startFromDownloads) {
+                    searchViewPager.setPosition(0);
+                }
                 searchViewPager.showOnlyDialogsAdapter(onlyDialogsAdapter);
+                if (startFromDownloads) {
+                    searchViewPager.updateTabs();
+                }
             }
             whiteActionBar = !onlyDialogsAdapter || hasStories;
             if (whiteActionBar) {
