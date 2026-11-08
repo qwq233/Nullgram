@@ -5586,11 +5586,11 @@ public class DialogsActivity extends BaseFragment implements NotificationCenter.
                     passcodeItem.setAlpha(1f - progress);
                 }
                 if (searchItem != null) {
-                    searchItem.setAlpha(anotherFragmentOpened ? 0f : 1f);
+                    searchItem.setAlpha(1f - progress);
                     searchItem.setEnabled(!anotherFragmentOpened);
                 }
                 if (actionBar.getBackButton() != null) {
-                    actionBar.getBackButton().setAlpha(progress == 1f ? 0f : 1f);
+                    actionBar.getBackButton().setAlpha(1f - progress);
                 }
 
                 if (folderId != 0 || communityId != 0) {
