@@ -2510,7 +2510,7 @@ public class DialogsActivity extends BaseFragment implements NotificationCenter.
                     if (animationSupportListView instanceof BlurredRecyclerView) {
                         topPadding -= ((BlurredRecyclerView) animationSupportListView).blurTopPadding;
                     }
-                    animationSupportListView.setPadding(getPaddingLeft(), topPadding, getPaddingLeft(), getPaddingBottom());
+                    animationSupportListView.setPadding(getPaddingLeft(), topPadding, getPaddingRight(), getPaddingBottom());
                     if (anchorView != null) {
                         DialogsAdapter adapter = (DialogsAdapter) animationSupportListView.getAdapter();
                         int p = adapter.findDialogPosition(anchorView.getDialogId());
