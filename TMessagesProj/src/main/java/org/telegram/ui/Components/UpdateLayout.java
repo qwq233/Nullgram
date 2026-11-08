@@ -168,8 +168,8 @@ public class UpdateLayout extends IUpdateLayout {
             } else {
                 if (FileLoader.getInstance(currentAccount).isLoadingFile(fileName)) {
                     updateLayoutIcon.setIcon(MediaActionDrawable.ICON_CANCEL, true, animated);
-                    updateLayoutIcon.setProgress(0, false);
                     Float p = ImageLoader.getInstance().getFileProgress(fileName);
+                    updateLayoutIcon.setProgress(p != null ? p : 0, false);
                     setUpdateText(LocaleController.formatString("AppUpdateDownloading", R.string.AppUpdateDownloading, (int) ((p != null ? p : 0.0f) * 100)), animated);
                     showSize = false;
                 } else {

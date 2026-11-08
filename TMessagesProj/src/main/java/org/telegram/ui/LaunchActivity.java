@@ -9402,6 +9402,9 @@ public class LaunchActivity extends BasePermissionsActivity implements INavigati
         if (drawerLayoutAdapter != null) {
             drawerLayoutAdapter.notifyDataSetChanged();
         }
+        if (updateLayout != null) {
+            updateLayout.updateAppUpdateViews(currentAccount, false);
+        }
     }
 
 
