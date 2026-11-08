@@ -187,6 +187,12 @@ public class DrawerLayoutAdapter extends RecyclerListView.SelectionAdapter {
                 drawerUserCell.setAccount(accountNumbers.get(position - 2));
                 break;
             }
+            case 5: {
+                if (holder.itemView instanceof DrawerAddCell) {
+                    ((DrawerAddCell) holder.itemView).updateText();
+                }
+                break;
+            }
         }
     }
 

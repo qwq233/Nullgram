@@ -9399,6 +9399,12 @@ public class LaunchActivity extends BasePermissionsActivity implements INavigati
                 actionBarLayout.rebuildAllFragmentViews(last, last);
             }
         }
+        if (drawerLayoutAdapter != null) {
+            drawerLayoutAdapter.notifyDataSetChanged();
+        }
+        if (updateLayout != null) {
+            updateLayout.updateAppUpdateViews(currentAccount, false);
+        }
     }
 
 
