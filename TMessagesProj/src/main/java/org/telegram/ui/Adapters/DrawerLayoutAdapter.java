@@ -188,7 +188,9 @@ public class DrawerLayoutAdapter extends RecyclerListView.SelectionAdapter {
                 break;
             }
             case 5: {
-                ((DrawerAddCell) holder.itemView).updateText();
+                if (holder.itemView instanceof DrawerAddCell) {
+                    ((DrawerAddCell) holder.itemView).updateText();
+                }
                 break;
             }
         }
