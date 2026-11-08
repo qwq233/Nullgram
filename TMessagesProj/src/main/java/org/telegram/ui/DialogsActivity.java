@@ -346,7 +346,6 @@ public class DialogsActivity extends BaseFragment implements NotificationCenter.
 
     private final String ACTION_MODE_SEARCH_DIALOGS_TAG = "search_dialogs_action_mode";
     private boolean rightFragmentTransitionInProgress;
-    private boolean rightFragmentTransitionIsOpen;
     private boolean allowGlobalSearch = true;
 
     private TLRPC.RequestPeerType requestPeerType;
@@ -1089,12 +1088,8 @@ public class DialogsActivity extends BaseFragment implements NotificationCenter.
                     filterTabsView.setAlpha(filterTabsProgress);
                 }
                 if (rightSlidingDialogContainer.hasFragment()) {
-                    float rightFragmentOffset = 0;
-                    if (rightFragmentTransitionInProgress) {
-                        float scrollOffset = rightFragmentTransitionIsOpen ? 0 : scrollYOffset;
-                        rightFragmentOffset = -AndroidUtilities.lerp(-scrollOffset, scrollOffset, rightSlidingDialogContainer.openedProgress);
-                    }
-                    viewPages[0].setTranslationY(-(1f - filterTabsProgress) * filterTabsMoveFrom + rightFragmentOffset);
+                    // Only a running tabs animation may move the list vertically.
+                    viewPages[0].setTranslationY(filtersTabAnimator == null ? 0 : -(1f - filterTabsProgress) * filterTabsMoveFrom);
                 } else {
                     viewPages[0].setTranslationY(getActionBarMoveFrom(false) - AndroidUtilities.lerp(getActionBarMoveFrom(false), filterTabsMoveFrom, (1f - filterTabsProgress)));
                 }
@@ -1987,8 +1982,6 @@ public class DialogsActivity extends BaseFragment implements NotificationCenter.
             float maxBottom = Integer.MIN_VALUE;
             DialogCell selectedCell = null;
 
-            float scrollOffset = rightFragmentTransitionIsOpen ? 0 : scrollYOffset;
-
             for (int i = 0; i < getChildCount(); i++) {
                 View view = getChildAt(i);
                 DialogCell dialogCell = null;
@@ -2013,11 +2006,11 @@ public class DialogsActivity extends BaseFragment implements NotificationCenter.
                             dialogCell.collapseOffset = (animateToView.getTop() - dialogCell.getTop()) * rightFragmentOpenedProgress;
 
                             if (dialogCell.getTop() + dialogCell.collapseOffset < maxTop) {
-                                maxTop = dialogCell.getTop() + dialogCell.collapseOffset - scrollOffset;
+                                maxTop = dialogCell.getTop() + dialogCell.collapseOffset;
                             }
                             float bottom = dialogCell.getTop() + AndroidUtilities.lerp(dialogCell.getMeasuredHeight(), animateToView.getMeasuredHeight(), rightFragmentOpenedProgress);
                             if (bottom + dialogCell.collapseOffset > maxBottom) {
-                                maxBottom = bottom + dialogCell.collapseOffset - scrollOffset;
+                                maxBottom = bottom + dialogCell.collapseOffset;
                             }
                         }
                     }
@@ -2038,7 +2031,7 @@ public class DialogsActivity extends BaseFragment implements NotificationCenter.
 
                     canvas.translate(view.getX(), view.getY());
                     if (dialogCell != null) {
-                        dialogCell.rightFragmentOffset = -scrollOffset;
+                        dialogCell.rightFragmentOffset = 0;
                     } else {
                         canvas.saveLayerAlpha(0, 0, view.getMeasuredWidth(), view.getMeasuredHeight(), (int) (255 * (1f - rightFragmentOpenedProgress)), Canvas.ALL_SAVE_FLAG);
                     }
@@ -2512,7 +2505,11 @@ public class DialogsActivity extends BaseFragment implements NotificationCenter.
 
             if (anchorView != null) {
                 if (animationSupportListView != null) {
-                    int topPadding = this.topPadding;
+                    // Support cells are drawn in this list's coordinates, including blur padding.
+                    int topPadding = getPaddingTop();
+                    if (animationSupportListView instanceof BlurredRecyclerView) {
+                        topPadding -= ((BlurredRecyclerView) animationSupportListView).blurTopPadding;
+                    }
                     animationSupportListView.setPadding(getPaddingLeft(), topPadding, getPaddingLeft(), getPaddingBottom());
                     if (anchorView != null) {
                         DialogsAdapter adapter = (DialogsAdapter) animationSupportListView.getAdapter();
@@ -2529,9 +2526,6 @@ public class DialogsActivity extends BaseFragment implements NotificationCenter.
                 DialogsAdapter adapter = (DialogsAdapter) getAdapter();
                 int p = adapter.findDialogPosition(anchorView.getDialogId());
                 int offset = (int) (anchorView.getTop() - getPaddingTop());
-                if (backward && hasStories) {
-                    offset += dp(DialogStoriesCell.HEIGHT_IN_DP);
-                }
                 if (p >= 0) {
                     ((LinearLayoutManager) getLayoutManager()).scrollToPositionWithOffset(p, offset);
                 }
@@ -5451,7 +5445,6 @@ public class DialogsActivity extends BaseFragment implements NotificationCenter.
             @Override
             public void openAnimationStarted(boolean open) {
                 rightFragmentTransitionInProgress = true;
-                rightFragmentTransitionIsOpen = open;
                 contentView.requestLayout();
                 fromScrollYProperty = scrollYOffset;
 
@@ -5514,7 +5507,7 @@ public class DialogsActivity extends BaseFragment implements NotificationCenter.
                 hideFloatingButton(anotherFragmentOpened);
                 transitionPage.dialogsAdapter.notifyDataSetChanged();
                 transitionPage.animationSupportDialogsAdapter.notifyDataSetChanged();
-                float scrollOffset = hasStories && !open ? scrollYOffset : -scrollYOffset;
+                float scrollOffset = open ? -scrollYOffset : 0;
                 transitionPage.listView.setAnimationSupportView(transitionPage.animationSupportListView, scrollOffset, open, false);
                 transitionPage.listView.setClipChildren(false);
                 actionBar.setAllowOverlayTitle(false);
