@@ -5507,7 +5507,8 @@ public class DialogsActivity extends BaseFragment implements NotificationCenter.
                 hideFloatingButton(anotherFragmentOpened);
                 transitionPage.dialogsAdapter.notifyDataSetChanged();
                 transitionPage.animationSupportDialogsAdapter.notifyDataSetChanged();
-                float scrollOffset = open ? -scrollYOffset : 0;
+                // Align the opening list with the collapsed story strip.
+                float scrollOffset = open ? -fromScrollYProperty - (hasStories ? getMaxScrollYOffset() : 0) : 0;
                 transitionPage.listView.setAnimationSupportView(transitionPage.animationSupportListView, scrollOffset, open, false);
                 transitionPage.listView.setClipChildren(false);
                 actionBar.setAllowOverlayTitle(false);
@@ -5532,7 +5533,9 @@ public class DialogsActivity extends BaseFragment implements NotificationCenter.
                 // The closing fragment is detached after the final progress update.
                 updateDrawerSwipeEnabled();
                 contentView.requestLayout();
-                if (!hasStories) {
+                if (hasStories && hasFragment()) {
+                    DialogsActivity.this.setScrollY(-getMaxScrollYOffset());
+                } else if (!hasStories) {
                     DialogsActivity.this.setScrollY(0);
                 }
                 if (!hasFragment()) {
