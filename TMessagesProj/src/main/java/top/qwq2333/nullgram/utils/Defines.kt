@@ -36,6 +36,7 @@ object Defines {
     @BooleanConfig const val allowScreenshotOnNoForwardChat = "allowScreenshotOnNoForwardChat"
     @BooleanConfig(true) const val disableSharePhoneWithContactByDefault = "disableSharePhoneWithContactByDefault"
     @BooleanConfig const val autoDisableBuiltInProxy = "autoDisableBuiltInProxy"
+    @BooleanConfig const val addCommaAfterMention = "addCommaAfterMention"
     @BooleanConfig const val labelChannelUser = "labelChannelUser"
     @BooleanConfig const val displaySpoilerMsgDirectly = "displaySpoilerMsgDirectly"
     @BooleanConfig const val disableGreetingSticker = "disableGreetingSticker"

@@ -96,6 +96,7 @@ public class ChatSettingActivity extends BaseActivity {
     private int disablePremiumStickerRow;
     private int messageMenuRow;
     private int allowScreenshotOnNoForwardChatRow;
+    private int addCommaAfterMentionRow;
     private int labelChannelUserRow;
     private int displaySpoilerDirectlyRow;
     private int disableJumpToNextChannelRow;
@@ -215,6 +216,11 @@ public class ChatSettingActivity extends BaseActivity {
             Config.toggleAllowScreenshotOnNoForwardChat();
             if (view instanceof TextCheckCell) {
                 ((TextCheckCell) view).setChecked(Config.allowScreenshotOnNoForwardChat);
+            }
+        } else if (position == addCommaAfterMentionRow) {
+            Config.toggleAddCommaAfterMention();
+            if (view instanceof TextCheckCell) {
+                ((TextCheckCell) view).setChecked(Config.addCommaAfterMention);
             }
         } else if (position == labelChannelUserRow) {
             if (!Config.channelAlias) {
@@ -423,6 +429,7 @@ public class ChatSettingActivity extends BaseActivity {
         if (Config.showHiddenSettings) {
             allowScreenshotOnNoForwardChatRow = addRow("allowScreenshotOnNoForwardChat");
         }
+        addCommaAfterMentionRow = addRow("addCommaAfterMention");
         labelChannelUserRow = addRow("labelChannelUser");
         displaySpoilerDirectlyRow = addRow("displaySpoilerDirectly");
         disableJumpToNextChannelRow = addRow("disableJumpToNextChannel");
@@ -541,6 +548,8 @@ public class ChatSettingActivity extends BaseActivity {
                         textCell.setTextAndCheck(LocaleController.getString("disablePremiumSticker", R.string.disablePremiumSticker), Config.disablePremiumSticker, true);
                     } else if (position == allowScreenshotOnNoForwardChatRow) {
                         textCell.setTextAndValueAndCheck(LocaleController.getString("allowScreenshotOnNoForwardChat", R.string.allowScreenshotOnNoForwardChat), LocaleController.getString("allowScreenshotOnNoForwardChatWarning", R.string.allowScreenshotOnNoForwardChatWarning), Config.allowScreenshotOnNoForwardChat, true, true);
+                    } else if (position == addCommaAfterMentionRow) {
+                        textCell.setTextAndCheck(LocaleController.getString("addCommaAfterMention", R.string.addCommaAfterMention), Config.addCommaAfterMention, true);
                     } else if (position == labelChannelUserRow) {
                         if (Config.channelAlias) {
                             textCell.setEnabled(false, null);
