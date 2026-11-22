@@ -35,11 +35,6 @@ import top.qwq2333.nullgram.utils.Defines
 import top.qwq2333.nullgram.utils.Log
 import java.io.IOException
 import java.util.Locale
-import java.util.UUID
-import java.util.concurrent.ThreadLocalRandom
-import java.util.concurrent.atomic.AtomicLong
-import java.util.regex.Matcher
-import java.util.regex.Pattern
 
 /**
  * @author Naomi
@@ -47,6 +42,9 @@ import java.util.regex.Pattern
  *
  */
 object DeepLTranslator : BaseTranslator() {
+
+    private const val TRANSLATE_URL = "https://oneshot-free.www.deepl.com/v1/translate"
+    private const val USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36"
 
     private val targetLanguages = listOf(
         "bg", "cs", "da", "de", "el", "en-GB", "en-US", "en", "es", "et",
@@ -71,45 +69,51 @@ object DeepLTranslator : BaseTranslator() {
         return code
     }
 
-    private val uuid = UUID.randomUUID().toString()
-
     override suspend fun translateText(text: String, from: String, to: String): RequestResult {
         Log.d("text: $text")
         Log.d("from: $from")
         Log.d("to: $to")
 
-        client.post("https://www2.deepl.com/jsonrpc") {
+        val targetLang = when (to.lowercase(Locale.getDefault())) {
+            "zh" -> "zh-Hans"
+            "pt" -> "pt-BR"
+            else -> to
+        }
+
+        val payload = JSONObject().apply {
+            put("text", JSONArray().put(text))
+            put("target_lang", targetLang)
+            if (from.isNotEmpty() && !from.equals("auto", ignoreCase = true)) {
+                put("source_lang", from)
+            }
+            put("usage_type", "translate")
+        }
+
+        val response = client.post(TRANSLATE_URL) {
             contentType(ContentType.Application.Json)
+            header("Authorization", "None")
             header("Referer", "https://www.deepl.com/")
-            header("User-Agent", "DeepL/26.44(286) Android 13 (Pixel 5;aarch64)")
-            header("Client-Id", uuid)
-            header("x-instance", uuid)
-            header("x-app-os-name", "Android")
-            header("x-app-os-version", "13")
-            header("x-app-version", "26.44")
-            header("x-app-build", "286")
-            header("x-app-device", "Pixel 5")
-            header("x-app-instance-id", uuid)
-            setBody(getRequestBody(text, from, to))
-        }.let {
-            when (it.status) {
-                HttpStatusCode.OK -> {
-                    val jsonObject = JSONObject(it.bodyAsText())
-                    if (jsonObject.has("error")) {
-                        throw IOException(jsonObject.getString("message"))
-                    }
-                    val array = jsonObject.getJSONObject("result")
+            header("Origin", "https://www.deepl.com")
+            header("User-Agent", USER_AGENT)
+            setBody(payload.toString())
+        }
 
-                    return RequestResult(
-                        array.getString("lang").lowercase(),
-                        array.getJSONArray("texts").getJSONObject(0).getString("text")
-                    )
+        return when (response.status) {
+            HttpStatusCode.OK -> {
+                val jsonObject = JSONObject(response.bodyAsText())
+                if (jsonObject.has("error")) {
+                    throw IOException(jsonObject.getString("message"))
                 }
+                val translations = jsonObject.getJSONArray("translations")
+                val first = translations.getJSONObject(0)
+                val detected = first.optString("detected_source_language", from).lowercase(Locale.getDefault())
+                val translatedText = first.getString("text")
+                RequestResult(detected, translatedText)
+            }
 
-                else -> {
-                    Log.w(it.bodyAsText())
-                    return RequestResult(from, null, it.status)
-                }
+            else -> {
+                Log.w(response.bodyAsText())
+                RequestResult(from, null, response.status)
             }
         }
     }
@@ -118,47 +122,6 @@ object DeepLTranslator : BaseTranslator() {
     const val FORMALITY_MORE = 1
     const val FORMALITY_LESS = 2
 
-    private val id: AtomicLong = AtomicLong(ThreadLocalRandom.current().nextLong("10000000000".toLong()))
-
-    private fun getRequestBody(text: String, from: String, to: String): String {
-        var iCounter = 1
-        val iMatcher: Matcher = Pattern.compile("[i]").matcher(text)
-        while (iMatcher.find()) {
-            iCounter++
-        }
-        val texts = JSONArray().put(JSONObject().apply {
-            put("text", text)
-            put("requestAlternatives", 0)
-        })
-        val lang = JSONObject().apply {
-            put("source_lang_user_selected", from)
-            put("target_lang", to)
-        }
-        val commonJobParams = JSONObject().apply {
-            put("regionalVariant", JSONObject.NULL)
-            put("wasSpoken", false)
-            put("formality", getFormalityString() ?: JSONObject.NULL)
-        }
-        val params = JSONObject().apply {
-            put("texts", texts)
-            put("splitting", "newlines")
-            put("commonJobParams", commonJobParams)
-            put("lang", lang)
-            put("timestamp", getTimestamp(iCounter))
-        }
-        val _body = JSONObject().apply {
-            put("jsonrpc", "2.0")
-            put("method", "LMT_handle_texts")
-            put("params", params)
-            put("id", id.incrementAndGet())
-        }
-
-        val body: String = if ((id.get() + 3) % 13 == 0L || (id.get() + 5) % 29 == 0L) _body.toString().replace("hod\":\"", "hod\" : \"")
-        else _body.toString().replace("hod\":\"", "hod\": \"")
-
-        return body
-    }
-
     private fun getFormalityString(): String? {
         return when (ConfigManager.getIntOrDefault(Defines.deepLFormality, -1)) {
             FORMALITY_DEFAULT -> null
@@ -166,10 +129,5 @@ object DeepLTranslator : BaseTranslator() {
             FORMALITY_LESS -> "informal"
             else -> null
         }
-    }
-
-    private fun getTimestamp(iNumber: Int): Long {
-        val now = System.currentTimeMillis()
-        return now + iNumber - now % iNumber
     }
 }
